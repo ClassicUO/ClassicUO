@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class Panel : Control
+    internal class Panel : Control
     {
         private readonly SpriteTexture[] _frame = new SpriteTexture[9];
 

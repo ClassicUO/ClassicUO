@@ -22,7 +22,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.IO
 {
-    public class UOFileMul : UOFile
+    internal class UOFileMul : UOFile
     {
         private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;

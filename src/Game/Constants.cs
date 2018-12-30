@@ -52,5 +52,9 @@ namespace ClassicUO.Game
         public const int SPELLBOOK_7_SPELLS_COUNT = 30;
 
         public const int WAIT_FOR_TARGET_DELAY = 5000;
+
+        public const int CONTAINER_RECT_STEP = 20;
+        public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
+        public const int CONTAINER_RECT_LINESTEP = 800;
     }
 }

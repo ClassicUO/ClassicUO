@@ -33,7 +33,7 @@ using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game
 {
-    public static class GameActions
+    internal static class GameActions
     {
         private static Action<Item, int, int, int?> _pickUpAction;
 

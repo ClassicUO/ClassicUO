@@ -22,7 +22,7 @@ using System;
 
 namespace ClassicUO.Network
 {
-    public class PacketWriter : PacketBase
+    internal class PacketWriter : PacketBase
     {
         private byte[] _data;
 

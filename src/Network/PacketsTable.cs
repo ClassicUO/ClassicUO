@@ -22,7 +22,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Network
 {
-    public static class PacketsTable
+    internal static class PacketsTable
     {
         private static readonly short[] _packetsTable = new short[255]
         {

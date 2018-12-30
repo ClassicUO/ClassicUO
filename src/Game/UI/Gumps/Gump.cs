@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    public class Gump : Control
+    internal class Gump : Control
     {
         public Gump(Serial local, Serial server)
         {
@@ -114,12 +114,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (Control control in Children)
                     {
-                        if (control is Checkbox checkbox && checkbox.IsChecked)
-                            switches.Add(control.LocalSerial);
-                        //else if (control is RadioButton radioButton && radioButton.IsChecked)
-                        //    switches.Add(control.LocalSerial);
-                        else if (control is TextBox textBox)
-                            entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+                        switch (control)
+                        {
+                            case Checkbox checkbox when checkbox.IsChecked: switches.Add(control.LocalSerial);
+
+                                break;
+                            case TextBox textBox: entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+
+                                break;
+                        }
                     }
 
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
@@ -128,6 +131,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.UI.SavePosition(ServerSerial, Location);
                 Dispose();
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
         }
 
         protected override void CloseWithRightClick()

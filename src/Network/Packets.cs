@@ -30,7 +30,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
 {
-    public sealed class PACKTalk : PacketWriter
+    internal sealed class PACKTalk : PacketWriter
     {
         public PACKTalk() : base(0x03)
         {
@@ -74,7 +74,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSeed : PacketWriter
+    internal sealed class PSeed : PacketWriter
     {
         public PSeed(byte[] version) : base(0xEF)
         {
@@ -90,7 +90,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PFirstLogin : PacketWriter
+    internal sealed class PFirstLogin : PacketWriter
     {
         public PFirstLogin(string account, string password) : base(0x80)
         {
@@ -100,7 +100,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSelectServer : PacketWriter
+    internal sealed class PSelectServer : PacketWriter
     {
         public PSelectServer(byte index) : base(0xA0)
         {
@@ -109,7 +109,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSecondLogin : PacketWriter
+    internal sealed class PSecondLogin : PacketWriter
     {
         public PSecondLogin(string account, string password, uint seed) : base(0x91)
         {
@@ -205,7 +205,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PDeleteCharacter : PacketWriter
+    internal sealed class PDeleteCharacter : PacketWriter
     {
         public PDeleteCharacter(byte index, uint ipclient) : base(0x83)
         {
@@ -215,7 +215,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSelectCharacter : PacketWriter
+    internal sealed class PSelectCharacter : PacketWriter
     {
         public PSelectCharacter(uint index, string name, uint ipclient) : base(0x5D)
         {
@@ -232,7 +232,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPickUpRequest : PacketWriter
+    internal sealed class PPickUpRequest : PacketWriter
     {
         public PPickUpRequest(Serial serial, ushort count) : base(0x07)
         {
@@ -241,7 +241,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PDropRequestOld : PacketWriter
+    internal sealed class PDropRequestOld : PacketWriter
     {
         public PDropRequestOld(Serial serial, Position position, Serial container) : base(0x08)
         {
@@ -253,7 +253,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PDropRequestNew : PacketWriter
+    internal sealed class PDropRequestNew : PacketWriter
     {
         public PDropRequestNew(Serial serial, ushort x, ushort y, sbyte z, byte slot, Serial container) : base(0x08)
         {
@@ -270,7 +270,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PEquipRequest : PacketWriter
+    internal sealed class PEquipRequest : PacketWriter
     {
         public PEquipRequest(Serial serial, Layer layer, Serial container) : base(0x13)
         {
@@ -280,7 +280,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PChangeWarMode : PacketWriter
+    internal sealed class PChangeWarMode : PacketWriter
     {
         public PChangeWarMode(bool state) : base(0x72)
         {
@@ -291,7 +291,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PHelpRequest : PacketWriter
+    internal sealed class PHelpRequest : PacketWriter
     {
         public PHelpRequest() : base(0x9B)
         {
@@ -300,7 +300,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PStatusRequest : PacketWriter
+    internal sealed class PStatusRequest : PacketWriter
     {
         public PStatusRequest(Serial serial) : base(0x34)
         {
@@ -310,7 +310,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSkillsRequest : PacketWriter
+    internal sealed class PSkillsRequest : PacketWriter
     {
         public PSkillsRequest(Serial serial) : base(0x34)
         {
@@ -320,7 +320,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSkillsStatusChangeRequest : PacketWriter
+    internal sealed class PSkillsStatusChangeRequest : PacketWriter
     {
         public PSkillsStatusChangeRequest(ushort skillindex, byte lockstate) : base(0x3A)
         {
@@ -329,7 +329,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PClickRequest : PacketWriter
+    internal sealed class PClickRequest : PacketWriter
     {
         public PClickRequest(Serial serial) : base(0x09)
         {
@@ -337,7 +337,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PDoubleClickRequest : PacketWriter
+    internal sealed class PDoubleClickRequest : PacketWriter
     {
         public PDoubleClickRequest(Serial serial) : base(0x06)
         {
@@ -345,7 +345,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PAttackRequest : PacketWriter
+    internal sealed class PAttackRequest : PacketWriter
     {
         public PAttackRequest(Serial serial) : base(0x05)
         {
@@ -353,7 +353,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PClientVersion : PacketWriter
+    internal sealed class PClientVersion : PacketWriter
     {
         //public PClientVersion(byte[] version) : base(0xBD)
         //{
@@ -370,7 +370,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PASCIISpeechRequest : PacketWriter
+    internal sealed class PASCIISpeechRequest : PacketWriter
     {
         public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
         {
@@ -381,7 +381,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PUnicodeSpeechRequest : PacketWriter
+    internal sealed class PUnicodeSpeechRequest : PacketWriter
     {
         public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
@@ -426,7 +426,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCastSpell : PacketWriter
+    internal sealed class PCastSpell : PacketWriter
     {
         public PCastSpell(int idx) : base(0xBF)
         {
@@ -447,7 +447,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCastSpellFromBook : PacketWriter
+    internal sealed class PCastSpellFromBook : PacketWriter
     {
         public PCastSpellFromBook(int idx, Serial serial) : base(0x12)
         {
@@ -456,7 +456,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PUseSkill : PacketWriter
+    internal sealed class PUseSkill : PacketWriter
     {
         public PUseSkill(int idx) : base(0x12)
         {
@@ -465,7 +465,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class POpenDoor : PacketWriter
+    internal sealed class POpenDoor : PacketWriter
     {
         public POpenDoor() : base(0x12)
         {
@@ -473,7 +473,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class POpenSpellBook : PacketWriter
+    internal sealed class POpenSpellBook : PacketWriter
     {
         public POpenSpellBook(byte type) : base(0x12)
         {
@@ -482,7 +482,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PEmoteAction : PacketWriter
+    internal sealed class PEmoteAction : PacketWriter
     {
         public PEmoteAction(string action) : base(0x12)
         {
@@ -491,7 +491,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PGumpResponse : PacketWriter
+    internal sealed class PGumpResponse : PacketWriter
     {
         public PGumpResponse(Serial local, Serial server, int buttonID, Serial[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
         {
@@ -526,7 +526,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PVirtueGumpReponse : PacketWriter
+    internal sealed class PVirtueGumpReponse : PacketWriter
     {
         public PVirtueGumpReponse() : base(0xB1)
         {
@@ -534,7 +534,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PMenuResponse : PacketWriter
+    internal sealed class PMenuResponse : PacketWriter
     {
         public PMenuResponse() : base(0x7D)
         {
@@ -542,7 +542,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PGrayMenuResponse : PacketWriter
+    internal sealed class PGrayMenuResponse : PacketWriter
     {
         public PGrayMenuResponse() : base(0x7D)
         {
@@ -550,7 +550,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTradeResponse : PacketWriter
+    internal sealed class PTradeResponse : PacketWriter
     {
         public PTradeResponse(Serial serial, int code, bool state) : base(0x6F)
         {
@@ -568,7 +568,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTextEntryDialogResponse : PacketWriter
+    internal sealed class PTextEntryDialogResponse : PacketWriter
     {
         public PTextEntryDialogResponse() : base(0xAC)
         {
@@ -576,7 +576,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PRenameRequest : PacketWriter
+    internal sealed class PRenameRequest : PacketWriter
     {
         public PRenameRequest(Serial serial, string name) : base(0x75)
         {
@@ -585,7 +585,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PNameRequest : PacketWriter
+    internal sealed class PNameRequest : PacketWriter
     {
         public PNameRequest(Serial serial) : base(0x98)
         {
@@ -593,7 +593,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTipRequest : PacketWriter
+    internal sealed class PTipRequest : PacketWriter
     {
         public PTipRequest(ushort id, byte flag) : base(0xA7)
         {
@@ -602,7 +602,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTargetObject : PacketWriter
+    internal sealed class PTargetObject : PacketWriter
     {
         public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
@@ -620,7 +620,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTargetXYZ : PacketWriter
+    internal sealed class PTargetXYZ : PacketWriter
     {
         public PTargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType) : base(0x6C)
         {
@@ -635,7 +635,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTargetCancel : PacketWriter
+    internal sealed class PTargetCancel : PacketWriter
     {
         public PTargetCancel(Serial cursorID, byte cursorType) : base(0x6C)
         {
@@ -650,17 +650,17 @@ namespace ClassicUO.Network
         }
     }
 
-    /*public sealed class PASCIIPromptResponse : PacketWriter
+    /*internal sealed class PASCIIPromptResponse : PacketWriter
     {
         public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)
     }
 
-    public sealed class PUnicodePromptResponse : PacketWriter
+    internal sealed class PUnicodePromptResponse : PacketWriter
     {
         public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base()
     }*/
 
-    public sealed class PDyeDataResponse : PacketWriter
+    internal sealed class PDyeDataResponse : PacketWriter
     {
         public PDyeDataResponse(Serial serial, Graphic graphic, Hue hue) : base(0x95)
         {
@@ -670,7 +670,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PProfileRequest : PacketWriter
+    internal sealed class PProfileRequest : PacketWriter
     {
         public PProfileRequest(Serial serial) : base(0xB8)
         {
@@ -679,7 +679,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PProfileUpdate : PacketWriter
+    internal sealed class PProfileUpdate : PacketWriter
     {
         public PProfileUpdate(Serial serial, string text, int len) : base(0xB8)
         {
@@ -691,7 +691,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCloseStatusBarGump : PacketWriter
+    internal sealed class PCloseStatusBarGump : PacketWriter
     {
         public PCloseStatusBarGump(Serial serial) : base(0xBF)
         {
@@ -700,7 +700,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyInviteRequest : PacketWriter
+    internal sealed class PPartyInviteRequest : PacketWriter
     {
         public PPartyInviteRequest() : base(0xBF)
         {
@@ -710,7 +710,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyRemoveRequest : PacketWriter
+    internal sealed class PPartyRemoveRequest : PacketWriter
     {
         public PPartyRemoveRequest(Serial serial) : base(0xBF)
         {
@@ -720,7 +720,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyChangeLootTypeRequest : PacketWriter
+    internal sealed class PPartyChangeLootTypeRequest : PacketWriter
     {
         public PPartyChangeLootTypeRequest(bool type) : base(0xBF)
         {
@@ -730,7 +730,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyAccept : PacketWriter
+    internal sealed class PPartyAccept : PacketWriter
     {
         public PPartyAccept(Serial serial) : base(0xBF)
         {
@@ -740,7 +740,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyDecline : PacketWriter
+    internal sealed class PPartyDecline : PacketWriter
     {
         public PPartyDecline(Serial serial) : base(0xBF)
         {
@@ -750,7 +750,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPartyMessage : PacketWriter
+    internal sealed class PPartyMessage : PacketWriter
     {
         public PPartyMessage(string text, Serial serial) : base(0xBF)
         {
@@ -768,7 +768,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PGameWindowSize : PacketWriter
+    internal sealed class PGameWindowSize : PacketWriter
     {
         public PGameWindowSize(uint w, uint h) : base(0xBF)
         {
@@ -778,7 +778,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PBulletinBoardRequestMessage : PacketWriter
+    internal sealed class PBulletinBoardRequestMessage : PacketWriter
     {
         public PBulletinBoardRequestMessage(Serial serial, Serial msgserial) : base(0x71)
         {
@@ -788,7 +788,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PBulletinBoardRequestMessageSummary : PacketWriter
+    internal sealed class PBulletinBoardRequestMessageSummary : PacketWriter
     {
         public PBulletinBoardRequestMessageSummary(Serial serial, Serial msgserial) : base(0x71)
         {
@@ -798,7 +798,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PBulletinBoardPostMessage : PacketWriter
+    internal sealed class PBulletinBoardPostMessage : PacketWriter
     {
         public PBulletinBoardPostMessage(Serial serial, Serial msgserial, string subject, string message) : base(0x71)
         {
@@ -821,7 +821,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PBulletinBoardRemoveMessage : PacketWriter
+    internal sealed class PBulletinBoardRemoveMessage : PacketWriter
     {
         public PBulletinBoardRemoveMessage(Serial serial, Serial msgserial) : base(0x71)
         {
@@ -831,7 +831,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PAssistVersion : PacketWriter
+    internal sealed class PAssistVersion : PacketWriter
     {
         public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
         {
@@ -851,7 +851,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PRazorAnswer : PacketWriter
+    internal sealed class PRazorAnswer : PacketWriter
     {
         public PRazorAnswer() : base(0xF0)
         {
@@ -859,7 +859,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PLanguage : PacketWriter
+    internal sealed class PLanguage : PacketWriter
     {
         public PLanguage(string lang) : base(0xBF)
         {
@@ -868,7 +868,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PClientType : PacketWriter
+    internal sealed class PClientType : PacketWriter
     {
         public PClientType() : base(0xBF)
         {
@@ -881,7 +881,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PRequestPopupMenu : PacketWriter
+    internal sealed class PRequestPopupMenu : PacketWriter
     {
         public PRequestPopupMenu(Serial serial) : base(0xBF)
         {
@@ -890,7 +890,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPopupMenuSelection : PacketWriter
+    internal sealed class PPopupMenuSelection : PacketWriter
     {
         public PPopupMenuSelection(Serial serial, Graphic menuid) : base(0xBF)
         {
@@ -900,7 +900,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class POpenChat : PacketWriter
+    internal sealed class POpenChat : PacketWriter
     {
         public POpenChat(string name) : base(0xB5)
         {
@@ -908,7 +908,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PMapMessage : PacketWriter
+    internal sealed class PMapMessage : PacketWriter
     {
         public PMapMessage(Serial serial, byte action, byte pin, ushort x, ushort y) : base(0x56)
         {
@@ -920,7 +920,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PGuildMenuRequest : PacketWriter
+    internal sealed class PGuildMenuRequest : PacketWriter
     {
         public PGuildMenuRequest() : base(0xD7)
         {
@@ -930,7 +930,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PQuestMenuRequest : PacketWriter
+    internal sealed class PQuestMenuRequest : PacketWriter
     {
         public PQuestMenuRequest() : base(0xD7)
         {
@@ -941,7 +941,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PEquipLastWeapon : PacketWriter
+    internal sealed class PEquipLastWeapon : PacketWriter
     {
         public PEquipLastWeapon() : base(0xD7)
         {
@@ -951,7 +951,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PVirtueRequest : PacketWriter
+    internal sealed class PVirtueRequest : PacketWriter
     {
         public PVirtueRequest(uint buttonID) : base(0xB1)
         {
@@ -963,7 +963,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PInvokeVirtueRequest : PacketWriter
+    internal sealed class PInvokeVirtueRequest : PacketWriter
     {
         public PInvokeVirtueRequest(byte id) : base(0x12)
         {
@@ -973,7 +973,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PMegaClilocRequestOld : PacketWriter
+    internal sealed class PMegaClilocRequestOld : PacketWriter
     {
         public PMegaClilocRequestOld(Serial serial) : base(0xBF)
         {
@@ -982,7 +982,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PMegaClilocRequest : PacketWriter
+    internal sealed class PMegaClilocRequest : PacketWriter
     {
         public PMegaClilocRequest(List<Serial> list) : base(0xD6)
         {
@@ -995,7 +995,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PChangeStatLockStateRequest : PacketWriter
+    internal sealed class PChangeStatLockStateRequest : PacketWriter
     {
         public PChangeStatLockStateRequest(byte stat, Lock state) : base(0xBF)
         {
@@ -1005,7 +1005,7 @@ namespace ClassicUO.Network
         }
     }
 
-    /* public sealed class PBookPageData : PacketWriter
+    /* internal sealed class PBookPageData : PacketWriter
      {
          public PBookPageData()
          {
@@ -1013,7 +1013,7 @@ namespace ClassicUO.Network
          }
      }*/
 
-    public sealed class PBookPageDataRequest : PacketWriter
+    internal sealed class PBookPageDataRequest : PacketWriter
     {
         public PBookPageDataRequest(Serial serial, ushort page) : base(0x66)
         {
@@ -1024,7 +1024,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PBuyRequest : PacketWriter
+    internal sealed class PBuyRequest : PacketWriter
     {
         public PBuyRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x3B)
         {
@@ -1046,7 +1046,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PSellRequest : PacketWriter
+    internal sealed class PSellRequest : PacketWriter
     {
         public PSellRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x9F)
         {
@@ -1061,7 +1061,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PUseCombatAbility : PacketWriter
+    internal sealed class PUseCombatAbility : PacketWriter
     {
         public PUseCombatAbility(byte idx) : base(0xD7)
         {
@@ -1073,7 +1073,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTargetSelectedObject : PacketWriter
+    internal sealed class PTargetSelectedObject : PacketWriter
     {
         public PTargetSelectedObject(Serial useObjSerial, Serial targObjSerial) : base(0xBF)
         {
@@ -1083,7 +1083,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PToggleGargoyleFlying : PacketWriter
+    internal sealed class PToggleGargoyleFlying : PacketWriter
     {
         public PToggleGargoyleFlying() : base(0xBF)
         {
@@ -1093,7 +1093,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseDataRequest : PacketWriter
+    internal sealed class PCustomHouseDataRequest : PacketWriter
     {
         public PCustomHouseDataRequest(Serial serial) : base(0xBF)
         {
@@ -1102,7 +1102,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PStunRequest : PacketWriter
+    internal sealed class PStunRequest : PacketWriter
     {
         public PStunRequest() : base(0xBF)
         {
@@ -1110,7 +1110,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PDisarmRequest : PacketWriter
+    internal sealed class PDisarmRequest : PacketWriter
     {
         public PDisarmRequest() : base(0xBF)
         {
@@ -1118,14 +1118,14 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PResend : PacketWriter
+    internal sealed class PResend : PacketWriter
     {
         public PResend() : base(0x22)
         {
         }
     }
 
-    public sealed class PWalkRequest : PacketWriter
+    internal sealed class PWalkRequest : PacketWriter
     {
         public PWalkRequest(Direction direction, byte seq, bool run, uint fastwalk) : base(0x02)
         {
@@ -1137,7 +1137,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseBackup : PacketWriter
+    internal sealed class PCustomHouseBackup : PacketWriter
     {
         public PCustomHouseBackup() : base(0xD7)
         {
@@ -1147,7 +1147,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseRestore : PacketWriter
+    internal sealed class PCustomHouseRestore : PacketWriter
     {
         public PCustomHouseRestore() : base(0xD7)
         {
@@ -1157,7 +1157,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseCommit : PacketWriter
+    internal sealed class PCustomHouseCommit : PacketWriter
     {
         public PCustomHouseCommit() : base(0xD7)
         {
@@ -1167,7 +1167,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseBuildingExit : PacketWriter
+    internal sealed class PCustomHouseBuildingExit : PacketWriter
     {
         public PCustomHouseBuildingExit() : base(0xD7)
         {
@@ -1177,7 +1177,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseGoToFloor : PacketWriter
+    internal sealed class PCustomHouseGoToFloor : PacketWriter
     {
         public PCustomHouseGoToFloor(byte floor) : base(0xD7)
         {
@@ -1189,7 +1189,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseSync : PacketWriter
+    internal sealed class PCustomHouseSync : PacketWriter
     {
         public PCustomHouseSync() : base(0xD7)
         {
@@ -1199,7 +1199,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseClear : PacketWriter
+    internal sealed class PCustomHouseClear : PacketWriter
     {
         public PCustomHouseClear() : base(0xD7)
         {
@@ -1209,7 +1209,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseRevert : PacketWriter
+    internal sealed class PCustomHouseRevert : PacketWriter
     {
         public PCustomHouseRevert() : base(0xD7)
         {
@@ -1219,7 +1219,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseResponse : PacketWriter
+    internal sealed class PCustomHouseResponse : PacketWriter
     {
         public PCustomHouseResponse() : base(0xD7)
         {
@@ -1229,7 +1229,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseAddItem : PacketWriter
+    internal sealed class PCustomHouseAddItem : PacketWriter
     {
         public PCustomHouseAddItem(Graphic graphic, uint x, uint y) : base(0xD7)
         {
@@ -1245,7 +1245,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseDeleteItem : PacketWriter
+    internal sealed class PCustomHouseDeleteItem : PacketWriter
     {
         public PCustomHouseDeleteItem(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
@@ -1263,7 +1263,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseAddRoof : PacketWriter
+    internal sealed class PCustomHouseAddRoof : PacketWriter
     {
         public PCustomHouseAddRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
@@ -1281,7 +1281,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseDeleteRoof : PacketWriter
+    internal sealed class PCustomHouseDeleteRoof : PacketWriter
     {
         public PCustomHouseDeleteRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
@@ -1299,7 +1299,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCustomHouseAddStair : PacketWriter
+    internal sealed class PCustomHouseAddStair : PacketWriter
     {
         public PCustomHouseAddStair(Graphic graphic, uint x, uint y) : base(0xD7)
         {
@@ -1315,7 +1315,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PPing : PacketWriter
+    internal sealed class PPing : PacketWriter
     {
         public PPing() : base(0x73)
         {
@@ -1323,7 +1323,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PClientViewRange : PacketWriter
+    internal sealed class PClientViewRange : PacketWriter
     {
         public PClientViewRange(byte range) : base(0xC8)
         {

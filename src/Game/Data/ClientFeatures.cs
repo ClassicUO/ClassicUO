@@ -8,7 +8,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.Data
 {
-    public class ClientFeatures
+    internal class ClientFeatures
     {
         public CharacterListFlag Flags { get; private set; }
 

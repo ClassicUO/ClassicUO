@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class ScrollBar : Control, IScrollBar
+    internal class ScrollBar : Control, IScrollBar
     {
         private const float TIME_BETWEEN_CLICKS = 500f;
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;

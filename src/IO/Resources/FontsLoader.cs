@@ -2649,18 +2649,18 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct FontHeader
+    internal readonly struct FontHeader
     {
         public readonly byte Width, Height, Unknown;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct FontCharacter
+    internal readonly struct FontCharacter
     {
         public readonly byte Width, Height, Unknown;
     }
 
-    public readonly struct FontCharacterData
+    internal readonly struct FontCharacterData
     {
         public FontCharacterData(byte w, byte h, ushort[] data)
         {
@@ -2673,7 +2673,7 @@ namespace ClassicUO.IO.Resources
         public readonly ushort[] Data;
     }
 
-    public readonly struct FontData
+    internal readonly struct FontData
     {
         public FontData(byte header, FontCharacterData[] chars)
         {
@@ -2687,7 +2687,7 @@ namespace ClassicUO.IO.Resources
         public readonly FontCharacterData[] Chars;
     }
 
-    public sealed class MultilinesFontInfo
+    internal sealed class MultilinesFontInfo
     {
         public TEXT_ALIGN_TYPE Align;
         public int CharCount;
@@ -2710,7 +2710,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public class MultilinesFontData
+    internal class MultilinesFontData
     {
         public uint Color;
         public ushort Flags;
@@ -2720,19 +2720,19 @@ namespace ClassicUO.IO.Resources
         public MultilinesFontData Next;
     }
 
-    public struct WebLinkRect
+    internal struct WebLinkRect
     {
         public ushort LinkID;
         public int StartX, StartY, EndX, EndY;
     }
 
-    public struct WebLink
+    internal struct WebLink
     {
         public bool IsVisited;
         public string Link;
     }
 
-    public struct HTMLChar
+    internal struct HTMLChar
     {
         public char Char;
         public byte Font;
@@ -2742,7 +2742,7 @@ namespace ClassicUO.IO.Resources
         public ushort LinkID;
     }
 
-    public struct HTMLDataInfo
+    internal struct HTMLDataInfo
     {
         public HTML_TAG_TYPE Tag;
         public TEXT_ALIGN_TYPE Align;

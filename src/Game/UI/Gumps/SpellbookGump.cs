@@ -24,6 +24,7 @@ using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -84,6 +85,12 @@ namespace ClassicUO.Game.UI.Gumps
             _spellBook.Items.Removed -= ItemsOnRemoved;
             _spellBook.Disposed -= SpellBookOnDisposed;
             Dispose();
+        }
+
+        public override void Dispose()
+        {
+            Engine.UI.SavePosition(LocalSerial, Location);
+            base.Dispose();
         }
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)

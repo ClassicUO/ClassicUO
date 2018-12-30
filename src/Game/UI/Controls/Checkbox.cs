@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class Checkbox : Control
+    internal class Checkbox : Control
     {
         private const int INACTIVE = 0;
         private const int ACTIVE = 1;

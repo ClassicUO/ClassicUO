@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class ResizePic : Control
+    internal class ResizePic : Control
     {
         private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
 

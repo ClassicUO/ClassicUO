@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
 {
-    public sealed class GameCursor
+    internal sealed class GameCursor
     {
         private static readonly ushort[,] _cursorData = new ushort[2, 16]
         {

@@ -353,7 +353,7 @@ namespace ClassicUO.IO
             return (UInt16)((sum2 << 8) | sum1);
         }
 
-        public sealed class UltimaLiveHashResponse : PacketWriter
+        internal sealed class UltimaLiveHashResponse : PacketWriter
         {
             public UltimaLiveHashResponse(uint block, byte mapid, ushort[] crcs) : base(0x3F)
             {

@@ -27,6 +27,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -34,8 +37,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private GumpPic _eyeGumpPic;
         private bool _isCorspeContainer;
-        private Graphic _gumpID;
-        private Item _item;
+        private readonly Graphic _gumpID;
+        private readonly Item _item;
         private long _corpseEyeTicks;
         private int _eyeCorspeOffset;
 
@@ -66,8 +69,15 @@ namespace ClassicUO.Game.UI.Gumps
             _isCorspeContainer = _gumpID == 0x0009;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
-            AddChildren(new GumpPicContainer(0, 0, ContainerManager.Get(_gumpID).Graphic, 0, _item));
-            if (_isCorspeContainer) AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+
+            Graphic g = ContainerManager.Get(_gumpID).Graphic;
+            AddChildren(new GumpPicContainer(0, 0, g, 0, _item));
+            if (_isCorspeContainer)
+                AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+
+            ContainerManager.CalculateContainerPosition(g);
+            X = ContainerManager.X;
+            Y = ContainerManager.Y;
         }
 
         public override void Update(double totalMS, double frameMS)

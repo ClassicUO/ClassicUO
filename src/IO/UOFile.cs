@@ -29,7 +29,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    public abstract unsafe class UOFile : DataReader
+    internal abstract unsafe class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
         private MemoryMappedFile _file;

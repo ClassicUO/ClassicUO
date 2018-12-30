@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class CroppedText : Control
+    internal class CroppedText : Control
     {
         private readonly RenderedText _gameText;
 

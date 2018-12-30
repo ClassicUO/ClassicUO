@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    public sealed class UIManager
+    internal sealed class UIManager
     {
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<Control> _gumps = new List<Control>();
@@ -249,6 +249,7 @@ namespace ClassicUO.Game.Managers
         public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);
 
         public bool IsDragging => _isDraggingControl && _draggingControl != null;
+
 
         //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 

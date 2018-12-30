@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class CheckerTrans : Control
+    internal class CheckerTrans : Control
     {
         private static SpriteTexture _transparentTexture;
         private readonly float _alpha;

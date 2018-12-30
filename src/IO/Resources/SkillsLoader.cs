@@ -53,7 +53,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public readonly struct SkillEntry
+    internal readonly struct SkillEntry
     {
         public SkillEntry(int index, string name, bool hasbutton)
         {

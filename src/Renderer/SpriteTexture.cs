@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    public class SpriteTexture : Texture2D
+    internal class SpriteTexture : Texture2D
     {
         private bool[] _hitMap;
         private readonly bool _is32Bit;
@@ -104,7 +104,7 @@ namespace ClassicUO.Renderer
         }
     }
 
-    public class FontTexture : SpriteTexture
+    internal class FontTexture : SpriteTexture
     {
         public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
         {
@@ -117,7 +117,7 @@ namespace ClassicUO.Renderer
         public List<WebLinkRect> Links { get; }
     }
 
-    public class AnimationFrameTexture : SpriteTexture
+    internal class AnimationFrameTexture : SpriteTexture
     {
         public AnimationFrameTexture(int width, int height) : base(width, height, false)
         {
@@ -128,7 +128,7 @@ namespace ClassicUO.Renderer
         public short CenterY { get; set; }
     }
 
-    public class ArtTexture : SpriteTexture
+    internal class ArtTexture : SpriteTexture
     {
         public ArtTexture(int offsetX, int offsetY, int offsetW, int offsetH, int width, int height) : base(width, height, false)
         {

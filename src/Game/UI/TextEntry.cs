@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    public class TextEntry : IDisposable
+    internal class TextEntry : IDisposable
     {
         private string _plainText;
 

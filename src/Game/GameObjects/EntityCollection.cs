@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    public class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
+    internal class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
     {
         private readonly IReadOnlyList<T> _data;
 

@@ -128,7 +128,7 @@ namespace ClassicUO.Network
             while (_pending.Count > 0) _pending.Dequeue().Release();
         }
 
-        public class Gram
+        internal class Gram
         {
             private static readonly Stack<Gram> _Pool = new Stack<Gram>();
 
@@ -182,7 +182,7 @@ namespace ClassicUO.Network
     }
 
     [Serializable]
-    public sealed class CapacityExceededException : Exception
+    internal sealed class CapacityExceededException : Exception
     {
         public CapacityExceededException() : base("Too much data pending.")
         {

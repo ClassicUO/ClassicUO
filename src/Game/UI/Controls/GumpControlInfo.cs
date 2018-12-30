@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Controls
         Under
     }
 
-    public class GumpControlInfo
+    internal class GumpControlInfo
     {
         public GumpControlInfo(Control control)
         {

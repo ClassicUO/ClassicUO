@@ -26,7 +26,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    public static class CommandManager
+    internal static class CommandManager
     {
         private static readonly Dictionary<string, Action> _commands = new Dictionary<string, Action>();
 

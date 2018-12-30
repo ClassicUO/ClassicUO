@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class StaticPic : Control
+    internal class StaticPic : Control
     {
         private readonly Graphic _graphic;
         private readonly bool _isPartial;

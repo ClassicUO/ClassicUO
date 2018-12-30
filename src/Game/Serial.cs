@@ -23,7 +23,7 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    public struct Serial : IComparable, IComparable<uint>
+    internal struct Serial : IComparable, IComparable<uint>
     {
         public static readonly Serial Invalid = new Serial(0);
         public static readonly Serial MinusOne = new Serial(0xFFFFFFFF);

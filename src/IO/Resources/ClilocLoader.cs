@@ -103,7 +103,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public readonly struct StringEntry
+    internal readonly struct StringEntry
     {
         public StringEntry(int num, string text)
         {

@@ -135,7 +135,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct MultiBlock
+    internal readonly struct MultiBlock
     {
         public readonly ushort ID;
         public readonly short X;
@@ -145,7 +145,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct MultiBlockNew
+    internal readonly struct MultiBlockNew
     {
         public readonly ushort ID;
         public readonly short X;

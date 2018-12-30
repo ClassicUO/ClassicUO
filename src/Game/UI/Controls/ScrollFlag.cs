@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class ScrollFlag : Control, IScrollBar
+    internal class ScrollFlag : Control, IScrollBar
     {
         private bool _btnSliderClicked;
         private Point _clickPosition;

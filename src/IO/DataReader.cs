@@ -29,7 +29,7 @@ namespace ClassicUO.IO
     /// A fast Little Endian data reader.
     /// </summary>
     [SecurityCritical]
-    public unsafe class DataReader
+    internal unsafe class DataReader
     {
         [SecurityCritical]
         private byte* _data;

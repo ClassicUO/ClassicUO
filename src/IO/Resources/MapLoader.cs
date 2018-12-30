@@ -238,7 +238,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaticsBlock
+    internal readonly struct StaticsBlock
     {
         public readonly ushort Color;
         public readonly byte X;
@@ -248,7 +248,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaidxBlock
+    internal readonly struct StaidxBlock
     {
         public readonly uint Position;
         public readonly uint Size;
@@ -256,14 +256,14 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MapCells
+    internal struct MapCells
     {
         public ushort TileID;
         public sbyte Z;
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    //public struct MapBlock
+    //internal struct MapBlock
     //{
     //    public readonly uint Header;
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
@@ -271,21 +271,21 @@ namespace ClassicUO.IO.Resources
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
-    public struct MapBlock
+    internal struct MapBlock
     {
         public readonly uint Header;
         public unsafe MapCells* Cells;
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
-    //public struct MapBlock2
+    //internal struct MapBlock2
     //{
     //    public readonly uint Header;
     //    public IntPtr Cells;
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RadarMapcells
+    internal struct RadarMapcells
     {
         public ushort Graphic;
         public sbyte Z;
@@ -293,13 +293,13 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RadarMapBlock
+    internal struct RadarMapBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public RadarMapcells[,] Cells;
     }
 
-    public readonly struct IndexMap
+    internal readonly struct IndexMap
     {
         public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
         {

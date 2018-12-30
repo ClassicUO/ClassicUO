@@ -119,7 +119,7 @@ namespace ClassicUO
             Window.AllowUserResizing = true;
         }
 
-      //  public static ClassicUO_API.NetPipes.Server Server { get; } = new Server();
+      //  internal static classicUO_API.NetPipes.Server Server { get; } = new Server();
 
         public static Batcher2D Batcher => _engine._batcher;
 

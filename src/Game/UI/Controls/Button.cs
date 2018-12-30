@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
         Activate = 1
     }
 
-    public class Button : Control
+    internal class Button : Control
     {
         private const int NORMAL = 0;
         private const int PRESSED = 1;

@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
             box._entry.UpdateCaretPosition();
         }
 
-        public sealed class PBookHeaderNew : PacketWriter
+        internal sealed class PBookHeaderNew : PacketWriter
         {
             public PBookHeaderNew( BookGump gump ) : base( 0xD4 )//Serial serial, string title,string author,int pagecount ) : base( 0xD4 )
             {
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
 
            
         }
-        public sealed class PBookHeader : PacketWriter
+        internal sealed class PBookHeader : PacketWriter
         {
             public PBookHeader( BookGump gump ) : base( 0x93 )//Serial serial, string title, string author, int pagecount ) : base( 0x93 )
             {
@@ -314,7 +314,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private const int MaxBookLines = 8;
-        public sealed class PBookData : PacketWriter
+        internal sealed class PBookData : PacketWriter
         {
             public PBookData( BookGump gump ) : base(0x66)//Serial serial, List<TextBox> data
             {

@@ -32,7 +32,7 @@ using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Configuration
 {
-    public class ProfileManager
+    internal class ProfileManager
     {
         public Profile Current { get; private set; }
 

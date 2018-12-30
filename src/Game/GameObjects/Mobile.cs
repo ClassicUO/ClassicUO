@@ -665,7 +665,7 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        public struct Step
+        internal struct Step
         {
             public int X, Y;
             public sbyte Z;

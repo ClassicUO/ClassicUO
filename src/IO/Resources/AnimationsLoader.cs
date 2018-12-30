@@ -1533,7 +1533,7 @@ namespace ClassicUO.IO.Resources
         LAG_ANIMATION_COUNT
     }
 
-    public struct IndexAnimation
+    internal struct IndexAnimation
     {
         public ushort Graphic;
         public ushort Color;
@@ -1546,14 +1546,14 @@ namespace ClassicUO.IO.Resources
         public AnimationGroup[] Groups;
     }
 
-    public struct AnimationGroup
+    internal struct AnimationGroup
     {
         // 5
         public AnimationDirection[] Direction;
         public UopFileData UOPAnimData;
     }
 
-    public struct AnimationDirection
+    internal struct AnimationDirection
     {
         public byte FrameCount;
         public long BaseAddress;
@@ -1569,7 +1569,7 @@ namespace ClassicUO.IO.Resources
         public uint[] FramesHashes;
     }
 
-    public readonly struct EquipConvData
+    internal readonly struct EquipConvData
     {
         public EquipConvData(ushort graphic, ushort gump, ushort color)
         {
@@ -1583,7 +1583,7 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Color;
     }
 
-    public readonly struct UopFileData
+    internal readonly struct UopFileData
     {
         public UopFileData(uint offset, uint clen, uint dlen, int index)
         {

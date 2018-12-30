@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    public class SkillListEntry : Control
+    internal class SkillListEntry : Control
     {
         private readonly Button _activeUse;
         private readonly Skill _skill;

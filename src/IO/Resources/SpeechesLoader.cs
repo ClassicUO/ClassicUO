@@ -95,7 +95,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public struct SpeechEntry : IComparable<SpeechEntry>
+    internal struct SpeechEntry : IComparable<SpeechEntry>
     {
         public SpeechEntry(int id, string keyword)
         {

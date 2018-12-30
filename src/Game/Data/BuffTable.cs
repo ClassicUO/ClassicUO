@@ -20,7 +20,7 @@
 #endregion
 namespace ClassicUO.Game.Data
 {
-    public static class BuffTable
+    internal static class BuffTable
     {
         public static Graphic[] Table { get; } =
         {

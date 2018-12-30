@@ -26,7 +26,7 @@
 
 //namespace ClassicUO.Game.Gumps.UIGumps
 //{
-//    public class OptionsGump : Gump
+//    internal class OptionsGump : Gump
 //    {
 //        private Checkbox _checkboxSound, _checkboxMusic, _checboxFootstepsSound, _checkboxPlayCombatMusic, _checkboxPlaySoundsInBackground, _checkboxHighlightGameObjects, _checkboxUseTooltips, _checkboxSmoothMovement;
 //        private ColorPickerGump _colorPickerGump;
