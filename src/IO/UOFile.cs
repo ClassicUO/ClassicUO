@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
@@ -96,13 +97,10 @@ namespace ClassicUO.IO
         {
             fixed (byte* ptr = buffer)
             {
-                byte* start = ptr;
-                byte* end = &ptr[0] + count;
-                while (start != end)
-                {
-                    *start++ = ReadByte();
-                }
+                Buffer.MemoryCopy((byte*)PositionAddress, ptr, count, count);
             }
+
+            Position += count;
         }
 
         internal T[] ReadArray<T>(int count) where T : struct

@@ -472,7 +472,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
-            if (mobile.Graphic >= AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT) return 0;
+            if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT) return 0;
 
             switch (type)
             {

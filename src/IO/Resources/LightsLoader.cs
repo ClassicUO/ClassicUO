@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.IO.Resources
 {
     class LightsLoader : ResourceLoader
     {
-        public const int LIGHT_COUNT = 100;
         private  UOFileMul _file;
 
         public override void Load()
@@ -19,7 +20,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
-            _file = new UOFileMul(path, pathidx, LIGHT_COUNT);
+            _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
         }
 
         protected override void CleanResources()

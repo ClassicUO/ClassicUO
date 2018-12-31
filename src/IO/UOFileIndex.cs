@@ -45,17 +45,17 @@ namespace ClassicUO.IO
     {
         public UOFileIndex5D(int file, int index, int offset, int length, int extra = 0)
         {
-            File = file;
-            Index = index;
-            Offset = offset;
+            FileID = file;
+            BlockID = index;
+            Position = offset;
             Length = length;
-            Extra = extra;
+            GumpData = extra;
         }
 
-        public int File;
-        public int Index;
-        public int Offset;
+        public int FileID;
+        public int BlockID;
+        public int Position;
         public int Length;
-        public int Extra;
+        public int GumpData;
     }
 }

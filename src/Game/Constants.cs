@@ -56,5 +56,17 @@ namespace ClassicUO.Game
         public const int CONTAINER_RECT_STEP = 20;
         public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
         public const int CONTAINER_RECT_LINESTEP = 800;
+
+
+        public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
+        public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
+        public const int MAX_LAND_TEXTURES_DATA_INDEX_COUNT = 0x4000;
+        public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
+        public const int MAX_SOUND_DATA_INDEX_COUNT = 0x0800;
+        public const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
+        public const int MAX_MUSIC_DATA_INDEX_COUNT = 150;
+        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
+
     }
 }

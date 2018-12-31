@@ -6,15 +6,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
-    {
-        private const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
-        private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
-
+    {    
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
 
@@ -32,7 +30,7 @@ namespace ClassicUO.IO.Resources
             if (staticscount > 2048)
                 staticscount = 2048;
             tiledata.Seek(0);
-            LandData = new LandTiles[MAX_LAND_DATA_INDEX_COUNT];
+            LandData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
             StaticData = new StaticTiles[staticscount * 32];
             byte[] bufferString = new byte[20];
 

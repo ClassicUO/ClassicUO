@@ -62,6 +62,13 @@ namespace ClassicUO.Game
                 {
                     InternalMapChangeClear(true);
 
+                    if (value < 0 && Map != null)
+                    {
+                        Map.Dispose();
+                        Map = null;
+                        return;
+                    }
+
                     if (Map != null)
                     {
                         if (MapIndex >= 0)

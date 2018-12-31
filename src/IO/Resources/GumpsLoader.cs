@@ -13,7 +13,6 @@ namespace ClassicUO.IO.Resources
 {
     class GumpsLoader : ResourceLoader<SpriteTexture>
     {
-        public const int GUMP_COUNT = 0x10000;
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
 
@@ -23,14 +22,14 @@ namespace ClassicUO.IO.Resources
 
             if (File.Exists(path))
             {
-                _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
+                _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
                 FileManager.UseUOPGumps = true;
             }
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
-                if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
+                if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
                 FileManager.UseUOPGumps = false;
             }
 
@@ -45,12 +44,12 @@ namespace ClassicUO.IO.Resources
                 {
                     int ingump = defReader.ReadInt();
 
-                    if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
 
                     int outgump = defReader.ReadGroupInt();
 
-                    if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength != 0)
+                    if (outgump < 0 || outgump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || _file.Entries[outgump].DecompressedLength != 0)
                         continue;
 
                     _file.Entries[ingump] = _file.Entries[outgump];

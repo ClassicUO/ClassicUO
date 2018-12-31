@@ -1945,7 +1945,14 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x18: // enable map patches
-                    Log.Message(LogTypes.Warning, "Map patches packet received. Not implemented yet");
+
+                    if (FileManager.Map.ApplyPatches(p))
+                    {
+                        int indx = World.MapIndex;
+                        World.MapIndex = -1;
+                        World.MapIndex = indx;
+                    }
+
                     break;
                 //===========================================================================================
                 //===========================================================================================

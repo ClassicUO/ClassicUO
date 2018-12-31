@@ -18,8 +18,6 @@ namespace ClassicUO.IO.Resources
 {
     class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
     {
-        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
-
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];
         private readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
@@ -47,7 +45,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
-        public IndexAnimation[] DataIndex { get; } = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
+        public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
 
@@ -99,7 +97,7 @@ namespace ClassicUO.IO.Resources
                         }, StringSplitOptions.RemoveEmptyEntries);
                         int id = int.Parse(parts[0]);
 
-                        if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
                         string testType = parts[1].ToLower();
                         int commentIdx = parts[2].IndexOf('#');
@@ -136,7 +134,7 @@ namespace ClassicUO.IO.Resources
             UOFile idxfile5 = _files[4]?.IdxFile;
             long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
-            for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
                 int findID = 0;
@@ -246,15 +244,15 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort body = (ushort) defReader.ReadInt();
 
-                    if (body >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     ushort graphic = (ushort) defReader.ReadInt();
-                    if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     ushort newGraphic = (ushort) defReader.ReadInt();
-                    if (newGraphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (newGraphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     int gump = defReader.ReadInt();
@@ -285,7 +283,7 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     ushort index = (ushort) defReader.ReadInt();
-                    if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     int[] anim =
@@ -490,7 +488,7 @@ namespace ClassicUO.IO.Resources
                 {
 
                     int index = defReader.ReadInt();
-                    if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -499,7 +497,7 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < group.Length; i++)
                     {
                         int checkIndex = group[i];
-                        if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
                         int count = 0;
 
@@ -575,7 +573,7 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     ushort index = (ushort) defReader.ReadInt();
-                    if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -585,7 +583,7 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < group.Length; i++)
                     {
                         int checkIndex = group[i];
-                        if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
 
                         int[] ignoreGroups =
@@ -654,7 +652,7 @@ namespace ClassicUO.IO.Resources
 
             byte maxGroup = 0;
 
-            for (int animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             {
                 for (byte grpID = 0; grpID < 100; grpID++)
                 {
@@ -685,7 +683,7 @@ namespace ClassicUO.IO.Resources
             {
                 // AnimationSequence.uop
                 // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
-                UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
+                UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT);
 
                 //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
 
@@ -821,7 +819,7 @@ namespace ClassicUO.IO.Resources
 
         public void UpdateAnimationTable(uint flags)
         {
-            for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 for (int g = 0; g < 100; g++)
                 {
@@ -911,7 +909,7 @@ namespace ClassicUO.IO.Resources
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
-            if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
 
             switch (DataIndex[graphic].Type)
@@ -956,7 +954,7 @@ namespace ClassicUO.IO.Resources
         {
             bool result = false;
 
-            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
+            if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 AnimationDirection d = DataIndex[graphic].Groups[group].Direction[0];
                 result = d.Address != 0 || d.IsUOP;
@@ -1211,7 +1209,7 @@ namespace ClassicUO.IO.Resources
 
         public void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {
-            if (id < MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
                 if (_animDimensionCache.TryGetValue(id, out Rectangle rect))
                 {

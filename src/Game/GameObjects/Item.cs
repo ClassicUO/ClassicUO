@@ -570,7 +570,7 @@ namespace ClassicUO.Game.GameObjects
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                    if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
                         int animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
                         ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
