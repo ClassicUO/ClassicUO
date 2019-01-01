@@ -337,7 +337,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetByLocalSerial<LoginGump>().FindControls<CharCreationGump>().SingleOrDefault();
+            var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -381,7 +381,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                Engine.UI.GetByLocalSerial<LoginGump>().FindControls<CharCreationGump>().SingleOrDefault()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
+                Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
 
                 return false;
             }
@@ -394,10 +394,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (_humanRadio.IsChecked)
                 return RaceType.HUMAN;
 
-            if (_elfRadio.IsChecked)
+            if (_elfRadio!=null && _elfRadio.IsChecked)
                 return RaceType.ELF;
 
-            if (_gargoyleRadio.IsChecked)
+            if (_gargoyleRadio!=null && _gargoyleRadio.IsChecked)
                 return RaceType.GARGOYLE;
 
             return RaceType.HUMAN;
