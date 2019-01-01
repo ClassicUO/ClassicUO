@@ -167,6 +167,7 @@
     <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\GameObjectHelper.cs" />
     <Compile Include="Utility\HuesHelper.cs" />
+    <Compile Include="Utility\Platforms\Native.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\UI\Controls\DataBox.cs" />
@@ -364,6 +365,7 @@
     <Compile Include="Utility\MathHelper.cs" />
     <Compile Include="Utility\Profiler.cs" />
     <Compile Include="Utility\RandomHelper.cs" />
+    <Compile Include="Utility\SDL2EX.cs" />
     <Compile Include="Utility\StringHelper.cs" />
     <Compile Include="Utility\UnsafeMemoryManager.cs" />
     <Compile Include="Utility\ZLib.cs" />

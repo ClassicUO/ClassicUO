@@ -335,7 +335,9 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            Plugin.Load();
+            Log.PushIndent();
+            Plugin.Create(@".\Assistant\Razor.dll");
+            Log.PopIndent();
 
             _sceneManager.ChangeScene(ScenesType.Login);
             base.LoadContent();           

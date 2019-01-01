@@ -63,5 +63,15 @@ namespace ClassicUO.Utility.Logging
         {
             _logger.Clear();
         }
+
+        public static void PushIndent()
+        {
+            _logger.PushIndent();
+        }
+
+        public static void PopIndent()
+        {
+            _logger.PopIndent();
+        }
     }
 }
