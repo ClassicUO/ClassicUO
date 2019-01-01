@@ -269,6 +269,11 @@ namespace ClassicUO.Game.UI.Gumps
                     Mode = ChatMode.Emote;
             }
 
+            if (Engine.Profile.Current.SpeechHue != _textBox.Hue)
+            {
+                _textBox.Hue = Engine.Profile.Current.SpeechHue;
+            }
+
             base.Update(totalMS, frameMS);
         }
 

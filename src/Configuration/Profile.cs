@@ -93,6 +93,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
         [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
         [JsonProperty] public int MobileHPType { get; set; } = 0;
+        [JsonProperty] public bool DrawRoofs { get; set; } = true;
+
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;

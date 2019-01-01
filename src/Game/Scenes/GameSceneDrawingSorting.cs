@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Scenes
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ)
+            if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ && _noDrawRoofs != Engine.Profile.Current.DrawRoofs)
                 return;
             _oldPlayerX = playerX;
             _oldPlayerY = playerY;
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Scenes
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
-            _noDrawRoofs = false;
+            _noDrawRoofs = !Engine.Profile.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
             Tile tile = World.Map.GetTile(bx, by, false);

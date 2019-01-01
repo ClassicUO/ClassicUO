@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS;
-        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState;
+        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs;
         private Combobox _hpComboBox;
 
         // sounds
@@ -154,38 +154,19 @@ namespace ClassicUO.Game.UI.Gumps
             fpsItem.AddChildren(_sliderFPS);
             rightArea.AddChildren(fpsItem);
 
-            // Highlight
-            _highlightObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects", 1)
-            {
-                Y = 10, IsChecked = Engine.Profile.Current.HighlightGameObjects
-            };
-            rightArea.AddChildren(_highlightObjects);
+            // Highlight    
+            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
-            // smooth movements
-            _smoothMovements = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
-            {
-                IsChecked = Engine.Profile.Current.SmoothMovements
-            };
-            rightArea.AddChildren(_smoothMovements);
+            //// smooth movements
+            //_smoothMovements = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
+            //{
+            //    IsChecked = Engine.Profile.Current.SmoothMovements
+            //};
+            //rightArea.AddChildren(_smoothMovements);
 
-            _enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
-            {
-                IsChecked = Engine.Profile.Current.EnablePathfind
-            };
-            rightArea.AddChildren(_enablePathfind);
-
-            _alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
-            {
-                IsChecked = Engine.Profile.Current.AlwaysRun
-            };
-            rightArea.AddChildren(_alwaysRun);
-
-            // preload maps
-            _preloadMaps = new Checkbox(0x00D2, 0x00D3, "Preload maps (it increases the RAM usage)", 1)
-            {
-                IsChecked = Engine.GlobalSettings.PreloadMaps
-            };
-            rightArea.AddChildren(_preloadMaps);
+            _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
+            _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
+            _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
 
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -214,6 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.AddChildren(hpAreaItem);
 
             // highlight character by flags
+
             ScrollAreaItem highlightByFlagsItem = new ScrollAreaItem();
 
             text = new Label("- Mobiles status", true, 1)
@@ -228,6 +210,10 @@ namespace ClassicUO.Game.UI.Gumps
             };
             highlightByFlagsItem.AddChildren(_highlightByState);
             rightArea.AddChildren(highlightByFlagsItem);
+
+
+            _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 10);
+
             AddChildren(rightArea, PAGE);
         }
 
@@ -318,7 +304,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
-            ScrollAreaItem item = new ScrollAreaItem();
+
+
+
             AddChildren(rightArea, PAGE);
         }
 
@@ -362,17 +350,8 @@ namespace ClassicUO.Game.UI.Gumps
             _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer color", 20, 0);
             _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy color", 20, 0);
 
+            _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
-            ScrollAreaItem item = new ScrollAreaItem();
-
-            _queryBeforAttackCheckbox = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
-            {
-                Y = 30,
-                IsChecked = Engine.Profile.Current.EnabledCriminalActionQuery
-            };
-            item.AddChildren(_queryBeforAttackCheckbox);
-
-            rightArea.AddChildren(item);
             AddChildren(rightArea, PAGE);
         }
 
@@ -425,6 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
+                    _drawRoofs.IsChecked = true;
                     break;
                 case 2: // sounds
                     
@@ -468,12 +448,13 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
-            Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
+            //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
+            Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
 
             // sounds
 
@@ -513,6 +494,31 @@ namespace ClassicUO.Game.UI.Gumps
             CriminalColor,
             EnemyColor,
             MurdererColor
+        }
+
+        private Checkbox CreateCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
+        {
+            Checkbox box = new Checkbox(0x00D2, 0x00D3, text, 1)
+            {
+                IsChecked = ischecked
+            };
+
+            if (x != 0)
+            {
+                ScrollAreaItem item = new ScrollAreaItem();
+                box.X = x;
+                box.Y = y;
+                
+                item.AddChildren(box);
+                area.AddChildren(item);
+            }
+            else
+            {
+                box.Y = y;
+
+                area.AddChildren(box);
+            }
+            return box;
         }
 
         private ClickableColorBox CreateClickableColorBox(ScrollArea area, int x, int y, ushort hue, string text, int labelX, int labelY)
