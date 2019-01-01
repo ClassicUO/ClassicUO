@@ -6,15 +6,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
-    {
-        private const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
-        private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
-
+    {    
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
 
@@ -32,7 +30,7 @@ namespace ClassicUO.IO.Resources
             if (staticscount > 2048)
                 staticscount = 2048;
             tiledata.Seek(0);
-            LandData = new LandTiles[MAX_LAND_DATA_INDEX_COUNT];
+            LandData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
             StaticData = new StaticTiles[staticscount * 32];
             byte[] bufferString = new byte[20];
 
@@ -151,7 +149,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public readonly struct LandTiles
+    internal readonly struct LandTiles
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
@@ -171,14 +169,14 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct LandGroup
+    internal readonly struct LandGroup
     {
         public readonly uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly LandTiles[] Tiles;
     }
 
-    public readonly struct StaticTiles
+    internal readonly struct StaticTiles
     {
         public static readonly StaticTiles Empty = default;
 
@@ -227,7 +225,7 @@ namespace ClassicUO.IO.Resources
     // old
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct LandGroupOld
+    internal readonly struct LandGroupOld
     {
         public readonly uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -235,7 +233,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct LandTilesOld
+    internal readonly struct LandTilesOld
     {
         public readonly uint Flags;
         public readonly ushort TexID;
@@ -244,7 +242,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaticGroupOld
+    internal readonly struct StaticGroupOld
     {
         public readonly uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -252,7 +250,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaticTilesOld
+    internal readonly struct StaticTilesOld
     {
         public readonly uint Flags;
         public readonly byte Weight;
@@ -269,7 +267,7 @@ namespace ClassicUO.IO.Resources
     // new 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct LandGroupNew
+    internal readonly struct LandGroupNew
     {
         public readonly uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -277,7 +275,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct LandTilesNew
+    internal readonly struct LandTilesNew
     {
         public readonly TileFlag Flags;
         public readonly ushort TexID;
@@ -286,7 +284,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaticGroupNew
+    internal readonly struct StaticGroupNew
     {
         public readonly uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -294,7 +292,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct StaticTilesNew
+    internal readonly struct StaticTilesNew
     {
         public readonly TileFlag Flags;
         public readonly byte Weight;

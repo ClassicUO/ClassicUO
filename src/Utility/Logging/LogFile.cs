@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Logging
 {
-    public sealed class LogFile : IDisposable
+    internal sealed class LogFile : IDisposable
     {
         private readonly FileStream logStream;
 

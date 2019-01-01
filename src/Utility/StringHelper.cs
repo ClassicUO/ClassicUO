@@ -27,7 +27,7 @@ using System.Text;
 
 namespace ClassicUO.Utility
 {
-    public static class StringHelper
+    internal static class StringHelper
     {
         public static string CapitalizeFirstCharacter(string str)
         {

@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    public sealed class UIManager
+    internal sealed class UIManager
     {
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<Control> _gumps = new List<Control>();
@@ -250,6 +250,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsDragging => _isDraggingControl && _draggingControl != null;
 
+
         //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
         //public void AddInputBlocker(object obj)
@@ -335,7 +336,16 @@ namespace ClassicUO.Game.Managers
                             {
                                 Control g = gump.Children[i];
                                 g.IsTransparent = true;
-                                if (g.Bounds.Contains(t.Bounds) && (g is Button || g is Checkbox)) g.IsVisible = false;
+
+                                if (g.Bounds.Contains(t.Bounds))
+                                {
+                                    if (g is ResizePic res)
+                                        res.OnlyCenterTransparent = true;
+                                    else if (g is Button || g is Checkbox)
+                                    {
+                                        g.IsVisible = false;
+                                    }
+                                }
                             }
 
                             gump.AddChildren(t, page);

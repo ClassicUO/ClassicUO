@@ -121,6 +121,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
+    <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />

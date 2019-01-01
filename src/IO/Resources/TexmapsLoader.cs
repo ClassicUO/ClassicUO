@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
     class TexmapsLoader : ResourceLoader<SpriteTexture>
     {
-        public const int TEXTMAP_COUNT = 0x4000;
         private UOFile _file;
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
@@ -25,7 +25,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
-            _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
+            _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
             if (!File.Exists(pathdef))
@@ -36,7 +36,7 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     int index = defReader.ReadInt();
-                    if (index < 0 || index >= TEXTMAP_COUNT)
+                    if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
                     {
                         int checkindex = group[i];
 
-                        if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
+                        if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                             continue;
                         _file.Entries[index] = _file.Entries[checkindex];
                     }

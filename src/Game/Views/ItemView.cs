@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
+            HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : GameObject.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
 
             if (item.Amount > 1 && item.ItemData.IsStackable && item.DisplayedGraphic == GameObject.Graphic)
             {

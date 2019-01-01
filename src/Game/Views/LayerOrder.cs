@@ -24,7 +24,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Views
 {
-    public static class LayerOrder
+    internal static class LayerOrder
     {
         public static Layer[,] UsedLayers { get; } = new Layer[8, Constants.USED_LAYER_COUNT]
         {

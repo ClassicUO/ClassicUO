@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class Checkbox : Control
+    internal class Checkbox : Control
     {
         private const int INACTIVE = 0;
         private const int ACTIVE = 1;
@@ -42,6 +42,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             _textures[INACTIVE] = FileManager.Gumps.GetTexture(inactive);
             _textures[ACTIVE] = FileManager.Gumps.GetTexture(active);
+
+            if (_textures[0] == null || _textures[1] == null)
+            {
+                Dispose();
+                return;
+            }
+
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;

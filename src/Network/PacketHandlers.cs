@@ -47,7 +47,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
 {
-    public class PacketHandler
+    internal class PacketHandler
     {
         public PacketHandler(Action<Packet> callback)
         {
@@ -57,7 +57,7 @@ namespace ClassicUO.Network
         public Action<Packet> Callback { get; }
     }
 
-    public class PacketHandlers
+    internal class PacketHandlers
     {
         private readonly List<PacketHandler>[] _handlers = new List<PacketHandler>[0x100];
 
@@ -765,6 +765,7 @@ namespace ClassicUO.Network
                 World.Player.ForcePosition(x, y, z , dir);
             }
 #else
+            World.Player.CloseBank();
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
             World.Player.Direction = dir;
@@ -901,12 +902,12 @@ namespace ClassicUO.Network
                 {
                     ContainerGump container = new ContainerGump(item, graphic);
                                       
-                    if (!Engine.UI.GetGumpCachePosition(item, out Point location))
-                    {
-                        location = new Point(64, 64);
-                    }
+                    //if (!Engine.UI.GetGumpCachePosition(item, out Point location))
+                    //{
+                    //    location = Engine.UI.GetContainerPosition();
+                    //}
 
-                    container.Location = location;
+                    //container.Location = location;
                     Engine.UI.Add(container);
                 }
             }
@@ -1436,8 +1437,8 @@ namespace ClassicUO.Network
             if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
             {
                 if (!ui.GetGumpCachePosition(mobile, out Point location))
-                {                   
-                    location = new Point(100 ,100);                    
+                {
+                    location = new Point(100, 100);                    
                 }
                 ui.Add(new PaperDollGump(mobile, text) { Location = location});
             }
@@ -1944,7 +1945,14 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x18: // enable map patches
-                    Log.Message(LogTypes.Warning, "Map patches packet received. Not implemented yet");
+
+                    if (FileManager.Map.ApplyPatches(p))
+                    {
+                        int indx = World.MapIndex;
+                        World.MapIndex = -1;
+                        World.MapIndex = indx;
+                    }
+
                     break;
                 //===========================================================================================
                 //===========================================================================================

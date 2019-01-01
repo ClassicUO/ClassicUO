@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
 {
-    public static class Exstentions
+    internal static class Exstentions
     {
         public static void Raise(this EventHandler handler, object sender = null)
         {

@@ -33,7 +33,7 @@ using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game
 {
-    public static class GameActions
+    internal static class GameActions
     {
         private static Action<Item, int, int, int?> _pickUpAction;
 
@@ -56,7 +56,7 @@ namespace ClassicUO.Game
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null && World.Player.NotorietyFlag == NotorietyFlag.Innocent && m.NotorietyFlag == NotorietyFlag.Innocent)
+                if (m != null && World.Player.NotorietyFlag == NotorietyFlag.Innocent && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
 
                     QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",

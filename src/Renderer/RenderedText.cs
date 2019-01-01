@@ -44,7 +44,7 @@ namespace ClassicUO.Renderer
         ExtraHeight = 0x0100
     }
 
-    public sealed class RenderedText : IDisposable
+    internal sealed class RenderedText : IDisposable
     {
         private string _text;
 

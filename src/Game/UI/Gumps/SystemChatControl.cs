@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _messageHistoryIndex = -1;
         private ChatMode _mode = ChatMode.Default;
         private readonly TextBox _textBox;
-        private readonly CheckerTrans _trans;
+        private readonly AlphaBlendControl _trans;
 
         //public override bool AcceptKeyboardInput
         //{
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height - 3
             };
 
-            AddChildren(_trans = new CheckerTrans
+            AddChildren(_trans = new AlphaBlendControl
             {
                 X = _textBox.X,
                 Y = _textBox.Y,

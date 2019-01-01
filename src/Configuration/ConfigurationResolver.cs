@@ -28,7 +28,7 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public static class ConfigurationResolver
+    internal static class ConfigurationResolver
     {
         public static T Load<T>(string file) where T : class
         {

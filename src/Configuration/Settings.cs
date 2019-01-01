@@ -30,7 +30,7 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public sealed class Settings
+    internal sealed class Settings
     {
         [JsonConstructor]
         public Settings()

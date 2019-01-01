@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    public abstract class Control : IDrawableUI, IUpdateable, IColorable, IDebuggable
+    internal abstract class Control : IDrawableUI, IUpdateable, IColorable, IDebuggable
     {
         private static SpriteTexture _debugTexture;
         private readonly List<Control> _children;
@@ -403,13 +403,13 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
-        public event EventHandler<MouseWheelEventArgs> MouseWheel;
+        internal event EventHandler<MouseWheelEventArgs> MouseWheel;
 
-        public event EventHandler<KeyboardEventArgs> Keyboard;
+        internal event EventHandler<KeyboardEventArgs> Keyboard;
 
-        public event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
+        internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
         public void Initialize()
         {
@@ -780,7 +780,9 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             if (Parent == null)
+            {
                 Dispose();
+            }
             else
                 Parent.CloseWithRightClick();
         }

@@ -22,7 +22,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
-    public class InputKeyboardEvent : InputEvent
+    internal class InputKeyboardEvent : InputEvent
     {
         private readonly int _keyDataExtra;
 

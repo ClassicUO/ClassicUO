@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Data
             });
         }
 
-        public class ComboContent
+        internal class ComboContent
         {
             private readonly int[] _ids;
             private readonly int[] _labels;

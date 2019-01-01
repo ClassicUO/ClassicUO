@@ -495,7 +495,7 @@ namespace ClassicUO.Game.Scenes
         }
     }
 
-    public class ServerListEntry
+    internal class ServerListEntry
     {
         public readonly uint Address;
         public readonly ushort Index;

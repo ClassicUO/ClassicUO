@@ -236,7 +236,7 @@ namespace ClassicUO.Game.Views
                                 {
                                     Graphic mountGraphic = item.GetGraphicForAnimation();
 
-                                    if (mountGraphic < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                    if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = FileManager.Animations.DataIndex[mountGraphic].MountedHeightOffset;
                                     AddLayer(dir, mountGraphic, mount.Hue, mobile, true, offsetY: mountOffset);
                                 }

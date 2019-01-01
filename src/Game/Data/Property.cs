@@ -20,7 +20,7 @@
 #endregion
 namespace ClassicUO.Game.Data
 {
-    public readonly struct Property
+    internal readonly struct Property
     {
         public Property(uint cliloc, string args)
         {

@@ -26,7 +26,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
-    public sealed class Packet : PacketBase
+    internal sealed class Packet : PacketBase
     {
         private readonly byte[] _data;
 

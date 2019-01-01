@@ -14,8 +14,6 @@ namespace ClassicUO.IO.Resources
 {
     class ArtLoader : ResourceLoader<ArtTexture>
     {
-        public const int ART_COUNT = 0x10000;
-
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
         //private readonly List<uint> _usedIndexLand = new List<uint>();
@@ -26,14 +24,14 @@ namespace ClassicUO.IO.Resources
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
-                _file = new UOFileUop(filepath, ".tga", ART_COUNT);
+                _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
                 string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
 
                 if (File.Exists(filepath) && File.Exists(idxpath))
-                    _file = new UOFileMul(filepath, idxpath, ART_COUNT);
+                    _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
             }
         }
 

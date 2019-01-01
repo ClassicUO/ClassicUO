@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct AnimDataFrame
+    internal readonly struct AnimDataFrame
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public readonly sbyte[] FrameData;

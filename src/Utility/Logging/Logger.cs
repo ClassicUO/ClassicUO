@@ -25,7 +25,7 @@ using System.Threading;
 
 namespace ClassicUO.Utility.Logging
 {
-    public class Logger
+    internal class Logger
     {
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {

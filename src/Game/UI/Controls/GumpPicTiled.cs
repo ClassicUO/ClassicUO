@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class GumpPicTiled : Control
+    internal class GumpPicTiled : Control
     {
         private Graphic _lastGraphic;
 

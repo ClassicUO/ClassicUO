@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Utility
 {
-    public class Bag<T> : IEnumerable<T>
+    internal class Bag<T> : IEnumerable<T>
     {
         private readonly bool _isPrimitive;
         private T[] _items;

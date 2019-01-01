@@ -20,7 +20,7 @@
 #endregion
 namespace ClassicUO.Game.Data
 {
-    public class LockedFeatures
+    internal class LockedFeatures
     {
         public LockedFeatureFlags Flags { get; private set; }
 

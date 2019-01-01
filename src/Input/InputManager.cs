@@ -29,7 +29,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
-    public sealed class InputManager : IDisposable
+    internal sealed class InputManager : IDisposable
     {
         private bool _dragStarted;
         private readonly SDL_EventFilter _hookDel;

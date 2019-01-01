@@ -36,7 +36,7 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public sealed class Profile
+    internal sealed class Profile
     {
         [JsonConstructor]
         public Profile(string username, string servername, string charactername)

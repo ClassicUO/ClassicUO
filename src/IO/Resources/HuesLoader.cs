@@ -211,7 +211,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct HuesBlock
+    internal readonly struct HuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly ushort[] ColorTable;
@@ -222,7 +222,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct HuesGroup
+    internal readonly struct HuesGroup
     {
         public readonly uint Header;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
@@ -230,7 +230,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct VerdataHuesBlock
+    internal readonly struct VerdataHuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly ushort[] ColorTable;
@@ -243,14 +243,14 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct VerdataHuesGroup
+    internal readonly struct VerdataHuesGroup
     {
         public readonly uint Header;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public readonly HuesBlock[] Entries;
     }
 
-    public struct FloatHues
+    internal struct FloatHues
     {
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 96)]
         public float[] Palette;

@@ -22,7 +22,7 @@ using System;
 
 namespace ClassicUO.Utility
 {
-    public static class RandomHelper
+    internal static class RandomHelper
     {
         private static readonly Random _random = new Random();
 

@@ -577,7 +577,7 @@ namespace ClassicUO.Game.GameObjects
                 FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                     FileManager.Animations.AnimID = id;
@@ -665,7 +665,7 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        public struct Step
+        internal struct Step
         {
             public int X, Y;
             public sbyte Z;

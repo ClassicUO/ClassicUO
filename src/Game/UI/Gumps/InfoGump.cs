@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    public class InfoGumpEntry : Control
+    internal class InfoGumpEntry : Control
     {
         public readonly Label Entry;
 

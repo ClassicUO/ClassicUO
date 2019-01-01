@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class RadioButton : Checkbox
+    internal class RadioButton : Checkbox
     {
         public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
         {

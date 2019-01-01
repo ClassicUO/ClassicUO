@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Data
 {
-    public sealed class MultiInfo
+    internal sealed class MultiInfo
     {
         public MultiInfo(short x, short y)
         {

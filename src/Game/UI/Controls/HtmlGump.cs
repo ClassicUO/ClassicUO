@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class HtmlGump : Control
+    internal class HtmlGump : Control
     {
         private RenderedText _gameText;
         private IScrollBar _scrollBar;

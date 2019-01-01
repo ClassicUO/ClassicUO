@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace ClassicUO.IO
 {
-    public class UOFileUop : UOFile
+    internal class UOFileUop : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
         private readonly string _extension;

@@ -22,7 +22,7 @@ using System;
 
 namespace ClassicUO.Network
 {
-    public abstract class PacketBase
+    internal abstract class PacketBase
     {
         protected abstract byte this[int index] { get; set; }
 

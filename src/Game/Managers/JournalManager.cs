@@ -5,7 +5,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-    public class JournalManager
+    internal class JournalManager
     {
         private readonly Deque<JournalEntry> _entries = new Deque<JournalEntry>();
 
@@ -26,7 +26,7 @@ namespace ClassicUO.Game.Managers
         public void Clear() => _entries.Clear();
     }
 
-    public readonly struct JournalEntry
+    internal readonly struct JournalEntry
     {
         public JournalEntry(string text, MessageFont font, Hue hue, string name, bool isunicode)
         {

@@ -148,16 +148,19 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            if (IsSelected)
+            if (Engine.Profile.Current.HighlightGameObjects)
             {
-                if (_storedHue == Vector3.Zero)
-                    _storedHue = HueVector;
-                HueVector = ShaderHuesTraslator.SelectedHue;
-            }
-            else if (_storedHue != Vector3.Zero)
-            {
-                HueVector = _storedHue;
-                _storedHue = Vector3.Zero;
+                if (IsSelected)
+                {
+                    if (_storedHue == Vector3.Zero)
+                        _storedHue = HueVector;
+                    HueVector = ShaderHuesTraslator.SelectedHue;
+                }
+                else if (_storedHue != Vector3.Zero)
+                {
+                    HueVector = _storedHue;
+                    _storedHue = Vector3.Zero;
+                }
             }
 
             if (vertex[0].Hue != HueVector)

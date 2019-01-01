@@ -81,8 +81,8 @@ namespace ClassicUO.Game.Scenes
                         _selectedObject.View.IsSelected = false;
                     _selectedObject = value;
 
-                    if (Engine.Profile.Current.HighlightGameObjects)
-                        _selectedObject.View.IsSelected = true;
+                    
+                    _selectedObject.View.IsSelected = true;
                 }
             }
         }

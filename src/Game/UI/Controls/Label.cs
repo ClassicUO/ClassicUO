@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class Label : Control
+    internal class Label : Control
     {
         private float _alpha;
         private readonly RenderedText _gText;

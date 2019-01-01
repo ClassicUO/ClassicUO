@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,10 +14,30 @@ using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SDL2;
+
 namespace ClassicUO.Renderer
 {
-    public class Batcher2D
+    internal class Batcher2D
     {
+        // 0x0DE1
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate void Enable(int cap);
+        public static Enable glEnable;
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate void Disable(int cap);
+        public static Disable glDisable;
+        static Batcher2D()
+        {
+            glEnable = (Enable) Marshal.GetDelegateForFunctionPointer(
+                                                                      SDL.SDL_GL_GetProcAddress("glEnable"),
+                                                                      typeof(Enable));
+
+            glDisable = (Disable) Marshal.GetDelegateForFunctionPointer(
+                                                                        SDL.SDL_GL_GetProcAddress("glDisable"),
+                                                                        typeof(Disable));
+        }
+
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
@@ -31,6 +52,7 @@ namespace ClassicUO.Renderer
         private readonly EffectParameter _projectionMatrixEffect;
         private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
+
         //private readonly DepthStencilState _dss = new DepthStencilState
         //{
         //    DepthBufferEnable = true,
@@ -51,6 +73,7 @@ namespace ClassicUO.Renderer
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
+        private DepthStencilState _stencil;
 
 
         private int _numSprites;
@@ -91,6 +114,8 @@ namespace ClassicUO.Renderer
                 SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
                 ScissorTestEnable = true
             };
+
+            _stencil = DepthStencilState.None;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -494,7 +519,7 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = _blendState;
-            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
@@ -565,11 +590,21 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
 
 
-        public void SetBlendState(BlendState blend)
+        public void SetBlendState(BlendState blend, bool noflush = false)
         {
-            Flush();
+            if (!noflush)
+                Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
+        }
+
+
+        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        {
+            if (!noflush)
+                Flush();
+
+            _stencil = stencil ?? DepthStencilState.None;
         }
 
         private static short[] GenerateIndexArray()

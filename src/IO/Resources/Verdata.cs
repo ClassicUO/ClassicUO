@@ -22,7 +22,7 @@ using System.IO;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Verdata
+    internal static class Verdata
     {
         static Verdata()
         {

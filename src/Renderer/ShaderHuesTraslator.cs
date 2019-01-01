@@ -35,7 +35,7 @@ namespace ClassicUO.Renderer
         Shadow = 12
     }
 
-    public static class ShaderHuesTraslator
+    internal static class ShaderHuesTraslator
     {
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 

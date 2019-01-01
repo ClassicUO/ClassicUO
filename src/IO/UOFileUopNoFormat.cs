@@ -8,7 +8,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.IO
 {
-    public class UOFileUopNoFormat : UOFile
+    internal class UOFileUopNoFormat : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
         private readonly int _indexFile;

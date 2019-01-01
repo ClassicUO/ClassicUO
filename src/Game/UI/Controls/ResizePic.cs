@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class ResizePic : Control
+    internal class ResizePic : Control
     {
         private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
 
@@ -61,6 +61,8 @@ namespace ClassicUO.Game.UI.Controls
             Width = int.Parse(parts[4]);
             Height = int.Parse(parts[5]);
         }
+
+        public bool OnlyCenterTransparent { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -138,7 +140,9 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += _gumpTexture[0].Height;
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
+                        if (!OnlyCenterTransparent)
+                            batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
 
                         break;
                 }

@@ -6,18 +6,19 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
     class MultiLoader : ResourceLoader
     {
-        const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
-
         private UOFileMul _file;
         private UOFileUopNoFormat _fileUop;
         private int _itemOffset;
         private DataReader _reader;
+
+        public int Count { get; private set; }
 
         public override void Load()
         {
@@ -25,17 +26,18 @@ namespace ClassicUO.IO.Resources
             string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
             if (File.Exists(path) && File.Exists(pathidx))
-                _file = new UOFileMul(path, pathidx, MAX_MULTI_DATA_INDEX_COUNT, 14);
+                _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
             else
                 throw new FileNotFoundException();
 
-            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+            Count = _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
 
 
             string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
 
             if (File.Exists(uopPath))
             {
+                Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
                 _fileUop = new UOFileUopNoFormat(uopPath);
                 _reader = new DataReader();
 
@@ -54,7 +56,7 @@ namespace ClassicUO.IO.Resources
 
                     uint id = _reader.ReadUInt();
 
-                    if (id < MAX_MULTI_DATA_INDEX_COUNT)
+                    if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT)
                     {
                         ref UOFileIndex3D index = ref _file.Entries[id];
                         int count = _reader.ReadInt();
@@ -135,7 +137,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct MultiBlock
+    internal readonly struct MultiBlock
     {
         public readonly ushort ID;
         public readonly short X;
@@ -145,7 +147,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct MultiBlockNew
+    internal readonly struct MultiBlockNew
     {
         public readonly ushort ID;
         public readonly short X;

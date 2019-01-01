@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public abstract class GumpPicBase : Control
+    internal abstract class GumpPicBase : Control
     {
         private ushort _lastGump = 0xFFFF;
 
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Controls
         }
     }
 
-    public class GumpPic : GumpPicBase
+    internal class GumpPic : GumpPicBase
     {
         public GumpPic(int x, int y, Graphic graphic, Hue hue)
         {

@@ -23,7 +23,7 @@ using System.IO.Compression;
 
 namespace ClassicUO.Utility
 {
-    public static class ZLib
+    internal static class ZLib
     {
         public static void Decompress(byte[] source, int offset, byte[] dest, int length)
         {

@@ -28,7 +28,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class TextBox : Control
+    internal class TextBox : Control
     {
         public enum PageCommand
         {
