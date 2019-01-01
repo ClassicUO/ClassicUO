@@ -565,6 +565,9 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
             MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
+
+            if (button == MouseButton.Right && CanCloseWithRightClick)
+                CloseWithRightClick();
         }
 
         public void InvokeMouseOver(Point position)
@@ -597,15 +600,15 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseClick(x, y, button);
 
-            if (button == MouseButton.Right)
-            {
-                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
 
-                if (CanCloseWithRightClick)
-                    CloseWithRightClick();
-            }
-            else
-                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            //if (button == MouseButton.Right)
+            //{
+
+
+            //}
+            //else
+            //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)

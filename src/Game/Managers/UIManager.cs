@@ -682,7 +682,7 @@ namespace ClassicUO.Game.Managers
                     int deltaX = mousePosition.X - _dragOriginX;
                     int deltaY = mousePosition.Y - _dragOriginY;
 
-                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > 4)
+                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) >= 0)
                     {
                         _isDraggingControl = true;
                         dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));

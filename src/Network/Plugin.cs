@@ -112,6 +112,19 @@ namespace ClassicUO.Network
                 return;
             }
 
+
+            //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
+            //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_recv));
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_send));
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPacketLength));
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPlayerPosition));
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_castSpell));
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getStaticImage));
+            //Marshal.WriteIntPtr(headerPtr, SDL.SDL_GL_GetCurrentWindow());
+            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getUoFilePath));
+
+
             PluginHeader header = new PluginHeader
             {
                 ClientVersion = (int) FileManager.ClientVersion,
@@ -152,6 +165,8 @@ namespace ClassicUO.Network
                 _onFocusLost = Marshal.GetDelegateForFunctionPointer<OnFocusLost>(header.OnFocusLost);
 
             IsValid = true;
+
+            //Marshal.FreeHGlobal(headerPtr);
 
             _onInitialize?.Invoke();
         }
