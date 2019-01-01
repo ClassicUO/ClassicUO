@@ -535,8 +535,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Clear()
         {
-            for (int i = 0; i < Children.Count; i++)
-                Children[i].Dispose();
+            _children.ForEach(s => s.Dispose());
         }
 
         public T[] GetControls<T>() where T : Control
@@ -599,16 +598,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseClick(x, y, button);
-
             MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-
-            //if (button == MouseButton.Right)
-            //{
-
-
-            //}
-            //else
-            //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)

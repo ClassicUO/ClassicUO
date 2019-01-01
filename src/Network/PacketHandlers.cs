@@ -39,8 +39,6 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using ClassicUO_API;
-
 using Microsoft.Xna.Framework;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;

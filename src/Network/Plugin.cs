@@ -11,7 +11,7 @@ using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using ClassicUO_API;
+using CUO_API;
 
 using SDL2;
 

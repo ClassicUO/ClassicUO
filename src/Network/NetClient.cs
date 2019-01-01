@@ -27,7 +27,6 @@ using System.Net.Sockets;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using ClassicUO_API;
 
 namespace ClassicUO.Network
 {
