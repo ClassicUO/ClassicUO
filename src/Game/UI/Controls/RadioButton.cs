@@ -20,7 +20,10 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+
+using ClassicUO.Input;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -29,25 +32,40 @@ namespace ClassicUO.Game.UI.Controls
         public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
         {
             GroupIndex = group;
-            ValueChanged += RadioButton_ValueChanged;
         }
 
         public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0) : base(inactive, active, text, font, color)
         {
             GroupIndex = group;
-            ValueChanged += RadioButton_ValueChanged;
         }
 
         public int GroupIndex { get; set; }
 
-        private void RadioButton_ValueChanged(object sender, EventArgs e)
+        protected override void OnCheckedChanged()
         {
-            if (Parent != null && IsChecked) HandleClick();
+            if (IsChecked)
+            {
+                if (HandleClick())
+                    base.OnCheckedChanged();
+            }
+            
         }
 
-        private void HandleClick()
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            Parent?.GetControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex).Where(s => s != this).ToList().ForEach(s => s.IsChecked = false);
+            if (Parent?.FindControls<RadioButton>().Any( s => s.GroupIndex == GroupIndex && s.IsChecked && s != this) == true)
+                base.OnMouseClick(x, y, button);
+        }
+
+        private bool HandleClick()
+        {
+            IEnumerable<RadioButton> en = Parent?.FindControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex && s != this);
+            if (en == null)
+                return false;
+
+            foreach (RadioButton button in en)
+                button.IsChecked = false;
+            return true;
         }
     }
 }

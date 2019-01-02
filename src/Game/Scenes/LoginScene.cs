@@ -141,6 +141,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
+            Engine.UI.GameCursor.IsLoading = false;
+
             base.Unload();
         }
 
@@ -148,6 +150,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (_lastLoginStep != CurrentLoginStep)
             {
+                Engine.UI.GameCursor.IsLoading = false;
+
                 // this trick avoid the flickering
                 var g = _currentGump;
                 Engine.UI.Add(_currentGump = GetGumpForStep());
@@ -171,7 +175,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
                 case LoginStep.PopUpMessage:
-
+                    Engine.UI.GameCursor.IsLoading = true;
                     return GetLoadingScreen();
                 case LoginStep.CharacterSelection:
 

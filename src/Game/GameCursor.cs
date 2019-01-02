@@ -348,6 +348,8 @@ namespace ClassicUO.Game
             }
         }
 
+        public bool IsLoading { get; set; }
+
         private ushort AssignGraphicByState()
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
@@ -357,6 +359,12 @@ namespace ClassicUO.Game
 
             if (Engine.UI.IsDragging)
                 return _cursorData[war, 8];
+
+            if (IsLoading)
+                return _cursorData[war, 13];
+
+            if (Engine.UI.MouseOverControl is TextBox)
+                return _cursorData[war, 14];
 
             ushort result = _cursorData[war, 9];
 

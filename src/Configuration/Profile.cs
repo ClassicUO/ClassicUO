@@ -62,7 +62,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MusicVolume { get; set; } = 100;
         [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
         [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
-        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = true;
+        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = false;
 
         // fonts and speech
         [JsonProperty] public byte ChatFont { get; set; } = 1;

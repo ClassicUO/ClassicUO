@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -77,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_isChecked != value)
                 {
                     _isChecked = value;
-                    ValueChanged.Raise();
+                    OnCheckedChanged();
                 }
             }
         }
@@ -108,10 +109,17 @@ namespace ClassicUO.Game.UI.Controls
             return ok;
         }
 
+        protected virtual void OnCheckedChanged()
+        {
+            ValueChanged.Raise(this);
+        }
+
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 IsChecked = !IsChecked;
+            }
         }
 
         public override void Dispose()

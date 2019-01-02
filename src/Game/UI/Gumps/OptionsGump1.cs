@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Linq;
+
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -37,11 +39,16 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _hpComboBox;
 
         // sounds
+        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musinInBackground;
+        private HSliderBar _soundsVolume, _musicVolume;
 
         // speech
         private Checkbox _scaleSpeechDelay;
         private HSliderBar _sliderSpeechDelay;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
+        // fonts
+        private FontSelector _fontSelectorChat;
 
         // combat
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
@@ -222,57 +229,39 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 2;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
-            Checkbox soundCheckbox = new Checkbox(0x00D2, 0x00D3, "Sounds", 1)
-            {
-                IsChecked = Engine.Profile.Current.EnableSound
-            };
-            rightArea.AddChildren(soundCheckbox);
+            _enableSounds = CreateCheckBox(rightArea, "Sounds", Engine.Profile.Current.EnableSound, 0, 0);
+
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Sounds volume:", true, 0, 0, 1);
 
-            HSliderBar sliderVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            _soundsVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
             item.AddChildren(text);
-            item.AddChildren(sliderVolume);
+            item.AddChildren(_soundsVolume);
             rightArea.AddChildren(item);
 
-            Checkbox musicCheckbox = new Checkbox(0x00D2, 0x00D3, "Music", 1)
-            {
-                IsChecked = Engine.Profile.Current.EnableMusic
-            };
-            rightArea.AddChildren(musicCheckbox);
+
+            _enableMusic = CreateCheckBox(rightArea, "Music", Engine.Profile.Current.EnableMusic, 0, 0);
+
+           
             item = new ScrollAreaItem();
             text = new Label("- Music volume:", true, 0, 0, 1);
 
-            HSliderBar sliderMusicVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            _musicVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
             item.AddChildren(text);
-            item.AddChildren(sliderMusicVolume);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Checkbox footstepsCheckbox = new Checkbox(0x00D2, 0x00D3, "Footsteps sound", 1)
-            {
-                Y = 30, IsChecked = Engine.Profile.Current.EnableFootstepsSound
-            };
-            item.AddChildren(footstepsCheckbox);
+            item.AddChildren(_musicVolume);
             rightArea.AddChildren(item);
 
-            Checkbox combatMusicCheckbox = new Checkbox(0x00D2, 0x00D3, "Combat music", 1)
-            {
-                IsChecked = Engine.Profile.Current.EnableCombatMusic
-            };
-            rightArea.AddChildren(combatMusicCheckbox);
+            _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
+            _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
+            _musinInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focussed", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
 
-            Checkbox backgroundMusicCheckbox = new Checkbox(0x00D2, 0x00D3, "Reproduce music when ClassicUO is not focussed", 1)
-            {
-                IsChecked = Engine.Profile.Current.ReproduceSoundsInBackground
-            };
-            rightArea.AddChildren(backgroundMusicCheckbox);
+           
             AddChildren(rightArea, PAGE);
         }
 
@@ -305,7 +294,12 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
+            Label text = new Label("Chat font:", true, 0, 0, 1);
 
+            rightArea.AddChildren(text);
+
+            _fontSelectorChat = new FontSelector() { X = 20 };
+            rightArea.AddChildren(_fontSelectorChat);
 
             AddChildren(rightArea, PAGE);
         }
@@ -407,7 +401,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _drawRoofs.IsChecked = true;
                     break;
                 case 2: // sounds
-                    
+                    _enableSounds.IsChecked = true;
+                    _enableMusic.IsChecked = true;
+                    _combatMusic.IsChecked = true;
+                    _soundsVolume.Value = 255;
+                    _musicVolume.Value = 255;
+                    _musinInBackground.IsChecked = false;
+                    _footStepsSound.IsChecked = true;
                     break;
                 case 3: // video
 
@@ -419,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
                 case 6: // fonts
-                    
+                    _fontSelectorChat.SetSelectedFont(0);
                     
                     break;
                 case 7: // speech
@@ -457,6 +457,13 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
 
             // sounds
+            Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
+            Engine.Profile.Current.EnableMusic = _enableMusic.IsChecked;
+            Engine.Profile.Current.EnableFootstepsSound = _footStepsSound.IsChecked;
+            Engine.Profile.Current.EnableCombatMusic = _combatMusic.IsChecked;
+            Engine.Profile.Current.ReproduceSoundsInBackground = _musinInBackground.IsChecked;
+            Engine.Profile.Current.SoundVolume = _soundsVolume.Value;
+            Engine.Profile.Current.MusicVolume = _musicVolume.Value;
 
             // speech
             Engine.Profile.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
@@ -467,7 +474,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
             Engine.Profile.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
 
-            //// combat
+            // fonts
+            Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+
+            // combat
             Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
             Engine.Profile.Current.FriendHue = _friendColorPickerBox.Hue;
             Engine.Profile.Current.CriminalHue = _crimialColorPickerBox.Hue;
@@ -578,5 +588,53 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        class FontSelector : Control
+        {
+            private readonly RadioButton[] _buttons = new RadioButton[20];
+
+            public FontSelector()
+            {
+                CanMove = false;
+                CanCloseWithRightClick = false;
+
+                int y = 0;
+               
+                for (byte i = 0; i < 20; i++)
+                {
+                    if (FileManager.Fonts.UnicodeFontExists(i))
+                    {
+                        AddChildren(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, 1)
+                        {
+                            Y = y,
+                            Tag = i,
+                            IsChecked =  Engine.Profile.Current.ChatFont == i
+                        });
+
+                        y += 25;
+                    }
+                }
+            }
+
+            public byte GetSelectedFont()
+            {
+                for (byte i = 0; i < _buttons.Length; i++)
+                {
+                    RadioButton b = _buttons[i];
+
+                    if (b != null && b.IsChecked)
+                    {
+                        return i;
+                    }
+                }
+
+                return 0xFF;
+            }
+
+            public void SetSelectedFont(int index)
+            {
+                _buttons[index].IsChecked = true;
+            }
+
+        }
     }
 }

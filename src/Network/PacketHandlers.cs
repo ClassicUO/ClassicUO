@@ -1699,7 +1699,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true, lang));
+            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, (MessageFont) Engine.Profile.Current.ChatFont, true, lang));
         }
 
         private static void OpenGump(Packet p)
