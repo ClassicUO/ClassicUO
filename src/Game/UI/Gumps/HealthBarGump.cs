@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _outOfRange = false;
 
-                    if (_name != Mobile.Name)
+                    if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
                         _name = Mobile.Name;
 
                     hitsColor = 0;
