@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Item item:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
@@ -258,12 +258,12 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
                     case TextOverhead overhead when overhead.Parent is Entity entity:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(entity);
                         break;
                 }
