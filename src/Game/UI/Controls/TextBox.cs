@@ -172,12 +172,12 @@ namespace ClassicUO.Game.UI.Controls
                     if (MultiLineInputAllowed)
                     {
                         s = _entry.InsertString("\n");
-                        Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
                     }
                     else
                     {
                         s = _entry.Text;
-                       //Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+                       Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
