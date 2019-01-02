@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS;
-        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation;
+        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -258,6 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.AddChildren(hpAreaItem);
 
 
+            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
 
             AddChildren(rightArea, PAGE);
         }
@@ -442,6 +443,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _normalFields.IsChecked = true;
                     _staticFields.IsChecked = false;
                     _fieldsToTile.IsChecked = false;
+                    _noColorOutOfRangeObjects.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -512,8 +514,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
-
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
+            Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

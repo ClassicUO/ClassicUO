@@ -120,8 +120,8 @@ namespace ClassicUO.Game.Views
                 else if (StaticFilters.IsWallOfStone(effect.Graphic))
                     hue = 0x038A;
 
-                if (effect.AnimationGraphic != 0x1826)
-                    effect.AnimationGraphic = 0x1826;
+                if (effect.AnimationGraphic != Constants.FIELD_REPLACE_GRAPHIC)
+                    effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
             }
 
             if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)

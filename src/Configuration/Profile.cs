@@ -97,6 +97,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TreeToStumps { get; set; } = false;
         [JsonProperty] public bool HideVegetation { get; set; } = false;
         [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
+        [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
 
 
         // tooltip

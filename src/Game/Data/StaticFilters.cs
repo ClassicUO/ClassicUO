@@ -9,7 +9,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {
-    static class StaticFilters
+    internal static class StaticFilters
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsTree(ushort g)
@@ -59,6 +59,12 @@ namespace ClassicUO.Game.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsCave(ushort g)
+        {
+            return g >= 0x053B && g <= 0x0554 && g != 0x0550;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsField(ushort g)
         {
             return g >= 0x398C && g <= 0x399F ||
@@ -67,18 +73,23 @@ namespace ClassicUO.Game.Data
                    g >= 0x3914 && g <= 0x3929;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsFireField(ushort g)
             => g >= 0x398C && g <= 0x399F;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsParalyzeField(ushort g)
             => g >= 0x3967 && g <= 0x397A;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEnergyField(ushort g)
             => g >= 0x3946 && g <= 0x3964;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPoisonField(ushort g)
             => g >= 0x3914 && g <= 0x3929;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWallOfStone(ushort g)
             => g == 0x038A;
     }

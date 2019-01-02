@@ -88,6 +88,9 @@ namespace ClassicUO.Game.Views
 
             int z = GameObject.Position.Z * 4;
 
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+
             if (Engine.Profile.Current.HighlightGameObjects)
             {
                 if (IsSelected)
@@ -123,6 +126,8 @@ namespace ClassicUO.Game.Views
                     ptr[3].Hue = HueVector;
                 }
             }
+
+            
 
             if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
