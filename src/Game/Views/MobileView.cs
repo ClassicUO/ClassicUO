@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Views
             }
 
             bool isAttack = mobile.Serial == World.LastAttack;
-            bool isUnderMouse = IsSelected && TargetManager.IsTargeting;
+            bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
             bool needHpLine = false;
 
             if (mobile != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == mobile))

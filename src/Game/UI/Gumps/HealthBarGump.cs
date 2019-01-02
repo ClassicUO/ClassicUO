@@ -432,6 +432,22 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnMouseEnter(int x, int y)
+        {
+            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+            {
+                Mobile.View.IsSelected = true;
+            }
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            if (Mobile.View.IsSelected && Mobile != null)
+            {
+                Mobile.View.IsSelected = false;
+            }
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             switch ((ButtonParty) buttonID)
