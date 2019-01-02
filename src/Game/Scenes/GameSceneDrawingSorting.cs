@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
@@ -153,7 +154,17 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
-        private bool _updateDrawPosition;
+        private bool _updateDrawPosition, _changeTreeToStumps = true;
+
+        public bool ChangeTreeToStumps
+        {
+            get => _changeTreeToStumps;
+            set
+            {
+                _changeTreeToStumps = value;
+                _updateDrawPosition = true;
+            }
+        }
 
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
@@ -190,7 +201,19 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-                            if (_noDrawRoofs && itemData.IsRoof)
+                            if (obj is Static st)
+                            {
+
+                                if (StaticFilters.IsTree(st.OriginalGraphic))
+                                {
+                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != 0x0E59)
+                                        st.SetGraphic(0x0E59);
+                                    else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
+                                        st.RestoreOriginalGraphic();
+                                }                               
+                            }
+
+                            if (_noDrawRoofs && itemData.IsRoof || (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
                             maxObjectZ += itemData.Height;
                         }

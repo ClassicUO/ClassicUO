@@ -21,6 +21,7 @@
 
 using System.Linq;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -35,8 +36,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS;
-        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs;
+        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation;
         private Combobox _hpComboBox;
+        private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musinInBackground;
@@ -220,6 +222,42 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 10);
+            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
+            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
+
+            hpAreaItem = new ScrollAreaItem();
+            text = new Label("- Fields: ", true, 1)
+            {
+                Y = 10,
+            };
+            hpAreaItem.AddChildren(text);
+
+
+            _normalFields = new RadioButton(0, 0x00D0, 0x00D1, "Normal fields", 1)
+            {
+                X = 25,
+                Y = 30,
+                IsChecked = Engine.Profile.Current.FieldsType == 0,
+            };
+            hpAreaItem.AddChildren(_normalFields);
+            _staticFields = new RadioButton(0, 0x00D0, 0x00D1, "Static fields", 1)
+            {
+                X = 25,
+                Y = 30 + _normalFields.Height,
+                IsChecked = Engine.Profile.Current.FieldsType == 1
+            };
+            hpAreaItem.AddChildren(_staticFields);
+            _fieldsToTile = new RadioButton(0, 0x00D0, 0x00D1, "Tile fields", 1)
+            {
+                X = 25,
+                Y = 30 + _normalFields.Height * 2,
+                IsChecked = Engine.Profile.Current.FieldsType == 2
+            };
+            hpAreaItem.AddChildren(_fieldsToTile);
+
+            rightArea.AddChildren(hpAreaItem);
+
+
 
             AddChildren(rightArea, PAGE);
         }
@@ -399,6 +437,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _hpComboBox.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
                     _drawRoofs.IsChecked = true;
+                    _treeToStumps.IsChecked = false;
+                    _hideVegetation.IsChecked = false;
+                    _normalFields.IsChecked = true;
+                    _staticFields.IsChecked = false;
+                    _fieldsToTile.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -455,6 +498,22 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
+
+            if (Engine.Profile.Current.TreeToStumps != _treeToStumps.IsChecked)
+            {
+                Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
+
+                Engine.SceneManager.GetScene<GameScene>().ChangeTreeToStumps = true;
+                //FileManager.Art.CleanResources();
+
+                //int mapIndex = World.MapIndex;
+                //World.MapIndex = -1;
+                //World.MapIndex = mapIndex;
+            }
+
+            Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
+
+            Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;

@@ -148,6 +148,9 @@ namespace ClassicUO.Game.Views
                 }
             }
 
+            //if (GameObject.Distance > World.ViewRange)
+            //    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+
             if (Engine.Profile.Current.HighlightGameObjects)
             {
                 if (IsSelected)

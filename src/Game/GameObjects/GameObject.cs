@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected GameObject()
         {
-            
+
         }
 
         public GameObject Left { get; set; }
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
         public virtual Hue Hue { get; set; }
 
         public virtual Graphic Graphic { get; set; }
-
+       
         public View View => _view ?? (_view = CreateView());
 
         public sbyte AnimIndex { get; set; }

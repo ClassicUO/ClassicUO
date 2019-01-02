@@ -94,6 +94,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
         [JsonProperty] public int MobileHPType { get; set; } = 0;
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
+        [JsonProperty] public bool TreeToStumps { get; set; } = false;
+        [JsonProperty] public bool HideVegetation { get; set; } = false;
+        [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
 
 
         // tooltip

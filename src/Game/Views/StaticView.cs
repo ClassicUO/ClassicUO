@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -36,6 +37,8 @@ namespace ClassicUO.Game.Views
         private float _alpha;
         private float _timeToProcessAlpha;
 
+        private Graphic _oldGraphic;
+
         public StaticView(Static st) : base(st)
         {
             _isFoliage = st.ItemData.IsFoliage;
@@ -52,9 +55,11 @@ namespace ClassicUO.Game.Views
                 return false;
 
             Static st = (Static) GameObject;
-          
-            if (Texture == null || Texture.IsDisposed)
+
+            if (Texture == null || Texture.IsDisposed || _oldGraphic != GameObject.Graphic)
             {
+                _oldGraphic = GameObject.Graphic;
+
                 ArtTexture texture = FileManager.Art.GetTexture(GameObject.Graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);

@@ -51,11 +51,11 @@ namespace ClassicUO.Game.UI.Controls
             
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (Parent?.FindControls<RadioButton>().Any( s => s.GroupIndex == GroupIndex && s.IsChecked && s != this) == true)
-                base.OnMouseClick(x, y, button);
-        }
+        //protected override void OnMouseClick(int x, int y, MouseButton button)
+        //{
+        //    if (Parent?.FindControls<RadioButton>().Any( s => s.GroupIndex == GroupIndex && s.IsChecked && s != this) == true)
+        //        base.OnMouseClick(x, y, button);
+        //}
 
         private bool HandleClick()
         {

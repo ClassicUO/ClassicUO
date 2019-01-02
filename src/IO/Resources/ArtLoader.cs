@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -42,7 +43,6 @@ namespace ClassicUO.IO.Resources
                 ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
-                //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
             return texture;
@@ -56,7 +56,6 @@ namespace ClassicUO.IO.Resources
                 ushort[] pixels = ReadLandArt((ushort)g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetDataHitMap16(pixels);
-                //_usedIndexLand.Add(g);
                 _landDictionary.Add(g, texture);
             }
             return texture;
@@ -81,30 +80,18 @@ namespace ClassicUO.IO.Resources
 
         public override void CleanResources()
         {
-            throw new NotImplementedException();
+            ResourceDictionary.ToList().ForEach( s =>
+            {
+                s.Value.Dispose();
+                ResourceDictionary.Remove(s.Key);
+            });
+
+            _landDictionary.ToList().ForEach(s =>
+            {
+                s.Value.Dispose();
+                _landDictionary.Remove(s.Key);
+            });
         }
-
-
-        //public void Clear()
-        //{
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        SpriteTexture texture = ResourceDictionary[g];
-        //        texture.Dispose();
-        //        _usedIndex.RemoveAt(i--);
-        //        ResourceDictionary.Remove(g);
-        //    }
-
-        //    for (int i = 0; i < _usedIndexLand.Count; i++)
-        //    {
-        //        uint g = _usedIndexLand[i];
-        //        SpriteTexture texture = _landDictionary[g];
-        //        texture.Dispose();
-        //        _usedIndexLand.RemoveAt(i--);
-        //        _landDictionary.Remove(g);
-        //    }
-        //}
 
         public override void CleaUnusedResources()
         {
@@ -123,147 +110,127 @@ namespace ClassicUO.IO.Resources
                 });
         }
 
-        //public void ClearUnusedTextures()
-        //{
-        //    int count = 0;
-        //    long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        SpriteTexture texture = ResourceDictionary[g];
-
-        //        if (texture.Ticks < ticks)
-        //        {
-        //            texture.Dispose();
-        //            _usedIndex.RemoveAt(i--);
-        //            ResourceDictionary.Remove(g);
-
-        //            if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-        //                break;
-        //        }
-        //    }
-
-        //    count = 0;
-
-        //    for (int i = 0; i < _usedIndexLand.Count; i++)
-        //    {
-        //        uint g = _usedIndexLand[i];
-        //        SpriteTexture texture = _landDictionary[g];
-
-        //        if (texture.Ticks < ticks)
-        //        {
-        //            texture.Dispose();
-        //            _usedIndexLand.RemoveAt(i--);
-        //            _landDictionary.Remove(g);
-
-        //            if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-        //                break;
-        //        }
-        //    }
-        //}
-
         private unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
-            _file.Skip(4);
-            width = _file.ReadShort();
-            height = _file.ReadShort();
-            imageRectangle = Rectangle.Empty;
+            //if (Engine.Profile != null && Engine.Profile.Current != null && Engine.Profile.Current.TreeToStumps && StaticFilters.IsTree(graphic))
+            //{
+            //    width = 47;
+            //    height = 64;
+            //    imageRectangle = Rectangle.Empty;
 
-            if (width == 0 || height == 0)
-                return new ushort[0];
-            ushort[] pixels = new ushort[width * height];
-            ushort* ptr = (ushort*)_file.PositionAddress;
-            ushort* lineoffsets = ptr;
-            byte* datastart = (byte*)ptr + height * 2;
-            int x = 0;
-            int y = 0;
-            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
-            int minX = width, minY = height, maxX = 0, maxY = 0;
+            //    ushort[] pixels = new ushort[width * height];
 
-            while (y < height)
+            //    fixed (ushort* srcPtr = StaticFilters.StumpsData)
+            //        fixed (ushort* pixelsPtr = pixels)
+            //            Buffer.MemoryCopy(srcPtr, pixelsPtr, pixels.Length * 2, pixels.Length);
+
+            //    return pixels;
+            //}
+            //else
             {
-                ushort xoffs = *ptr++;
-                ushort run = *ptr++;
 
-                if (xoffs + run >= 2048)
+
+                (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+                _file.Skip(4);
+                width = _file.ReadShort();
+                height = _file.ReadShort();
+                imageRectangle = Rectangle.Empty;
+
+                if (width == 0 || height == 0)
+                    return new ushort[0];
+
+                ushort[] pixels = new ushort[width * height];
+                ushort* ptr = (ushort*) _file.PositionAddress;
+                ushort* lineoffsets = ptr;
+                byte* datastart = (byte*) ptr + height * 2;
+                int x = 0;
+                int y = 0;
+                ptr = (ushort*) (datastart + lineoffsets[0] * 2);
+                int minX = width, minY = height, maxX = 0, maxY = 0;
+
+                while (y < height)
                 {
-                    pixels = new ushort[width * height];
+                    ushort xoffs = *ptr++;
+                    ushort run = *ptr++;
 
-                    return pixels;
-                }
-
-                if (xoffs + run != 0)
-                {
-                    x += xoffs;
-                    int pos = y * width + x;
-
-                    for (int j = 0; j < run; j++)
+                    if (xoffs + run >= 2048)
                     {
-                        ushort val = *ptr++;
+                        pixels = new ushort[width * height];
 
-
-                        if (val > 0)
-                            val = (ushort)(0x8000 | val);
-                        pixels[pos++] = val;
-
-                        if (val != 0)
-                        {
-                            minX = Math.Min(minX, x);
-                            maxX = Math.Max(maxX, x);
-                            minY = Math.Min(minY, y);
-                            maxY = Math.Max(maxY, y);
-                        }
+                        return pixels;
                     }
 
-                    x += run;
+                    if (xoffs + run != 0)
+                    {
+                        x += xoffs;
+                        int pos = y * width + x;
+
+                        for (int j = 0; j < run; j++)
+                        {
+                            ushort val = *ptr++;
+
+
+                            if (val > 0)
+                                val = (ushort) (0x8000 | val);
+                            pixels[pos++] = val;
+
+                            if (val != 0)
+                            {
+                                minX = Math.Min(minX, x);
+                                maxX = Math.Max(maxX, x);
+                                minY = Math.Min(minY, y);
+                                maxY = Math.Max(maxY, y);
+                            }
+                        }
+
+                        x += run;
+                    }
+                    else
+                    {
+                        x = 0;
+                        y++;
+                        ptr = (ushort*) (datastart + lineoffsets[y] * 2);
+                    }
                 }
-                else
+
+                if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
                 {
-                    x = 0;
-                    y++;
-                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    for (int i = 0; i < width; i++)
+                    {
+                        pixels[i] = 0;
+                        pixels[(height - 1) * width + i] = 0;
+                    }
+
+                    for (int i = 0; i < height; i++)
+                    {
+                        pixels[i * width] = 0;
+                        pixels[i * width + width - 1] = 0;
+                    }
                 }
+
+                //int pos1 = 0;
+
+                //for (y = 0; y < height; y++)
+                //    for (x = 0; x < width; x++)
+                //    {
+                //        if (pixels[pos1++] != 0)
+                //        {
+                //            minX = Math.Min(minX, x);
+                //            maxX = Math.Max(maxX, x);
+                //            minY = Math.Min(minY, y);
+                //            maxY = Math.Max(maxY, y);
+                //        }
+                //    }
+
+                //width = (short) (maxX - minX);
+                //height = (short)(maxY - minY);
+                imageRectangle.X = minX;
+                imageRectangle.Y = minY;
+                imageRectangle.Width = maxX - minX;
+                imageRectangle.Height = maxY - minY;
+
+                return pixels;
             }
-
-            if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    pixels[i] = 0;
-                    pixels[(height - 1) * width + i] = 0;
-                }
-
-                for (int i = 0; i < height; i++)
-                {
-                    pixels[i * width] = 0;
-                    pixels[i * width + width - 1] = 0;
-                }
-            }
-
-            //int pos1 = 0;
-
-            //for (y = 0; y < height; y++)
-            //    for (x = 0; x < width; x++)
-            //    {
-            //        if (pixels[pos1++] != 0)
-            //        {
-            //            minX = Math.Min(minX, x);
-            //            maxX = Math.Max(maxX, x);
-            //            minY = Math.Min(minY, y);
-            //            maxY = Math.Max(maxY, y);
-            //        }
-            //    }
-
-            //width = (short) (maxX - minX);
-            //height = (short)(maxY - minY);
-            imageRectangle.X = minX;
-            imageRectangle.Y = minY;
-            imageRectangle.Width = maxX - minX;
-            imageRectangle.Height = maxY - minY;
-
-            return pixels;
         }
 
         private ushort[] ReadLandArt(ushort graphic)
