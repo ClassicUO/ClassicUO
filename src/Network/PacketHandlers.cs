@@ -1482,7 +1482,7 @@ namespace ClassicUO.Network
         {
             Item book = World.Items.Get(p.ReadUInt());
             bool oldpacket = p.ID == 0x93;
-            bool editable = p.ReadByte() == 0 ? false : true;
+            bool editable = p.ReadBool();
             p.Skip(1);
             UIManager ui = Engine.UI;
 
@@ -1502,7 +1502,6 @@ namespace ClassicUO.Network
                         Width = 155,
                         IsEditable = editable,
                         Text = oldpacket ? p.ReadASCII(60).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0'),
-                        Debug = true
                     },
                     BookAuthor =
                     new TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
@@ -1513,7 +1512,6 @@ namespace ClassicUO.Network
                         Width = 155,
                         IsEditable = editable,
                         Text = oldpacket ? p.ReadASCII(30).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0'),
-                        Debug = true
                     },
                     IsBookEditable = editable
                 } );

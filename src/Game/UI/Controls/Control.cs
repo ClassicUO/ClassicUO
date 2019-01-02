@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable, IColorable, IDebuggable
+    internal abstract class Control : IDrawableUI, IUpdateable, IColorable
     {
         private static SpriteTexture _debugTexture;
         private readonly List<Control> _children;
@@ -65,7 +65,6 @@ namespace ClassicUO.Game.UI.Controls
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
-            Debug = true;
         }
 
         protected virtual ClickPriority Priority => ClickPriority.Default;
@@ -292,8 +291,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public Vector3 HueVector { get; set; }
 
-        public bool Debug { get; set; }
-
         public bool AllowedToDraw { get; set; }
 
         public SpriteTexture Texture { get; set; }
@@ -317,7 +314,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (IsVisible && Debug)
+            if (IsVisible && Engine.GlobalSettings.Debug)
             {
                 if (_debugTexture == null)
                 {

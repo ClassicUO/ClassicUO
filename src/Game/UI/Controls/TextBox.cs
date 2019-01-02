@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Controls
                     else
                     {
                         s = _entry.Text;
-                        Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+                       //Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -185,55 +185,55 @@ namespace ClassicUO.Game.UI.Controls
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                     {
                         _entry.RemoveChar(true);
-                        Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, _entry.CaretIndex == 0 ? string.Empty : null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, _entry.CaretIndex == 0 ? string.Empty : null);
                     }
                     else
                         ReplaceDefaultTextOnFirstKeyPress = false;
-                    break;
+                     break;
                 case SDL.SDL_Keycode.SDLK_UP when MultiLineInputAllowed:
                     _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y - (_entry.RenderCaret.Height >> 1));
                         if (_entry.CaretIndex == 0 && oldidx == 0)
                         {
-                            Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                            //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
                         }
                     break;
                 case SDL.SDL_Keycode.SDLK_DOWN when MultiLineInputAllowed:
                     _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y + _entry.RenderCaret.Height);
                     if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
                     {
-                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _entry.SeekCaretPosition(-1);
                     if (_entry.CaretIndex == 0 && oldidx == 0)
                     {
-                        Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _entry.SeekCaretPosition(1);
                     if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
                     {
-                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
                     _entry.RemoveChar(false);
-                    Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, null);
+                    //Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, null);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
                     _entry.SetCaretPosition(0);
                     if (oldidx == 0)
                     {
-                        Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
                     _entry.SetCaretPosition(Text.Length - 1);
                     if (oldidx == Text.Length)
                     {
-                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
                     }
                     break;
             }

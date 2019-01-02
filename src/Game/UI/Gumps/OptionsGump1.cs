@@ -49,6 +49,9 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderSpeechDelay;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
+        // video
+        private Checkbox _debugControls;
+
         // fonts
         private FontSelector _fontSelectorChat;
 
@@ -328,7 +331,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 3;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
-            ScrollAreaItem item = new ScrollAreaItem();
+
+
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+
+
             AddChildren(rightArea, PAGE);
         }
 
@@ -478,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _footStepsSound.IsChecked = true;
                     break;
                 case 3: // video
-
+                    _debugControls.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -560,6 +567,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
             Engine.Profile.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
             Engine.Profile.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
+
+            // video
+            Engine.GlobalSettings.Debug = _debugControls.IsChecked;
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();

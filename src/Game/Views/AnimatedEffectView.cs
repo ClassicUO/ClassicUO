@@ -112,18 +112,30 @@ namespace ClassicUO.Game.Views
                 else if (Engine.Profile.Current.FieldsType == 2)
                 {
                     if (StaticFilters.IsFireField(effect.Graphic))
-                        hue = 0x0020;
-                    else if (StaticFilters.IsParalyzeField(effect.Graphic))
-                        hue = 0x0058;
-                    else if (StaticFilters.IsEnergyField(effect.Graphic))
-                        hue = 0x0070;
-                    else if (StaticFilters.IsPoisonField(effect.Graphic))
-                        hue = 0x0044;
-                    else if (StaticFilters.IsWallOfStone(effect.Graphic))
-                        hue = 0x038A;
-
-                    if (effect.AnimationGraphic != Constants.FIELD_REPLACE_GRAPHIC)
+                    {
                         effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0020;
+                    }
+                    else if (StaticFilters.IsParalyzeField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0058;
+                    }
+                    else if (StaticFilters.IsEnergyField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0070;
+                    } 
+                    else if (StaticFilters.IsPoisonField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0044;
+                    }
+                    else if (StaticFilters.IsWallOfStone(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x038A;
+                    }
                 }
             }
 
