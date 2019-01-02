@@ -167,6 +167,8 @@ namespace ClassicUO.Game.Views
             FrameInfo.Width = FrameInfo.X + rect.Width;
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
+
+
             MessageOverHead(batcher, position, mobile.IsMounted ? 0 : -22);
 
             if (needHpLine)

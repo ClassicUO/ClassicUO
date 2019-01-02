@@ -224,7 +224,10 @@ namespace ClassicUO.Game.GameObjects
                 width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
-            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
+            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive)
+            {
+                MessageType = type
+            };
 
             InsertGameText(overhead);
 
@@ -243,7 +246,10 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.AddToFront(gameText);
+            if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
+                _overHeads.AddToFront(gameText);
+            else 
+                _overHeads.Insert(1, gameText);
             //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
