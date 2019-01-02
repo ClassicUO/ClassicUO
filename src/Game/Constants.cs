@@ -69,6 +69,7 @@ namespace ClassicUO.Game
         public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
 
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
+        public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
 
         public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 2;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;

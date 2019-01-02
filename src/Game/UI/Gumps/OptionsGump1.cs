@@ -221,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.AddChildren(highlightByFlagsItem);
 
 
-            _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 10);
+            _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
 
@@ -318,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
-            _musinInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focussed", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
+            _musinInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
 
            
             AddChildren(rightArea, PAGE);
@@ -466,6 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _noColorOutOfRangeObjects.IsChecked = false;
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
+                    _preloadMaps.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -513,6 +514,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void Apply()
         {
             // general
+            Engine.GlobalSettings.PreloadMaps = _preloadMaps.IsChecked;
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;

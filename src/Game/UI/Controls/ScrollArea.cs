@@ -53,8 +53,9 @@ namespace ClassicUO.Game.UI.Controls
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             WantUpdateSize = false;
+            CanMove = true;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -137,11 +138,6 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
             }
-        }
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            base.OnMouseClick(x, y, button);
         }
 
         protected override void OnChildAdded()

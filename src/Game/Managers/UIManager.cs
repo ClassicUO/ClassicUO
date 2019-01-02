@@ -194,8 +194,8 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.MouseWheel += (sender, isup) =>
             {
-                if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                    return;
+                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
+                //    return;
 
                 if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
                     MouseOverControl.InvokeMouseWheel(isup ? MouseEvent.WheelScrollUp : MouseEvent.WheelScrollDown);

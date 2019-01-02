@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
-            Debug = false;
+            Debug = true;
         }
 
         protected virtual ClickPriority Priority => ClickPriority.Default;
@@ -451,9 +451,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             List<Control> results = new List<Control>();
             //Stack<Control> results = new Stack<Control>();
-            bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
-            if (inbouds)
+            if (Bounds.Contains(position.X - ParentX, position.Y - ParentY))
             {
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
