@@ -35,8 +35,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
 
         // general
-        private HSliderBar _sliderFPS;
-        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects;
+        private HSliderBar _sliderFPS, _circleOfTranspRadius;
+        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -260,6 +260,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
 
+
+            hpAreaItem = new ScrollAreaItem();
+            text = new Label("- Circle of Transparency:", true, 1)
+            {
+                Y = 10
+            };
+            hpAreaItem.AddChildren(text);
+
+            _circleOfTranspRadius = new HSliderBar(160, 15, 100, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            hpAreaItem.AddChildren(_circleOfTranspRadius);
+
+            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", 1)
+            {
+                X = 25,
+                Y = 30,
+                IsChecked = Engine.Profile.Current.UseCircleOfTransparency
+            };
+            hpAreaItem.AddChildren(_useCircleOfTransparency);
+
+            rightArea.AddChildren(hpAreaItem);
             AddChildren(rightArea, PAGE);
         }
 
@@ -444,6 +464,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _staticFields.IsChecked = false;
                     _fieldsToTile.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
+                    _circleOfTranspRadius.Value = 5;
+                    _useCircleOfTransparency.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -516,6 +538,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
+            Engine.Profile.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
+            Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

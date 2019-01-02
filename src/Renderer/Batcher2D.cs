@@ -115,7 +115,7 @@ namespace ClassicUO.Renderer
                 ScissorTestEnable = true
             };
 
-            _stencil = DepthStencilState.None;
+            _stencil =  DepthStencilState.None;
         }
 
         public Matrix TransformMatrix => _transformMatrix;

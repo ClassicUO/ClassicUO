@@ -203,7 +203,6 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (obj is Static st)
                             {
-
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
                                     if (Engine.Profile.Current.TreeToStumps && st.Graphic != 0x0E59)

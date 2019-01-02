@@ -384,7 +384,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();
@@ -464,6 +464,14 @@ namespace ClassicUO.Game.Scenes
 
             // Draw in game overhead text messages
             _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
+
+            //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
+            //int drawY = (Engine.Profile.Current.GameWindowSize.Y >> 1) - 22;
+
+            //if (CircleOfTransparency.Circle == null)
+            //    CircleOfTransparency.Create(100);
+            //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
 
             batcher.End();
             batcher.EnableLight(false);

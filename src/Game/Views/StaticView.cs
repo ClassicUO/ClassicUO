@@ -124,6 +124,17 @@ namespace ClassicUO.Game.Views
                 }
             }
 
+            if (Engine.Profile.Current.UseCircleOfTransparency)
+            {
+                int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
+                int distance = GameObject.Distance;
+
+                if (distance <= distanceMax && !st.ItemData.IsBackground && !st.ItemData.IsSurface)
+                    _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
+                else if (_alpha != 0.0f)
+                    _alpha = 0;
+            }
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else

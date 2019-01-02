@@ -103,6 +103,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
+    <Compile Include="Game\CircleOfTransparency.cs" />
     <Compile Include="Game\Constants.cs" />
     <Compile Include="Game\Data\Ability.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
