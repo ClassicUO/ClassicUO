@@ -63,7 +63,6 @@ namespace ClassicUO.Game.GameObjects
         public bool Initialized { get; set; }
 
         public bool IsOverlapped { get; set; }
-     
 
         protected override View CreateView()
         {

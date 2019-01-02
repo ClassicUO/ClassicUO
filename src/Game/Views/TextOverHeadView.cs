@@ -99,6 +99,20 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
+            if (IsSelected && _text.Hue != 0x0035)
+            {
+                _text.Hue = 0x0035;
+                _text.CreateTexture();
+                Texture = _text.Texture;
+            }
+            else if (!IsSelected && overhead.Hue != _text.Hue)
+            {
+                _text.Hue = overhead.Hue;
+                _text.CreateTexture();
+                Texture = _text.Texture;
+            }
+
+
             HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
             if (EdgeDetection)
@@ -136,14 +150,13 @@ namespace ClassicUO.Game.Views
         //private static Texture2D _edge;
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
-        {
-            int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+        {          
+            int x = list.MousePosition.X - (int) vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
 
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+                list.Add(GameObject, vertex[0].Position);            
         }
-
     }
 
     internal class DamageOverheadView : TextOverheadView
