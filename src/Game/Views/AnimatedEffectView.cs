@@ -138,7 +138,11 @@ namespace ClassicUO.Game.Views
 
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTransparent;
-            HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, isTransparent ? .5f : 0, false);
+
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)
             {

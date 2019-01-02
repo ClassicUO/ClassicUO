@@ -67,12 +67,18 @@ namespace ClassicUO.Game.Views
 
             if (tile.IsStretched)
             {
-                HueVector = GetHueVector(GameObject.Hue, true);
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                else
+                    HueVector = GetHueVector(GameObject.Hue, true);
 
                 return Draw3DStretched(batcher, position, objectList);
             }
 
-            HueVector = GetHueVector(GameObject.Hue, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = GetHueVector(GameObject.Hue, false);
 
             return base.Draw(batcher, position, objectList);
         }
@@ -87,9 +93,6 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = Engine.Ticks;
 
             int z = GameObject.Position.Z * 4;
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
-                HueVector = new Vector3(0x038E, 1, HueVector.Z);
 
             if (Engine.Profile.Current.HighlightGameObjects)
             {

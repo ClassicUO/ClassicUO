@@ -153,7 +153,11 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsParital, 0, false);
+
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                else
+                    HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsParital, 0, false);
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }

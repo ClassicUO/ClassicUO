@@ -124,7 +124,10 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, _isPartialHue, _alpha, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, _isPartialHue, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.StaticsRendered++;
             return base.Draw(batcher, position, objectList);

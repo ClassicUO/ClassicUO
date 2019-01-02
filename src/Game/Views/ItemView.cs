@@ -74,7 +74,10 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
 
             if (item.Amount > 1 && item.ItemData.IsStackable && item.DisplayedGraphic == GameObject.Graphic)
             {
@@ -157,7 +160,10 @@ namespace ClassicUO.Game.Views
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                    HueVector = ShaderHuesTraslator.GetHueVector(color);
+                    if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                        HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                    else
+                        HueVector = ShaderHuesTraslator.GetHueVector(color);
                     base.Draw(batcher, position, objectList);
                     Pick(frame, Bounds, position, objectList);
                 }

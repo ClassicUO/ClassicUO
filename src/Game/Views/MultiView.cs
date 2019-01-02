@@ -46,7 +46,10 @@ namespace ClassicUO.Game.Views
                 FrameInfo.Height = texture.ImageRectangle.Height;
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.MultiRendered++;
             return base.Draw(batcher, position, objectList);
