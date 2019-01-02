@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -21,7 +24,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = false;
             AcceptMouseInput = false;
-            WantUpdateSize = false;
 
             AddChildren(_background = new GumpPic(0,0, 0x1068, 0));
             AddChildren(_hp = new GumpPicWithWidth(0, 0, 0x1069, 0, 1));
@@ -98,7 +100,13 @@ namespace ClassicUO.Game.UI.Gumps
             _hp.Percent = per;
         }
 
-        
-
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        {
+            if (X < Engine.Profile.Current.GameWindowPosition.X || X + Width > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X)
+                return false;
+            if (Y < Engine.Profile.Current.GameWindowPosition.Y || Y + Height > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y)
+                return false;
+            return base.Draw(batcher, position, hue);
+        }
     }
 }
