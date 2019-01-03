@@ -220,6 +220,7 @@ namespace ClassicUO.IO.Resources
         public bool IsTransparent => (Flags & TileFlag.Transparent) != 0;
         public bool IsContainer => (Flags & TileFlag.Container) != 0;
         public bool IsDoor => (Flags & TileFlag.Door) != 0;
+        public bool IsWall => (Flags & TileFlag.Wall) != 0;
     }
 
     // old
