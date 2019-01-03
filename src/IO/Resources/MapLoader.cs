@@ -75,6 +75,11 @@ namespace ClassicUO.IO.Resources
                         foundedOneMap = true;
                     }
 
+                    path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
+                    if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path, false);
+                    path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
+                    if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
+
                     path = Path.Combine(FileManager.UoFolderPath, $"mapdifl{i}.mul");
 
                     if (!File.Exists(path))
@@ -87,11 +92,6 @@ namespace ClassicUO.IO.Resources
                     _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifi{i}.mul"));
                     _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadif{i}.mul"));
                 }
-
-                path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
-                if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path, false);
-                path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
-                if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
             }
 
             if (!foundedOneMap)
