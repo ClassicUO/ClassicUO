@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile.View.IsSelected && Mobile != null)
+            if (Mobile != null && Mobile.View.IsSelected)
             {
                 Mobile.View.IsSelected = false;
             }

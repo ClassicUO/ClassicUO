@@ -35,18 +35,23 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    internal abstract class View : IDrawable, IColorable
+    internal abstract class View : IDrawable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
+        private float _processAlpha = 1;
+        private long _processAlphaTime = Constants.ALPHA_OBJECT_TIME;
+
         protected View(GameObject parent)
         {
             GameObject = parent;
             AllowedToDraw = true;
         }
+
+        protected virtual bool CanProcessAlpha => true;
 
         public GameObject GameObject { get; }
 
@@ -58,7 +63,7 @@ namespace ClassicUO.Game.Views
 
         public bool IsSelected { get; set; }
 
-        public Vector3 HueVector { get; set; }
+        public Vector3 HueVector;
 
         public bool AllowedToDraw { get; set; }
 
@@ -160,6 +165,31 @@ namespace ClassicUO.Game.Views
                 {
                     HueVector = _storedHue;
                     _storedHue = Vector3.Zero;
+                }
+            }
+
+
+            //if (ProcessInitialAlpha)
+            {
+                {
+                    if (CanProcessAlpha)
+                    {
+                        _processAlphaTime -= Engine.TicksFrame;
+
+                        if (_processAlphaTime > 0)
+                        {
+                            _processAlpha = _processAlphaTime / Constants.ALPHA_OBJECT_VALUE;
+                        }
+                        else if (_processAlphaTime < 0)
+                        {
+                            _processAlpha = 0;
+                        }
+
+                        if (HueVector.Z < _processAlpha)
+                            HueVector.Z = _processAlpha;
+                    }
+
+                    
                 }
             }
 

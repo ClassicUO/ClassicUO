@@ -48,6 +48,8 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = tile.Graphic > 2;
         }
 
+        protected override bool CanProcessAlpha => false;
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)

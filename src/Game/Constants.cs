@@ -43,6 +43,9 @@ namespace ClassicUO.Game
         public const float FOLIAGE_ALPHA = .7f;
         public const int ALPHA_TIME = 25;
 
+        public const float ALPHA_OBJECT_VALUE = 200.0f;
+        public const int ALPHA_OBJECT_TIME = 200;
+
         public const int SPELLBOOK_1_SPELLS_COUNT = 64;
         public const int SPELLBOOK_2_SPELLS_COUNT = 17;
         public const int SPELLBOOK_3_SPELLS_COUNT = 10;

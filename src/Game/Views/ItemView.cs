@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Views
             }
         }
 
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)

@@ -49,7 +49,6 @@ namespace ClassicUO.Game.Views
             HasShadow = true;
         }
 
-
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)

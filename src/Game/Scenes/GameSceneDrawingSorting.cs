@@ -171,7 +171,9 @@ namespace ClassicUO.Game.Scenes
             for (; obj != null; obj = obj.Right)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
+                {
                     continue;
+                }
 
                 if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
@@ -220,19 +222,25 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 if (maxObjectZ > maxZ)
+                {
                     break;
+                }
 
                 obj.CurrentRenderIndex = _renderIndex;
 
                 bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
                 if (!ismobile && !iscorpse && itemData.IsInternal)
+                {
                     continue;
+                }
 
                 bool island = !ismobile && !iscorpse && obj is Land;
 
                 if (!island && z >= _maxZ)
+                {
                     continue;
+                }
 
                 int testMinZ = (int) drawY + z * 4;
                 int testMaxZ = (int) drawY;

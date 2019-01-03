@@ -78,7 +78,6 @@ namespace ClassicUO.Game.Views
 
 
             parent.Initialized = true;
-
             parent.Disposed += ParentOnDisposed;
             EdgeDetection = true;
         }
