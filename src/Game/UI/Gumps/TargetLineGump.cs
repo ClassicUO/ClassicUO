@@ -68,6 +68,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsDisposed)
                 return;
 
@@ -80,7 +82,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (!IsVisible)
                 IsVisible = true;
 
-            base.Update(totalMS, frameMS);
 
             int per = Mobile.HitsMax;
 
@@ -102,6 +103,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (Engine.Profile == null || Engine.Profile.Current == null)
+                return false;
+
             if (X < Engine.Profile.Current.GameWindowPosition.X || X + Width > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X)
                 return false;
             if (Y < Engine.Profile.Current.GameWindowPosition.Y || Y + Height > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y)
