@@ -111,19 +111,10 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private bool LoadDif(ref UOFileMul mul, string path)
-        {
-            if (!File.Exists(path))
-                return false;
-
-
-
-            return true;
-        }
-
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < MAPS_COUNT; i++)
+                UnloadMap(i);
         }
 
 
@@ -207,12 +198,6 @@ namespace ClassicUO.IO.Resources
                 BlockData[i] = null;
             }
         }
-
-        //public void Clear()
-        //{
-        //    for (int i = 0; i < MAPS_COUNT; i++)
-        //        UnloadMap(i);
-        //}
 
         public void PatchMapBlock(ulong block, ulong address)
         {
