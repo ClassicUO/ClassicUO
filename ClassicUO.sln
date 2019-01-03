@@ -1,25 +1,42 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO", "ClassicUO.csproj", "{71F289FA-0EF8-4F72-A26E-A8280C0931C5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36371756-8DDA-41A4-BB9A-B7651459ADC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO", "src\ClassicUO.csproj", "{71F289FA-0EF8-4F72-A26E-A8280C0931C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.ActiveCfg = Debug|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.Build.0 = Debug|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x86.Build.0 = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.ActiveCfg = Release|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.Build.0 = Release|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4B97EDE3-430D-4A61-9F34-7F2B84E9DFD6}
+		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}
 	EndGlobalSection
 EndGlobal
