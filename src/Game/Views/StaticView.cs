@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Views
         private readonly bool _isFoliage, _isPartialHue;
         private float _alpha;
         private float _timeToProcessAlpha;
-        private int _canBeTransparent;
+        private readonly int _canBeTransparent;
 
         private Graphic _oldGraphic;
 
@@ -138,9 +138,9 @@ namespace ClassicUO.Game.Views
             {
                 int z = World.Player.Z + 5;
 
-                if (!(GameObject.Z <= z - st.ItemData.Height || z < st.Z && (_canBeTransparent & 0xFF) == 0))
+                if (!(GameObject.Z <= z - st.ItemData.Height || (z < st.Z && (_canBeTransparent & 0xFF) == 0)))
                 {
-                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
+                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
                     int distance = GameObject.Distance;
 
                     if (distance <= distanceMax)
@@ -148,7 +148,11 @@ namespace ClassicUO.Game.Views
                     else if (_alpha != 0.0f)
                         _alpha = 0;
                 }
+                else if (_alpha != 0.0f)
+                    _alpha = 0;
             }
+            else if (!_isFoliage && _alpha != 0.0f)
+                _alpha = 0;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
