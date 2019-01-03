@@ -275,7 +275,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     continue;
                 }
-
                 
                 int iconX = 62;
                 int topTextX = 87;

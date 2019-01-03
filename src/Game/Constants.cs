@@ -77,6 +77,6 @@ namespace ClassicUO.Game
         public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 2;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;
 
-
+        public const int MAX_ABILITIES_COUNT = 32;
     }
 }

@@ -267,5 +267,16 @@ namespace ClassicUO.Game
         public static void EmoteAction(string action)
             => Socket.Send(new PEmoteAction(action));
 
+        public static void OpenAbilitiesBook()
+        {
+            if (Engine.UI.GetByLocalSerial<CombatBookGump>() == null)
+            {
+                Engine.UI.Add(new CombatBookGump(100, 100));
+            }
+        }
+
+       
+        public static void UseAbility(byte index)
+            => Socket.Send(new PUseCombatAbility(index));
     }
 }

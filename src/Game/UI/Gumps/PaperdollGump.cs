@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private bool _isWarMode;
         private GumpPic _partyManifestPic;
-        private GumpPic _specialMovesBookPic;
+        private GumpPic _specialMovesBook, _combatBook, _racialAbilitiesBook;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
         private PaperDollInteractable _paperDollInteractable;
@@ -170,8 +171,25 @@ namespace ClassicUO.Game.UI.Gumps
                 //AddChildren(_specialMovesBookPic = new GumpPic(178, 220, 0x2B34, 0));
                 //_specialMovesBookPic.MouseDoubleClick += SpecialMoves_MouseDoubleClickEvent;
                 // Party manifest caller
-                AddChildren(_partyManifestPic = new GumpPic(44, 195, 2002, 0));
+
+                int partyManifestX = 37;
+                const int SCROLLS_STEP = 12;
+
+                if (World.ClientFlags.PaperdollBooks)
+                {
+                    AddChildren(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
+                    _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    {
+                        AddChildren(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
+
+                        partyManifestX += SCROLLS_STEP;
+                    }
+                }
+
+                AddChildren(_partyManifestPic = new GumpPic(partyManifestX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
+
             }
             else
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));

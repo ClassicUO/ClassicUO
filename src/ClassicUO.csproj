@@ -130,6 +130,7 @@
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
     <Compile Include="Game\UI\Gumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
+    <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
     <Compile Include="Game\Views\MultiView.cs" />
     <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
