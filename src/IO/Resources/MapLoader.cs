@@ -77,15 +77,15 @@ namespace ClassicUO.IO.Resources
 
                     path = Path.Combine(FileManager.UoFolderPath, $"mapdifl{i}.mul");
 
-                    if (!File.Exists(path))
-                        continue;
+                    if (File.Exists(path))
+                    {
+                        _mapDifl[i] = new UOFileMul(path);
+                        _mapDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"mapdif{i}.mul"));
 
-                    _mapDifl[i] = new UOFileMul(path);
-                    _mapDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"mapdif{i}.mul"));
-
-                    _staDifl[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifl{i}.mul"));
-                    _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifi{i}.mul"));
-                    _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadif{i}.mul"));
+                        _staDifl[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifl{i}.mul"));
+                        _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifi{i}.mul"));
+                        _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadif{i}.mul"));
+                    }
                 }
 
                 path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
