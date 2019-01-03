@@ -30,34 +30,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _pages = value;
 
-                for (int k = 1; k <= _pages.Length; k++)
+                if (m_Pages.Count > 0)
                 {
-                    int x = 38;
-                    int y = 30;
-                    if (k % 2 == 1)
+                    for (int k = 0; k < _pages.Length; k++)
                     {
-                        x = 223;
-                        //right hand page
+                        m_Pages[k].Text = _pages[k];
                     }
-                    int page = k + 1;
-                    if (page % 2 == 1)
-                        page += 1;
-                    page = page >> 1;
-                    TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
-                    {
-                        X = x,
-                        Y = y,
-                        Height = 170,
-                        Width = 155,
-                        IsEditable = this.IsBookEditable,
-                        Text = _pages[k - 1],
-                        MultiLineInputAllowed = true,
-                        MaxLines = 8,
-
-                    };
-                    AddChildren(tbox, page);
-                    m_Pages.Add(tbox);
-                    AddChildren(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
                 }
             }
         }
@@ -121,19 +99,22 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                //TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
-                //{
-                //    X = x,
-                //    Y = y,
-                //    Height = 170,
-                //    Width = 155,
-                //    IsEditable = this.IsBookEditable,
-                //    Text = BookPages[k - 1],
-                //    MultiLineInputAllowed = true,
-                //    MaxLines = 8,
-                //};
-                //AddChildren(tbox, page);
-                //m_Pages.Add(tbox);
+                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
+                {
+                    X = x,
+                    Y = y,
+                    Height = 170,
+                    Width = 155,
+                    IsEditable = this.IsBookEditable,
+                    //Text = BookPages[k - 1],
+                    MultiLineInputAllowed = true,
+                    MaxLines = 8,
+                };
+
+                if (BookPages != null)
+                    tbox.Text = BookPages[k - 1];
+                AddChildren(tbox, page);
+                m_Pages.Add(tbox);
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
             SetActivePage( 1 );
