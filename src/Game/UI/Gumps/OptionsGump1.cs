@@ -536,7 +536,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
 
-                Engine.SceneManager.GetScene<GameScene>().ChangeTreeToStumps = true;
                 //FileManager.Art.CleanResources();
 
                 //int mapIndex = World.MapIndex;
