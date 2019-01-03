@@ -21,43 +21,25 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort BookPageCount { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
         public static byte DefaultFont => (byte)(IsNewBookD4 ? 1 : 4);
-        private string[] _pages;
+        private bool _activated;
 
         public string[] BookPages
         {
-            get => _pages;
+            get => null;
             set
             {
-                _pages = value;
-
-                for (int k = 1; k <= _pages.Length; k++)
+                if(_activated)
                 {
-                    int x = 38;
-                    int y = 30;
-                    if (k % 2 == 1)
+                    for (int i = 0; i < m_Pages.Count; i++)
                     {
-                        x = 223;
-                        //right hand page
+                        m_Pages[i].Text = value[i];
                     }
-                    int page = k + 1;
-                    if (page % 2 == 1)
-                        page += 1;
-                    page = page >> 1;
-                    TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
-                    {
-                        X = x,
-                        Y = y,
-                        Height = 170,
-                        Width = 155,
-                        IsEditable = this.IsBookEditable,
-                        Text = _pages[k - 1],
-                        MultiLineInputAllowed = true,
-                        MaxLines = 8,
-
-                    };
-                    AddChildren(tbox, page);
-                    m_Pages.Add(tbox);
-                    AddChildren(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
+                    SetActivePage(ActivePage);
+                }
+                else if(value!=null)
+                {
+                    BuildGump(value);
+                    SetActivePage(1);
                 }
             }
         }
@@ -72,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private Button m_Forward, m_Backward;
-        private void BuildGump()
+        private void BuildGump(string[] pages)
         {
             AddChildren( new GumpPic( 0, 0, 0x1FE, 0 )
             {
@@ -121,22 +103,21 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                //TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
-                //{
-                //    X = x,
-                //    Y = y,
-                //    Height = 170,
-                //    Width = 155,
-                //    IsEditable = this.IsBookEditable,
-                //    Text = BookPages[k - 1],
-                //    MultiLineInputAllowed = true,
-                //    MaxLines = 8,
-                //};
-                //AddChildren(tbox, page);
-                //m_Pages.Add(tbox);
+                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
+                {
+                    X = x,
+                    Y = y,
+                    Height = 170,
+                    Width = 155,
+                    IsEditable = this.IsBookEditable,
+                    Text = pages[k - 1],
+                    MultiLineInputAllowed = true,
+                    MaxLines = 8,
+                };
+                AddChildren(tbox, page);
+                m_Pages.Add(tbox);
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
-            SetActivePage( 1 );
         }
         private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
@@ -176,10 +157,10 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnButtonClick( buttonID );
         }
 
-        protected override void OnInitialize()
+        /*protected override void OnInitialize()
         {
             BuildGump();
-        }
+        }*/
         protected override void CloseWithRightClick()
         {
             if ( PageChanged[0] )
@@ -272,10 +253,9 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (m_Pages[curpage].Text[Math.Min(Math.Max(curlen - 1, 0), chonline)] == '\n')
                                     chonline++;
 
-                                if (!isempty)
-                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline);
-                                else
-                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline - curlen);
+                                m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline);
+                                /*else
+                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline - curlen);*/
                             }
 
                             m_Pages[prevpage]._entry.InsertString(sb.ToString());
