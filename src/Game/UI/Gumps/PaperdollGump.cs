@@ -182,7 +182,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (FileManager.ClientVersion >= ClientVersions.CV_7000)
                     {
                         AddChildren(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
-
+                        _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
+                        {
+                            if (Engine.UI.GetByLocalSerial<RacialAbilitiesBookGump>() == null)
+                            {
+                                Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            }
+                        };
                         partyManifestX += SCROLLS_STEP;
                     }
                 }

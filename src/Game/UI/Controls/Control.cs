@@ -379,13 +379,18 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void SetTooltip(string c)
+        public void SetTooltip(string c, int maxWidth = 0)
         {
             if (string.IsNullOrEmpty(c))
                 ClearTooltip();
             else
+            {
                 Tooltip = c;
+                TooltipMaxLength = maxWidth;
+            }
         }
+
+        public int TooltipMaxLength { get; private set; }
 
         public void ClearTooltip()
         {
