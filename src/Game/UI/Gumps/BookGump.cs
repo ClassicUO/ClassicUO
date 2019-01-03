@@ -118,6 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Pages.Add(tbox);
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
+            _activated = true;
         }
         private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
@@ -191,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (BookPages == null)
+            if (_activated)
             {
                 if (BookAuthor.IsChanged || BookTitle.IsChanged)
                     PageChanged[0] = true;
