@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed;
+        private bool _rightMousePressed, _continueRunning;
 
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
@@ -75,15 +75,27 @@ namespace ClassicUO.Game.Scenes
         {
             if (e.Button == MouseButton.Left)
             {
-                GameObject obj = _mousePicker.MouseOverObject;
-                Point point = _mousePicker.MouseOverObjectPoint;
-                _dragginObject = obj;
-                _dragOffset = point;
+                if (_rightMousePressed)
+                {
+                    _continueRunning = true;
+                }
+                else
+                {
+
+                    GameObject obj = _mousePicker.MouseOverObject;
+                    Point point = _mousePicker.MouseOverObjectPoint;
+                    _dragginObject = obj;
+                    _dragOffset = point;
+                }
+
             }
             else if (e.Button == MouseButton.Right)
             {
                 if (!_rightMousePressed)
+                {
                     _rightMousePressed = true;
+                    _continueRunning = false;
+                }
             }
         }
 
@@ -232,7 +244,7 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Item item:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
@@ -246,12 +258,12 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
                     case TextOverhead overhead when overhead.Parent is Entity entity:
-                        e.Result = false;
+                        e.Result = true;
                         GameActions.DoubleClick(entity);
                         break;
                 }

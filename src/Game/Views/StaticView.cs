@@ -36,6 +36,7 @@ namespace ClassicUO.Game.Views
         private readonly bool _isFoliage, _isPartialHue;
         private float _alpha;
         private float _timeToProcessAlpha;
+        private int _canBeTransparent;
 
         private Graphic _oldGraphic;
 
@@ -47,6 +48,15 @@ namespace ClassicUO.Game.Views
 
             if (st.ItemData.IsTranslucent)
                 _alpha = 0.5f;
+
+            if (st.ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (st.ItemData.IsRoof || (st.ItemData.IsSurface && st.ItemData.IsBackground) || st.ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (st.ItemData.Height == 5 && st.ItemData.IsSurface && !st.ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
         }
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
@@ -126,13 +136,18 @@ namespace ClassicUO.Game.Views
 
             if (Engine.Profile.Current.UseCircleOfTransparency)
             {
-                int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
-                int distance = GameObject.Distance;
+                int z = World.Player.Z + 5;
 
-                if (distance <= distanceMax && !st.ItemData.IsBackground && !st.ItemData.IsSurface)
-                    _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
-                else if (_alpha != 0.0f)
-                    _alpha = 0;
+                if (!(GameObject.Z <= z - st.ItemData.Height || z < st.Z && (_canBeTransparent & 0xFF) == 0))
+                {
+                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
+                    int distance = GameObject.Distance;
+
+                    if (distance <= distanceMax)
+                        _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
+                    else if (_alpha != 0.0f)
+                        _alpha = 0;
+                }
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)

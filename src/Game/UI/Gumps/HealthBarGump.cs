@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _outOfRange = false;
 
-                    if (_name != Mobile.Name)
+                    if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
                         _name = Mobile.Name;
 
                     hitsColor = 0;
@@ -429,6 +429,22 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[2].Percent = stam;
                     _oldStam = stam;
                 }
+            }
+        }
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+            {
+                Mobile.View.IsSelected = true;
+            }
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            if (Mobile.View.IsSelected && Mobile != null)
+            {
+                Mobile.View.IsSelected = false;
             }
         }
 

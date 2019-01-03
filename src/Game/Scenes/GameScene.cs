@@ -417,7 +417,7 @@ namespace ClassicUO.Game.Scenes
 
             _mouseOverList.Clear();
 
-            if (_rightMousePressed)
+            if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
             // ===================================
             World.Update(totalMS, frameMS);
