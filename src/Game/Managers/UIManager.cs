@@ -225,7 +225,7 @@ namespace ClassicUO.Game.Managers
                     {
                         Control c = _gumps[i];
 
-                        if (!c.IsDisposed && c.IsVisible && c.IsEnabled && c.AcceptKeyboardInput)
+                        if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
 

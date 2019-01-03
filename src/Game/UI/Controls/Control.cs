@@ -511,8 +511,10 @@ namespace ClassicUO.Game.UI.Controls
 
             foreach (Control c in _children)
             {
-                if (c.AcceptKeyboardInput)
-                    return c.GetFirstControlAcceptKeyboardInput();
+                Control a = c.GetFirstControlAcceptKeyboardInput();
+
+                if (a != null)
+                    return a;
             }
 
             return null;
