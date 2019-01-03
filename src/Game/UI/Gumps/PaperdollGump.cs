@@ -167,10 +167,6 @@ namespace ClassicUO.Game.UI.Gumps
                 // Virtue menu
                 AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
-                // Special moves book
-                //AddChildren(_specialMovesBookPic = new GumpPic(178, 220, 0x2B34, 0));
-                //_specialMovesBookPic.MouseDoubleClick += SpecialMoves_MouseDoubleClickEvent;
-                // Party manifest caller
 
                 int partyManifestX = 37;
                 const int SCROLLS_STEP = 12;

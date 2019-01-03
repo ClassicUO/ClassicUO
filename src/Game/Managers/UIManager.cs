@@ -610,22 +610,18 @@ namespace ClassicUO.Game.Managers
         {
             if (_isDraggingControl)
                 return _draggingControl;
-            var controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal) : _gumps;
-            IReadOnlyList<Control> mouseoverControls = null;
+
+            IEnumerable<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal) : _gumps;
 
             foreach (Control c in controls)
             {
-                var ctrls = c.HitTest(position);
+                IReadOnlyList<Control> ctrls = c.HitTest(position);
 
                 if (ctrls != null)
-                {
-                    mouseoverControls = ctrls;
-
-                    break;
-                }
+                    return ctrls.LastOrDefault(s => s.AcceptMouseInput);
             }
 
-            return mouseoverControls?.LastOrDefault(s => s.AcceptMouseInput);
+            return null;
         }
 
         private void MakeTopMostGump(Control control)

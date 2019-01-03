@@ -459,7 +459,8 @@ namespace ClassicUO.Game.UI.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                       results.Add(this);  //results.Push(this);
+                        results.Add(this);
+                       //results.Insert(0, this);  //results.Push(this);
 
                     for (int j = 0; j < Children.Count; j++)
                     {
@@ -474,15 +475,15 @@ namespace ClassicUO.Game.UI.Controls
                                 //for (int i = cl.Length - 1; i >= 0; i--)
                                 //    results.Push(cl[i]);
 
-                      
+
                                 //foreach (Control control in cl)
                                 //{
                                 //    results.Push(control);
                                 //}
 
-                               // for (int i = cl.Count - 1; i >= 0; i--)
-                                 //   results.Add(cl[i]);
-                                 results.AddRange(cl);
+                                //for (int i = cl.Count - 1; i >= 0; i--)
+                                //    results.Insert(0, cl[i]);
+                                results.AddRange(cl);
                             }
                         }
                     }

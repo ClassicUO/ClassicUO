@@ -68,7 +68,6 @@ namespace ClassicUO.IO.Resources
                     return null;
                 texture = new SpriteTexture(w, h, false);
                 texture.SetDataHitMap16(pixels);
-                //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
             return texture;
@@ -169,26 +168,39 @@ namespace ClassicUO.IO.Resources
                     gsize = (length >> 2) - lookuplist[y];
                 GumpBlock* gmul = (GumpBlock*)(dataStart + lookuplist[y] * 4);
                 int pos = y * width;
-                int x = 0;
+
 
                 for (int i = 0; i < gsize; i++)
                 {
                     ushort val = gmul[i].Value;
+
+                    ushort a = (ushort)((val != 0 ? 0x8000 : 0) | val);
+
                     int count = gmul[i].Run;
 
-                    if (val > 0)
-                    {
-                        for (int j = 0; j < count; j++)
-                            pixels[pos + x++] = (ushort)(0x8000 | val);
-                    }
-                    else
-                        x += count;
-
-                    //ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
-                    //int count = gmul[i].Run;
-                    //for (int j = 0; j < count; j++)
-                    //    pixels[pos++] = a;
+                    for (int j = 0; j < count; j++)
+                        pixels[pos++] = a;
                 }
+                //int x = 0;
+
+                //for (int i = 0; i < gsize; i++)
+                //{
+                //    ushort val = gmul[i].Value;
+                //    int count = gmul[i].Run;
+
+                //    if (val > 0)
+                //    {
+                //        for (int j = 0; j < count; j++)
+                //            pixels[pos + x++] = (ushort)(0x8000 | val);
+                //    }
+                //    else
+                //        x += count;
+
+                //    //ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
+                //    //int count = gmul[i].Run;
+                //    //for (int j = 0; j < count; j++)
+                //    //    pixels[pos++] = a;
+                //}
             }
 
             return pixels;

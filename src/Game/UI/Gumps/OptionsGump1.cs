@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -458,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 1: // general
                     _sliderFPS.Value = 60;
                     _highlightObjects.IsChecked = true;
-                    _smoothMovements.IsChecked = true;
+                    //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
