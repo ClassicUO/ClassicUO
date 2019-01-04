@@ -161,13 +161,6 @@ namespace ClassicUO.IO
                             {
                                 for (int j = 0; j < 8; j++)
                                 {
-                                    //var list = chunk.Tiles[i][j].ObjectsOnTiles;
-                                    //for (int k = list.Count - 1; k >= 0; --k)
-                                    //{
-                                    //    if (list[k] is Static)
-                                    //        chunk.Tiles[i][j].RemoveGameObject(list[k]);
-                                    //}
-
                                     for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
                                     {
                                         if (obj is Static)
@@ -285,12 +278,8 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    //var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
-
                     for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
-                        //for (int k = 0; k < list.Count; k++)
                     {
-                        //GameObject o = list[k];
                         if (obj is Land ln)
                         {
                             landdata[blockByteIdx] = (byte)(ln.Graphic & 0x00FF);
@@ -311,12 +300,8 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    //var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
                     for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
-
-                    //for (int k = 0; k < list.Count; k++)
                     {
-                        //GameObject obj = list[k];
                         if (obj is Static st)
                         {
                             staticdata[blockByteIdx] = (byte)(st.Graphic & 0x00FF);
@@ -366,13 +351,14 @@ namespace ClassicUO.IO
             }
         }
 
+        private static readonly char[] _pathSeparatorChars = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         private static string ValidatePath(string shardname)
         {
             try
             {
                 string fullPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "UltimaLive", shardname));
 
-                if (shardname.IndexOfAny(new char[] { '/', '\\' }) == -1 && !string.IsNullOrEmpty(fullPath))//we cannot allow directory separator inside our name
+                if (shardname.IndexOfAny(_pathSeparatorChars) == -1 && !string.IsNullOrEmpty(fullPath))//we cannot allow directory separator inside our name
                     return fullPath;
             }
             catch
