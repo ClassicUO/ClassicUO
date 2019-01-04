@@ -21,14 +21,14 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort BookPageCount { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
         public static byte DefaultFont => (byte)(IsNewBookD4 ? 1 : 4);
-        private bool _activated;
+        private byte _activated = 0;
 
         public string[] BookPages
         {
             get => null;
             set
             {
-                if(_activated)
+                if(_activated > 0)
                 {
                     for (int i = 0; i < m_Pages.Count; i++)
                     {
@@ -116,9 +116,15 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 AddChildren(tbox, page);
                 m_Pages.Add(tbox);
+                tbox.MouseClick += (sender, e) => {
+                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                };
+                tbox.MouseDoubleClick += (sender, e) => {
+                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                };
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
-            _activated = true;
+            _activated = 1;
         }
         private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
@@ -185,48 +191,60 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
-
-            if (IsDisposed)
+            if (_activated > 1)
             {
-                return;
-            }
-
-            if (_activated)
-            {
-                if (BookAuthor.IsChanged || BookTitle.IsChanged)
-                    PageChanged[0] = true;
-                for (int i = m_Pages.Count - 1; i >= 0; --i)
+                if (!IsDisposed)
                 {
-                    if (m_Pages[i].IsChanged)
-                        PageChanged[i + 1] = true;
+                    if (BookAuthor.IsChanged || BookTitle.IsChanged)
+                        PageChanged[0] = true;
+                    for (int i = m_Pages.Count - 1; i >= 0; --i)
+                    {
+                        if (m_Pages[i].IsChanged)
+                            PageChanged[i + 1] = true;
+                    }
                 }
             }
+            else if(_activated > 0)
+                _activated++;
+            base.Update(totalMS, frameMS);
         }
 
+        // < 0 == backward
+        // > 0 == forward
+        // 0 == invariant
+        // this is our only place to check for page movement from key
+        // or displacement of caretindex from mouse
+        private sbyte _AtEnd = 0;
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             int curpage = ActiveInternalPage;
             var textbox = m_Pages[curpage];
             var entry = textbox._entry;
-            int oldidx = entry.CaretIndex;
 
             if (key == SDL.SDL_Keycode.SDLK_BACKSPACE || key == SDL.SDL_Keycode.SDLK_DELETE)
             {
                 if (curpage >= 0)
                 {
-                    bool isempty = entry.CaretIndex == 0;
-
-                    if (isempty)
+                    if (curpage > 0)
                     {
-                        if (curpage == 0)
-                            return; //we can't go more backward
-
-                        if ((curpage + 1) % 2 == 0)
-                            SetActivePage(ActivePage - 1);
-                        curpage--;
-                        RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
+                        if (key == SDL.SDL_Keycode.SDLK_BACKSPACE)
+                        {
+                            if (_AtEnd < 0)
+                            {
+                                if ((curpage + 1) % 2 == 0)
+                                    SetActivePage(ActivePage - 1);
+                                curpage--;
+                                RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
+                                _AtEnd = 1;
+                            }
+                            else if (entry.CaretIndex == 0)
+                                _AtEnd = -1;
+                        }
+                        else
+                            _AtEnd = (sbyte)(entry.CaretIndex == 0 ? -1 : entry.CaretIndex + 1 >=  entry.Text.Length && curpage < BookPageCount ? 1 : 0);
                     }
+                    else
+                        _AtEnd = 0;
 
                     int active = curpage, caretpos = m_Pages[curpage]._entry.CaretIndex;
                     curpage++;
@@ -270,149 +288,155 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (key == SDL.SDL_Keycode.SDLK_RIGHT)
             {
-                if (entry.CaretIndex == textbox.Text.Length && oldidx == textbox.Text.Length)
+                if (curpage >= 0 && curpage + 1 < BookPageCount)
                 {
-                    if (curpage >= 0 && curpage + 1 < BookPageCount)
+                    if (entry.CaretIndex + 1 >= textbox.Text.Length)
+                    {
+                        if (_AtEnd > 0)
+                        {
+                            if ((curpage + 1) % 2 == 1)
+                                SetActivePage(ActivePage + 1);
+                            RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                            _AtEnd = -1;
+                        }
+                        else
+                            _AtEnd = 1;
+                        return;
+                    }
+                }
+                _AtEnd = 0;
+            }
+            else if (key == SDL.SDL_Keycode.SDLK_LEFT)
+            {
+                if (entry.CaretIndex == 0)
+                {
+                    if (_AtEnd < 0)
+                    {
+                        if ((curpage + 1) % 2 == 0)
+                            SetActivePage(ActivePage - 1);
+                        RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                        _AtEnd = 1;
+                    }
+                    else
+                        _AtEnd = -1;
+                }
+                else
+                    _AtEnd = 0;
+            }
+            else if (key == SDL.SDL_Keycode.SDLK_UP)
+            {
+                if (curpage > 0)
+                {
+                    if (entry.CaretIndex == 0)
+                    {
+                        if (_AtEnd < 0)
+                        {
+                            if ((curpage + 1) % 2 == 0)
+                                SetActivePage(ActivePage - 1);
+                            RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                            _AtEnd = 1;
+                        }
+                        else
+                            _AtEnd = -1;
+                        return;
+                    }
+                }
+                _AtEnd = 0;
+            }
+            else if (key == SDL.SDL_Keycode.SDLK_DOWN)
+            {
+                if (curpage + 1 < BookPageCount && curpage >= 0)
+                {
+                    if (entry.CaretIndex + 1 >= textbox.Text.Length)
+                    {
+                        if (_AtEnd > 0)
+                        {
+                            if ((curpage + 1) % 2 == 1)
+                                SetActivePage(ActivePage + 1);
+                            RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                            _AtEnd = -1;
+                        }
+                        else
+                            _AtEnd = 1;
+                        return;
+                    }
+                }
+                _AtEnd = 0;
+            }
+            else if (key == SDL.SDL_Keycode.SDLK_HOME)
+            {
+                if (curpage > 0)
+                {
+                    if (_AtEnd < 0)
+                    {
+                        if ((curpage + 1) % 2 == 0)
+                            SetActivePage(ActivePage - 1);
+                        RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                        _AtEnd = 1;
+                    }
+                    else
+                        _AtEnd = -1;
+                }
+                else
+                    _AtEnd = 0;
+            }
+            else if (key == SDL.SDL_Keycode.SDLK_END)
+            {
+                if (curpage >= 0 && curpage + 1 < BookPageCount)
+                {
+                    if (_AtEnd > 0)
                     {
                         if ((curpage + 1) % 2 == 1)
                             SetActivePage(ActivePage + 1);
                         RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                        _AtEnd = -1;
                     }
+                    else
+                        _AtEnd = 1;
                 }
+                else
+                    _AtEnd = 0;
             }
-            else if (key == SDL.SDL_Keycode.SDLK_LEFT)
-            {
-                if (entry.CaretIndex == 0 && oldidx == 0)
-                {
-                    if ((curpage + 1) % 2 == 0)
-                        SetActivePage(ActivePage - 1);
-                    RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
-                }
-            }
-            else if (key == SDL.SDL_Keycode.SDLK_UP)
-            {
-                if (textbox.MultiLineInputAllowed && entry.CaretIndex == 0 && oldidx == 0 && curpage > 0)
-                {
-                    if ((curpage + 1) % 2 == 0)
-                        SetActivePage(ActivePage - 1);
-                    RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
-                }
-            }
-            else if (key == SDL.SDL_Keycode.SDLK_DOWN)
-            {
-                if (textbox.MultiLineInputAllowed && entry.CaretIndex == textbox.Text.Length && oldidx == textbox.Text.Length && curpage >= 0 && curpage + 1 < BookPageCount)
-                {
-                    if ((curpage + 1) % 2 == 1)
-                        SetActivePage(ActivePage + 1);
-                    RefreshShowCaretPos(0, m_Pages[curpage + 1]);
-                }
-            }
-            else if (key == SDL.SDL_Keycode.SDLK_HOME)
-            {
-                if (oldidx == 0 && curpage > 0)
-                {
-                    if ((curpage + 1) % 2 == 0)
-                        SetActivePage(ActivePage - 1);
-                    RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
-                }
-            }
-            else if (key == SDL.SDL_Keycode.SDLK_END)
-            {
-                if (oldidx == textbox.Text.Length && curpage >= 0 && curpage + 1 < BookPageCount)
-                {
-                    if ((curpage + 1) % 2 == 1)
-                        SetActivePage(ActivePage + 1);
-                    RefreshShowCaretPos(0, m_Pages[curpage + 1]);
-                }
-            }
-          
+            else
+                _AtEnd = 0;
+        }
+
+        private void OnLeftClick()
+        {
+            var curpage = ActiveInternalPage;
+            var entry = m_Pages[curpage]._entry;
+            var caretpos = m_Pages[curpage]._entry.CaretIndex;
+            _AtEnd = (sbyte)(caretpos == 0 && curpage > 0 ? -1 : caretpos + 1 >= entry.Text.Length && curpage >= 0 && curpage < BookPageCount ? 1 : 0);
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
             int curpage = ActiveInternalPage;
-            switch ((TextBox.PageCommand)textID)
+            if(textID == TextBox.PasteCommandID && text != null && curpage >= 0)
             {
-                case TextBox.PageCommand.GoBackward when curpage > 0:
-                    if((curpage+1)%2 == 0)
-                        SetActivePage(ActivePage - 1);
-                    RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
-                    break;
-                case TextBox.PageCommand.GoForward when curpage >= 0 && curpage+1 < BookPageCount:
-                    if((curpage+1)%2 == 1)
-                        SetActivePage(ActivePage + 1);
-                    RefreshShowCaretPos(0, m_Pages[curpage + 1]);
-                    break;
-                case TextBox.PageCommand.PasteText when text!=null && curpage >= 0:
-                    curpage++;
-                    if (curpage % 2 == 1)
-                        SetActivePage(ActivePage + 1);
-                    while (text != null && curpage < BookPageCount)
+                curpage++;
+                if (curpage % 2 == 1)
+                    SetActivePage(ActivePage + 1);
+                while (text != null && curpage < BookPageCount)
+                {
+                    RefreshShowCaretPos(0, m_Pages[curpage]);
+                    text = m_Pages[curpage]._entry.InsertString(text);
+                    if (!string.IsNullOrEmpty(text))
                     {
-                        RefreshShowCaretPos(0, m_Pages[curpage]);
-                        text = m_Pages[curpage]._entry.InsertString(text);
-                        if (!string.IsNullOrEmpty(text))
+                        curpage++;
+                        if (curpage < BookPageCount)
                         {
-                            curpage++;
-                            if (curpage < BookPageCount)
-                            {
-                                if(curpage % 2 == 1)
-                                    SetActivePage(ActivePage + 1);
-                            }
-                            else
-                            {
-                                --curpage;
-                                text = null;
-                            }
+                            if (curpage % 2 == 1)
+                                SetActivePage(ActivePage + 1);
+                        }
+                        else
+                        {
+                            --curpage;
+                            text = null;
                         }
                     }
-                    RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
-                    break;
-                case TextBox.PageCommand.RemoveText when curpage >= 0:
-                    //we have already removed our text with a KEYBOARD pressure, now we do this:
-                    //1) calculate the remaining one until the very LAST PAGE
-                    //2) avoid the repetition of this piece of code
-                    if(text!=null)
-                    {
-                        if (curpage == 0)
-                            return; //we can't go more backward
-                        if ((curpage + 1) % 2 == 0)
-                            SetActivePage(ActivePage - 1);
-                        curpage--;
-                        RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
-                    }
-                    int active = curpage, caretpos = m_Pages[curpage]._entry.CaretIndex;
-                    curpage++;
-                    if (curpage < BookPageCount)//if we are on the last page it doesn't need the front text backscaling
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        do
-                        {
-                            int curlen = m_Pages[curpage].Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = m_Pages[curpage].GetCharsOnLine(0), prevpage = curpage - 1;
-                            m_Pages[prevpage]._entry.SetCaretPosition(prevlen);
-                            for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i)
-                            {
-                                sb.Append('\n');
-                            }
-                            sb.Append(m_Pages[curpage].Text.Substring(0, chonline));
-                            if (curlen > 0)
-                            {
-                                sb.Append('\n');
-                                if (m_Pages[curpage].Text[Math.Min(Math.Max(curlen - 1, 0), chonline)] == '\n')
-                                    chonline++;
-                                if (string.IsNullOrEmpty(text))
-                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline);
-                                else
-                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline - curlen);
-                            }
-                            m_Pages[prevpage]._entry.InsertString(sb.ToString());
-                            curpage++;
-                            sb.Clear();
-                        }
-                        while (curpage < BookPageCount);
-                        m_Pages[active]._entry.SetCaretPosition(caretpos);
-                    }
-                    break;
+                }
+                RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
             }
         }
 

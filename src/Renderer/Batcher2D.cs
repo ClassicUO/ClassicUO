@@ -215,6 +215,8 @@ namespace ClassicUO.Renderer
 
         public unsafe bool Draw2D(Texture2D texture, Point position, Vector3 hue)
         {
+            if (texture == null)
+                return false;
             fixed (SpriteVertex* ptr = _vertexBufferUI)
             {
                 ptr[0].Position.X = position.X;
