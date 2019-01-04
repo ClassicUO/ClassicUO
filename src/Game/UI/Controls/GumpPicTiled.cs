@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            batcher.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
+            batcher.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
 
             return base.Draw(batcher, position, hue);
         }

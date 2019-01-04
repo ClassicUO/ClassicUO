@@ -20,24 +20,6 @@ namespace ClassicUO.Renderer
 {
     internal class Batcher2D
     {
-        // 0x0DE1
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void Enable(int cap);
-        public static Enable glEnable;
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void Disable(int cap);
-        public static Disable glDisable;
-        static Batcher2D()
-        {
-            glEnable = (Enable) Marshal.GetDelegateForFunctionPointer(
-                                                                      SDL.SDL_GL_GetProcAddress("glEnable"),
-                                                                      typeof(Enable));
-
-            glDisable = (Disable) Marshal.GetDelegateForFunctionPointer(
-                                                                        SDL.SDL_GL_GetProcAddress("glDisable"),
-                                                                        typeof(Disable));
-        }
-
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;

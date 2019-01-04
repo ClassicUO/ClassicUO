@@ -1405,8 +1405,8 @@ namespace ClassicUO.Network
         {
             Serial serial = p.ReadUInt();
             uint id = p.ReadUInt();
-            string name = p.ReadASCII(p.ReadByte());
-            int count = p.ReadByte();
+            //string name = p.ReadASCII(p.ReadByte());
+            //int count = p.ReadByte();
             // to finish
         }
 

@@ -45,7 +45,6 @@ namespace ClassicUO.Game.UI.Controls
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
             AcceptMouseInput = false;
-
         }
 
         public static SpriteTexture TransparentTexture
@@ -88,66 +87,40 @@ namespace ClassicUO.Game.UI.Controls
         //    }
         //}
 
-        //private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
-        //{
-        //    DepthStencilState state = new DepthStencilState();
+        private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState();
 
-        //    //state.DepthBufferEnable = true;
-        //    //state.StencilEnable = true;
+            state.DepthBufferEnable = false;
+            state.StencilEnable = false;
 
-        //    state.StencilFunction = CompareFunction.Always;
-        //    state.ReferenceStencil = 1;
-        //    state.StencilMask = 1;
-        //    state.StencilWriteMask = 1;
+            state.StencilFunction = CompareFunction.Always;
+            state.ReferenceStencil = 1;
+            state.StencilMask = 1;
 
-        //    state.StencilFail = StencilOperation.Keep;
-        //    state.StencilDepthBufferFail = StencilOperation.Keep;
-        //    state.StencilPass = StencilOperation.Replace;
+            state.StencilFail = StencilOperation.Keep;
+            state.StencilDepthBufferFail = StencilOperation.Keep;
+            state.StencilPass = StencilOperation.Replace;
 
+            state.TwoSidedStencilMode = false;
 
-        //    state.CounterClockwiseStencilPass = StencilOperation.Replace;
-
-
-            
-
-        //    return state;
-        //});
-
-        //private static readonly Lazy<DepthStencilState> _checkerStencil2 = new Lazy<DepthStencilState>(() =>
-        //{
-        //    DepthStencilState state = new DepthStencilState
-        //    {
-        //        StencilFunction = CompareFunction.NotEqual,
-        //        StencilMask = 1,
-        //        ReferenceStencil = 1,
-        //        StencilFail = StencilOperation.Keep,
-        //        StencilDepthBufferFail = StencilOperation.Keep,
-        //        StencilPass = StencilOperation.Keep
-        //    };
+            return state;
+        });
 
 
-
-        //    return state;
-        //});
-
-        //private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        //{
-        //    BlendState blend = new BlendState();
-        //    blend.ColorWriteChannels = ColorWriteChannels.None;
-        //    blend.ColorWriteChannels1 = ColorWriteChannels.None;
-        //    blend.ColorWriteChannels2 = ColorWriteChannels.None;
-        //    blend.ColorWriteChannels3 = ColorWriteChannels.None;
-        //    return blend;
-        //});
+        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState blend = new BlendState();
+            blend.ColorWriteChannels = ColorWriteChannels.None;
+            return blend;
+        });
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);
 
-            ////Batcher2D.glDisable(0x0DE1);
-            //batcher.Draw2D(TransparentTexture2, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero /*ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false)*/);
-            ////Batcher2D.glEnable(0x0DE1);
+            //batcher.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero /*ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false)*/);
 
             //batcher.SetBlendState(null);
             //batcher.SetStencil(null);

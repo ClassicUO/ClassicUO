@@ -106,8 +106,8 @@ namespace ClassicUO
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
-            _graphicDeviceManager.PreferredBackBufferWidth = 640; // should be changed by settings file
-            _graphicDeviceManager.PreferredBackBufferHeight = 480; // should be changed by settings file
+            _graphicDeviceManager.PreferredBackBufferWidth = 640;
+            _graphicDeviceManager.PreferredBackBufferHeight = 480;
             _graphicDeviceManager.ApplyChanges();
 
             Window.ClientSizeChanged += (sender, e) =>

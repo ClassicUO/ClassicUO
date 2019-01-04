@@ -332,23 +332,65 @@ namespace ClassicUO.Game.Managers
                         case "checkertrans":
                             CheckerTrans t = new CheckerTrans(gparams);
 
-                            for (int i = 0; i < gump.Children.Count; i++)
-                            {
-                                Control g = gump.Children[i];
-                                g.IsTransparent = true;
 
-                                if (g.Bounds.Contains(t.Bounds))
+                            for (int i = gump.Children.Count - 1; i >= 0; i--)
+                            {
+                                var c = gump.Children[i];
+
+                                if (c is CheckerTrans)
+                                    break;
+                                c.IsTransparent = true;
+                                c.Alpha = 0.5f;
+
+                                if (t.Bounds.Intersects(c.Bounds))
                                 {
-                                    if (g is ResizePic res)
-                                        res.OnlyCenterTransparent = true;
-                                    else if (g is Button || g is Checkbox)
+                                    if (c is Button)
                                     {
-                                        g.IsVisible = false;
+                                        c.IsVisible = false;
                                     }
                                 }
                             }
 
-                            gump.AddChildren(t, page);
+                            //float[] alpha = { 0, 0.5f };
+
+                            //bool checkTransparent(Control c, int start)
+                            //{
+                            //    bool transparent = false;
+                            //    for (int i = start; i < c.Children.Count; i++)
+                            //    {
+                            //        var control = c.Children[i];
+
+                            //        bool canDraw = c.Page == 0 || control.Page == 0 || c.Page == control.Page;
+
+                            //        if (canDraw && control is CheckerTrans)
+                            //        {
+                            //            transparent = true;
+                            //        }
+                            //    }
+
+                            //    return transparent;
+                            //}
+
+
+                            //bool trans = checkTransparent(gump, 0);
+
+                            //for (int i = gump.Children.Count - 1; i >= 0; i--)
+                            //{
+                            //    Control g = gump.Children[i];
+                            //    g.IsTransparent = true;
+
+                            //    if (g is CheckerTrans)
+                            //    {
+                            //        trans = checkTransparent(gump, i + 1);
+
+                            //        continue;
+                            //    }
+
+                            //    g.Alpha = alpha[trans ? 1 : 0];
+                            //}
+
+                            //gump.AddChildren(t, page);
+
 
                             break;
                         case "croppedtext":

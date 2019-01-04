@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
 
             //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
@@ -242,12 +242,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            //SpriteTexture texture = GetTextureByState();
-
             return _textures[NORMAL].Contains(x, y);
-
-            //return (Texture != null && Texture.Contains(x, y)) /*|| Bounds.Contains(X + x, Y + y)*/;
-            //return FileManager.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
         }
 
         public override void Dispose()
