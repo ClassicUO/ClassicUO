@@ -215,6 +215,9 @@ namespace ClassicUO.Renderer
 
         public unsafe bool Draw2D(Texture2D texture, Point position, Vector3 hue)
         {
+            // TODO: CHECK if this is really needed, since some client datafiles could have  
+            // some missing sprites in files...it won't harm client functionality, and will  
+            // avoid client crashes in case some sprites are missing from files.
             if (texture == null)
                 return false;
             fixed (SpriteVertex* ptr = _vertexBufferUI)
