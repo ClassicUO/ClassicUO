@@ -164,10 +164,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnButtonClick( buttonID );
         }
 
-        /*protected override void OnInitialize()
-        {
-            BuildGump();
-        }*/
         protected override void CloseWithRightClick()
         {
             if ( PageChanged[0] )
@@ -387,12 +383,10 @@ namespace ClassicUO.Game.UI.Gumps
                             SetActivePage(ActivePage - 1);
                         RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
                         _AtEnd = 1;
+                        return;
                     }
-                    else
-                        _AtEnd = -1;
                 }
-                else
-                    _AtEnd = 0;
+                _AtEnd = 0;
             }
             else if (key == SDL.SDL_Keycode.SDLK_END)
             {
@@ -404,12 +398,10 @@ namespace ClassicUO.Game.UI.Gumps
                             SetActivePage(ActivePage + 1);
                         RefreshShowCaretPos(0, m_Pages[curpage + 1]);
                         _AtEnd = -1;
+                        return;
                     }
-                    else
-                        _AtEnd = 1;
                 }
-                else
-                    _AtEnd = 0;
+                _AtEnd = 0;
             }
             else
                 _AtEnd = 0;
@@ -443,6 +435,51 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 caretpos -= linech[l];
                 _scale = caretpos == 0;
+            }
+        }
+
+        public void OnHomeOrEnd(TextEntry entry, bool home)
+        {
+            var linech = entry.GetLinesCharsCount();
+            for (int l = 0; l + 1 < linech.Length; l++)
+            {
+                linech[l]++;
+            }
+            int caretpos = entry.CaretIndex;
+
+            for (int l = 0; l < linech.Length; l++)
+            {
+                caretpos -= linech[l];
+                if (!home)
+                {
+                    if (caretpos == -1 || entry.CaretIndex == entry.Text.Length)
+                    {
+                        if (entry.CaretIndex == entry.Text.Length && ActiveInternalPage+1 < BookPageCount)
+                            _AtEnd = 1;
+                        entry.SetCaretPosition(entry.Text.Length);
+                        break;
+                    }
+                    else if (caretpos < 0)
+                    {
+                        entry.SetCaretPosition(entry.CaretIndex - caretpos - 1);
+                        break;
+                    }
+                }
+                else
+                {
+                    if(caretpos == 0 || entry.CaretIndex == 0)
+                    {
+                        if(entry.CaretIndex == 0 && ActiveInternalPage > 0)
+                            _AtEnd = -1;
+                        entry.SetCaretPosition(0);
+                        break;
+                    }
+                    else if(caretpos < 0)
+                    {
+                        entry.SetCaretPosition(entry.CaretIndex - (linech[l] + caretpos));
+                        break;
+                    }
+                }
             }
         }
 
@@ -576,7 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MaxBookLines = 8;
         internal sealed class PBookData : PacketWriter
         {
-            public PBookData( BookGump gump ) : base(0x66)//Serial serial, List<TextBox> data
+            public PBookData( BookGump gump ) : base(0x66)
             {
                 EnsureSize( 256 );
 

@@ -203,10 +203,16 @@ namespace ClassicUO.Game.UI.Controls
                     _entry.RemoveChar(false);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
-                    _entry.SetCaretPosition(0);
+                    if (Parent is Gumps.BookGump hbook)
+                        hbook.OnHomeOrEnd(_entry, true);
+                    else
+                        _entry.SetCaretPosition(0);
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
-                    _entry.SetCaretPosition(Text.Length - 1);
+                    if (Parent is Gumps.BookGump ebook)
+                        ebook.OnHomeOrEnd(_entry, false);
+                    else
+                        _entry.SetCaretPosition(Text.Length - 1);
                     break;
             }
 
