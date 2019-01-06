@@ -101,6 +101,7 @@ namespace ClassicUO.Game.UI.Controls
         public int MaxLines { get => _entry.MaxLines; set => _entry.MaxLines = value; }
         public const int PasteCommandID = 0x10000000;
         public const int RetrnCommandID = 0x20000000;
+        public const int PasteRetnCmdID = 0x30000000;
 
         public void SetText(string text, bool append = false)
         {
@@ -155,7 +156,8 @@ namespace ClassicUO.Game.UI.Controls
                 s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))
                 {
-                    s = _entry.InsertString(s.Replace("\r", string.Empty));
+                    if(!MultiLineInputAllowed)
+                        s = _entry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
                     Parent?.OnKeyboardReturn(PasteCommandID, s);
                     return;
                 }
@@ -165,8 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if (MultiLineInputAllowed)
                     {
-                        s = _entry.InsertString("\n");
-                        Parent?.OnKeyboardReturn(RetrnCommandID, s);
+                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                     }
                     else
                     {
@@ -177,6 +178,8 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                     {
+                        if (Parent is Gumps.BookGump bbook)
+                            bbook.ScaleOnBackspace(_entry);
                         _entry.RemoveChar(true);
                     }
                     else
@@ -195,6 +198,8 @@ namespace ClassicUO.Game.UI.Controls
                     _entry.SeekCaretPosition(1);
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
+                    if (Parent is Gumps.BookGump dbook)
+                        dbook.ScaleOnDelete(_entry);
                     _entry.RemoveChar(false);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
