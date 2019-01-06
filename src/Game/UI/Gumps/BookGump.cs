@@ -28,26 +28,30 @@ namespace ClassicUO.Game.UI.Gumps
             get => null;
             set
             {
-                if(_activated > 0)
+                if (value != null)
                 {
-                    for (int i = 0; i < m_Pages.Count; i++)
+                    if (_activated > 0)
                     {
-                        m_Pages[i].Text = value[i];
+                        for (int i = 0; i < m_Pages.Count; i++)
+                        {
+                            m_Pages[i].IsEditable = this.IsEditable;
+                            m_Pages[i].Text = value[i];
+                        }
+                        SetActivePage(ActivePage);
                     }
-                    SetActivePage(ActivePage);
-                }
-                else if(value!=null)
-                {
-                    BuildGump(value);
-                    SetActivePage(1);
+                    else
+                    {
+                        BuildGump(value);
+                        SetActivePage(1);
+                    }
                 }
             }
         }
-        public bool IsBookEditable { get; internal set; }
+
         public bool IntroChanges => PageChanged[0];
         public bool[] PageChanged;
 
-        public BookGump( Item book ) : base( book.Serial, 0 )
+        public BookGump( UInt32 serial ) : base( serial, 0 )
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -85,10 +89,8 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             PageChanged = new bool[BookPageCount + 1];
-            //title allows only 47  dots (. + \0) so 47 is the right number
             AddChildren( BookTitle, 1);
             AddChildren( new Label( "by", true, 1 ) { X = BookAuthor.X, Y = BookAuthor.Y - 30 },1);
-            //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
             AddChildren( BookAuthor, 1);
             for ( int k = 1; k <= BookPageCount; k++ )
             {
@@ -103,13 +105,13 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
+                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
                 {
                     X = x,
                     Y = y,
                     Height = 170,
                     Width = 155,
-                    IsEditable = this.IsBookEditable,
+                    IsEditable = this.IsEditable,
                     Text = pages[k - 1],
                     MultiLineInputAllowed = true,
                     MaxLines = 8,
@@ -238,7 +240,6 @@ namespace ClassicUO.Game.UI.Gumps
                             else if (entry.CaretIndex == 0)
                             {
                                 _AtEnd = -1;
-                                _scale = false;
                             }
                         }
                         else
@@ -421,6 +422,7 @@ namespace ClassicUO.Game.UI.Gumps
                 caretpos -= linech[l];
                 _scale = caretpos == -linech[l];
             }
+            _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
         }
 
         public void ScaleOnDelete(TextEntry entry)
@@ -441,6 +443,8 @@ namespace ClassicUO.Game.UI.Gumps
         public void OnHomeOrEnd(TextEntry entry, bool home)
         {
             var linech = entry.GetLinesCharsCount();
+            // sepos = 1 if at end of whole text, -1 if at begin, else it will always be 0
+            sbyte sepos = (sbyte)(entry.CaretIndex == 0 ? -1 : (entry.CaretIndex == entry.Text.Length ? 1 : 0));
             for (int l = 0; l + 1 < linech.Length; l++)
             {
                 linech[l]++;
@@ -452,29 +456,30 @@ namespace ClassicUO.Game.UI.Gumps
                 caretpos -= linech[l];
                 if (!home)
                 {
-                    if (caretpos == -1 || entry.CaretIndex == entry.Text.Length)
+                    int txtlen = entry.Text.Length;
+                    if ((caretpos == -1 && sepos <= 0) || sepos > 0 || txtlen == 0)
                     {
-                        if (entry.CaretIndex == entry.Text.Length && ActiveInternalPage+1 < BookPageCount)
+                        if (entry.CaretIndex == txtlen && ActiveInternalPage+1 < BookPageCount)
                             _AtEnd = 1;
-                        entry.SetCaretPosition(entry.Text.Length);
+                        entry.SetCaretPosition(txtlen);
                         break;
                     }
-                    else if (caretpos < 0)
+                    else if (caretpos < 0 || sepos < 0)
                     {
-                        entry.SetCaretPosition(entry.CaretIndex - caretpos - 1);
+                        entry.SetCaretPosition(entry.CaretIndex - caretpos - (l+1 != linech.Length ? 1 : 0));
                         break;
                     }
                 }
                 else
                 {
-                    if(caretpos == 0 || entry.CaretIndex == 0)
+                    if((caretpos == 0 && (sepos == 0 || (l+2 == linech.Length && linech[l+1] == 0))) || sepos < 0)
                     {
                         if(entry.CaretIndex == 0 && ActiveInternalPage > 0)
                             _AtEnd = -1;
                         entry.SetCaretPosition(0);
                         break;
                     }
-                    else if(caretpos < 0)
+                    else if(caretpos < 0 || (sepos > 0 && caretpos == 0))
                     {
                         entry.SetCaretPosition(entry.CaretIndex - (linech[l] + caretpos));
                         break;

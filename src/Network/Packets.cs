@@ -517,10 +517,10 @@ namespace ClassicUO.Network
 
                 for (int i = 0; i < entries.Length; i++)
                 {
-                    int length = entries[i].Item2.Length;
+                    int length = Math.Min(239, entries[i].Item2.Length);
                     WriteUShort(entries[i].Item1);
                     WriteUShort((ushort) length);
-                    WriteUnicode(entries[i].Item2, entries[i].Item2.Length);
+                    WriteUnicode(entries[i].Item2, length);
                 }
             }
         }
