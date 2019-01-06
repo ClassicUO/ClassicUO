@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            if (Mobile != null)
+            if (Mobile == null)
                 return;
 
             if (key == SDL.SDL_Keycode.SDLK_RETURN && _textBox.IsEditable)

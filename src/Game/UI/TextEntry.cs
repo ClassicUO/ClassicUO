@@ -153,9 +153,11 @@ namespace ClassicUO.Game.UI
                 var newlines = GetLinesCharsCount(text);
                 if (newlines.Length > MaxLines)
                 {
+                    for (int l = 0; l + 1 < newlines.Length; l++)
+                        newlines[l]++;
                     count = newlines.Length - MaxLines;
-                    for (int i = newlines.Length - 1; i >= MaxLines; --i)
-                        count += newlines[i];
+                    for (int l = newlines.Length - 1; l >= MaxLines; --l)
+                        count += newlines[l];
                     c = text;
                     text = text.Remove(text.Length - count);
                     c = c.Substring(Math.Min(c.Length - 1, text.Length + 1));

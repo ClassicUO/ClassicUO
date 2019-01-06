@@ -19,10 +19,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -71,14 +74,65 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
+        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState blend = new BlendState();
+            blend.AlphaSourceBlend = blend.ColorSourceBlend = Blend.SourceAlpha;
+            blend.AlphaDestinationBlend = blend.ColorDestinationBlend = Blend.InverseSourceAlpha;
+
+
+            return blend;
+        });
+
+        private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState();
+
+            state.DepthBufferEnable = true;
+            state.StencilEnable = true;
+
+            //state.StencilFunction = CompareFunction.Always;
+            //state.ReferenceStencil = 1;
+            //state.StencilMask = 1;
+
+            //state.StencilFail = StencilOperation.Keep;
+            //state.StencilDepthBufferFail = StencilOperation.Keep;
+            //state.StencilPass = StencilOperation.Replace;
+
+            //state.TwoSidedStencilMode = false;
+
+            return state;
+        });
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             //int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
             //int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
             //int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
             //int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
+
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
 
+            //if (IsTransparent)
+            //{
+            //    batcher.SetBlendState(_checkerBlend.Value);
+            //    DrawInternal(batcher, position, color);
+            //    batcher.SetBlendState(null);
+
+            //    batcher.SetStencil(_checkerStencil.Value);
+            //    DrawInternal(batcher, position, color);
+            //    batcher.SetStencil(null);
+            //}
+            //else
+            //{
+            //    DrawInternal(batcher, position, color);
+            //}
+            DrawInternal(batcher, position, color);
+            return base.Draw(batcher, position, hue);
+        }
+
+        private void DrawInternal(Batcher2D batcher, Point position, Vector3 color)
+        {
             for (int i = 0; i < 9; i++)
             {
                 SpriteTexture t = _gumpTexture[i];
@@ -141,35 +195,16 @@ namespace ClassicUO.Game.UI.Controls
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
 
-                        if (!OnlyCenterTransparent)
-                            batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        //if (!OnlyCenterTransparent)
+                        var c = color;
+
+                        if (OnlyCenterTransparent)
+                            c.Z = 1;
+                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), c);
 
                         break;
                 }
             }
-
-            //int centerWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-            //int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
-            //int line2Y = position.Y + _gumpTexture[0].Height;
-            //int line3Y = position.Y + Height - _gumpTexture[6].Height;
-            //Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-
-            //// top row
-            //batcher.Draw2D(_gumpTexture[0], position, color);
-            //batcher.Draw2DTiled(_gumpTexture[1], new Rectangle(position.X + _gumpTexture[0].Width, position.Y, centerWidth, _gumpTexture[0].Height), color);
-            //batcher.Draw2D(_gumpTexture[2], new Point(position.X + Width - _gumpTexture[2].Width, position.Y), color);
-
-            //// middle
-            //batcher.Draw2DTiled(_gumpTexture[3], new Rectangle(position.X, line2Y, _gumpTexture[3].Width, centerHeight), color);
-            //batcher.Draw2DTiled(_gumpTexture[4], new Rectangle(position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), color);
-            //batcher.Draw2DTiled(_gumpTexture[5], new Rectangle(position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width, centerHeight), color);
-
-            //// bottom
-            //batcher.Draw2D(_gumpTexture[6], new Point(position.X, line3Y), color);
-            //batcher.Draw2DTiled(_gumpTexture[7], new Rectangle(position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height), color);
-            //batcher.Draw2D(_gumpTexture[8], new Point(position.X + Width - _gumpTexture[8].Width, line3Y), color);
-
-            return base.Draw(batcher, position, hue);
         }
     }
 }

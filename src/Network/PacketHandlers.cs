@@ -713,7 +713,14 @@ namespace ClassicUO.Network
                 Item item = World.Items.Get(serial);
 
                 if (!item.OnGround && item.Container.IsValid)
+                {
+                    if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded)
+                    {
+                        World.Player.UpdateAbilities();
+                    }
+
                     World.Get(item.Container).Items.Remove(item);
+                }
 
                 if (World.RemoveItem(serial))
                     World.Items.ProcessDelta();
@@ -983,7 +990,8 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
             mobile?.ProcessDelta();
-            if (mobile == World.Player) World.Player.UpdateAbilities();
+            if (mobile == World.Player)
+                World.Player.UpdateAbilities();
         }
 
         private static void FightOccuring(Packet p)
@@ -1352,6 +1360,7 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player) // resync ?
             {
+                World.Player.UpdateAbilities();
                 //World.Player.ResetSteps();
                 //World.Player.Position = new Position(x, y, z);
                 //World.Player.Direction = direction;
@@ -1396,8 +1405,8 @@ namespace ClassicUO.Network
         {
             Serial serial = p.ReadUInt();
             uint id = p.ReadUInt();
-            string name = p.ReadASCII(p.ReadByte());
-            int count = p.ReadByte();
+            //string name = p.ReadASCII(p.ReadByte());
+            //int count = p.ReadByte();
             // to finish
         }
 

@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Views
 
         public virtual unsafe bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
+            //if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
             Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 

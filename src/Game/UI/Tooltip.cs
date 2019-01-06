@@ -41,6 +41,7 @@ namespace ClassicUO.Game.UI
         private float _lastHoverTime;
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
+        private int _maxWidth;
 
         public string Text { get; protected set; }
 
@@ -71,17 +72,24 @@ namespace ClassicUO.Game.UI
                     IsUnicode = true,
                     IsHTML = true,
                     Cell = 5,
-                    FontStyle = FontStyle.BlackBorder
+                    FontStyle = FontStyle.BlackBorder,
                 };
             }
             else if (_renderedText.Text != Text)
             {
                 FileManager.Fonts.RecalculateWidthByInfo = true;
-                int width = FileManager.Fonts.GetWidthUnicode(1, Text);
 
-                if (width > 600)
-                    width = 600;
-                _renderedText.MaxWidth = width;
+                if (_maxWidth <= 0)
+                {
+                    int width = FileManager.Fonts.GetWidthUnicode(1, Text);
+
+                    if (width > 600)
+                        width = 600;
+                    _renderedText.MaxWidth = width;
+                }
+                else
+                    _renderedText.MaxWidth = _maxWidth;
+
                 _renderedText.Text = _textHTML;
                 FileManager.Fonts.RecalculateWidthByInfo = false;
             }
@@ -106,12 +114,14 @@ namespace ClassicUO.Game.UI
             _gameObject = null;
             _hash = 0;
             _textHTML = Text = null;
+            _maxWidth = 0;
         }
 
         public void SetGameObject(Entity obj)
         {
             if (_gameObject == null || obj != _gameObject || obj.PropertiesHash != _gameObject.PropertiesHash)
             {
+                _maxWidth = 0;
                 _gameObject = obj;
                 _hash = obj.PropertiesHash;
                 Text = ReadProperties(obj, out _textHTML);
@@ -173,8 +183,10 @@ namespace ClassicUO.Game.UI
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-        public void SetText(string text)
+
+        public void SetText(string text, int maxWidth = 0)
         {
+            _maxWidth = maxWidth;
             _gameObject = null;
             Text = _textHTML = text;
         }

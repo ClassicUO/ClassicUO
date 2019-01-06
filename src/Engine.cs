@@ -106,8 +106,8 @@ namespace ClassicUO
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
-            _graphicDeviceManager.PreferredBackBufferWidth = 640; // should be changed by settings file
-            _graphicDeviceManager.PreferredBackBufferHeight = 480; // should be changed by settings file
+            _graphicDeviceManager.PreferredBackBufferWidth = 640;
+            _graphicDeviceManager.PreferredBackBufferHeight = 480;
             _graphicDeviceManager.ApplyChanges();
 
             Window.ClientSizeChanged += (sender, e) =>
@@ -232,7 +232,6 @@ namespace ClassicUO
         private static void Configure()
         {
             Log.Start(LogTypes.All);
-
             ExePath = Directory.GetCurrentDirectory();
 
 #if !DEBUG
@@ -266,6 +265,14 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
+            Log.NewLine();
+            Log.NewLine();
+
+            Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
+
+            Log.NewLine();
+            Log.NewLine();
+
             _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
             if (_settings == null)
@@ -279,6 +286,7 @@ namespace ClassicUO
             }
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
+            Log.PushIndent();
 
             try
             {
@@ -291,10 +299,14 @@ namespace ClassicUO
                 throw e;
             }
 
-            Log.Message(LogTypes.Trace, "Done!");
+            Log.Message(LogTypes.Trace, "Done!");          
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.PopIndent();
+
             Log.Message(LogTypes.Trace, "Loading files...");
+            Log.PushIndent();
             FileManager.LoadFiles();
+            Log.PopIndent();
             uint[] hues = FileManager.Hues.CreateShaderColors();
             _batcher = new Batcher2D(GraphicsDevice);
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
@@ -308,10 +320,13 @@ namespace ClassicUO
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
+
             Log.Message(LogTypes.Trace, "Network calibration...");
+            Log.PushIndent();
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
+            Log.PopIndent();
 
             FpsLimit = LOGIN_SCREEN_FPS;
 
@@ -335,8 +350,10 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
+            Log.Message(LogTypes.Trace, "Loading plugins...");
             Log.PushIndent();
             Plugin.Create(@".\Assistant\Razor.dll");
+            Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
 
             _sceneManager.ChangeScene(ScenesType.Login);

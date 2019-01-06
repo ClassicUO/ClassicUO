@@ -53,6 +53,24 @@ namespace ClassicUO.Utility.Logging
                 LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
             }
         };
+
+        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>()
+        {
+            { ConsoleColor.Green, ConsoleColor.Black },
+            { ConsoleColor.Black, ConsoleColor.White },
+            { ConsoleColor.White, ConsoleColor.Black },
+            { ConsoleColor.DarkBlue, ConsoleColor.White },
+            { ConsoleColor.Cyan, ConsoleColor.Black },
+            { ConsoleColor.Magenta, ConsoleColor.Black },
+            { ConsoleColor.DarkGreen, ConsoleColor.Black },
+            { ConsoleColor.DarkGray, ConsoleColor.White },
+            { ConsoleColor.DarkCyan, ConsoleColor.Black },
+            { ConsoleColor.Gray, ConsoleColor.White },
+            { ConsoleColor.DarkRed, ConsoleColor.White },
+            { ConsoleColor.Yellow, ConsoleColor.Black }
+            
+        };
+
         private bool _isLogging;
 
         // No volatile support for properties, let's use a private backing field.
@@ -68,14 +86,14 @@ namespace ClassicUO.Utility.Logging
             _isLogging = false;
         }
 
-        public void Message(LogTypes logType, string text)
+        public void Message(LogTypes logType, string text, ConsoleColor highlightColor)
         {
-            SetLogger(logType, text);
+            SetLogger(logType, text, highlightColor);
         }
 
         public void NewLine()
         {
-            SetLogger(LogTypes.None, string.Empty);
+            SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
         }
 
         public void Clear()
@@ -96,30 +114,46 @@ namespace ClassicUO.Utility.Logging
                 _indent = 0;
         }
 
-        private void SetLogger(LogTypes type, string text)
+        private void SetLogger(LogTypes type, string text, ConsoleColor highlightColor)
         {
             if (!_isLogging)
                 return;
 
             if ((LogTypes & type) == type)
             {
-                string time = type == LogTypes.None ? string.Empty : DateTime.Now.ToString("T");
+                var temp = Console.BackgroundColor;
+                Console.BackgroundColor = highlightColor;
 
+                Console.ForegroundColor = _foreGroundsColors[highlightColor];
 
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"{time} |");
-                Console.ForegroundColor = LogTypeInfo[type].Item1;
-                Console.Write(LogTypeInfo[type].Item2);
-                Console.ForegroundColor = ConsoleColor.White;
-
-                if (_indent > 0)
+                if (type == LogTypes.None)
                 {
-                    Console.Write("| ");
-                    Console.Write(new string('\t', _indent * 2));
-                    Console.WriteLine(text);
+                    if (_indent > 0)
+                    {
+                        Console.Write(new string('\t', _indent * 2));
+                        Console.WriteLine(text);
+                    }
+                    else
+                        Console.WriteLine(text);
                 }
                 else
-                    Console.WriteLine($"| {text}");
+                {
+                    Console.Write($"{DateTime.Now:T} |");
+                    Console.ForegroundColor = LogTypeInfo[type].Item1;
+                    Console.Write(LogTypeInfo[type].Item2);
+                    Console.ForegroundColor = _foreGroundsColors[highlightColor];
+
+                    if (_indent > 0)
+                    {
+                        Console.Write("| ");
+                        Console.Write(new string('\t', _indent * 2));
+                        Console.WriteLine(text);
+                    }
+                    else
+                        Console.WriteLine($"| {text}");
+                }
+
+                Console.BackgroundColor = temp;
             }
         }
     }

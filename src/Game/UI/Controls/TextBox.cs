@@ -30,14 +30,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class TextBox : Control
     {
-        public enum PageCommand
-        {
-            Nothing = 0x00,
-            GoForward = 0x01,
-            GoBackward = 0x02,
-            RemoveText = 0x04,
-            PasteText = 0x08
-        }
         public bool MultiLineInputAllowed { get; set; } = false;
         public TextEntry _entry { get; private set; }
 
@@ -107,13 +99,16 @@ namespace ClassicUO.Game.UI.Controls
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
         public int MaxLines { get => _entry.MaxLines; set => _entry.MaxLines = value; }
+        public const int PasteCommandID = 0x10000000;
+        public const int RetrnCommandID = 0x20000000;
+        public const int PasteRetnCmdID = 0x30000000;
 
         public void SetText(string text, bool append = false)
         {
             if (append)
             {
                 text = _entry.InsertString(text);
-                Parent?.OnKeyboardReturn((int)PageCommand.PasteText, text);
+                Parent?.OnKeyboardReturn(PasteCommandID, text);
             }
             else
                 _entry.SetText(text);
@@ -161,8 +156,9 @@ namespace ClassicUO.Game.UI.Controls
                 s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))
                 {
-                    s = _entry.InsertString(s.Replace("\r", string.Empty));
-                    Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+                    if(!MultiLineInputAllowed)
+                        s = _entry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
+                    Parent?.OnKeyboardReturn(PasteCommandID, s);
                     return;
                 }
             }
@@ -171,70 +167,52 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if (MultiLineInputAllowed)
                     {
-                        s = _entry.InsertString("\n");
-                        //Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                     }
                     else
                     {
                         s = _entry.Text;
-                       Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+                       Parent?.OnKeyboardReturn(0, s);
                     }
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                    //TODO remove from current ccaret index
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                     {
+                        if (Parent is Gumps.BookGump bbook)
+                            bbook.ScaleOnBackspace(_entry);
                         _entry.RemoveChar(true);
-                        //Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, _entry.CaretIndex == 0 ? string.Empty : null);
                     }
                     else
                         ReplaceDefaultTextOnFirstKeyPress = false;
                      break;
                 case SDL.SDL_Keycode.SDLK_UP when MultiLineInputAllowed:
                     _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y - (_entry.RenderCaret.Height >> 1));
-                        if (_entry.CaretIndex == 0 && oldidx == 0)
-                        {
-                            //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
-                        }
                     break;
                 case SDL.SDL_Keycode.SDLK_DOWN when MultiLineInputAllowed:
                     _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y + _entry.RenderCaret.Height);
-                    if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
-                    {
-                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
-                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _entry.SeekCaretPosition(-1);
-                    if (_entry.CaretIndex == 0 && oldidx == 0)
-                    {
-                        //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
-                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _entry.SeekCaretPosition(1);
-                    if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
-                    {
-                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
-                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
+                    if (Parent is Gumps.BookGump dbook)
+                        dbook.ScaleOnDelete(_entry);
                     _entry.RemoveChar(false);
-                    //Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, null);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
-                    _entry.SetCaretPosition(0);
-                    if (oldidx == 0)
-                    {
-                        //Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
-                    }
+                    if (Parent is Gumps.BookGump hbook)
+                        hbook.OnHomeOrEnd(_entry, true);
+                    else
+                        _entry.SetCaretPosition(0);
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
-                    _entry.SetCaretPosition(Text.Length - 1);
-                    if (oldidx == Text.Length)
-                    {
-                        //Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
-                    }
+                    if (Parent is Gumps.BookGump ebook)
+                        ebook.OnHomeOrEnd(_entry, false);
+                    else
+                        _entry.SetCaretPosition(Text.Length - 1);
                     break;
             }
 

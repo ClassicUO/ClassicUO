@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -54,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             _textures[NORMAL] = FileManager.Gumps.GetTexture(normal);
             _textures[PRESSED] = FileManager.Gumps.GetTexture(pressed);
             if (over > 0) _textures[OVER] = FileManager.Gumps.GetTexture(over);
-            ref SpriteTexture t = ref _textures[NORMAL];
+            SpriteTexture t = _textures[NORMAL];
 
             if (t == null)
             {
@@ -146,16 +148,27 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
+        private bool _entered;
+        protected override void OnMouseEnter(int x, int y)
+        {
+            _entered = true;
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _entered = false;
+        }
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
 
             //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {
-                RenderedText textTexture = _fontTexture[Engine.UI.MouseOverControl == this ? 1 : 0];
+                RenderedText textTexture = _fontTexture[_entered ? 1 : 0];
 
                 if (FontCenter)
                 {
@@ -183,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private SpriteTexture GetTextureByState()
         {
-            if (MouseIsOver)
+            if (_entered)
             {
                 if (_clicked && _textures[PRESSED] != null)
                     return _textures[PRESSED];
@@ -197,7 +210,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private Graphic GetGraphicByState()
         {
-            if (MouseIsOver)
+            if (_entered)
             {
                 if (_clicked && _textures[PRESSED] != null)
                     return _gumpGraphics[PRESSED];
@@ -229,11 +242,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            SpriteTexture texture = GetTextureByState();
-
-            return texture.Contains(x, y);
-            //return (Texture != null && Texture.Contains(x, y)) /*|| Bounds.Contains(X + x, Y + y)*/;
-            //return FileManager.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+            return _textures[NORMAL].Contains(x, y);
         }
 
         public override void Dispose()

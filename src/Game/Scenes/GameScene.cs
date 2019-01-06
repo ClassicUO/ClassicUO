@@ -369,9 +369,6 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             _updateDrawPosition = false;
-
-            if (ChangeTreeToStumps)
-                _changeTreeToStumps = false;
         }
 
         public override void Update(double totalMS, double frameMS)

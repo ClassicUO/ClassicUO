@@ -339,7 +339,7 @@ namespace ClassicUO.Game
                 if (_tooltip.Text != Engine.UI.MouseOverControl.Tooltip) _tooltip.Clear();
 
                 if (_tooltip.IsEmpty)
-                    _tooltip.SetText(Engine.UI.MouseOverControl.Tooltip);
+                    _tooltip.SetText(Engine.UI.MouseOverControl.Tooltip, Engine.UI.MouseOverControl.TooltipMaxLength);
                 _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
             }
             else if (!_tooltip.IsEmpty)

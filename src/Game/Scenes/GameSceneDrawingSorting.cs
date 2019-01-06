@@ -50,6 +50,7 @@ namespace ClassicUO.Game.Scenes
 
             if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ && _noDrawRoofs != Engine.Profile.Current.DrawRoofs)
                 return;
+
             _oldPlayerX = playerX;
             _oldPlayerY = playerY;
             _oldPlayerZ = playerZ;
