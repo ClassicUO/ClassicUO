@@ -24,10 +24,10 @@ using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.System;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -40,14 +40,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
-    public partial class GameScene : Scene
+    internal partial class GameScene : Scene
     {
         private RenderTarget2D _renderTarget;
         private long _timePing;
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private Settings _settings;
         private JournalManager _journalManager;
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
@@ -61,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
+        public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
         public GameObject SelectedObject
         {
@@ -82,8 +81,8 @@ namespace ClassicUO.Game.Scenes
                         _selectedObject.View.IsSelected = false;
                     _selectedObject = value;
 
-                    if (Engine.Profile.Current.HighlightGameObjects)
-                        _selectedObject.View.IsSelected = true;
+                    
+                    _selectedObject.View.IsSelected = true;
                 }
             }
         }
@@ -116,41 +115,121 @@ namespace ClassicUO.Game.Scenes
 
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
-            Engine.UI.Add(new WorldViewportGump(this));
-            Engine.UI.Add(new TopBarGump(this));           
-            _viewPortGump = Service.Get<WorldViewport>();
-            _settings = Service.Get<Settings>();
+
+            WorldViewportGump viewport = new WorldViewportGump(this);
+            Engine.UI.Add(viewport);
+            Engine.UI.Add(new TopBarGump(this));
+            _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
+
             GameActions.Initialize(PickupItemBegin);
-            Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
-            Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
-            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            Engine.Input.DragBegin += OnMouseDragBegin;
-            Engine.Input.MouseDragging += OnMouseDragging;
-            Engine.Input.MouseMoving += OnMouseMoving;
+
+            _viewPortGump.MouseDown += OnMouseDown;
+            _viewPortGump.MouseUp += OnMouseUp;
+            _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
+            _viewPortGump.DragBegin += OnMouseDragBegin;
+            //_viewPortGump.Keyboard += OnKeyboard;
+
+            //Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
+            //Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
+            //Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
+            //Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
+            //Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
+            //Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
+            //Engine.Input.DragBegin += OnMouseDragBegin;
+            //Engine.Input.MouseDragging += OnMouseDragging;
+            //Engine.Input.MouseMoving += OnMouseMoving;
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
-            Engine.Input.MouseWheel += (sender, e) =>
-            {
-                if (IsMouseOverWorld)
-                {
-                    if (!e)
-                        Scale += 0.1f;
-                    else
-                        Scale -= 0.1f;
+            //Engine.Input.MouseWheel += (sender, e) =>
+            //{
+            //    if (IsMouseOverWorld)
+            //    {
+            //        if (!e)
+            //            Scale += 0.1f;
+            //        else
+            //            Scale -= 0.1f;
 
-                    if (Scale < 0.7f)
-                        Scale = 0.7f;
-                    else if (Scale > 2.3f)
-                        Scale = 2.3f;
-                }
-            };
-            Commands.Initialize();
+            //        if (Scale < 0.7f)
+            //            Scale = 0.7f;
+            //        else if (Scale > 2.3f)
+            //            Scale = 2.3f;
+            //    }
+            //};
+            CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
+            Chat.Message += ChatOnMessage;
+
+            Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());
+        }
+
+        private void ChatOnMessage(object sender, UOMessageEventArgs e)
+        {
+            if (e.Type == MessageType.Command)
+                return;
+
+            string name;
+            string text;
+
+            switch (e.Type)
+            {
+                case MessageType.Regular:
+
+                    if (e.Parent == null || e.Parent.Serial == Serial.Invalid)
+                        name = "System";
+                    else
+                        name = e.Parent.Name;
+
+                    text = e.Text;
+                    break;
+
+                case MessageType.System:
+                    name = "System";
+                    text = e.Text;
+                    break;
+
+                case MessageType.Emote:
+                    name = e.Parent.Name;
+                    text = $"*{e.Text}*";
+
+                    break;
+                case MessageType.Label:
+                    name = "You see";
+                    text = e.Text;
+                    break;
+
+                case MessageType.Spell:
+
+                    if (e.Parent != null && e.Parent.Serial.IsValid)
+                    {
+                        name = e.Parent.Name;
+                    }
+                    else
+                        name = "<Not found>";
+
+                    text = e.Text;
+                    break;
+                case MessageType.Party:
+                    text = e.Text;
+                    name = "[Party]";
+                    break;
+                case MessageType.Alliance:
+                    text = e.Text;
+                    name = "[Alliance]";
+
+                    break;
+                case MessageType.Guild:
+                    text = e.Text;
+                    name = "[Guild]";
+
+                    break;
+                default:
+                    Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
+                    return;
+            }
+
+            _journalManager.Add(text, e.Font, e.Hue, name);
         }
 
         private IEnumerable<IWaitCondition> CastSpell()
@@ -159,7 +238,10 @@ namespace ClassicUO.Game.Scenes
             {
                 yield return new WaitTime(TimeSpan.FromMilliseconds(1));
 
-                GameActions.CastSpell(1);
+                foreach (Mobile mobile in World.Mobiles)
+                {
+                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
+                }
             }
 
         }
@@ -167,29 +249,38 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            Plugin.OnDisconnected();
+
             _renderList = null;
 
-            TargetSystem.ClearTargetingWithoutTargetCancelPacket();
+            TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
+            Engine.Profile.UnLoadProfile();
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
-            Commands.UnRegisterAll();
+            CommandManager.UnRegisterAll();
+
+            _viewPortGump.MouseDown -= OnMouseDown;
+            _viewPortGump.MouseUp -= OnMouseUp;
+            _viewPortGump.MouseDoubleClick -= OnMouseDoubleClick;
+            _viewPortGump.DragBegin -= OnMouseDragBegin;
+
             Engine.UI.Clear();
             World.Clear();
 
-           
-            Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
-            Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
-            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            Engine.Input.DragBegin -= OnMouseDragBegin;
-            Engine.Input.MouseDragging -= OnMouseDragging;
-            Engine.Input.MouseMoving -= OnMouseMoving;
+
+            //Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
+            //Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
+            //Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
+            //Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
+            //Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
+            //Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
+            //Engine.Input.DragBegin -= OnMouseDragBegin;
+            //Engine.Input.MouseDragging -= OnMouseDragging;
+            //Engine.Input.MouseMoving -= OnMouseMoving;
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
 
@@ -201,15 +292,17 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue.Clear();
             _useItemQueue = null;
 
+            Chat.Message -= ChatOnMessage;
+
             base.Unload();
         }
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            Engine.UI.Add(new MessageBoxGump(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1) - 100, Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
-            {               
-                s.Dispose();
-                Engine.SceneManager.ChangeScene(ScenesType.Login);
+            Engine.UI.Add(new MessageBoxGump(200, 125, "Connection lost", (s) =>
+            {         
+                if (s)
+                    Engine.SceneManager.ChangeScene(ScenesType.Login);
             }));
         }
 
@@ -271,13 +364,11 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-
-
             _renderIndex++;
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
-            _updateDrawPosition = false;      
+            _updateDrawPosition = false;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -290,7 +381,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();
@@ -314,7 +405,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (IsMouseOverWorld)
+            if (Engine.UI.IsMouseOverWorld)
             {
                 _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
                 _mousePicker.PickOnly = PickerType.PickEverything;
@@ -323,7 +414,7 @@ namespace ClassicUO.Game.Scenes
 
             _mouseOverList.Clear();
 
-            if (_rightMousePressed)
+            if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
             // ===================================
             World.Update(totalMS, frameMS);
@@ -370,6 +461,14 @@ namespace ClassicUO.Game.Scenes
 
             // Draw in game overhead text messages
             _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
+
+            //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
+            //int drawY = (Engine.Profile.Current.GameWindowSize.Y >> 1) - 22;
+
+            //if (CircleOfTransparency.Circle == null)
+            //    CircleOfTransparency.Create(100);
+            //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
 
             batcher.End();
             batcher.EnableLight(false);

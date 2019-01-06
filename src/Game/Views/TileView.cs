@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -32,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class TileView : View
+    internal class TileView : View
     {
         private readonly Vector3[] _normals = new Vector3[4];
         private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
@@ -47,31 +48,39 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = tile.Graphic > 2;
         }
 
+        protected override bool CanProcessAlpha => false;
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
             Land tile = (Land) GameObject;
-
+            Engine.DebugInfo.LandsRendered++;
             if (Texture == null || Texture.IsDisposed)
             {
                 if (tile.IsStretched)
-                    Texture = TextmapTextures.GetTextmapTexture(tile.TileData.TexID);
+                    Texture = FileManager.Textmaps.GetTexture(tile.TileData.TexID);
                 else
                 {
-                    Texture = Art.GetLandTexture(GameObject.Graphic);
+                    Texture = FileManager.Art.GetLandTexture(GameObject.Graphic);
                     Bounds = new Rectangle(0, 0, 44, 44);
                 }
             }
 
             if (tile.IsStretched)
             {
-                HueVector = GetHueVector(GameObject.Hue, true);
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                else
+                    HueVector = GetHueVector(GameObject.Hue, true);
 
                 return Draw3DStretched(batcher, position, objectList);
             }
 
-            HueVector = GetHueVector(GameObject.Hue, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = GetHueVector(GameObject.Hue, false);
 
             return base.Draw(batcher, position, objectList);
         }
@@ -87,16 +96,19 @@ namespace ClassicUO.Game.Views
 
             int z = GameObject.Position.Z * 4;
 
-            if (IsSelected)
+            if (Engine.Profile.Current.HighlightGameObjects)
             {
-                if (_storedHue == Vector3.Zero)
-                    _storedHue = HueVector;
-                HueVector = ShaderHuesTraslator.SelectedHue;
-            }
-            else if (_storedHue != Vector3.Zero)
-            {
-                HueVector = _storedHue;
-                _storedHue = Vector3.Zero;
+                if (IsSelected)
+                {
+                    if (_storedHue == Vector3.Zero)
+                        _storedHue = HueVector;
+                    HueVector = ShaderHuesTraslator.SelectedHue;
+                }
+                else if (_storedHue != Vector3.Zero)
+                {
+                    HueVector = _storedHue;
+                    _storedHue = Vector3.Zero;
+                }
             }
 
             fixed (SpriteVertex* ptr = _vertex)
@@ -119,6 +131,8 @@ namespace ClassicUO.Game.Views
                     ptr[3].Hue = HueVector;
                 }
             }
+
+            
 
             if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
@@ -143,7 +157,7 @@ namespace ClassicUO.Game.Views
             Land tile = (Land) GameObject;
             Map.Map map = World.Map;
 
-            if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
+            if (tile.IsStretched || FileManager.Textmaps.GetTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 tile.IsStretched = false;
                 tile.MinZ = z;

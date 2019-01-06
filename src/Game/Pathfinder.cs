@@ -31,11 +31,10 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 using MathHelper = ClassicUO.Utility.MathHelper;
-using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game
 {
-    public static class Pathfinder
+    internal static class Pathfinder
     {
         private const int PATHFINDER_MAX_NODES = 10000;
         private static int _goalNode;
@@ -90,19 +89,18 @@ namespace ClassicUO.Game
                         if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
                         {
                             uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
-                            ulong tileDataFlags = tile1.TileData.Flags;
 
                             if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                             {
-                                if (TileData.IsWet(tileDataFlags))
+                                if (tile1.TileData.IsWet)
                                     flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                             }
                             else
                             {
-                                if (!TileData.IsImpassable(tileDataFlags))
+                                if (!tile1.TileData.IsImpassable)
                                     flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
 
-                                if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal(tileDataFlags))
+                                if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && tile1.TileData.IsNoDiagonal)
                                     flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                             }
 
@@ -127,7 +125,7 @@ namespace ClassicUO.Game
 
                                 break;
                             }
-                            case Item item when item.IsMulti || TileData.IsInternal( item.ItemData.Flags):
+                            case Item item when item.IsMulti || item.ItemData.IsInternal:
 
                             {
                                 canBeAdd = false;
@@ -136,7 +134,7 @@ namespace ClassicUO.Game
                             }
                             case Item item2:
 
-                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor(item2.ItemData.Flags) || item2.ItemData.Weight <= 0x5A /*|| (isGM && !)*/))
+                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || (isGM && !item2.IsLocked)))
                                     dropFlags = true;
                                 else 
                                     dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
@@ -148,25 +146,24 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            //if (obj is IDynamicItem dyn)
                             if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
-                                    if (TileData.IsWet(itemdata.Flags))
+                                    if (itemdata.IsWet)
                                         flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
                                 else
                                 {
-                                    if (TileData.IsImpassable(itemdata.Flags) || TileData.IsSurface(itemdata.Flags))
+                                    if (itemdata.IsImpassable || itemdata.IsSurface)
                                         flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
-                                    if (!TileData.IsImpassable(itemdata.Flags))
+                                    if (!itemdata.IsImpassable)
                                     {
-                                        if (TileData.IsSurface(itemdata.Flags))
+                                        if (itemdata.IsSurface)
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
 
-                                        if (TileData.IsBridge(itemdata.Flags))
+                                        if (itemdata.IsBridge)
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
                                     }
 
@@ -184,7 +181,7 @@ namespace ClassicUO.Game
                                     if (dropFlags)
                                         flags &= 0xFFFFFFFE;
 
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal(itemdata.Flags))
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && itemdata.IsNoDiagonal)
                                         flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
@@ -194,7 +191,7 @@ namespace ClassicUO.Game
                                     int staticHeight = itemdata.Height;
                                     int staticAverageZ = staticHeight;
 
-                                    if (TileData.IsBridge(itemdata.Flags))
+                                    if (itemdata.IsBridge)
                                         staticAverageZ /= 2;
                                     list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
                                 }
@@ -774,12 +771,13 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-#if !JAEDAN_MOVEMENT_PATCH
-            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
-#else
+#if MOVEMENT2
+            if (AutoWalking && World.InGame && World.Player.LastStepRequestedTime < Engine.Ticks)
+#elif JAEDAN_MOVEMENT_PATCH
             if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
+#else
+            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
 #endif
-
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {
@@ -790,7 +788,7 @@ namespace ClassicUO.Game
                     if (dir == (Direction)p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction)p.Direction, true))
+                    if (!World.Player.Walk((Direction)p.Direction, Engine.Profile.Current.AlwaysRun))
                         StopAutoWalk();
                 }
                 else

@@ -25,18 +25,17 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.System;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
-    public static class World
+    internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
 
 
-        public static PartySystem Party { get; } = new PartySystem();
+        public static PartyManager Party { get; } = new PartyManager();
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 
@@ -52,6 +51,8 @@ namespace ClassicUO.Game
 
         public static byte ViewRange { get; set; } = 24;
 
+        public static Serial LastAttack { get; set; }
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
@@ -60,6 +61,13 @@ namespace ClassicUO.Game
                 if (MapIndex != value)
                 {
                     InternalMapChangeClear(true);
+
+                    if (value < 0 && Map != null)
+                    {
+                        Map.Dispose();
+                        Map = null;
+                        return;
+                    }
 
                     if (Map != null)
                     {
@@ -224,7 +232,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void AddEffect(GameEffect effect)
+        internal static void AddEffect(GameEffect effect)
         {
             _effectManager.Add(effect);
         }
@@ -251,6 +259,7 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
+            LastAttack = 0;        
         }
 
         private static void InternalMapChangeClear(bool noplayer)

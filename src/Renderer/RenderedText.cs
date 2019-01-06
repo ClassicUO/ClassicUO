@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -31,18 +32,19 @@ namespace ClassicUO.Renderer
     [Flags]
     public enum FontStyle : ushort
     {
-        None = 0x00,
-        Solid = 0x01,
-        Italic = 0x02,
-        Indention = 0x04,
-        BlackBorder = 0x08,
-        Underline = 0x10,
-        Fixed = 0x20,
-        Cropped = 0x40,
-        BQ = 0x80
+        None = 0x0000,
+        Solid = 0x0001,
+        Italic = 0x0002,
+        Indention = 0x0004,
+        BlackBorder = 0x0008,
+        Underline = 0x0010,
+        Fixed = 0x0020,
+        Cropped = 0x0040,
+        BQ = 0x0080,
+        ExtraHeight = 0x0100
     }
 
-    public sealed class RenderedText : IDisposable
+    internal sealed class RenderedText : IDisposable
     {
         private string _text;
 
@@ -90,7 +92,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
 
                         if (IsHTML)
-                            Fonts.SetUseHTML(false);
+                            FileManager.Fonts.SetUseHTML(false);
                         Links.Clear();
                         Texture?.Dispose();
                         Texture = null;
@@ -162,13 +164,13 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             bool ispartial = false;
 
             if (IsUnicode)
-                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
             else
-                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
             IsPartialHue = ispartial;
 
             if (Texture != null)
@@ -179,7 +181,7 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                Fonts.SetUseHTML(false);
+                FileManager.Fonts.SetUseHTML(false);
         }
 
         public void Dispose()

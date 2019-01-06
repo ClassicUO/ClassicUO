@@ -25,8 +25,10 @@ using System.Threading;
 
 namespace ClassicUO.Utility.Logging
 {
-    public class Logger
+    internal class Logger
     {
+        private int _indent;
+
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
             {
@@ -51,7 +53,24 @@ namespace ClassicUO.Utility.Logging
                 LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
             }
         };
-        private readonly BlockingCollection<Tuple<LogTypes, string, string>> _logQueue = new BlockingCollection<Tuple<LogTypes, string, string>>();
+
+        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>()
+        {
+            { ConsoleColor.Green, ConsoleColor.Black },
+            { ConsoleColor.Black, ConsoleColor.White },
+            { ConsoleColor.White, ConsoleColor.Black },
+            { ConsoleColor.DarkBlue, ConsoleColor.White },
+            { ConsoleColor.Cyan, ConsoleColor.Black },
+            { ConsoleColor.Magenta, ConsoleColor.Black },
+            { ConsoleColor.DarkGreen, ConsoleColor.Black },
+            { ConsoleColor.DarkGray, ConsoleColor.White },
+            { ConsoleColor.DarkCyan, ConsoleColor.Black },
+            { ConsoleColor.Gray, ConsoleColor.White },
+            { ConsoleColor.DarkRed, ConsoleColor.White },
+            { ConsoleColor.Yellow, ConsoleColor.Black }
+            
+        };
+
         private bool _isLogging;
 
         // No volatile support for properties, let's use a private backing field.
@@ -59,58 +78,7 @@ namespace ClassicUO.Utility.Logging
 
         public void Start(LogFile logFile = null)
         {
-            //Thread logThread = new Thread(async () =>
-            //{
-            //    using (_logQueue)
-            //    {
-            //        using (logFile)
-            //        {
-            //            _isLogging = true;
-
-            //            while (_isLogging)
-            //            {
-            //                Thread.Sleep(1);
-
-            //                // Do nothing if logging is turned off (LogTypes.None) & the log queue is empty, but continue the loop.
-            //                if (LogTypes == LogTypes.None || !_logQueue.TryTake(out Tuple<LogTypes, string, string> log))
-            //                    continue;
-
-            //                if (log.Item1 == LogTypes.Table)
-            //                {
-            //                    Console.WriteLine(string.Format(log.Item3));
-
-            //                    continue;
-            //                }
-
-            //                // LogTypes.None is also used for empty/simple log lines (without timestamp, etc.).
-            //                if (log.Item1 != LogTypes.None)
-            //                {
-            //                    Console.ForegroundColor = ConsoleColor.White;
-            //                    Console.Write($"{log.Item2} |");
-            //                    Console.ForegroundColor = LogTypeInfo[log.Item1].Item1;
-            //                    Console.Write(LogTypeInfo[log.Item1].Item2);
-            //                    Console.ForegroundColor = ConsoleColor.White;
-            //                    Console.WriteLine($"| {log.Item3}");
-
-            //                    if (logFile != null)
-            //                        await logFile.WriteAsync($"{log.Item2} |{LogTypeInfo[log.Item1].Item2}| {log.Item3}");
-            //                }
-            //                else
-            //                {
-            //                    Console.WriteLine(log.Item3);
-
-            //                    if (logFile != null)
-            //                        await logFile.WriteAsync(log.Item3);
-            //                }
-            //            }
-            //        }
-            //    }
-            //})
-            //{
-            //    IsBackground = true
-            //};
-            //logThread.Start();
-            //_isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
+            _isLogging = true;
         }
 
         public void Stop()
@@ -118,14 +86,14 @@ namespace ClassicUO.Utility.Logging
             _isLogging = false;
         }
 
-        public void Message(LogTypes logType, string text)
+        public void Message(LogTypes logType, string text, ConsoleColor highlightColor)
         {
-            SetLogger(logType, text);
+            SetLogger(logType, text, highlightColor);
         }
 
         public void NewLine()
         {
-            SetLogger(LogTypes.None, string.Empty);
+            SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
         }
 
         public void Clear()
@@ -133,21 +101,59 @@ namespace ClassicUO.Utility.Logging
             Console.Clear();
         }
 
-        private void SetLogger(LogTypes type, string text)
+        public void PushIndent()
         {
+            _indent++;
+        }
+
+        public void PopIndent()
+        {
+            _indent--;
+
+            if (_indent < 0)
+                _indent = 0;
+        }
+
+        private void SetLogger(LogTypes type, string text, ConsoleColor highlightColor)
+        {
+            if (!_isLogging)
+                return;
+
             if ((LogTypes & type) == type)
             {
-                //_logQueue.TryAdd(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+                var temp = Console.BackgroundColor;
+                Console.BackgroundColor = highlightColor;
 
-                string time = type == LogTypes.None ? string.Empty : DateTime.Now.ToString("T");
+                Console.ForegroundColor = _foreGroundsColors[highlightColor];
 
+                if (type == LogTypes.None)
+                {
+                    if (_indent > 0)
+                    {
+                        Console.Write(new string('\t', _indent * 2));
+                        Console.WriteLine(text);
+                    }
+                    else
+                        Console.WriteLine(text);
+                }
+                else
+                {
+                    Console.Write($"{DateTime.Now:T} |");
+                    Console.ForegroundColor = LogTypeInfo[type].Item1;
+                    Console.Write(LogTypeInfo[type].Item2);
+                    Console.ForegroundColor = _foreGroundsColors[highlightColor];
 
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"{time} |");
-                Console.ForegroundColor = LogTypeInfo[type].Item1;
-                Console.Write(LogTypeInfo[type].Item2);
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"| {text}");
+                    if (_indent > 0)
+                    {
+                        Console.Write("| ");
+                        Console.Write(new string('\t', _indent * 2));
+                        Console.WriteLine(text);
+                    }
+                    else
+                        Console.WriteLine($"| {text}");
+                }
+
+                Console.BackgroundColor = temp;
             }
         }
     }

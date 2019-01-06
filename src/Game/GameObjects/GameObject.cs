@@ -22,10 +22,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -36,7 +39,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.Invalid;
         private View _view;
@@ -46,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected GameObject()
         {
-            
+
         }
 
         public GameObject Left { get; set; }
@@ -95,14 +98,14 @@ namespace ClassicUO.Game.GameObjects
         public virtual Hue Hue { get; set; }
 
         public virtual Graphic Graphic { get; set; }
-
+       
         public View View => _view ?? (_view = CreateView());
 
         public sbyte AnimIndex { get; set; }
 
         public int CurrentRenderIndex { get; set; }
 
-        public byte UseInRender { get; set; }
+        //public byte UseInRender { get; set; }
 
         public short PriorityZ { get; set; }
 
@@ -132,6 +135,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {         
                     
@@ -179,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler Disposed;
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
         {
             RealScreenPosition = new Vector3(ScreenPosition.X - offset.X - 22, ScreenPosition.Y - offset.Y - 22, 0);
@@ -193,7 +197,7 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
-        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
+        public TextOverhead AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return null;
@@ -214,13 +218,16 @@ namespace ClassicUO.Game.GameObjects
             //    }
             //}
 
-            int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
+            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
             if (width > 200)
-                width = isunicode ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
-            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
+            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive)
+            {
+                MessageType = type
+            };
 
             InsertGameText(overhead);
 
@@ -230,8 +237,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
-                    over.Dispose();
-                    _overHeads.RemoveAt(_overHeads.Count - 1);
+                    _overHeads.RemoveFromBack().Dispose();
                 }
             }
 
@@ -240,7 +246,10 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.AddToFront(gameText);
+            if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
+                _overHeads.AddToFront(gameText);
+            else 
+                _overHeads.Insert(1, gameText);
             //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
@@ -254,6 +263,11 @@ namespace ClassicUO.Game.GameObjects
             if (_view != null)
                 _view = null;
         }
+
+        //~GameObject()
+        //{
+        //    Dispose();
+        //}
 
         public virtual void Dispose()
         {
@@ -274,8 +288,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 textOverhead.Dispose();
             }
-            //_overHeads.ForEach(s => s.Dispose());
-            _overHeads.Clear();            
+            _overHeads.Clear();
+
+            //GC.SuppressFinalize(this);
         }
     }
 }

@@ -35,25 +35,23 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    public struct FrameInfo
-    {
-        public int X, Y, OffsetX, OffsetY, EndX, EndY, Width, Height;
-
-        public static readonly FrameInfo Empty = new FrameInfo();
-    }
-
-    public abstract class View : IDrawable, IColorable
+    internal abstract class View : IDrawable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
+        private float _processAlpha = 1;
+        private long _processAlphaTime = Constants.ALPHA_OBJECT_TIME;
+
         protected View(GameObject parent)
         {
             GameObject = parent;
             AllowedToDraw = true;
         }
+
+        protected virtual bool CanProcessAlpha => true;
 
         public GameObject GameObject { get; }
 
@@ -65,7 +63,7 @@ namespace ClassicUO.Game.Views
 
         public bool IsSelected { get; set; }
 
-        public Vector3 HueVector { get; set; }
+        public Vector3 HueVector;
 
         public bool AllowedToDraw { get; set; }
 
@@ -85,7 +83,7 @@ namespace ClassicUO.Game.Views
 
         public virtual unsafe bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
+            //if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
             Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
@@ -155,16 +153,44 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            if (IsSelected)
+            if (Engine.Profile.Current.HighlightGameObjects)
             {
-                if (_storedHue == Vector3.Zero)
-                    _storedHue = HueVector;
-                HueVector = ShaderHuesTraslator.SelectedHue;
+                if (IsSelected)
+                {
+                    if (_storedHue == Vector3.Zero)
+                        _storedHue = HueVector;
+                    HueVector = ShaderHuesTraslator.SelectedHue;
+                }
+                else if (_storedHue != Vector3.Zero)
+                {
+                    HueVector = _storedHue;
+                    _storedHue = Vector3.Zero;
+                }
             }
-            else if (_storedHue != Vector3.Zero)
+
+
+            //if (ProcessInitialAlpha)
             {
-                HueVector = _storedHue;
-                _storedHue = Vector3.Zero;
+                {
+                    if (CanProcessAlpha)
+                    {
+                        _processAlphaTime -= Engine.TicksFrame;
+
+                        if (_processAlphaTime > 0)
+                        {
+                            _processAlpha = _processAlphaTime / Constants.ALPHA_OBJECT_VALUE;
+                        }
+                        else if (_processAlphaTime < 0)
+                        {
+                            _processAlpha = 0;
+                        }
+
+                        if (HueVector.Z < _processAlpha)
+                            HueVector.Z = _processAlpha;
+                    }
+
+                    
+                }
             }
 
             if (vertex[0].Hue != HueVector)
@@ -189,7 +215,6 @@ namespace ClassicUO.Game.Views
 
             return true;
         }
-
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

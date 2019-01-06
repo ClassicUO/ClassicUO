@@ -26,13 +26,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Configuration
 {
-    public class ProfileManager
+    internal class ProfileManager
     {
         public Profile Current { get; private set; }
 
@@ -53,5 +53,7 @@ namespace ClassicUO.Configuration
 
             return null;
         }
+
+        public void UnLoadProfile() => Current = null;
     }
 }

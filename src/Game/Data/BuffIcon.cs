@@ -23,7 +23,7 @@ using System;
 
 namespace ClassicUO.Game.Data
 {
-    public readonly struct BuffIcon : IEquatable<BuffIcon>
+    internal readonly struct BuffIcon : IEquatable<BuffIcon>
     {
         public BuffIcon(Graphic graphic, long timer, string text)
         {

@@ -27,9 +27,10 @@ using System.Net.Sockets;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+
 namespace ClassicUO.Network
 {
-    public sealed class NetClient
+    internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x20000;
         private readonly object _sendLock = new object();
@@ -81,6 +82,32 @@ namespace ClassicUO.Network
         public event EventHandler Connected, Disconnected;
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
+
+        public static void EnqueuePacketFromPlugin(Packet p)
+        {
+
+            if (LoginSocket.IsDisposed && Socket.IsConnected)
+            {
+                lock (Socket._sync)
+                {
+                    Socket._workingQueue.Enqueue(p);
+                    Socket.Statistics.TotalPacketsReceived++;
+                }
+            }
+            else if (Socket.IsDisposed && LoginSocket.IsConnected)
+            {
+                lock (LoginSocket._sync)
+                {
+                    LoginSocket._workingQueue.Enqueue(p);
+                    LoginSocket.Statistics.TotalPacketsReceived++;
+                }
+            }
+            else
+            {
+                throw new AccessViolationException("Attempt to write into a dead socket");
+            }
+            
+        }
 
         public void Connect(string ip, ushort port)
         {
@@ -193,8 +220,15 @@ namespace ClassicUO.Network
         {
             byte[] data = p.ToArray();
             Packet packet = new Packet(data, p.Length);
-            PacketSended.Raise(packet);
-            if (!packet.Filter) Send(data);
+
+            //if (Engine.Server.IsConnected)
+            //    Engine.Server.SendToPlugin(data, data.Length, p.IsDynamic, true);
+
+            if (Plugin.ProcessSendPacket(data, packet.Length))
+            {
+                PacketSended.Raise(packet);
+                Send(data);
+            }
         }
 
         public void Update()
@@ -206,7 +240,14 @@ namespace ClassicUO.Network
                 _queue = temp;
             }
 
-            while (_queue.Count > 0) PacketReceived.Raise(_queue.Dequeue());
+            while (_queue.Count > 0)
+            {
+                Packet p = _queue.Dequeue();
+
+                if (Plugin.ProcessRecvPacket(p.ToArray(), p.Length))
+                    PacketReceived.Raise(p);
+            }
+
             Flush();
         }
 
@@ -248,7 +289,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private void Send(byte[] data)
+        public void Send(byte[] data)
         {
             if (_socket == null) return;
 

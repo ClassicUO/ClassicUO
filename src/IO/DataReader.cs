@@ -25,8 +25,11 @@ using System.Security;
 
 namespace ClassicUO.IO
 {
+    /// <summary>
+    /// A fast Little Endian data reader.
+    /// </summary>
     [SecurityCritical]
-    public unsafe class DataReader
+    internal unsafe class DataReader
     {
         [SecurityCritical]
         private byte* _data;
@@ -48,7 +51,8 @@ namespace ClassicUO.IO
 
         internal void SetData(byte[] data, long length)
         {
-            fixed (byte* ptr = data) SetData(ptr, length);
+            fixed (byte* ptr = data)
+                SetData(ptr, length);
         }
 
         internal void SetData(IntPtr data, long length)

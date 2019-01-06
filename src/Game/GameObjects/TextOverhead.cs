@@ -26,7 +26,7 @@ using System.Diagnostics;
 namespace ClassicUO.Game.GameObjects
 {
     [DebuggerDisplay("Text = {Text}")]
-    public class TextOverhead : GameObject
+    internal class TextOverhead : GameObject
     {
         public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f)
         {
@@ -63,7 +63,6 @@ namespace ClassicUO.Game.GameObjects
         public bool Initialized { get; set; }
 
         public bool IsOverlapped { get; set; }
-     
 
         protected override View CreateView()
         {
@@ -110,7 +109,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    public class DamageOverhead : TextOverhead
+    internal class DamageOverhead : TextOverhead
     {
         private const int DAMAGE_Y_MOVING_TIME = 50;
 

@@ -22,7 +22,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
-    public class InputEvent
+    internal class InputEvent
     {
         public InputEvent(SDL_Keymod modifiers)
         {

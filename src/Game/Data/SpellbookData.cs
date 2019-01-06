@@ -22,7 +22,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
 {
-    public static class SpellbookData
+    internal static class SpellbookData
     {
         public static SpellBookType GetTypeByGraphic(Graphic graphic)
         {

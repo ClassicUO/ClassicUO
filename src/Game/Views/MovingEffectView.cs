@@ -20,6 +20,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -44,15 +45,18 @@ namespace ClassicUO.Game.Views
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
+                Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
             }
 
             Bounds.X = (int)-effect.Offset.X;
             Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);
             Rotation = effect.AngleToTarget;
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
-
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
+            Engine.DebugInfo.EffectsRendered++;
             return base.Draw(batcher, position, list);
         }
     }

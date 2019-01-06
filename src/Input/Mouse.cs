@@ -93,11 +93,11 @@ namespace ClassicUO.Input
                 SDL.SDL_GetMouseState(out _position.X, out _position.Y);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
-            RealPosition = Position;
+            RealPosition = _position;
 
 	        if (!wasDragging && IsDragging)
 		        _dragOrigin = Position;
-			else if (!IsDragging)
+	        else if (!IsDragging)
 		        _dragOrigin = Point.Zero;
         }
     }

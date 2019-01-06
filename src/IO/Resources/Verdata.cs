@@ -22,7 +22,7 @@ using System.IO;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Verdata
+    internal static class Verdata
     {
         static Verdata()
         {
@@ -54,7 +54,7 @@ namespace ClassicUO.IO.Resources
         //1 - staidx0.mul
         //2 - statics0.mul
         //3 - artidx.mul
-        //4 - art.mul
+        //4 - FileManager.Art.mul
         //5 - anim.idx
         //6 - anim.mul
         //7 - soundidx.mul
@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
         //9 - texidx.mul
         //10 - texmaps.mul
         //11 - gumpidx.mul
-        //12 - gumpart.mul
+        //12 - gumpFileManager.Art.mul
         //13 - multi.idx
         //14 - multi.mul
         //15 - skills.idx

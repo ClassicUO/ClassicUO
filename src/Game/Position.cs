@@ -22,7 +22,7 @@ using System;
 
 namespace ClassicUO.Game
 {
-    public struct Position
+    internal struct Position
     {
         public static Position Invalid = new Position(0xFFFF, 0xFFFF);
 

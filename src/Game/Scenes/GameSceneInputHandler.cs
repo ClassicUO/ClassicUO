@@ -25,11 +25,12 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.UIGumps;
-using ClassicUO.Game.System;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -49,12 +50,11 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed;
+        private bool _rightMousePressed, _continueRunning;
 
- 
-        public bool IsMouseOverUI => Engine.UI.IsMouseOverUI && !(Engine.UI.MouseOverControl is WorldViewport);
 
-        public bool IsMouseOverWorld => Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is WorldViewport;
+        public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
+
 
         private void MoveCharacterByInputs()
         {
@@ -62,75 +62,89 @@ namespace ClassicUO.Game.Scenes
             {
                 Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y>> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
-                World.Player.Walk(direction, true);
+
+                float distanceFromCenter = Utility.MathHelper.GetDistance(center, Mouse.Position);
+
+                bool run = distanceFromCenter >= 190.0f;
+
+                World.Player.Walk(direction, run);
             }
         }
 
-        private void OnLeftMouseButtonDown(object sender, EventArgs e)
+        private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (IsMouseOverWorld)
+            if (e.Button == MouseButton.Left)
             {
-                GameObject obj = _mousePicker.MouseOverObject;
-                Point point = _mousePicker.MouseOverObjectPoint;
-                _dragginObject = obj;
-                _dragOffset = point;
-            }
-        }
-
-        private void OnLeftMouseButtonUp(object sender, EventArgs e)
-        {
-            if (TargetSystem.IsTargeting)
-            {
-                switch (TargetSystem.TargetingState)
+                if (_rightMousePressed)
                 {
-                    case TargetType.Position:
-                    case TargetType.Object:
-                        GameObject obj = null;
+                    _continueRunning = true;
+                }
+                else
+                {
 
-                        if (IsMouseOverUI)
-                        {
-                            Control control = Engine.UI.MouseOverControl;
+                    GameObject obj = _mousePicker.MouseOverObject;
+                    Point point = _mousePicker.MouseOverObjectPoint;
+                    _dragginObject = obj;
+                    _dragOffset = point;
+                }
 
-                            if (control is ItemGump gumpling)
-                                obj = gumpling.Item;
-                            else if (control.Parent is HealthBarGump healthGump)
-                                obj = healthGump.Mobile;
-                        }
-                        else if (IsMouseOverWorld) obj = SelectedObject;
-
-                        if (obj != null)
-                        {
-                            TargetSystem.TargetGameObject(obj);
-                            Mouse.LastLeftButtonClickTime = 0;
-                        }
-
-                        break;
-                    case TargetType.Nothing:
-
-                        break;
-                    case TargetType.SetTargetClientSide:
-                        obj = null;
-                        if (IsMouseOverWorld) obj = SelectedObject;
-                        if (obj != null)
-                        {
-                            TargetSystem.TargetGameObject(obj);
-                            Mouse.LastLeftButtonClickTime = 0;
-                            Engine.UI.Add(new InfoGump(obj));
-
-                        }
-                        break;
-                    default:
-                        Log.Message(LogTypes.Warning, "Not implemented.");
-
-                        break;
+            }
+            else if (e.Button == MouseButton.Right)
+            {
+                if (!_rightMousePressed)
+                {
+                    _rightMousePressed = true;
+                    _continueRunning = false;
                 }
             }
-            else if (IsHoldingItem)
-            {
-                SelectedObject = null;
+        }
 
-                if (IsMouseOverWorld)
+        private void OnMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left)
+            {
+                if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
+                    return;
+
+                if (TargetManager.IsTargeting)
                 {
+                    switch (TargetManager.TargetingState)
+                    {
+                        case TargetType.Position:
+                        case TargetType.Object:
+                            GameObject obj = SelectedObject;
+
+                            if (obj != null)
+                            {
+                                TargetManager.TargetGameObject(obj);
+                                Mouse.LastLeftButtonClickTime = 0;
+                            }
+
+                            break;
+                        case TargetType.Nothing:
+
+                            break;
+                        case TargetType.SetTargetClientSide:
+
+                            obj = SelectedObject;
+                            if (obj != null)
+                            {
+                                TargetManager.TargetGameObject(obj);
+                                Mouse.LastLeftButtonClickTime = 0;
+                                Engine.UI.Add(new InfoGump(obj));
+
+                            }
+                            break;
+                        default:
+                            Log.Message(LogTypes.Warning, "Not implemented.");
+
+                            break;
+                    }
+                }
+                else if (IsHoldingItem)
+                {
+                    SelectedObject = null;
+      
                     GameObject obj = _mousePicker.MouseOverObject;
 
                     if (obj != null && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
@@ -148,7 +162,7 @@ namespace ClassicUO.Game.Scenes
                                 {
                                     SelectedObject = item;
 
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
+                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && dyn1.ItemData.IsStackable)
                                         MergeHeldItem(item);
                                     else
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
@@ -166,13 +180,10 @@ namespace ClassicUO.Game.Scenes
 
                                 return;
                         }
-                    }
+                    }                    
                 }
-            }
-            else
-            {
-                if (IsMouseOverWorld)
-                {
+                else
+                {                 
                     GameObject obj = _mousePicker.MouseOverObject;
 
                     switch (obj)
@@ -181,20 +192,20 @@ namespace ClassicUO.Game.Scenes
 
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
-                                name = Cliloc.GetString(1020000 + st.Graphic);
+                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
 
                             if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
+                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
                             break;
                         case Multi multi:
                             name = multi.Name;
 
                             if (string.IsNullOrEmpty(name))
-                                name = Cliloc.GetString(1020000 + multi.Graphic);
+                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
 
                             if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
+                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
                         case Entity entity:
 
@@ -214,13 +225,19 @@ namespace ClassicUO.Game.Scenes
 
                             break;
                     }
+                    
                 }
+            }
+            else if (e.Button == MouseButton.Right)
+            {
+                if (_rightMousePressed)
+                    _rightMousePressed = false;
             }
         }
 
-        private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        private void OnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (IsMouseOverWorld)
+            if (e.Button == MouseButton.Left)
             {
                 GameObject obj = _mousePicker.MouseOverObject;
 
@@ -234,8 +251,8 @@ namespace ClassicUO.Game.Scenes
                     case Mobile mob:
                         e.Result = true;
 
-                        if (World.Player.InWarMode)
-                            GameActions.Attack(mob);                            
+                        if (World.Player.InWarMode && World.Player != mob)
+                            GameActions.Attack(mob);
                         else
                             GameActions.DoubleClick(mob);
 
@@ -245,37 +262,25 @@ namespace ClassicUO.Game.Scenes
                         GameActions.DoubleClick(item);
 
                         break;
+                    case TextOverhead overhead when overhead.Parent is Entity entity:
+                        e.Result = true;
+                        GameActions.DoubleClick(entity);
+                        break;
                 }
 
                 ClearDequeued();
             }
-        }
-
-        private void OnRightMouseButtonDown(object sender, EventArgs e)
-        {
-            if (IsMouseOverWorld && !_rightMousePressed)
-                _rightMousePressed = true;
-        }
-
-        private void OnRightMouseButtonUp(object sender, EventArgs e)
-        {
-            if (_rightMousePressed)
-                _rightMousePressed = false;
-        }
-
-        private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
-        {
-            if (IsMouseOverWorld)
+            else if (e.Button == MouseButton.Right)
             {
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
+                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && itemdata.IsSurface))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
                         if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
-                            World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+                            World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
 
                             e.Result = true;
                         }
@@ -284,11 +289,11 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void OnMouseDragBegin(object sender, EventArgs e)
+        private void OnMouseDragBegin(object sender, MouseEventArgs e)
         {
-            if (Mouse.LButtonPressed)
+            if (e.Button == MouseButton.Left)
             {
-                if (!IsHoldingItem && IsMouseOverWorld)
+                if (!IsHoldingItem)
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
@@ -296,17 +301,17 @@ namespace ClassicUO.Game.Scenes
                     {
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
-           
+
                             Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
                                 Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
 
-                            Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X= Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-                            
+
 
                             break;
                         case Item item:
@@ -318,22 +323,20 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void OnMouseDragging(object sender, EventArgs e)
-        {
-        }
-
-        private void OnMouseMoving(object sender, EventArgs e)
-        {
-        }
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
-                TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
+                TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
-               
+
+                foreach (Mobile mobile in World.Mobiles)
+                {
+                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
+                }
+
                 //Task.Run(async () =>
                 //{
                 //    while (true)

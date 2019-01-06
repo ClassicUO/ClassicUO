@@ -23,7 +23,7 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    public struct Hue : IComparable, IComparable<ushort>
+    internal struct Hue : IComparable, IComparable<ushort>
     {
         public const ushort Invalid = 0xFFFF;
         public static Hue SystemCol = new Hue(0x3B2);

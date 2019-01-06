@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.IO;
 
 using ClassicUO.Utility.Logging;
@@ -26,7 +28,7 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public static class ConfigurationResolver
+    internal static class ConfigurationResolver
     {
         public static T Load<T>(string file) where T : class
         {

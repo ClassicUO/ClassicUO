@@ -34,6 +34,7 @@ namespace ClassicUO.IO
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
         public static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
+        public static UInt16[,] WrapSize;
         public static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
@@ -56,8 +57,8 @@ namespace ClassicUO.IO
                             return;
                         }
 
-                        int mapWidthInBlocks = Resources.Map.MapBlocksSize[mapID, 0];
-                        int mapHeightInBlocks = Resources.Map.MapBlocksSize[mapID, 1];
+                        int mapWidthInBlocks = FileManager.Map.MapBlocksSize[mapID, 0];
+                        int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
                         int blocks = mapWidthInBlocks * mapHeightInBlocks;
                         if (block < 0 || block >= blocks)
                         {
@@ -75,13 +76,19 @@ namespace ClassicUO.IO
 
                         int blockX = block / mapHeightInBlocks;
                         int blockY = block % mapHeightInBlocks;
+                        //this will avoid going OVER the wrapsize, so that we have the ILLUSION of never going over the main world
+                        mapWidthInBlocks = blockX < (WrapSize[mapID, 0] >> 3) ? WrapSize[mapID, 0] >> 3 : mapWidthInBlocks;
+                        mapHeightInBlocks = blockY < (WrapSize[mapID, 1] >> 3) ? WrapSize[mapID, 1] >> 3 : mapHeightInBlocks;
                         ushort[] tosendCRCs = new ushort[CRCLength];     //byte 015 through 64   -  25 block CRCs
                         for (int x = -2; x <= 2; x++)
                         {
                             int xBlockItr = (blockX + x) % mapWidthInBlocks;
                             if (xBlockItr < 0 && xBlockItr > -3)
                             {
-                                xBlockItr += mapWidthInBlocks;
+                                
+                                {
+                                    xBlockItr += mapWidthInBlocks;
+                                }
                             }
 
                             for (int y = -2; y <= 2; y++)
@@ -147,20 +154,13 @@ namespace ClassicUO.IO
                             staticsData[i] = p.ReadByte();
                         }
                         int index = 0;
-                        if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID, 0] * IO.Resources.Map.MapBlocksSize[mapID, 1]))
+                        if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
                         {
                             var chunk = World.Map.Chunks[block];
                             for (int i = 0; i < 8; i++)
                             {
                                 for (int j = 0; j < 8; j++)
                                 {
-                                    //var list = chunk.Tiles[i][j].ObjectsOnTiles;
-                                    //for (int k = list.Count - 1; k >= 0; --k)
-                                    //{
-                                    //    if (list[k] is Static)
-                                    //        chunk.Tiles[i][j].RemoveGameObject(list[k]);
-                                    //}
-
                                     for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
                                     {
                                         if (obj is Static)
@@ -193,6 +193,8 @@ namespace ClassicUO.IO
 
                         p.Seek(7);
                         uint maps = (p.ReadUInt() * 7) / 9;
+                        if (WrapSize == null)
+                            WrapSize = new UInt16[maps, 2];
                         if (p.Length < (maps * 9 + 15))//the packet has padding inside, so it's usually larger or equal than what we expect
                         {
                             return;
@@ -204,11 +206,11 @@ namespace ClassicUO.IO
                         p.Seek(15);//byte 15 to end of packet, the map definitions
                         for (int i = 0; i < maps; i++)
                         {
-                            byte mapnum = p.ReadByte();
-                            ushort dimX = p.ReadUShort();
-                            ushort dimY = p.ReadUShort();
-                            ushort wrapdimX = p.ReadUShort();
-                            ushort wrapdimY = p.ReadUShort();
+                            int mapnum = p.ReadByte();
+                            ushort dimX = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
+                            ushort dimY = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
+                            WrapSize[mapnum,0] = p.ReadUShort();
+                            WrapSize[mapnum,1] = p.ReadUShort();
                         }
                         IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
@@ -246,7 +248,7 @@ namespace ClassicUO.IO
             if (World.Map == null || mapID != World.Map.Index)
                 return;
             int index = 0;
-            if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID, 0] * IO.Resources.Map.MapBlocksSize[mapID, 1]))
+            if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
                 for (int i = 0; i < 8; i++)
                 {
@@ -276,12 +278,8 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    //var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
-
                     for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
-                        //for (int k = 0; k < list.Count; k++)
                     {
-                        //GameObject o = list[k];
                         if (obj is Land ln)
                         {
                             landdata[blockByteIdx] = (byte)(ln.Graphic & 0x00FF);
@@ -302,12 +300,8 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    //var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
                     for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
-
-                    //for (int k = 0; k < list.Count; k++)
                     {
-                        //GameObject obj = list[k];
                         if (obj is Static st)
                         {
                             staticdata[blockByteIdx] = (byte)(st.Graphic & 0x00FF);
@@ -344,7 +338,7 @@ namespace ClassicUO.IO
             return (UInt16)((sum2 << 8) | sum1);
         }
 
-        public sealed class UltimaLiveHashResponse : PacketWriter
+        internal sealed class UltimaLiveHashResponse : PacketWriter
         {
             public UltimaLiveHashResponse(uint block, byte mapid, ushort[] crcs) : base(0x3F)
             {
@@ -357,13 +351,14 @@ namespace ClassicUO.IO
             }
         }
 
+        private static readonly char[] _pathSeparatorChars = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         private static string ValidatePath(string shardname)
         {
             try
             {
                 string fullPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "UltimaLive", shardname));
 
-                if (shardname.IndexOfAny(new char[] { '/', '\\' }) == -1 && !string.IsNullOrEmpty(fullPath))//we cannot allow directory separator inside our name
+                if (shardname.IndexOfAny(_pathSeparatorChars) == -1 && !string.IsNullOrEmpty(fullPath))//we cannot allow directory separator inside our name
                     return fullPath;
             }
             catch

@@ -20,8 +20,6 @@
 #endregion
 using System;
 
-using ClassicUO.Game.System;
-
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -30,7 +28,7 @@ namespace ClassicUO.Game.Scenes
         Game
     }
 
-    public sealed class SceneManager
+    internal sealed class SceneManager
     {
         public Scene CurrentScene { get; private set; }
 

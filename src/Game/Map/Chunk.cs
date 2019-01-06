@@ -23,7 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
@@ -31,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Chunk : IDisposable
+    internal sealed class Chunk : IDisposable
     {
         public Chunk(ushort x, ushort y)
         {
@@ -124,7 +126,7 @@ namespace ClassicUO.Game.Map
                                     Position = new Position(staticX, staticY, z)
                                 };                  
 
-                                if (TileData.IsAnimated(staticObject.ItemData.Flags))
+                                if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
                                 else
                                     Tiles[x, y].AddGameObject(staticObject);
@@ -174,9 +176,7 @@ namespace ClassicUO.Game.Map
         //    }
         //}
 
-        private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
-
-        private static IndexMap GetIndex(int map, int x, int y) => IO.Resources.Map.GetIndex(map, x, y);
+        private IndexMap GetIndex(int map) => FileManager.Map.GetIndex(map, X, Y);
 
         public void Dispose()
         {
@@ -191,7 +191,6 @@ namespace ClassicUO.Game.Map
                         if (obj != World.Player)
                         {
                             obj.Dispose();
-                            //tile.RemoveGameObject(obj);
                         }
                     }
 

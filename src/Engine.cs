@@ -30,9 +30,9 @@ using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -44,26 +44,47 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SDL2;
+
 namespace ClassicUO
 {
-    public class Engine : Microsoft.Xna.Framework.Game
+    internal class DebugInfo
     {
+        public int MobilesRendered { get; set; }
+        public int ItemsRendered { get; set; }
+        public int StaticsRendered { get; set; }
+        public int MultiRendered { get; set; }
+        public int LandsRendered { get; set; }
+        public int EffectsRendered { get; set; }
+
+        public void Reset()
+        {
+            MobilesRendered = ItemsRendered = StaticsRendered = MultiRendered = LandsRendered = EffectsRendered = 0;
+        }
+    }
+
+    internal class Engine : Microsoft.Xna.Framework.Game
+    { 
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
-        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
-        private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
-        private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
+        private const int LOGIN_SCREEN_FPS = 60;
 
-        private static int _fpsLimit = MIN_FPS;
+        //private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
+        //private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
+        //private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
+
+        //private const string DEBUG_STRING_1 = "- FPS: {0}\n- Rendered: {1} mobiles, {2} items, {3} statics, {4} multi, {5} lands, {6} effects\n";
+        //private const string DEBUG_STRING_2 = "- CharPos: {0}    Mouse: {1}    InGamePos: {2}\n";
+        //private const string DEBUG_STRING_3 = "- Selected: {0}";
+
+
+        private static int _fpsLimit = 30;
         private static Engine _engine;
-
-
-
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
         private double _currentFpsTime;
-        private RenderedText _infoText;
+        //private RenderedText _infoText;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private InputManager _inputManager;
@@ -71,11 +92,13 @@ namespace ClassicUO
         private float _time;
         private int _totalFrames;
         private UIManager _uiManager;
+        private Settings _settings;
+        private DebugInfo _debugInfo;
+        private bool _isRunningSlowly;
 
         private Engine()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
-
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -83,8 +106,8 @@ namespace ClassicUO
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
-            _graphicDeviceManager.PreferredBackBufferWidth = 640; // should be changed by settings file
-            _graphicDeviceManager.PreferredBackBufferHeight = 480; // should be changed by settings file
+            _graphicDeviceManager.PreferredBackBufferWidth = 640;
+            _graphicDeviceManager.PreferredBackBufferHeight = 480;
             _graphicDeviceManager.ApplyChanges();
 
             Window.ClientSizeChanged += (sender, e) =>
@@ -96,11 +119,11 @@ namespace ClassicUO
             Window.AllowUserResizing = true;
         }
 
-
+      //  internal static classicUO_API.NetPipes.Server Server { get; } = new Server();
 
         public static Batcher2D Batcher => _engine._batcher;
 
-        protected float IntervalFixedUpdate => 1000.0f / FpsLimit;
+        protected float IntervalFixedUpdate { get; private set; }
 
         public static int FpsLimit
         {
@@ -116,9 +139,13 @@ namespace ClassicUO
                     else if (_fpsLimit > MAX_FPS)
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
+
+                    _engine.IntervalFixedUpdate = 1000.0f / _fpsLimit;
                 }
             }
         }
+
+        public static Version Version { get; } = new Version(0, 0, 0, 1);
 
         public static int CurrentFPS { get; private set; }
 
@@ -170,11 +197,15 @@ namespace ClassicUO
 
         public static ProfileManager Profile => _engine._profileManager;
 
+        public static Settings GlobalSettings => _engine._settings;
+
         public static SceneManager SceneManager => _engine._sceneManager;
 
-        public static Assembly Assembly { get; private set; }
-
         public static string ExePath { get; private set; }
+
+        public static DebugInfo DebugInfo => _engine._debugInfo;
+
+        public static bool IsRunningSlowly => _engine._isRunningSlowly;
 
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -201,9 +232,7 @@ namespace ClassicUO
         private static void Configure()
         {
             Log.Start(LogTypes.All);
-
-            Assembly = Assembly.GetExecutingAssembly();
-            ExePath = Path.GetDirectoryName(Assembly.Location);
+            ExePath = Directory.GetCurrentDirectory();
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
@@ -229,30 +258,39 @@ namespace ClassicUO
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
 
 
 
         protected override void Initialize()
         {
-            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+            Log.NewLine();
+            Log.NewLine();
 
-            if (settings == null)
+            Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
+
+            Log.NewLine();
+            Log.NewLine();
+
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+
+            if (_settings == null)
             {
                 Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
-                settings = new Settings();
-                settings.Save();
+                _settings = new Settings();
+                _settings.Save();
                 Quit();
 
                 return;
             }
 
-            Service.Register(settings);
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
+            Log.PushIndent();
 
             try
             {
-                FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
+                FileManager.UoFolderPath = _settings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException e)
             {
@@ -261,55 +299,73 @@ namespace ClassicUO
                 throw e;
             }
 
-            Log.Message(LogTypes.Trace, "Done!");
+            Log.Message(LogTypes.Trace, "Done!");          
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.PopIndent();
+
             Log.Message(LogTypes.Trace, "Loading files...");
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            Log.PushIndent();
             FileManager.LoadFiles();
-            uint[] hues = Hues.CreateShaderColors();
+            Log.PopIndent();
+            uint[] hues = FileManager.Hues.CreateShaderColors();
             _batcher = new Batcher2D(GraphicsDevice);
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
-            texture0.SetData(hues, 0, 32 * Hues.HuesCount);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
-            texture1.SetData(hues, 32 * Hues.HuesCount, 32 * Hues.HuesCount);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
+            texture0.SetData(hues, 0, 32 * FileManager.Hues.HuesCount);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
+            texture1.SetData(hues, 32 * FileManager.Hues.HuesCount, 32 * FileManager.Hues.HuesCount);
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
-            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
-            stopwatch.Stop();
+         
             _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
-            //Register Command Stack          
+
             Log.Message(LogTypes.Trace, "Network calibration...");
+            Log.PushIndent();
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
-            FpsLimit = settings.MaxFPS;
+            Log.PopIndent();
 
-            _infoText = new RenderedText
-            {
-                IsUnicode = true,
-                Font = 3,
-                FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                MaxWidth = 150
-            };
+            FpsLimit = LOGIN_SCREEN_FPS;
+
+            _debugInfo = new DebugInfo();
+
+            //_infoText = new RenderedText
+            //{
+            //    IsUnicode = true,
+            //    Font = 1,
+            //    FontStyle = FontStyle.BlackBorder,
+            //    Align = TEXT_ALIGN_TYPE.TS_LEFT,
+            //    Hue = 0x35,
+            //    Cell = 31,
+            //    //MaxWidth = 500
+            //};
+
+            _uiManager.Add(new DebugGump());
             base.Initialize();
         }
 
 
         protected override void LoadContent()
         {
+            Log.Message(LogTypes.Trace, "Loading plugins...");
+            Log.PushIndent();
+            Plugin.Create(@".\Assistant\Razor.dll");
+            Log.Message(LogTypes.Trace, "Done!");
+            Log.PopIndent();
+
             _sceneManager.ChangeScene(ScenesType.Login);
-            base.LoadContent();
+            base.LoadContent();           
         }
 
         protected override void UnloadContent()
-        {
+        {   
             _inputManager.Dispose();
             _sceneManager.CurrentScene?.Unload();
-            Service.Get<Settings>().Save();
+            _settings.Save();
+            Plugin.OnClosing();
             base.UnloadContent();
         }
 
@@ -353,11 +409,15 @@ namespace ClassicUO
                 SuppressDraw();
             }
 
+           // Server.Flush();
             Profiler.EnterContext("OutOfContext");
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            _isRunningSlowly = gameTime.IsRunningSlowly;
+            _debugInfo.Reset();
+
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
@@ -365,21 +425,21 @@ namespace ClassicUO
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("RenderFrame");
             _totalFrames++;
-            _sceneManager.CurrentScene.Draw(_batcher);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.Draw(_batcher);
             GraphicsDevice.Clear(Color.Transparent);
-            int totalCalls = _batcher.Calls;
-            int totalMerged = _batcher.Merged;
-            int totalFlushes = _batcher.FlushCount;
             _batcher.Begin();
             UI.Draw(_batcher);
-            totalCalls += _batcher.Calls;
-            totalMerged += _batcher.Merged;
-            totalFlushes += _batcher.FlushCount;
-            _sb.Clear();
-            _sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
-            _sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
-            _infoText.Text = _sb.ToString();
-            _infoText.Draw(_batcher, new Point(Window.ClientBounds.Width - 150, 20));
+            //_sb.Clear();
+
+            //_sb.AppendFormat(DEBUG_STRING_1, CurrentFPS, _debugInfo.MobilesRendered, _debugInfo.ItemsRendered, _debugInfo.StaticsRendered, _debugInfo.MultiRendered, _debugInfo.LandsRendered, _debugInfo.EffectsRendered);
+            //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, _sceneManager.CurrentScene is GameScene gs ? gs.MouseOverWorldPosition : Point.Zero);
+            //_sb.AppendFormat(DEBUG_STRING_3, _sceneManager.CurrentScene is GameScene gs1 && gs1.SelectedObject != null ? gs1.SelectedObject.ToString() : "");
+
+            ////_sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
+            ////_sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
+            //_infoText.Text = _sb.ToString();
+            //_infoText.Draw(_batcher, new Point(20, 0));
             _batcher.End();
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
@@ -435,12 +495,14 @@ namespace ClassicUO
 
         private void OnUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.Update(totalMS, frameMS);
         }
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }
 }

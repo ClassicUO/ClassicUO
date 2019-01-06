@@ -50,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
         FastUnmountAndCantRun
     }
 
-    public partial class Mobile : Entity
+    internal partial class Mobile : Entity
     {
         private ushort _hits;
         private ushort _hitsMax;
@@ -395,12 +395,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-#if JAEDAN_MOVEMENT_PATCH
+#if JAEDAN_MOVEMENT_PATCH || MOVEMENT2
         public virtual void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
+            ClearSteps();
             Position = new Position(x, y, z);
             Direction = dir;
-            ClearSteps();
             AddToTile();
             ProcessDelta();
         }
@@ -434,7 +434,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationRepeat = false;
                 AnimationFromServer = true;
 
-                byte index = (byte) Animations.GetGroupIndex(GetGraphicForAnimation());
+                byte index = (byte) FileManager.Animations.GetGroupIndex(GetGraphicForAnimation());
 
                 AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
             }
@@ -470,22 +470,20 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Step step = Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run); // - (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
-                    {
-                        if (Engine.Profile.Current.SmoothMovements)
-                        {
-                            float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float x = frameOffset;
-                            float y = frameOffset;
-                            MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                            Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
-                        }
+                    {     
+                        float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                        float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                        float x = frameOffset;
+                        float y = frameOffset;
 
+                        MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
+                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                     
                         turnOnly = false;
                     }
                     else
@@ -507,7 +505,7 @@ namespace ClassicUO.Game.GameObjects
                                 // oUCH!!!!
                             }
 
-#if !JAEDAN_MOVEMENT_PATCH
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
                             if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
                             {
                                 int sequence = World.Player.Walker.CurrentWalkSequence + 1;
@@ -576,16 +574,16 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 bool mirror = false;
-                Animations.GetAnimDirection(ref dir, ref mirror);
+                FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
-                    Animations.AnimID = id;
-                    Animations.AnimGroup = (byte) animGroup;
-                    Animations.Direction = dir;
-                    if ((direction.FrameCount == 0 || direction.FramesHashes == null)) Animations.LoadDirectionGroup(ref direction);
+                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    FileManager.Animations.AnimID = id;
+                    FileManager.Animations.AnimGroup = (byte) animGroup;
+                    FileManager.Animations.Direction = dir;
+                    if ((direction.FrameCount == 0 || direction.FramesHashes == null)) FileManager.Animations.LoadDirectionGroup(ref direction);
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {
@@ -667,12 +665,15 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        public struct Step
+        internal struct Step
         {
             public int X, Y;
             public sbyte Z;
             public byte Direction;
             public bool Run;
+            public byte Rej;
+            public bool Anim;
+            public byte Seq;
         }
     }
 }

@@ -28,13 +28,12 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class Entity : GameObject
+    internal abstract class Entity : GameObject
     {
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
         private Flags _flags;
-        private Graphic _graphic;
         private Hue _hue;
         private string _name;
 
@@ -55,12 +54,12 @@ namespace ClassicUO.Game.GameObjects
 
         public override Graphic Graphic
         {
-            get => _graphic;
+            get => base.Graphic;
             set
             {
-                if (_graphic != value)
+                if (base.Graphic != value)
                 {
-                    _graphic = value;
+                    base.Graphic = value;
                     _delta |= Delta.Appearance;
                 }
             }

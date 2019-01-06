@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -32,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class AnimatedEffectView : View
+    internal class AnimatedEffectView : View
     {
         private Graphic _displayedGraphic = Graphic.Invalid;
 
@@ -100,22 +101,63 @@ namespace ClassicUO.Game.Views
             if (effect.AnimationGraphic == Graphic.Invalid)
                 return false;
 
+            Hue hue = effect.Hue;
+
+            if (effect.Source is Item)
+            {
+                if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(effect.AnimationGraphic))
+                {
+                    effect.AnimIndex = 0;
+                }
+                else if (Engine.Profile.Current.FieldsType == 2)
+                {
+                    if (StaticFilters.IsFireField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0020;
+                    }
+                    else if (StaticFilters.IsParalyzeField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0058;
+                    }
+                    else if (StaticFilters.IsEnergyField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0070;
+                    } 
+                    else if (StaticFilters.IsPoisonField(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x0044;
+                    }
+                    else if (StaticFilters.IsWallOfStone(effect.Graphic))
+                    {
+                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        hue = 0x038A;
+                    }
+                }
+            }
+
             if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)
             {
                 _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
+                Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
             Bounds.X = (Texture.Width >> 1) - 22 - (int)effect.Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
 
-            ulong flags = TileData.StaticData[_displayedGraphic].Flags;
+            StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
 
+            bool isPartial = data.IsPartialHue;
+            bool isTransparent = data.IsTransparent;
 
-            bool isPartial = TileData.IsPartialHue(flags);
-            bool isTransparent = TileData.IsTransparent(flags);
-            HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue, isPartial, isTransparent ? .5f : 0, false);
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            else
+                HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)
             {
@@ -150,6 +192,7 @@ namespace ClassicUO.Game.Views
                     break;
             }
 
+            Engine.DebugInfo.EffectsRendered++;
 
             return true;
         }
@@ -158,7 +201,6 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            //if (Art.Contains(GameObject.Graphic, x, y))
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }

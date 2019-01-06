@@ -26,7 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -36,7 +36,7 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public sealed class Profile
+    internal sealed class Profile
     {
         [JsonConstructor]
         public Profile(string username, string servername, string charactername)
@@ -62,7 +62,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MusicVolume { get; set; } = 100;
         [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
         [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
-        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = true;
+        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = false;
 
         // fonts and speech
         [JsonProperty] public byte ChatFont { get; set; } = 1;
@@ -93,6 +93,14 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
         [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
         [JsonProperty] public int MobileHPType { get; set; } = 0;
+        [JsonProperty] public bool DrawRoofs { get; set; } = true;
+        [JsonProperty] public bool TreeToStumps { get; set; } = false;
+        [JsonProperty] public bool HideVegetation { get; set; } = false;
+        [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
+        [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
+        [JsonProperty] public bool UseCircleOfTransparency { get; set; } = false;
+        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
+
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;
@@ -101,13 +109,14 @@ namespace ClassicUO.Configuration
 
         // movements
         [JsonProperty] public bool EnablePathfind { get; set; } = true;
-        [JsonProperty] public bool AlwaysRun { get; set; } = false;
+        [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonProperty] public int MaxFPS { get; set; } = 60;
 
 
         public void Save(List<Gump> gumps = null)

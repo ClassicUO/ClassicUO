@@ -22,9 +22,11 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Network
 {
-    public sealed class Packet : PacketBase
+    internal sealed class Packet : PacketBase
     {
         private readonly byte[] _data;
 
@@ -134,6 +136,58 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        public string ReadUTF8StringSafe()
+        {
+            if (Position >= Length)
+            {
+                return String.Empty;
+            }
+
+            int count = 0;
+            int index = Position;
+
+            while (index < Length && _data[index++] != 0)
+            {
+                ++count;
+            }
+
+            index = 0;
+
+            var buffer = new byte[count];
+            int val = 0;
+
+            while (Position < Length && (val = _data[Position++]) != 0)
+            {
+                buffer[index++] = (byte)val;
+            }
+
+            string s = Encoding.UTF8.GetString(buffer);
+
+            bool isSafe = true;
+
+            for (int i = 0; isSafe && i < s.Length; ++i)
+            {
+                isSafe = Utility.StringHelper.IsSafeChar(s[i]);
+            }
+
+            if (isSafe)
+            {
+                return s;
+            }
+
+            StringBuilder sb = new StringBuilder(s.Length);
+
+            for (int i = 0; i < s.Length; ++i)
+            {
+                if (Utility.StringHelper.IsSafeChar(s[i]))
+                {
+                    sb.Append(s[i]);
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public string ReadUnicode()
         {
             EnsureSize(2);
@@ -157,16 +211,6 @@ namespace ClassicUO.Network
 
             return sb.ToString();
         }
-
-        //public string ReadUTF8String()
-        //{
-        //    StringBuilder sb = new StringBuilder();
-
-        //    char c;
-        //    while ((c = (char)ReadByte()) != '\0') sb.Append(c);
-
-        //    return sb.ToString();
-        //}
 
         public byte[] ReadArray(int count)
         {

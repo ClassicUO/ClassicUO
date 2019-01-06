@@ -23,7 +23,7 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    public struct Graphic : IComparable, IComparable<ushort>
+    internal struct Graphic : IComparable, IComparable<ushort>
     {
         public const ushort Invariant = ushort.MaxValue;
         public static Graphic Invalid = new Graphic(0xFFFF);
