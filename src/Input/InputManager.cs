@@ -21,6 +21,7 @@
 using System;
 
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 using static SDL2.SDL;
 
@@ -28,7 +29,10 @@ namespace ClassicUO.Input
 {
     public sealed class InputManager : IDisposable
     {
+	    private static int _minimumDistanceForDrag = 3;
+
         private bool _dragStarted;
+
         private readonly SDL_EventFilter _hookDel;
 
         public InputManager()
@@ -121,13 +125,21 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
                     MouseMoving.Raise();
-                    if (Mouse.IsDragging) MouseDragging.Raise();
 
-                    if (Mouse.IsDragging && !_dragStarted)
-                    {
-                        DragBegin.Raise();
-                        _dragStarted = true;
-                    }
+	                if (Mouse.IsDragging)
+	                {
+		                if (!_dragStarted)
+		                {
+			                if (Math.Abs(Mouse.DragOffset.X) < _minimumDistanceForDrag && Math.Abs(Mouse.DragOffset.Y) < _minimumDistanceForDrag)
+				                break;
+
+							DragBegin.Raise();
+			                _dragStarted = true;
+		                }
+
+		                if (_dragStarted)
+			                MouseDragging.Raise();
+	                }
 
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
