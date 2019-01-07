@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -121,7 +122,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(PlayerMobile character, uint clientIP, int serverIndex, uint slot) : base(0x00)
+        public PCreateCharacter(PlayerMobile character, CityInfo startingCity, uint clientIP, int serverIndex, uint slot) : base(0x00)
         {
             int skillcount = 3;
 
@@ -189,11 +190,14 @@ namespace ClassicUO.Network
             }
 
             WriteByte((byte) serverIndex);
-            var location = 0; // TODO: write the city index
+
+            var location = startingCity.Index; // City
 
             if (FileManager.ClientVersion < ClientVersions.CV_70130)
                 location--;
-            WriteByte((byte) location); //location
+
+            WriteByte((byte) location);
+
             WriteUInt(slot);
             WriteUInt(clientIP);
             WriteUShort(character.Equipment[(int) Layer.Shirt].Hue);
