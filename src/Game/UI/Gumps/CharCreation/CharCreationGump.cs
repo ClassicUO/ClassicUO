@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					if (existing != null)
 						RemoveChildren(existing);
 
-					AddChildren(new CreateCharCityGump(_character), 3);
+					AddChildren(new CreateCharCityGump(), 3);
 
 					ChangePage(3);
 					break;

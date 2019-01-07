@@ -48,8 +48,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			new MapInfo(5, "Ter Mur",   5598, 0x0500, 0x0100, 0x1000, 0x0AC0),
 		};
 
-		private readonly PlayerMobile _character;
-
 		private Label _mapName;
 		private HtmlGump _description;
 	
@@ -77,10 +75,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			}
 		}
 
-		public CreateCharCityGump(PlayerMobile character) : base(0, 0)
+		public CreateCharCityGump() : base(0, 0)
 		{
-			_character = character;
-
 			var loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
 			_maps = loginScene.Cities.GroupBy(city => city.Map)
@@ -177,9 +173,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 					_selectedCity = city;
 
-					if (_description != null)
-						RemoveChildren(_description);
-
 					SetDescription(city);
 				}
 			}
@@ -217,8 +210,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			if (_description != null)
 				RemoveChildren(_description);
 
-			AddChildren((_description = new HtmlGump(452, 60, 173, 367, true, true, false,
-				FileManager.Cliloc.GetString(info.Description), 0x000000, ishtml: true)));
+			AddChildren(_description = new HtmlGump(452, 60, 173, 367, true, true, false,
+				FileManager.Cliloc.GetString(info.Description), 0x000000, ishtml: true));
 		}
 
 		private IEnumerable<CitySelector> GetSelectors()
@@ -281,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					};
 
 					var textX = buttonX;
-					var textY = buttonY - 15;
+					var textY = buttonY - 16;
 
 					var cityName = city.City;
 					var cityNameWidth = FileManager.Fonts.GetWidthASCII(3, cityName);
