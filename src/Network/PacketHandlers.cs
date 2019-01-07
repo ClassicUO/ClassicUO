@@ -1650,30 +1650,6 @@ namespace ClassicUO.Network
 
         private static void CharacterList(Packet p)
         {
-            //int locCount = p.ReadByte();
-            //if (FileManager.ClientVersion >= ClientVersions.CV_70130)
-            //{
-            //    for (int i = 0; i < locCount; i++)
-            //    {
-            //        byte cityIdx = p.ReadByte();
-            //        string cityName = p.ReadASCII(32);
-            //        string cityArea = p.ReadASCII(32);
-            //        Position cityPosition.Set((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
-            //        uint mapIdx = p.ReadUInt();
-            //        uint cliloc = p.ReadUInt();
-            //        p.Skip(4);
-
-            //    }
-            //}
-            //else
-            //{
-            //    for (int i = 0; i < locCount; i++)
-            //    {
-            //        byte cityIdx = p.ReadByte();
-            //        string cityName = p.ReadASCII(31);
-            //        string cityArea = p.ReadASCII(31);
-            //    }
-            //}
         }
 
         private static void AttackCharacter(Packet p)

@@ -158,8 +158,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Strength = (ushort) _attributeSliders[0].Value;
                         _character.Dexterity = (ushort) _attributeSliders[1].Value;
                         _character.Intelligence = (ushort) _attributeSliders[2].Value;
-                        charCreationGump.CreateCharacter();
-                    }
+
+						charCreationGump.SetAttributes();
+					}
 
                     break;
             }

@@ -91,7 +91,9 @@ namespace ClassicUO.Game.Scenes
 
         public ServerListEntry[] Servers { get; private set; }
 
-        public string[] Characters { get; private set; }
+	    public CityInfo[] Cities { get; set; }
+
+		public string[] Characters { get; private set; }
 
         public string PopupMessage { get; private set; }
 
@@ -300,7 +302,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character)
+        public void CreateCharacter(PlayerMobile character, CityInfo startingCity)
         {
             int i = 0;
 
@@ -310,7 +312,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
+            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
         }
 
         public void DeleteCharacter(uint index)
@@ -455,21 +457,41 @@ namespace ClassicUO.Game.Scenes
                 p.Skip(30);
             }
 
-            count = p.ReadByte();
+	        count = p.ReadByte();
 
-            // TODO: implemnet city infos
-            if (FileManager.ClientVersion >= ClientVersions.CV_70130)
-            {
-                for (int i = 0; i < count; i++)
-                    p.Skip(1 +32 +32 + 4 + 4 + 4 + 4 + 4 + 4);
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                    p.Skip(1 + 31 + 31);
-            }
+			var cities = new CityInfo[count];
 
-            World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
+			for (int i = 0; i < count; i++)
+			{
+				var cityInfo = default(CityInfo);
+
+		        if (FileManager.ClientVersion >= ClientVersions.CV_70130)
+		        {
+			        var cityIndex = p.ReadByte();
+			        var cityName = p.ReadASCII(32);
+			        var cityBuilding = p.ReadASCII(32);
+			        var cityPosition = new Position((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
+			        var cityMapIndex = p.ReadUInt();
+			        var cityDescription = p.ReadUInt();
+			        p.ReadUInt();
+
+					cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, (int)cityDescription, cityPosition, cityMapIndex);
+		        }
+		        else
+			    {
+				    var cityIndex = p.ReadByte();
+				    var cityName = p.ReadASCII(31);
+				    var cityBuilding = p.ReadASCII(31);
+
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, 0, Position.Invalid, 0);
+				}
+
+				cities[i] = cityInfo;
+			}
+
+	        Cities = cities;
+
+			World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
         }
 
         private void HandleErrorCode(Packet reader)
@@ -516,4 +538,24 @@ namespace ClassicUO.Game.Scenes
             Address = reader.ReadUInt();
         }
     }
+
+	internal class CityInfo
+	{
+		public readonly int Index;
+		public readonly string City;
+		public readonly string Building;
+		public readonly int Description;
+		public readonly Position Position;
+		public readonly uint Map;
+
+		public CityInfo(int index, string city, string building, int description, Position position, uint map)
+		{
+			Index = index;
+			City = city;
+			Building = building;
+			Description = description;
+			Position = position;
+			Map = map;
+		}
+	}
 }
