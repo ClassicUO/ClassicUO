@@ -1026,7 +1026,7 @@ namespace ClassicUO.Network
                     break;
                 case 0xDF:
                     id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort());
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort(), true);
 
                     break;
                 case 0xFF:
