@@ -86,42 +86,38 @@ namespace ClassicUO.Game
     
         public static void OnMessage(UOMessageEventArgs args)
         {
-            switch (args.Type)
-            {
-                case MessageType.Spell:
-                case MessageType.Label:
-                case MessageType.Regular:
-                    args.Parent?.AddOverhead(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    break;
-                case MessageType.Emote:
-                     args.Parent?.AddOverhead(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
-                    break;           
-                case MessageType.Focus:
-                    break;
-                case MessageType.Whisper:
-                    break;
-                case MessageType.Yell:
-                    break;          
-                case MessageType.Command:
-                    break;
-                case MessageType.Encoded:
+			switch (args.Type)
+			{
+				case MessageType.Spell:
+				case MessageType.Label:
+				case MessageType.Regular:
+					args.Parent?.AddOverhead(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+					break;
+				case MessageType.Emote:
+					args.Parent?.AddOverhead(args.Type, $"*{args.Text}*", (byte)args.Font, args.Hue, args.IsUnicode);
+					break;
+				case MessageType.Focus:
+				case MessageType.Whisper:
+				case MessageType.Yell:
+				case MessageType.Command:
+				case MessageType.Encoded:
+				case MessageType.System:
+				case MessageType.Party:
+				case MessageType.Guild:
+				case MessageType.Alliance:
+					break;
+			}
 
-                    break;
-                default:
+			Message.Raise(args, args.Parent ?? _system);
+		}
 
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            Message.Raise(args, args.Parent ?? _system);
-        }
-
-        public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
+		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
         {
             LocalizedMessage.Raise(args, entity ?? _system);
         }
-    }
+	}
 
-    internal class UOMessageEventArgs : EventArgs
+	internal class UOMessageEventArgs : EventArgs
     {
         public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
