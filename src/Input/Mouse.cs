@@ -27,9 +27,7 @@ namespace ClassicUO.Input
     internal static class Mouse
     {
         public const int MOUSE_DELAY_DOUBLE_CLICK = 350;
-
         private static Point _position;
-	    private static Point _dragOrigin;
 
         public static uint LastLeftButtonClickTime { get; set; }
 
@@ -49,9 +47,7 @@ namespace ClassicUO.Input
 
         public static Point Position => _position;
 
-	    public static Point DragOffset => _dragOrigin - _position;
-
-		public static Point RealPosition { get; private set; }
+        public static Point RealPosition { get; private set; }
 
         public static Point LDropPosition { get; set; }
 
@@ -80,8 +76,6 @@ namespace ClassicUO.Input
 
         public static void Update()
         {
-	        var wasDragging = IsDragging;
-
             if (!MouseInWindow)
             {
                 SDL.SDL_GetGlobalMouseState(out int x, out int y);
@@ -94,11 +88,6 @@ namespace ClassicUO.Input
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
             RealPosition = _position;
-
-	        if (!wasDragging && IsDragging)
-		        _dragOrigin = Position;
-	        else if (!IsDragging)
-		        _dragOrigin = Point.Zero;
         }
     }
 }
