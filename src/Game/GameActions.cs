@@ -47,7 +47,12 @@ namespace ClassicUO.Game
             Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
         }
 
-        public static void OpenPaperdoll(Serial serial)
+	    public static void UpdateWarMode(bool state)
+	    {
+		    Socket.Send(new PChangeWarMode(state));
+	    }
+
+		public static void OpenPaperdoll(Serial serial)
             => DoubleClick(serial | 0x80000000);
 
         public static void Attack(Serial serial)

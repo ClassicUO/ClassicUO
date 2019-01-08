@@ -193,10 +193,20 @@ namespace ClassicUO.Game.UI.Gumps
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
 
             }
-            else
-                AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+	        else
+	        {
+		        AddChildren(new GumpPic(0, 0, 0x07d1, 0));
 
-            // Equipment slots for hat/earrings/neck/ring/bracelet
+		        // STATUS BUTTON
+		        AddChildren(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+		        {
+			        X = 185,
+			        Y = 44 + 27 * 7,
+			        ButtonAction = ButtonAction.Activate
+		        });
+	        }
+
+	        // Equipment slots for hat/earrings/neck/ring/bracelet
             AddChildren(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
             AddChildren(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
             AddChildren(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
@@ -306,67 +316,85 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
-            {
-                case Buttons.Help:
-                    GameActions.RequestHelp();
+	        switch ((Buttons)buttonID)
+	        {
+		        case Buttons.Help:
+			        GameActions.RequestHelp();
 
-                    break;
-                case Buttons.Options:
+			        break;
+		        case Buttons.Options:
 
-                    if (Engine.UI.GetByLocalSerial<OptionsGump1>() == null)
-                    {
-                        Engine.UI.Add(new OptionsGump1
-                        {
-                            X = 80, Y = 80
-                        });
-                    }
-                    else
-                        Engine.UI.Remove<OptionsGump1>();
+			        if (Engine.UI.GetByLocalSerial<OptionsGump1>() == null)
+			        {
+				        Engine.UI.Add(new OptionsGump1
+				        {
+					        X = 80,
+					        Y = 80
+				        });
+			        }
+			        else
+				        Engine.UI.Remove<OptionsGump1>();
 
-                    break;
-                case Buttons.LogOut:
-                    Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
-                    {
-                        if (s)
-                            Engine.SceneManager.ChangeScene(ScenesType.Login);
-                    }));
+			        break;
+		        case Buttons.LogOut:
+			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
+			        {
+				        if (s)
+					        Engine.SceneManager.ChangeScene(ScenesType.Login);
+			        }));
 
-                    break;
-                case Buttons.Quests:
-                    GameActions.RequestQuestMenu();
+			        break;
+		        case Buttons.Quests:
+			        GameActions.RequestQuestMenu();
 
-                    break;
-                case Buttons.Skills:
+			        break;
+		        case Buttons.Skills:
 
-                    if (Engine.UI.GetByLocalSerial<SkillGumpAdvanced>() == null)
-                        Engine.UI.Add(new SkillGumpAdvanced());
-                    else
-                        Engine.UI.Remove<SkillGumpAdvanced>();
+			        if (Engine.UI.GetByLocalSerial<SkillGumpAdvanced>() == null)
+				        Engine.UI.Add(new SkillGumpAdvanced());
+			        else
+				        Engine.UI.Remove<SkillGumpAdvanced>();
 
-                    break;
-                case Buttons.Guild:
-                    GameActions.OpenGuildGump();
+			        break;
+		        case Buttons.Guild:
+			        GameActions.OpenGuildGump();
 
-                    break;
-                case Buttons.PeaceWarToggle:
-                    GameActions.ToggleWarMode();
+			        break;
+		        case Buttons.PeaceWarToggle:
+			        GameActions.ToggleWarMode();
 
-                    break;
-                case Buttons.Status:
+			        break;
+		        case Buttons.Status:
+			        if (Mobile == World.Player)
+			        {
+				        Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile)?.Dispose();
 
-                    Engine.UI.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
+				        if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
+				        {
+					        Engine.UI.Add(new StatusGump()
+					        {
+						        X = Mouse.Position.X - 100,
+						        Y = Mouse.Position.Y - 25
+					        });
+				        }
+			        }
+			        else
+			        {
+				        if (Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile) != null)
+					        break;
 
-                    if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
-                    {
-                        Engine.UI.Add(new StatusGump()
-                        {
-                            X = Mouse.Position.X - 100,
-                            Y = Mouse.Position.Y - 25
-                        });
-                    }
+				        GameActions.RequestMobileStatus(Mobile);
 
-                    break;
+				        var bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+						Engine.UI.Add(new HealthBarGump(Mobile)
+						{
+							X = Mouse.Position.X - (bounds.Width / 2),
+							Y = Mouse.Position.Y - 5,
+						});
+					}
+
+			        break;
             }
         }
 

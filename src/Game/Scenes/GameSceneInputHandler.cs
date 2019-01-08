@@ -347,6 +347,12 @@ namespace ClassicUO.Game.Scenes
 
                 //});
             }
+            else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            {
+	            if (!World.Player.InWarMode)
+		            GameActions.UpdateWarMode(true);
+
+            }
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
@@ -374,7 +380,12 @@ namespace ClassicUO.Game.Scenes
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
-        {
-        }
+		{
+			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+			{
+				if (World.Player.InWarMode)
+					GameActions.UpdateWarMode(false);
+			}
+		}
     }
 }
