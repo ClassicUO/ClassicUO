@@ -394,8 +394,20 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0x86: // UpdateCharacterList
-                case 0xA9: // ReceiveCharacterList
+	                ParseCharacterList(e);
+
+					Engine.UI.Remove<CharacterSelectionGump>();
+
+	                if (_currentGump != null)
+		                _currentGump.Dispose();
+
+					Engine.UI.Add(_currentGump = new CharacterSelectionGump());
+
+					break;
+				case 0xA9: // ReceiveCharacterList
                     ParseCharacterList(e);
+					ParseCities(e);
+					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
                     break;
@@ -456,43 +468,48 @@ namespace ClassicUO.Game.Scenes
                 Characters[i] = p.ReadASCII(30);
                 p.Skip(30);
             }
+        }
 
-	        count = p.ReadByte();
+	    private void ParseCities(Packet p)
+	    {
+		    var count = p.ReadByte();
+		    var cities = new CityInfo[count];
 
-			var cities = new CityInfo[count];
+		    for (int i = 0; i < count; i++)
+		    {
+			    var cityInfo = default(CityInfo);
 
-			for (int i = 0; i < count; i++)
-			{
-				var cityInfo = default(CityInfo);
+			    if (FileManager.ClientVersion >= ClientVersions.CV_70130)
+			    {
+				    var cityIndex = p.ReadByte();
+				    var cityName = p.ReadASCII(32);
+				    var cityBuilding = p.ReadASCII(32);
+				    var cityPosition = new Position((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
+				    var cityMapIndex = p.ReadUInt();
+				    var cityDescription = p.ReadUInt();
+				    p.ReadUInt();
 
-		        if (FileManager.ClientVersion >= ClientVersions.CV_70130)
-		        {
-			        var cityIndex = p.ReadByte();
-			        var cityName = p.ReadASCII(32);
-			        var cityBuilding = p.ReadASCII(32);
-			        var cityPosition = new Position((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
-			        var cityMapIndex = p.ReadUInt();
-			        var cityDescription = p.ReadUInt();
-			        p.ReadUInt();
-
-					cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, (int)cityDescription, cityPosition, cityMapIndex);
-		        }
-		        else
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, (int)cityDescription, cityPosition, cityMapIndex);
+			    }
+			    else
 			    {
 				    var cityIndex = p.ReadByte();
 				    var cityName = p.ReadASCII(31);
 				    var cityBuilding = p.ReadASCII(31);
 
 				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, 0, Position.Invalid, 0);
-				}
+			    }
 
-				cities[i] = cityInfo;
-			}
+			    cities[i] = cityInfo;
+		    }
 
-	        Cities = cities;
+		    Cities = cities;
+		}
 
-			World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
-        }
+	    private void ParseFlags(Packet p)
+	    {
+		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
+		}
 
         private void HandleErrorCode(Packet reader)
         {
