@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.IO;
 using ClassicUO.Network;
 
 using Microsoft.Xna.Framework;
@@ -143,7 +144,16 @@ namespace ClassicUO.Game
 
         public static void DropItem(Serial serial, int x, int y, int z, Serial container)
         {
-            Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+            {
+                Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
+            }
+            else
+            {
+                Socket.Send(new PDropRequestOld(serial, (ushort)x, (ushort)y, (sbyte)z, container));
+
+            }
         }
 
         public static void DropItem(Serial serial, Position position, Serial container)

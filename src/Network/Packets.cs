@@ -247,14 +247,18 @@ namespace ClassicUO.Network
 
     internal sealed class PDropRequestOld : PacketWriter
     {
-        public PDropRequestOld(Serial serial, Position position, Serial container) : base(0x08)
+        public PDropRequestOld(Serial serial, ushort x, ushort y, sbyte z, Serial container) : base(0x08)
         {
             WriteUInt(serial);
-            WriteUShort(position.X);
-            WriteUShort(position.Y);
-            WriteSByte(position.Z);
+            WriteUShort(x);
+            WriteUShort(y);
+            WriteSByte(z);
             WriteUInt(container);
         }
+
+        public PDropRequestOld(Serial serial, Position position, Serial container) : this (serial, position.X, position.Y, position.Z, container)
+        {
+        } 
     }
 
     internal sealed class PDropRequestNew : PacketWriter
