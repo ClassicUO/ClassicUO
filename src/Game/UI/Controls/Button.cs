@@ -113,22 +113,36 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override ClickPriority Priority => ClickPriority.High;
 
-        public int ButtonGraphicNormal
+        public ushort ButtonGraphicNormal
         {
             get => _gumpGraphics[NORMAL];
-            set => _textures[NORMAL] = FileManager.Gumps.GetTexture((ushort) value);
+            set
+            {
+                _textures[NORMAL] = FileManager.Gumps.GetTexture(value);
+                _gumpGraphics[NORMAL] = value;
+            } 
         }
 
-        public int ButtonGraphicPressed
+        public ushort ButtonGraphicPressed
         {
             get => _gumpGraphics[PRESSED];
-            set => _textures[PRESSED] = FileManager.Gumps.GetTexture((ushort) value);
+            set
+            {
+                _textures[PRESSED] = FileManager.Gumps.GetTexture(value);
+                _gumpGraphics[PRESSED] = value;
+
+            }
         }
 
-        public int ButtonGraphicOver
+        public ushort ButtonGraphicOver
         {
             get => _gumpGraphics[OVER];
-            set => _textures[OVER] = FileManager.Gumps.GetTexture((ushort) value);
+            set
+            {
+                _textures[OVER] = FileManager.Gumps.GetTexture(value);
+                _gumpGraphics[OVER] = value;
+
+            }
         }
 
         public Hue FontHue { get; }

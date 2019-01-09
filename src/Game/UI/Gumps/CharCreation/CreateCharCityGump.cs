@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					}
 				);
 
-			SelectedMapIndex = 0;
+			SelectedMapIndex = FileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
 
 			var mapCenterX = (393 / 2) + 57;
 
@@ -326,7 +326,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					if (_isSelected != value)
 					{
 						_label.Hue = (ushort)(value ? 1153 : 88);
-						_button.ButtonGraphicNormal = value ? 1210 : 1209;
+						_button.ButtonGraphicNormal = (ushort) (value ? 1210 : 1209);
 
 						_isSelected = value;
 					}

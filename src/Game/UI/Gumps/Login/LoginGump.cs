@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
         private Checkbox _checkboxSaveAccount;
-        private readonly Button _nextArrow0, _nextArrow1;
+        private readonly Button _nextArrow0;
 
         private float _time;
 
@@ -74,20 +74,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 AddChildren(new GumpPic(286, 45, 0x058A, 0));
 
             // Arrow Button
-            AddChildren(_nextArrow0 = new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A4)
+            AddChildren(_nextArrow0 = new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
             {
                 X = 610,
                 Y = 445,
                 ButtonAction = ButtonAction.Activate,
-                IsVisible = false
-            });
-
-            AddChildren(_nextArrow1 = new Button((int)Buttons.NextArrow, 0x15A5, 0x15A6, 0x15A5)
-            {
-                X = 610,
-                Y = 445,
-                ButtonAction = ButtonAction.Activate,
-                IsVisible = true
             });
 
             // Account Text Input Background
@@ -171,6 +162,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _textboxPassword.SetText(Engine.GlobalSettings.Password);
         }
 
+        private ushort _buttonNormal = 0x15A4;
+        private ushort _buttonOver = 0x15A5;
+
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
@@ -182,8 +176,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _time = (float) totalMS + 1000;
 
-                _nextArrow0.IsVisible = _nextArrow1.IsVisible;
-                _nextArrow1.IsVisible = !_nextArrow0.IsVisible;
+                _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
             if (_textboxPassword.HasKeyboardFocus)
