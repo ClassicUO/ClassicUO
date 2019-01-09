@@ -144,6 +144,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
+            if (ReplaceDefaultTextOnFirstKeyPress)
+            {
+                _entry.Clear();
+                ReplaceDefaultTextOnFirstKeyPress = false;
+            }
             _entry.InsertString(c);
         }
 

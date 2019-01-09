@@ -300,7 +300,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (!IsHoldingItem)
                 {
-                    GameObject obj = _mousePicker.MouseOverObject;
+                    GameObject obj = _dragginObject; //_mousePicker.MouseOverObject;
 
                     switch (obj)
                     {
@@ -324,6 +324,8 @@ namespace ClassicUO.Game.Scenes
 
                             break;
                     }
+
+                    _dragginObject = null;
                 }
             }
         }
@@ -337,10 +339,10 @@ namespace ClassicUO.Game.Scenes
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
 
-                foreach (Mobile mobile in World.Mobiles)
-                {
-                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
-                }
+                //foreach (Mobile mobile in World.Mobiles)
+                //{
+                //    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
+                //}
 
                 //Task.Run(async () =>
                 //{
