@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*//* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
             }
 
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _scrollBar.Height = Height;
                     _scrollBar.MinValue = 0;
-                    _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
+                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height +(HasBackground ? 8 : 0);
                     //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                     WantUpdateSize = false;
                 }
