@@ -61,6 +61,8 @@ namespace ClassicUO.Game.UI.Gumps
                 AddChildren(new ItemGump(i));
         }
 
+        public Graphic Graphic => _gumpID;
+
         private void BuildGump()
         {
             CanMove = true;

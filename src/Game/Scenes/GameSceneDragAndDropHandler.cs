@@ -151,34 +151,60 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToContainer(Item container)
         {
-            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            int x = RandomHelper.GetValue(bounds.Left, bounds.Right);
-            int y = RandomHelper.GetValue(bounds.Top, bounds.Bottom);
-            DropHeldItemToContainer(container, x, y);
+            /*var gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
+
+            int x, y;
+
+            if (gump != null)
+            {
+                Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
+
+                x = RandomHelper.GetValue(bounds.Left, bounds.Right);
+                y = RandomHelper.GetValue(bounds.Top, bounds.Bottom);
+            }
+            else
+            {
+                x = 0xFFFF;
+                y = 0xFFFF;
+            }*/
+
+            DropHeldItemToContainer(container, 0xFFFF, 0xFFFF);
         }
 
         public void DropHeldItemToContainer(Item container, int x, int y)
         {
-            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+            ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 
-            if (texture != null && !texture.IsDisposed)
+            if (gump != null)
             {
-                x -= texture.Width >> 1;
-                y -= texture.Height >> 1;
+                Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
+                ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
 
-                if (x + texture.Width > bounds.Width)
-                    x = bounds.Width - texture.Width;
+                if (texture != null && !texture.IsDisposed)
+                {
+                    x -= texture.Width >> 1;
+                    y -= texture.Height >> 1;
 
-                if (y + texture.Height > bounds.Height)
-                    y = bounds.Height - texture.Height;
+                    if (x + texture.Width > bounds.Width)
+                        x = bounds.Width - texture.Width;
+
+                    if (y + texture.Height > bounds.Height)
+                        y = bounds.Height - texture.Height;
+                }
+
+                if (x < bounds.X)
+                    x = bounds.X;
+
+                if (y < bounds.Y)
+                    y = bounds.Y;
             }
+            else
+            {
+                x = 0xFFFF;
+                y = 0xFFFF;
+            }
+            
 
-            if (x < bounds.X)
-                x = bounds.X;
-
-            if (y < bounds.Y)
-                y = bounds.Y;
             GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
