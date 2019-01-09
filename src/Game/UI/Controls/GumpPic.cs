@@ -90,13 +90,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsPartialHue { get; set; }
 
-        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
+        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1 : 0))
         {
+
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, 0, false));
+            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, Alpha, true));
 
             return base.Draw(batcher, position, hue);
         }

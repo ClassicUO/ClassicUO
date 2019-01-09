@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsTransparent { get; set; }
 
-        public float Alpha { get; set; } = .5f;
+        public float Alpha { get; set; }
 
         public IReadOnlyList<Control> Children => _children;
 
