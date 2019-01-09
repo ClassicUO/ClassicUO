@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
 
                 float distanceFromCenter = Utility.MathHelper.GetDistance(center, Mouse.Position);
 
-                bool run = distanceFromCenter >= 190.0f;
+                bool run = distanceFromCenter >= 150.0f;
 
                 World.Player.Walk(direction, run);
             }
