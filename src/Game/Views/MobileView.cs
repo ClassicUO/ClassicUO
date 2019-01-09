@@ -62,7 +62,8 @@ namespace ClassicUO.Game.Views
             IsFlipped = mirror;
             SetupLayers(dir, mobile, out int mountOffset);
 
-
+            if (mobile.Graphic == 0)
+                return false;
 
             AnimationFrameTexture bodyFrame = FileManager.Animations.GetTexture(_frames[0].Hash);
 
