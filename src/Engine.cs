@@ -320,7 +320,6 @@ namespace ClassicUO
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
-
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
             PacketHandlers.Load();
@@ -410,6 +409,7 @@ namespace ClassicUO
             }
 
            // Server.Flush();
+            base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }
 
@@ -444,6 +444,8 @@ namespace ClassicUO
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
             UpdateWindowCaption(gameTime);
+
+            base.Draw(gameTime);
         }
 
         private void UpdateWindowCaption(GameTime gameTime)

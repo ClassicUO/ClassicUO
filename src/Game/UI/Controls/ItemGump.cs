@@ -141,7 +141,9 @@ namespace ClassicUO.Game.UI.Controls
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                {                   
                     return;
+                }
 
                 gs.SelectedObject = Item;
 

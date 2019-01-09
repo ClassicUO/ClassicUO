@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Sounds volume:", true, 0, 0, 1);
 
-            _soundsVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            _soundsVolume = new HSliderBar(40, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.UI.Gumps
             item = new ScrollAreaItem();
             text = new Label("- Music volume:", true, 0, 0, 1);
 
-            _musicVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            _musicVolume = new HSliderBar(40, 5, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
@@ -479,8 +479,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableSounds.IsChecked = true;
                     _enableMusic.IsChecked = true;
                     _combatMusic.IsChecked = true;
-                    _soundsVolume.Value = 255;
-                    _musicVolume.Value = 255;
+                    _soundsVolume.Value = 100;
+                    _musicVolume.Value = 100;
                     _musinInBackground.IsChecked = false;
                     _footStepsSound.IsChecked = true;
                     break;

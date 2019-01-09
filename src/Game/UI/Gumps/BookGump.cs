@@ -76,13 +76,19 @@ namespace ClassicUO.Game.UI.Gumps
                 ButtonAction = ButtonAction.Activate
             } );
             m_Forward.MouseClick += ( sender,e ) => {
-                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage(ActivePage + 1);
+                if (e.Button == MouseButton.Left && sender is Control ctrl)
+                {
+                    SetActivePage(ActivePage + 1);
+                }
             };
             m_Forward.MouseDoubleClick += (sender, e) => {
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
             m_Backward.MouseClick += ( sender, e ) => {
-                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage( ActivePage - 1 );
+                if (e.Button == MouseButton.Left && sender is Control ctrl)
+                {
+                    SetActivePage( ActivePage - 1 );
+                }
             };
             m_Backward.MouseDoubleClick += (sender, e) => {
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
@@ -127,7 +133,10 @@ namespace ClassicUO.Game.UI.Gumps
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
             _activated = 1;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
+
         private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
         private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
@@ -151,6 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Backward.IsVisible = true;
                 m_Forward.IsVisible = true;
             }
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
 
             ActivePage = page;
         }

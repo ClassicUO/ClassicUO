@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.FpsLimit = 60;
+            Engine.FpsLimit = Engine.GlobalSettings.MaxLoginFPS;
 
             Engine.UI.Add(new LoginBackground());
             Engine.UI.Add(_currentGump = new LoginGump());
@@ -130,12 +130,15 @@ namespace ClassicUO.Game.Scenes
             {
                 byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
             };
+
+            Audio.PlayMusic(0);
         }
 
 
         public override void Unload()
         {
-            //Engine.UI.Remove<LoginGump>();
+            Audio.StopMusic();
+
             Engine.UI.Remove<LoginBackground>();
             _currentGump?.Dispose();
 

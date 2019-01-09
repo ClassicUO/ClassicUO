@@ -79,6 +79,7 @@ namespace ClassicUO.IO
         public static TexmapsLoader Textmaps { get; private set; }
         public static SpeechesLoader Speeches { get; private set; }
         public static LightsLoader Lights { get; private set; }
+        public static SoundsLoader Sounds { get; private set; }
 
         public static void LoadFiles()
         {
@@ -125,6 +126,9 @@ namespace ClassicUO.IO
 
             Lights = new LightsLoader();
             Lights.Load();
+
+            Sounds = new SoundsLoader();
+            Sounds.Load();
 
             if (Verdata.File != null)
             {

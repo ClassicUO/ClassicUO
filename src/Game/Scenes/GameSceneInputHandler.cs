@@ -183,7 +183,9 @@ namespace ClassicUO.Game.Scenes
 
                                 return;
                         }
-                    }                    
+                    }
+                    else
+                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
                 }
                 else
                 {                 

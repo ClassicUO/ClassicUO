@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {         
                     
-                if (World.Player.Steps.Count > 0)
+                if (World.Player.IsMoving && this != World.Player)
                 {
                     Mobile.Step step = World.Player.Steps.Back();
 

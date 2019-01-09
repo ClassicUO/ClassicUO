@@ -77,6 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
             _spellBook.Disposed += SpellBookOnDisposed;
 
             OnEntityUpdate(_spellBook);
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         private void SpellBookOnDisposed(object sender, EventArgs e)
@@ -89,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+
             Engine.UI.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -620,6 +624,8 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)

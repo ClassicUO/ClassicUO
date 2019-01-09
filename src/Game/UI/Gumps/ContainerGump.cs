@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -72,7 +73,9 @@ namespace ClassicUO.Game.UI.Gumps
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
 
-            Graphic g = ContainerManager.Get(_gumpID).Graphic;
+            var cont = ContainerManager.Get(_gumpID);
+            Graphic g = cont.Graphic;
+
             AddChildren(new GumpPicContainer(0, 0, g, 0, _item));
             if (_isCorspeContainer)
                 AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
@@ -80,6 +83,9 @@ namespace ClassicUO.Game.UI.Gumps
             ContainerManager.CalculateContainerPosition(g);
             X = ContainerManager.X;
             Y = ContainerManager.Y;
+
+            if (cont.OpenSound != 0)
+                Engine.SceneManager.CurrentScene.Audio.PlaySound(cont.OpenSound);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -144,6 +150,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
+
+                var cont = ContainerManager.Get(_gumpID);
+
+                if (cont.ClosedSound != 0)
+                    Engine.SceneManager.CurrentScene.Audio.PlaySound(cont.ClosedSound);
             }
 
             base.Dispose();

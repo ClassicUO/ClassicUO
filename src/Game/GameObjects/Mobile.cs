@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
+using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -260,6 +261,10 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
+        public long LastStepSoundTime { get; set; }
+
+        public int StepSoundOffset { get; set; }
+
         protected virtual bool IsWalking => LastStepTime > Engine.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
@@ -458,6 +463,51 @@ namespace ClassicUO.Game.GameObjects
             return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
         }
 
+        private void ProcessFootstepsSound()
+        {
+            if (Engine.Profile.Current.EnableFootstepsSound && IsHuman && !IsHidden)
+            {
+                long ticks = Engine.Ticks;
+
+                if (IsMoving && LastStepSoundTime < ticks)
+                {
+                    int incID = StepSoundOffset;
+                    int soundID = 0x012B;
+                    int delaySound = 400;
+
+                    if (IsMounted)
+                    {
+                        if (Steps.Back().Run)
+                        {
+                            soundID = 0x0129;
+                            delaySound = 150;
+                        }
+                        else
+                        {
+                            incID = 0;
+                            delaySound = 350;
+                        }
+                    }
+
+                    delaySound = delaySound * 13 / 10;
+
+                    soundID += incID;
+
+                    StepSoundOffset = (incID + 1) % 2;
+
+                    float soundByRange = Engine.Profile.Current.SoundVolume / (float) World.ViewRange;
+                    soundByRange *= Distance;
+                    float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 100f;
+
+                    if (volume > 0 && volume < 0.01f)
+                        volume = 0.01f;
+
+                    Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
+                    LastStepSoundTime = ticks + delaySound;
+                }
+            }
+        }
+
         public override void ProcessAnimation()
         {
             byte dir = (byte) GetDirectionForAnimation();
@@ -539,6 +589,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                 } while (Steps.Count > 0 && turnOnly);
             }
+
+            ProcessFootstepsSound();
 
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {

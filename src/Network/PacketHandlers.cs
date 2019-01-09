@@ -35,6 +35,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -207,6 +208,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
             ToClient.Add(0x6C, TargetCursor);
+            ToClient.Add(0x6D, PlayMusic);
             ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
@@ -901,6 +903,8 @@ namespace ClassicUO.Network
 
                         spellbookGump.Location = location;
                         Engine.UI.Add(spellbookGump);
+
+                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
                     }
                 }
                 else
@@ -1118,6 +1122,30 @@ namespace ClassicUO.Network
 
         private static void PlaySoundEffect(Packet p)
         {
+            p.Skip(1);
+
+            ushort index = p.ReadUShort();
+            ushort audio = p.ReadUShort();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+
+            Position position = new Position(x, y, p.ReadSByte());
+
+            float soundByRange = Engine.Profile.Current.SoundVolume / (float)World.ViewRange;
+            soundByRange *= World.Player.Position.DistanceTo(position);
+            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 100f;
+
+            if (volume > 0 && volume < 0.01f)
+                volume = 0.01f;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(index, volume, true);
+        }
+
+        private static void PlayMusic(Packet p)
+        {
+            ushort index = p.ReadUShort();
+
+            Engine.SceneManager.CurrentScene.Audio.PlayMusic(index);
         }
 
         private static void LoginComplete(Packet p)

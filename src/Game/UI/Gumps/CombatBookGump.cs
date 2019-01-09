@@ -161,7 +161,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButton.Left && sender is Control ctrl)
+            {
+                SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            }
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
@@ -179,6 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _dictionaryPagesCount ? 0 : int.MaxValue;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
     }
 }

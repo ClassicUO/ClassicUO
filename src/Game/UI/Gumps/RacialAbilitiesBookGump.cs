@@ -199,6 +199,8 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         private static readonly string[] _humanNames = { "Strong Back", "Tough", "Workhorse", "Jack of All Trades"};

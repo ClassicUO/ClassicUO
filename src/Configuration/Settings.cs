@@ -49,9 +49,9 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = "7.0.59.8";
+        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
-        //[JsonProperty(PropertyName = "maxfps")]public int MaxFPS { get; set; } = 144;
+        [JsonProperty(PropertyName = "login_fps")]public int MaxLoginFPS { get; set; } = 60;
 
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; } = true;
 
@@ -60,6 +60,13 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "preload_maps")] public bool PreloadMaps { get; set; }
 
         [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; }
+
+        [JsonProperty(PropertyName = "login_music")]
+        public bool LoginMusic { get; set; } = true;
+
+        [JsonProperty(PropertyName = "login_music_volume")]
+        public int LoginMusicVolume { get; set; } = 100;
+
 
         public void Save()
         {

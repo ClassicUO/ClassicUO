@@ -474,6 +474,5 @@ namespace ClassicUO.Game.Scenes
             batcher.EnableLight(false);
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
-
     }
 }
