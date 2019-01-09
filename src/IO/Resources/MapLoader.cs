@@ -252,7 +252,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < PatchesCount; i++)
             {
-                if (_filesMap[i].StartAddress == IntPtr.Zero)
+                if (_filesMap[i] == null || _filesMap[i].StartAddress == IntPtr.Zero)
                 {
                     reader.Skip(8);
                     continue;

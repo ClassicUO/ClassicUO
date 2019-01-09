@@ -600,8 +600,8 @@ namespace ClassicUO.Network
 
             if (graphic >= 0x4000)
             {
-                item.IsMulti = true;
                 item.Graphic -= 0x4000;
+                item.IsMulti = true;
             }
 
             item.Container = Serial.Invalid;
