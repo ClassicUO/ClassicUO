@@ -168,6 +168,9 @@ namespace ClassicUO.Game.Scenes
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                                 }
                                 break;
+                            case Multi multi:
+                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
+                                break;
                             case Static st:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
                                 break;
