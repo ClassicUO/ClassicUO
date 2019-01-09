@@ -19,7 +19,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -475,11 +478,18 @@ namespace ClassicUO.Game.Scenes
 		    var count = p.ReadByte();
 		    var cities = new CityInfo[count];
 
-		    for (int i = 0; i < count; i++)
+	        bool isNew = FileManager.ClientVersion >= ClientVersions.CV_70130;
+	        string[] descriptions = null;
+
+	        if (!isNew)
+	            descriptions = ReadCityTextFile(count);
+
+
+            for (int i = 0; i < count; i++)
 		    {
 			    var cityInfo = default(CityInfo);
 
-			    if (FileManager.ClientVersion >= ClientVersions.CV_70130)
+			    if (isNew)
 			    {
 				    var cityIndex = p.ReadByte();
 				    var cityName = p.ReadASCII(32);
@@ -489,7 +499,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityDescription = p.ReadUInt();
 				    p.ReadUInt();
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, (int)cityDescription, cityPosition, cityMapIndex);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex);
 			    }
 			    else
 			    {
@@ -497,7 +507,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityName = p.ReadASCII(31);
 				    var cityBuilding = p.ReadASCII(31);
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, 0, Position.Invalid, 0);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.Invalid, 0);
 			    }
 
 			    cities[i] = cityInfo;
@@ -505,6 +515,98 @@ namespace ClassicUO.Game.Scenes
 
 		    Cities = cities;
 		}
+
+        private string[] ReadCityTextFile(int count)
+        {
+            string path = Path.Combine(FileManager.UoFolderPath, "citytext.enu");
+            if (!File.Exists(path))
+                return null;
+
+            string[] descr = new string[count];
+
+            byte[] data = new byte[4];
+
+            StringBuilder name = new StringBuilder();
+            StringBuilder text = new StringBuilder();
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                int cityIndex = 0;
+                while (stream.Position < stream.Length)
+                {
+                    int r = stream.Read(data, 0, 4);
+
+                    if (r == -1)
+                        break;
+
+                    string dataText = Encoding.UTF8.GetString(data, 0, 4);
+
+                    if (dataText == "END\0")
+                    {
+                        name.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b = (char) stream.ReadByte();
+
+                            if (b == '<')
+                            {
+                                stream.Position -= 1;
+                                break;
+                            }
+
+                            name.Append(b);
+                        }
+
+                        text.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b;
+
+                            while ((b = (char) stream.ReadByte()) != '\0')
+                            {
+                                text.Append(b);
+                            }
+
+                            if (text.Length != 0)
+                            {
+                                string t = text.ToString();
+                                text.Clear();
+                                //text.AppendLine();
+                                //text.AppendLine();
+                                text.Append(t);
+                            }
+
+                            long pos = stream.Position;
+                            byte end = (byte) stream.ReadByte();
+                            stream.Position = pos;
+
+                            if (end == 0x2E)
+                                break;
+
+                            int r1 = stream.Read(data, 0, 4);
+                            stream.Position = pos;
+
+                            if (r1 == -1)
+                                break;
+
+                            string dataText1 = Encoding.UTF8.GetString(data, 0, 4);
+
+                            if (dataText1 == "END\0")
+                                break;
+                        }
+
+                        descr[cityIndex++] = text.ToString();
+
+                    }
+                    else
+                        stream.Position -= 3;
+                }
+            }
+
+            return descr;
+        }
 
 	    private void ParseFlags(Packet p)
 	    {
@@ -561,11 +663,11 @@ namespace ClassicUO.Game.Scenes
 		public readonly int Index;
 		public readonly string City;
 		public readonly string Building;
-		public readonly int Description;
+		public readonly string Description;
 		public readonly Position Position;
 		public readonly uint Map;
 
-		public CityInfo(int index, string city, string building, int description, Position position, uint map)
+		public CityInfo(int index, string city, string building, string description, Position position, uint map)
 		{
 			Index = index;
 			City = city;

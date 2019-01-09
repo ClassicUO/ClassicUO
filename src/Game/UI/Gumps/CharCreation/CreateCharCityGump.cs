@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				RemoveChildren(_description);
 
 			AddChildren(_description = new HtmlGump(452, 60, 173, 367, true, true, false,
-				FileManager.Cliloc.GetString(info.Description), 0x000000, ishtml: true));
+				info.Description, 0x000000, ishtml: true));
 		}
 
 		private IEnumerable<CitySelector> GetSelectors()

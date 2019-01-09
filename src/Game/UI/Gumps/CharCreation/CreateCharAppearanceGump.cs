@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Layer.Hair, 1
             },
             {
-                Layer.Beard, 1
+                Layer.Beard, 0
             }
         };
 
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             bool isFemale = _femaleRadio.IsChecked;
             var race = GetSelectedRace();
-            CurrentOption[Layer.Beard] = 1;
+            CurrentOption[Layer.Beard] = 0;
             CurrentOption[Layer.Hair] = 1;
 
             if (_paperDoll != null)
