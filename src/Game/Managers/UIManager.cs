@@ -168,16 +168,27 @@ namespace ClassicUO.Game.Managers
                 if (MouseOverControl != null)
                 {
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    {
                         MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Right);
+                        MouseOverControl.InvokeMouseCloseGumpWithRClick();
+                    }
+
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Right);
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                    {
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+                        _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
+                    }
+
 
                     lastRightUp = MouseOverControl;
                 }
-                else
-                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
+                else if (_mouseDownControls[btn] != null)
+                {
+                    _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+                    _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
+                }
 
                 CloseIfClickOutGumps();
                 _mouseDownControls[btn] = null;

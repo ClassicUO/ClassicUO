@@ -569,9 +569,12 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
+            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);   
+        }
 
-            if (button == MouseButton.Right && CanCloseWithRightClick)
+        public void InvokeMouseCloseGumpWithRClick()
+        {
+            if (CanCloseWithRightClick)
                 CloseWithRightClick();
         }
 
