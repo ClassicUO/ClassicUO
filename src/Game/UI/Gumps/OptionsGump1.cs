@@ -558,6 +558,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.SoundVolume = _soundsVolume.Value;
             Engine.Profile.Current.MusicVolume = _musicVolume.Value;
 
+            Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
+
             // speech
             Engine.Profile.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
             Engine.Profile.Current.SpeechDelay = _sliderSpeechDelay.Value;

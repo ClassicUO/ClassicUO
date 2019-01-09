@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
                     return;
 
-                volume = Engine.Profile.Current.SoundVolume / 100f;
+                volume = Engine.Profile.Current.MusicVolume / 100f;
             }
 
 
@@ -72,6 +72,21 @@ namespace ClassicUO.Game.Managers
                 StopMusic();
                 _currentMusic = (UOMusic) m;
                 _currentMusic.Play(false, volume: volume);
+            }
+        }
+
+        public void UpdateCurrentMusicVolume()
+        {
+            if (_currentMusic != null)
+            {
+                if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
+                    return;
+
+                float volume = Engine.Profile.Current.MusicVolume / 100f;
+                if (volume < 0.01f || volume > 1f)
+                    return;
+
+                _currentMusic.SetVolume(volume);
             }
         }
 
