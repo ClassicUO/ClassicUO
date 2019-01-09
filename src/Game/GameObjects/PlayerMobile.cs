@@ -95,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < _sklls.Length; i++)
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
-                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
+                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
 
             if (serial.IsValid)

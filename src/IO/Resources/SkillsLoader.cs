@@ -46,7 +46,10 @@ namespace ClassicUO.IO.Resources
                 if (length == 0)
                     return default;
 
-                _skills[index] = new SkillEntry(index, Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)), _file.ReadBool()); 
+	            var hasAction = _file.ReadBool();
+	            var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1));
+
+				_skills[index] = new SkillEntry(index, name, hasAction); 
             }
 
             return value;
@@ -55,15 +58,15 @@ namespace ClassicUO.IO.Resources
 
     internal readonly struct SkillEntry
     {
-        public SkillEntry(int index, string name, bool hasbutton)
+        public SkillEntry(int index, string name, bool hasAction)
         {
             Index = index;
             Name = name;
-            HasButton = hasbutton;
+            HasAction = hasAction;
         }
 
         public readonly int Index;
         public readonly string Name;
-        public readonly bool HasButton;
+        public readonly bool HasAction;
     }
 }
