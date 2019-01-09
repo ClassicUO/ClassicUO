@@ -282,5 +282,7 @@ namespace ClassicUO.Game
 
         public static void UseAbility(byte index)
             => Socket.Send(new PUseCombatAbility(index));
+
+	    public static void QuestArrow(bool rightClick) => Socket.Send(new PClickQuestArrow(rightClick));
     }
 }

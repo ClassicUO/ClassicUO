@@ -1753,6 +1753,21 @@ namespace ClassicUO.Network
 
         private static void DisplayQuestArrow(Packet p)
         {
+			var ui = Engine.UI;
+			
+			var display = p.ReadBool();
+			var mx = p.ReadUShort();
+			var my = p.ReadUShort();
+			
+			var serial = default(Serial);
+			
+			if (FileManager.ClientVersion >= ClientVersions.CV_7090)
+			    serial = p.ReadUInt();
+			
+			ui.GetByLocalSerial<QuestArrowGump>(serial)?.Dispose();
+			
+			if (display)
+			    ui.Add(new QuestArrowGump(serial, mx, my));
         }
 
         private static void UltimaMessengerR(Packet p)

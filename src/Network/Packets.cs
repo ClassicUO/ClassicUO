@@ -695,7 +695,16 @@ namespace ClassicUO.Network
         }
     }
 
-    internal sealed class PCloseStatusBarGump : PacketWriter
+	internal sealed class PClickQuestArrow : PacketWriter
+	{
+		public PClickQuestArrow(bool rightClick) : base(0xBF)
+		{
+			WriteUShort(0x07);
+			WriteBool(rightClick);
+		}
+	}
+
+	internal sealed class PCloseStatusBarGump : PacketWriter
     {
         public PCloseStatusBarGump(Serial serial) : base(0xBF)
         {
