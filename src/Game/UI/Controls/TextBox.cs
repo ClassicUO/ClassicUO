@@ -153,6 +153,9 @@ namespace ClassicUO.Game.UI.Controls
             int oldidx = _entry.CaretIndex;
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
+                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                    return;
+
                 s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))
                 {
