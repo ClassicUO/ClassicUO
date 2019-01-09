@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -13,12 +10,48 @@ namespace ClassicUO.Game.UI.Gumps
 {
 	internal class QuestArrowGump : Gump
 	{
+		private static double[] _offsetTableX = new[] { -0.5, -0.75, -0.5, 0.0, 0.5, 0.75, 0.5, 0.0 };
+		private static double[] _offsetTableY = new[] { 0.5, 0.0, -0.5, -0.75, -0.5, 0.0, 0.5, 0.75 };
+
+		private int _mx;
+		private int _my;
+
+		private Direction _direction;
+
+		private GumpPic _arrow;
+		private Rectangle _arrowBounds;
+
 		public QuestArrowGump(Serial serial, int mx, int my) : base(serial, serial)
 		{
 			CanMove = false;
 			CanCloseWithRightClick = false;
 			
 			AcceptMouseInput = true;
+
+			_mx = mx;
+			_my = my;
+		}
+
+		private void UpdateArrow(Direction direction)
+		{
+			_direction = direction;
+
+			if (_arrow != null)
+				RemoveChildren(_arrow);
+
+			var graphic = (uint)0x1194;
+
+			if (_direction >= Direction.North && _direction <= Direction.West)
+				graphic = 0x1195 + (uint)_direction;
+
+			_arrowBounds = FileManager.Gumps.GetTexture(graphic).Bounds;
+
+			AddChildren(_arrow = new GumpPic(0, 0, (Graphic)graphic, 0));
+		}
+
+		public override void Update(double totalMS, double frameMS)
+		{
+			base.Update(totalMS, frameMS);
 
 			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
 			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;
@@ -29,47 +62,30 @@ namespace ClassicUO.Game.UI.Gumps
 			int screenCenterX = (screenRight - screenLeft) / 2;
 			int screenCenterY = (screenBottom - screenTop) / 2;
 
-			int playerX = World.Player.X;
-			int playerY = World.Player.Y;
-
-			int offsetX = mx - playerX;
-			int offsetY = my - playerY;
+			int offsetX = _mx - World.Player.X;
+			int offsetY = _my - World.Player.Y;
 
 			int drawX = screenLeft + (int)(screenCenterX + (offsetX - offsetY) * 22) + 3;
 			int drawY = screenTop + (int)(screenCenterY + (offsetX + offsetY) * 22) + 3;
 
 			var direction = DirectionHelper.DirectionFromPoints(
-				new Point(screenCenterX, screenCenterY), 
+				new Point(screenCenterX, screenCenterY),
 				new Point(drawX, drawY));
 
-			var graphic = (uint)0x1194;
+			if (_direction != direction || _arrow == null)
+				UpdateArrow(direction);
 
-			if (direction >= Direction.North && direction <= Direction.West)
-				graphic = 0x1195 + (uint)direction;
+			var arrowWidth = _arrowBounds.Width;
+			var arrowHeight = _arrowBounds.Height;
 
-			AddChildren(new GumpPic(0, 0, (Graphic)graphic, 0));
-
-			var size = FileManager.Gumps.GetTexture(graphic).Bounds;
-
-			drawX -= (size.Width / 2);
-			drawY -= (size.Height / 2);
-
-			var xOffsetTable = new[] { -0.5, -0.75, -0.5,  0.0,  0.5, 0.75, 0.5, 0.0 };
-			var yOffsetTable = new[] {  0.5,  0.0, -0.5, -0.75, -0.5, 0.0, 0.5, 0.75 };
-
-			var directionint = (int)direction;
-
-			drawX += (int)(xOffsetTable[(int)direction] * (size.Width + 22));
-			drawY += (int)(yOffsetTable[(int)direction] * (size.Height + 22));
+			drawX += (int)(_offsetTableX[(int)direction] * (arrowWidth + 22)) - (arrowWidth / 2);
+			drawY += (int)(_offsetTableY[(int)direction] * (arrowHeight + 22)) - (arrowHeight / 2);
 
 			if (drawX < screenLeft) drawX = screenLeft;
 			if (drawY < screenTop) drawY = screenTop;
 
-			if (drawX + size.Width > screenRight)
-				drawX = (screenRight - size.Width);
-
-			if (drawY + size.Height > screenBottom)
-				drawY = (screenBottom - size.Height);
+			if (drawX + arrowWidth > screenRight) drawX = (screenRight - arrowWidth);
+			if (drawY + arrowHeight > screenBottom) drawY = (screenBottom - arrowHeight);
 
 			X = drawX;
 			Y = drawY;
