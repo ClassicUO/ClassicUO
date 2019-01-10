@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                     return;
 
-                if (Item.Layer == Layer.Backpack || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
                     gs.SelectedObject = Item;
                     gs.DropHeldItemToContainer(Item, x, y);
