@@ -301,9 +301,9 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDroppedOffset;
 
-                const int MIN_PICKUP_DRA_DISTANCE = 5;
+                const int MIN_PICKUP_DRAG_DISTANCE = 5;
 
-                if (Math.Abs(offset.X) > MIN_PICKUP_DRA_DISTANCE || Math.Abs(offset.Y) > MIN_PICKUP_DRA_DISTANCE)
+                if (Math.Abs(offset.X) > MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > MIN_PICKUP_DRAG_DISTANCE)
                 {
                     GameObject obj = _dragginObject;
 
@@ -379,53 +379,12 @@ namespace ClassicUO.Game.Scenes
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 
-			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            {
-
-                //foreach (Mobile mobile in World.Mobiles)
-                //{
-                //    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
-                //}
-
-                //Task.Run(async () =>
-                //{
-                //    while (true)
-                //    {
-                //        await Task.Delay(1);
-                //        GameActions.CastSpell(205);
-                //    }
-
-                //});
-            }
-            else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
             {
 	            if (!World.Player.InWarMode)
 		            GameActions.UpdateWarMode(true);
             }
-            // TEST PURPOSE
-            /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            {
-
-                bool first = false;
-
-                string tobrit = "[go britain";
-                string toluna = "[go luna";
-
-                Task.Run(async () =>
-               {
-
-                   while (true)
-                   {
-                       await Task.Delay(500);
-
-                       NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
-
-                       first = !first;
-
-
-                   }
-               });
-            }*/
+           
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
