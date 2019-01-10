@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -28,33 +28,16 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class TextBox : AbstractTextBox
+    internal class MultiLineBox : AbstractTextBox
     {
-        public TextEntry TxEntry { get; private set; }
+        public MultiLineEntry TxEntry { get; private set; }
 
-        public TextBox(TextEntry txentry, bool editable)
+        public MultiLineBox(MultiLineEntry txentry, bool editable)
         {
             TxEntry = txentry;
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = editable;
-        }
-        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
-        {
-            TxEntry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
-            base.AcceptKeyboardInput = true;
-            base.AcceptMouseInput = true;
-            IsEditable = true;
-        }
-
-        public TextBox(string[] parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
-        {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
-            LocalSerial = Serial.Parse(parts[6]);
-            SetText(lines[int.Parse(parts[7])]);
         }
 
         public bool IsChanged => TxEntry.IsChanged;
@@ -65,38 +48,34 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.Hue = value;
         }
 
-        public bool IsPassword
-        {
-            get => TxEntry.IsPassword;
-            set => TxEntry.IsPassword = value;
-        }
-
-        public bool NumericOnly
-        {
-            get => TxEntry.NumericOnly;
-            set => TxEntry.NumericOnly = value;
-        }
-
-        public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
-
         public string Text { get => TxEntry.Text; set => SetText(value); }
+
+        public int LinesCount => TxEntry.GetLinesCharsCount().Length;
+        public int GetCharsOnLine(int line)
+        {
+            int[] lnch = TxEntry.GetLinesCharsCount();
+            if (line < lnch.Length)
+                return lnch[line];
+            return 0;
+        }
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
-        public void SetText(string text, bool append = false)
+        public int MaxLines { get => TxEntry.MaxLines; set => TxEntry.MaxLines = value; }
+        public const int PasteCommandID = 0x10000000;
+        public const int RetrnCommandID = 0x20000000;
+        public const int PasteRetnCmdID = 0x30000000;
+
+        public void SetText(string text)
         {
-            int oldidx = TxEntry.CaretIndex;
-            TxEntry.SetText(text);
-            TxEntry.SetCaretPosition(oldidx + text.Length);
+            TxEntry.SetText(text, TxEntry.CaretIndex + text.Length);
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
                 return;
-
-            if(Height != TxEntry.Height)
-                Height = TxEntry.Height;
 
             if (TxEntry.IsChanged)
                 TxEntry.UpdateCaretPosition();
@@ -118,17 +97,14 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-			if (ReplaceDefaultTextOnFirstKeyPress)
-            {
-                TxEntry.Clear();
-				ReplaceDefaultTextOnFirstKeyPress = false;
-            }
-            TxEntry.InsertString(c);
+            string s = TxEntry.InsertString(c);
+            if (!string.IsNullOrEmpty(s))
+                Parent?.OnKeyboardReturn(PasteCommandID, s);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            string s=null;
+            string s = null;
             int oldidx = TxEntry.CaretIndex;
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
@@ -136,40 +112,52 @@ namespace ClassicUO.Game.UI.Controls
                     return;
 
                 s = SDL.SDL_GetClipboardText();
-                if(!string.IsNullOrEmpty(s))
+                if (!string.IsNullOrEmpty(s))
                 {
-                    TxEntry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
+                    Parent?.OnKeyboardReturn(PasteCommandID, s);
                     return;
                 }
             }
             else switch (key)
-            {
-                case SDL.SDL_Keycode.SDLK_RETURN:
-                        s = TxEntry.Text;
-                       Parent?.OnKeyboardReturn(0, s);
-                    break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                    if (!ReplaceDefaultTextOnFirstKeyPress)
+                {
+                    case SDL.SDL_Keycode.SDLK_RETURN:
+                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
+                        break;
+                    case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                        if (Parent is Gumps.BookGump bbook)
+                            bbook.ScaleOnBackspace(TxEntry);
                         TxEntry.RemoveChar(true);
-                    else
-                        ReplaceDefaultTextOnFirstKeyPress = false;
-                     break;
-                case SDL.SDL_Keycode.SDLK_LEFT:
-                    TxEntry.SeekCaretPosition(-1);
-                    break;
-                case SDL.SDL_Keycode.SDLK_RIGHT:
-                    TxEntry.SeekCaretPosition(1);
-                    break;
-                case SDL.SDL_Keycode.SDLK_DELETE:
-                    TxEntry.RemoveChar(false);
-                    break;
-                case SDL.SDL_Keycode.SDLK_HOME:
-                    TxEntry.SetCaretPosition(0);
-                    break;
-                case SDL.SDL_Keycode.SDLK_END:
-                    TxEntry.SetCaretPosition(Text.Length - 1);
-                    break;
-            }
+                        break;
+                    case SDL.SDL_Keycode.SDLK_UP:
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1));
+                        break;
+                    case SDL.SDL_Keycode.SDLK_DOWN:
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_LEFT:
+                        TxEntry.SeekCaretPosition(-1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_RIGHT:
+                        TxEntry.SeekCaretPosition(1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_DELETE:
+                        if (Parent is Gumps.BookGump dbook)
+                            dbook.ScaleOnDelete(TxEntry);
+                        TxEntry.RemoveChar(false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_HOME:
+                        if (Parent is Gumps.BookGump hbook)
+                            hbook.OnHomeOrEnd(TxEntry, true);
+                        else
+                            TxEntry.SetCaretPosition(0);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_END:
+                        if (Parent is Gumps.BookGump ebook)
+                            ebook.OnHomeOrEnd(TxEntry, false);
+                        else
+                            TxEntry.SetCaretPosition(Text.Length - 1);
+                        break;
+                }
 
 
             base.OnKeyDown(key, mod);
@@ -180,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 TxEntry.OnMouseClick(x, y);
-            } 
+            }
         }
 
         public override void Dispose()
