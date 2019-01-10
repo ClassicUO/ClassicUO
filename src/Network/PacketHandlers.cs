@@ -1150,8 +1150,9 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());
 
-                if (FileManager.ClientVersion >= ClientVersions.CV_305D)
-                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+                //TODO: issue with viewrange
+                //if (FileManager.ClientVersion >= ClientVersions.CV_305D)
+                //    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
                 scene.Load();
@@ -2580,8 +2581,6 @@ namespace ClassicUO.Network
                 item.IsMulti = true;
                 item.Graphic = (ushort) (item.Graphic & 0x3FFF);
             }
-
-           
 
             item.ProcessDelta();
             if (World.Items.Add(item))

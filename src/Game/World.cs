@@ -49,7 +49,7 @@ namespace ClassicUO.Game
 
         public static Map.Map Map { get; private set; }
 
-        public static byte ViewRange { get; set; } = 32;
+        public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static Serial LastAttack { get; set; }
 

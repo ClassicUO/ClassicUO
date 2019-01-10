@@ -307,8 +307,11 @@ namespace ClassicUO
             Log.PushIndent();
             FileManager.LoadFiles();
             Log.PopIndent();
+
             uint[] hues = FileManager.Hues.CreateShaderColors();
+
             _batcher = new Batcher2D(GraphicsDevice);
+
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
             texture0.SetData(hues, 0, 32 * FileManager.Hues.HuesCount);
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);

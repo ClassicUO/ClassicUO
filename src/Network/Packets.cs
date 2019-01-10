@@ -1346,9 +1346,10 @@ namespace ClassicUO.Network
     {
         public PClientViewRange(byte range) : base(0xC8)
         {
-            if (range < 5)
-                range = 5;
-            else if (range > 24) range = 24;
+            if (range < Constants.MIN_VIEW_RANGE)
+                range = Constants.MIN_VIEW_RANGE;
+            else if (range > Constants.MAX_VIEW_RANGE)
+                range = Constants.MAX_VIEW_RANGE;
             WriteByte(range);
         }
     }

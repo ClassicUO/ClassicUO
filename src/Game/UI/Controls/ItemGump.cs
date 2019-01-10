@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -140,21 +141,57 @@ namespace ClassicUO.Game.UI.Controls
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                {                   
-                    return;
+                if (TargetManager.IsTargeting)
+                {
+
+                    switch (TargetManager.TargetingState)
+                    {
+                        case TargetType.Position:
+                        case TargetType.Object:
+                            gs.SelectedObject = Item;
+
+
+                            if (Item != null)
+                            {
+                                TargetManager.TargetGameObject(Item);
+                                Mouse.LastLeftButtonClickTime = 0;
+                            }
+
+                            break;
+                        case TargetType.Nothing:
+
+                            break;
+                        case TargetType.SetTargetClientSide:
+                            gs.SelectedObject = Item;
+
+                            if (Item != null)
+                            {
+                                TargetManager.TargetGameObject(Item);
+                                Mouse.LastLeftButtonClickTime = 0;
+                                Engine.UI.Add(new InfoGump(Item));
+                            }
+                            break;
+                    }
                 }
-
-                gs.SelectedObject = Item;
-
-                if (Item.ItemData.IsContainer)
-                    gs.DropHeldItemToContainer(Item);
-                else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.ItemData.IsStackable)
-                    gs.MergeHeldItem(Item);
                 else
                 {
-                    if (Item.Container.IsItem)
-                        gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+
+                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    {
+                        return;
+                    }
+
+                    gs.SelectedObject = Item;
+
+                    if (Item.ItemData.IsContainer)
+                        gs.DropHeldItemToContainer(Item);
+                    else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.ItemData.IsStackable)
+                        gs.MergeHeldItem(Item);
+                    else
+                    {
+                        if (Item.Container.IsItem)
+                            gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+                    }
                 }
             }
         }

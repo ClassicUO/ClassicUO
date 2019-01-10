@@ -80,6 +80,7 @@ namespace ClassicUO.IO.Resources
             uint[] hues = new uint[32 * 2 * HuesCount];
             int len = HuesRange.Length;
 
+            //int idx = 32;
             for (int r = 0; r < len; r++)
             {
                 for (int y = 0; y < 8; y++)
@@ -87,7 +88,7 @@ namespace ClassicUO.IO.Resources
                     for (int x = 0; x < 32; x++)
                     {
                         int idx = r * 8 * 32 + y * 32 + x;
-                        hues[idx] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                        hues[idx + 32] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
                     }
                 }
             }

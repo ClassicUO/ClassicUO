@@ -6,7 +6,6 @@
 #define SPECTRAL 10
 #define SHADOW 12
 
-const float HuesPerTexture = 3000;
 const float ToGrayScale = 3;
 
 
@@ -15,6 +14,7 @@ float4x4 ProjectionMatrix;
 float4x4 WorldMatrix;
 float2 Viewport;
 
+const float HuesPerTexture = 3000;
 bool DrawLighting;
 float3 lightDirection;
 float lightIntensity;
@@ -82,8 +82,6 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		else
 			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
 		hueColor.a = color.a;
-
-
 		color = hueColor;
 	}
 	else if (mode == PARTIAL_COLOR)

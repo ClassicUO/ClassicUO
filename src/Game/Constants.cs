@@ -80,5 +80,8 @@ namespace ClassicUO.Game
 
         public const int DRAG_ITEMS_DISTANCE = 3;
         public const int MIN_GUMP_DRAG_DISTANCE = 0;
+
+        public const int MIN_VIEW_RANGE = 5;
+        public const int MAX_VIEW_RANGE = 24;
     }
 }

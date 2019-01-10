@@ -74,7 +74,7 @@ namespace ClassicUO.Renderer
             else
                 type = ShadersEffectType.None;
 
-            return new Vector3(hue, (int) type, alpha);
+            return new Vector3(hue + 1, (int) type, alpha);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
