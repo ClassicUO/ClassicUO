@@ -134,22 +134,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
-            foreach (ItemGump v in Children
-                                    .OfType<ItemGump>()
-                                    .Where(s => e.Contains(s.Item)))
-            {
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();  
-            }
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            foreach (ItemGump v in Children
-                             .OfType<ItemGump>()
-                             .Where(s => e.Contains(s.Item)))
-            {
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
-            }
 
             foreach (Item item in e)
                 AddChildren(new ItemGump(item));
