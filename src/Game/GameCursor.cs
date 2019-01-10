@@ -310,6 +310,9 @@ namespace ClassicUO.Game
                             case GumpPicBackpack backpack:
                                 it = backpack.Backpack;
                                 break;
+							case Control control when control.Tooltip is Item i:
+								it = i;
+								break;
                         }
 
                         if (it != null && it.Properties.Count > 0)
@@ -336,11 +339,16 @@ namespace ClassicUO.Game
 
             if (Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-                if (_tooltip.Text != Engine.UI.MouseOverControl.Tooltip) _tooltip.Clear();
+	            if (Engine.UI.MouseOverControl.Tooltip is String text)
+	            {
+		            if (_tooltip.Text != text)
+			            _tooltip.Clear();
 
-                if (_tooltip.IsEmpty)
-                    _tooltip.SetText(Engine.UI.MouseOverControl.Tooltip, Engine.UI.MouseOverControl.TooltipMaxLength);
-                _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+		            if (_tooltip.IsEmpty)
+			            _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
+
+		            _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+	            }
             }
             else if (!_tooltip.IsEmpty)
             {

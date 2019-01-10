@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -511,7 +511,18 @@ namespace ClassicUO.Game.Managers
                             }
 
                             break;
-                        case "noresize":
+	                    case "itemproperty":
+		                    if (World.ClientFlags.TooltipsEnabled)
+		                    {
+			                    var entity = World.Get(Serial.Parse(gparams[1]));
+			                    var lastControl = gump.Children.LastOrDefault();
+
+			                    if (lastControl != default(Control) && entity != default(Entity))
+				                    lastControl.SetTooltip(entity);
+		                    }
+
+		                    break;
+						case "noresize":
 
                             break;
                         case "mastergump":
