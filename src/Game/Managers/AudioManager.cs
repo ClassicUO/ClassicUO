@@ -67,7 +67,11 @@ namespace ClassicUO.Game.Managers
 
             ASound m = FileManager.Sounds.GetMusic(music);
 
-            if (m != null && m != _currentMusic)
+            if( m == null && _currentMusic != null )
+            {
+                StopMusic();
+            }
+            else if (m != _currentMusic)
             {
                 StopMusic();
                 _currentMusic = (UOMusic) m;
