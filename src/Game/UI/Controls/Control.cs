@@ -47,8 +47,6 @@ namespace ClassicUO.Game.UI.Controls
 
     internal abstract class Control : IDrawableUI, IUpdateable, IColorable
     {
-	    private static int _minimumDistanceForDrag = 5;
-
         private static SpriteTexture _debugTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
@@ -686,12 +684,27 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseOver(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag 
-                             && (Math.Abs(Mouse.LDroppedOffset.X) > _minimumDistanceForDrag 
-                                 || Math.Abs(Mouse.LDroppedOffset.Y) > _minimumDistanceForDrag))
+            //if (_mouseIsDown && !_attempToDrag 
+            //                 && (Math.Abs(Mouse.LDroppedOffset.X) > _minimumDistanceForDrag 
+            //                     || Math.Abs(Mouse.LDroppedOffset.Y) > _minimumDistanceForDrag))
+            //{
+            //    InvokeDragBegin(new Point(x, y));
+            //    _attempToDrag = true;
+            //}
+
+            if (_mouseIsDown)
             {
-                InvokeDragBegin(new Point(x, y));
-                _attempToDrag = true;
+                if (!_attempToDrag)
+                {
+                    var offset = Mouse.LDroppedOffset;
+                    if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
+                        || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+
+                    {
+                        InvokeDragBegin(new Point(x, y));
+                        _attempToDrag = true;
+                    }
+                }
             }
         }
 

@@ -126,7 +126,8 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseDown += OnMouseDown;
             _viewPortGump.MouseUp += OnMouseUp;
             _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
-            _viewPortGump.DragBegin += OnMouseDragBegin;
+            //_viewPortGump.DragBegin += OnMouseDragBegin;
+            _viewPortGump.MouseOver += OnMouseMove;
             //_viewPortGump.Keyboard += OnKeyboard;
 
             //Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;

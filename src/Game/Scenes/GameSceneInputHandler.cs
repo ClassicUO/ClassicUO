@@ -295,13 +295,53 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (Mouse.LButtonPressed && !IsHoldingItem)
+            {
+                Point offset = Mouse.LDroppedOffset;
+
+                const int MIN_PICKUP_DRA_DISTANCE = 5;
+
+                if (Math.Abs(offset.X) > MIN_PICKUP_DRA_DISTANCE || Math.Abs(offset.Y) > MIN_PICKUP_DRA_DISTANCE)
+                {
+                    GameObject obj = _dragginObject;
+
+                    switch (obj)
+                    {
+                        case Mobile mobile:
+                            GameActions.RequestMobileStatus(mobile);
+
+                            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
+
+                            if (mobile == World.Player)
+                                Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                            HealthBarGump currentHealthBarGump;
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+
+
+                            break;
+                        case Item item:
+                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+
+                            break;
+                    }
+
+                    _dragginObject = null;
+                }
+            }
+        }
+
         private void OnMouseDragBegin(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left)
             {
                 if (!IsHoldingItem)
                 {
-                    GameObject obj = _dragginObject; //_mousePicker.MouseOverObject;
+                    GameObject obj = _dragginObject;
 
                     switch (obj)
                     {
