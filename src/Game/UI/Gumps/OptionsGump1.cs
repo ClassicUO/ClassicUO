@@ -35,14 +35,14 @@ namespace ClassicUO.Game.UI.Gumps
     {
 
         // general
-        private HSliderBar _sliderFPS, _circleOfTranspRadius;
+        private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
         // sounds
-        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musinInBackground;
-        private HSliderBar _soundsVolume, _musicVolume;
+        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
+        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
 
         // speech
         private Checkbox _scaleSpeechDelay;
@@ -162,8 +162,15 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, 1);
             fpsItem.AddChildren(text);
-            _sliderFPS = new HSliderBar(40, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            _sliderFPS = new HSliderBar(80, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             fpsItem.AddChildren(_sliderFPS);
+            rightArea.AddChildren(fpsItem);
+
+            fpsItem = new ScrollAreaItem();
+            text = new Label("- Login FPS:", true, 1);
+            fpsItem.AddChildren(text);
+            _sliderFPSLogin = new HSliderBar(80, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            fpsItem.AddChildren(_sliderFPSLogin);
             rightArea.AddChildren(fpsItem);
 
             // Highlight    
@@ -296,10 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Sounds volume:", true, 0, 0, 1);
 
-            _soundsVolume = new HSliderBar(40, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
-            {
-                X = 120
-            };
+            _soundsVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             item.AddChildren(text);
             item.AddChildren(_soundsVolume);
             rightArea.AddChildren(item);
@@ -311,19 +315,26 @@ namespace ClassicUO.Game.UI.Gumps
             item = new ScrollAreaItem();
             text = new Label("- Music volume:", true, 0, 0, 1);
 
-            _musicVolume = new HSliderBar(40, 5, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
-            {
-                X = 120
-            };
+            _musicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+
             item.AddChildren(text);
             item.AddChildren(_musicVolume);
             rightArea.AddChildren(item);
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
-            _musinInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
+            _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
 
-           
+
+            _loginMusic = CreateCheckBox(rightArea, "Login music", Engine.GlobalSettings.LoginMusic, 0, 40);
+
+            item = new ScrollAreaItem();
+            text = new Label("- Login music volume:", true, 0, 0, 1);
+            _loginMusicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            item.AddChildren(text);
+            item.AddChildren(_loginMusicVolume);
+            rightArea.AddChildren(item);
+
             AddChildren(rightArea, PAGE);
         }
 
@@ -457,6 +468,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1: // general
                     _sliderFPS.Value = 60;
+                    _sliderFPSLogin.Value = 60;
                     _highlightObjects.IsChecked = true;
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
@@ -481,8 +493,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _combatMusic.IsChecked = true;
                     _soundsVolume.Value = 100;
                     _musicVolume.Value = 100;
-                    _musinInBackground.IsChecked = false;
+                    _musicInBackground.IsChecked = false;
                     _footStepsSound.IsChecked = true;
+                    _loginMusicVolume.Value = 100;
+                    _loginMusic.IsChecked = true;
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
@@ -523,6 +537,7 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             Engine.GlobalSettings.PreloadMaps = _preloadMaps.IsChecked;
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
+            Engine.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
@@ -554,9 +569,11 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableMusic = _enableMusic.IsChecked;
             Engine.Profile.Current.EnableFootstepsSound = _footStepsSound.IsChecked;
             Engine.Profile.Current.EnableCombatMusic = _combatMusic.IsChecked;
-            Engine.Profile.Current.ReproduceSoundsInBackground = _musinInBackground.IsChecked;
+            Engine.Profile.Current.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
             Engine.Profile.Current.SoundVolume = _soundsVolume.Value;
             Engine.Profile.Current.MusicVolume = _musicVolume.Value;
+            Engine.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
+            Engine.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
             Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
 

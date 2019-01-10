@@ -568,7 +568,6 @@ namespace ClassicUO.Game.Managers
 
                 if (g.IsDisposed)
                     _gumps.RemoveAt(i--);
-
             }
 
             GameCursor.Update(totalMS, frameMS);
