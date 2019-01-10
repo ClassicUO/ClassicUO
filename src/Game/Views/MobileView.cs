@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Views
             byte dir = (byte)mobile.GetDirectionForAnimation();
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            SetupLayers(dir, mobile, out int mountOffset);
+            SetupLayers(dir, mobile, out int mountOffset, ref mirror);
 
             if (mobile.Graphic == 0)
                 return false;
@@ -69,6 +69,7 @@ namespace ClassicUO.Game.Views
 
             if (bodyFrame == null)
                 return false;
+
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
             int drawY = mountOffset + drawCenterY + (int)(mobile.Offset.Z / 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
@@ -77,6 +78,13 @@ namespace ClassicUO.Game.Views
                 drawX = -22 + (int)mobile.Offset.X;
             else
                 drawX = -22 - (int)mobile.Offset.X;
+
+
+            /*if (_frames[0].IsSitting)
+            {
+                int x1 = 0, y1 = 0;
+                FileManager.Animations.FixSittingDirection(ref dir, ref mirror, ref x1, ref y1);
+            }*/
 
             FrameInfo = Rectangle.Empty;
             Rectangle rect = Rectangle.Empty;
@@ -215,7 +223,7 @@ namespace ClassicUO.Game.Views
             if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
         }
 
-        private void SetupLayers(byte dir, Mobile mobile, out int mountOffset)
+        private void SetupLayers(byte dir, Mobile mobile, out int mountOffset, ref bool mirror)
         {
             _layerCount = 0;
             mountOffset = 0;
@@ -230,7 +238,7 @@ namespace ClassicUO.Game.Views
                         continue;
 
                     if (layer == Layer.Invalid)
-                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile);
+                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile, ref mirror);
                     else
                     {
                         Item item;
@@ -247,7 +255,7 @@ namespace ClassicUO.Game.Views
 
                                     if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = FileManager.Animations.DataIndex[mountGraphic].MountedHeightOffset;
-                                    AddLayer(dir, mountGraphic, mount.Hue, mobile, true, offsetY: mountOffset);
+                                    AddLayer(dir, mountGraphic, mount.Hue, mobile, ref mirror, true, offsetY: mountOffset);
                                 }
                             }
                             else
@@ -268,7 +276,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, mobile, false, convertedItem, item.ItemData.IsPartialHue);
+                                    AddLayer(dir, graphic, hue, mobile, ref mirror, false, convertedItem, item.ItemData.IsPartialHue);
                                 }
                             }
                         }
@@ -276,13 +284,26 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile);
+                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile, ref mirror);
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, ref bool mirror, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;
+
+            /* bool isitting = false;
+            if (mobile.IsHuman && !mounted)
+            {
+                if ((FileManager.Animations.SittingValue = mobile.IsSitting) != 0)
+                {
+                    animGroup = (byte) (FileManager.Animations.Direction == 3 ? 25 : (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND);
+                    animIndex = 0;
+
+                    isitting = true;
+                }
+            } */
+
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
@@ -308,7 +329,7 @@ namespace ClassicUO.Game.Views
                     if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 
-                _frames[_layerCount++] = new ViewLayer(graphic, hue, hash, ispartial, offsetY);
+                _frames[_layerCount++] = new ViewLayer(graphic, hue, hash, ispartial, offsetY /*, isitting */);
             }
         }
 
@@ -421,13 +442,14 @@ namespace ClassicUO.Game.Views
 
         private readonly struct ViewLayer
         {
-            public ViewLayer(Graphic graphic, Hue hue, uint frame, bool partial, int offsetY)
+            public ViewLayer(Graphic graphic, Hue hue, uint frame, bool partial, int offsetY /*, bool sitting*/)
             {
                 Graphic = graphic;
                 Hue = hue;
                 Hash = frame;
                 IsParital = partial;
                 OffsetY = offsetY;
+                //IsSitting = sitting;
             }
 
             public readonly Graphic Graphic;
@@ -435,6 +457,7 @@ namespace ClassicUO.Game.Views
             public readonly uint Hash;
             public readonly bool IsParital;
             public readonly int OffsetY;
+            //public readonly bool IsSitting;
         }
     }
 }

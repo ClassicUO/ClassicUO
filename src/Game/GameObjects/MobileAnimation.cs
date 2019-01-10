@@ -514,6 +514,32 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
+        private static bool TestStepNoChangeDirection( Mobile mob, byte group)
+        {
+            switch ( (PEOPLE_ANIMATION_GROUP) group)
+            {
+                case PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST:
+                case PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED:
+                case PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED:
+                case PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW:
+                case PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE:
+                case PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED:
+                case PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED:
+
+                    if (mob.IsMoving)
+                    {
+                        var s = mob.Steps.Front();
+
+                        if (s.X != mob.X || s.Y != mob.Y)
+                            return true;
+                    }
+
+                    break;
+            }
+
+            return false;
+        }
+
         private static byte GetObjectNewAnimationType_0(Mobile mobile, ushort action, byte mode)
         {
             if (action <= 10)

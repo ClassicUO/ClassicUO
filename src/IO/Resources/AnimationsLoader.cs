@@ -45,6 +45,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
+        public int SittingValue { get; set; }
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
@@ -880,7 +881,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        readonly struct SittingInfoData
+        public readonly struct SittingInfoData
         {
             public SittingInfoData(ushort graphic, sbyte d1,
                                    sbyte d2, sbyte d3, sbyte d4,
@@ -904,7 +905,7 @@ namespace ClassicUO.IO.Resources
             public readonly bool DrawBack;
         }
 
-        private readonly SittingInfoData[] _sittingInfos =
+        public SittingInfoData[] SittingInfos { get; } =
         {
             new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
             new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
@@ -1042,9 +1043,111 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+
         public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
         {
+            ref var data = ref SittingInfos[SittingValue - 1];
 
+            switch (Direction)
+            {
+                case 7:
+                case 0:
+                {
+                    if (data.Direction1 == -1)
+                    {
+                        if (Direction == 7)
+                            Direction = (byte) data.Direction4;
+                        else
+                            Direction = (byte) data.Direction2;
+                    }
+                    else
+                        Direction = (byte) data.Direction1;
+
+                    break;
+                }
+                case 1:
+                case 2:
+                {
+                    if (data.Direction2 == -1)
+                    {
+                        if (Direction == 1)
+                            Direction = (byte) data.Direction1;
+                        else
+                            Direction = (byte) data.Direction3;
+                    }
+                    else
+                        Direction = (byte) data.Direction2;
+
+                    break;
+                }
+                case 3:
+                case 4:
+                {
+                    if (data.Direction3 == -1)
+                    {
+                        if (Direction == 3)
+                            Direction = (byte) data.Direction2;
+                        else
+                            Direction = (byte) data.Direction4;
+                    }
+                    else
+                        Direction = (byte) data.Direction3;
+
+                    break;
+                }
+                case 5:
+                case 6:
+                {
+                    if (data.Direction4 == -1)
+                    {
+                        if (Direction == 5)
+                            Direction = (byte) data.Direction3;
+                        else
+                            Direction = (byte) data.Direction1;
+                    }
+                    else
+                        Direction = (byte) data.Direction4;
+
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            layerDirection = Direction;
+            byte dir = Direction;
+            GetSittingAnimDirection(ref dir, ref mirror, ref x, ref y);
+            Direction = dir;
+
+            const int SITTING_OFFSET_X = 8;
+
+            int offsX = SITTING_OFFSET_X;
+
+            if (mirror)
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x += offsX - 4;
+                }
+                else
+                {
+                    y += data.OffsetY + 9;
+                }
+            }
+            else
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x -= 3;
+                }
+                else
+                {
+                    y += 9 + data.OffsetY;
+                    x -= offsX + 1;
+                }
+            }
         }
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
