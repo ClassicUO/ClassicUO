@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
             {
                 StopMusic();
             }
-            else if (m != _currentMusic)
+            else if (m != null && m != _currentMusic)
             {
                 StopMusic();
                 _currentMusic = (UOMusic) m;
