@@ -606,7 +606,7 @@ namespace ClassicUO.Network
                 item.IsMulti = true;
             }
 
-            item.Container = Serial.Invalid;
+            item.Container = Serial.INVALID;
             item.ProcessDelta();
 
 
@@ -2570,7 +2570,7 @@ namespace ClassicUO.Network
             item.Flags = (Flags) p.ReadByte();
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 p.ReadUShort(); //unknown
-            item.Container = Serial.Invalid;
+            item.Container = Serial.INVALID;
 
             if (item.Graphic != 0x2006)
                 item.Graphic += graphicInc;

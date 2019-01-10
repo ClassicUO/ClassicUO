@@ -176,7 +176,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case MessageType.Regular:
 
-                    if (e.Parent == null || e.Parent.Serial == Serial.Invalid)
+                    if (e.Parent == null || e.Parent.Serial == Serial.INVALID)
                         name = "System";
                     else
                         name = e.Parent.Name;

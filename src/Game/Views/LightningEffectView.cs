@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Views
         {
             new Point(48, 0), new Point(68, 0), new Point(92, 0), new Point(72, 0), new Point(48, 0), new Point(56, 0), new Point(76, 0), new Point(76, 0), new Point(92, 0), new Point(80, 0)
         };
-        private Graphic _displayed = Graphic.Invalid;
+        private Graphic _displayed = Graphic.INVALID;
 
         public LightningEffectView(LightningEffect effect) : base(effect)
         {

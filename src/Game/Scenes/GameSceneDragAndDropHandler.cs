@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Scenes
                 z = 0;
             }
             else
-                serial = Serial.MinusOne;
+                serial = Serial.MINUS_ONE;
 
             GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
             ClearHolding();

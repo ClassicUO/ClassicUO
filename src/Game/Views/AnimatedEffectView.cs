@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Views
 {
     internal class AnimatedEffectView : View
     {
-        private Graphic _displayedGraphic = Graphic.Invalid;
+        private Graphic _displayedGraphic = Graphic.INVALID;
 
         public AnimatedEffectView(AnimatedItemEffect effect) : base(effect)
         {
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Views
                 return false;
             AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
 
-            if (effect.AnimationGraphic == Graphic.Invalid)
+            if (effect.AnimationGraphic == Graphic.INVALID)
                 return false;
 
             Hue hue = effect.Hue;
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)
+            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.INVALID)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);

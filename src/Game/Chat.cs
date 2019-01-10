@@ -70,9 +70,9 @@ namespace ClassicUO.Game
     internal static class Chat
     {
         private const ushort defaultHue = 0x0017;
-        private static readonly Mobile _system = new Mobile(Serial.Invalid)
+        private static readonly Mobile _system = new Mobile(Serial.INVALID)
         {
-            Graphic = Graphic.Invariant, Name = "System"
+            Graphic = Graphic.INVARIANT, Name = "System"
         };
 
         public static event EventHandler<UOMessageEventArgs> Message;
