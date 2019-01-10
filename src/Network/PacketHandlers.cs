@@ -2136,39 +2136,61 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void DisplayClilocString(Packet p)
-        {
-            if (World.Player == null)
-                return;
-            Serial serial = p.ReadUInt();
-            Entity entity = World.Get(serial);
-            ushort graphic = p.ReadUShort();
-            MessageType type = (MessageType) p.ReadByte();
-            Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont) p.ReadUShort();
-            uint cliloc = p.ReadUInt();
-            byte flags = p.ID == 0xCC ? p.ReadByte() : (byte) 0;
-            string name = p.ReadASCII(30);
-            string arguments = null;
+		[Flags]
+	    public enum AffixType
+	    {
+		    Append = 0x00,
+		    Prepend = 0x01,
+		    System = 0x02
+	    }
 
-            if (p.Position < p.Length)
-                arguments = p.ReadUnicodeReversed(p.Length - p.Position);
-            string text = FileManager.Cliloc.Translate((int) cliloc, arguments);
+	    private static void DisplayClilocString(Packet p)
+	    {
+		    if (World.Player == null)
+			    return;
+		    Serial serial = p.ReadUInt();
+		    Entity entity = World.Get(serial);
+		    ushort graphic = p.ReadUShort();
+		    MessageType type = (MessageType)p.ReadByte();
+		    Hue hue = p.ReadUShort();
+		    MessageFont font = (MessageFont)p.ReadUShort();
+		    uint cliloc = p.ReadUInt();
+		    AffixType flags = (p.ID == 0xCC) ? (AffixType)p.ReadByte() : 0x00;
+		    string name = p.ReadASCII(30);
+		    string affix = (p.ID == 0xCC) ? p.ReadASCII() : String.Empty;
 
-            if (!FileManager.Fonts.UnicodeFontExists((byte) font))
-                font = MessageFont.Bold;
+		    string arguments = null;
 
-            if (entity != null)
-            {
-                entity.Graphic = graphic;
-                entity.Name = name;
-                entity.ProcessDelta();
-            }
+		    if (p.Position < p.Length)
+			    arguments = p.ReadUnicodeReversed(p.Length - p.Position);
 
-            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true));
-        }
+		    string text = FileManager.Cliloc.Translate((int)cliloc, arguments);
 
-        private static void UnicodePrompt(Packet p)
+			if (!String.IsNullOrWhiteSpace(affix))
+			{
+			    if ((flags & AffixType.Prepend) != 0)
+				    text = $"{affix}{text}";
+			    else
+				    text = $"{text}{affix}";
+			}
+
+			if ((flags & AffixType.System) != 0)
+			    type = MessageType.System;
+
+		    if (!FileManager.Fonts.UnicodeFontExists((byte)font))
+			    font = MessageFont.Bold;
+
+		    if (entity != null)
+		    {
+			    entity.Graphic = graphic;
+			    entity.Name = name;
+			    entity.ProcessDelta();
+		    }
+
+		    Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true));
+	    }
+
+		private static void UnicodePrompt(Packet p)
         {
         }
 
