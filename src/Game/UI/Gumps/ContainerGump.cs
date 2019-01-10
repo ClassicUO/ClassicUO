@@ -42,6 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Item _item;
         private long _corpseEyeTicks;
         private int _eyeCorspeOffset;
+        private ContainerData _data;
 
         public ContainerGump() : base(0, 0)
         {
@@ -73,8 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
 
-            var cont = ContainerManager.Get(_gumpID);
-            Graphic g = cont.Graphic;
+            _data = ContainerManager.Get(_gumpID);
+            Graphic g = _data.Graphic;
 
             AddChildren(new GumpPicContainer(0, 0, g, 0, _item));
             if (_isCorspeContainer)
@@ -84,8 +85,8 @@ namespace ClassicUO.Game.UI.Gumps
             X = ContainerManager.X;
             Y = ContainerManager.Y;
 
-            if (cont.OpenSound != 0)
-                Engine.SceneManager.CurrentScene.Audio.PlaySound(cont.OpenSound);
+            if (_data.OpenSound != 0)
+                Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.OpenSound);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -133,12 +134,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
-            Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)).ToList().ForEach(RemoveChildren);
+            foreach (ItemGump v in Children
+                                    .OfType<ItemGump>()
+                                    .Where(s => e.Contains(s.Item)))
+            {
+                v.Dispose();  
+            }
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)).ToList().ForEach(RemoveChildren);
+            foreach (ItemGump v in Children
+                             .OfType<ItemGump>()
+                             .Where(s => e.Contains(s.Item)))
+            {
+                v.Dispose();
+            }
 
             foreach (Item item in e)
                 AddChildren(new ItemGump(item));
@@ -151,10 +162,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
 
-                var cont = ContainerManager.Get(_gumpID);
-
-                if (cont.ClosedSound != 0)
-                    Engine.SceneManager.CurrentScene.Audio.PlaySound(cont.ClosedSound);
+                if (_data.ClosedSound != 0)
+                    Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.ClosedSound);
             }
 
             base.Dispose();
