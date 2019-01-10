@@ -23,6 +23,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
@@ -182,6 +183,8 @@ namespace ClassicUO.Game.GameObjects
                             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
                             house.Generate();
+
+                            Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
                         }
                     }
                     else

@@ -625,12 +625,7 @@ namespace ClassicUO.Network
         }
 
         private static void EnterWorld(Packet p)
-        {
-            GameScene scene = new GameScene();
-            Engine.SceneManager.ChangeScene(scene);
-
-
-
+        {          
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -649,25 +644,12 @@ namespace ClassicUO.Network
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
-            List<Gump> gumps = Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
-
-
             NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_200)
-            {
-                NetClient.Socket.Send(new PGameWindowSize((uint)Engine.Profile.Current.GameWindowSize.X, (uint)Engine.Profile.Current.GameWindowSize.Y));
-                NetClient.Socket.Send(new PLanguage("ENU"));
-            }
 
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
-
-            Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
-            scene.Load();
-            gumps?.ForEach(Engine.UI.Add);
         }
 
         private static void Talk(Packet p)
@@ -1150,6 +1132,31 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
+            if (World.Player != null)
+            {
+                GameScene scene = new GameScene();
+                Engine.SceneManager.ChangeScene(scene);
+
+                List<Gump> gumps = Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
+
+                if (FileManager.ClientVersion >= ClientVersions.CV_200)
+                {
+                    NetClient.Socket.Send(new PGameWindowSize((uint)Engine.Profile.Current.GameWindowSize.X, (uint)Engine.Profile.Current.GameWindowSize.Y));
+                    NetClient.Socket.Send(new PLanguage("ENU"));
+                }
+
+                NetClient.Socket.Send(new PSkillsRequest(World.Player));
+
+                if (FileManager.ClientVersion >= ClientVersions.CV_306E)
+                    NetClient.Socket.Send(new PClientType());
+
+                if (FileManager.ClientVersion >= ClientVersions.CV_305D)
+                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+
+                Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
+                scene.Load();
+                gumps?.ForEach(Engine.UI.Add);
+            }
         }
 
         private static void MapData(Packet p)
@@ -2094,7 +2101,11 @@ namespace ClassicUO.Network
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
                     }
                     else
+                    {
                         house.Generate();
+                        Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+                    }
+
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2390,6 +2401,7 @@ namespace ClassicUO.Network
                     }
 
                     house.Generate();
+                    Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
                 }
             }
         }

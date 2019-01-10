@@ -45,6 +45,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
+        //public int SittingValue { get; set; }
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
@@ -880,6 +881,135 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        /* public readonly struct SittingInfoData
+        {
+            public SittingInfoData(ushort graphic, sbyte d1,
+                                   sbyte d2, sbyte d3, sbyte d4,
+                                   sbyte offsetY,
+                                   sbyte mirrorOffsetY,
+                                   bool drawback)
+            {
+                Graphic = graphic;
+                Direction1 = d1;
+                Direction2 = d2;
+                Direction3 = d3;
+                Direction4 = d4;
+                OffsetY = offsetY;
+                MirrorOffsetY = mirrorOffsetY;
+                DrawBack = drawback;
+            }
+
+            public readonly ushort Graphic;
+            public readonly sbyte Direction1, Direction2, Direction3, Direction4;
+            public readonly sbyte OffsetY, MirrorOffsetY;
+            public readonly bool DrawBack;
+        }
+
+        public SittingInfoData[] SittingInfos { get; } =
+        {
+            new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x045B, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0A2A, 0, 2, 4, 6, -4, -4, false),
+            new SittingInfoData(0x0A2B, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B2C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0B2D, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x0B2E, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B2F, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B30, 6, 6, 6, 6, -8, 8, true),
+            new SittingInfoData(0x0B31, 0, 0, 0, 0, 0, 4, true),
+            new SittingInfoData(0x0B32, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B33, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4E, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4F, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B50, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B51, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B52, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B53, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B54, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B55, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B56, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x0B57, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x0B58, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x0B59, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5A, 2, 2, 2, 2, 8, 8, false),
+            new SittingInfoData(0x0B5B, 4, 4, 4, 4, 8, 8, false),
+            new SittingInfoData(0x0B5C, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5D, 6, 6, 6, 6, 0 ,8, true),
+            new SittingInfoData(0x0B5E, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B5F, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B60, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B61, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B62, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B63, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B64, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B65, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B66, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B67, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B68, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B69, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B6A, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B91, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0CF3, -1, 2, -1 , 6, 2, 8, false),
+            new SittingInfoData(0x0CF4, -1, 2, -1 , 6, 2, 8, false),
+            new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
+            new SittingInfoData(0x1218, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x1219, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x121A, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x121B, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x1527, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x1771, 0, 2, 4, 6, 0 , 0, false),
+            new SittingInfoData(0x1776, 0, 2, 4, 6, 0 , 0, false),
+            new SittingInfoData(0x1779, 0, 2, 4, 6, 0 , 0, false),       
+            new SittingInfoData(0x1DC7, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC8, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC9, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCA, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCB, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCC, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCD, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCE, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCF, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DD0, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD1, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD2, -1, 2, -1, 6, 3, 10, false),
+
+            new SittingInfoData(0x2A58, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x2A59, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x2A5A, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A5B, 0, 2, 4, 6, 10, 10, false),
+            new SittingInfoData(0x2A7F, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A80, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2DDF, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE0, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE3, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DE4, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DE5, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DE6, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEB, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEC, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DED, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DEE, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DF5, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x2DF6, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3088, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3089, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308A, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308B, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x35ED, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
+
+            new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
+        };
+       
+
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
             switch (dir)
@@ -906,6 +1036,115 @@ namespace ClassicUO.IO.Resources
                     break;
             }
         }
+
+
+        public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
+        {
+            ref var data = ref SittingInfos[SittingValue - 1];
+
+            switch (Direction)
+            {
+                case 7:
+                case 0:
+                {
+                    if (data.Direction1 == -1)
+                    {
+                        if (Direction == 7)
+                            Direction = (byte) data.Direction4;
+                        else
+                            Direction = (byte) data.Direction2;
+                    }
+                    else
+                        Direction = (byte) data.Direction1;
+
+                    break;
+                }
+                case 1:
+                case 2:
+                {
+                    if (data.Direction2 == -1)
+                    {
+                        if (Direction == 1)
+                            Direction = (byte) data.Direction1;
+                        else
+                            Direction = (byte) data.Direction3;
+                    }
+                    else
+                        Direction = (byte) data.Direction2;
+
+                    break;
+                }
+                case 3:
+                case 4:
+                {
+                    if (data.Direction3 == -1)
+                    {
+                        if (Direction == 3)
+                            Direction = (byte) data.Direction2;
+                        else
+                            Direction = (byte) data.Direction4;
+                    }
+                    else
+                        Direction = (byte) data.Direction3;
+
+                    break;
+                }
+                case 5:
+                case 6:
+                {
+                    if (data.Direction4 == -1)
+                    {
+                        if (Direction == 5)
+                            Direction = (byte) data.Direction3;
+                        else
+                            Direction = (byte) data.Direction1;
+                    }
+                    else
+                        Direction = (byte) data.Direction4;
+
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            layerDirection = Direction;
+            byte dir = Direction;
+            GetSittingAnimDirection(ref dir, ref mirror, ref x, ref y);
+            Direction = dir;
+
+            const int SITTING_OFFSET_X = 8;
+
+            int offsX = SITTING_OFFSET_X;
+
+            if (mirror)
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x += offsX - 4;
+                }
+                else
+                {
+                    y += data.OffsetY + 9;
+                }
+            }
+            else
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x -= 3;
+                }
+                else
+                {
+                    y += 9 + data.OffsetY;
+                    x -= offsX + 1;
+                }
+            }
+        }
+        
+       */
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {

@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
         private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
-        private readonly List<Static> _staticToUpdate = new List<Static>();
+        private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
 
         private TextOverhead _firstNode;
 
@@ -148,8 +148,8 @@ namespace ClassicUO.Game.Managers
 
         public void AddOverhead(TextOverhead overhead, Vector3 position)
         {
-            if (overhead.Parent is Static st && !_staticToUpdate.Contains(st))
-                _staticToUpdate.Add(st);
+            if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
+                _staticToUpdate.Add(overhead.Parent);
 
 
             overhead.Right = null;
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _staticToUpdate.Count; i++)
             {
-                Static st = _staticToUpdate[i];
+                var st = _staticToUpdate[i];
                 st.Update(totalMS, frameMS);
 
                 if (st.IsDisposed)

@@ -710,6 +710,148 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        /* public int IsSitting
+        {
+            get
+            {
+                int result = 0;
+
+                if (IsHuman && !IsMounted)
+                {
+                    GameObject start = World.Map.GetTile(X, Y).FirstNode;
+
+                    while (start != null && result == 0 && !TestStepNoChangeDirection(this, GetGroupForAnimation(this)))
+                    {
+                        if (GameObjectHelper.TryGetStaticData(start, out var itemdata) && Math.Abs(Z - start.Z) <= 1)
+                        {
+                            ushort graphic = start.Graphic;
+
+                            if (start is Multi)
+                                graphic = 0;
+
+                            switch (graphic)
+                            {
+                                case 0x0459:
+                                case 0x045A:
+                                case 0x045B:
+                                case 0x045C:
+                                case 0x0A2A:
+                                case 0x0A2B:
+                                case 0x0B2C:
+                                case 0x0B2D:
+                                case 0x0B2E:
+                                case 0x0B2F:
+                                case 0x0B30:
+                                case 0x0B31:
+                                case 0x0B32:
+                                case 0x0B33:
+                                case 0x0B4E:
+                                case 0x0B4F:
+                                case 0x0B50:
+                                case 0x0B51:
+                                case 0x0B52:
+                                case 0x0B53:
+                                case 0x0B54:
+                                case 0x0B55:
+                                case 0x0B56:
+                                case 0x0B57:
+                                case 0x0B58:
+                                case 0x0B59:
+                                case 0x0B5A:
+                                case 0x0B5B:
+                                case 0x0B5C:
+                                case 0x0B5D:
+                                case 0x0B5E:
+                                case 0x0B5F:
+                                case 0x0B60:
+                                case 0x0B61:
+                                case 0x0B62:
+                                case 0x0B63:
+                                case 0x0B64:
+                                case 0x0B65:
+                                case 0x0B66:
+                                case 0x0B67:
+                                case 0x0B68:
+                                case 0x0B69:
+                                case 0x0B6A:
+                                case 0x0B91:
+                                case 0x0B92:
+                                case 0x0B93:
+                                case 0x0B94:
+                                case 0x0CF3:
+                                case 0x0CF4:
+                                case 0x0CF6:
+                                case 0x0CF7:
+                                case 0x11FC:
+                                case 0x1218:
+                                case 0x1219:
+                                case 0x121A:
+                                case 0x121B:
+                                case 0x1527:
+                                case 0x1771:
+                                case 0x1776:
+                                case 0x1779:
+                                case 0x1DC7:
+                                case 0x1DC8:
+                                case 0x1DC9:
+                                case 0x1DCA:
+                                case 0x1DCB:
+                                case 0x1DCC:
+                                case 0x1DCD:
+                                case 0x1DCE:
+                                case 0x1DCF:
+                                case 0x1DD0:
+                                case 0x1DD1:
+                                case 0x1DD2:
+                                case 0x2A58:
+                                case 0x2A59:
+                                case 0x2A5A:
+                                case 0x2A5B:
+                                case 0x2A7F:
+                                case 0x2A80:
+                                case 0x2DDF:
+                                case 0x2DE0:
+                                case 0x2DE3:
+                                case 0x2DE4:
+                                case 0x2DE5:
+                                case 0x2DE6:
+                                case 0x2DEB:
+                                case 0x2DEC:
+                                case 0x2DED:
+                                case 0x2DEE:
+                                case 0x2DF5:
+                                case 0x2DF6:
+                                case 0x3088:
+                                case 0x3089:
+                                case 0x308A:
+                                case 0x308B:
+                                case 0x35ED:
+                                case 0x35EE:
+                                case 0x3DFF:
+                                case 0x3E00:
+
+                                    for (int i = 0; i < 98; i++)
+                                    {
+                                        if (FileManager.Animations.SittingInfos[i].Graphic == graphic)
+                                        {
+                                            result = i + 1;
+
+                                            break;
+                                        }
+                                    }
+
+                                    break;
+                            }
+                        }
+
+                        start = start.Right;
+                    }
+                }
+
+                return result;
+            }
+        } */
+
         public override void Dispose()
         {
             for (int i = 0; i < Equipment.Length; i++)
