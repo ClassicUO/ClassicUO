@@ -34,7 +34,11 @@ namespace ClassicUO.IO
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
         public static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
-        public static UInt16[,] WrapSize;
+        //WrapMapSize includes 2 different kind of values at each side of the array:
+        //left - mapID (zero based value), so first map is at ZERO
+        //right- we have the size of the map, values in index 0 and 1 are wrapsize x and y
+        //       values in index 2 and 3 is for the total size of map, x and y
+        public static UInt16[,] WrapMapSize;
         public static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
@@ -77,8 +81,8 @@ namespace ClassicUO.IO
                         int blockX = block / mapHeightInBlocks;
                         int blockY = block % mapHeightInBlocks;
                         //this will avoid going OVER the wrapsize, so that we have the ILLUSION of never going over the main world
-                        mapWidthInBlocks = blockX < (WrapSize[mapID, 0] >> 3) ? WrapSize[mapID, 0] >> 3 : mapWidthInBlocks;
-                        mapHeightInBlocks = blockY < (WrapSize[mapID, 1] >> 3) ? WrapSize[mapID, 1] >> 3 : mapHeightInBlocks;
+                        mapWidthInBlocks = blockX < (WrapMapSize[mapID, 2] >> 3) ? WrapMapSize[mapID, 2] >> 3 : mapWidthInBlocks;
+                        mapHeightInBlocks = blockY < (WrapMapSize[mapID, 3] >> 3) ? WrapMapSize[mapID, 3] >> 3 : mapHeightInBlocks;
                         ushort[] tosendCRCs = new ushort[CRCLength];     //byte 015 through 64   -  25 block CRCs
                         for (int x = -2; x <= 2; x++)
                         {
@@ -193,8 +197,7 @@ namespace ClassicUO.IO
 
                         p.Seek(7);
                         uint maps = (p.ReadUInt() * 7) / 9;
-                        if (WrapSize == null)
-                            WrapSize = new UInt16[maps, 2];
+                        WrapMapSize = new UInt16[maps, 4];//we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes.
                         if (p.Length < (maps * 9 + 15))//the packet has padding inside, so it's usually larger or equal than what we expect
                         {
                             return;
@@ -207,10 +210,10 @@ namespace ClassicUO.IO
                         for (int i = 0; i < maps; i++)
                         {
                             int mapnum = p.ReadByte();
-                            ushort dimX = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
-                            ushort dimY = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
-                            WrapSize[mapnum,0] = p.ReadUShort();
-                            WrapSize[mapnum,1] = p.ReadUShort();
+                            WrapMapSize[mapnum,0] = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
+                            WrapMapSize[mapnum,1] = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
+                            WrapMapSize[mapnum,2] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,0]);
+                            WrapMapSize[mapnum,3] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,1]);
                         }
                         IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;

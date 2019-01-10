@@ -226,8 +226,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             int curpage = ActiveInternalPage;
-            var textbox = m_Pages[curpage];
-            var entry = textbox._entry;
+            var box = m_Pages[curpage];
+            var entry = box.TxEntry;
 
             if (key == SDL.SDL_Keycode.SDLK_BACKSPACE || key == SDL.SDL_Keycode.SDLK_DELETE)
             {
@@ -242,9 +242,9 @@ namespace ClassicUO.Game.UI.Gumps
                                 if ((curpage + 1) % 2 == 0)
                                     SetActivePage(ActivePage - 1);
                                 curpage--;
-                                textbox = m_Pages[curpage];
-                                entry = textbox._entry;
-                                RefreshShowCaretPos(entry.Text.Length, textbox);
+                                box = m_Pages[curpage];
+                                entry = box.TxEntry;
+                                RefreshShowCaretPos(entry.Text.Length, box);
                                 _AtEnd = 1;
                             }
                             else if (entry.CaretIndex == 0)
@@ -273,10 +273,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         do
                         {
-                            entry = m_Pages[curpage]._entry;
-                            textbox = m_Pages[curpage];
-                            int curlen = entry.Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = textbox.GetCharsOnLine(0), prevpage = curpage - 1;
-                            m_Pages[prevpage]._entry.SetCaretPosition(prevlen);
+                            entry = m_Pages[curpage].TxEntry;
+                            box = m_Pages[curpage];
+                            int curlen = entry.Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
+                            m_Pages[prevpage].TxEntry.SetCaretPosition(prevlen);
 
                             for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i)
                             {
@@ -295,12 +295,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 entry.Text = entry.Text.Substring(chonline);
                             }
 
-                            m_Pages[prevpage]._entry.InsertString(sb.ToString());
+                            m_Pages[prevpage].TxEntry.InsertString(sb.ToString());
                             curpage++;
                             sb.Clear();
                         } while (curpage < BookPageCount);
 
-                        m_Pages[active]._entry.SetCaretPosition(caretpos);
+                        m_Pages[active].TxEntry.SetCaretPosition(caretpos);
                     }
                 }
             }
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage >= 0 && curpage + 1 < BookPageCount)
                 {
-                    if (entry.CaretIndex + 1 >= textbox.Text.Length)
+                    if (entry.CaretIndex + 1 >= box.Text.Length)
                     {
                         if (_AtEnd > 0)
                         {
@@ -368,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage + 1 < BookPageCount && curpage >= 0)
                 {
-                    if (entry.CaretIndex + 1 >= textbox.Text.Length)
+                    if (entry.CaretIndex + 1 >= box.Text.Length)
                     {
                         if (_AtEnd > 0)
                         {
@@ -501,8 +501,8 @@ namespace ClassicUO.Game.UI.Gumps
         private void OnLeftClick()
         {
             var curpage = ActiveInternalPage;
-            var entry = m_Pages[curpage]._entry;
-            var caretpos = m_Pages[curpage]._entry.CaretIndex;
+            var entry = m_Pages[curpage].TxEntry;
+            var caretpos = m_Pages[curpage].TxEntry.CaretIndex;
             _AtEnd = (sbyte)(caretpos == 0 && curpage > 0 ? -1 : caretpos + 1 >= entry.Text.Length && curpage >= 0 && curpage < BookPageCount ? 1 : 0);
         }
 
@@ -511,9 +511,9 @@ namespace ClassicUO.Game.UI.Gumps
             if((TextBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
             {
                 text = text.Replace("\r", string.Empty);
-                int curpage = ActiveInternalPage, oldcaretpos = m_Pages[curpage]._entry.CaretIndex, oldpage = curpage;
+                int curpage = ActiveInternalPage, oldcaretpos = m_Pages[curpage].TxEntry.CaretIndex, oldpage = curpage;
                 string original = textID == TextBox.PasteCommandID ? text : m_Pages[curpage].Text;
-                text = m_Pages[curpage]._entry.InsertString(text);
+                text = m_Pages[curpage].TxEntry.InsertString(text);
                 if (curpage >= 0)
                 {
                     curpage++;
@@ -521,7 +521,7 @@ namespace ClassicUO.Game.UI.Gumps
                         SetActivePage(ActivePage + 1);
                     while (text != null && curpage < BookPageCount)
                     {
-                        var entry = m_Pages[curpage]._entry;
+                        var entry = m_Pages[curpage].TxEntry;
                         RefreshShowCaretPos(0, m_Pages[curpage]);
                         if(text.Length==0 || text[text.Length - 1] != '\n')
                             text = entry.InsertString(text + "\n");
@@ -555,7 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        int[] linechr = m_Pages[oldpage]._entry.GetLinesCharsCount(original);
+                        int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
                         for (int l = 0; l+1 < linechr.Length; l++)
                         {
                             if(l+1 % MaxBookLines != 0)
@@ -583,8 +583,8 @@ namespace ClassicUO.Game.UI.Gumps
         private void RefreshShowCaretPos(int pos, TextBox box)
         {
             box.SetKeyboardFocus();
-            box._entry.SetCaretPosition(pos);
-            box._entry.UpdateCaretPosition();
+            box.TxEntry.SetCaretPosition(pos);
+            box.TxEntry.UpdateCaretPosition();
         }
 
         internal sealed class PBookHeader : PacketWriter
