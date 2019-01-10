@@ -73,6 +73,7 @@ namespace ClassicUO.Game.GameObjects
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
+                    OnPositionChanged();
                 }
             }
         }
