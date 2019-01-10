@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
-        public int SittingValue { get; set; }
+        //public int SittingValue { get; set; }
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
@@ -881,7 +881,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public readonly struct SittingInfoData
+        /* public readonly struct SittingInfoData
         {
             public SittingInfoData(ushort graphic, sbyte d1,
                                    sbyte d2, sbyte d3, sbyte d4,
@@ -1008,13 +1008,7 @@ namespace ClassicUO.IO.Resources
             new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
             new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
         };
-
-
-
-
-
-
-
+       
 
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
@@ -1149,6 +1143,8 @@ namespace ClassicUO.IO.Resources
                 }
             }
         }
+        
+       */
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
