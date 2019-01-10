@@ -154,6 +154,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
 
+                foreach (Item child in _item.Items)
+                {
+                    if (child.Container == _item)
+                        Engine.UI.GetByLocalSerial<ContainerGump>(child)?.Dispose();
+                }
+
                 if (_data.ClosedSound != 0)
                     Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.ClosedSound);
             }
