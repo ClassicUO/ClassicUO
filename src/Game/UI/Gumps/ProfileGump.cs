@@ -39,8 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 40,
                 Y = 82,
-                Text = body,
-                MaxLines = int.MaxValue
+                Text = body
             });
 
             /*
