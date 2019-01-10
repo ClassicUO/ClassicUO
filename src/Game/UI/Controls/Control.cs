@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -119,9 +119,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public object Tag { get; set; }
 
-        public string Tooltip { get; private set; }
+        public object Tooltip { get; private set; }
 
-        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
+        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && Tooltip != null;
 
         public virtual bool AcceptKeyboardInput
         {
@@ -379,18 +379,26 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void SetTooltip(string c, int maxWidth = 0)
+        public void SetTooltip(string text, int maxWidth = 0)
         {
-            if (string.IsNullOrEmpty(c))
-                ClearTooltip();
-            else
+	        ClearTooltip();
+
+			if (!String.IsNullOrEmpty(text))
             {
-                Tooltip = c;
+                Tooltip = text;
                 TooltipMaxLength = maxWidth;
             }
         }
 
-        public int TooltipMaxLength { get; private set; }
+	    public void SetTooltip(Entity entity)
+	    {
+		    ClearTooltip();
+
+		    if (entity != null & !entity.IsDisposed)
+			    Tooltip = entity;
+	    }
+
+		public int TooltipMaxLength { get; private set; }
 
         public void ClearTooltip()
         {
