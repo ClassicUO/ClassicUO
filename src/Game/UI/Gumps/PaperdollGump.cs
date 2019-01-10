@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Game.Data;
@@ -42,6 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
             0x07e8, 0x07e9, 0x07ea
         };
         private bool _isWarMode;
+	    private GumpPic _profilePic;
         private GumpPic _partyManifestPic;
         private GumpPic _specialMovesBook, _combatBook, _racialAbilitiesBook;
         private GumpPic _virtueMenuPic;
@@ -168,8 +170,8 @@ namespace ClassicUO.Game.UI.Gumps
                 AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
-                int partyManifestX = 37;
-                const int SCROLLS_STEP = 12;
+				int profileX = 25;
+                const int SCROLLS_STEP = 14;
 
                 if (World.ClientFlags.PaperdollBooks)
                 {
@@ -185,11 +187,16 @@ namespace ClassicUO.Game.UI.Gumps
                                 Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
                             }
                         };
-                        partyManifestX += SCROLLS_STEP;
+	                    profileX += SCROLLS_STEP;
                     }
                 }
 
-                AddChildren(_partyManifestPic = new GumpPic(partyManifestX, 196, 0x07D2, 0));
+	            AddChildren(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
+	            _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
+
+	            profileX += SCROLLS_STEP;
+
+				AddChildren(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
 
             }
@@ -260,7 +267,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
+	    private void Profile_MouseDoubleClickEvent(object o, MouseDoubleClickEventArgs args)
+	    {
+			if (args.Button == MouseButton.Left)
+			{
+				GameActions.RequestProfile(Mobile.Serial);
+			}
+		}
+
+		private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
