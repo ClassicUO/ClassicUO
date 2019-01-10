@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             foreach (ServerListEntry server in loginScene.Servers) scrollArea.AddChildren(new ServerEntryGump(server));
             AddChildren(scrollArea);
 
-            if (loginScene.Servers.Count() > 0)
+            if (loginScene.Servers.Length > 0)
             {
                 if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
                 {
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     case Buttons.Next:
 
-                        if (loginScene.Servers.Count() > 0)
+                        if (loginScene.Servers.Any())
                             loginScene.SelectServer(0);
 
                         break;
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (key == SDL.SDL_Keycode.SDLK_RETURN)
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
-                if (loginScene.Servers.Count() > 0)
+                if (loginScene.Servers.Any())
                     loginScene.SelectServer(0);
             }
         }

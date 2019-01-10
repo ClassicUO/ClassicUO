@@ -132,6 +132,12 @@ namespace ClassicUO.Game.Scenes
             };
 
             Audio.PlayMusic(0);
+
+            if (Engine.GlobalSettings.AutoLogin)
+            {
+                if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
+                    Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+            }
         }
 
 
@@ -391,6 +397,12 @@ namespace ClassicUO.Game.Scenes
                     Engine.GlobalSettings.Save();
                     CurrentLoginStep = LoginStep.ServerSelection;
 
+                    if (Engine.GlobalSettings.AutoLogin)
+                    {
+                        if (Servers.Length != 0)
+                            SelectServer(0);
+                    }
+
                     break;
                 case 0x8C: // ReceiveServerRelay
                     // On OSI, upon receiving this packet, the client would disconnect and
@@ -404,10 +416,9 @@ namespace ClassicUO.Game.Scenes
 
 					Engine.UI.Remove<CharacterSelectionGump>();
 
-	                if (_currentGump != null)
-		                _currentGump.Dispose();
+                    _currentGump?.Dispose();
 
-					Engine.UI.Add(_currentGump = new CharacterSelectionGump());
+                    Engine.UI.Add(_currentGump = new CharacterSelectionGump());
 
 					break;
 				case 0xA9: // ReceiveCharacterList
@@ -415,6 +426,21 @@ namespace ClassicUO.Game.Scenes
 					ParseCities(e);
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
+
+				    if (Engine.GlobalSettings.AutoLogin)
+				    {
+				        for (byte i = 0; i < Characters.Length; i++)
+				        {
+				            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+				            {
+				                SelectCharacter(i);
+                                return;
+				            }
+				        }
+
+                        if (Characters.Length != 0)
+                            SelectCharacter(0);
+				    }
 
                     break;
                 case 0xBD: // ReceiveVersionRequest
