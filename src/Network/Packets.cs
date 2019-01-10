@@ -892,8 +892,10 @@ namespace ClassicUO.Network
             WriteUShort(0x0F);
             WriteByte(0x0A);
             uint clientFlag = 0;
-            /*IFOR(i, 0, g_CharacterList.ClientFlag)
-                clientFlag |= (1 << i);*/
+
+            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
+                clientFlag |= (uint) (1 << i);
+
             WriteUInt(clientFlag);
         }
     }

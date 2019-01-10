@@ -91,7 +91,6 @@ namespace ClassicUO.Game.Scenes
 
         public OverheadManager Overheads => _overheadManager;
 
-
         public void DoubleClickDelayed(Serial serial)
             => _useItemQueue.Add(serial);
 

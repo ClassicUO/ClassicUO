@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Views
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                     HueVector = new Vector3(0x038E, 1, HueVector.Z);
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsParital, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsPartial, 0, false);
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }
@@ -329,7 +329,13 @@ namespace ClassicUO.Game.Views
                     if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 
-                _frames[_layerCount++] = new ViewLayer(graphic, hue, hash, ispartial, offsetY /*, isitting */);
+                //_frames[_layerCount++] = new ViewLayer(graphic, hue, hash, ispartial, offsetY /*, isitting */);
+
+                ref var frame = ref _frames[_layerCount++];
+                frame.Hue = hue;
+                frame.Hash = hash;
+                frame.OffsetY = offsetY;
+                frame.IsPartial = ispartial;
             }
         }
 
@@ -440,24 +446,32 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-        private readonly struct ViewLayer
-        {
-            public ViewLayer(Graphic graphic, Hue hue, uint frame, bool partial, int offsetY /*, bool sitting*/)
-            {
-                Graphic = graphic;
-                Hue = hue;
-                Hash = frame;
-                IsParital = partial;
-                OffsetY = offsetY;
-                //IsSitting = sitting;
-            }
+        //private readonly struct ViewLayer
+        //{
+        //    public ViewLayer(Graphic graphic, Hue hue, uint frame, bool partial, int offsetY /*, bool sitting*/)
+        //    {
+        //        Graphic = graphic;
+        //        Hue = hue;
+        //        Hash = frame;
+        //        IsPartial = partial;
+        //        OffsetY = offsetY;
+        //        //IsSitting = sitting;
+        //    }
 
-            public readonly Graphic Graphic;
-            public readonly Hue Hue;
-            public readonly uint Hash;
-            public readonly bool IsParital;
-            public readonly int OffsetY;
-            //public readonly bool IsSitting;
+        //    public readonly Graphic Graphic;
+        //    public readonly Hue Hue;
+        //    public readonly uint Hash;
+        //    public readonly bool IsPartial;
+        //    public readonly int OffsetY;
+        //    //public readonly bool IsSitting;
+        //}
+
+        private struct ViewLayer
+        {
+            public Hue Hue;
+            public uint Hash;
+            public bool IsPartial;
+            public int OffsetY;
         }
     }
 }

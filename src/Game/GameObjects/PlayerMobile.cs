@@ -96,10 +96,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
-            }
-
-            if (serial.IsValid)
-                NetClient.Socket.Send(new PSkillsRequest(this));
+            }                
         }
 
         public IReadOnlyList<Skill> Skills => _sklls;

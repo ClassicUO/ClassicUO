@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers
 {
     internal class HouseManager
     {
         private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+
+        public IReadOnlyCollection<House> Houses => _houses.Values;
 
         public void Add(Serial serial, House revision)
         {
