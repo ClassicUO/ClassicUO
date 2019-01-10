@@ -149,29 +149,7 @@ namespace ClassicUO.Game.Scenes
             Mouse.CancelDoubleClick = true;
         }
 
-        public void DropHeldItemToContainer(Item container)
-        {
-            /*var gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
-
-            int x, y;
-
-            if (gump != null)
-            {
-                Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-
-                x = RandomHelper.GetValue(bounds.Left, bounds.Right);
-                y = RandomHelper.GetValue(bounds.Top, bounds.Bottom);
-            }
-            else
-            {
-                x = 0xFFFF;
-                y = 0xFFFF;
-            }*/
-
-            DropHeldItemToContainer(container, 0xFFFF, 0xFFFF);
-        }
-
-        public void DropHeldItemToContainer(Item container, int x, int y)
+        public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
             ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 
