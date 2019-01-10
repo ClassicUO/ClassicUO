@@ -17,7 +17,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class BookGump : Gump
     {
-        public TextBox BookTitle, BookAuthor;
+        public MultiLineBox BookTitle, BookAuthor;
         public ushort BookPageCount { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
         public static byte DefaultFont => (byte)(IsNewBookD4 ? 1 : 4);
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
                 {
                     X = x,
                     Y = y,
@@ -119,7 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = 155,
                     IsEditable = this.IsEditable,
                     Text = pages[k - 1],
-                    MultiLineInputAllowed = true,
                     MaxLines = 8,
                 };
                 AddChildren(tbox, page);
@@ -137,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private List<TextBox> m_Pages = new List<TextBox> ();
+        private List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
         private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
 
@@ -226,8 +225,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             int curpage = ActiveInternalPage;
-            var box = m_Pages[curpage];
-            var entry = box.TxEntry;
+            var box = curpage >= 0 ? m_Pages[curpage] : null;
+            var entry = box?.TxEntry;
 
             if (key == SDL.SDL_Keycode.SDLK_BACKSPACE || key == SDL.SDL_Keycode.SDLK_DELETE)
             {
@@ -419,7 +418,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private bool _scale = false;
-        public void ScaleOnBackspace(TextEntry entry)
+        public void ScaleOnBackspace(MultiLineEntry entry)
         {
             var linech = entry.GetLinesCharsCount();
             for (int l = 0; l + 1 < linech.Length; l++)
@@ -435,7 +434,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
         }
 
-        public void ScaleOnDelete(TextEntry entry)
+        public void ScaleOnDelete(MultiLineEntry entry)
         {
             var linech = entry.GetLinesCharsCount();
             for (int l = 0; l + 1 < linech.Length; l++)
@@ -450,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void OnHomeOrEnd(TextEntry entry, bool home)
+        public void OnHomeOrEnd(MultiLineEntry entry, bool home)
         {
             var linech = entry.GetLinesCharsCount();
             // sepos = 1 if at end of whole text, -1 if at begin, else it will always be 0
@@ -508,11 +507,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if((TextBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
+            if((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
             {
                 text = text.Replace("\r", string.Empty);
                 int curpage = ActiveInternalPage, oldcaretpos = m_Pages[curpage].TxEntry.CaretIndex, oldpage = curpage;
-                string original = textID == TextBox.PasteCommandID ? text : m_Pages[curpage].Text;
+                string original = textID == MultiLineBox.PasteCommandID ? text : m_Pages[curpage].Text;
                 text = m_Pages[curpage].TxEntry.InsertString(text);
                 if (curpage >= 0)
                 {
@@ -542,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }
-                    if (TextBox.RetrnCommandID == textID)
+                    if (MultiLineBox.RetrnCommandID == textID)
                     {
                         if (oldcaretpos >= m_Pages[oldpage].Text.Length && original == m_Pages[oldpage].Text && oldpage + 1 < BookPageCount)
                         {
@@ -580,7 +579,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void RefreshShowCaretPos(int pos, TextBox box)
+        private void RefreshShowCaretPos(int pos, MultiLineBox box)
         {
             box.SetKeyboardFocus();
             box.TxEntry.SetCaretPosition(pos);
