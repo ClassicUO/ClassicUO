@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -91,19 +93,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 0,
                 Width = 30,
                 Height = 27,
-                IsVisible = false,
-                IsEnabled = false
             }, 2);
 
             AddChildren(new Button(0, 5537, 5539, 5538)
             {
-                ButtonAction = ButtonAction.SwitchPage, ToPage = 1, X = 5, Y = 3
+                ButtonAction = ButtonAction.SwitchPage,
+                ToPage = 1,
+                X = 5,
+                Y = 3
             }, 2);
 
             //layer
             ControlInfo.Layer = UILayer.Over;
             _scene = scene;
         }
+
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
@@ -114,10 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void OnPageChanged()
+        {
+            WantUpdateSize = true;
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             switch ((Buttons) buttonID)
-            {
+            {              
                 case Buttons.Map:
                     MiniMapGump.Toggle(_scene);
 

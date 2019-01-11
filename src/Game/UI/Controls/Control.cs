@@ -254,12 +254,19 @@ namespace ClassicUO.Game.UI.Controls
             set => _handlesKeyboardFocus = value;
         }
 
+        public virtual void OnPageChanged()
+        {
+
+        }
+
         public int ActivePage
         {
             get => _activePage;
             set
             {              
                 _activePage = value;
+
+                OnPageChanged();
 
                 if (Engine.UI.KeyboardFocusControl != null)
                 {
@@ -310,10 +317,19 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         Point offset = new Point(c.X + position.X, c.Y + position.Y);
                         c.Draw(batcher, offset, hue);
+
+                        //DrawDebug(batcher, position);
                     }
                 }
             }
 
+            DrawDebug(batcher, position);
+
+            return true;
+        }
+
+        private void DrawDebug(Batcher2D batcher, Point position)
+        {
             if (IsVisible && Engine.GlobalSettings.Debug)
             {
                 if (_debugTexture == null)
@@ -328,8 +344,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
-
-            return true;
         }
 
         public virtual void Update(double totalMS, double frameMS)
