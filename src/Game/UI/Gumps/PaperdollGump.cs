@@ -30,6 +30,8 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class PaperDollGump : Gump
@@ -276,15 +278,13 @@ namespace ClassicUO.Game.UI.Gumps
 
 		private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
-            //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
             {
-                Log.Message(LogTypes.Warning, "Party manifest pic event!!");
-
-                if (Engine.UI.GetByLocalSerial<PartyGumpAdvanced>() == null)
+                var party = Engine.UI.GetByLocalSerial<PartyGumpAdvanced>();
+                if (party == null)
                     Engine.UI.Add(new PartyGumpAdvanced());
                 else
-                    Engine.UI.Remove<PartyGumpAdvanced>();
+                    party.BringOnTop();
             }
         }
 
@@ -338,7 +338,9 @@ namespace ClassicUO.Game.UI.Gumps
 			        break;
 		        case Buttons.Options:
 
-			        if (Engine.UI.GetByLocalSerial<OptionsGump1>() == null)
+		            OptionsGump1 gump = Engine.UI.GetByLocalSerial<OptionsGump1>();
+
+                    if (gump == null)
 			        {
 				        Engine.UI.Add(new OptionsGump1
 				        {
@@ -347,9 +349,10 @@ namespace ClassicUO.Game.UI.Gumps
 				        });
 			        }
 			        else
-				        Engine.UI.Remove<OptionsGump1>();
+                        gump.BringOnTop();
 
-			        break;
+
+                    break;
 		        case Buttons.LogOut:
 			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
 			        {
@@ -364,12 +367,14 @@ namespace ClassicUO.Game.UI.Gumps
 			        break;
 		        case Buttons.Skills:
 
-			        if (Engine.UI.GetByLocalSerial<SkillGumpAdvanced>() == null)
+		            SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
+
+                    if (gumpSkills == null)
 				        Engine.UI.Add(new SkillGumpAdvanced());
 			        else
-				        Engine.UI.Remove<SkillGumpAdvanced>();
+                        gumpSkills.BringOnTop();
 
-			        break;
+                    break;
 		        case Buttons.Guild:
 			        GameActions.OpenGuildGump();
 
@@ -383,7 +388,9 @@ namespace ClassicUO.Game.UI.Gumps
 			        {
 				        Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile)?.Dispose();
 
-				        if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
+			            StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
+
+                        if (status == null)
 				        {
 					        Engine.UI.Add(new StatusGump()
 					        {
@@ -391,7 +398,9 @@ namespace ClassicUO.Game.UI.Gumps
 						        Y = Mouse.Position.Y - 25
 					        });
 				        }
-			        }
+                        else
+                            status.BringOnTop();
+                    }
 			        else
 			        {
 				        if (Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile) != null)
@@ -399,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 				        GameActions.RequestMobileStatus(Mobile);
 
-				        var bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+				        Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
 
 						Engine.UI.Add(new HealthBarGump(Mobile)
 						{

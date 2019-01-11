@@ -379,6 +379,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void BringOnTop()
+        {
+            Engine.UI.MakeTopMostGump(this);
+        }
+
         public void SetTooltip(string text, int maxWidth = 0)
         {
 	        ClearTooltip();

@@ -687,7 +687,7 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
-        private void MakeTopMostGump(Control control)
+        public void MakeTopMostGump(Control control)
         {
             Control c = control;
 

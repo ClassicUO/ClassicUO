@@ -123,31 +123,33 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
                 case Buttons.Paperdoll:
-
-                    if (Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player) == null)
+                    PaperDollGump paperdollGump = Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player);
+                    if (paperdollGump == null)
                         GameActions.OpenPaperdoll(World.Player);
                     else
-                        Engine.UI.Remove<PaperDollGump>(World.Player);
+                        paperdollGump.BringOnTop();
 
                     break;
                 case Buttons.Inventory:
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
 
-                    if (backpack != null && !backpack.IsDisposed)
+                    ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+
+                    if (backpackGump == null)
                     {
-                        if (Engine.UI.GetByLocalSerial(backpack) == null)
-                            GameActions.DoubleClick(backpack);
-                        else
-                            Engine.UI.Remove<Gump>(backpack);
+                        GameActions.DoubleClick(backpack);
                     }
+                    else
+                        backpackGump.BringOnTop();
 
                     break;
                 case Buttons.Journal:
+                    JournalGump journalGump = Engine.UI.GetByLocalSerial<JournalGump>();
 
-                    if (Engine.UI.GetByLocalSerial<JournalGump>() == null)
+                    if (journalGump == null)
                         Engine.UI.Add(new JournalGump() { X = 64, Y = 64});
                     else
-                        Engine.UI.Remove<JournalGump>();
+                        journalGump.BringOnTop();
 
                     break;
                 case Buttons.Chat:

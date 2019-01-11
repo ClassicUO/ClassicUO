@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -257,7 +258,13 @@ namespace ClassicUO.Game.UI.Controls
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
         {
             Item backpack = _mobile.Equipment[(int)Layer.Backpack];
-            GameActions.DoubleClick(backpack);
+
+            ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+
+            if (backpackGump == null)
+                GameActions.DoubleClick(backpack);
+            else 
+                backpackGump.BringOnTop();
         }
 
     }
