@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 0,
                 Width = 30,
                 Height = 27,
-                IsVisible = false,
+                IsVisible = true,
                 IsEnabled = false
             }, 2);
 
