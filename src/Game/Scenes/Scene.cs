@@ -71,6 +71,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Unload()
         {
+            _audio.StopMusic();
             Coroutines.Clear();
         }
 

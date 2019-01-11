@@ -625,7 +625,9 @@ namespace ClassicUO.Network
         }
 
         private static void EnterWorld(Packet p)
-        {          
+        {
+            Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
+
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -643,6 +645,14 @@ namespace ClassicUO.Network
             World.Player.Position = new Position(x, y ,z);
             World.Player.Direction = direction;
             World.Player.AddToTile();
+
+
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_200)
+            {
+                NetClient.Socket.Send(new PGameWindowSize((uint)Engine.Profile.Current.GameWindowSize.X, (uint)Engine.Profile.Current.GameWindowSize.Y));
+                NetClient.Socket.Send(new PLanguage("ENU"));
+            }
 
             NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 
@@ -1137,14 +1147,7 @@ namespace ClassicUO.Network
                 GameScene scene = new GameScene();
                 Engine.SceneManager.ChangeScene(scene);
 
-                List<Gump> gumps = Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
-
-                if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                {
-                    NetClient.Socket.Send(new PGameWindowSize((uint)Engine.Profile.Current.GameWindowSize.X, (uint)Engine.Profile.Current.GameWindowSize.Y));
-                    NetClient.Socket.Send(new PLanguage("ENU"));
-                }
-
+                
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_306E)
@@ -1156,7 +1159,8 @@ namespace ClassicUO.Network
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
                 scene.Load();
-                gumps?.ForEach(Engine.UI.Add);
+
+                Engine.Profile.Current.ReadGumps()?.ForEach(Engine.UI.Add);
             }
         }
 
@@ -1737,8 +1741,6 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Log.Message(LogTypes.Warning, "OpenGump 0xB0 not handled.");
-            return;
             Serial sender = p.ReadUInt();
             Serial gumpID = p.ReadUInt();
             uint x = p.ReadUInt();
@@ -1819,6 +1821,9 @@ namespace ClassicUO.Network
 
         private static void Season(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             byte season = p.ReadByte();
             byte music = p.ReadByte();
 
