@@ -681,7 +681,9 @@ namespace ClassicUO.Game.Managers
                 IReadOnlyList<Control> ctrls = c.HitTest(position);
 
                 if (ctrls != null)
+                {
                     return ctrls.LastOrDefault(s => s.AcceptMouseInput);
+                }
             }
 
             return null;
@@ -761,7 +763,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_mouseDownControls[i] != null && _mouseDownControls[i] != _draggingControl)
                     {
-                        _mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
+                        //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
                         _mouseDownControls[i] = null;
                     }
                 }

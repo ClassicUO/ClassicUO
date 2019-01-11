@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_clickedCanDrag && Math.Abs(_clickedPoint.X - x) + Math.Abs(_clickedPoint.Y - y) > 3)
+            if (_clickedCanDrag && Math.Abs(_clickedPoint.X - x) + Math.Abs(_clickedPoint.Y - y) >= 1)
             {
                 _clickedCanDrag = false;
                 AttempPickUp();

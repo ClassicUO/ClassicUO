@@ -190,7 +190,7 @@ namespace ClassicUO.Game.Scenes
 
         public void WearHeldItem(Mobile target)
         {
-            GameActions.Equip(HeldItem, Layer.Invalid, target);
+            GameActions.Equip(HeldItem, (Layer) HeldItem.ItemData.Layer, target);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }
