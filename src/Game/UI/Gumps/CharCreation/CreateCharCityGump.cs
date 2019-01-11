@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		};
 
 		private Label _mapName;
-		private HtmlGump _description;
+		private HtmlControl _description;
 	
 		private Dictionary<uint, CityCollection> _maps;
 
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			if (_description != null)
 				RemoveChildren(_description);
 
-			AddChildren(_description = new HtmlGump(452, 60, 173, 367, true, true, false,
+			AddChildren(_description = new HtmlControl(452, 60, 173, 367, true, true, false,
 				info.Description, 0x000000, ishtml: true));
 		}
 

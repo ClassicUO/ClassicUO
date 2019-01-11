@@ -261,7 +261,7 @@ namespace ClassicUO.Game
                 }
                 DrawToolTip(sb, Mouse.Position);
 
-                Vector3 vec = World.InGame && !World.Player.InWarMode && World.MapIndex != 0 && !(Engine.UI.MouseOverControl is TextBox) ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
+                Vector3 vec = World.InGame && !World.Player.InWarMode && World.MapIndex != 0 && !(Engine.UI.MouseOverControl is AbstractTextBox) ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
 
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), vec);
 
@@ -371,7 +371,7 @@ namespace ClassicUO.Game
             if (IsLoading)
                 return _cursorData[war, 13];
 
-            if (Engine.UI.MouseOverControl is TextBox)
+            if (Engine.UI.MouseOverControl is AbstractTextBox t && t.IsEditable)
                 return _cursorData[war, 14];
 
             ushort result = _cursorData[war, 9];

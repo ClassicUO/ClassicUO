@@ -133,11 +133,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
-
         protected override void CloseWithRightClick()
         {
             if (!CanCloseWithRightClick)

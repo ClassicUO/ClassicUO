@@ -254,9 +254,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public bool ContainsByBounds { get; set; }
+
         protected override bool Contains(int x, int y)
         {
-            return _textures[NORMAL].Contains(x, y);
+            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
         public override void Dispose()

@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI.Gumps
         public JournalGump() : base(0, 0)
         {
             CanMove = true;
-            AcceptMouseInput = true;
             CanBeSaved = true;
             AddChildren(_background = new ExpandableScroll(0, 0, 300)
             {

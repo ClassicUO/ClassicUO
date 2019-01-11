@@ -135,6 +135,7 @@
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
+    <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
@@ -327,7 +328,7 @@
     <Compile Include="Game\UI\Controls\GumpPicContainer.cs" />
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
-    <Compile Include="Game\UI\Controls\HtmlGump.cs" />
+    <Compile Include="Game\UI\Controls\HtmlControl.cs" />
     <Compile Include="Game\UI\Controls\IScrollBar.cs" />
     <Compile Include="Game\UI\Controls\ItemGump.cs" />
     <Compile Include="Game\UI\Controls\ItemGumpPaperdoll.cs" />

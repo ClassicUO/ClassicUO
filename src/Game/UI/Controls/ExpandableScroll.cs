@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             _expandableScrollHeight = height;
             _isResizable = isResizable;
             CanMove = true;
+            AcceptMouseInput = true;
         }
 
         private int _gumplingMidY => _gumpTop.Height;

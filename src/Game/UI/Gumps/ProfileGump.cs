@@ -21,11 +21,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
 
             AcceptKeyboardInput = true;
-            AcceptMouseInput = true;
 
-            AddChildren(_background = new ExpandableScroll(0, 0, 300)
-            {
-            });
+            AddChildren(_background = new ExpandableScroll(0, 0, 300));
             _scrollBar = new ScrollFlag(this, 0, 0, Height);
 
             AddHorizontalBar(92, 40, 40, 220);
@@ -39,6 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 40,
                 Y = 82,
+                Width = 220,
                 Text = body
             });
 
@@ -66,11 +64,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
+        public override void OnButtonClick(int buttonID)
+        {
+            // necessary to avoid closing
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             WantUpdateSize = true;
 
-            _textBox.Height = Height - 98;
+            _textBox.Height = Height - 150;
 
             base.Update(totalMS, frameMS);
         }
