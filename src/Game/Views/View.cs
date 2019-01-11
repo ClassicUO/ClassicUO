@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Views
         public Rectangle FrameInfo;
 
         private float _processAlpha = 1;
-        private long _processAlphaTime = Constants.ALPHA_OBJECT_TIME;
+        private long _processAlphaTime = -1; // Constants.ALPHA_OBJECT_TIME;
 
         protected View(GameObject parent)
         {
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = true;
         }
 
-        protected virtual bool CanProcessAlpha => true;
+        protected virtual bool CanProcessAlpha { get; private set; } = true;
 
         public GameObject GameObject { get; }
 
@@ -168,31 +168,31 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-
-            //if (ProcessInitialAlpha)
+           
+            if (CanProcessAlpha)
             {
+                long ticks = Engine.Ticks;
+
+                if (_processAlphaTime == -1)
+                    _processAlphaTime = ticks + Constants.ALPHA_OBJECT_TIME;
+                else
+                    ticks -= Constants.ALPHA_OBJECT_TIME;
+
+                if (_processAlphaTime < ticks) // finished!
                 {
-                    if (CanProcessAlpha)
-                    {
-                        _processAlphaTime -= Engine.TicksFrame;
-
-                        if (_processAlphaTime > 0)
-                        {
-                            _processAlpha = _processAlphaTime / Constants.ALPHA_OBJECT_VALUE;
-                        }
-                        else if (_processAlphaTime < 0)
-                        {
-                            _processAlpha = 0;
-                        }
-
-                        if (HueVector.Z < _processAlpha)
-                            HueVector.Z = _processAlpha;
-                    }
-
-                    
+                    _processAlpha = 0;
+                    CanProcessAlpha = false;
                 }
+                else
+                {
+                    _processAlpha = ((_processAlphaTime - Engine.Ticks) / Constants.ALPHA_OBJECT_VALUE);
+                }
+
+                if (HueVector.Z < _processAlpha)
+                    HueVector.Z = _processAlpha;
             }
 
+  
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
