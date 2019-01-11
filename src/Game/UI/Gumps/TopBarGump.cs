@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.IO;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -32,13 +33,12 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
     {
-        private readonly GameScene _scene;
-
-        public TopBarGump(GameScene scene) : base(0, 0)
+        public TopBarGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            CanBeSaved = true;
 
             // maximized view
             AddChildren(new ResizePic(9200)
@@ -105,7 +105,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             //layer
             ControlInfo.Layer = UILayer.Over;
-            _scene = scene;
+        }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+
+            writer.Write(ActivePage == 2);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            bool minimized = reader.ReadBoolean();
+            if (minimized)
+                ChangePage(2);
         }
 
 
@@ -128,7 +143,12 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {              
                 case Buttons.Map:
-                    MiniMapGump.Toggle(_scene);
+
+                    MiniMapGump miniMapGump = Engine.UI.GetByLocalSerial<MiniMapGump>();
+                    if (miniMapGump == null)
+                        Engine.UI.Add(new MiniMapGump());
+                    else
+                        miniMapGump.BringOnTop();
 
                     break;
                 case Buttons.Paperdoll:

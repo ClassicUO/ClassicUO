@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Scenes
 
             WorldViewportGump viewport = new WorldViewportGump(this);
             Engine.UI.Add(viewport);
-            Engine.UI.Add(new TopBarGump(this));
+            Engine.UI.Add(new TopBarGump());
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);

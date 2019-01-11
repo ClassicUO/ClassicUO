@@ -38,7 +38,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class MiniMapGump : Gump
     {
-        private static MiniMapGump _self;
         private SpriteTexture _gumpTexture, _mapTexture;
         private bool _forceUpdate;
         private Texture2D _playerIndicator, _mobilesIndicator;
@@ -56,19 +55,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public static void Toggle(GameScene scene)
-        {
-            if (Engine.UI.GetByLocalSerial<MiniMapGump>() == null)
-            {
-                Engine.UI.Add(_self = new MiniMapGump());
-            }
-            else
-            {
-                _self.Dispose();
-            }
-
-        }
-
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -78,7 +64,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            _self = this;
             _useLargeMap = reader.ReadBoolean();
             _forceUpdate = true;
         }
