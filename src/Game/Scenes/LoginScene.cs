@@ -63,34 +63,18 @@ namespace ClassicUO.Game.Scenes
         }
 
         private byte[] _clientVersionBuffer;
-        private LoginRejectionReasons? _loginRejectionReason;
-        private LoginStep _loginStep = LoginStep.Main;
         private Gump _currentGump;
-
+        private LoginStep _lastLoginStep;
+        private static bool _isFirstLogin = true;
 
         public LoginScene() : base()
         {
         }
 
-        private LoginStep _lastLoginStep;
 
-        public LoginStep CurrentLoginStep
-        {
-            get => _loginStep;
-            private set
-            {
-                _loginStep = value;
+        public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
-             
-
-            }
-        }
-
-        public LoginRejectionReasons? LoginRejectionReason
-        {
-            get => _loginRejectionReason;
-            private set => _loginRejectionReason = value;
-        }
+        public LoginRejectionReasons? LoginRejectionReason { get; private set; }
 
         public ServerListEntry[] Servers { get; private set; }
 
@@ -133,10 +117,12 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(0);
 
-            if (Engine.GlobalSettings.AutoLogin)
+            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
+                {
                     Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+                }
             }
         }
 
@@ -334,7 +320,7 @@ namespace ClassicUO.Game.Scenes
 
         public void StepBack()
         {
-            _loginRejectionReason = null;
+            LoginRejectionReason = null;
             PopupMessage = null;
 
             switch (CurrentLoginStep)
@@ -397,7 +383,7 @@ namespace ClassicUO.Game.Scenes
                     Engine.GlobalSettings.Save();
                     CurrentLoginStep = LoginStep.ServerSelection;
 
-                    if (Engine.GlobalSettings.AutoLogin)
+                    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
                     {
                         if (Servers.Length != 0)
                             SelectServer(0);
@@ -427,9 +413,11 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin)
+				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
 				    {
-				        for (byte i = 0; i < Characters.Length; i++)
+				        _isFirstLogin = false;
+
+                        for (byte i = 0; i < Characters.Length; i++)
 				        {
 				            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
 				            {

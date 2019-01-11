@@ -76,25 +76,20 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	if (mode == COLOR)
 	{
-		float4 hueColor;
 		if (IN.Hue.x < HuesPerTexture)
-			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
+			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture)).rgb;
 		else
-			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
-		hueColor.a = color.a;
-		color = hueColor;
+			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture)).rgb;
 	}
 	else if (mode == PARTIAL_COLOR)
 	{
-		float4 hueColor;
-		if (IN.Hue.x < HuesPerTexture)
-			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
-		else
-			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
-		hueColor.a = color.a;
-
-		if ((color.r == color.g) && (color.r == color.b))
-			color = hueColor;
+		if (color.r == color.g && color.r == color.b)
+		{
+			if (IN.Hue.x < HuesPerTexture)
+				color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture)).rgb;
+			else
+				color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture)).rgb;
+		}
 	}
 	else if (mode == LAND)
 	{
@@ -106,14 +101,10 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == LAND_COLOR)
 	{
-		float4 hueColor;
 		if (IN.Hue.x < HuesPerTexture)
-			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
+			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture)).rgb;
 		else
-			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
-		hueColor.a = color.a;
-
-		color = hueColor;
+			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture)).rgb;
 
 		float3 light = normalize(lightDirection);
 		float3 normal = normalize(IN.Normal);
@@ -123,21 +114,13 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == SPECTRAL)
 	{
-		float4 hueColor;
-		if (IN.Hue.x < HuesPerTexture)
-			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
-		else
-			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
-		hueColor.a = color.a;
-
-		float red = color.r * 1.5f;
-		alpha = 1 - red;
-
-		color = hueColor;
+		alpha = 1 - (color.r * 1.5f);
+		color.rgb = float3(0, 0, 0);
 	}
 
 	if (DrawLighting)
 		color.rgb *= lightIntensity;
+
 	color *= alpha;
 
 	return color;
