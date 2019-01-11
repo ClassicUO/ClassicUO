@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isWarMode;
 	    private GumpPic _profilePic;
         private GumpPic _partyManifestPic;
-        private GumpPic _specialMovesBook, _combatBook, _racialAbilitiesBook;
+        private GumpPic _combatBook, _racialAbilitiesBook;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
         private PaperDollInteractable _paperDollInteractable;
@@ -263,7 +263,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Mobile.Serial
                 });
-                Log.Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
 
@@ -343,8 +342,8 @@ namespace ClassicUO.Game.UI.Gumps
 			        {
 				        Engine.UI.Add(new OptionsGump1
 				        {
-					        X = 80,
-					        Y = 80
+					        X = Engine.WindowWidth / 2 - 300,
+					        Y = Engine.WindowHeight / 2 - 250
 				        });
 			        }
 			        else

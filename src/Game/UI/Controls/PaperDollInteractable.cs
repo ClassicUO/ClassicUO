@@ -79,23 +79,6 @@ namespace ClassicUO.Game.UI.Controls
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            //foreach (Item item in e)
-            //{
-            //    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile));
-            //}
-
-            //for (int i = 0; i < _layerOrder.Length; i++)
-            //{
-            //    int layerIndex = (int) _layerOrder[i];
-            //    Item item = _mobile.Equipment[layerIndex];
-
-            //    if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
-            //    {
-            //        ItemGumpPaperdoll c = Children.OfType<ItemGumpPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
-            //        RemoveChildren(c);
-            //    }
-            //}
-
             if (_fakeItem != null)
             {
                 foreach (Item item in e)

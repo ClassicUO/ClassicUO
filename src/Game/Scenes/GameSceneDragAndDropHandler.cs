@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (item.Container.IsMobile)
                 {
-                    World.Mobiles.Get(item.Container).Equipment[item.ItemData.Layer] = null;
+                    ((Mobile)entity).Equipment[item.ItemData.Layer] = null;
                 }
 
                 //item.Container = Serial.Invalid;

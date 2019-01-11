@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump
     {
-        private readonly bool _isTransparent;
+        private readonly bool _isTransparent, _isPartialHue;
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
 
@@ -45,6 +45,7 @@ namespace ClassicUO.Game.UI.Controls
             Mobile = owner;
             HighlightOnMouseOver = false;
             _isTransparent = transparent;
+            _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
 
@@ -79,10 +80,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsDisposed)
                 return;
 
-            base.Update(totalMS, frameMS);
             Texture.Ticks = (long) totalMS;
         }
 
@@ -91,13 +93,12 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, Item.ItemData.IsPartialHue, _isTransparent ? .5f : 0, false));
+            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, _isTransparent ? .5f : 0, false));
         }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
-            //return FileManager.Gumps.Contains(_gumpIndex, x, y);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)

@@ -264,26 +264,11 @@ namespace ClassicUO.Game.UI.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            //var gs = Engine.SceneManager.GetScene<GameScene>();
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
             if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
             {
-                //if (_labels.Count <= 0)
-                //{
-                //    foreach (TextOverhead overhead in Item.OverHeads)
-                //    {
-                //        overhead.Initialized = true;
-                //        overhead.TimeToLive = 4000;
-
-                //        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
-                //        {
-                //            FadeOut = true
-                //        };
-                //        label.ControlInfo.Layer = UILayer.Over;
-                //        Engine.UI.Add(label);
-                //        _labels.Add(label);
-                //    }
-                //}
-
                 if (_labels.Count == 0)
                 {
                     foreach (TextOverhead overhead in Item.Overheads)
