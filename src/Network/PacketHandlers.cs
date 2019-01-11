@@ -1821,6 +1821,9 @@ namespace ClassicUO.Network
         {
             byte season = p.ReadByte();
             byte music = p.ReadByte();
+
+            if (Engine.Profile.Current.EnableCombatMusic)
+                Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
         }
 
         private static void ClientVersion(Packet p)
@@ -1984,7 +1987,7 @@ namespace ClassicUO.Network
                             Engine.UI.Remove<HealthBarGump>(serial);
                             break;
                         case 8: // char profile
-                            // TODO
+                            Engine.UI.Remove<ProfileGump>();
                             break;
                         case 0x0C: //container
                             Engine.UI.Remove<ContainerGump>(serial);
@@ -2156,7 +2159,7 @@ namespace ClassicUO.Network
         }
 
 		[Flags]
-	    public enum AffixType
+	    private enum AffixType
 	    {
 		    Append = 0x00,
 		    Prepend = 0x01,
