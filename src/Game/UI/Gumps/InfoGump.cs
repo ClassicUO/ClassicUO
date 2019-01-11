@@ -46,12 +46,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
             AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
             AddChildren(new Label("Object Information", true, 1153, font: 3) { X = 20, Y = 20 });
             AddChildren(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));

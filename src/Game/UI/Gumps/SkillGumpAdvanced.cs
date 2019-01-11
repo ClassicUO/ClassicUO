@@ -52,12 +52,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
             AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
