@@ -155,7 +155,7 @@
     <Compile Include="Game\Views\MultiView.cs" />
     <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
-    <Compile Include="IO\Audio\ASound.cs" />
+    <Compile Include="IO\Audio\Sound.cs" />
     <Compile Include="IO\Audio\AudioEffects.cs" />
     <Compile Include="IO\Audio\MP3Sharp\Buffer16BitStereo.cs" />
     <Compile Include="IO\Audio\MP3Sharp\Decoding\ABuffer.cs" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Audio
 {
-    class UOSound : ASound
+    class UOSound : Sound
     {
         private readonly byte[] m_WaveBuffer;
 

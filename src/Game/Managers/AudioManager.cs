@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Managers
             if (volume < 0.01f || volume > 1f)
                 return;
 
-            ASound m = FileManager.Sounds.GetMusic(music);
+            Sound m = FileManager.Sounds.GetMusic(music);
 
             if( m == null && _currentMusic != null )
             {

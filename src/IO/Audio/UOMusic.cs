@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
 {
-    class UOMusic : ASound
+    class UOMusic : Sound
     {
         MP3Stream m_Stream;
         const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds

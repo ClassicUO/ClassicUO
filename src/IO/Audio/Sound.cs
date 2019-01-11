@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
 {
-    abstract class ASound : IDisposable
+    abstract class Sound : IDisposable
     {
         string m_Name;
         public string Name
@@ -40,13 +40,13 @@ namespace ClassicUO.IO.Audio
         protected int Frequency = 22050;
         protected AudioChannels Channels = AudioChannels.Mono;
 
-        static ASound()
+        static Sound()
         {
             m_EffectInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
             m_MusicInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
         }
 
-        public ASound(string name)
+        public Sound(string name)
         {
             Name = name;         
         }
