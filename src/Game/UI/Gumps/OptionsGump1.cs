@@ -577,6 +577,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
 
+            if (!Engine.Profile.Current.EnableMusic)
+                Engine.SceneManager.CurrentScene.Audio.StopMusic();
+
             // speech
             Engine.Profile.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
             Engine.Profile.Current.SpeechDelay = _sliderSpeechDelay.Value;
