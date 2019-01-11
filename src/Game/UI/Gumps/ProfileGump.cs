@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -37,6 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 40,
                 Y = 82,
                 Width = 220,
+                ScissorsEnabled = true,
                 Text = body
             });
 
@@ -78,6 +82,31 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Update(totalMS, frameMS);
         }
+
+
+        //private Rectangle _rect;
+
+        //public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        //{
+        //    _rect.X = position.X;
+        //    _rect.Y = position.Y;
+        //    _rect.Width = _textBox.Width;
+        //    _rect.Height = _textBox.Height;
+
+        //    Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+
+        //    if (ScissorStack.PushScissors(scissor))
+        //    {
+        //        batcher.EnableScissorTest(true);
+
+        //        base.Draw(batcher, position, hue);
+
+        //        batcher.EnableScissorTest(false);
+        //        ScissorStack.PopScissors();
+        //    }
+
+        //    return true;
+        //}
 
         private void AddHorizontalBar(Graphic start, int x, int y, int width)
         {

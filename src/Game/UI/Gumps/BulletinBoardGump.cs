@@ -10,6 +10,9 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -202,6 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 40,
                 Y = 120,
                 Width = 220,
+                ScissorsEnabled = true,
                 Text = data
             });
 
@@ -236,6 +240,30 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
         }
+
+        //private Rectangle _rect;
+
+        //public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        //{
+        //    _rect.X = _textBox.X;
+        //    _rect.Y = _textBox.Y;
+        //    _rect.Width = _textBox.Width;
+        //    _rect.Height = _textBox.Height;
+
+        //    Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+
+        //    if (ScissorStack.PushScissors(scissor))
+        //    {
+        //        batcher.EnableScissorTest(true);
+
+        //        base.Draw(batcher, position, hue);
+
+        //        batcher.EnableScissorTest(false);
+        //        ScissorStack.PopScissors();
+        //    }
+
+        //    return true;
+        //}
 
         enum ButtonType
         {

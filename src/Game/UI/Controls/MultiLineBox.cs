@@ -59,6 +59,8 @@ namespace ClassicUO.Game.UI.Controls
             return 0;
         }
 
+        public bool ScissorsEnabled { get; set; }
+
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
         public int MaxLines { get => TxEntry.MaxLines; set => TxEntry.MaxLines = value; }
@@ -82,14 +84,44 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
+        private Rectangle _rect;
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
-
-            if (IsEditable)
+            if (ScissorsEnabled)
             {
-                if (HasKeyboardFocus)
-                    TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                _rect.X = position.X;
+                _rect.Y = position.Y;
+                _rect.Width = Width;
+                _rect.Height = Height;
+
+                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+
+                if (ScissorStack.PushScissors(scissor))
+                {
+                    batcher.EnableScissorTest(true);
+
+                    TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
+
+                    if (IsEditable)
+                    {
+                        if (HasKeyboardFocus)
+                            TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                    }
+
+                    batcher.EnableScissorTest(false);
+                    ScissorStack.PopScissors();
+                }
+            }
+            else
+            {
+                TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
+
+                if (IsEditable)
+                {
+                    if (HasKeyboardFocus)
+                        TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                }
             }
 
             return base.Draw(batcher, position, hue);
