@@ -198,6 +198,11 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        public TextOverhead AddOverhead(MessageType type, string message)
+        {
+            return AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+        }
+
         public TextOverhead AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))

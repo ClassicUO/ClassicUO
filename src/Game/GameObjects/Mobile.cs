@@ -520,11 +520,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Step step = Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run); // - (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
-                    if (Position.X != step.X || Position.Y != step.Y)
+                    //if ((byte) Direction == step.Direction)
+                    if (X != step.X || Y != step.Y)
                     {     
                         float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                         float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
@@ -532,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
                         float y = frameOffset;
 
                         MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Z) * frameOffset * (4.0f / framesPerTile)));
                      
                         turnOnly = false;
                     }
@@ -546,13 +547,14 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (this == World.Player)
                         {
-                            if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
-                            {
-                            }
+                            //if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
+                            //{
+                            //}
 
                             if (Position.Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
+                                AddOverhead(MessageType.Label, "Ouch!");
                             }
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -584,10 +586,11 @@ namespace ClassicUO.Game.GameObjects
                         IsRunning = step.Run;
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();
+                        CalculateRandomIdleTime();
                         LastStepTime = Engine.Ticks;
                         ProcessDelta();
                     }
-                } while (Steps.Count > 0 && turnOnly);
+                } while (Steps.Count != 0 && turnOnly);
             }
 
             ProcessFootstepsSound();
