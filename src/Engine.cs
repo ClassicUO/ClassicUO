@@ -63,6 +63,25 @@ namespace ClassicUO
         }
     }
 
+    //internal class Window
+    //{
+    //    private Engine _engine;
+
+    //    public Window(Engine engine)
+    //    {
+    //        _engine = engine;
+    //    }
+
+    //    public int X
+    //    {
+    //        get => _engine.Window.ClientBounds.X;
+    //        set
+    //        {
+    //            _engine.Window.
+    //        }
+    //    }
+    //}
+
     internal class Engine : Microsoft.Xna.Framework.Game
     { 
         private const int MIN_FPS = 15;

@@ -316,7 +316,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.UI.GetByLocalSerial<HealthBarGump>(Member.Mobile)?.Dispose();
 
                     if (Member.Mobile == World.Player)
-                        Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+                        StatusGumpBase.GetStatusGump()?.Dispose();
+
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                     Engine.UI.Add(new HealthBarGump(Member.Mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
 

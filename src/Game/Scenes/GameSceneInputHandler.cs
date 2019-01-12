@@ -315,7 +315,7 @@ namespace ClassicUO.Game.Scenes
                             Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
-                                Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+                                StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
@@ -351,7 +351,7 @@ namespace ClassicUO.Game.Scenes
                             Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
-                                Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+                                StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;

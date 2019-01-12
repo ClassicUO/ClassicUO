@@ -51,6 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // video
         private Checkbox _debugControls;
+        private Combobox _shardType;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -346,6 +347,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
 
+            ScrollAreaItem item = new ScrollAreaItem();
+            Label text = new Label("- Status gump type:", true, 0, 0, 1)
+            {
+                Y = 40
+            };
+
+            item.AddChildren(text);
+
+            _shardType = new Combobox(text.Width + 20, 5, 100, new[] { "Modern", "Old", "Outlands" })
+            {
+                SelectedIndex = Engine.GlobalSettings.ShardType
+            };
+            item.AddChildren(_shardType);
+
+            rightArea.AddChildren(item);
 
             AddChildren(rightArea, PAGE);
         }
@@ -500,6 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
+                    _shardType.SelectedIndex = 0;
                     break;
                 case 4: // commands
 
@@ -591,6 +608,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             // video
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
+
+            if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
+            {
+                var status = StatusGumpBase.GetStatusGump();
+
+                Engine.GlobalSettings.ShardType = _shardType.SelectedIndex;
+
+                if (status != null)
+                {
+                    status.Dispose();
+                    StatusGumpBase.AddStatusGump(status.ScreenCoordinateX, status.ScreenCoordinateY);
+                }
+            }
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();

@@ -388,15 +388,11 @@ namespace ClassicUO.Game.UI.Gumps
 			        {
 				        Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile)?.Dispose();
 
-			            StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
+			            StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
                         if (status == null)
 				        {
-					        Engine.UI.Add(new StatusGump()
-					        {
-						        X = Mouse.Position.X - 100,
-						        Y = Mouse.Position.Y - 25
-					        });
+                            StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25);					      
 				        }
                         else
                             status.BringOnTop();

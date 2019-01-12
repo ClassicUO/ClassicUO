@@ -217,12 +217,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Engine.UI.Add(new StatusGump
-                    {
-                        X = ScreenCoordinateX,
-                        Y = ScreenCoordinateY
-                    });
-                    Dispose();
+                     StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
+                     Dispose();
                 }
             }
 
