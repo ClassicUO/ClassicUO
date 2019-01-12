@@ -743,7 +743,7 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int i = 0; i < _gumps.Count; i++)
                         {
-                            if (_gumps[i] == c && _gumps[i].ControlInfo.Layer != UILayer.Over)
+                            if (_gumps[i] == c /*&& _gumps[i].ControlInfo.Layer != UILayer.Over*/)
                             {
                                 _gumps.RemoveAt(i);
                                 _gumps.Insert(0, c);

@@ -1039,21 +1039,32 @@ namespace ClassicUO.IO.Resources
                 linesCount++;
                 int w = _leftMargin;
 
-                if (ptr.Align == TEXT_ALIGN_TYPE.TS_CENTER)
+                switch (ptr.Align)
                 {
-                    w += (width - ptr.Width) >> 1;
+                    case TEXT_ALIGN_TYPE.TS_CENTER:
 
-                    if (w < 0)
-                        w = 0;
-                }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_RIGHT)
-                {
-                    w += width - 10 - ptr.Width;
+                    {
+                        w += (width - ptr.Width) >> 1;
 
-                    if (w < 0)
-                        w = 0;
+                        if (w < 0)
+                            w = 0;
+
+                        break;
+                    }
+                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+
+                    {
+                        w += width - 10 - ptr.Width;
+
+                        if (w < 0)
+                            w = 0;
+
+                        break;
+                    }
+                    case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0: w += ptr.IndentionOffset;
+
+                        break;
                 }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0) w += ptr.IndentionOffset;
 
                 ushort oldLink = 0;
                 int dataSize = ptr.Data.Count;
@@ -2717,7 +2728,7 @@ namespace ClassicUO.IO.Resources
         public byte Font;
         public char Item;
         public ushort LinkID;
-        public MultilinesFontData Next;
+        //public MultilinesFontData Next;
     }
 
     internal struct WebLinkRect
