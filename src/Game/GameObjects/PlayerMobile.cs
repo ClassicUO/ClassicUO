@@ -1668,7 +1668,7 @@ namespace ClassicUO.Game.GameObjects
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun)
+            if (SpeedMode >= CharacterSpeedType.CantRun || (Stamina <= 1 && !IsDead))
                 run = false;
             else if (!run)
                 run = Engine.Profile.Current.AlwaysRun;

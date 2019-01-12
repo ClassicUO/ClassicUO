@@ -134,25 +134,37 @@ namespace ClassicUO.Game.Views
                 }
             }
 
+            
             if (Engine.Profile.Current.UseCircleOfTransparency)
             {
                 int z = World.Player.Z + 5;
 
-                if (!(GameObject.Z <= z - st.ItemData.Height || (z < st.Z && (_canBeTransparent & 0xFF) == 0)))
+                bool r = true;
+
+                if (!_isFoliage)
+                {
+                    if (st.Z <= z - st.ItemData.Height)
+                        r = false;
+                    else if (z < st.Z && (_canBeTransparent & 0xFF) == 0)
+                        r = false;
+                }
+
+                if (r)
                 {
                     int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
                     int distance = GameObject.Distance;
 
                     if (distance <= distanceMax)
                         _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
-                    else if (_alpha != 0.0f)
+                    else if (_alpha != 0)
                         _alpha = 0;
                 }
-                else if (_alpha != 0.0f)
+                else if (_alpha != 0)
                     _alpha = 0;
             }
-            else if (!_isFoliage && _alpha != 0.0f)
+            else if (!_isFoliage && _alpha != 0)
                 _alpha = 0;
+            
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);

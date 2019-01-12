@@ -182,7 +182,8 @@ namespace ClassicUO.Game.Scenes
                 int maxObjectZ = obj.PriorityZ;
 
                 bool ismobile = false;
-                StaticTiles itemData = StaticTiles.Empty;
+
+                StaticTiles itemData = default;
 
                 switch (obj)
                 {
