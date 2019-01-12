@@ -117,7 +117,9 @@ namespace ClassicUO.Game.Scenes
 
             WorldViewportGump viewport = new WorldViewportGump(this);
             Engine.UI.Add(viewport);
-            Engine.UI.Add(new TopBarGump());
+
+            TopBarGump.Create();
+
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);
@@ -127,17 +129,7 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
             //_viewPortGump.DragBegin += OnMouseDragBegin;
             _viewPortGump.MouseOver += OnMouseMove;
-            //_viewPortGump.Keyboard += OnKeyboard;
 
-            //Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            //Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            //Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            //Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
-            //Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
-            //Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            //Engine.Input.DragBegin += OnMouseDragBegin;
-            //Engine.Input.MouseDragging += OnMouseDragging;
-            //Engine.Input.MouseMoving += OnMouseMoving;
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
             //Engine.Input.MouseWheel += (sender, e) =>
@@ -271,16 +263,6 @@ namespace ClassicUO.Game.Scenes
             Engine.UI.Clear();
             World.Clear();
 
-
-            //Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            //Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            //Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            //Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
-            //Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
-            //Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            //Engine.Input.DragBegin -= OnMouseDragBegin;
-            //Engine.Input.MouseDragging -= OnMouseDragging;
-            //Engine.Input.MouseMoving -= OnMouseMoving;
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
 

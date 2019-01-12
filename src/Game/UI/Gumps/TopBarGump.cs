@@ -33,12 +33,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
     {
-        public TopBarGump() : base(0, 0)
+        private TopBarGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
-            CanBeSaved = true;
 
             // maximized view
             AddChildren(new ResizePic(9200)
@@ -107,23 +106,27 @@ namespace ClassicUO.Game.UI.Gumps
             ControlInfo.Layer = UILayer.Over;
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
+        private static TopBarGump _gump;
 
-            writer.Write(ActivePage == 2);
+        public static void Create()
+        {
+            if (_gump == null)
+            {
+                Engine.UI.Add(_gump = new TopBarGump()
+                {
+                    X = Engine.Profile.Current.TopbarGumpPosition.X,
+                    Y = Engine.Profile.Current.TopbarGumpPosition.Y,
+                });
+
+                if (Engine.Profile.Current.TopbarGumpIsMinimized)
+                    _gump.ChangePage(2);
+            }
+
         }
 
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
 
-            bool minimized = reader.ReadBoolean();
-            if (minimized)
-                ChangePage(2);
-        }
-
-
+        public bool IsMinimized { get; private set; }
+       
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Right && (X != 0 || Y != 0))
@@ -135,7 +138,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnPageChanged()
         {
+            Engine.Profile.Current.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
             WantUpdateSize = true;
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            Engine.Profile.Current.TopbarGumpPosition = Location;
         }
 
         public override void OnButtonClick(int buttonID)

@@ -476,7 +476,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
      
-        public IReadOnlyList<Control> HitTest(Point position)
+        public Control[] HitTest(Point position)
         {
             List<Control> results = new List<Control>();
             //Stack<Control> results = new Stack<Control>();
@@ -486,12 +486,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Add(this);
-                       //results.Insert(0, this);  //results.Push(this);
+                        results.Insert(0, this);
+                    //results.Add(this);
+                    //results.Insert(0, this);  //results.Push(this);
 
-                    for (int j = 0; j < Children.Count; j++)
+                    for (int i = 0; i < Children.Count; i++)
                     {
-                        Control c = Children[j];
+                        Control c = Children[i];
 
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
@@ -499,18 +500,9 @@ namespace ClassicUO.Game.UI.Controls
 
                             if (cl != null)
                             {
-                                //for (int i = cl.Length - 1; i >= 0; i--)
-                                //    results.Push(cl[i]);
-
-
-                                //foreach (Control control in cl)
-                                //{
-                                //    results.Push(control);
-                                //}
-
-                                //for (int i = cl.Count - 1; i >= 0; i--)
-                                //    results.Insert(0, cl[i]);
-                                results.AddRange(cl);
+                                for (int j = cl.Length - 1; j >= 0; j--)
+                                    results.Insert(0, cl[j]);
+                                //results.AddRange(cl);
                             }
                         }
                     }
@@ -519,9 +511,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (results.Count != 0)
             {
-                results.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+                //results.Sort((a, b) => b.Priority.CompareTo(a.Priority));
 
-                return results;
+                return results.ToArray();
             }
 
             return null;

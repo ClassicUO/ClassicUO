@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
             });
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             CanMove = true;
             BuildGeneral();
             BuildSounds();
@@ -355,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item.AddChildren(text);
 
-            _shardType = new Combobox(text.Width + 20, 5, 100, new[] { "Modern", "Old", "Outlands" })
+            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
             {
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };

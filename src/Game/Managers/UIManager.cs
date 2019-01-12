@@ -674,15 +674,27 @@ namespace ClassicUO.Game.Managers
             if (_isDraggingControl)
                 return _draggingControl;
 
-            IEnumerable<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal) : _gumps;
+            List<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
 
+            Control[] mouseOverControls = null;
             foreach (Control c in controls)
             {
-                IReadOnlyList<Control> ctrls = c.HitTest(position);
+                Control[] ctrls = c.HitTest(position);
 
                 if (ctrls != null)
                 {
-                    return ctrls.LastOrDefault(s => s.AcceptMouseInput);
+                    mouseOverControls = ctrls;
+
+                    break;
+                }
+            }
+
+            if (mouseOverControls != null)
+            {
+                for (int i = 0; i < mouseOverControls.Length; i++)
+                {
+                    if (mouseOverControls[i].AcceptMouseInput)
+                        return mouseOverControls[i];
                 }
             }
 
@@ -712,7 +724,35 @@ namespace ClassicUO.Game.Managers
         {
             if (_needSort)
             {
-                _gumps.Sort((a, b) => a.ControlInfo.Layer.CompareTo(b.ControlInfo.Layer));
+                List<Control> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+
+                foreach (Control c in gumps)
+                {
+                    if (c.ControlInfo.Layer == UILayer.Under )
+                    {
+                        for (int i = 0; i < _gumps.Count; i++)
+                        {
+                            if (_gumps[i] == c)
+                            {
+                                _gumps.RemoveAt(i);
+                                _gumps.Insert(_gumps.Count, c);
+                            }
+                        }
+                    }
+                    else if (c.ControlInfo.Layer == UILayer.Over)
+                    {
+                        for (int i = 0; i < _gumps.Count; i++)
+                        {
+                            if (_gumps[i] == c && _gumps[i].ControlInfo.Layer != UILayer.Over)
+                            {
+                                _gumps.RemoveAt(i);
+                                _gumps.Insert(0, c);
+                            }
+                        }
+                    }
+                }
+
+                //_gumps.Sort((a, b) => a.ControlInfo.Layer.CompareTo(b.ControlInfo.Layer));
                 _needSort = false;
             }
         }
@@ -763,7 +803,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_mouseDownControls[i] != null && _mouseDownControls[i] != _draggingControl)
                     {
-                        //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
+                        _mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
                         _mouseDownControls[i] = null;
                     }
                 }
