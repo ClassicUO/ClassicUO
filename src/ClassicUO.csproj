@@ -133,6 +133,7 @@
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
+    <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />

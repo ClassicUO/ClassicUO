@@ -101,6 +101,8 @@ namespace ClassicUO.Game.Managers
 
                 if (MouseOverControl != null)
                 {
+                    Console.WriteLine(MouseOverControl);
+
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                         MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Left);
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
@@ -344,21 +346,33 @@ namespace ClassicUO.Game.Managers
                             CheckerTrans t = new CheckerTrans(gparams);
 
 
+                            //for (int i = 0; i < gump.Children.Count; i++)
                             for (int i = gump.Children.Count - 1; i >= 0; i--)
                             {
-                                var c = gump.Children[i];
-
+                                Control c = gump.Children[i];
+                                c.Initialize();
                                 if (c is CheckerTrans)
                                     break;
+
                                 c.IsTransparent = true;
                                 c.Alpha = 0.5f;
 
                                 if (t.Bounds.Intersects(c.Bounds))
                                 {
+                                    //if (t.Bounds.Contains(c.Bounds))
+                                    //{
+                                    //    c.IsEnabled = false;
+                                    //}
+
                                     if (c is Button)
                                     {
                                         c.IsVisible = false;
                                     }
+                                    else if (c is HtmlControl)
+                                        c.IsEnabled = false;
+
+                                    //else
+                                    //    c.IsEnabled = false;
                                 }
                             }
 
@@ -400,7 +414,8 @@ namespace ClassicUO.Game.Managers
                             //    g.Alpha = alpha[trans ? 1 : 0];
                             //}
 
-                            //gump.AddChildren(t, page);
+
+                            gump.AddChildren(t, page);
 
 
                             break;
@@ -720,11 +735,49 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public void MakeTopMostGumpOverAnother(Control control, Control overed)
+        {
+            Control c = control;
+
+            while (c.Parent != null)
+                c = c.Parent;
+
+            Control c1 = overed;
+
+            while (c1.Parent != null)
+                c1 = c1.Parent;
+
+            int index = 0;
+
+            for (int i = _gumps.Count - 1; i >= 1; i--)
+            {
+                if (_gumps[i] == c)
+                {
+                    Control cm = _gumps[i];
+                    _gumps.RemoveAt(i);
+
+                    if (index == 0)
+                        index = i;
+
+                    _gumps.Insert(index - 1, cm);
+                    _needSort = true;
+                }
+                else if (_gumps[i] == c1)
+                {
+                    index = i;
+                }
+            }
+        }
+
+
         private void SortControlsByInfo()
         {
             if (_needSort)
             {
                 List<Control> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+
+                int over = 0;
+                int under = _gumps.Count - 1;
 
                 foreach (Control c in gumps)
                 {
@@ -735,7 +788,7 @@ namespace ClassicUO.Game.Managers
                             if (_gumps[i] == c)
                             {
                                 _gumps.RemoveAt(i);
-                                _gumps.Insert(_gumps.Count, c);
+                                _gumps.Insert(under--, c);
                             }
                         }
                     }
@@ -743,10 +796,10 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int i = 0; i < _gumps.Count; i++)
                         {
-                            if (_gumps[i] == c /*&& _gumps[i].ControlInfo.Layer != UILayer.Over*/)
+                            if (_gumps[i] == c)
                             {
                                 _gumps.RemoveAt(i);
-                                _gumps.Insert(0, c);
+                                _gumps.Insert(over++, c);
                             }
                         }
                     }

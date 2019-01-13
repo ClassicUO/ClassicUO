@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -38,13 +39,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        private readonly List<Label> _labels = new List<Label>();
         private bool _clickedCanDrag;
         private Point _clickedPoint, _labelClickedPosition;
         private float _picUpTime;
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
-
 
         public ItemGump(Item item)
         {
@@ -63,6 +62,29 @@ namespace ClassicUO.Game.UI.Controls
 
             WantUpdateSize = false;
             ShowLabel = true;
+
+            if (!World.ClientFlags.TooltipsEnabled)
+                Item.OverheadAdded += ItemOnOverheadAdded;
+        }
+
+
+        private void ItemOnOverheadAdded(object sender, EventArgs e)
+        {
+            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+            if (container == null)
+            {
+                container = new LabelContainer(Item);
+                Engine.UI.Add(container);
+            }
+
+            TextOverhead overhead = (TextOverhead) sender;
+
+            overhead.Initialized = true;
+            overhead.TimeToLive = 4000;
+
+            FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
+            container.AddChildren(label);
         }
 
         private void ItemOnDisposed(object sender, EventArgs e)
@@ -243,6 +265,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
+            if (!World.ClientFlags.TooltipsEnabled)
+                Item.OverheadAdded -= ItemOnOverheadAdded;
             Item.Disposed -= ItemOnDisposed;
             UpdateLabel(true);
             base.Dispose();
@@ -262,6 +287,69 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        class LabelContainer : Gump
+        {
+            public LabelContainer(Item item) : base(item, 0)
+            {
+                AcceptMouseInput = false;
+                CanMove = true;
+                WantUpdateSize = false;
+            }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                if (Children.Count == 0)
+                    Dispose();
+
+                base.Update(totalMS, frameMS);
+            }
+
+            public override void AddChildren(Control c, int page = 0)
+            {
+                c.X = Width - (c.Width >> 1);
+
+                if (Children.Count > 0)
+                {
+                    var a = Children[Children.Count - 1];
+                    c.Y = a.Y + a.Height;
+                }
+
+                if (Width > c.Width)
+                    Width = c.Width;
+
+                Height += c.Height;
+
+                base.AddChildren(c, page);
+            }
+
+
+            public override void RemoveChildren(Control c)
+            {            
+                base.RemoveChildren(c);
+
+                if (IsDisposed)
+                    return;
+
+                if (Width == c.Width)
+                {
+                    int newWidth = 0;
+                    int newHeight = 0;
+                    foreach (Control control in Children)
+                    {
+                        if (newWidth < control.Width)
+                            newWidth = control.Width;
+                        newHeight += control.Height;
+                    }
+
+                    Width = newWidth;
+                    Height = newHeight;
+                }
+
+            }
+        }
+
+        //private int _overheads;
+
         private void UpdateLabel(bool isDisposing = false)
         {
             if (World.ClientFlags.TooltipsEnabled)
@@ -269,37 +357,57 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
             {
-                if (_labels.Count == 0)
+                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+                if (container == null)
                 {
-                    foreach (TextOverhead overhead in Item.Overheads)
-                    {
-                        overhead.Initialized = true;
-                        overhead.TimeToLive = 4000;
-                        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
-                        {
-                            FadeOut = true,
-                            ControlInfo = { Layer =  UILayer.Over}
-                        };
-                        Engine.UI.Add(label);
-                        _labels.Add(label);
-                    }
+                    container = new LabelContainer(Item);
+                    Engine.UI.Add(container);
                 }
 
-                int y = 0;
+                //if (_overheads < Item.Overheads.Count)
+                //{
+                //    int i = 0;
 
-                for (int i = _labels.Count - 1; i >= 0; i--)
+                //    if (container.Children.Count > 0)
+                //    {
+                //        i = container.Children.Count;
+                //    }
+
+                //    for (; i < Item.Overheads.Count; i++)
+                //    {
+                //        var overhead = Item.Overheads[i];
+
+                //        overhead.Initialized = true;
+                //        overhead.TimeToLive = 4000;
+
+                //        FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
+                //        container.AddChildren(label);
+                //    }
+
+                //    _overheads = Item.Overheads.Count;
+                //}
+
+                if (this is ItemGumpPaperdoll)
                 {
-                    Label l = _labels[i];
-                    l.X = ScreenCoordinateX + _clickedPoint.X - (l.Width >> 1);
-                    l.Y = ScreenCoordinateY + _clickedPoint.Y - (l.Height >> 1) + y;
-                    y += l.Height;
+                    container.X = ScreenCoordinateX + _clickedPoint.X /*- (container.Width >> 1)*/;
+                    container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
                 }
+                else
+                {
+                    container.X = ScreenCoordinateX + (Width >> 1) /*- (container.Width >> 1)*/;
+                    container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
+                }
+
+
+                Engine.UI.MakeTopMostGumpOverAnother(container, this);
             }
-            else if (_labels.Count > 0)
-            {
-                _labels.ForEach(s => s.Dispose());
-                _labels.Clear();
-            }
+            //else if (_overheads > 0)
+            //{
+            //    _overheads = 0;
+            //    Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
+            //}
+
         }
     }
 }

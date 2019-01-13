@@ -147,7 +147,9 @@ namespace ClassicUO.Game.UI.Gumps
                 v.Dispose();
 
             foreach (Item item in e)
+            {
                 AddChildren(new ItemGump(item));
+            }
         }
 
         public override void Dispose()

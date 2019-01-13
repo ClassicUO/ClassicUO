@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump
     {
-        private readonly bool _isTransparent, _isPartialHue;
+        private readonly bool _isPartialHue;
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
 
@@ -44,7 +44,10 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Mobile = owner;
             HighlightOnMouseOver = false;
-            _isTransparent = transparent;
+
+            if (transparent)
+                Alpha = 0.5f;
+
             _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
@@ -93,7 +96,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, _isTransparent ? .5f : 0, false));
+            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
         }
 
         protected override bool Contains(int x, int y)
@@ -106,8 +109,11 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                {
                     return;
+                }
 
                 if (gs.HeldItem.ItemData.IsWearable)
                 {

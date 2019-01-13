@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ushort _normalHue;
         private readonly ushort _overHue;
 
-        public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0) : base(text, isunicode, hue, maxwidth, font, style, align, timeToLive)
+        public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(text, isunicode, hue, maxwidth, font, style, align)
         {
             _overHue = overHue;
             _normalHue = hue;

@@ -182,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
         public void AddToTile() => AddToTile(X, Y);
       
 
-        public event EventHandler Disposed;
+        public event EventHandler Disposed, OverheadAdded;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
@@ -246,6 +246,8 @@ namespace ClassicUO.Game.GameObjects
                     _overHeads.RemoveFromBack().Dispose();
                 }
             }
+
+            OverheadAdded?.Raise(overhead);
 
             return overhead;
         }
