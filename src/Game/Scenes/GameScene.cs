@@ -164,6 +164,8 @@ namespace ClassicUO.Game.Scenes
             string name;
             string text;
 
+            Hue hue = e.Hue;
+
             switch (e.Type)
             {
                 case MessageType.Regular:
@@ -205,23 +207,24 @@ namespace ClassicUO.Game.Scenes
                 case MessageType.Party:
                     text = e.Text;
                     name = "[Party]";
+                    hue = Engine.Profile.Current.PartyMessageHue;
                     break;
                 case MessageType.Alliance:
                     text = e.Text;
                     name = "[Alliance]";
-
+                    hue = Engine.Profile.Current.AllyMessageHue;
                     break;
                 case MessageType.Guild:
                     text = e.Text;
-                    name = "[Guild]";
-
+                    name = $"[Guild][{e.Parent.Name}]";
+                    hue = Engine.Profile.Current.GuildMessageHue;
                     break;
                 default:
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
                     return;
             }
 
-            _journalManager.Add(text, e.Font, e.Hue, name);
+            _journalManager.Add(text, e.Font, hue, name);
         }
 
         private IEnumerable<IWaitCondition> CastSpell()

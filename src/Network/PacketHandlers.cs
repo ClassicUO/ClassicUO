@@ -687,7 +687,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, false));
+            Chat.OnMessage(entity, text, hue, type, font);
         }
 
         private static void DeleteObject(Packet p)
@@ -1832,7 +1832,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang));
+            Chat.OnMessage(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
         }
 
         private static void OpenGump(Packet p)
@@ -2323,7 +2323,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true));
+            Chat.OnMessage(entity, text, hue, type, font, true);
         }
 
         private static void UnicodePrompt(Packet p)

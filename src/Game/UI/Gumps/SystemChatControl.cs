@@ -161,10 +161,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
-                case MessageType.Party:
-                case MessageType.Guild:
-                case MessageType.Alliance:
                     AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+
+                    break;
+                case MessageType.Party:
+                    AddLine($"[Party][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+
+                    break;
+                case MessageType.Guild:
+                    AddLine($"[Guild][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+                    break;
+                case MessageType.Alliance:
+                    AddLine($"[Alliance][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
                     break;
             }
         }

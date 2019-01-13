@@ -781,9 +781,9 @@ namespace ClassicUO.Game.GameObjects
 			        var direction = (delta < 0 ? "decreased" : "increased");
 			
 			        if (displayMessage)
-				        Chat.OnMessage(new UOMessageEventArgs(this,
+				        Chat.OnMessage(this,
 					        $"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.",
-					        0x57, MessageType.System, MessageFont.Normal, true));
+					        0x57, MessageType.System, MessageFont.Normal, true);
 			    }
 			
 			    skill.ValueFixed = realValue;

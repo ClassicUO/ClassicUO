@@ -37,7 +37,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             _scrollBar = scrollBarControl;
             _scrollBar.IsVisible = false;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
+            CanMove = true;
             X = x;
             Y = y;
             Width = width;
