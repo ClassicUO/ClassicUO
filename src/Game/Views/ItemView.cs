@@ -165,12 +165,15 @@ namespace ClassicUO.Game.Views
                         HueVector = new Vector3(0x038E, 1, HueVector.Z);
                     else
                         HueVector = ShaderHuesTraslator.GetHueVector(color);
+
                     base.Draw(batcher, position, objectList);
                     Pick(frame, Bounds, position, objectList);
                 }
 
                 break;
             }
+
+            MessageOverHead(batcher, position, Bounds.Y);
 
             return true;
         }
