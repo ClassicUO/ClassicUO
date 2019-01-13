@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Scenes
             if (!item.IsPickable)
                 return;
 
-            if (item.Container.IsValid)
+            if (!item.OnGround)
             {
                 Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
@@ -106,6 +106,11 @@ namespace ClassicUO.Game.Scenes
 
                 //item.Container = Serial.Invalid;
                 entity.Items.ProcessDelta();
+            }
+            else
+            {
+                World.Map.GetTile(item.X, item.Y)
+                     .RemoveGameObject(item);
             }
 
             CloseItemGumps(item);

@@ -934,15 +934,30 @@ namespace ClassicUO.Network
 
             if (scene == null)
                 throw new Exception("Where is my fucking GameScene?");
+            scene.HeldItem.AddToTile();
             scene.ClearHolding();
         }
 
         private static void EndDraggingItem(Packet p)
         {
+            if (!World.InGame)
+                return;
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (scene == null)
+                throw new Exception("Where is my fucking GameScene?");
+            scene.ClearHolding();
         }
 
         private static void DropItemAccepted(Packet p)
         {
+            if (!World.InGame)
+                return;
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (scene == null)
+                throw new Exception("Where is my fucking GameScene?");
+            scene.ClearHolding();
         }
 
         private static void Blood(Packet p)
