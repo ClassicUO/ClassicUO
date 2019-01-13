@@ -39,8 +39,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        private bool _clickedCanDrag;
-        private Point _clickedPoint, _labelClickedPosition;
+        protected bool _clickedCanDrag;
         private float _picUpTime;
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
@@ -149,10 +148,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return;
+
             _clickedCanDrag = true;
             float totalMS = Engine.Ticks;
             _picUpTime = totalMS + 500f;
-            _clickedPoint = new Point(x, y);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -220,16 +221,21 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_clickedCanDrag && Math.Abs(_clickedPoint.X - x) + Math.Abs(_clickedPoint.Y - y) >= 3)
+            if (_clickedCanDrag)
             {
-                _clickedCanDrag = false;
-                AttempPickUp();
+                Point offset = Mouse.LDroppedOffset;
+
+                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE)
+                {
+                    _clickedCanDrag = false;
+                    AttempPickUp();
+                }
             }
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {      
-            if (Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
                 return;
 
             if (TargetManager.IsTargeting)
@@ -242,9 +248,6 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                _labelClickedPosition.X = x;
-                _labelClickedPosition.Y = y;
-
                 if (_clickedCanDrag)
                 {
                     _clickedCanDrag = false;
@@ -269,7 +272,6 @@ namespace ClassicUO.Game.UI.Controls
             if (!World.ClientFlags.TooltipsEnabled)
                 Item.OverheadAdded -= ItemOnOverheadAdded;
             Item.Disposed -= ItemOnDisposed;
-            UpdateLabel(true);
             base.Dispose();
         }
 
@@ -283,11 +285,34 @@ namespace ClassicUO.Game.UI.Controls
                     GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
                 }
                 else
-                    GameActions.PickUp(Item, _clickedPoint);
+                    GameActions.PickUp(Item, Point.Zero);
             }
         }
 
-        class LabelContainer : Gump
+       
+        protected virtual void UpdateLabel()
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            if (!Item.IsDisposed && Item.Overheads.Count > 0)
+            {
+                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+                if (container == null)
+                {
+                    container = new LabelContainer(Item);
+                    Engine.UI.Add(container);
+                }
+                container.X = ScreenCoordinateX + (Width >> 1) /*- (container.Width >> 1)*/;
+                container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
+                
+                Engine.UI.MakeTopMostGumpOverAnother(container, this);
+            }
+        }
+
+       
+        protected class LabelContainer : Gump
         {
             public LabelContainer(Item item) : base(item, 0)
             {
@@ -324,7 +349,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
             public override void RemoveChildren(Control c)
-            {            
+            {
                 base.RemoveChildren(c);
 
                 if (IsDisposed)
@@ -348,66 +373,5 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        //private int _overheads;
-
-        private void UpdateLabel(bool isDisposing = false)
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                //if (_overheads < Item.Overheads.Count)
-                //{
-                //    int i = 0;
-
-                //    if (container.Children.Count > 0)
-                //    {
-                //        i = container.Children.Count;
-                //    }
-
-                //    for (; i < Item.Overheads.Count; i++)
-                //    {
-                //        var overhead = Item.Overheads[i];
-
-                //        overhead.Initialized = true;
-                //        overhead.TimeToLive = 4000;
-
-                //        FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
-                //        container.AddChildren(label);
-                //    }
-
-                //    _overheads = Item.Overheads.Count;
-                //}
-
-                if (this is ItemGumpPaperdoll)
-                {
-                    container.X = ScreenCoordinateX + _clickedPoint.X /*- (container.Width >> 1)*/;
-                    container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
-                }
-                else
-                {
-                    container.X = ScreenCoordinateX + (Width >> 1) /*- (container.Width >> 1)*/;
-                    container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
-                }
-
-
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-            //else if (_overheads > 0)
-            //{
-            //    _overheads = 0;
-            //    Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
-            //}
-
-        }
     }
 }

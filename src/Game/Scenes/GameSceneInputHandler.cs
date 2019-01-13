@@ -301,9 +301,7 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDroppedOffset;
 
-                const int MIN_PICKUP_DRAG_DISTANCE = 5;
-
-                if (Math.Abs(offset.X) > MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > MIN_PICKUP_DRAG_DISTANCE)
+                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE)
                 {
                     GameObject obj = _dragginObject;
 
