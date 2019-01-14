@@ -688,7 +688,7 @@ namespace ClassicUO.IO.Resources
 
                 //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
 
-                for (int i = 0; i < animSeq.Entries.Length; i++)
+				for (int i = 0; i < animSeq.Entries.Length; i++)
                 {
                     UOFileIndex3D entry = animSeq.Entries[i];
 
@@ -704,16 +704,12 @@ namespace ClassicUO.IO.Resources
                         uint animID = _reader.ReadUInt();
                         ref IndexAnimation index = ref DataIndex[animID];
 
-                        if (!index.IsUOP)
-                            continue;
                         _reader.Skip(48);
+
                         int replaces = _reader.ReadInt();
 
-                        if (replaces == 48 || replaces == 68)
-                            continue;
-
-                        //StringBuilder sb = new StringBuilder();
-                        //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
+                       //StringBuilder sb = new StringBuilder();
+                       //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
 
                         //switch (replaces)
                         //{
@@ -736,68 +732,132 @@ namespace ClassicUO.IO.Resources
                             int oldIdx = _reader.ReadInt();
                             uint frameCount = _reader.ReadUInt();
                             int newIDX = _reader.ReadInt();
+	                        int unknown = _reader.ReadInt();
 
-                            //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+	                       //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-                            if (frameCount == 0)
-                                index.Groups[oldIdx] = index.Groups[newIDX];
-                            else
-                            {
-                                //int offset = 64;
-                                if (animID == 0x02df)
-                                {
-                                }
+	                        if (newIDX > 0)
+		                        index.Groups[oldIdx] = index.Groups[newIDX];
 
-                                //_reader.Skip(40);
+							_reader.Skip(48);
 
-                                //byte[] unk = new byte[20];
+							var unknownA = _reader.ReadInt();
 
-                                //for (int o = 0; o < 20; o++)
-                                //{
-                                //    unk[o] = _reader.ReadByte();
-                                //}
+	                        //sb.AppendLine($"\t\t\t\t UnknownA: {unknownA}");
 
-                                //for (int j = 0; j < 5; j++)
-                                //{
-                                //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
-                                //}
-                            }
+							if (unknownA > 0)
+							{
+								for (int x = 0; x < unknownA; x++)
+								{
+									var unknownB = _reader.ReadInt();
+									var effectCount = _reader.ReadInt();
 
-                            _reader.Skip(60);
+									//sb.AppendLine($"\t\t\t\t\t\t UnknownB: {unknownB}\t\t EffectCount: {effectCount}");
+
+									for (int e = 0; e < effectCount; e++)
+									{
+										var effectUnknownA = _reader.ReadInt();
+	
+										var effectUnknownB = _reader.ReadInt();
+
+										// loop here, but no data read
+
+										var effectUnknownC = _reader.ReadInt();
+
+										//sb.AppendLine($"\t\t\t\t\t\t\t\t effectUnknownA: {effectUnknownA}\t\t effectUnknownB: {effectUnknownB}\t\t effectUnknownC: {effectUnknownC}");
+
+										for (int z = 0; z < effectUnknownC; z++)
+										{
+											var effectUnknownD = _reader.ReadInt();
+
+											var effectUnknownE = _reader.ReadInt();
+
+											//sb.AppendLine($"\t\t\t\t\t\t\t\t\t\t effectUnknownD: {effectUnknownD}\t\t effectUnknownE: {effectUnknownE}\t\t");
+										}
+
+
+										//				loop back to function here
+										
+										var unknownF = _reader.ReadInt();
+									}
+
+	
+								}
+							}
+
+	                        var unknownC = _reader.ReadInt();
+
+	                        //sb.AppendLine($"\t\t\t\t UnknownC: {unknownC}");
+
+							if (unknownC > 0)
+	                        {
+		                        for (int x = 0; x < unknownC; x++)
+		                        {
+			                        var unknownD = _reader.ReadInt();
+
+			                       //sb.AppendLine($"\t\t\t\t\t\t unknownD: {unknownD}");
+								}
+	                        }
                         }
+
+
+	                    var unknownZ = _reader.ReadInt();
+
+	                    if (unknownZ > 0)
+	                    {
+		                    for (int z = 0; z < unknownZ; z++)
+		                    {
+			                    var unknownZ_0 = _reader.ReadByte();
+			                    var unknownZ_1 = _reader.ReadByte();
+			                    var unknownZ_2 = _reader.ReadInt();
+
+								// I don't know yet
+			                    {
+				                    var unknown_float_A = 0.0;
+
+				                    if (unknownZ_1 < 0)
+					                    unknown_float_A = 0.0;
+			                    }
+
+			                    var unknownZ_3 = _reader.ReadInt();
+
+			                    for (int y = 0; y < unknownZ_3; y++)
+			                    {
+				                    var unknownY_0 = _reader.ReadByte();
+				                    var unknownY_1 = _reader.ReadInt();
+			                    }
+
+			                    var unknownZ_4 = _reader.ReadInt();
+
+			                    for (int x = 0; x < unknownZ_4; x++)
+			                    {
+				                    var unknownX_0 = _reader.ReadByte();
+				                    var unknownX_1 = _reader.ReadInt();
+				                    var unknownX_2 = _reader.ReadInt();
+								}
+
+			                    var unknownZ_5 = _reader.ReadInt();
+
+			                    for (int w = 0; w < unknownZ_5; w++)
+			                    {
+				                    var unknownW_0 = _reader.ReadByte();
+				                    var unknownW_1 = _reader.ReadByte();
+				                    var unknownW_2 = _reader.ReadInt();
+
+				                    for (int v = 0; v < unknownW_2; v++)
+				                    {
+					                    var unknownV_0 = _reader.ReadInt();
+									}
+			                    }
+							}
+	                    }
 
                         int toread = (int)(_reader.Length - _reader.Position);
-                        byte[] data = _reader.ReadArray(toread);
-                        _reader.SetData(data, toread);
 
-                        if (animID == 0x02df)
-                        {
-                            //int len = entry.Length;
-                            //byte[] decc = new byte[len];
+	                    if (toread > 0)
+		                    throw new Exception("More data");
 
-                            //ZLib.Compress(decbuffer, ref decc);
-
-                            // ZLib.Pack(decc, ref len, decbuffer, decLen);
-                        }
-
-                        //if (!Directory.Exists("files"))
-                        //    Directory.CreateDirectory("files");
-
-                        //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
-                        //{
-                        //    writer.Write(data);
-                        //}
-                        //sb.AppendLine("Data len: " + toread);
-                        //for (int ii = 0; ii < toread; ii++)
-                        //{
-                        //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
-                        //}
-                        uint unk0 = _reader.ReadUInt();
-                        _reader.Skip(1);
-                        uint unk1 = _reader.ReadUInt();
-                        //uint unk2 = _reader.ReadUInt();
-                        //uint unk3 = _reader.ReadUInt();
-                        //file.WriteAsync(sb.ToString());
+                       // file.WriteAsync(sb.ToString());
                     }
                 }
 
