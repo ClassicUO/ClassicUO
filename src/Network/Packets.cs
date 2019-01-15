@@ -658,15 +658,27 @@ namespace ClassicUO.Network
         }
     }
 
-    /*internal sealed class PASCIIPromptResponse : PacketWriter
+    internal sealed class PASCIIPromptResponse : PacketWriter
     {
-        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)
+        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x9A)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint) (cancel ? 0 : 1));
+
+            WriteASCII(text, len);
+        }
     }
 
     internal sealed class PUnicodePromptResponse : PacketWriter
     {
-        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base()
-    }*/
+        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base(0xC2)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint)(cancel ? 0 : 1));
+            WriteASCII(lang, 3);
+            WriteUnicode(text, len);
+        }
+    }
 
     internal sealed class PDyeDataResponse : PacketWriter
     {

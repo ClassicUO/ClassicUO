@@ -206,12 +206,12 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case MessageType.Party:
                     text = e.Text;
-                    name = "[Party]";
+                    name = $"[Party][{e.Parent.Name}]";
                     hue = Engine.Profile.Current.PartyMessageHue;
                     break;
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = "[Alliance]";
+                    name = $"[Alliance][{e.Parent.Name}]";
                     hue = Engine.Profile.Current.AllyMessageHue;
                     break;
                 case MessageType.Guild:

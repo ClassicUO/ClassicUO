@@ -259,7 +259,8 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
-            LastAttack = 0;        
+            LastAttack = 0;
+            Chat.PromptData = default;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

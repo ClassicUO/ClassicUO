@@ -1241,7 +1241,7 @@ namespace ClassicUO.Network
             bool frameDirection = !p.ReadBool();
             bool repeat = p.ReadBool();
             byte delay = p.ReadByte();
-            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile, action), delay, (byte)frameCount, (byte)repeatMode, repeat, frameDirection);
+            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action), delay, (byte)frameCount, (byte)repeatMode, repeat, frameDirection);
             mobile.AnimationFromServer = true;
         }
 
@@ -1715,6 +1715,16 @@ namespace ClassicUO.Network
 
         private static void ASCIIPrompt(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            byte[] data = p.ReadArray(8);
+
+            Chat.PromptData = new PromptData()
+            {
+                Prompt = ConsolePrompt.ASCII,
+                Data = data
+            };       
         }
 
         private static void RequestAssistance(Packet p)
@@ -2343,6 +2353,16 @@ namespace ClassicUO.Network
 
         private static void UnicodePrompt(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            byte[] data = p.ReadArray(8);
+
+            Chat.PromptData = new PromptData()
+            {
+                Prompt = ConsolePrompt.Unicode,
+                Data = data
+            };
         }
 
         private static void Semivisible(Packet p)

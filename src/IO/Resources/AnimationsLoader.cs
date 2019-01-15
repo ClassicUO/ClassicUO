@@ -708,8 +708,8 @@ namespace ClassicUO.IO.Resources
 
                         int replaces = _reader.ReadInt();
 
-                       //StringBuilder sb = new StringBuilder();
-                       //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
+                        StringBuilder sb = new StringBuilder();
+                        //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
 
                         //switch (replaces)
                         //{
@@ -727,6 +727,11 @@ namespace ClassicUO.IO.Resources
                         //        break;
                         //}
 
+                        if (animID == 735)
+                        {
+
+                        }
+
                         for (int k = 0; k < replaces; k++)
                         {
                             int oldIdx = _reader.ReadInt();
@@ -734,10 +739,30 @@ namespace ClassicUO.IO.Resources
                             int newIDX = _reader.ReadInt();
 	                        int unknown = _reader.ReadInt();
 
-	                       //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
+	                       sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-	                        if (newIDX > 0)
-		                        index.Groups[oldIdx] = index.Groups[newIDX];
+                            if (animID == 735)
+                            {
+                                if (oldIdx == 4)
+                                {
+                                    //newIDX = 25;
+                                }
+
+                                if (newIDX == 4)
+                                {
+
+                                }
+                            }
+
+                            if (newIDX > 0)
+                            {
+                                if (index.IsUOP)
+                                    index.Groups[oldIdx] = index.Groups[newIDX];
+                                else
+                                {
+                                    index.Groups[oldIdx].UOPAnimData = index.Groups[newIDX].UOPAnimData;
+                                }
+                            }
 
 							_reader.Skip(48);
 
@@ -800,19 +825,38 @@ namespace ClassicUO.IO.Resources
 	                        }
                         }
 
+                        var a = sb.ToString();
 
 	                    var unknownZ = _reader.ReadInt();
 
 	                    if (unknownZ > 0)
 	                    {
+	                        const int TO_CHECK = 25;
+	                        const int ID = 735;
+
 		                    for (int z = 0; z < unknownZ; z++)
 		                    {
 			                    var unknownZ_0 = _reader.ReadByte();
 			                    var unknownZ_1 = _reader.ReadByte();
 			                    var unknownZ_2 = _reader.ReadInt();
 
-								// I don't know yet
-			                    {
+		                        if (unknownZ_0 == TO_CHECK && animID == ID)
+		                        {
+
+		                        }
+
+		                        if (unknownZ_1 == TO_CHECK && animID == ID)
+		                        {
+
+		                        }
+
+		                        if (unknownZ_2 == TO_CHECK && animID == ID)
+		                        {
+
+		                        }
+
+                                // I don't know yet
+                                {
 				                    var unknown_float_A = 0.0;
 
 				                    if (unknownZ_1 < 0)
@@ -825,7 +869,18 @@ namespace ClassicUO.IO.Resources
 			                    {
 				                    var unknownY_0 = _reader.ReadByte();
 				                    var unknownY_1 = _reader.ReadInt();
-			                    }
+
+
+			                        if (unknownY_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownY_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+                                }
 
 			                    var unknownZ_4 = _reader.ReadInt();
 
@@ -834,21 +889,57 @@ namespace ClassicUO.IO.Resources
 				                    var unknownX_0 = _reader.ReadByte();
 				                    var unknownX_1 = _reader.ReadInt();
 				                    var unknownX_2 = _reader.ReadInt();
-								}
 
-			                    var unknownZ_5 = _reader.ReadInt();
+			                        if (unknownX_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownX_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownX_2 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        //index.Groups[unknownX_0] = index.Groups[unknownX_1];
+			                        //index.Groups[unknownX_0] = index.Groups[unknownX_2];
+
+                                }
+
+                                var unknownZ_5 = _reader.ReadInt();
 
 			                    for (int w = 0; w < unknownZ_5; w++)
 			                    {
 				                    var unknownW_0 = _reader.ReadByte();
 				                    var unknownW_1 = _reader.ReadByte();
-				                    var unknownW_2 = _reader.ReadInt();
 
-				                    for (int v = 0; v < unknownW_2; v++)
+			                        if (unknownW_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownW_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        var unknownW_2 = _reader.ReadInt();
+
+                                    for (int v = 0; v < unknownW_2; v++)
 				                    {
 					                    var unknownV_0 = _reader.ReadInt();
-									}
-			                    }
+
+				                        if (unknownV_0 == TO_CHECK && animID == ID)
+				                        {
+
+				                        }
+
+                                    }
+                                }
 							}
 	                    }
 
