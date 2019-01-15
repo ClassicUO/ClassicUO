@@ -739,7 +739,7 @@ namespace ClassicUO.IO.Resources
                             int newIDX = _reader.ReadInt();
 	                        int unknown = _reader.ReadInt();
 
-	                       sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
+	                       //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
                             if (animID == 735)
                             {
