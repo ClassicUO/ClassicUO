@@ -509,6 +509,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
