@@ -78,11 +78,7 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = login;
                     break;
                 case GameScene game:
-
-                    Engine.fullScreenMode(2);
-
-                    //Engine.WindowWidth = 800;
-                    //Engine.WindowHeight = 800;
+                    Engine.FullScreenMode(2);
                     CurrentScene = game;
                     break;
             }
