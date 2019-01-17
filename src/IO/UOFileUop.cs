@@ -109,8 +109,8 @@ namespace ClassicUO.IO
                             Seek(curpos);
                         }
                     }
-                    else
-                        throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
+                    //else
+                    //    throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
                 }
 
                 Seek(nextBlock);

@@ -35,6 +35,8 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SDL2;
+
 namespace ClassicUO.Game
 {
     internal sealed class GameCursor
@@ -195,19 +197,13 @@ namespace ClassicUO.Game
 
         private ItemHold _itemHold;
 
-        //private bool _isDouble, _isPartial, _isTransparent;
         public void SetDraggedItem(ItemHold hold)
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            //_hue = hue;
-            //_isDouble = isDouble;
-            //_isPartial = ispartial;
-            //_isTransparent = istransparent;
             _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
         }
-
 
         public void Update(double totalMS, double frameMS)
         {

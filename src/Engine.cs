@@ -369,7 +369,8 @@ namespace ClassicUO
             //    //MaxWidth = 500
             //};
 
-            _uiManager.Add(new DebugGump());
+            _uiManager.Add(new DebugGump());          
+
             base.Initialize();
         }
 

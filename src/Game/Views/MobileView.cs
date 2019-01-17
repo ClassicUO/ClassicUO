@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Views
                 return false;
 
             Mobile mobile = (Mobile)GameObject;
+            //mobile.AnimIndex = 0;
 
             bool mirror = false;
             byte dir = (byte)mobile.GetDirectionForAnimation();

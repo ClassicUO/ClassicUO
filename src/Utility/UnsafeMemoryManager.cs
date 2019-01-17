@@ -46,6 +46,8 @@ namespace ClassicUO.Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SizeOf<T>() //where T : struct
         {
+            return Marshal.SizeOf<T>();
+
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
 
             TypedReference tRef0 = __makeref(doubleStruct.First);
