@@ -147,12 +147,11 @@ namespace ClassicUO.Game.UI.Gumps
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             var shopItem = (ShopItem) sender;
-            TransactionItem transactionItem;
 
             if (shopItem.Amount <= 0)
                 return;
 
-            if (_transactionItems.TryGetValue(shopItem.Item, out transactionItem))
+            if (_transactionItems.TryGetValue(shopItem.Item, out TransactionItem transactionItem))
                 transactionItem.Amount++;
             else
             {

@@ -109,6 +109,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            HeldItem = new ItemHold();
             _journalManager = new JournalManager();
             _overheadManager = new OverheadManager();
 
@@ -206,12 +207,12 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case MessageType.Party:
                     text = e.Text;
-                    name = "[Party]";
+                    name = $"[Party][{e.Parent.Name}]";
                     hue = Engine.Profile.Current.PartyMessageHue;
                     break;
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = "[Alliance]";
+                    name = $"[Alliance][{e.Parent.Name}]";
                     hue = Engine.Profile.Current.AllyMessageHue;
                     break;
                 case MessageType.Guild:
@@ -244,6 +245,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            HeldItem.Clear();
+
             Plugin.OnDisconnected();
 
             _renderList = null;
@@ -410,6 +413,7 @@ namespace ClassicUO.Game.Scenes
                 NetClient.Socket.Send(new PPing());
                 _timePing = (long) totalMS + 10000;
             }
+
 
             _useItemQueue.Update(totalMS, frameMS);
         }

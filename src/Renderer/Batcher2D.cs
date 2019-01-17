@@ -66,7 +66,8 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Engine.ExePath, "shaders/IsometricWorld.fxc")));
-            _effect.Parameters["HuesPerTexture"].SetValue((float)FileManager.Hues.HuesCount);
+            float f = (float) FileManager.Hues.HuesCount;
+            _effect.Parameters["HuesPerTexture"].SetValue(f);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
             _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
@@ -509,14 +510,15 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
             Viewport viewport = GraphicsDevice.Viewport;
             _projectionMatrix.M11 = (float)(2.0 / viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / viewport.Height);
-            _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
-            _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+            //_projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
+            //_projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
 
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);

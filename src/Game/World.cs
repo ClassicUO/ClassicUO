@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 
 using Microsoft.Xna.Framework;
 
@@ -259,7 +260,8 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
-            LastAttack = 0;        
+            LastAttack = 0;
+            Chat.PromptData = default;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -36,35 +39,21 @@ namespace ClassicUO.Game.Scenes
     {
         private GameObject _dragginObject;
         private Point _dragOffset;
-        private Item _heldItem;
 
-        public Item HeldItem
-        {
-            get => _heldItem;
-            set
-            {
-                if (value == null && _heldItem != null)
-                {
-                    //Engine.UI.RemoveInputBlocker(this);
-                    Engine.UI.GameCursor.ClearDraggedItem();
-                }
-                else if (value != null && _heldItem == null)
-                {
-                    //Engine.UI.AddInputBlocker(this);
-                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && value.ItemData.IsStackable, value.ItemData.IsPartialHue, value.ItemData.IsTransparent || value.ItemData.IsTranslucent);
-                }
 
-                _heldItem = value;
-            }
-        }
+        public ItemHold HeldItem { get; private set; }
 
-        public bool IsHoldingItem => HeldItem != null;
+        public bool IsHoldingItem => HeldItem != null && HeldItem.Enabled;
+
 
         public void MergeHeldItem(Entity entity)
         {
-            GameActions.DropItem(HeldItem, Position.Invalid, entity.Serial);
-            ClearHolding();
-            Mouse.CancelDoubleClick = true;
+            if (HeldItem.Enabled && HeldItem.Serial != entity)
+            {
+                GameActions.DropItem(HeldItem.Serial, entity.Position, entity.Serial);
+                HeldItem.Enabled = false;
+                HeldItem.Dropped = true;
+            }
         }
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
@@ -90,13 +79,20 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
         {
+            if (HeldItem.Enabled || (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid))
+            {
+                return;
+            }
+
+
             if (!item.IsPickable)
                 return;
+            HeldItem.Clear();
+            HeldItem.Set(item);
 
             if (!item.OnGround)
             {
                 Entity entity = World.Get(item.Container);
-                item.Position = entity.Position;
                 entity.Items.Remove(item);
 
                 if (item.Container.IsMobile)
@@ -104,7 +100,6 @@ namespace ClassicUO.Game.Scenes
                     ((Mobile)entity).Equipment[item.ItemData.Layer] = null;
                 }
 
-                //item.Container = Serial.Invalid;
                 entity.Items.ProcessDelta();
             }
             else
@@ -112,10 +107,9 @@ namespace ClassicUO.Game.Scenes
                 World.Map.GetTile(item.X, item.Y)
                      .RemoveGameObject(item);
             }
-
+            World.Items.Remove(item);
             CloseItemGumps(item);
-            item.Amount = (ushort) amount;
-            HeldItem = item;
+           
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
         }
 
@@ -149,60 +143,64 @@ namespace ClassicUO.Game.Scenes
             else
                 serial = Serial.MINUS_ONE;
 
-            GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
-            ClearHolding();
-            Mouse.CancelDoubleClick = true;
+            if (HeldItem.Enabled && HeldItem.Serial != serial)
+            { 
+                GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
+                HeldItem.Enabled = false;
+                HeldItem.Dropped = true;
+            }
         }
 
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
-
-            if (gump != null)
+            if (HeldItem.Enabled && HeldItem.Serial != container)
             {
-                Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-                ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+                ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 
-                if (texture != null && !texture.IsDisposed)
+                if (gump != null)
                 {
-                    x -= texture.Width >> 1;
-                    y -= texture.Height >> 1;
+                    Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
+                    ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
 
-                    if (x + texture.Width > bounds.Width)
-                        x = bounds.Width - texture.Width;
+                    if (texture != null && !texture.IsDisposed)
+                    {
+                        x -= texture.Width >> 1;
+                        y -= texture.Height >> 1;
 
-                    if (y + texture.Height > bounds.Height)
-                        y = bounds.Height - texture.Height;
+                        if (x + texture.Width > bounds.Width)
+                            x = bounds.Width - texture.Width;
+
+                        if (y + texture.Height > bounds.Height)
+                            y = bounds.Height - texture.Height;
+                    }
+
+                    if (x < bounds.X)
+                        x = bounds.X;
+
+                    if (y < bounds.Y)
+                        y = bounds.Y;
+                }
+                else
+                {
+                    x = 0xFFFF;
+                    y = 0xFFFF;
                 }
 
-                if (x < bounds.X)
-                    x = bounds.X;
 
-                if (y < bounds.Y)
-                    y = bounds.Y;
+                GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
+                HeldItem.Enabled = false;
+                HeldItem.Dropped = true;
             }
-            else
-            {
-                x = 0xFFFF;
-                y = 0xFFFF;
-            }
-            
-
-            GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
-            ClearHolding();
-            Mouse.CancelDoubleClick = true;
         }
 
         public void WearHeldItem(Mobile target)
         {
-            GameActions.Equip(HeldItem, (Layer) HeldItem.ItemData.Layer, target);
-            ClearHolding();
-            Mouse.CancelDoubleClick = true;
-        }
-
-        public void ClearHolding()
-        {
-            HeldItem = null;
+            if (HeldItem.Enabled && HeldItem.IsWearable)
+            {
+                GameActions.Equip(HeldItem.Serial, (Layer) FileManager.TileData.StaticData[HeldItem.Graphic].Layer, target);
+                HeldItem.Enabled = false;
+                HeldItem.Dropped = true;
+            }
         }
     }
 }

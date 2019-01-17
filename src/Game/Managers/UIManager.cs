@@ -101,8 +101,6 @@ namespace ClassicUO.Game.Managers
 
                 if (MouseOverControl != null)
                 {
-                    Console.WriteLine(MouseOverControl);
-
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                         MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Left);
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
@@ -368,8 +366,7 @@ namespace ClassicUO.Game.Managers
                                     {
                                         c.IsVisible = false;
                                     }
-                                    else if (c is HtmlControl)
-                                        c.IsEnabled = false;
+
 
                                     //else
                                     //    c.IsEnabled = false;
@@ -621,7 +618,6 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            GameCursor?.ClearDraggedItem();
             _gumps.ForEach(s =>
             {
                 if (!(s is DebugGump))
@@ -788,7 +784,7 @@ namespace ClassicUO.Game.Managers
                             if (_gumps[i] == c)
                             {
                                 _gumps.RemoveAt(i);
-                                _gumps.Insert(under--, c);
+                                _gumps.Insert(under, c);
                             }
                         }
                     }

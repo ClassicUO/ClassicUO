@@ -81,20 +81,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public bool FadeOut { get; set; }
-
-        private static Hue TransformHue(Hue hue)
-        {
-            if (hue > 1)
-                hue -= 2;
-
-            if (hue < 2)
-                hue = 1;
-
-            return hue;
-        }
-
-
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;

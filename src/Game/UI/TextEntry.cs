@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI
                 Font = font,
                 MaxWidth = width,
                 FontStyle = style,
-                Hue = hue
+                Hue = hue,
+                Text = string.Empty
             };
 
             if (maxWidth > 0)

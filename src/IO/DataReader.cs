@@ -21,6 +21,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 
 namespace ClassicUO.IO
@@ -42,6 +43,14 @@ namespace ClassicUO.IO
 
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
+        private GCHandle _handle;
+
+        public void ReleaseData()
+        {
+            if (_handle.IsAllocated)
+                _handle.Free();
+        }
+
         internal void SetData(byte* data, long length)
         {
             _data = data;
@@ -51,8 +60,11 @@ namespace ClassicUO.IO
 
         internal void SetData(byte[] data, long length)
         {
-            fixed (byte* ptr = data)
-                SetData(ptr, length);
+            if (_handle.IsAllocated)
+                _handle.Free();
+            _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            //fixed (byte* ptr = data)
+            SetData((byte*)_handle.AddrOfPinnedObject(), length);
         }
 
         internal void SetData(IntPtr data, long length)

@@ -129,6 +129,18 @@ namespace ClassicUO.Utility
             return inrect;
         }
 
+        public static string MakeSafe(this string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (Utility.StringHelper.IsSafeChar(s[i]))
+                    sb.Append(s[i]);
+            }
+
+            return sb.ToString();
+        }
+
         public static string ReadUTF8String(this BinaryReader reader, int length)
         {
             byte[] data = new byte[length];

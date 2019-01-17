@@ -152,10 +152,9 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                if (gs.HeldItem.ItemData.IsWearable)
-                {
-                    gs.WearHeldItem(Mobile);                   
-                }       
+
+                gs.WearHeldItem(Mobile);                   
+                   
             }
         }
     }

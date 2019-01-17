@@ -114,10 +114,12 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\Layers.cs" />
+    <Compile Include="Game\Data\MapMessageType.cs" />
     <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
+    <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RacialAbilityData.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
@@ -136,6 +139,7 @@
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
+    <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
@@ -148,10 +152,12 @@
     <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
+    <Compile Include="Game\UI\Gumps\MapGump.cs" />
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
     <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
+    <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
     <Compile Include="Game\UI\MultiLineEntry.cs" />
     <Compile Include="Game\Views\MultiView.cs" />
@@ -218,6 +224,7 @@
     <Compile Include="IO\Resources\LightsLoader.cs" />
     <Compile Include="IO\Resources\MapLoader.cs" />
     <Compile Include="IO\Resources\MultiLoader.cs" />
+    <Compile Include="IO\Resources\MultiMapLoader.cs" />
     <Compile Include="IO\Resources\SkillsLoader.cs" />
     <Compile Include="IO\Resources\SoundsLoader.cs" />
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
@@ -349,7 +356,7 @@
     <Compile Include="Game\UI\Gumps\ContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\Gump.cs" />
     <Compile Include="Game\UI\Gumps\JournalGump.cs" />
-    <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\WorldMapGump.cs" />
     <Compile Include="Game\UI\Gumps\MiniMapGump.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PaperdollGump.cs" />

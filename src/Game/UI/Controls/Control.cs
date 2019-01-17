@@ -511,7 +511,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (results.Count != 0)
             {
-                //results.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+                results.Sort((a, b) => a.Priority.CompareTo(b.Priority));
 
                 return results.ToArray();
             }
@@ -711,17 +711,17 @@ namespace ClassicUO.Game.UI.Controls
             //    _attempToDrag = true;
             //}
 
-            //if (_mouseIsDown && !_attempToDrag)
-            //{
-            //    Point offset = Mouse.LDroppedOffset;
-            //    if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
-            //        || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+            if (_mouseIsDown && !_attempToDrag)
+            {
+                Point offset = Mouse.LDroppedOffset;
+                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
+                    || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
 
-            //    {
-            //        InvokeDragBegin(new Point(x, y));
-            //        _attempToDrag = true;
-            //    }
-            //}
+                {
+                    InvokeDragBegin(new Point(x, y));
+                    _attempToDrag = true;
+                }
+            }
         }
 
         protected virtual void OnMouseEnter(int x, int y)

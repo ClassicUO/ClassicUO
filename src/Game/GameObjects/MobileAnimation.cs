@@ -271,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (isRun)
                     {
-                        if (mobile.Equipment[(int) Layer.Mount] != null)
+                        if (mobile.IsMounted)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
                         else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
                         {
-                            if (mobile.Equipment[(int) Layer.Mount] != null)
+                            if (mobile.IsMounted)
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                             else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
                             {
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (mobile.Equipment[(int) Layer.Mount] != null)
+                        if (mobile.IsMounted)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
                         {
@@ -314,7 +314,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null)
+                    if (mobile.IsMounted)
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
                     else if (inWar && !mobile.IsDead)
                     {
@@ -428,21 +428,21 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (group == ANIMATION_GROUPS.AG_PEOPLE)
             {
-                switch ((PEOPLE_ANIMATION_GROUP) animation)
+                switch ((PEOPLE_ANIMATION_GROUP)animation)
                 {
                     case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
                     case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                        animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1;
+                        animation = (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1;
 
                         break;
                 }
 
                 if (!FileManager.Animations.AnimationExists(graphic, animation))
-                    animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    animation = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
             }
         }
 
-        public static byte GetReplacedObjectAnimation(Mobile mobile, ushort index)
+        public static byte GetReplacedObjectAnimation(Graphic graphic, ushort index)
         {
             ushort getReplacedGroup(IReadOnlyList<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
             {
@@ -459,7 +459,7 @@ namespace ClassicUO.Game.GameObjects
                 return idx;
             }
 
-            ANIMATION_GROUPS group = FileManager.Animations.GetGroupIndex(mobile.Graphic);
+            ANIMATION_GROUPS group = FileManager.Animations.GetGroupIndex(graphic);
 
             if (group == ANIMATION_GROUPS.AG_LOW)
                 return (byte) (getReplacedGroup(FileManager.Animations.GroupReplaces[0], index, (ushort) LOW_ANIMATION_GROUP.LAG_WALK) % (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);

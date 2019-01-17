@@ -513,7 +513,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) switches.Length);
 
-                for (int i = 0; i < switches.Length; i++)
+                for (int i = switches.Length - 1; i >= 0; i--)
                     WriteUInt(switches[i]);
             }
 
@@ -523,7 +523,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) entries.Length);
 
-                for (int i = 0; i < entries.Length; i++)
+                for (int i = entries.Length - 1; i >= 0 ; i--)
                 {
                     int length = Math.Min(239, entries[i].Item2.Length);
                     WriteUShort(entries[i].Item1);
@@ -578,9 +578,15 @@ namespace ClassicUO.Network
 
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse() : base(0xAC)
+        public PTextEntryDialogResponse(Serial serial, byte button, string text, bool code) : base(0xAC)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteByte(button);
+            WriteByte(0);
+            WriteBool(code);
+
+            WriteUShort((ushort)(text.Length + 1));
+            WriteASCII(text, text.Length + 1);
         }
     }
 
@@ -658,15 +664,27 @@ namespace ClassicUO.Network
         }
     }
 
-    /*internal sealed class PASCIIPromptResponse : PacketWriter
+    internal sealed class PASCIIPromptResponse : PacketWriter
     {
-        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)
+        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x9A)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint) (cancel ? 0 : 1));
+
+            WriteASCII(text, len);
+        }
     }
 
     internal sealed class PUnicodePromptResponse : PacketWriter
     {
-        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base()
-    }*/
+        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base(0xC2)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint)(cancel ? 0 : 1));
+            WriteASCII(lang, 3);
+            WriteUnicode(text, len);
+        }
+    }
 
     internal sealed class PDyeDataResponse : PacketWriter
     {

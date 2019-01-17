@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -327,17 +328,21 @@ namespace ClassicUO
             FileManager.LoadFiles();
             Log.PopIndent();
 
+
             uint[] hues = FileManager.Hues.CreateShaderColors();
 
             _batcher = new Batcher2D(GraphicsDevice);
 
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
-            texture0.SetData(hues, 0, 32 * FileManager.Hues.HuesCount);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
-            texture1.SetData(hues, 32 * FileManager.Hues.HuesCount, 32 * FileManager.Hues.HuesCount);
+            int size = FileManager.Hues.HuesCount;
+
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
+            texture0.SetData(hues, 0, size);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
+            texture1.SetData(hues, size, size);
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
-         
+
+
             _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
@@ -364,7 +369,8 @@ namespace ClassicUO
             //    //MaxWidth = 500
             //};
 
-            _uiManager.Add(new DebugGump());
+            _uiManager.Add(new DebugGump());          
+
             base.Initialize();
         }
 

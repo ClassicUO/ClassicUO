@@ -22,9 +22,11 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -45,7 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
         PartyPrivate,
         Guild,
         Alliance,
-        ClientCommand
+        ClientCommand,
+        Prompt
     }
 
     internal class SystemChatControl : Control
@@ -328,6 +331,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Mode = ChatMode.Default;
 
                     break;
+                case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
+                    if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
+                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, 0, true));
+                    else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
+                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, 0, "ENU", true));
+                    Chat.PromptData = default;
+                    break;
             }
         }
 
@@ -341,65 +351,93 @@ namespace ClassicUO.Game.UI.Gumps
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;
 
-            switch (sentMode)
+            if (Chat.PromptData.Prompt != ConsolePrompt.None)
             {
-                case ChatMode.Default:
-                    GameActions.Say(text, Engine.Profile.Current.SpeechHue);
-                    break;
-                case ChatMode.Whisper:
-                    GameActions.Say(text, 33, MessageType.Whisper);
-                    break;
-                case ChatMode.Emote:
-                    GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
-                    break;
-                case ChatMode.Party:
+                if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
+                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length, text.Length < 1));
+                else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
+                    NetClient.Socket.Send(new PUnicodePromptResponse(text, text.Length, "ENU", text.Length < 1));
 
-                    text = text.ToLower();
+                Chat.PromptData = default;
+            }
+            else
+            {
+                switch (sentMode)
+                {
+                    case ChatMode.Default:
+                        GameActions.Say(text, Engine.Profile.Current.SpeechHue);
 
-                    switch (text)
-                    {
-                        case "add":
-                            World.Party.TriggerAddPartyMember();
-                            break;
-                        case "loot":
-                            if (World.Party.IsInParty)
-                                World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
-                            break;
-                        case "quit":
-                            if (World.Party.IsInParty)
-                                World.Party.QuitParty();
-                            break;
-                        case "accept":
-                            if (!World.Party.IsInParty)
-                                World.Party.AcceptPartyInvite();
-                            break;
-                        case "decline":
-                            if (!World.Party.IsInParty)
-                                World.Party.DeclinePartyInvite();
-                            break;
-                        default:
+                        break;
+                    case ChatMode.Whisper:
+                        GameActions.Say(text, 33, MessageType.Whisper);
 
-                            if (World.Party.IsInParty)
-                            {
-                                World.Party.PartyMessage(text);
-                            }
-                            break;
-                    }
-                    break;
-                case ChatMode.PartyPrivate:
-                    
-                    //GameActions.Say(text, hue, speechType);
-                    break;
-                case ChatMode.Guild:
-                    GameActions.Say(text, Engine.Profile.Current.GuildMessageHue, MessageType.Guild);
-                    break;
-                case ChatMode.Alliance:
-                    GameActions.Say(text, Engine.Profile.Current.AllyMessageHue, MessageType.Alliance);
-                    break;
-                case ChatMode.ClientCommand:
-                    CommandManager.Execute(text);
+                        break;
+                    case ChatMode.Emote:
+                        GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
 
-                    break;
+                        break;
+                    case ChatMode.Party:
+
+                        text = text.ToLower();
+
+                        switch (text)
+                        {
+                            case "add":
+                                World.Party.TriggerAddPartyMember();
+
+                                break;
+                            case "loot":
+
+                                if (World.Party.IsInParty)
+                                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
+
+                                break;
+                            case "quit":
+
+                                if (World.Party.IsInParty)
+                                    World.Party.QuitParty();
+
+                                break;
+                            case "accept":
+
+                                if (!World.Party.IsInParty)
+                                    World.Party.AcceptPartyInvite();
+
+                                break;
+                            case "decline":
+
+                                if (!World.Party.IsInParty)
+                                    World.Party.DeclinePartyInvite();
+
+                                break;
+                            default:
+
+                                if (World.Party.IsInParty)
+                                {
+                                    World.Party.PartyMessage(text);
+                                }
+
+                                break;
+                        }
+
+                        break;
+                    case ChatMode.PartyPrivate:
+
+                        //GameActions.Say(text, hue, speechType);
+                        break;
+                    case ChatMode.Guild:
+                        GameActions.Say(text, Engine.Profile.Current.GuildMessageHue, MessageType.Guild);
+
+                        break;
+                    case ChatMode.Alliance:
+                        GameActions.Say(text, Engine.Profile.Current.AllyMessageHue, MessageType.Alliance);
+
+                        break;
+                    case ChatMode.ClientCommand:
+                        CommandManager.Execute(text);
+
+                        break;
+                }
             }
 
             DisposeChatModePrefix();

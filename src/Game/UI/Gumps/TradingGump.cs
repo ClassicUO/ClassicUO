@@ -253,9 +253,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (y < 0)
                         y = 0;
 
-                    GameActions.DropItem(gs.HeldItem, x, y, 0, ID1);
-                    gs.ClearHolding();
-                    Mouse.CancelDoubleClick = true;
+                    GameActions.DropItem(gs.HeldItem.Serial, x, y, 0, ID1);
+                    gs.HeldItem.Dropped = true;
+                    gs.HeldItem.Enabled = false;
+                    //Mouse.CancelDoubleClick = true;
                 }
             };
         }

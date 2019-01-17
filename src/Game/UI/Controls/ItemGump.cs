@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (Item.ItemData.IsContainer)
                         gs.DropHeldItemToContainer(Item);
-                    else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.ItemData.IsStackable)
+                    else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
                         gs.MergeHeldItem(Item);
                     else
                     {

@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
@@ -67,6 +68,8 @@ namespace ClassicUO.Game
         None = 0xFF
     }
 
+   
+
     internal static class Chat
     {
         private const ushort defaultHue = 0x0017;
@@ -74,6 +77,8 @@ namespace ClassicUO.Game
         {
             Graphic = Graphic.INVARIANT, Name = "System"
         };
+
+        public static PromptData PromptData { get; set; }
 
         public static event EventHandler<UOMessageEventArgs> Message;
 
@@ -127,6 +132,7 @@ namespace ClassicUO.Game
         {
             LocalizedMessage.Raise(args, entity ?? _system);
         }
+
 	}
 
 	internal class UOMessageEventArgs : EventArgs

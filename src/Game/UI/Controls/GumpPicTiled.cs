@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
         public GumpPicTiled(Graphic graphic)
         {
             CanMove = true;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             Texture = FileManager.Gumps.GetTexture(graphic);
             Graphic = _lastGraphic = graphic;
         }
