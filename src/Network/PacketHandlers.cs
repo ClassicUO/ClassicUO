@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -1000,26 +1001,24 @@ namespace ClassicUO.Network
                                 }
                                 else
                                 {
-
+                                    Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
                                 }
                             }
                             else
                             {
-
+                                Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (is null)");
                             }
                         }
                         else 
                             item.AddToTile();
                     }
-
-
                 }
 
                 hold.Clear();
             }
             else
             {
-
+                Log.Message(LogTypes.Warning, "There was a problem with ItemHold object. It was cleared before :|");
             }
 
             byte code = p.ReadByte();
@@ -1286,6 +1285,38 @@ namespace ClassicUO.Network
 
         private static void MapData(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+
+            MapGump gump = Engine.UI.GetByLocalSerial<MapGump>(serial);
+
+            if (gump != null)
+            {
+                switch ((MapMessageType)p.ReadByte())
+                {
+                    case MapMessageType.Add:
+                        p.Skip(1);
+
+                        ushort x = p.ReadUShort();
+                        ushort y = p.ReadUShort();
+
+                        gump.AddToContainer(new GumpPic(x + 24, y + 31, 0x139B, 0));
+
+                        break;
+                    case MapMessageType.Insert: break;
+                    case MapMessageType.Move: break;
+                    case MapMessageType.Remove: break;
+                    case MapMessageType.Clear:
+                        gump.ClearContainer();
+                        break;
+                    case MapMessageType.Edit: break;
+                    case MapMessageType.EditResponse:
+                        gump.SetPlotState(p.ReadByte());
+                        break;
+                }
+            }
         }
 
         private static void SetTime(Packet p)
@@ -1742,12 +1773,27 @@ namespace ClassicUO.Network
             ushort width = p.ReadUShort();
             ushort height = p.ReadUShort();
 
-            // to finish
+            MapGump gump = new MapGump(serial, gumpid, width, height);
+
+            if (p.ID == 0xF5 || FileManager.ClientVersion >= ClientVersions.CV_308Z)
+            {
+                ushort facet = 0;
+
+                if (p.ID == 0xF5)
+                    facet = p.ReadUShort();
+                gump.SetMapTexture(FileManager.Multimap.LoadFacet(facet, width, height, startX, startY, endX, endY));
+            }
+            else
+            {
+                gump.SetMapTexture(FileManager.Multimap.LoadMap(width, height, startX, startY, endX, endY));
+            }
+
+            Engine.UI.Add(gump);
         }
 
         private static void OpenBook(Packet p)
         {
-            var serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             bool oldpacket = p.ID == 0x93;
             bool editable = p.ReadBool();
             p.Skip(1);

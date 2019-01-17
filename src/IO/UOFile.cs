@@ -30,12 +30,12 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    internal abstract unsafe class UOFile : DataReader
+    internal unsafe class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
         private MemoryMappedFile _file;
 
-        protected UOFile(string filepath)
+        public UOFile(string filepath)
         {
             Path = filepath;
         }
