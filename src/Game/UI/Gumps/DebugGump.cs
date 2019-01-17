@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS);
             //_sb.AppendFormat(DEBUG_PROFILER, (timeDraw / timeTotal), (timeUpdate / timeTotal), (timeFixedUpdate / timeTotal), (int) avgDrawMs, Engine.IsRunningSlowly);
             _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-            _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, scene?.SelectedObject?.Position ?? Position.Invalid);
+            _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
             _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
 
             _label.Text = _sb.ToString();

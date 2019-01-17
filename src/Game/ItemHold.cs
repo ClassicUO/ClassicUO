@@ -54,7 +54,7 @@ namespace ClassicUO.Game
         public void Clear()
         {
             Serial = Serial.INVALID;
-            Position = Position.Invalid;
+            Position = Position.INVALID;
             Container = Serial.INVALID;
             DisplayedGraphic = Graphic = Graphic.INVALID;
             Hue = Hue.INVALID;

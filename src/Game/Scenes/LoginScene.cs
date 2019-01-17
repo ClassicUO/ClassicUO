@@ -534,7 +534,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityName = p.ReadASCII(31);
 				    var cityBuilding = p.ReadASCII(31);
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.Invalid, 0);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.INVALID, 0);
 			    }
 
 			    cities[i] = cityInfo;

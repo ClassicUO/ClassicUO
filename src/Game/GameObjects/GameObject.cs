@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
-        private Position _position = Position.Invalid;
+        private Position _position = Position.INVALID;
         private View _view;
         public Vector3 Offset;
         private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
@@ -168,10 +168,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                //if (_tile != null && _tile.X == x && _tile.Y == y)
-                //    return;
-
-                if (Position != Position.Invalid)
+                if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
                 _tile = World.Map.GetTile(x, y);
