@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Views
 {
     internal class StaticView : View
     {
-        private readonly bool _isFoliage, _isPartialHue;
+        private readonly bool _isFoliage, _isPartialHue, _isTransparent;
         private float _alpha;
         private float _timeToProcessAlpha;
         private readonly int _canBeTransparent;
@@ -44,9 +44,11 @@ namespace ClassicUO.Game.Views
         {
             _isFoliage = st.ItemData.IsFoliage;
             _isPartialHue = st.ItemData.IsPartialHue;
+            _isTransparent = st.ItemData.IsTransparent || st.ItemData.IsTranslucent;
+
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
-            if (st.ItemData.IsTranslucent)
+            if (_isTransparent)
                 _alpha = 0.5f;
 
             if (st.ItemData.Height > 5)
@@ -133,6 +135,8 @@ namespace ClassicUO.Game.Views
                     }
                 }
             }
+            else if (_isTransparent && _alpha != 0.5f)
+                _alpha = 0.5f;
 
             
             if (Engine.Profile.Current.UseCircleOfTransparency)
@@ -157,13 +161,13 @@ namespace ClassicUO.Game.Views
                     if (distance <= distanceMax)
                         _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
                     else if (_alpha != 0)
-                        _alpha = 0;
+                        _alpha = _isTransparent ? .5f : 0;
                 }
                 else if (_alpha != 0)
-                    _alpha = 0;
+                    _alpha = _isTransparent ? .5f : 0;
             }
             else if (!_isFoliage && _alpha != 0)
-                _alpha = 0;
+                _alpha = _isTransparent ? .5f : 0;
             
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
