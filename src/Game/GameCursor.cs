@@ -51,9 +51,8 @@ namespace ClassicUO.Game
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly Tooltip _tooltip;
         private SpriteTexture _draggedItemTexture;
-        private bool _draggingItem;
         private Graphic _graphic = 0x2073;
-        private Hue _hue;
+        //private Hue _hue;
         private bool _needGraphicUpdate;
         private Point _offset;
         private Rectangle _rect;
@@ -194,23 +193,21 @@ namespace ClassicUO.Game
 
         public ArtTexture Texture { get; private set; }
 
-        private bool _isDouble, _isPartial, _isTransparent;
-        public void SetDraggedItem(Graphic graphic, Hue hue, bool isDouble, bool ispartial, bool istransparent)
+        private ItemHold _itemHold;
+
+        //private bool _isDouble, _isPartial, _isTransparent;
+        public void SetDraggedItem(ItemHold hold)
         {
-            _draggedItemTexture = FileManager.Art.GetTexture(graphic);
-            _hue = hue;
-            _isDouble = isDouble;
-            _isPartial = ispartial;
-            _isTransparent = istransparent;
+            _itemHold = hold;
+            _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
+            //_hue = hue;
+            //_isDouble = isDouble;
+            //_isPartial = ispartial;
+            //_isTransparent = istransparent;
             _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
-            _draggingItem = true;
         }
 
-        public void ClearDraggedItem()
-        {
-            _draggingItem = false;
-        }
 
         public void Update(double totalMS, double frameMS)
         {
@@ -224,7 +221,7 @@ namespace ClassicUO.Game
 
             Texture.Ticks = (long) totalMS;
 
-            if (_draggingItem)
+            if (_itemHold != null && _itemHold.Enabled)
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
@@ -246,13 +243,13 @@ namespace ClassicUO.Game
 
             if (id < 16)
             {
-                if (_draggingItem)
+                if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
                 {
                     Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
-                    Vector3 hue = ShaderHuesTraslator.GetHueVector(_hue, _isPartial, _isTransparent ? .5f : 0, false);
+                    Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
                     sb.Draw2D(_draggedItemTexture, p, _rect, hue);
 
-                    if (_isDouble)
+                    if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
                     {
                         p.X += 5;
                         p.Y += 5;

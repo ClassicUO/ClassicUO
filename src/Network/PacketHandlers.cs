@@ -631,7 +631,6 @@ namespace ClassicUO.Network
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
-
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = (sbyte)p.ReadUShort();
@@ -682,7 +681,7 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.Graphic = graphic;
+                //entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
             }
@@ -701,6 +700,11 @@ namespace ClassicUO.Network
 
             if (World.Get(serial) == null)
                 return;
+
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (scene.HeldItem.Serial == serial)
+                scene.HeldItem.Enabled = false;
 
             if (serial.IsItem)
             {
@@ -930,13 +934,110 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
+
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (scene == null)
-                throw new Exception("Where is my fucking GameScene?");
-            scene.HeldItem.AddToTile();
-            scene.ClearHolding();
+            ItemHold hold = scene.HeldItem;
+
+            Item item = World.Items.Get(hold.Serial);
+
+            if (hold.Enabled || (hold.Dropped && item == null))
+            {
+                if (hold.Layer == Layer.Invalid && hold.Container.IsValid)
+                {
+                    Entity container = World.Get(hold.Container);
+
+                    if (container != null)
+                    {
+                        item = World.GetOrCreateItem(hold.Serial);
+                        item.Graphic = hold.Graphic;
+                        item.Hue = hold.Hue;
+                        item.Amount = hold.Amount;
+                        item.Flags = hold.Flags;
+                        item.Layer = hold.Layer;
+                        item.Container = hold.Container;
+                        item.Position = hold.Position;
+
+                        container.Items.Add(item);
+
+                        World.Items.Add(item);
+                        World.Items.ProcessDelta();
+
+                        container.ProcessDelta();
+                    }
+                }
+                else
+                {
+                    item = World.GetOrCreateItem(hold.Serial);
+
+                    //if (item != null)
+                    {
+                        item.Graphic = hold.Graphic;
+                        item.Hue = hold.Hue;
+                        item.Amount = hold.Amount;
+                        item.Flags = hold.Flags;
+                        item.Layer = hold.Layer;
+                        item.Container = hold.Container;
+                        item.Position = hold.Position;
+
+                        if (!hold.OnGround)
+                        {
+                            Entity container = World.Get(item.Container);
+
+                            if (container != null)
+                            {
+                                if (container.Serial.IsMobile)
+                                {
+                                    Mobile mob = (Mobile) container;
+
+                                    mob.Items.Add(item);
+
+                                    mob.Equipment[(int) hold.Layer] = item;
+
+                                    World.Items.Add(item);
+
+                                    mob.ProcessDelta();
+                                }
+                                else
+                                {
+
+                                }
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                        else 
+                            item.AddToTile();
+                    }
+
+
+                }
+
+                hold.Clear();
+            }
+            else
+            {
+
+            }
+
+            byte code = p.ReadByte();
+
+            if (code < 5)
+            {
+                Chat.OnMessage(null, _errorMessages[code], 0, MessageType.System, MessageFont.Normal);
+            }
         }
+
+        private static readonly string[] _errorMessages =
+        {
+            "You can not pick that up.",
+            "That is too far away.",
+            "That is out of sight.",
+            "That item does not belong to you.  You'll have to steal it.",
+            "You are already holding an item."
+        };
 
         private static void EndDraggingItem(Packet p)
         {
@@ -944,9 +1045,8 @@ namespace ClassicUO.Network
                 return;
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (scene == null)
-                throw new Exception("Where is my fucking GameScene?");
-            scene.ClearHolding();
+            scene.HeldItem.Enabled = false;
+            scene.HeldItem.Dropped = false;
         }
 
         private static void DropItemAccepted(Packet p)
@@ -955,9 +1055,10 @@ namespace ClassicUO.Network
                 return;
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (scene == null)
-                throw new Exception("Where is my fucking GameScene?");
-            scene.ClearHolding();
+            scene.HeldItem.Enabled = false;
+            scene.HeldItem.Dropped = false;
+
+            Console.WriteLine("ACCEPTED: {0}", scene.HeldItem.Serial);
         }
 
         private static void Blood(Packet p)
@@ -992,7 +1093,7 @@ namespace ClassicUO.Network
             item.Amount = 1;
             Mobile mobile = World.Mobiles.Get(item.Container);
 
-            if (mobile != null) // could it render bad mobiles?
+            if (mobile != null)
             {
                 mobile.Equipment[(int)item.Layer] = item;
                 mobile.Items.Add(item);
@@ -1001,8 +1102,14 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
             mobile?.ProcessDelta();
-            if (mobile == World.Player)
+
+            if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs.HeldItem.Serial == item.Serial)
+                gs.HeldItem.Clear();
         }
 
         private static void FightOccuring(Packet p)
@@ -1025,13 +1132,13 @@ namespace ClassicUO.Network
             {
                 case 0:
 
-                    while ((id = p.ReadUShort()) > 0)
+                    while (p.Position + 2 <= p.Length && (id = p.ReadUShort()) > 0)
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock)p.ReadByte(), 100);
 
                     break;
                 case 2:
 
-                    while ((id = p.ReadUShort()) > 0)
+                    while (p.Position + 2 <= p.Length && (id = p.ReadUShort()) > 0)
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock)p.ReadByte(), p.ReadUShort());
 
                     break;
@@ -2767,6 +2874,14 @@ namespace ClassicUO.Network
             item.Hue = p.ReadUShort();
             items.Add(item);
             Entity entity = World.Get(item.Container);
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
+            {
+                Console.WriteLine("FROM CONTAINER");
+                gs.HeldItem.Clear();
+            }
 
             if (entity != null)
             {

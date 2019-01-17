@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case GameEffect effect:
                         return string.Format("GameEffect");
                     case TextOverhead overhead:
-                        return string.Format("TextOverhead");
+                        return string.Format("TextOverhead hue: {0}", overhead.Hue);
                     case Land land:
                         return string.Format("Static ({0:X4})  flags: {1}", land.Graphic, land.TileData.Flags);
                 }

@@ -109,6 +109,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            HeldItem = new ItemHold();
             _journalManager = new JournalManager();
             _overheadManager = new OverheadManager();
 
@@ -244,6 +245,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            HeldItem.Clear();
+
             Plugin.OnDisconnected();
 
             _renderList = null;
@@ -410,6 +413,7 @@ namespace ClassicUO.Game.Scenes
                 NetClient.Socket.Send(new PPing());
                 _timePing = (long) totalMS + 10000;
             }
+
 
             _useItemQueue.Update(totalMS, frameMS);
         }

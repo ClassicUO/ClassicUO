@@ -131,7 +131,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
-            foreach (ServerListEntry server in loginScene.Servers) scrollArea.AddChildren(new ServerEntryGump(server));
+            foreach (ServerListEntry server in loginScene.Servers)
+                scrollArea.AddChildren(new ServerEntryGump(server));
             AddChildren(scrollArea);
 
             if (loginScene.Servers.Length > 0)
@@ -171,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     case Buttons.Next:
 
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer(0);
+                            loginScene.SelectServer((byte) loginScene.Servers[0].Index);
 
                         break;
                     case Buttons.Prev:
@@ -188,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer(0);
+                    loginScene.SelectServer((byte)loginScene.Servers[0].Index);
             }
         }
 

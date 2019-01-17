@@ -192,18 +192,15 @@ namespace ClassicUO.Game.UI.Gumps
                 p.Y = 150;
             }
 
-            Label text;
 
-            if (!string.IsNullOrEmpty(World.Player.Name))
+            Label text = new Label(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, false, 0x0386, font: 1)
             {
-                text = new Label(World.Player.Name, false, 0x0386, font: 1)
-                {
-                    X = 86,
-                    Y = 42
-                };
-                _labels[(int) MobileStats.Name] = text;
-                AddChildren(text);
-            }
+                X = 86,
+                Y = 42
+            };
+            _labels[(int) MobileStats.Name] = text;
+            AddChildren(text);
+            
 
             text = new Label(World.Player.Strength.ToString(), false, 0x0386, font: 1)
             {
@@ -294,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long) totalMS + 250;
 
-                _labels[(int) MobileStats.Name].Text = World.Player.Name;
+                _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
                 _labels[(int) MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int) MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int) MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
@@ -344,10 +341,9 @@ namespace ClassicUO.Game.UI.Gumps
                 p.X = 389;
                 p.Y = 152;
 
-                if (!string.IsNullOrEmpty(World.Player.Name))
-                {                   
-                    AddStatTextLabel(World.Player.Name, MobileStats.Name, _useUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
-                }
+                                 
+                AddStatTextLabel(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, MobileStats.Name, _useUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
+                
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_5020)
                 {
@@ -611,7 +607,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long) totalMS + 250;
 
-                _labels[(int) MobileStats.Name].Text = World.Player.Name;
+                _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
 
                 if (_useUOPGumps)
                     _labels[(int) MobileStats.HitChanceInc].Text = World.Player.HitChanceInc.ToString();
@@ -713,7 +709,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         public StatusGumpOutlands() : base()
         {
-            Label text;
             Point pos = Point.Zero;
             _labels = new Label[(int) MobileStats.Max];
 
@@ -746,17 +741,16 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateStatusFillBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
 
             // Name
-            if (!string.IsNullOrEmpty(World.Player.Name))
+            
+            Label text = new Label(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                text = new Label(World.Player.Name, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    X = 100,
-                    Y = 10
-                };
+                X = 100,
+                Y = 10
+            };
 
-                _labels[(int) MobileStats.Name] = text;
-                AddChildren(text);
-            }
+            _labels[(int) MobileStats.Name] = text;
+            AddChildren(text);
+            
 
             // Stat locks
             AddChildren(_lockers[(int) StatType.Str] = new GumpPic(
@@ -963,7 +957,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
                 UpdateStatusFillBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
 
-                _labels[(int) MobileStats.Name].Text = World.Player.Name;
+                _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
                 _labels[(int) MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int) MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int) MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();

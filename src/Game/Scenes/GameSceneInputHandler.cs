@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Scenes
                                 {
                                     SelectedObject = item;
 
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && dyn1.ItemData.IsStackable)
+                                    if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                         MergeHeldItem(item);
                                     else
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));

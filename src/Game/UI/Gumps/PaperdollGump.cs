@@ -246,10 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 return;
 
-            if (gs.HeldItem.ItemData.IsWearable)
-            {
-                gs.WearHeldItem(Mobile);
-            }
+            gs.WearHeldItem(Mobile);        
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)

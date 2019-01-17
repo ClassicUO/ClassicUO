@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -33,6 +34,7 @@ using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Scenes
@@ -276,9 +278,17 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.ServerSelection)
             {
-                ServerIndex = index;
+                for (byte i = 0; i < Servers.Length; i++)
+                {
+                    if (Servers[i].Index == index)
+                    {
+                        ServerIndex = i;
+                        break;
+                    }
+                }
+
                 CurrentLoginStep = LoginStep.LoginInToServer;
-                World.ServerName = Servers[index].Name;
+                World.ServerName = Servers[ServerIndex].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
             }
         }
@@ -386,7 +396,7 @@ namespace ClassicUO.Game.Scenes
                     if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
                     {
                         if (Servers.Length != 0)
-                            SelectServer(0);
+                            SelectServer( (byte) Servers[0].Index);
                     }
 
                     break;
@@ -473,8 +483,8 @@ namespace ClassicUO.Game.Scenes
             byte flags = reader.ReadByte();
             ushort count = reader.ReadUShort();
             Servers = new ServerListEntry[count];
-            for (ushort i = 0; i < count; i++
-                 ) Servers[i] = new ServerListEntry(reader);
+            for (ushort i = 0; i < count; i++)
+                Servers[i] = new ServerListEntry(reader);
         }
 
         private void ParseCharacterList(Packet p)
@@ -668,7 +678,7 @@ namespace ClassicUO.Game.Scenes
         public ServerListEntry(Packet reader)
         {
             Index = reader.ReadUShort();
-            Name = reader.ReadASCII(32);
+            Name = reader.ReadASCII(32).MakeSafe();
             PercentFull = reader.ReadByte();
             Timezone = reader.ReadByte();
             Address = reader.ReadUInt();

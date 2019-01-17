@@ -152,7 +152,6 @@ namespace ClassicUO.Game
             else
             {
                 Socket.Send(new PDropRequestOld(serial, (ushort)x, (ushort)y, (sbyte)z, container));
-
             }
         }
 

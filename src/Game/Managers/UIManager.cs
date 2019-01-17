@@ -618,7 +618,6 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            GameCursor?.ClearDraggedItem();
             _gumps.ForEach(s =>
             {
                 if (!(s is DebugGump))
