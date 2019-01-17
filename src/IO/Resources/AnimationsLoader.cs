@@ -768,7 +768,7 @@ namespace ClassicUO.IO.Resources
 
                             if (frameCount == 0)
                             {
-                                index.Groups[oldIdx].UOPAnimData = index.Groups[newIDX].UOPAnimData;
+                                index.Groups[oldIdx] = index.Groups[newIDX];
                             }
 
 
@@ -966,7 +966,7 @@ namespace ClassicUO.IO.Resources
 
 			                        }
 
-			                        //index.Groups[unknownX_0].UOPAnimData = index.Groups[unknownX_1].UOPAnimData;
+                                    //index.Groups[unknownX_0].UOPAnimData = index.Groups[unknownX_1].UOPAnimData;
 
                                     //index.Groups[unknownX_0] = index.Groups[unknownX_1];
                                     //index.Groups[unknownX_0] = index.Groups[unknownX_2];
