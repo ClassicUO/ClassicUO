@@ -49,13 +49,10 @@ namespace ClassicUO.Game
             Flags = item.Flags;
 
             Engine.UI.GameCursor.SetDraggedItem(this);
-
-            Console.WriteLine("SETTED: {0}", Serial);
         }
 
         public void Clear()
         {
-            Console.WriteLine("CLEARED: {0}", Serial);
             Serial = Serial.INVALID;
             Position = Position.Invalid;
             Container = Serial.INVALID;

@@ -81,14 +81,12 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled || (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid))
             {
-                Console.WriteLine("ALREADY ENABLED");
                 return;
             }
 
 
             if (!item.IsPickable)
                 return;
-            Console.WriteLine("FROM START");
             HeldItem.Clear();
             HeldItem.Set(item);
 
@@ -190,7 +188,6 @@ namespace ClassicUO.Game.Scenes
 
 
                 GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
-                Console.WriteLine("START DROP {0}", HeldItem.Serial);
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
             }

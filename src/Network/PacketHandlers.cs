@@ -1057,8 +1057,6 @@ namespace ClassicUO.Network
 
             scene.HeldItem.Enabled = false;
             scene.HeldItem.Dropped = false;
-
-            Console.WriteLine("ACCEPTED: {0}", scene.HeldItem.Serial);
         }
 
         private static void Blood(Packet p)
@@ -2879,7 +2877,6 @@ namespace ClassicUO.Network
 
             if (gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
             {
-                Console.WriteLine("FROM CONTAINER");
                 gs.HeldItem.Clear();
             }
 
