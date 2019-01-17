@@ -453,10 +453,6 @@ namespace ClassicUO.Game.Scenes
                     HandleErrorCode(e);
 
                     break;
-                default:
-                    Log.Message(LogTypes.Debug, e.ID.ToString());
-
-                    break;
             }
         }
 
