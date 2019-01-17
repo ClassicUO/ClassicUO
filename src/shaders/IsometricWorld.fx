@@ -45,8 +45,8 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.Position = mul(mul(IN.Position, WorldMatrix), ProjectionMatrix);
 	
 	// Half pixel offset for correct texel centering.
-	OUT.Position.x -= 0.5 / Viewport.x;
-	OUT.Position.y += 0.5 / Viewport.y;
+	//OUT.Position.x -= 0.5 / Viewport.x;
+	//OUT.Position.y += 0.5 / Viewport.y;
 
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;

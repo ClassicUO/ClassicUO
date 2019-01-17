@@ -271,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (isRun)
                     {
-                        if (mobile.Equipment[(int) Layer.Mount] != null)
+                        if (mobile.IsMounted)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
                         else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
                         {
-                            if (mobile.Equipment[(int) Layer.Mount] != null)
+                            if (mobile.IsMounted)
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                             else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
                             {
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (mobile.Equipment[(int) Layer.Mount] != null)
+                        if (mobile.IsMounted)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
                         {
@@ -314,7 +314,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null)
+                    if (mobile.IsMounted)
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
                     else if (inWar && !mobile.IsDead)
                     {

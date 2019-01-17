@@ -78,19 +78,26 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Graphic = graphic;
+
             Hue = hue;
 
             Texture = FileManager.Gumps.GetTexture(Graphic);
         }
 
-        public GumpPic()
+        private static ushort TransformHue(ushort hue)
         {
+            
+            if (hue <= 2)
+                hue = 0;
 
+            //if (hue < 2)
+            //    hue = 1;
+            return hue;
         }
 
         public bool IsPartialHue { get; set; }
 
-        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1 : 0))
+        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Length > 4 ? TransformHue( (ushort )( Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
 
         }

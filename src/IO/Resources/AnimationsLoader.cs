@@ -92,11 +92,6 @@ namespace ClassicUO.IO.Resources
                 ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
                 int findID = 0;
 
-                if (i == 735)
-                {
-
-                }
-
                 if (i >= 200)
                 {
                     if (i >= 400)
@@ -738,6 +733,11 @@ namespace ClassicUO.IO.Resources
                         //}
 
                         if (animID == 735)
+                        {
+
+                        }
+
+                        if (animID == 0x2E)
                         {
 
                         }
