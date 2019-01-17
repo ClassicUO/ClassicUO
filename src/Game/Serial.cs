@@ -23,10 +23,10 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    public struct Serial : IComparable, IComparable<uint>
+    internal struct Serial : IComparable, IComparable<uint>
     {
-        public static readonly Serial Invalid = new Serial(0);
-        public static readonly Serial MinusOne = new Serial(0xFFFFFFFF);
+        public const uint INVALID = 0;
+        public const uint MINUS_ONE = 0xFFFF_FFFF;
 
         public Serial(uint serial)
         {
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
 
         public override string ToString()
         {
-            return string.Format("0x{0:X8}", Value);
+            return $"0x{Value:X8}";
         }
 
         public override int GetHashCode()
@@ -93,10 +93,12 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Serial serial) return Value == serial.Value;
-            if (obj is uint u) return Value == u;
-
-            return false;
+            switch (obj)
+            {
+                case Serial serial: return Value == serial.Value;
+                case uint u: return Value == u;
+                default: return false;
+            }
         }
 
         public static Serial Parse(string str)

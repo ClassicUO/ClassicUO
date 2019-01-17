@@ -24,7 +24,7 @@ using SDL2;
 
 namespace ClassicUO.Input
 {
-    public class InputMouseEvent : InputEvent
+    internal class InputMouseEvent : InputEvent
     {
         private readonly int _clicks;
         private readonly int _data;

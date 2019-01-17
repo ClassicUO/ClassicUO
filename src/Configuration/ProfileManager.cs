@@ -26,17 +26,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Configuration
 {
-    public class ProfileManager
+    internal class ProfileManager
     {
         public Profile Current { get; private set; }
 
-        public List<Gump> Load(string servername, string username, string charactername)
+        public void Load(string servername, string username, string charactername)
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
@@ -47,11 +47,9 @@ namespace ClassicUO.Configuration
             else
             {
                 Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json")) ?? new Profile(username, servername, charactername);
-
-                return Current.ReadGumps();               
             }
-
-            return null;
         }
+
+        public void UnLoadProfile() => Current = null;
     }
 }

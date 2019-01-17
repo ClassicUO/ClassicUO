@@ -23,15 +23,18 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class Static : GameObject
+    internal class Static : GameObject
     {
+        private StaticTiles? _itemData;
+
         public Static(Graphic graphic, Hue hue, int index)
         {
-            Graphic = graphic;
+            Graphic = OriginalGraphic = graphic;
             Hue = hue;
             Index = index;
         }
@@ -40,17 +43,29 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        private StaticTiles? _itemData;
-       
+        public Graphic OriginalGraphic { get; }
+
         public StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = TileData.StaticData[Graphic];
+                    _itemData = FileManager.TileData.StaticData[Graphic];
                 return _itemData.Value;
             }
+        }
+
+        public void SetGraphic(Graphic g)
+        {
+            Graphic = g;
+            _itemData = null;
+        }
+
+        public void RestoreOriginalGraphic()
+        {
+            Graphic = OriginalGraphic;
+            _itemData = null;
         }
 
         protected override View CreateView() => new StaticView(this);

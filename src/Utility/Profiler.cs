@@ -26,7 +26,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
 {
-    public static class Profiler
+    internal static class Profiler
     {
         public const int ProfileTimeCount = 60;
         private static readonly List<ContextAndTick> m_Context;
@@ -120,7 +120,7 @@ namespace ClassicUO.Utility
             return ProfileData.Empty;
         }
 
-        public class ProfileData
+        internal class ProfileData
         {
             public static ProfileData Empty = new ProfileData(null, 0d);
             private readonly double[] m_LastTimes = new double[ProfileTimeCount];

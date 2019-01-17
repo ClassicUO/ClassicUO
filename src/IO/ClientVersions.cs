@@ -33,7 +33,7 @@ namespace ClassicUO.IO
         CV_400B = (4 << 24) | (0 << 16) | (0 << 8) | 1, // Deletes tooltips
         CV_405A = (4 << 24) | (0 << 16) | (5 << 8) | 0, // Adds ninja, samurai
         CV_4011D = (4 << 24) | (0 << 16) | (11 << 8) | 3, // Adds elven race
-        CV_500A = (5 << 24) | (0 << 16) | (0 << 8) | 0, // Paperdoll buttons journal becomes quests, chat becomes guild. Use mega cliloc. Removes verdata.mul.
+        CV_500A = (5 << 24) | (0 << 16) | (0 << 8) | 0, // Paperdoll buttons journal becomes quests, chat becomes guild. Use mega FileManager.Cliloc. Removes verdata.mul.
         CV_5020 = (5 << 24) | (0 << 16) | (2 << 8) | 0, // Adds buff bar
         CV_5090 = (5 << 24) | (0 << 16) | (9 << 8) | 0, //
         CV_6000 = (6 << 24) | (0 << 16) | (0 << 8) | 0, // Adds colored guild/all chat and ignore system. New targeting systems, object properties and handles.

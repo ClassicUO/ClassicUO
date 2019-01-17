@@ -1,0 +1,429 @@
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
+using System;
+using System.IO;
+
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
+using ClassicUO.IO;
+using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
+
+namespace ClassicUO.Game.UI.Gumps
+{
+    internal class PaperDollGump : Gump
+    {
+        private static readonly ushort[] PeaceModeBtnGumps =
+        {
+            0x07e5, 0x07e6, 0x07e7
+        };
+        private static readonly ushort[] WarModeBtnGumps =
+        {
+            0x07e8, 0x07e9, 0x07ea
+        };
+        private bool _isWarMode;
+	    private GumpPic _profilePic;
+        private GumpPic _partyManifestPic;
+        private GumpPic _combatBook, _racialAbilitiesBook;
+        private GumpPic _virtueMenuPic;
+        private Button _warModeBtn;
+        private PaperDollInteractable _paperDollInteractable;
+
+        public PaperDollGump() : base(0, 0)
+        {
+            
+        }
+
+        public PaperDollGump(Serial serial, string mobileTitle) : this()
+        {
+            Mobile mobile = World.Mobiles.Get(serial);
+
+            if (mobile != null)
+            {
+                Mobile = mobile;
+                Title = mobileTitle;
+                BuildGump();
+            }
+        }
+
+        public string Title { get; }
+
+        public Mobile Mobile { get; set; }
+
+        public override void Dispose()
+        {
+            Engine.UI.SavePosition(LocalSerial, Location);
+
+            if (Mobile == World.Player)
+            {
+                if (_virtueMenuPic != null)
+                    _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
+                if (_partyManifestPic != null)
+                    _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
+            }
+
+            Clear();
+            base.Dispose();
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _paperDollInteractable.AddFakeDress(null);
+        }
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs.IsHoldingItem)
+            {
+                _paperDollInteractable.AddFakeDress(new Item(gs.HeldItem.Serial)
+                {
+                    Graphic = gs.HeldItem.Graphic,
+                    Hue = gs.HeldItem.Hue
+                });
+            }
+        }
+
+        private void BuildGump()
+        {
+            AcceptMouseInput = false;
+            CanBeSaved = true;
+            CanMove = true;
+            LocalSerial = Mobile.Serial;
+
+            if (Mobile == World.Player)
+            {
+                AddChildren(new GumpPic(0, 0, 0x07d0, 0));
+
+                //HELP BUTTON
+                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                {
+                    X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate
+                });
+
+                //OPTIONS BUTTON
+                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                {
+                    X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate
+                });
+
+                // LOG OUT BUTTON
+                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                {
+                    X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate
+                });
+
+                // QUESTS BUTTON
+                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                {
+                    X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate
+                });
+
+                // SKILLS BUTTON
+                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                {
+                    X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate
+                });
+
+                // GUILD BUTTON
+                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                {
+                    X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate
+                });
+                // TOGGLE PEACE/WAR BUTTON
+                _isWarMode = Mobile.InWarMode;
+                ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
+
+                AddChildren(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                {
+                    X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
+                });
+
+                // STATUS BUTTON
+                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+                {
+                    X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
+                });
+                // Virtue menu
+                AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
+                _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
+
+				int profileX = 25;
+                const int SCROLLS_STEP = 14;
+
+                if (World.ClientFlags.PaperdollBooks)
+                {
+                    AddChildren(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
+                    _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    {
+                        AddChildren(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
+                        _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
+                        {
+                            if (Engine.UI.GetByLocalSerial<RacialAbilitiesBookGump>() == null)
+                            {
+                                Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            }
+                        };
+	                    profileX += SCROLLS_STEP;
+                    }
+                }
+
+	            AddChildren(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
+	            _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
+
+	            profileX += SCROLLS_STEP;
+
+				AddChildren(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
+                _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
+
+            }
+	        else
+	        {
+		        AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+
+		        // STATUS BUTTON
+		        AddChildren(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+		        {
+			        X = 185,
+			        Y = 44 + 27 * 7,
+			        ButtonAction = ButtonAction.Activate
+		        });
+	        }
+
+	        // Equipment slots for hat/earrings/neck/ring/bracelet
+            AddChildren(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
+            AddChildren(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
+
+            // Paperdoll control!
+            _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
+            //_paperDollInteractable.MouseOver += (sender, e) =>
+            //{
+            //    OnMouseOver(e.X, e.Y);
+            //};
+            AddChildren(_paperDollInteractable);
+
+            // Name and title
+            Label titleLabel = new Label(Title, false, 0x0386, 185)
+            {
+                X = 39, Y = 262
+            };
+            AddChildren(titleLabel);
+        }
+
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                return;
+
+            gs.WearHeldItem(Mobile);        
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            return true;
+        }
+
+        private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
+        {
+            if (args.Button == MouseButton.Left)
+            {
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
+                {
+                    Mobile.Serial
+                });
+            }
+        }
+
+	    private void Profile_MouseDoubleClickEvent(object o, MouseDoubleClickEventArgs args)
+	    {
+			if (args.Button == MouseButton.Left)
+			{
+				GameActions.RequestProfile(Mobile.Serial);
+			}
+		}
+
+		private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
+        {
+            if (args.Button == MouseButton.Left)
+            {
+                var party = Engine.UI.GetByLocalSerial<PartyGumpAdvanced>();
+                if (party == null)
+                    Engine.UI.Add(new PartyGumpAdvanced());
+                else
+                    party.BringOnTop();
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (Mobile != null && Mobile.IsDisposed)
+                Mobile = null;
+
+            if (Mobile == null)
+            {
+                Dispose();
+
+                return;
+            }
+
+            // This is to update the state of the war mode button.
+            if (_isWarMode != Mobile.InWarMode && Mobile == World.Player)
+            {
+                _isWarMode = Mobile.InWarMode;
+                ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
+                _warModeBtn.ButtonGraphicNormal = btngumps[0];
+                _warModeBtn.ButtonGraphicPressed = btngumps[1];
+                _warModeBtn.ButtonGraphicOver = btngumps[2];
+            }
+
+            base.Update(totalMS, frameMS);
+        }
+
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(Mobile.Serial);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            LocalSerial = reader.ReadUInt32();
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            Dispose();
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+	        switch ((Buttons)buttonID)
+	        {
+		        case Buttons.Help:
+			        GameActions.RequestHelp();
+
+			        break;
+		        case Buttons.Options:
+
+		            OptionsGump1 gump = Engine.UI.GetByLocalSerial<OptionsGump1>();
+
+                    if (gump == null)
+			        {
+				        Engine.UI.Add(new OptionsGump1
+				        {
+					        X = Engine.WindowWidth / 2 - 300,
+					        Y = Engine.WindowHeight / 2 - 250
+				        });
+			        }
+			        else
+                        gump.BringOnTop();
+
+
+                    break;
+		        case Buttons.LogOut:
+			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
+			        {
+				        if (s)
+					        Engine.SceneManager.ChangeScene(ScenesType.Login);
+			        }));
+
+			        break;
+		        case Buttons.Quests:
+			        GameActions.RequestQuestMenu();
+
+			        break;
+		        case Buttons.Skills:
+
+		            SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
+
+                    if (gumpSkills == null)
+				        Engine.UI.Add(new SkillGumpAdvanced());
+			        else
+                        gumpSkills.BringOnTop();
+
+                    break;
+		        case Buttons.Guild:
+			        GameActions.OpenGuildGump();
+
+			        break;
+		        case Buttons.PeaceWarToggle:
+			        GameActions.ToggleWarMode();
+
+			        break;
+		        case Buttons.Status:
+			        if (Mobile == World.Player)
+			        {
+				        Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile)?.Dispose();
+
+			            StatusGumpBase status = StatusGumpBase.GetStatusGump();
+
+                        if (status == null)
+				        {
+                            StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25);					      
+				        }
+                        else
+                            status.BringOnTop();
+                    }
+			        else
+			        {
+				        if (Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile) != null)
+					        break;
+
+				        GameActions.RequestMobileStatus(Mobile);
+
+				        Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+						Engine.UI.Add(new HealthBarGump(Mobile)
+						{
+							X = Mouse.Position.X - (bounds.Width / 2),
+							Y = Mouse.Position.Y - 5,
+						});
+					}
+
+			        break;
+            }
+        }
+
+        private enum Buttons
+        {
+            Help,
+            Options,
+            LogOut,
+            Quests,
+            Skills,
+            Guild,
+            PeaceWarToggle,
+            Status
+        }
+    }
+}

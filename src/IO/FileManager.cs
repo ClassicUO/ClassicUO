@@ -19,15 +19,17 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
 using System.IO;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    public static class FileManager
+    internal static class FileManager
     {
         private static string _uofolderpath;
 
@@ -43,7 +45,7 @@ namespace ClassicUO.IO
 
                 //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(), out Version version))
+                if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
                 {
                     Log.Message(LogTypes.Error, "Wrong version.");
 
@@ -63,22 +65,137 @@ namespace ClassicUO.IO
 
         public static bool UseUOPGumps { get; set; }
 
+        public static AnimationsLoader Animations { get; private set; }
+        public static AnimDataLoader AnimData { get; private set; }
+        public static ArtLoader Art { get; private set; }
+        public static MapLoader Map { get; private set; }
+        public static ClilocLoader Cliloc { get; private set; }
+        public static GumpsLoader Gumps { get; private set; }
+        public static FontsLoader Fonts { get; private set; }    
+        public static HuesLoader Hues { get; private set; }
+        public static TileDataLoader TileData { get; private set; }
+        public static MultiLoader Multi { get; private set; }
+        public static SkillsLoader Skills { get; private set; }
+        public static TexmapsLoader Textmaps { get; private set; }
+        public static SpeechesLoader Speeches { get; private set; }
+        public static LightsLoader Lights { get; private set; }
+        public static SoundsLoader Sounds { get; private set; }
+        public static MultiMapLoader Multimap { get; private set; }
+
         public static void LoadFiles()
         {
-            Map.Load();
-            Art.Load();
-            Cliloc.Load();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            Animations = new AnimationsLoader();
             Animations.Load();
-            Gumps.Load();
-            Fonts.Load();
-            Hues.Load();
-            TileData.Load();
-            Multi.Load();
-            Skills.Load();
-            TextmapTextures.Load();
-            Speeches.Load();
+
+            AnimData = new AnimDataLoader();
             AnimData.Load();
-            Light.Load();
+
+            Art = new ArtLoader();
+            Art.Load();
+
+            Map = new MapLoader();
+            Map.Load();
+
+            Cliloc = new ClilocLoader();
+            Cliloc.Load();
+
+            Gumps = new GumpsLoader();
+            Gumps.Load();
+
+            Fonts = new FontsLoader();
+            Fonts.Load();
+
+            Hues = new HuesLoader();
+            Hues.Load();
+
+            TileData = new TileDataLoader();
+            TileData.Load();
+
+            Multi = new MultiLoader();
+            Multi.Load();
+
+            Skills = new SkillsLoader();
+            Skills.Load();
+
+            Textmaps = new TexmapsLoader();
+            Textmaps.Load();
+
+            Speeches = new SpeechesLoader();
+            Speeches.Load();
+
+            Lights = new LightsLoader();
+            Lights.Load();
+
+            Sounds = new SoundsLoader();
+            Sounds.Load();
+
+            Multimap = new MultiMapLoader();
+            Multimap.Load();
+
+            if (Verdata.File != null)
+            {
+                Log.Message(LogTypes.Trace, "Patching...");
+
+                unsafe
+                {
+                    //int dataCount = Verdata.File.StartAddress;
+
+                    //long address = (long) Verdata.File.StartAddress;
+
+                    //for (int i = 0; i < dataCount; i++)
+                    //{
+                    //    var vh = Verdata.Patches[i];
+
+                    //    if (vh.FileID == 0)
+                    //    {
+                    //        Map.PatchMapBlock((ulong)vh.BlockID, (ulong) (address + vh.Position));
+                    //    }
+                    //    else if (vh.FileID == 4)
+                    //    {
+                    //        if (vh.BlockID >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                    //        {
+                    //            ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
+                                
+                    //        }
+                    //        else
+                    //        {
+                                
+                    //        }
+                    //    }
+                    //    else if (vh.FileID == 12)
+                    //    {
+
+                    //    }
+                    //    else if (vh.FileID == 14 && vh.BlockID < Multi.Count)
+                    //    {
+
+                    //    }
+                    //    else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
+                    //    {
+
+                    //    }
+                    //    else if (vh.FileID == 30)
+                    //    {
+
+                    //    }
+                    //    else if (vh.FileID == 32)
+                    //    {
+
+                    //    }
+                    //    else if (vh.FileID != 5 && vh.FileID != 6)
+                    //    {
+
+                    //    }
+                    //}
+                }
+
+                Log.Message(LogTypes.Trace, "Patched!");
+            }
+
+            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
+            stopwatch.Stop();
         }
     }
 }

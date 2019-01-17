@@ -44,9 +44,9 @@ First, double click ClassicUO.exe and the game will create a settings.json next 
   "port": 2593,
   "lastcharactername": "",
   "ultimaonlinedirectory": "YOUR\\PATH\\TO\\ULTIMAONLINE",
-  "clientversion": "7.0.59.8",
+  "clientversion": "YOUR.CLIENT.VERSION",
   "maxfps": 144,
-  "debug": true,
+  "debug": false,
   "profiler": true,
 }
 ~~~

@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class TextOverheadView : View
+    internal class TextOverheadView : View
     {
         private readonly RenderedText _text;
 
@@ -58,16 +58,26 @@ namespace ClassicUO.Game.Views
             //Bounds.Width = Texture.Width;
             //Bounds.Height = Texture.Height;
 
-            int delay = Engine.Profile.Current.SpeechDelay;
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
 
-            if (delay < 10)
-                delay = 10;
+                if (delay < 10)
+                    delay = 10;
 
-            if (parent.TimeToLive <= 0.0f)
-                parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+                if (parent.TimeToLive <= 0.0f)
+                    parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+            }
+            else
+            {
+                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
+
+                if (parent.TimeToLive <= 0.0f)
+                    parent.TimeToLive = (delay >> 31) + delay;
+            }
+
 
             parent.Initialized = true;
-
             parent.Disposed += ParentOnDisposed;
             EdgeDetection = true;
         }
@@ -87,6 +97,20 @@ namespace ClassicUO.Game.Views
 
             Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
+
+            if (IsSelected && _text.Hue != 0x0035)
+            {
+                _text.Hue = 0x0035;
+                _text.CreateTexture();
+                Texture = _text.Texture;
+            }
+            else if (!IsSelected && overhead.Hue != _text.Hue)
+            {
+                _text.Hue = overhead.Hue;
+                _text.CreateTexture();
+                Texture = _text.Texture;
+            }
+
 
             HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
@@ -125,17 +149,16 @@ namespace ClassicUO.Game.Views
         //private static Texture2D _edge;
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
-        {
-            int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+        {          
+            int x = list.MousePosition.X - (int) vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
 
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+                list.Add(GameObject, vertex[0].Position);            
         }
-
     }
 
-    public class DamageOverheadView : TextOverheadView
+    internal class DamageOverheadView : TextOverheadView
     {
         public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
         {

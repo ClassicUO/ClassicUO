@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers
 {
-    public class HouseManager
+    internal class HouseManager
     {
         private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+
+        public IReadOnlyCollection<House> Houses => _houses.Values;
 
         public void Add(Serial serial, House revision)
         {
@@ -26,7 +29,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                _houses[serial].Dispose();
+                _houses[serial].ClearComponents();
                 _houses.Remove(serial);
 
                 return true;
@@ -55,7 +58,7 @@ namespace ClassicUO.Game.Managers
         {
             if (TryGetHouse(serial, out House house))
             {
-                house.Dispose();
+                house.ClearComponents();
                 _houses.Remove(serial);
             }
         }
@@ -66,7 +69,7 @@ namespace ClassicUO.Game.Managers
         {
             foreach (KeyValuePair<Serial, House> house in _houses)
             {
-                house.Value.Dispose();
+                house.Value.ClearComponents();
             }
             _houses.Clear();
         }

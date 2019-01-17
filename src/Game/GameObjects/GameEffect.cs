@@ -22,11 +22,12 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject
+    internal abstract class GameEffect : GameObject
     {
         private readonly List<GameEffect> _children;
 
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsEnabled { get; set; }
 
-        public Graphic AnimationGraphic { get; set; } = Graphic.Invalid;
+        public Graphic AnimationGraphic { get; set; } = Graphic.INVALID;
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
 
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Load()
         {
-            AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
+            AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
             Speed = (AnimDataFrame.FrameInterval > 0 ?  AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY);
@@ -131,8 +132,6 @@ namespace ClassicUO.Game.GameObjects
             Source = source;
             Position = source.Position;
             AddToTile(source.X, source.Y);
-            //if (!IsItemEffect)
-            //    Tile = World.Map.GetTile(Source.X, source.Y);
         }
 
         public void SetSource(int x, int y, int z)
@@ -143,8 +142,6 @@ namespace ClassicUO.Game.GameObjects
             SourceZ = z;
             Position = new Position((ushort) x, (ushort) y, (sbyte) z);
             AddToTile(x, y);
-            //if (!IsItemEffect)
-            //    Tile = World.Map.GetTile(x, y);
         }
 
         protected (int x, int y, int z) GetTarget()

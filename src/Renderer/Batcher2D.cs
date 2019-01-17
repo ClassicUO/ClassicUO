@@ -4,17 +4,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SDL2;
+
 namespace ClassicUO.Renderer
 {
-    public class Batcher2D
+    internal class Batcher2D
     {
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
@@ -30,6 +34,7 @@ namespace ClassicUO.Renderer
         private readonly EffectParameter _projectionMatrixEffect;
         private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
+
         //private readonly DepthStencilState _dss = new DepthStencilState
         //{
         //    DepthBufferEnable = true,
@@ -50,6 +55,7 @@ namespace ClassicUO.Renderer
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
+        private DepthStencilState _stencil;
 
 
         private int _numSprites;
@@ -60,7 +66,8 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Engine.ExePath, "shaders/IsometricWorld.fxc")));
-            _effect.Parameters["HuesPerTexture"].SetValue((float)Hues.HuesCount);
+            float f = (float) FileManager.Hues.HuesCount;
+            _effect.Parameters["HuesPerTexture"].SetValue(f);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
             _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
@@ -90,17 +97,13 @@ namespace ClassicUO.Renderer
                 SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
                 ScissorTestEnable = true
             };
+
+            _stencil =  DepthStencilState.None;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
 
         public GraphicsDevice GraphicsDevice { get; }
-
-        public int Calls { get; set; }
-
-        public int Merged { get; set; }
-
-        public int FlushCount { get; set; }
 
         public void SetLightDirection(Vector3 dir)
         {
@@ -121,9 +124,6 @@ namespace ClassicUO.Renderer
         {
             EnsureNotStarted();
             _started = true;
-            Calls = 0;
-            Merged = 0;
-            FlushCount = 0;
 
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
@@ -216,6 +216,11 @@ namespace ClassicUO.Renderer
 
         public unsafe bool Draw2D(Texture2D texture, Point position, Vector3 hue)
         {
+            // TODO: CHECK if this is really needed, since some client datafiles could have  
+            // some missing sprites in files...it won't harm client functionality, and will  
+            // avoid client crashes in case some sprites are missing from files.
+            if (texture == null)
+                return false;
             fixed (SpriteVertex* ptr = _vertexBufferUI)
             {
                 ptr[0].Position.X = position.X;
@@ -502,17 +507,18 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = _blendState;
-            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
             Viewport viewport = GraphicsDevice.Viewport;
             _projectionMatrix.M11 = (float)(2.0 / viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / viewport.Height);
-            _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
-            _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+            //_projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
+            //_projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
 
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
@@ -530,9 +536,6 @@ namespace ClassicUO.Renderer
             if (_numSprites == 0)
                 return;
 
-
-            FlushCount++;
-
             fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -547,12 +550,9 @@ namespace ClassicUO.Renderer
                     current = _textureInfo[i];
                     offset = i;
                 }
-                else
-                    Merged++;
             }
 
             InternalDraw(current, offset, _numSprites - offset);
-            Calls += _numSprites;
             //Array.Clear(_textureInfo, 0, _numSprites);
             _numSprites = 0;
         }
@@ -579,11 +579,21 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
 
 
-        public void SetBlendState(BlendState blend)
+        public void SetBlendState(BlendState blend, bool noflush = false)
         {
-            Flush();
+            if (!noflush)
+                Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
+        }
+
+
+        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        {
+            if (!noflush)
+                Flush();
+
+            _stencil = stencil ?? DepthStencilState.None;
         }
 
         private static short[] GenerateIndexArray()

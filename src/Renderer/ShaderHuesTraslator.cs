@@ -20,6 +20,8 @@
 #endregion
 using System.Runtime.CompilerServices;
 
+using ClassicUO.IO;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -35,11 +37,11 @@ namespace ClassicUO.Renderer
         Shadow = 12
     }
 
-    public static class ShaderHuesTraslator
+    internal static class ShaderHuesTraslator
     {
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
-        public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
+        public static Vector3 SelectedHue { get; } = new Vector3(23, 1, 0);
 
         public static Vector3 SelectedItemHue { get; } = new Vector3(0x0035, 1, 0);
 
@@ -72,7 +74,9 @@ namespace ClassicUO.Renderer
                     type = ShadersEffectType.Hued;
             }
             else
+            {
                 type = ShadersEffectType.None;
+            }
 
             return new Vector3(hue, (int) type, alpha);
         }

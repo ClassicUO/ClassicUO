@@ -21,14 +21,33 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Reflection.Emit;
 
 namespace ClassicUO.Utility
 {
-    public static class UnsafeMemoryManager
+    public static unsafe class UnsafeMemoryManager
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int SizeOf<T>() where T : struct
+        public static void* AsPointer<T>(ref T v)
         {
+            TypedReference t = __makeref(v);
+            return (void*)*((IntPtr*)&t + (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0) );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T As<T>(object v)
+        {
+            int size = SizeOf<T>();
+
+            return Reinterpret<object, T>(v, size);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SizeOf<T>() //where T : struct
+        {
+            return Marshal.SizeOf<T>();
+
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
 
             TypedReference tRef0 = __makeref(doubleStruct.First);
@@ -41,7 +60,7 @@ namespace ClassicUO.Utility
             bool use2nd = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
 
             IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
-            IntPtr secondValueAddress0 = *((IntPtr*)&tRef0 + 1);
+            IntPtr secondValueAddress0 = *(IntPtr*)&tRef0 + 1;
             IntPtr firstValueAddress1 = *(IntPtr*)&tRef1;
             IntPtr secondValueAddress1 = *((IntPtr*)&tRef1 + 1);
 
@@ -56,24 +75,43 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) where TIn : struct where TOut : struct
+        public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
         {
             TOut result = default;
+
+            //SingleStruct<TIn> inS = SingleStruct<TIn>.Value;
+            //SingleStruct<TOut> outS = SingleStruct<TOut>.Value;
+
             TypedReference resultRef = __makeref(result);
-            byte* resultPtr = (byte*) *(IntPtr*) &resultRef;
             TypedReference curValueRef = __makeref(curValue);
-            byte* curValuePtr = (byte*) *(IntPtr*) &curValueRef;
-            for (int i = 0; i < sizeBytes; ++i) resultPtr[i] = curValuePtr[i];
+
+
+            int offset = (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0);
+
+            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + offset);
+            byte* curValuePtr = (byte*)*((IntPtr*)&curValueRef + offset);
+
+            //for (int i = 0; i < sizeBytes; ++i)
+            //    resultPtr[i] = curValuePtr[i];
+
+            Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
 
             return result;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleStruct<T> where T : struct
+        private struct DoubleStruct<T> //where T : struct
         {
             public T First;
             public T Second;
             public static readonly DoubleStruct<T> Value;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct SingleStruct<T> //where T : struct
+        {
+            public T First;
+            public static readonly SingleStruct<T> Value;
         }
     }
 }

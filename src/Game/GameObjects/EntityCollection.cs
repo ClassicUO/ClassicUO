@@ -28,7 +28,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class EntityCollection<T> : IEnumerable<T> where T : Entity
+    internal class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
         private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    public class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
+    internal class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
     {
         private readonly IReadOnlyList<T> _data;
 

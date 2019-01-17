@@ -18,11 +18,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ClassicUO.Utility
 {
-    public static class StringHelper
+    internal static class StringHelper
     {
         public static string CapitalizeFirstCharacter(string str)
         {
@@ -67,5 +72,9 @@ namespace ClassicUO.Utility
             return Encoding.UTF8.GetString(data, (int)(ptr - data));
         }
 
-    }
+        public static bool IsSafeChar(int c)
+        {
+            return (c >= 0x20 && c < 0xFFFE);
+        }
+    } 
 }

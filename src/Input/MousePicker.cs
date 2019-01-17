@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
 {
-    public class MousePicker
+    internal class MousePicker
     {
         private MouseOverItem _overObject;
         private MouseOverItem _overTile;

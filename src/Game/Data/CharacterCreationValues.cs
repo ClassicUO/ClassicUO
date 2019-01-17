@@ -21,6 +21,7 @@
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Data
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.Data
             });
         }
 
-        public class ComboContent
+        internal class ComboContent
         {
             private readonly int[] _ids;
             private readonly int[] _labels;
@@ -217,7 +218,7 @@ namespace ClassicUO.Game.Data
                 _ids = ids;
             }
 
-            public string[] Labels => _labels.Select(o => Cliloc.GetString(o)).ToArray();
+            public string[] Labels => _labels.Select(o => FileManager.Cliloc.GetString(o)).ToArray();
 
             public int GetGraphic(int index)
             {

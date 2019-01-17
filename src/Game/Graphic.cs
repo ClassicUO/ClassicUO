@@ -23,10 +23,10 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    public struct Graphic : IComparable, IComparable<ushort>
+    internal struct Graphic : IComparable, IComparable<ushort>
     {
-        public const ushort Invariant = ushort.MaxValue;
-        public static Graphic Invalid = new Graphic(0xFFFF);
+        public const ushort INVARIANT = ushort.MaxValue;
+        public const ushort INVALID = 0xFFFF;
         private readonly ushort _value;
 
         public Graphic(ushort graphic)
@@ -34,7 +34,7 @@ namespace ClassicUO.Game
             _value = graphic;
         }
 
-        public bool IsInvariant => _value == Invariant;
+        public bool IsInvariant => _value == INVARIANT;
 
         public static implicit operator Graphic(ushort value)
         {
@@ -78,7 +78,7 @@ namespace ClassicUO.Game
 
         public override string ToString()
         {
-            return string.Format("0x{0:X4}", _value);
+            return $"0x{_value:X4}";
         }
 
         public override int GetHashCode()

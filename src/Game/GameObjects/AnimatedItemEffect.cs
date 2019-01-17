@@ -22,7 +22,7 @@ using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class AnimatedItemEffect : GameEffect
+    internal class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {
@@ -97,6 +97,8 @@ namespace ClassicUO.Game.GameObjects
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
                     Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                    AddToTile();
+                  
                 }
             }
         }

@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
 {
-    public class MouseOverItem
+    internal class MouseOverItem
     {
         public MouseOverItem(GameObject obj, Point pos)
         {
@@ -40,7 +40,7 @@ namespace ClassicUO.Input
         public GameObject Object { get; }
     }
 
-    public class MouseOverList
+    internal class MouseOverList
     {
         private readonly List<MouseOverItem> _items;
 

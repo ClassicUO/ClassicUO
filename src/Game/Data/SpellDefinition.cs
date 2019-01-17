@@ -22,9 +22,11 @@
 using System;
 using System.Text;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Game.Data
 {
-    public readonly struct SpellDefinition : IEquatable<SpellDefinition>
+    internal readonly struct SpellDefinition : IEquatable<SpellDefinition>
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
 

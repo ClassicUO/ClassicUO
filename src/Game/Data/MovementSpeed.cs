@@ -24,7 +24,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
 {
-    public static class MovementSpeed
+    internal static class MovementSpeed
     {
         private const int STEP_DELAY_MOUNT_RUN = 100;
         private const int STEP_DELAY_MOUNT_WALK = 200;

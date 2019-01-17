@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Data
         NONE = 0xED
     }
 
-    public static class DirectionHelper
+    internal static class DirectionHelper
     {
         public static Direction DirectionFromPoints(Point from, Point to)
         {

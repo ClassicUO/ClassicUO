@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Data
         Locked = 2
     }
 
-    public sealed class Skill
+    internal sealed class Skill
     {
         public Skill(string name, int index, bool click)
         {

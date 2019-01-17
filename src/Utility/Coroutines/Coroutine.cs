@@ -8,7 +8,7 @@ using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Utility.Coroutines
 {
-    public sealed class Coroutine : IDisposable
+    internal sealed class Coroutine : IDisposable
     {
         public static Coroutine Start(Scene scene, IEnumerable<IWaitCondition> method, string name = null)
         {

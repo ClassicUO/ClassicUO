@@ -21,19 +21,23 @@
 using System;
 using System.Collections.Generic;
 
-using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
-    public abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IUpdateable, IDisposable
     {
+        private AudioManager _audio;
+
         protected Scene()
         {
         }
@@ -41,9 +45,13 @@ namespace ClassicUO.Game.Scenes
 
         public bool IsDisposed { get; private set; }
 
+        public bool IsLoaded { get; private set; }
+
         public int RenderedObjectsCount { get; protected set; }
 
         public CoroutineManager Coroutines { get; } = new CoroutineManager();
+
+        public AudioManager Audio => _audio;
 
         public virtual void Dispose()
         {
@@ -56,22 +64,20 @@ namespace ClassicUO.Game.Scenes
       
         public virtual void Load()
         {
+            _audio = new AudioManager();
+            Coroutine.Start(this, CleaningResources(), "cleaning resources");
+            IsLoaded = true;
         }
 
         public virtual void Unload()
         {
+            _audio.StopMusic();
             Coroutines.Clear();
-
-            //Animations.Clear();
-            //Art.Clear();
-            //TextmapTextures.Clear();
-            //IO.Resources.Gumps.Clear();
-            //IO.Resources.Map.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            CleaningResources();
+            _audio.Update();
             Coroutines.Update();
         }
 
@@ -84,13 +90,32 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        private void CleaningResources()
+        private IEnumerable<IWaitCondition> CleaningResources()
         {
-            Art.ClearUnusedTextures();
-            IO.Resources.Gumps.ClearUnusedTextures();
-            TextmapTextures.ClearUnusedTextures();
-            Animations.ClearUnusedTextures();
-            World.Map?.ClearUnusedBlocks();
+            Log.Message(LogTypes.Trace, "Cleaning routine running...");
+            while (!IsDisposed)
+            {
+                FileManager.Art.CleaUnusedResources();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+
+                FileManager.Gumps.CleaUnusedResources();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+
+                FileManager.Textmaps.CleaUnusedResources();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+
+                FileManager.Animations.CleaUnusedResources();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+
+                World.Map?.ClearUnusedBlocks();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+            }
+            Log.Message(LogTypes.Trace, "Cleaning routine finished");
         }
     }
 }

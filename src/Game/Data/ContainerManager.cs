@@ -20,11 +20,14 @@
 #endregion
 using System.Collections.Generic;
 
+using ClassicUO.IO;
+using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
 {
-    public static class ContainerManager
+    internal static class ContainerManager
     {
         private static readonly Dictionary<Graphic, ContainerData> _data = new Dictionary<Graphic, ContainerData>
         {
@@ -125,7 +128,7 @@ namespace ClassicUO.Game.Data
                 0x10E, new ContainerData(0x010E, 0x002F, 0x002E, 0, 20, 168, 115)
             },
             {
-                0x102, new ContainerData(0x0102, 0x004F, 0x0058, 15, 10, 245, 120)
+                0x102, new ContainerData(0x0102, 0x004F, 0x0058, 15, 10, 210, 110)
             },
             {
                 0x11B, new ContainerData(0x011B, 0x004F, 0x0058, 15, 10, 220, 120)
@@ -150,13 +153,67 @@ namespace ClassicUO.Game.Data
             }
         };
 
+        public static int DefaultX { get; } = 40;
+        public static int DefaultY { get; } = 40;
+
+        public static int X { get; private set; } = 40;
+        public static int Y { get; private set; } = 40;
+
+
         public static ContainerData Get(Graphic graphic)
         {
             return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
         }
+
+     
+        public static void CalculateContainerPosition(Graphic g)
+        {
+            SpriteTexture texture = FileManager.Gumps.GetTexture(g);
+
+            int passed = 0;
+
+            for (int i = 0; i < 4 && passed == 0; i++)
+            {
+                if (X + texture.Width + Constants.CONTAINER_RECT_STEP > Engine.WindowWidth)
+                {
+                    X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+
+                    if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowHeight)
+                    {
+                        Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                    }
+                    else
+                        Y += Constants.CONTAINER_RECT_LINESTEP;
+                }
+                else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Engine.WindowHeight)
+                {
+                    if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowWidth)
+                    {
+                        X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                    }
+                    else
+                        X += Constants.CONTAINER_RECT_LINESTEP;
+
+                    Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                }
+                else
+                    passed = i + 1;
+            }
+
+            if (passed == 0)
+            {
+                X = DefaultX;
+                Y = DefaultY;
+            }
+            else if (passed == 1)
+            {
+                X += Constants.CONTAINER_RECT_STEP;
+                Y += Constants.CONTAINER_RECT_STEP;
+            }
+        }
     }
 
-    public struct ContainerData
+    internal struct ContainerData
     {
         public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h)
         {

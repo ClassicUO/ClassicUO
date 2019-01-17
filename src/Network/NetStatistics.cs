@@ -22,7 +22,7 @@ using System;
 
 namespace ClassicUO.Network
 {
-    public class NetStatistics
+    internal class NetStatistics
     {
         private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
         private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;

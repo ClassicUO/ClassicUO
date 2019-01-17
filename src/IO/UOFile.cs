@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
@@ -29,12 +30,12 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    public abstract unsafe class UOFile : DataReader
+    internal unsafe class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
         private MemoryMappedFile _file;
 
-        protected UOFile(string filepath)
+        public UOFile(string filepath)
         {
             Path = filepath;
         }
@@ -54,7 +55,8 @@ namespace ClassicUO.IO
 
             if (size > 0)
             {
-                _file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
+                _file = MemoryMappedFile.CreateFromFile(File.OpenRead(fileInfo.FullName), null, 0, MemoryMappedFileAccess.Read, null, HandleInheritability.None, false);
+                //_file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
                 byte* ptr = null;
 
@@ -95,13 +97,10 @@ namespace ClassicUO.IO
         {
             fixed (byte* ptr = buffer)
             {
-                byte* start = ptr;
-                byte* end = &ptr[0] + count;
-                while (start != end)
-                {
-                    *start++ = ReadByte();
-                }
+                Buffer.MemoryCopy((byte*)PositionAddress, ptr, count, count);
             }
+
+            Position += count;
         }
 
         internal T[] ReadArray<T>(int count) where T : struct
