@@ -704,6 +704,9 @@ namespace ClassicUO.IO.Resources
                         uint animID = _reader.ReadUInt();
                         ref IndexAnimation index = ref DataIndex[animID];
 
+	                    if (animID != 729 && animID != 735)
+		                    continue;
+
                         _reader.Skip(48);
 
                         int replaces = _reader.ReadInt();
@@ -734,10 +737,19 @@ namespace ClassicUO.IO.Resources
                             int newIDX = _reader.ReadInt();
 	                        int unknown = _reader.ReadInt();
 
-	                       //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
+							//sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-	                        if (newIDX > 0)
-		                        index.Groups[oldIdx] = index.Groups[newIDX];
+							var hashstring = String.Empty;
+
+	                        if (newIDX >= 0)
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
+	                        else
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{oldIdx:D2}.bin";
+
+	                        ulong hash = UOFileUop.CreateHash(hashstring);
+
+	                        if (hashes.TryGetValue(hash, out UopFileData data))
+		                        DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
 
 							_reader.Skip(48);
 
@@ -864,7 +876,11 @@ namespace ClassicUO.IO.Resources
                 //file.Dispose();
                 animSeq.Dispose();
             }
-        }
+
+	        // Manually set the types for now
+			DataIndex[729].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+	        DataIndex[735].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+		}
 
 
 
