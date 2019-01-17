@@ -766,7 +766,7 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            if (frameCount == 0)
+                            if (frameCount == 0 && index.IsUOP)
                             {
                                 index.Groups[oldIdx] = index.Groups[newIDX];
                             }
