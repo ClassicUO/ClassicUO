@@ -513,7 +513,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) switches.Length);
 
-                for (int i = 0; i < switches.Length; i++)
+                for (int i = switches.Length - 1; i >= 0; i--)
                     WriteUInt(switches[i]);
             }
 
@@ -523,7 +523,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) entries.Length);
 
-                for (int i = 0; i < entries.Length; i++)
+                for (int i = entries.Length - 1; i >= 0 ; i--)
                 {
                     int length = Math.Min(239, entries[i].Item2.Length);
                     WriteUShort(entries[i].Item1);
@@ -578,9 +578,15 @@ namespace ClassicUO.Network
 
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse() : base(0xAC)
+        public PTextEntryDialogResponse(Serial serial, byte button, string text, bool code) : base(0xAC)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteByte(button);
+            WriteByte(0);
+            WriteBool(code);
+
+            WriteUShort((ushort)(text.Length + 1));
+            WriteASCII(text, text.Length + 1);
         }
     }
 

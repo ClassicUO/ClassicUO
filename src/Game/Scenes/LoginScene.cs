@@ -429,7 +429,7 @@ namespace ClassicUO.Game.Scenes
 
                         for (byte i = 0; i < Characters.Length; i++)
 				        {
-				            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+				            if (Characters[i].Length > 0 && Characters[i] == Engine.GlobalSettings.LastCharacterName)
 				            {
 				                SelectCharacter(i);
                                 return;

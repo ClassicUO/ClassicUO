@@ -1987,6 +1987,29 @@ namespace ClassicUO.Network
 
         private static void TextEntryDialog(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            byte parentID = p.ReadByte();
+            byte buttonID = p.ReadByte();
+
+            ushort textLen = p.ReadUShort();
+            string text = p.ReadASCII(textLen);
+
+            bool haveCancel = p.ReadBool();
+            byte variant = p.ReadByte();
+            uint maxLength = p.ReadUInt();
+
+            ushort descLen = p.ReadUShort();
+            string desc = p.ReadASCII(descLen);
+
+            TextEntryDialogGump gump = new TextEntryDialogGump(serial, 143, 172, variant, (int) maxLength, text, desc, buttonID, parentID)
+            {
+                CanCloseWithRightClick = haveCancel
+            };
+
+            Engine.UI.Add(gump);
         }
 
         private static void UnicodeTalk(Packet p)
