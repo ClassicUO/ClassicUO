@@ -730,7 +730,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButton.Left)
                 {
-                    ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
+                    ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
                     Engine.UI.Add(pickerGump);
                 }
             }

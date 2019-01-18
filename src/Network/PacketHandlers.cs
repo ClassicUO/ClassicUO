@@ -1836,9 +1836,18 @@ namespace ClassicUO.Network
 
         private static void DyeData(Packet p)
         {
-            Item item = World.Items.Get(p.ReadUInt());
+            Serial serial = p.ReadUInt();
             p.Skip(2);
             Graphic graphic = p.ReadUShort();
+
+            Rectangle rect = FileManager.Gumps.GetTexture(0x0906).Bounds;
+
+            int x = (Engine.WindowWidth >> 1) - (rect.Width >> 1);
+            int y = (Engine.WindowHeight >> 1) - (rect.Height >> 1);
+
+            ColorPickerGump gump = new ColorPickerGump(serial, graphic, x, y, null);
+
+            Engine.UI.Add(gump);
         }
 
         private static void MovePlayer(Packet p)
