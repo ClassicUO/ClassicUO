@@ -158,8 +158,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Hue = 0x034F,
                 IsPassword = true
             });
+
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
+            _textboxAccount.SetNextFocus = _textboxPassword;
+
             _textboxPassword.SetText(Engine.GlobalSettings.Password);
+            _textboxPassword.SetNextFocus = _textboxAccount;
+
         }
 
         private ushort _buttonNormal = 0x15A4;

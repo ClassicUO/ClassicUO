@@ -83,6 +83,8 @@ namespace ClassicUO.Game.UI.Controls
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
+        public TextBox SetNextFocus { get; set; }
+
         public void SetText(string text, bool append = false)
         {
             int oldidx = TxEntry.CaretIndex;
@@ -145,15 +147,18 @@ namespace ClassicUO.Game.UI.Controls
             else switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                        s = TxEntry.Text;
-                       Parent?.OnKeyboardReturn(0, s);
+                    s = TxEntry.Text;
+                    Parent?.OnKeyboardReturn(0, s);
+                    break;
+                case SDL.SDL_Keycode.SDLK_TAB:
+                    SetNextFocus.SetKeyboardFocus();
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                         TxEntry.RemoveChar(true);
                     else
                         ReplaceDefaultTextOnFirstKeyPress = false;
-                     break;
+                    break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     TxEntry.SeekCaretPosition(-1);
                     break;
@@ -170,8 +175,6 @@ namespace ClassicUO.Game.UI.Controls
                     TxEntry.SetCaretPosition(Text.Length - 1);
                     break;
             }
-
-
             base.OnKeyDown(key, mod);
         }
 
