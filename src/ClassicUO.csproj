@@ -121,6 +121,7 @@
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RacialAbilityData.cs" />
+    <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />

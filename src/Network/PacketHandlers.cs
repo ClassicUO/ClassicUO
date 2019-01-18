@@ -1025,18 +1025,9 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, _errorMessages[code], 0, MessageType.System, MessageFont.Normal);
+                Chat.OnMessage(null, ServerErrorMessages.PickUpErrors[code], 0, MessageType.System, MessageFont.Normal);
             }
         }
-
-        private static readonly string[] _errorMessages =
-        {
-            "You can not pick that up.",
-            "That is too far away.",
-            "That is out of sight.",
-            "That item does not belong to you.  You'll have to steal it.",
-            "You are already holding an item."
-        };
 
         private static void EndDraggingItem(Packet p)
         {

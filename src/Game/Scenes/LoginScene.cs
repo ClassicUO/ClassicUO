@@ -638,20 +638,7 @@ namespace ClassicUO.Game.Scenes
 
         private void HandleErrorCode(Packet reader)
         {
-            string[] messages = {
-                "Incorrect password",
-                "This character does not exist any more!",
-                "This character already exists.",
-                "Could not attach to game server.",
-                "Could not attach to game server.",
-                "A character is already logged in.",
-                "Synchronization Error.",
-                "You have been idle for to long.",
-                "Could not attach to game server.",
-                "Character transfer in progress."
-            };
-            
-            PopupMessage = messages[reader.ReadByte()];
+            PopupMessage = ServerErrorMessages.LoginErrors[reader.ReadByte()];
             CurrentLoginStep = LoginStep.PopUpMessage;
         }
 
