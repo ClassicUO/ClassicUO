@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Engine.GlobalSettings.LastCharacterName);
 
-            if (lastSelected != null)
+            if (!string.IsNullOrEmpty(lastSelected))
                 _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
             else if (loginScene.Characters.Length > 0)
                 _selectedCharacter = 0;
