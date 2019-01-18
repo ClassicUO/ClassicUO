@@ -21,6 +21,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -95,6 +96,7 @@ namespace ClassicUO.IO
             Position += count;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal byte ReadByte()
         {
             EnsureSize(1);
@@ -192,6 +194,7 @@ namespace ClassicUO.IO
             return data;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize(int size)
         {
             if (Position + size > Length)

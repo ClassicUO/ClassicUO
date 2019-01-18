@@ -29,16 +29,11 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ushort _normalHue;
         private readonly ushort _overHue;
 
-        private Label _overedLabel;
-
         public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(text, isunicode, hue, maxwidth, font, style, align)
         {
             _overHue = overHue;
             _normalHue = hue;
             AcceptMouseInput = true;
-
-            _overedLabel = this;
-            _overedLabel.Hue = overHue;
         }
 
 
@@ -46,32 +41,15 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (MouseIsOver)
             {
-                if (IsVisible)
-                {
-                    IsVisible = false;
-                    _overedLabel.IsVisible = true;
-                }
-
-                //if (Hue != _overHue)
-                //    Hue = _overHue;
+                if (Hue != _overHue)
+                    Hue = _overHue;
             }
-            else if (!IsVisible)
-            {
-                IsVisible = true;
-                _overedLabel.IsVisible = false;
-            }
-            //else if (Hue != _normalHue)
-            //    Hue = _normalHue;
 
-            //Hue = MouseIsOver ? _overHue : _normalHue;
+            else if (Hue != _normalHue)
+                Hue = _normalHue;
 
             base.Update(totalMS, frameMS);
         }
 
-        public override void Dispose()
-        {
-            _overedLabel?.Dispose();
-            base.Dispose();
-        }
     }
 }
