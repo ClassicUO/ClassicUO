@@ -24,11 +24,19 @@ using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
     class UltimaLive
     {
+        static UltimaLive()
+        {
+            Log.Message(LogTypes.Trace, "Setup packet for Ultima live", ConsoleColor.DarkGreen);
+            PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
+            PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
+        }
+
         public static bool IsUltimaLiveActive = false;
         public static string ShardName = null;
         private const int CRCLength = 25;
@@ -39,7 +47,7 @@ namespace ClassicUO.IO
         //right- we have the size of the map, values in index 0 and 1 are wrapsize x and y
         //       values in index 2 and 3 is for the total size of map, x and y
         public static UInt16[,] WrapMapSize;
-        public static void OnUltimaLivePacket(Packet p)
+        private static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
             byte command = p.ReadByte();
@@ -238,7 +246,7 @@ namespace ClassicUO.IO
             }
         }
 
-        public static void OnUpdateTerrainPacket(Packet p)
+        private static void OnUpdateTerrainPacket(Packet p)
         {
             int block = (int)p.ReadUInt();
             byte[] landData = new byte[LandBlockLenght];

@@ -48,7 +48,7 @@ namespace ClassicUO.Game
             Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
         }
 
-	    public static void UpdateWarMode(bool state)
+	    public static void SetWarMode(bool state)
 	    {
 		    Socket.Send(new PChangeWarMode(state));
 	    }

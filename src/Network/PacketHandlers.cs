@@ -153,6 +153,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x29, DropItemAccepted);
             ToClient.Add(0x2A, Blood);
             ToClient.Add(0x2B, GodMode);
+            ToClient.Add(0x2C, DeathScreen);
             ToClient.Add(0x2D, MobileAttributes);
             ToClient.Add(0x2E, EquipItem);
             ToClient.Add(0x2F, FightOccuring);
@@ -163,6 +164,7 @@ namespace ClassicUO.Network
             /*ToServer.Add(0x34, GetPlayerStatus);
             ToServer.Add(0x35, AddResourceGodClient);*/
             ToClient.Add(0x36, ResourceTileDataGodClient);
+            ToClient.Add(0x38, Pathfinding);
             /*ToServer.Add(0x37, MoveItemGodClient);
             ToServer.Add(0x38, PathfindingInClient);
             ToServer.Add(0x39, RemoveGroupS);*/
@@ -172,8 +174,6 @@ namespace ClassicUO.Network
             //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
-            ToClient.Add(0x3F, UltimaLive.OnUltimaLivePacket);
-            ToClient.Add(0x40, UltimaLive.OnUpdateTerrainPacket);
             /*ToServer.Add(0x45, VersionOK);
             ToServer.Add(0x46, NewArtwork);
             ToServer.Add(0x47, NewTerrain);
@@ -1058,6 +1058,19 @@ namespace ClassicUO.Network
         {
         }
 
+        private static void DeathScreen(Packet p)
+        {
+            // todo
+            byte action = p.ReadByte();
+
+            if (action != 1)
+            {
+                Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
+
+                GameActions.SetWarMode(false);
+            }
+        }
+
         private static void MobileAttributes(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
@@ -1152,6 +1165,18 @@ namespace ClassicUO.Network
 
         private static void PauseControl(Packet p)
         {
+        }
+
+        private static void Pathfinding(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            ushort z = p.ReadUShort();
+
+            Pathfinder.WalkTo(x, y, z, 0);
         }
 
         private static void ResourceTileDataGodClient(Packet p)
@@ -1853,8 +1878,11 @@ namespace ClassicUO.Network
 
         private static void MovePlayer(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Direction direction = (Direction)p.ReadByte();
-            World.Player.ProcessDelta();
+            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
         private static void AllNames3DGameOnlyR(Packet p)
