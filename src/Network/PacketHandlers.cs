@@ -922,6 +922,9 @@ namespace ClassicUO.Network
 
         private static void UpdateContainedItem(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             List<Item> items = new List<Item>();
 
             if (ReadContainerContent(p, items))
@@ -1185,6 +1188,8 @@ namespace ClassicUO.Network
 
         private static void UpdateContainedItems(Packet p)
         {
+            if (!World.InGame)
+                return;
             ushort count = p.ReadUShort();
             List<Item> items = new List<Item>(count);
 
@@ -2986,7 +2991,7 @@ namespace ClassicUO.Network
 
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
+            if (gs != null && gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
             {
                 gs.HeldItem.Clear();
             }
