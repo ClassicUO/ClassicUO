@@ -152,7 +152,7 @@ namespace ClassicUO.Game.Views
             StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
 
             bool isPartial = data.IsPartialHue;
-            bool isTransparent = data.IsTransparent;
+            bool isTransparent = data.IsTranslucent;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);

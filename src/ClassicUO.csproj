@@ -381,7 +381,7 @@
     <Compile Include="Game\Serial.cs" />
     <Compile Include="Game\Views\AnimatedEffectView.cs" />
     <Compile Include="Game\Views\ItemView.cs" />
-    <Compile Include="Game\Views\LayerOrder.cs" />
+    <Compile Include="Game\Data\LayerOrder.cs" />
     <Compile Include="Game\Views\MobileView.cs" />
     <Compile Include="Game\Views\StaticView.cs" />
     <Compile Include="Game\Views\TextOverHeadView.cs" />

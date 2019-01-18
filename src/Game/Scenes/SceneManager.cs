@@ -50,8 +50,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case ScenesType.Game:
-                    Engine.WindowWidth = 800;
-                    Engine.WindowHeight = 800;
+                    Engine.FullScreenMode(2);
                     CurrentScene = new GameScene();
 
                     break;

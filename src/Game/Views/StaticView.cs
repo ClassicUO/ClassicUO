@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Views
         {
             _isFoliage = st.ItemData.IsFoliage;
             _isPartialHue = st.ItemData.IsPartialHue;
-            _isTransparent = st.ItemData.IsTransparent || st.ItemData.IsTranslucent;
+            _isTransparent = st.ItemData.IsTranslucent;
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 

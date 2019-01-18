@@ -43,7 +43,7 @@ namespace ClassicUO.Game
             Amount = item.Amount;
             IsStackable = item.ItemData.IsStackable;
             IsPartialHue = item.ItemData.IsPartialHue;
-            HasAlpha = item.ItemData.IsTranslucent || item.ItemData.IsTransparent;
+            HasAlpha = item.ItemData.IsTranslucent;
             IsWearable = item.ItemData.IsWearable;
             Layer = item.Layer;
             Flags = item.Flags;
