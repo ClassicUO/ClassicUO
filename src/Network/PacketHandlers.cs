@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -1946,6 +1947,19 @@ namespace ClassicUO.Network
 
         private static void OpenUrl(Packet p)
         {
+            string url = p.ReadASCII();
+
+            if (!string.IsNullOrEmpty(url))
+            {
+                try
+                {
+                    Process.Start(url);
+                }
+                catch
+                {
+
+                }
+            }
         }
 
         private static void TipWindow(Packet p)
