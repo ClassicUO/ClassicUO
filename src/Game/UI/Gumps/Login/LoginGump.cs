@@ -34,7 +34,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private float _time;
 
-
         public override void OnKeyboardReturn(int textID, string text)
         {
             Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
@@ -59,7 +58,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 4,
                 ButtonAction = ButtonAction.Activate
             });
-
 
             // Login Panel
             AddChildren(new ResizePic(0x13BE)
