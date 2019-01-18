@@ -90,16 +90,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height - 3
             };
 
-            AddChildren(_trans = new AlphaBlendControl
+            Add(_trans = new AlphaBlendControl
             {
                 X = _textBox.X,
                 Y = _textBox.Y,
                 Width = Width,
                 Height = height + 5
             });
-            AddChildren(_textBox);
+            Add(_textBox);
 
-            AddChildren(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
+            Add(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
             {
                 X = _textBox.X,
                 Y = _textBox.Y,

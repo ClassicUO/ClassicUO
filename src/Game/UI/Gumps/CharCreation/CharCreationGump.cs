@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CharCreationGump() : base(0, 0)
         {
             loginScene = Engine.SceneManager.GetScene<LoginScene>();
-            AddChildren(new CreateCharAppearanceGump(), 1);
+            Add(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
         }
@@ -87,8 +87,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             var currentPage = ActivePage;
 
             if (_loadingGump != null)
-                RemoveChildren(_loadingGump);
-            AddChildren(_loadingGump = new LoadingGump(message, LoadingGump.Buttons.OK, a => ChangePage(currentPage)), 4);
+                Remove(_loadingGump);
+            Add(_loadingGump = new LoadingGump(message, LoadingGump.Buttons.OK, a => ChangePage(currentPage)), 4);
             ChangePage(4);
         }
 
@@ -106,9 +106,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					var existing = Children.FirstOrDefault(page => page.Page == 2);
 
 	                if (existing != null)
-		                RemoveChildren(existing);
+		                Remove(existing);
 
-					AddChildren(new CreateCharTradeGump(_character), 2);
+					Add(new CreateCharTradeGump(_character), 2);
 
                     ChangePage(2);
 	                break;
@@ -116,9 +116,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					existing = Children.FirstOrDefault(page => page.Page == 3);
 
 					if (existing != null)
-						RemoveChildren(existing);
+						Remove(existing);
 
-					AddChildren(new CreateCharCityGump(), 3);
+					Add(new CreateCharCityGump(), 3);
 
 					ChangePage(3);
 					break;

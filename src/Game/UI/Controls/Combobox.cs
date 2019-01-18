@@ -44,19 +44,19 @@ namespace ClassicUO.Game.UI.Controls
             _items = items;
             _maxHeight = maxHeight;
 
-            AddChildren(new ResizePic(0x0BB8)
+            Add(new ResizePic(0x0BB8)
             {
                 Width = width, Height = Height
             });
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            AddChildren(_label = new Label(initialText, false, 0x0453, font: 9, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            Add(_label = new Label(initialText, false, 0x0453, font: 9, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 2, Y = 5
             });
 
             if (showArrow)
-                AddChildren(new GumpPic(width - 18, 2, 0x00FC, 0));
+                Add(new GumpPic(width - 18, 2, 0x00FC, 0));
         }
 
         public bool IsOpen { get; set; }
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _box = box;
                 ResizePic background;
-                AddChildren(background = new ResizePic(0x0BB8));
+                Add(background = new ResizePic(0x0BB8));
                 Label[] labels = new Label[items.Length];
                 var index = 0;
 
@@ -123,16 +123,16 @@ namespace ClassicUO.Game.UI.Controls
                     foreach (var label in labels)
                     {
                         label.Y = 0;
-                        scrollArea.AddChildren(label);
+                        scrollArea.Add(label);
                     }
 
-                    AddChildren(scrollArea);
+                    Add(scrollArea);
                     background.Height = maxHeight;
                 }
                 else
                 {
                     foreach (var label in labels)
-                        AddChildren(label);
+                        Add(label);
                     background.Height = totalHeight;
                 }
 

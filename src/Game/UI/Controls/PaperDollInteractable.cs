@@ -189,13 +189,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (isGM)
             {
-                AddChildren(new GumpPic(0, 0, body, 0x03EA)
+                Add(new GumpPic(0, 0, body, 0x03EA)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
                     IsPartialHue = true
                 });
-                AddChildren(new GumpPic(0, 0, 0xC72B, 0)
+                Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
+                Add(new GumpPic(0, 0, body, _mobile.Hue)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                     }
 
-                    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                    Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                     {
                         SlotIndex = i, CanPickUp = canPickUp
                     });
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int)Layer.Backpack];
 
-                AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
+                Add(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
                 {
                     AcceptMouseInput = true
                 });

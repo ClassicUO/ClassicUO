@@ -39,19 +39,19 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             X = x;
             Y = y;
-            AddChildren(new GumpPic(0, 0, 0x0906, 0));
+            Add(new GumpPic(0, 0, 0x0906, 0));
 
-            AddChildren(new Button(0, 0x0907, 0x0908, 0x909)
+            Add(new Button(0, 0x0907, 0x0908, 0x909)
             {
                 X = 208, Y = 138, ButtonAction = ButtonAction.Activate
             });
             HSliderBar slider;
-            AddChildren(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
+            Add(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
             slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
-            AddChildren(_box = new ColorPickerBox(34, 34));
+            Add(_box = new ColorPickerBox(34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = (ushort) (_box.SelectedHue + 1); };
 
-            AddChildren(_dyeTybeImage = new StaticPic(0x0FAB, 0)
+            Add(_dyeTybeImage = new StaticPic(0x0FAB, 0)
             {
                 X = 208 - 10, Y = _box.Y + (_box.Height >> 1) - 10
             });

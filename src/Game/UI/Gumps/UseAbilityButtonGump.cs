@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true
             };
             _button.MouseDoubleClick += ButtonOnMouseDoubleClick;
-            AddChildren(_button);
+            Add(_button);
 
             WantUpdateSize = true;
         }

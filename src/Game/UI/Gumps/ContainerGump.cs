@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
                 c.Dispose();
 
             foreach (Item i in _item.Items)
-                AddChildren(new ItemGump(i));
+                Add(new ItemGump(i));
         }
 
         public Graphic Graphic => _gumpID;
@@ -77,9 +77,9 @@ namespace ClassicUO.Game.UI.Gumps
             _data = ContainerManager.Get(_gumpID);
             Graphic g = _data.Graphic;
 
-            AddChildren(new GumpPicContainer(0, 0, g, 0, _item));
+            Add(new GumpPicContainer(0, 0, g, 0, _item));
             if (_isCorspeContainer)
-                AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+                Add(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
 
             ContainerManager.CalculateContainerPosition(g);
             X = ContainerManager.X;
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item item in e)
             {
-                AddChildren(new ItemGump(item));
+                Add(new ItemGump(item));
             }
         }
 

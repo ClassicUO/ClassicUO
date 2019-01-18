@@ -25,8 +25,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             AcceptMouseInput = false;
 
-            AddChildren(_background = new GumpPic(0,0, 0x1068, 0));
-            AddChildren(_hp = new GumpPicWithWidth(0, 0, 0x1069, 0, 1));
+            Add(_background = new GumpPic(0,0, 0x1068, 0));
+            Add(_hp = new GumpPicWithWidth(0, 0, 0x1069, 0, 1));
         }
 
         public Mobile Mobile

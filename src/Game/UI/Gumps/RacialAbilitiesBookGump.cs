@@ -31,14 +31,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AddChildren(new GumpPic(0,0,0x2B29, 0));
+            Add(new GumpPic(0,0,0x2B29, 0));
 
-            AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
             _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
-            AddChildren(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseClick += PageCornerOnMouseClick;
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                     Label text = new Label("INDEX", false, 0x0288, font: 6) { X = indexX, Y = 10 };
-                    AddChildren(text, page);
+                    Add(text, page);
 
                     for (int i = 0; i < abilityOnPage; i++)
                     {
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
                             AcceptMouseInput = true,
                         };
 
-                        AddChildren(text, page);
+                        Add(text, page);
 
                         y += 15;
                         offs++;
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Label text = new Label(spellName, false, 0x0288, 100, 6)
                     { X = iconTextX, Y = 34 };
-                AddChildren(text, page1);
+                Add(text, page1);
 
                 if (passive)
                 {
@@ -123,15 +123,15 @@ namespace ClassicUO.Game.UI.Gumps
                         X = iconTextX,
                         Y = 64
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
                 }
 
 
                 GumpPic pic = new GumpPic(iconX, 40, (ushort)(iconStartGraphic), 0);
 
-                AddChildren(pic, page1);
+                Add(pic, page1);
                 pic.SetTooltip(FileManager.Cliloc.GetString(_tooltipOffset + i), 150);
-                AddChildren(new GumpPicTiled(iconX, 88, 120, 4, 0x0835), page1);
+                Add(new GumpPicTiled(iconX, 88, 120, 4, 0x0835), page1);
             }
         }
 

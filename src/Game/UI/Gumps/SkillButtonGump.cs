@@ -59,19 +59,19 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 120;
             Height = 40;
 
-            AddChildren(_buttonBackgroundNormal = new ResizePic(0x24B8)
+            Add(_buttonBackgroundNormal = new ResizePic(0x24B8)
             {
                 Width = 120,
                 Height = 40
             });
 
-            AddChildren(_buttonBackgroundOver = new ResizePic(0x24EA)
+            Add(_buttonBackgroundOver = new ResizePic(0x24EA)
             {
                 Width = 120,
                 Height = 40
             });
         
-            AddChildren(new HoveredLabel(_skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(new HoveredLabel(_skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 7,
                 Y = 5,

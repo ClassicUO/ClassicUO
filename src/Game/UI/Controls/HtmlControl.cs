@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (HasBackground)
             {
-                AddChildren(new ResizePic(0x2486)
+                Add(new ResizePic(0x2486)
                 {
                     Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
                 });

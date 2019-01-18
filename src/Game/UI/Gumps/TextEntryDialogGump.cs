@@ -22,38 +22,38 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-            AddChildren(new GumpPic(0, 0, 0x0474, 0));
+            Add(new GumpPic(0, 0, 0x0474, 0));
 
             Label label = new Label(text, false, 0x0386, font: 2)
             {
                 X = 60, Y = 50
             };
-            AddChildren(label);
+            Add(label);
 
             label = new Label(description, false, 0x0386, font: 2)
             {
                 X = 60,
                 Y = 108
             };
-            AddChildren(label);
+            Add(label);
 
-            AddChildren(new GumpPic(60, 130, 0x0477, 0));
+            Add(new GumpPic(60, 130, 0x0477, 0));
 
             _textBox = new TextBox(new TextEntry(1, unicode: false, hue: 0x0386, maxcharlength: maxlen, width: 200), true)
             {
                 X = 71, Y = 137,
                 NumericOnly = variant == 2
             };
-            AddChildren(_textBox);
+            Add(_textBox);
 
-            AddChildren(new Button((int)ButtonType.Ok, 0x047B, 0x047C, 0x047D)
+            Add(new Button((int)ButtonType.Ok, 0x047B, 0x047C, 0x047D)
             {
                 X = 117,
                 Y = 190,
                 ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int)ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
+            Add(new Button((int)ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
             {
                 X = 204,
                 Y = 190,

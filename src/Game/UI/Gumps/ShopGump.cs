@@ -56,14 +56,14 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
 
             if (isBuyGump)
-                AddChildren(new GumpPic(0, 0, 0x0870, 0));
+                Add(new GumpPic(0, 0, 0x0870, 0));
             else
-                AddChildren(new GumpPic(0, 0, 0x0872, 0));
+                Add(new GumpPic(0, 0, 0x0872, 0));
 
             if (isBuyGump)
-                AddChildren(new GumpPic(170, 214, 0x0871, 0));
+                Add(new GumpPic(170, 214, 0x0871, 0));
             else
-                AddChildren(new GumpPic(170, 214, 0x0873, 0));
+                Add(new GumpPic(170, 214, 0x0873, 0));
 
             HitBox boxAccept = new HitBox(200, 406, 34, 30)
             {
@@ -77,28 +77,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
             boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
-            AddChildren(boxAccept);
-            AddChildren(boxClear);
+            Add(boxAccept);
+            Add(boxClear);
 
             if (isBuyGump)
             {
-                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
                     X = 240, Y = 385
                 });
 
-                AddChildren(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
+                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
                 {
                     X = 358, Y = 385
                 });
             }
             else
-                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
                     X = 358, Y = 386
                 });
 
-            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 5)
+            Add(new Label(World.Player.Name, false, 0x0386, font: 5)
             {
                 X = 242, Y = 408
             });
@@ -109,12 +109,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ShopItem shopItem;
 
-                _shopScrollArea.AddChildren(shopItem = new ShopItem(item)
+                _shopScrollArea.Add(shopItem = new ShopItem(item)
                 {
                     X = 5, Y = 5
                 });
 
-                _shopScrollArea.AddChildren(new ResizePicLine(0x39)
+                _shopScrollArea.Add(new ResizePicLine(0x39)
                 {
                     X = 10, Width = 210
                 });
@@ -123,8 +123,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _shopItems.Add(item, shopItem);
             }
 
-            AddChildren(_shopScrollArea);
-            AddChildren(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+            Add(_shopScrollArea);
+            Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
 
             AcceptMouseInput = true;
             CanMove = true;
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
                 transactionItem = new TransactionItem(shopItem.Item);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
-                _transactionScrollArea.AddChildren(transactionItem);
+                _transactionScrollArea.Add(transactionItem);
                 _transactionItems.Add(shopItem.Item, transactionItem);
             }
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
             transactionItem.OnIncreaseButtomClicked -= TransactionItem_OnIncreaseButtomClicked;
             transactionItem.OnDecreaseButtomClicked -= TransactionItem_OnDecreaseButtomClicked;
             _transactionItems.Remove(transactionItem.Item);
-            _transactionScrollArea.RemoveChildren(transactionItem);
+            _transactionScrollArea.Remove(transactionItem);
             updateTotal = true;
         }
 
@@ -246,17 +246,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Item = item;
                 var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
 
-                AddChildren(new ItemGump(item)
+                Add(new ItemGump(item)
                 {
                     X = 5, Y = 5, Height = 50, AcceptMouseInput = false
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
                     Y = 5, X = 65
                 });
 
-                AddChildren(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
+                Add(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
                 {
                     X = 180, Y = 20
                 });
@@ -296,22 +296,22 @@ namespace ClassicUO.Game.UI.Gumps
                 Item = item;
                 var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
 
-                AddChildren(_amountLabel = new Label("1", false, 0x021F, font: 9)
+                Add(_amountLabel = new Label("1", false, 0x021F, font: 9)
                 {
                     X = 5, Y = 5
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
+                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
                 {
                     X = 30, Y = 5
                 });
 
-                AddChildren(new Button(0, 0x37, 0x37)
+                Add(new Button(0, 0x37, 0x37)
                 {
                     X = 170, Y = 5, ButtonAction = ButtonAction.Activate
                 }); // Plus
 
-                AddChildren(new Button(1, 0x38, 0x38)
+                Add(new Button(1, 0x38, 0x38)
                 {
                     X = 190, Y = 5, ButtonAction = ButtonAction.Activate
                 }); // Minus

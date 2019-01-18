@@ -63,12 +63,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             else if (loginScene.Characters.Length > 0)
                 _selectedCharacter = 0;
 
-            AddChildren(new ResizePic(0x0A28)
+            Add(new ResizePic(0x0A28)
             {
                 X = 160, Y = 70, Width = 408, Height = 343 + yBonus
             }, 1);
 
-            AddChildren(new Label(FileManager.Cliloc.GetString(3000050), false, 0x0386, font: 2)
+            Add(new Label(FileManager.Cliloc.GetString(3000050), false, 0x0386, font: 2)
             {
                 X = 267, Y = listTitleY
             }, 1);
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (!string.IsNullOrEmpty(character))
                 {
-                    AddChildren(new CharacterEntryGump((uint)i, character, SelectCharacter, LoginCharacter)
+                    Add(new CharacterEntryGump((uint)i, character, SelectCharacter, LoginCharacter)
                     {
                         X = 224,
                         Y = yOffset + posInList * 40,
@@ -91,23 +91,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (loginScene.Characters.Any(string.IsNullOrEmpty))
             {
-                AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
+                Add(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
                     X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
                 }, 1);
             }
 
-            AddChildren(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
+            Add(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
             {
                 X = 442, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
             }, 1);
 
-            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
             }, 1);
 
-            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+            Add(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
             {
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             }, 1);
@@ -160,10 +160,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 var existing = Children.OfType<LoadingGump>().FirstOrDefault();
 
                 if (existing != null)
-                    RemoveChildren(existing);
+                    Remove(existing);
                 var text = FileManager.Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
 
-                AddChildren(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
+                Add(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {
                     if (buttonID == (int) LoadingGump.Buttons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);
@@ -216,13 +216,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _loginFn = loginFn;
 
                 // Bg
-                AddChildren(new ResizePic(0x0BB8)
+                Add(new ResizePic(0x0BB8)
                 {
                     X = 0, Y = 0, Width = 280, Height = 30
                 });
 
                 // Char Name
-                AddChildren(_label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                Add(_label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 0
                 });

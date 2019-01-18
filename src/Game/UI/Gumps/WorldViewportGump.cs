@@ -82,10 +82,10 @@ namespace ClassicUO.Game.UI.Gumps
             _border = new GameBorder(0, 0, Width, Height, 4);
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
             _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
-            AddChildren(_border);
-            AddChildren(_button);
-            AddChildren(_viewport);
-            AddChildren(_systemChatControl);
+            Add(_border);
+            Add(_button);
+            Add(_viewport);
+            Add(_systemChatControl);
             Resize();
 
             _savedSize = _lastSize = Engine.Profile.Current.GameWindowSize;

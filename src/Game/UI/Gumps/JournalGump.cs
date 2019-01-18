@@ -36,12 +36,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             CanBeSaved = true;
-            AddChildren(_background = new ExpandableScroll(0, 0, 300)
+            Add(_background = new ExpandableScroll(0, 0, 300)
             {
                 TitleGumpID = 0x82A
             });
             _scrollBar = new ScrollFlag(this, 0, 0, Height);
-            AddChildren(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
+            Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
         }
 
         protected override void OnMouseWheel(MouseEvent delta)

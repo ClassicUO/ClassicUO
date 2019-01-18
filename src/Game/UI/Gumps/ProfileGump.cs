@@ -25,17 +25,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             AcceptKeyboardInput = true;
 
-            AddChildren(_background = new ExpandableScroll(0, 0, 300));
+            Add(_background = new ExpandableScroll(0, 0, 300));
             _scrollBar = new ScrollFlag(this, 0, 0, Height);
 
             AddHorizontalBar(92, 40, 40, 220);
-            AddChildren(new Label(header, true, 0, font: 1, maxwidth: 140)
+            Add(new Label(header, true, 0, font: 1, maxwidth: 140)
             {
                 X = 90,
                 Y = 32,
             });
 
-            AddChildren(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
+            Add(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
             {
                 X = 40,
                 Y = 82,
@@ -89,10 +89,10 @@ namespace ClassicUO.Game.UI.Gumps
             var middleBounds = FileManager.Gumps.GetTexture((Graphic)(start + 1));
             var endBounds = FileManager.Gumps.GetTexture((Graphic)(start + 2));
 
-            AddChildren(new GumpPic(x, y, start, 0));
-            AddChildren(new GumpPicWithWidth(x + startBounds.Width, y, (Graphic)(start + 1), 0,
+            Add(new GumpPic(x, y, start, 0));
+            Add(new GumpPicWithWidth(x + startBounds.Width, y, (Graphic)(start + 1), 0,
                 width - startBounds.Width - endBounds.Width));
-            AddChildren(new GumpPic(x + width - endBounds.Width, y, (Graphic)(start + 2), 0));
+            Add(new GumpPic(x + width - endBounds.Width, y, (Graphic)(start + 2), 0));
         }
 
         public override void OnKeyboardReturn(int textID, string text)

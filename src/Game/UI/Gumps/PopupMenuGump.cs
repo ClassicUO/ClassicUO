@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsTransparent = true, Alpha = 0.25f
             };
-            AddChildren(pic);
+            Add(pic);
             int offsetY = 10;
             bool arrowAdded = false;
             int width = 0, height = 20;
@@ -70,15 +70,15 @@ namespace ClassicUO.Game.UI.Gumps
                         Dispose();
                     }
                 };
-                AddChildren(box);
-                AddChildren(label);
+                Add(box);
+                Add(label);
 
                 if ((item.Flags & 0x02) != 0 && !arrowAdded)
                 {
                     arrowAdded = true;
 
                     // TODO: wat?
-                    AddChildren(new Button(0, 0x15E6, 0x15E2, 0x15E2)
+                    Add(new Button(0, 0x15E6, 0x15E2, 0x15E2)
                     {
                         X = 20, Y = offsetY
                     });

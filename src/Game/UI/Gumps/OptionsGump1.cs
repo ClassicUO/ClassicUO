@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public OptionsGump1() : base(0, 0)
         {
-            AddChildren(new ResizePic( /*0x2436*/ /*0x2422*/ /*0x9C40*/ 9200 /*0x53*/ /*0xE10*/)
+            Add(new ResizePic( /*0x2436*/ /*0x2422*/ /*0x9C40*/ 9200 /*0x53*/ /*0xE10*/)
             {
                 Width = 600, Height = 500
             });
@@ -78,66 +78,66 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea leftArea = new ScrollArea(10, 10, 160, 480, true);
             ScrollAreaItem item = new ScrollAreaItem();
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)
             {
                 Y = 30, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 1
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24)
             {
                 Y = 30 * 2, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 2
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24)
             {
                 Y = 30 * 3, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24)
             {
                 Y = 30 * 4, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24)
             {
                 Y = 30 * 5, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24)
             {
                 Y = 30 * 6, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24)
             {
                 Y = 30 * 7, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7
             });
 
-            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Combat", 1, true, 14, 24)
+            item.Add(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Combat", 1, true, 14, 24)
             {
                 Y = 30 * 8, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 8
             });
             leftArea.AddChildren(item);
-            AddChildren(leftArea);
+            Add(leftArea);
             int offsetX = 60;
             int offsetY = 60;
 
-            AddChildren(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
+            Add(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
             {
                 X = 154 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
+            Add(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
             {
                 X = 248 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
+            Add(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
             {
                 X = 346 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
+            Add(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
             {
                 X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
             });
@@ -162,16 +162,16 @@ namespace ClassicUO.Game.UI.Gumps
             // FPS
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, 1);
-            fpsItem.AddChildren(text);
+            fpsItem.Add(text);
             _sliderFPS = new HSliderBar(80, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            fpsItem.AddChildren(_sliderFPS);
+            fpsItem.Add(_sliderFPS);
             rightArea.AddChildren(fpsItem);
 
             fpsItem = new ScrollAreaItem();
             text = new Label("- Login FPS:", true, 1);
-            fpsItem.AddChildren(text);
+            fpsItem.Add(text);
             _sliderFPSLogin = new HSliderBar(80, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            fpsItem.AddChildren(_sliderFPSLogin);
+            fpsItem.Add(_sliderFPSLogin);
             rightArea.AddChildren(fpsItem);
 
             // Highlight    
@@ -195,13 +195,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Y = 10
             };
-            hpAreaItem.AddChildren(text);
+            hpAreaItem.Add(text);
 
             _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", 1)
             {
                 X = 25, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
-            hpAreaItem.AddChildren(_showHpMobile);
+            hpAreaItem.Add(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 "Percentage", "Line", "Both"
             }, mode);
-            hpAreaItem.AddChildren(_hpComboBox);
+            hpAreaItem.Add(_hpComboBox);
             rightArea.AddChildren(hpAreaItem);
 
             // highlight character by flags
@@ -222,13 +222,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Y = 10
             };
-            highlightByFlagsItem.AddChildren(text);
+            highlightByFlagsItem.Add(text);
 
             _highlightByState = new Checkbox(0x00D2, 0x00D3, "Highlight by state\n(poisoned, yellow hits, paralyzed)", 1)
             {
                 X = 25, Y = 30, IsChecked = Engine.Profile.Current.HighlightMobilesByFlags
             };
-            highlightByFlagsItem.AddChildren(_highlightByState);
+            highlightByFlagsItem.Add(_highlightByState);
             rightArea.AddChildren(highlightByFlagsItem);
 
 
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Y = 10,
             };
-            hpAreaItem.AddChildren(text);
+            hpAreaItem.Add(text);
 
 
             _normalFields = new RadioButton(0, 0x00D0, 0x00D1, "Normal fields", 1)
@@ -250,21 +250,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 30,
                 IsChecked = Engine.Profile.Current.FieldsType == 0,
             };
-            hpAreaItem.AddChildren(_normalFields);
+            hpAreaItem.Add(_normalFields);
             _staticFields = new RadioButton(0, 0x00D0, 0x00D1, "Static fields", 1)
             {
                 X = 25,
                 Y = 30 + _normalFields.Height,
                 IsChecked = Engine.Profile.Current.FieldsType == 1
             };
-            hpAreaItem.AddChildren(_staticFields);
+            hpAreaItem.Add(_staticFields);
             _fieldsToTile = new RadioButton(0, 0x00D0, 0x00D1, "Tile fields", 1)
             {
                 X = 25,
                 Y = 30 + _normalFields.Height * 2,
                 IsChecked = Engine.Profile.Current.FieldsType == 2
             };
-            hpAreaItem.AddChildren(_fieldsToTile);
+            hpAreaItem.Add(_fieldsToTile);
 
             rightArea.AddChildren(hpAreaItem);
 
@@ -277,10 +277,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Y = 10
             };
-            hpAreaItem.AddChildren(text);
+            hpAreaItem.Add(text);
 
             _circleOfTranspRadius = new HSliderBar(160, 15, 100, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            hpAreaItem.AddChildren(_circleOfTranspRadius);
+            hpAreaItem.Add(_circleOfTranspRadius);
 
             _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", 1)
             {
@@ -288,10 +288,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 30,
                 IsChecked = Engine.Profile.Current.UseCircleOfTransparency
             };
-            hpAreaItem.AddChildren(_useCircleOfTransparency);
+            hpAreaItem.Add(_useCircleOfTransparency);
 
             rightArea.AddChildren(hpAreaItem);
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildSounds()
@@ -305,8 +305,8 @@ namespace ClassicUO.Game.UI.Gumps
             Label text = new Label("- Sounds volume:", true, 0, 0, 1);
 
             _soundsVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            item.AddChildren(text);
-            item.AddChildren(_soundsVolume);
+            item.Add(text);
+            item.Add(_soundsVolume);
             rightArea.AddChildren(item);
 
 
@@ -318,8 +318,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _musicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
 
-            item.AddChildren(text);
-            item.AddChildren(_musicVolume);
+            item.Add(text);
+            item.Add(_musicVolume);
             rightArea.AddChildren(item);
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
@@ -332,11 +332,11 @@ namespace ClassicUO.Game.UI.Gumps
             item = new ScrollAreaItem();
             text = new Label("- Login music volume:", true, 0, 0, 1);
             _loginMusicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            item.AddChildren(text);
-            item.AddChildren(_loginMusicVolume);
+            item.Add(text);
+            item.Add(_loginMusicVolume);
             rightArea.AddChildren(item);
 
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildVideo()
@@ -353,17 +353,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 40
             };
 
-            item.AddChildren(text);
+            item.Add(text);
 
             _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
             {
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
-            item.AddChildren(_shardType);
+            item.Add(_shardType);
 
             rightArea.AddChildren(item);
 
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildCommands()
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 4;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
             ScrollAreaItem item = new ScrollAreaItem();
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildTooltip()
@@ -379,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 5;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
             ScrollAreaItem item = new ScrollAreaItem();
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildFonts()
@@ -389,12 +389,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Label text = new Label("Chat font:", true, 0, 0, 1);
 
-            rightArea.AddChildren(text);
+            rightArea.Add(text);
 
             _fontSelectorChat = new FontSelector() { X = 20 };
-            rightArea.AddChildren(_fontSelectorChat);
+            rightArea.Add(_fontSelectorChat);
 
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildSpeech()
@@ -407,13 +407,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
-            item.AddChildren(_scaleSpeechDelay);
+            item.Add(_scaleSpeechDelay);
             rightArea.AddChildren(item);
             item = new ScrollAreaItem();
             Label text = new Label("- Speech delay:", true, 1);
-            item.AddChildren(text);
+            item.Add(text);
             _sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            item.AddChildren(_sliderSpeechDelay);
+            item.Add(_sliderSpeechDelay);
             rightArea.AddChildren(item);
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 30, Engine.Profile.Current.SpeechHue, "Speech color", 20, 30);
@@ -422,7 +422,7 @@ namespace ClassicUO.Game.UI.Gumps
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild message color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance message color", 20, 0);
 
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
         private void BuildCombat()
@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
-            AddChildren(rightArea, PAGE);
+            Add(rightArea, PAGE);
         }
 
 
@@ -667,14 +667,14 @@ namespace ClassicUO.Game.UI.Gumps
                 box.X = x;
                 box.Y = y;
                 
-                item.AddChildren(box);
+                item.Add(box);
                 area.AddChildren(item);
             }
             else
             {
                 box.Y = y;
 
-                area.AddChildren(box);
+                area.Add(box);
             }
             return box;
         }
@@ -689,9 +689,9 @@ namespace ClassicUO.Game.UI.Gumps
                 color = FileManager.Hues.GetPolygoneColor(12, hue);
 
             ClickableColorBox box = new ClickableColorBox(x, y, 13, 14, hue, color);
-            item.AddChildren(box);
+            item.Add(box);
 
-            item.AddChildren(new Label(text, true, 1)
+            item.Add(new Label(text, true, 1)
             {
                 X = labelX, Y = labelY
             });
@@ -751,7 +751,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (FileManager.Fonts.UnicodeFontExists(i))
                     {
-                        AddChildren(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, 1)
+                        Add(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, 1)
                         {
                             Y = y,
                             Tag = i,
