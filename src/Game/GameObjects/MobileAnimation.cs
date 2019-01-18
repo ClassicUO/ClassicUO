@@ -378,11 +378,17 @@ namespace ClassicUO.Game.GameObjects
         {
             if (FileManager.Animations.IsReplacedByAnimationSequence(graphic, out byte t))
             {
-                if (result == 4) // stand
+                if (result == 4) // people stand
                     result = 25;
-                else if (result == 0 || result == 1 || result == 15) // walk
-                    result = 22;
-                else if (result == 2 || result == 19) // run
+                else if (
+                        result == 0 || // people walk un armed / high walk
+                        result == 1 || // walk armed / high stand
+                        result == 15)  // walk warmode
+                        result = 22;
+                else if (
+                        result == 2 || // people run unarmed
+                        result == 3 || // people run armed
+                        result == 19)  // high fly
                     result = 24;
             }
         }
