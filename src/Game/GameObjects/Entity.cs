@@ -102,6 +102,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public bool IsHidden => (Flags & Flags.Hidden) != 0;
+
         //public override Position Position
         //{
         //    get => base.Position;
