@@ -706,6 +706,9 @@ namespace ClassicUO.IO.Resources
                         uint animID = _reader.ReadUInt();
                         ref IndexAnimation index = ref DataIndex[animID];
 
+	                    if (animID != 729 && animID != 735)
+		                    continue;
+
                         _reader.Skip(48);
 
                         int replaces = _reader.ReadInt();
@@ -749,8 +752,21 @@ namespace ClassicUO.IO.Resources
                             int newIDX = _reader.ReadInt();
 	                        int unknown = _reader.ReadInt();
 
-	                       sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
+							//sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
+							var hashstring = String.Empty;
+
+	                        if (newIDX >= 0)
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
+	                        else
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{oldIdx:D2}.bin";
+
+	                        ulong hash = UOFileUop.CreateHash(hashstring);
+
+	                        if (hashes.TryGetValue(hash, out UopFileData data))
+		                        DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
+
+							/*
                             if (animID == 735)
                             {
 
@@ -770,8 +786,8 @@ namespace ClassicUO.IO.Resources
                             {
                                 index.Groups[oldIdx] = index.Groups[newIDX];
                             }
-
-
+							*/
+							
                             _reader.Skip(48);
 
 							var unknownA = _reader.ReadInt();
@@ -1064,8 +1080,12 @@ namespace ClassicUO.IO.Resources
                 //file.Dispose();
                 animSeq.Dispose();
             }
-        }
-   
+
+	        // Manually set the types for now
+			DataIndex[729].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+	        DataIndex[735].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+		}
+
         public override AnimationFrameTexture GetTexture(uint id)
         {
             return ResourceDictionary[id];

@@ -181,6 +181,36 @@ namespace ClassicUO
 
         public static uint[] FrameDelay { get; } = new uint[2];
 
+        /*
+         * 1 - Fullscreen (xna)
+         * 2 - Fullscreen Resize (maximize)
+         */
+        public static void FullScreenMode(int mode)
+        {
+            switch (mode)
+            {
+                case 1:
+                {
+                    _engine._graphicDeviceManager.IsFullScreen = true;
+                    _engine._graphicDeviceManager.ApplyChanges();
+
+                    break;
+                }
+                case 2:
+                {
+                    DisplayMode displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+
+                    _engine._graphicDeviceManager.PreferredBackBufferFormat = displayMode.Format;
+                    _engine._graphicDeviceManager.PreferredBackBufferWidth = (int)(displayMode.Width);
+                    _engine._graphicDeviceManager.PreferredBackBufferHeight = (int)(displayMode.Height) - 60;
+                    _engine._graphicDeviceManager.ApplyChanges();
+
+                    break;
+                }
+            }
+
+        }
+
         public static bool IsFullScreen
         {
             get => _engine._graphicDeviceManager.IsFullScreen;

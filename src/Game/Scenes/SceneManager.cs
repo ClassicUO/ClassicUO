@@ -20,6 +20,9 @@
 #endregion
 using System;
 
+using ClassicUO.Game.System;
+using ClassicUO.Utility.Logging;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -65,6 +68,8 @@ namespace ClassicUO.Game.Scenes
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
+            //Log.Message(LogTypes.Trace, string.Format("[~] scene : {0}", scene));
+
             switch (scene)
             {
                 case LoginScene login:
@@ -73,8 +78,7 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = login;
                     break;
                 case GameScene game:
-                    Engine.WindowWidth = 800;
-                    Engine.WindowHeight = 800;
+                    Engine.FullScreenMode(2);
                     CurrentScene = game;
                     break;
             }
