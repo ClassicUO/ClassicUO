@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (value != _mobile)
                 {
                     _mobile = value;
-                    OnEntityUpdated(_mobile);
+                    UpdateEntity();
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
         private void MobileOnDisposed(object sender, EventArgs e)
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Update()
         {
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
 
@@ -111,16 +111,16 @@ namespace ClassicUO.Game.UI.Controls
             if (item == null && _fakeItem != null)
             {
                 _fakeItem = null;
-                OnEntityUpdated(Mobile);
+                UpdateEntity();
             }
             else if (item != null && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
-                OnEntityUpdated(Mobile);
+                UpdateEntity();
             }
         }
 
-        private void OnEntityUpdated(Entity entity)
+        private void UpdateEntity()
         {
             Clear();
 
