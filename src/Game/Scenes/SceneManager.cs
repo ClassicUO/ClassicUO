@@ -66,8 +66,6 @@ namespace ClassicUO.Game.Scenes
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            //Log.Message(LogTypes.Trace, string.Format("[~] scene : {0}", scene));
-
             switch (scene)
             {
                 case LoginScene login:

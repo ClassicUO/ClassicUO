@@ -29,6 +29,8 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
@@ -112,6 +114,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_gump == null)
             {
+                if (Engine.Profile.Current.TopbarGumpPosition.X < 0 || Engine.Profile.Current.TopbarGumpPosition.Y < 0)
+                    Engine.Profile.Current.TopbarGumpPosition = Point.Zero;
+                
                 Engine.UI.Add(_gump = new TopBarGump()
                 {
                     X = Engine.Profile.Current.TopbarGumpPosition.X,
@@ -144,8 +149,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
+            base.OnDragEnd(x, y);
             Engine.Profile.Current.TopbarGumpPosition = Location;
         }
+
 
         public override void OnButtonClick(int buttonID)
         {
