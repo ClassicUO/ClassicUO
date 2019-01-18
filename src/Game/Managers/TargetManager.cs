@@ -94,6 +94,8 @@ namespace ClassicUO.Game.Managers
             {
                 selectedEntity = effect.Source;
             }
+            else if (selectedEntity is TextOverhead overhead && overhead.Parent != null)
+                selectedEntity = overhead.Parent;
 
             if (selectedEntity is Entity entity)
             {
