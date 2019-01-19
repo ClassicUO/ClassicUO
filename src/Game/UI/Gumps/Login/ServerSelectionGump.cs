@@ -36,6 +36,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class ServerSelectionGump : Gump
     {
+        private const ushort SELECTED_COLOR = 0x0021;
+        private const ushort NORMAL_COLOR = 0x034F;
+
         public ServerSelectionGump() : base(0,0)
         {
             //AddChildren(new LoginBackground(true));
@@ -193,7 +196,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
-
         private enum Buttons
         {
             Prev,
@@ -208,11 +210,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
-            private readonly ushort _hoverColor = 0x0021;
             private readonly RenderedText _labelName;
             private readonly RenderedText _labelPacketLoss;
             private readonly RenderedText _labelPing;
-            private readonly ushort _normalColor = 0x034F;
 
             public ServerEntryGump(ServerListEntry entry)
             {
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Text = text,
                     Font = 5,
                     IsUnicode = false,
-                    Hue = _normalColor,
+                    Hue = NORMAL_COLOR,
                     Align = TEXT_ALIGN_TYPE.TS_LEFT,
                     MaxWidth = 0
                 };
@@ -260,9 +260,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseOver(int x, int y)
             {
-                _labelName.Hue = _hoverColor;
-                _labelPing.Hue = _hoverColor;
-                _labelPacketLoss.Hue = _hoverColor;
+                _labelName.Hue = SELECTED_COLOR;
+                _labelPing.Hue = SELECTED_COLOR;
+                _labelPacketLoss.Hue = SELECTED_COLOR;
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();
@@ -271,9 +271,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseExit(int x, int y)
             {
-                _labelName.Hue = _normalColor;
-                _labelPing.Hue = _normalColor;
-                _labelPacketLoss.Hue = _normalColor;
+                _labelName.Hue = NORMAL_COLOR;
+                _labelPing.Hue = NORMAL_COLOR;
+                _labelPacketLoss.Hue = NORMAL_COLOR;
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();
