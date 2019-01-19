@@ -161,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
             _textboxPassword.SetText(Engine.GlobalSettings.Password);
 
-            _textboxAccount.SetNextFocus = _textboxPassword;
-            _textboxPassword.SetNextFocus = _textboxAccount;
+            _textboxAccount.NextFocus = _textboxPassword;
+            _textboxPassword.NextFocus = _textboxAccount;
         }
 
         private ushort _buttonNormal = 0x15A4;

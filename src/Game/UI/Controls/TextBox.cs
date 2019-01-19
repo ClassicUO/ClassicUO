@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         public TextEntry TxEntry { get; private set; }
 
-        public TextBox SetNextFocus { get; set; }
+        public TextBox NextFocus { get; set; }
 
         public TextBox(TextEntry txentry, bool editable)
         {
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.UI.Controls
                        Parent?.OnKeyboardReturn(0, s);
                     break;
                 case SDL.SDL_Keycode.SDLK_TAB:
-                    SetNextFocus.SetKeyboardFocus();
+                    NextFocus.SetKeyboardFocus();
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
