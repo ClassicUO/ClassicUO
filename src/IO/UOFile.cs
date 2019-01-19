@@ -43,7 +43,7 @@ namespace ClassicUO.IO
 
         public string FilePath { get; private set; }
 
-        internal uint UltimaLiveReloader(int newsize)
+        internal uint UltimaLiveReloader()
         {
             string oldfile = FilePath;
             FilePath = Path.Combine(UltimaLive.ShardName, Path.GetFileName(FilePath));

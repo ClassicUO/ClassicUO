@@ -30,7 +30,7 @@ namespace ClassicUO.IO
 {
     internal class UltimaLive
     {
-        static UltimaLive()
+        internal static void Load()
         {
             Log.Message(LogTypes.Trace, "Setup packet for Ultima live", ConsoleColor.DarkGreen);
             PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
@@ -46,9 +46,6 @@ namespace ClassicUO.IO
         private static UOFileMul[] _filesStatics;
         private static UOFileMul[] _filesIdxStatics;
         private static uint[] _EOF;
-        private const int MAP_MEMORY_SIZE = 100000000;     //Memory to allocate for the largest possible map file  
-        private const int STAIDX_MEMORY_SIZE = 10000000;   //Memory to allocate for the largest possible statics index file
-        private const int STATICS_MEMORY_SIZE = 200000000; //Memory to allocate for the largets possible statics file
         //WrapMapSize includes 2 different kind of values at each side of the array:
         //left - mapID (zero based value), so first map is at ZERO
         //right- we have the size of the map, values in index 0 and 1 are wrapsize x and y
@@ -211,9 +208,7 @@ namespace ClassicUO.IO
                                 _filesIdxStatics[mapID].Seek(block * 12);
                                 uint lookup = _filesIdxStatics[mapID].ReadUInt();
                                 uint existingStaticsLength = _filesIdxStatics[mapID].ReadUInt();
-                                //update index length on disk
-                                _filesIdxStatics[mapID]._Stream.Seek((block * 12) + 4, SeekOrigin.Begin);
-                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(totallen), 0, sizeof(uint));
+                                
                                 //Do we have enough room to write the statics into the existing location?
                                 if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
                                 {
@@ -230,6 +225,12 @@ namespace ClassicUO.IO
                                     _filesStatics[mapID]._Stream.Write(staticsData, 0, totallen);
                                     Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                                 }
+                                _filesIdxStatics[mapID]._Stream.Seek(block * 12, SeekOrigin.Begin);
+                                //update lookup
+                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(lookup), 0, sizeof(uint));
+                                //update index length on disk
+                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(totallen), 0, sizeof(uint));
+
                                 _filesIdxStatics[mapID]._Stream.Flush();
                                 _filesStatics[mapID]._Stream.Flush();
                             }
@@ -278,7 +279,7 @@ namespace ClassicUO.IO
                         _EOF = new uint[maps];
                         for(int i = 0; i < maps && active; i++)
                         {
-                            active = _filesMap[i].UltimaLiveReloader(MAP_MEMORY_SIZE) > 0 && _filesIdxStatics[i].UltimaLiveReloader(STAIDX_MEMORY_SIZE) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(STATICS_MEMORY_SIZE)) > 0;
+                            active = _filesMap[i].UltimaLiveReloader() > 0 && _filesIdxStatics[i].UltimaLiveReloader() > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader()) > 0;
                         }
                         IsUltimaLiveActive = Directory.Exists(ShardName) && active;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
