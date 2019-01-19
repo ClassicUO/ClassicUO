@@ -28,7 +28,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    class UltimaLive
+    internal class UltimaLive
     {
         static UltimaLive()
         {
@@ -37,16 +37,23 @@ namespace ClassicUO.IO
             PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
         }
 
-        public static bool IsUltimaLiveActive = false;
-        public static string ShardName = null;
+        internal static bool IsUltimaLiveActive = false;
+        internal static string ShardName = null;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
-        public static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
+        private static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
+        private static UOFile[] _filesMap;
+        private static UOFileMul[] _filesStatics;
+        private static UOFileMul[] _filesIdxStatics;
+        private static uint[] _EOF;
+        private const int MAP_MEMORY_SIZE = 100000000;     //Memory to allocate for the largest possible map file  
+        private const int STAIDX_MEMORY_SIZE = 10000000;   //Memory to allocate for the largest possible statics index file
+        private const int STATICS_MEMORY_SIZE = 200000000; //Memory to allocate for the largets possible statics file
         //WrapMapSize includes 2 different kind of values at each side of the array:
         //left - mapID (zero based value), so first map is at ZERO
         //right- we have the size of the map, values in index 0 and 1 are wrapsize x and y
         //       values in index 2 and 3 is for the total size of map, x and y
-        public static UInt16[,] WrapMapSize;
+        private static UInt16[,] WrapMapSize;
         private static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
@@ -189,10 +196,46 @@ namespace ClassicUO.IO
                                 }.AddToTile();
                                 index += 7;
                             }
+                            if(totallen <= 0)
+                            {
+                                //update index length on disk
+                                _filesIdxStatics[mapID]._Stream.Seek((block * 12) + 4, SeekOrigin.Begin);
+                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0, 0, 0, 0 }, 0, 4);
+                                //update index lookup on disk
+                                _filesIdxStatics[mapID]._Stream.Seek(block * 12, SeekOrigin.Begin);
+                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0xFF, 0xFF, 0xFF, 0xFF }, 0, 4);
+                                _filesIdxStatics[mapID]._Stream.Flush();
+                            }
+                            else
+                            {
+                                _filesIdxStatics[mapID].Seek(block * 12);
+                                uint lookup = _filesIdxStatics[mapID].ReadUInt();
+                                uint existingStaticsLength = _filesIdxStatics[mapID].ReadUInt();
+                                //update index length on disk
+                                _filesIdxStatics[mapID]._Stream.Seek((block * 12) + 4, SeekOrigin.Begin);
+                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(totallen), 0, sizeof(uint));
+                                //Do we have enough room to write the statics into the existing location?
+                                if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
+                                {
+                                    Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
+                                    _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
+                                    _filesStatics[mapID]._Stream.Write(staticsData, 0, totallen);
+                                }
+                                else
+                                {
+                                    lookup = _EOF[mapID];
+                                    _EOF[mapID] += (uint)totallen;
+                                    _filesStatics[mapID].Resize(_EOF[mapID]);
+                                    _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
+                                    _filesStatics[mapID]._Stream.Write(staticsData, 0, totallen);
+                                    Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
+                                }
+                                _filesIdxStatics[mapID]._Stream.Flush();
+                                _filesStatics[mapID]._Stream.Flush();
+                            }
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                             MapCRCs[mapID][block] = UInt16.MaxValue;
                         }
-                        //TODO: write staticdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
                         break;
                     }
                 case 0x01://map definition update
@@ -201,6 +244,10 @@ namespace ClassicUO.IO
                         {
                             //we cannot validate the pathfolder or packet is not correct
                             return;
+                        }
+                        else if(!Directory.Exists(ShardName))
+                        {
+                            Directory.CreateDirectory(ShardName);
                         }
 
                         p.Seek(7);
@@ -223,7 +270,17 @@ namespace ClassicUO.IO
                             WrapMapSize[mapnum,2] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,0]);
                             WrapMapSize[mapnum,3] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,1]);
                         }
-                        IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
+                        bool active = true;
+                        var refs = FileManager.Map.GetFileReferences;
+                        _filesMap = refs.Item1;
+                        _filesStatics = refs.Item2;
+                        _filesIdxStatics = refs.Item3;
+                        _EOF = new uint[maps];
+                        for(int i = 0; i < maps && active; i++)
+                        {
+                            active = _filesMap[i].UltimaLiveReloader(MAP_MEMORY_SIZE) > 0 && _filesIdxStatics[i].UltimaLiveReloader(STAIDX_MEMORY_SIZE) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(STATICS_MEMORY_SIZE)) > 0;
+                        }
+                        IsUltimaLiveActive = Directory.Exists(ShardName) && active;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
                     }
                 case 0x02://Live login confirmation
@@ -275,12 +332,15 @@ namespace ClassicUO.IO
                         }
                     }
                 }
+                _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
+                _filesMap[mapID]._Stream.Write(landData, 0, landData.Length);
+                _filesMap[mapID]._Stream.Flush();
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 MapCRCs[mapID][block] = UInt16.MaxValue;
             }
         }
 
-        public static UInt16 GetBlockCrc(int block, int xblock, int yblock)
+        internal static UInt16 GetBlockCrc(int block, int xblock, int yblock)
         {
             byte[] landdata = new byte[LandBlockLenght];
             int stcount = 0;
@@ -335,7 +395,7 @@ namespace ClassicUO.IO
             return crc;
         }
 
-        public static UInt16 Fletcher16(byte[] data)
+        internal static UInt16 Fletcher16(byte[] data)
         {
             UInt16 sum1 = 0;
             UInt16 sum2 = 0;
