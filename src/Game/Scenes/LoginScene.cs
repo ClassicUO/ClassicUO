@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(0);
 
-            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
@@ -266,9 +266,6 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
-
-            Engine.GlobalSettings.SaveAccount = saveAccount;
-
             Account = account;
             Password = password;
             Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");

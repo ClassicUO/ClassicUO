@@ -35,9 +35,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private float _time;
 
-
         public override void OnKeyboardReturn(int textID, string text)
         {
+            SaveCheckboxStatus();
             Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 
@@ -46,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
-
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                 // Full background
@@ -110,6 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 350,
                 Y = 420
             });
+
             Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3)
             {
                 X = 228,
@@ -122,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
 
             _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
+            _checkboxAutologin.IsChecked = Engine.GlobalSettings.AutoLogin;
 
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 
@@ -182,6 +183,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _textboxPassword.SetText(Engine.GlobalSettings.Password);
         }
 
+        private void SaveCheckboxStatus()
+        {
+            Engine.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
+            Engine.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
+        }
+
         private ushort _buttonNormal = 0x15A4;
         private ushort _buttonOver = 0x15A5;
 
@@ -222,6 +229,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
+                    SaveCheckboxStatus();
                     Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text, _checkboxSaveAccount.IsChecked);
                     break;
                 case Buttons.Quit:
