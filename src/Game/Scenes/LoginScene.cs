@@ -262,7 +262,7 @@ namespace ClassicUO.Game.Scenes
             if ((LoadingGump.Buttons)buttonId == LoadingGump.Buttons.OK) StepBack();
         }
 
-        public void Connect(string account, string password, bool saveAccount = false)
+        public void Connect(string account, string password)
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
