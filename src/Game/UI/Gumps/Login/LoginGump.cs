@@ -126,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             //g_MainScreen.m_AutoLogin =
             //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
             //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
+
             Add(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
             {
                 X = 253,
