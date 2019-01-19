@@ -73,7 +73,6 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
         public LoginRejectionReasons? LoginRejectionReason { get; private set; }
@@ -263,10 +262,13 @@ namespace ClassicUO.Game.Scenes
             if ((LoadingGump.Buttons)buttonId == LoadingGump.Buttons.OK) StepBack();
         }
 
-        public void Connect(string account, string password)
+        public void Connect(string account, string password, bool saveAccount = false)
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
+
+            Engine.GlobalSettings.SaveAccount = saveAccount;
+
             Account = account;
             Password = password;
             Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
@@ -391,9 +393,13 @@ namespace ClassicUO.Game.Scenes
                     ParseServerList(e);
 
                     // Save credentials to config file
-                    Engine.GlobalSettings.Username = Account;
-                    Engine.GlobalSettings.Password = Password;
-                    Engine.GlobalSettings.Save();
+                    if (Engine.GlobalSettings.SaveAccount)
+                    {
+                        Engine.GlobalSettings.Username = Account;
+                        Engine.GlobalSettings.Password = Password;
+                        Engine.GlobalSettings.Save();
+                    }
+
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)

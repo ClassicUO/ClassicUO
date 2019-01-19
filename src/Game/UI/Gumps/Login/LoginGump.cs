@@ -121,6 +121,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 420
             });
 
+            _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
+
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 
             //g_MainScreen.m_AutoLogin =
@@ -220,12 +222,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
-                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
-                    
+                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text, _checkboxSaveAccount.IsChecked);
                     break;
                 case Buttons.Quit:
                     Engine.Quit();
-
                     break;
             }
         }
