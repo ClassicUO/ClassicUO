@@ -118,8 +118,13 @@ namespace ClassicUO
 
         private Engine()
         {
-            //IsFixedTimeStep = false;
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            LoadSettings();
+
+            if (_settings.FixedTimeStep)
+                TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            else
+                IsFixedTimeStep = false;
+
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -313,17 +318,8 @@ namespace ClassicUO
         }
 
 
-
-        protected override void Initialize()
+        protected void LoadSettings()
         {
-            Log.NewLine();
-            Log.NewLine();
-
-            Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
-
-            Log.NewLine();
-            Log.NewLine();
-
             _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
             if (_settings == null)
@@ -335,6 +331,18 @@ namespace ClassicUO
 
                 return;
             }
+        }
+
+
+        protected override void Initialize()
+        {
+            Log.NewLine();
+            Log.NewLine();
+
+            Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
+
+            Log.NewLine();
+            Log.NewLine();
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
