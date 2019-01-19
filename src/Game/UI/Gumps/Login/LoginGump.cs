@@ -30,6 +30,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
         private Checkbox _checkboxSaveAccount;
+        private Checkbox _checkboxAutologin;
         private readonly Button _nextArrow0;
 
         private float _time;
@@ -104,6 +105,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 328,
                 Y = 417
             });
+            Add(new Label("Save Password", false, 0x0386, font: 1)
+            {
+                X = 350,
+                Y = 420
+            });
+            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3)
+            {
+                X = 228,
+                Y = 417
+            });
+            Add(new Label("Autologin", false, 0x0386, font: 1)
+            {
+                X = 250,
+                Y = 420
+            });
+
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 
             //g_MainScreen.m_AutoLogin =
