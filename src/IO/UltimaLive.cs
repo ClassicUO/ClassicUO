@@ -172,35 +172,13 @@ namespace ClassicUO.IO
                         int index = 0;
                         if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
                         {
-                            var chunk = World.Map.Chunks[block];
-                            for (int i = 0; i < 8; i++)
+                            if (totallen <= 0)
                             {
-                                for (int j = 0; j < 8; j++)
-                                {
-                                    for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
-                                    {
-                                        if (obj is Static)
-                                            chunk.Tiles[i, j].RemoveGameObject(obj);
-                                    }
-                                }
-                            }
-                            for (int k = 0; k < length; k++)
-                            {
-                                Tile t = chunk.Tiles[staticsData[index + 2], staticsData[index + 3]];
-                                new Static((ushort)(staticsData[index] | (staticsData[index + 1] << 8)), (ushort)(staticsData[index + 5] | (staticsData[index + 6] << 8)), k)
-                                {
-                                    Position = new Position(t.X, t.Y, (sbyte)staticsData[index + 4])
-                                }.AddToTile();
-                                index += 7;
-                            }
-                            if(totallen <= 0)
-                            {
-                                //update index length on disk
-                                _filesIdxStatics[mapID]._Stream.Seek((block * 12) + 4, SeekOrigin.Begin);
-                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0, 0, 0, 0 }, 0, 4);
                                 //update index lookup on disk
                                 _filesIdxStatics[mapID]._Stream.Seek(block * 12, SeekOrigin.Begin);
                                 _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0xFF, 0xFF, 0xFF, 0xFF }, 0, 4);
+                                //update index length on disk
+                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0, 0, 0, 0 }, 0, 4);
                                 _filesIdxStatics[mapID]._Stream.Flush();
                             }
                             else
@@ -208,9 +186,9 @@ namespace ClassicUO.IO
                                 _filesIdxStatics[mapID].Seek(block * 12);
                                 uint lookup = _filesIdxStatics[mapID].ReadUInt();
                                 uint existingStaticsLength = _filesIdxStatics[mapID].ReadUInt();
-                                
+
                                 //Do we have enough room to write the statics into the existing location?
-                                if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
+                                if (existingStaticsLength >= length && lookup != 0xFFFFFFFF)
                                 {
                                     Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
                                     _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
@@ -229,10 +207,35 @@ namespace ClassicUO.IO
                                 //update lookup
                                 _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(lookup), 0, sizeof(uint));
                                 //update index length on disk
-                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(totallen), 0, sizeof(uint));
+                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(length), 0, sizeof(uint));
 
                                 _filesIdxStatics[mapID]._Stream.Flush();
                                 _filesStatics[mapID]._Stream.Flush();
+                            }
+
+                            var chunk = World.Map.Chunks[block];
+                            if (chunk != null)
+                            {
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    for (int j = 0; j < 8; j++)
+                                    {
+                                        for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
+                                        {
+                                            if (obj is Static)
+                                                chunk.Tiles[i, j].RemoveGameObject(obj);
+                                        }
+                                    }
+                                }
+                                for (int k = 0; k < length; k++)
+                                {
+                                    Tile t = chunk.Tiles[staticsData[index + 2], staticsData[index + 3]];
+                                    new Static((ushort)(staticsData[index] | (staticsData[index + 1] << 8)), (ushort)(staticsData[index + 5] | (staticsData[index + 6] << 8)), k)
+                                    {
+                                        Position = new Position(t.X, t.Y, (sbyte)staticsData[index + 4])
+                                    }.AddToTile();
+                                    index += 7;
+                                }
                             }
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                             MapCRCs[mapID][block] = UInt16.MaxValue;
@@ -319,23 +322,27 @@ namespace ClassicUO.IO
             int index = 0;
             if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
+                _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
+                _filesMap[mapID]._Stream.Write(landData, 0, landData.Length);
+                _filesMap[mapID]._Stream.Flush();
                 for (int i = 0; i < 8; i++)
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        for (GameObject obj = World.Map.Chunks[block].Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
+                        var chunk = World.Map.Chunks[block];
+                        if (chunk != null)
                         {
-                            if (obj is Land ln)
+                            for (GameObject obj = chunk.Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
                             {
-                                ln.Graphic = (ushort)(landData[index++] | (landData[index++] << 8));
-                                ln.Z = (sbyte)landData[index++];
+                                if (obj is Land ln)
+                                {
+                                    ln.Graphic = (ushort)(landData[index++] | (landData[index++] << 8));
+                                    ln.Z = (sbyte)landData[index++];
+                                }
                             }
                         }
                     }
                 }
-                _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
-                _filesMap[mapID]._Stream.Write(landData, 0, landData.Length);
-                _filesMap[mapID]._Stream.Flush();
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 MapCRCs[mapID][block] = UInt16.MaxValue;
             }
@@ -343,56 +350,20 @@ namespace ClassicUO.IO
 
         internal static UInt16 GetBlockCrc(int block, int xblock, int yblock)
         {
-            byte[] landdata = new byte[LandBlockLenght];
-            int stcount = 0;
-            int blockByteIdx = 0;
-            for (int i = 0; i < 8; i++)
+            int mapID = World.Map.Index;
+            _filesIdxStatics[mapID].Seek(block * 12);
+            uint lookup = _filesIdxStatics[mapID].ReadUInt();
+            int stcount = Math.Max(0, _filesIdxStatics[mapID].ReadInt());
+            byte[] blockData = new byte[LandBlockLenght + stcount];
+            _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
+            _filesMap[mapID]._Stream.Read(blockData, 0, LandBlockLenght);
+            if (lookup != 0xFFFFFFFF && stcount > 0)
             {
-                for (int j = 0; j < 8; j++)
-                {
-                    for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
-                    {
-                        if (obj is Land ln)
-                        {
-                            landdata[blockByteIdx] = (byte)(ln.Graphic & 0x00FF);
-                            landdata[blockByteIdx + 1] = (byte)((ln.Graphic & 0xFF00) >> 8);
-                            landdata[blockByteIdx + 2] = (byte)ln.Z;
-                            blockByteIdx += 3;
-                        }
-                        else if (obj is Static)
-                        {
-                            stcount++;
-                        }
-                    }
-                }
+                _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
+                _filesStatics[mapID]._Stream.Read(blockData, LandBlockLenght, stcount);
             }
-            byte[] staticdata = new byte[stcount * 7];
-            blockByteIdx = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
-                    {
-                        if (obj is Static st)
-                        {
-                            staticdata[blockByteIdx] = (byte)(st.Graphic & 0x00FF);
-                            staticdata[blockByteIdx + 1] = (byte)((st.Graphic & 0xFF00) >> 8);
-                            staticdata[blockByteIdx + 2] = (byte)i;
-                            staticdata[blockByteIdx + 3] = (byte)j;
-                            staticdata[blockByteIdx + 4] = (byte)st.Z;
-                            staticdata[blockByteIdx + 5] = (byte)(st.Hue & 0x00FF);
-                            staticdata[blockByteIdx + 6] = (byte)((st.Hue & 0xFF00) >> 8);
-                            blockByteIdx += 7;
-                        }
-                    }
-                }
-            }
-            byte[] blockData = new byte[landdata.Length + staticdata.Length];
-            Array.Copy(landdata, 0, blockData, 0, landdata.Length);
-            Array.Copy(staticdata, 0, blockData, landdata.Length, staticdata.Length);
             ushort crc = Fletcher16(blockData);
-            landdata = staticdata = blockData = null;
+            blockData = null;
             return crc;
         }
 

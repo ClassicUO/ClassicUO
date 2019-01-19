@@ -83,7 +83,11 @@ namespace ClassicUO.IO
             {
                 newmmf.Dispose();
                 newam.SafeMemoryMappedViewHandle.ReleasePointer();
+                newam.Dispose();
+                _Stream?.Dispose();
                 _Stream = null;
+                UltimaLive.IsUltimaLiveActive = false;
+                return;
             }
             _file.Dispose();
             _file = newmmf;
