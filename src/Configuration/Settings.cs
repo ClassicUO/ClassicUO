@@ -47,6 +47,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 0;
+
         [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;

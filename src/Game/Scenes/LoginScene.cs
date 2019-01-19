@@ -287,6 +287,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
+                Engine.GlobalSettings.LastServerNum = ServerIndex;
+                Engine.GlobalSettings.Save();
+
                 CurrentLoginStep = LoginStep.LoginInToServer;
                 World.ServerName = Servers[ServerIndex].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
