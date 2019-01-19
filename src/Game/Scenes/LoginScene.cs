@@ -287,7 +287,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                Engine.GlobalSettings.LastServerNum = ServerIndex;
+                Engine.GlobalSettings.LastServerNum = (ushort) ( 1 + ServerIndex) ;
                 Engine.GlobalSettings.Save();
 
                 CurrentLoginStep = LoginStep.LoginInToServer;

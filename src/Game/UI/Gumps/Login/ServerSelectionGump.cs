@@ -134,8 +134,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+
             foreach (ServerListEntry server in loginScene.Servers)
                 scrollArea.Add(new ServerEntryGump(server));
+
             Add(scrollArea);
 
             if (loginScene.Servers.Length > 0)
@@ -173,14 +175,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 switch ((Buttons) buttonID)
                 {
                     case Buttons.Next:
-
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer((byte) loginScene.Servers[0].Index);
-
+                            loginScene.SelectServer((byte) loginScene.Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                         break;
                     case Buttons.Prev:
                         loginScene.StepBack();
-
                         break;
                 }
             }
@@ -192,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte)loginScene.Servers[0].Index);
+                    loginScene.SelectServer((byte)loginScene.Servers[(Engine.GlobalSettings.LastServerNum - 1)].Index);
             }
         }
 
@@ -217,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public ServerEntryGump(ServerListEntry entry)
             {
                 _buttonId = entry.Index;
-                _labelName = CreateRenderedText(entry.Name);
+                _labelName = CreateRenderedText(entry.Name + _buttonId);
                 _labelPing = CreateRenderedText("-");
                 _labelPacketLoss = CreateRenderedText("-");
                 _labelName.CreateTexture();
@@ -241,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Text = text,
                     Font = 5,
                     IsUnicode = false,
-                    Hue = NORMAL_COLOR,
+                    Hue = _buttonId == Engine.GlobalSettings.LastServerNum ? SELECTED_COLOR : NORMAL_COLOR,
                     Align = TEXT_ALIGN_TYPE.TS_LEFT,
                     MaxWidth = 0
                 };
