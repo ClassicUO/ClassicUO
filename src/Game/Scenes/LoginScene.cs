@@ -402,7 +402,7 @@ namespace ClassicUO.Game.Scenes
                     if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
                     {
                         if (Servers.Length != 0)
-                            SelectServer( (byte) Servers[0].Index);
+                            SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                     }
 
                     break;
