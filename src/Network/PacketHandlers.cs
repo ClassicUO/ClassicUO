@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -152,6 +153,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x29, DropItemAccepted);
             ToClient.Add(0x2A, Blood);
             ToClient.Add(0x2B, GodMode);
+            ToClient.Add(0x2C, DeathScreen);
             ToClient.Add(0x2D, MobileAttributes);
             ToClient.Add(0x2E, EquipItem);
             ToClient.Add(0x2F, FightOccuring);
@@ -162,6 +164,7 @@ namespace ClassicUO.Network
             /*ToServer.Add(0x34, GetPlayerStatus);
             ToServer.Add(0x35, AddResourceGodClient);*/
             ToClient.Add(0x36, ResourceTileDataGodClient);
+            ToClient.Add(0x38, Pathfinding);
             /*ToServer.Add(0x37, MoveItemGodClient);
             ToServer.Add(0x38, PathfindingInClient);
             ToServer.Add(0x39, RemoveGroupS);*/
@@ -171,8 +174,6 @@ namespace ClassicUO.Network
             //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
-            ToClient.Add(0x3F, UltimaLive.OnUltimaLivePacket);
-            ToClient.Add(0x40, UltimaLive.OnUpdateTerrainPacket);
             /*ToServer.Add(0x45, VersionOK);
             ToServer.Add(0x46, NewArtwork);
             ToServer.Add(0x47, NewTerrain);
@@ -921,6 +922,9 @@ namespace ClassicUO.Network
 
         private static void UpdateContainedItem(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             List<Item> items = new List<Item>();
 
             if (ReadContainerContent(p, items))
@@ -1057,6 +1061,19 @@ namespace ClassicUO.Network
         {
         }
 
+        private static void DeathScreen(Packet p)
+        {
+            // todo
+            byte action = p.ReadByte();
+
+            if (action != 1)
+            {
+                Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
+
+                GameActions.SetWarMode(false);
+            }
+        }
+
         private static void MobileAttributes(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
@@ -1153,12 +1170,26 @@ namespace ClassicUO.Network
         {
         }
 
+        private static void Pathfinding(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            ushort z = p.ReadUShort();
+
+            Pathfinder.WalkTo(x, y, z, 0);
+        }
+
         private static void ResourceTileDataGodClient(Packet p)
         {
         }
 
         private static void UpdateContainedItems(Packet p)
         {
+            if (!World.InGame)
+                return;
             ushort count = p.ReadUShort();
             List<Item> items = new List<Item>(count);
 
@@ -1836,15 +1867,27 @@ namespace ClassicUO.Network
 
         private static void DyeData(Packet p)
         {
-            Item item = World.Items.Get(p.ReadUInt());
+            Serial serial = p.ReadUInt();
             p.Skip(2);
             Graphic graphic = p.ReadUShort();
+
+            Rectangle rect = FileManager.Gumps.GetTexture(0x0906).Bounds;
+
+            int x = (Engine.WindowWidth >> 1) - (rect.Width >> 1);
+            int y = (Engine.WindowHeight >> 1) - (rect.Height >> 1);
+
+            ColorPickerGump gump = new ColorPickerGump(serial, graphic, x, y, null);
+
+            Engine.UI.Add(gump);
         }
 
         private static void MovePlayer(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Direction direction = (Direction)p.ReadByte();
-            World.Player.ProcessDelta();
+            World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
         private static void AllNames3DGameOnlyR(Packet p)
@@ -1937,6 +1980,19 @@ namespace ClassicUO.Network
 
         private static void OpenUrl(Packet p)
         {
+            string url = p.ReadASCII();
+
+            if (!string.IsNullOrEmpty(url))
+            {
+                try
+                {
+                    Process.Start(url);
+                }
+                catch
+                {
+
+                }
+            }
         }
 
         private static void TipWindow(Packet p)
@@ -2935,7 +2991,7 @@ namespace ClassicUO.Network
 
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
+            if (gs != null && gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
             {
                 gs.HeldItem.Clear();
             }

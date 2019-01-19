@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             Point p = Point.Zero;
             _labels = new Label[(int) MobileStats.NumStats];
 
-            AddChildren(new GumpPic(0, 0, 0x0802, 0));
+            Add(new GumpPic(0, 0, 0x0802, 0));
             p.X = 244;
             p.Y = 112;
 
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 42
             };
             _labels[(int) MobileStats.Name] = text;
-            AddChildren(text);
+            Add(text);
             
 
             text = new Label(World.Player.Strength.ToString(), false, 0x0386, font: 1)
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 61
             };
             _labels[(int) MobileStats.Strength] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.Dexterity.ToString(), false, 0x0386, font: 1)
             {
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 73
             };
             _labels[(int) MobileStats.Dexterity] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.Intelligence.ToString(), false, 0x0386, font: 1)
             {
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 85
             };
             _labels[(int) MobileStats.Intelligence] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.IsFemale ? "F" : "M", false, 0x0386, font: 1)
             {
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 97
             };
             _labels[(int) MobileStats.Sex] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.ResistPhysical.ToString(), false, 0x0386, font: 1)
             {
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 109
             };
             _labels[(int) MobileStats.AR] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label($"{World.Player.Hits}/{World.Player.HitsMax}", false, 0x0386, font: 1)
             {
@@ -248,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 61
             };
             _labels[(int) MobileStats.HealthCurrent] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label($"{World.Player.Mana}/{World.Player.ManaMax}", false, 0x0386, font: 1)
             {
@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 73
             };
             _labels[(int) MobileStats.ManaCurrent] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label($"{World.Player.Stamina}/{World.Player.StaminaMax}", false, 0x0386, font: 1)
             {
@@ -264,7 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 85
             };
             _labels[(int) MobileStats.StaminaCurrent] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 1)
             {
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 97
             };
             _labels[(int) MobileStats.Gold] = text;
-            AddChildren(text);
+            Add(text);
 
             text = new Label(World.Player.Weight.ToString(), false, 0x0386, font: 1)
             {
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 109
             };
             _labels[(int) MobileStats.WeightCurrent] = text;
-            AddChildren(text);
+            Add(text);
 
             _point = p;
         }
@@ -334,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
             int xOffset = 0;
             _labels = new Label[(int) MobileStats.NumStats];
 
-            AddChildren(new GumpPic(0, 0, 0x2A6C, 0));
+            Add(new GumpPic(0, 0, 0x2A6C, 0));
 
             if (FileManager.ClientVersion >= ClientVersions.CV_308Z)
             {
@@ -347,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_5020)
                 {
-                    AddChildren(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7538)
+                    Add(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7538)
                     {
                         X = 40,
                         Y = 50,
@@ -363,7 +363,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-                AddChildren(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
+                Add(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
 
                 _lockers[0].MouseClick += (sender, e) =>
                 {
@@ -394,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-                AddChildren(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
+                Add(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
 
                 _lockers[1].MouseClick += (sender, e) =>
                 {
@@ -424,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-                AddChildren(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
+                Add(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
 
                 _lockers[2].MouseClick += (sender, e) =>
                 {
@@ -485,9 +485,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 xOffset += 5;
 
-                AddChildren(new Line(xOffset, 138, Math.Abs(xOffset - 185), 1, 0xFF383838));
-                AddChildren(new Line(xOffset, 110, Math.Abs(xOffset - 185), 1, 0xFF383838));
-                AddChildren(new Line(xOffset, 82, Math.Abs(xOffset - 185), 1, 0xFF383838));
+                Add(new Line(xOffset, 138, Math.Abs(xOffset - 185), 1, 0xFF383838));
+                Add(new Line(xOffset, 110, Math.Abs(xOffset - 185), 1, 0xFF383838));
+                Add(new Line(xOffset, 82, Math.Abs(xOffset - 185), 1, 0xFF383838));
 
                 if (_useUOPGumps)
                 {
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AddStatTextLabel(World.Player.Weight.ToString(), MobileStats.WeightCurrent, xOffset, 126, textWidth, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
  
                 int lineX = _useUOPGumps ? 236 : 216;
-                AddChildren(new Line(lineX, 138, Math.Abs(lineX - (_useUOPGumps ? 270 : 250)), 1, 0xFF383838));
+                Add(new Line(lineX, 138, Math.Abs(lineX - (_useUOPGumps ? 270 : 250)), 1, 0xFF383838));
 
                 AddStatTextLabel(World.Player.WeightMax.ToString(), MobileStats.WeightMax, xOffset, 139, textWidth, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
@@ -598,7 +598,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _labels[(int)stat] = label;
-            AddChildren(label);
+            Add(label);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -712,10 +712,10 @@ namespace ClassicUO.Game.UI.Gumps
             Point pos = Point.Zero;
             _labels = new Label[(int) MobileStats.Max];
 
-            AddChildren(new GumpPic(0, 0, 0x2A6C, 0));
-            AddChildren(new GumpPic(34, 12, 0x0805, 0)); // Health bar
-            AddChildren(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
-            AddChildren(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
+            Add(new GumpPic(0, 0, 0x2A6C, 0));
+            Add(new GumpPic(34, 12, 0x0805, 0)); // Health bar
+            Add(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
+            Add(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
 
             Graphic gumpIdHp = 0x0806;
 
@@ -732,9 +732,9 @@ namespace ClassicUO.Game.UI.Gumps
             _fillBars[(int) FillStats.Mana] = new GumpPicWithWidth(34, 25, 0x0806, 0 ,0);
             _fillBars[(int) FillStats.Stam] = new GumpPicWithWidth(34, 38, 0x0806, 0, 0);
 
-            AddChildren(_fillBars[(int) FillStats.Hits]);
-            AddChildren(_fillBars[(int) FillStats.Mana]);
-            AddChildren(_fillBars[(int) FillStats.Stam]);
+            Add(_fillBars[(int) FillStats.Hits]);
+            Add(_fillBars[(int) FillStats.Mana]);
+            Add(_fillBars[(int) FillStats.Stam]);
 
             UpdateStatusFillBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
             UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
@@ -749,17 +749,17 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _labels[(int) MobileStats.Name] = text;
-            AddChildren(text);
+            Add(text);
             
 
             // Stat locks
-            AddChildren(_lockers[(int) StatType.Str] = new GumpPic(
+            Add(_lockers[(int) StatType.Str] = new GumpPic(
                                                                    LOCKER_COLUMN_X, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.StrLock), 0));
 
-            AddChildren(_lockers[(int) StatType.Dex] = new GumpPic(
+            Add(_lockers[(int) StatType.Dex] = new GumpPic(
                                                                    LOCKER_COLUMN_X, ROW_2_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.DexLock), 0));
 
-            AddChildren(_lockers[(int) StatType.Int] = new GumpPic(
+            Add(_lockers[(int) StatType.Int] = new GumpPic(
                                                                    LOCKER_COLUMN_X, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.IntLock), 0));
 
             _lockers[(int) StatType.Str].MouseClick += (sender, e) =>
@@ -844,9 +844,9 @@ namespace ClassicUO.Game.UI.Gumps
                  alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             // Current over max lines
-            AddChildren(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
-            AddChildren(new Line(xOffset, ROW_2_Y + 22, 30, 1, 0xFF383838));
-            AddChildren(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(xOffset, ROW_2_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
 
             // Followers / max followers
             xOffset = COLUMN_3_X + COLUMN_3_ICON_WIDTH;
@@ -865,7 +865,7 @@ namespace ClassicUO.Game.UI.Gumps
                              xOffset, ROW_1_Y + ROW_HEIGHT - ROW_PADDING,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
-            AddChildren(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
 
             // Armor, weight / max weight
             AddStatTextLabel(
@@ -890,7 +890,7 @@ namespace ClassicUO.Game.UI.Gumps
                              ROW_3_Y + ROW_HEIGHT - ROW_PADDING,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
-            AddChildren(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
 
             // Hunger satisfaction, murder count, damage, gold
             xOffset = COLUMN_4_X + COLUMN_4_ICON_WIDTH;
@@ -1059,7 +1059,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _labels[(int) stat] = label;
-            AddChildren(label);
+            Add(label);
         }
 
         private enum MobileStats

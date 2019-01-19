@@ -540,14 +540,14 @@ namespace ClassicUO.Game.UI.Controls
             return null;
         }
 
-        public virtual void AddChildren(Control c, int page = 0)
+        public virtual void Add(Control c, int page = 0)
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
         }
 
-        public virtual void RemoveChildren(Control c)
+        public virtual void Remove(Control c)
         {
             if (c == null)
                 return;

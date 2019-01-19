@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
             overhead.TimeToLive = 4000;
 
             FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
-            container.AddChildren(label);
+            container.Add(label);
         }
 
         private void ItemOnDisposed(object sender, EventArgs e)
@@ -329,7 +329,7 @@ namespace ClassicUO.Game.UI.Controls
                 base.Update(totalMS, frameMS);
             }
 
-            public override void AddChildren(Control c, int page = 0)
+            public override void Add(Control c, int page = 0)
             {
                 c.X = Width - (c.Width >> 1);
 
@@ -344,13 +344,13 @@ namespace ClassicUO.Game.UI.Controls
 
                 Height += c.Height;
 
-                base.AddChildren(c, page);
+                base.Add(c, page);
             }
 
 
-            public override void RemoveChildren(Control c)
+            public override void Remove(Control c)
             {
-                base.RemoveChildren(c);
+                base.Remove(c);
 
                 if (IsDisposed)
                     return;

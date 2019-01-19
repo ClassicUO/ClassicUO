@@ -41,15 +41,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AddChildren(new GumpPic(0, 0, 0x2B02, 0));
+            Add(new GumpPic(0, 0, 0x2B02, 0));
 
 
-            AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
             _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
-            AddChildren(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseClick += PageCornerOnMouseClick;
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     Label text = new Label("INDEX", false, 0x0288, font: 6) {X = indexX, Y = 6};
-                    AddChildren(text, page);
+                    Add(text, page);
 
                     for (int i = 0; i < spellsOnPage; i++)
                     {
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
                             X = dataX, Y = 42 + y, AcceptMouseInput = true,
                         };
 
-                        AddChildren(text, page);
+                        Add(text, page);
 
                         y += 15;
                         offs++;
@@ -96,8 +96,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + ( (byte)World.Player.PrimaryAbility & 0x7F ) - 1), 0);
                         text = new Label("Primary Ability Icon", false, 0x0288, 80, 6){ X=  265, Y = 105};
-                        AddChildren(_primAbility);
-                        AddChildren(text, page);
+                        Add(_primAbility);
+                        Add(text, page);
 
                         _primAbility.DragBegin += (sender, e) =>
                         {
@@ -113,8 +113,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + ((byte)World.Player.SecondaryAbility & 0x7F) - 1), 0);
                         text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) { X = 265, Y = 150 };
-                        AddChildren(_secAbility);
-                        AddChildren(text, page);
+                        Add(_secAbility);
+                        Add(text, page);
 
                         _secAbility.DragBegin += (sender, e) =>
                         {

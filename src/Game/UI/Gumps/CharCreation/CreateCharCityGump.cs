@@ -93,28 +93,28 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			var mapCenterX = (393 / 2) + 57;
 
-			AddChildren(new Button((int)Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
+			Add(new Button((int)Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
 			{
 				X = mapCenterX - 65,
 				Y = 440,
 				ButtonAction = ButtonAction.Activate
 			});
 
-			AddChildren(new Button((int)Buttons.NextCollection, 0x15A4, 0x15A6, 0x15A5)
+			Add(new Button((int)Buttons.NextCollection, 0x15A4, 0x15A6, 0x15A5)
 			{
 				X = mapCenterX + 50,
 				Y = 440,
 				ButtonAction = ButtonAction.Activate
 			});
 
-			AddChildren(new Button((int)Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
+			Add(new Button((int)Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
 			{
 				X = 586,
 				Y = 435,
 				ButtonAction = ButtonAction.Activate
 			});
 
-			AddChildren(new Button((int)Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
+			Add(new Button((int)Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
 			{
 				X = 610,
 				Y = 435,
@@ -181,21 +181,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		private void SelectMap(CityCollection map)
 		{
 			if (_selectedMap != null)
-				RemoveChildren(_selectedMap);
+				Remove(_selectedMap);
 
 			_selectedMap = map;
 
 			if (_selectedMap != null)
 			{
-				AddChildren(_selectedMap);
+				Add(_selectedMap);
 
 				if (_mapName != null)
-					RemoveChildren(_mapName);
+					Remove(_mapName);
 
 				var name = map.Name;
 				var nameWidth = FileManager.Fonts.GetWidthASCII(3, name);
 
-				AddChildren(_mapName = new Label(name, false, 1153, font: 3)
+				Add(_mapName = new Label(name, false, 1153, font: 3)
 				{
 					X = 57 + ((393 - nameWidth) / 2),
 					Y = 440,
@@ -208,9 +208,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		private void SetDescription(CityInfo info)
 		{
 			if (_description != null)
-				RemoveChildren(_description);
+				Remove(_description);
 
-			AddChildren(_description = new HtmlControl(452, 60, 173, 367, true, true, false,
+			Add(_description = new HtmlControl(452, 60, 173, 367, true, true, false,
 				info.Description, 0x000000, ishtml: true));
 		}
 
@@ -248,8 +248,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				_mapInfo = mapInfo;
 				_cities = cities;
 
-				AddChildren(new GumpPic(5, 5, _mapInfo.Gump, 0));
-				AddChildren(new GumpPic(0, 0, 0x15DF, 0));
+				Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
+				Add(new GumpPic(0, 0, 0x15DF, 0));
 
 				var width = 393;
 				var height = 393;
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 						Y = textY,
 					};
 
-					AddChildren(new CitySelector(button, label)
+					Add(new CitySelector(button, label)
 					{
 						OnClick = (selector) => OnSelect(selector),
 					});
@@ -335,8 +335,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			public CitySelector(Button button, Label label) : base(0, 0)
 			{
-				AddChildren(_button = button);
-				AddChildren(_label = label);
+				Add(_button = button);
+				Add(_label = label);
 			}
 
 			public override void Update(double totalMS, double frameMS)

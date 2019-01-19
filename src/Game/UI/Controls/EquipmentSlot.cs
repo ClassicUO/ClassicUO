@@ -50,12 +50,12 @@ namespace ClassicUO.Game.UI.Controls
             _mobile = mobile;
             _layer = layer;
 
-            AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A)
+            Add(new GumpPicTiled(0, 0, 19, 20, 0x243A)
             {
                 AcceptMouseInput = false
             });
 
-            AddChildren(new GumpPic(0, 0, 0x2344, 0)
+            Add(new GumpPic(0, 0, 0x2344, 0)
             {
                 AcceptMouseInput = false
             });
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Item != null)
                 {
-                    AddChildren(_itemGump = new ItemGump(Item)
+                    Add(_itemGump = new ItemGump(Item)
                     {
                         HighlightOnMouseOver = false,
                         ShowLabel = false

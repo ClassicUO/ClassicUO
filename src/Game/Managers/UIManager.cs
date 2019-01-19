@@ -328,13 +328,13 @@ namespace ClassicUO.Game.Managers
                     switch (gparams[0].ToLower())
                     {
                         case "button":
-                            gump.AddChildren(new Button(gparams), page);
+                            gump.Add(new Button(gparams), page);
 
                             break;
                         case "buttontileart":
-                            gump.AddChildren(new Button(gparams), page);
+                            gump.Add(new Button(gparams), page);
 
-                            gump.AddChildren(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
+                            gump.Add(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
                             {
                                 X = int.Parse(gparams[1]) + int.Parse(gparams[10]), Y = int.Parse(gparams[2]) + int.Parse(gparams[11])
                             }, page);
@@ -412,28 +412,28 @@ namespace ClassicUO.Game.Managers
                             //}
 
 
-                            gump.AddChildren(t, page);
+                            gump.Add(t, page);
 
 
                             break;
                         case "croppedtext":
-                            gump.AddChildren(new CroppedText(gparams, lines), page);
+                            gump.Add(new CroppedText(gparams, lines), page);
 
                             break;
                         case "gumppic":
-                            gump.AddChildren(new GumpPic(gparams), page);
+                            gump.Add(new GumpPic(gparams), page);
 
                             break;
                         case "gumppictiled":
-                            gump.AddChildren(new GumpPicTiled(gparams), page);
+                            gump.Add(new GumpPicTiled(gparams), page);
 
                             break;
                         case "htmlgump":
-                            gump.AddChildren(new HtmlControl(gparams, lines), page);
+                            gump.Add(new HtmlControl(gparams, lines), page);
 
                             break;
                         case "xmfhtmlgump":
-                            gump.AddChildren(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
+                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
 
                             break;
                         case "xmfhtmlgumpcolor":
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.Managers
 
                             if (color == 0x7FFF)
                                 color = 0x00FFFFFF;
-                            gump.AddChildren(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), color, true), page);
+                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), color, true), page);
 
                             break;
                         case "xmfhtmltok":
@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Managers
                                 }
                             }
 
-                            gump.AddChildren(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? FileManager.Cliloc.GetString(int.Parse(gparams[8])) : FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
+                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? FileManager.Cliloc.GetString(int.Parse(gparams[8])) : FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
 
                             break;
                         case "page":
@@ -471,21 +471,21 @@ namespace ClassicUO.Game.Managers
 
                             break;
                         case "resizepic":
-                            gump.AddChildren(new ResizePic(gparams), page);
+                            gump.Add(new ResizePic(gparams), page);
 
                             break;
                         case "text":
-                            gump.AddChildren(new Label(gparams, lines), page);
+                            gump.Add(new Label(gparams, lines), page);
 
                             break;
                         case "textentrylimited":
                         case "textentry":
-                            gump.AddChildren(new TextBox(gparams, lines), page);
+                            gump.Add(new TextBox(gparams, lines), page);
 
                             break;
                         case "tilepichue":
                         case "tilepic":
-                            gump.AddChildren(new StaticPic(gparams), page);
+                            gump.Add(new StaticPic(gparams), page);
 
                             break;
                         case "noclose":
@@ -506,11 +506,11 @@ namespace ClassicUO.Game.Managers
 
                             break;
                         case "radio":
-                            gump.AddChildren(new RadioButton(group, gparams, lines), page);
+                            gump.Add(new RadioButton(group, gparams, lines), page);
 
                             break;
                         case "checkbox":
-                            gump.AddChildren(new Checkbox(gparams, lines), page);
+                            gump.Add(new Checkbox(gparams, lines), page);
 
                             break;
                         case "tooltip":

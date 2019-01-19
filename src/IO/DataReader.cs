@@ -21,6 +21,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -53,6 +54,8 @@ namespace ClassicUO.IO
 
         internal void SetData(byte* data, long length)
         {
+            ReleaseData();
+
             _data = data;
             Length = length;
             Position = 0;
@@ -60,11 +63,12 @@ namespace ClassicUO.IO
 
         internal void SetData(byte[] data, long length)
         {
-            if (_handle.IsAllocated)
-                _handle.Free();
+            ReleaseData();
             _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            //fixed (byte* ptr = data)
-            SetData((byte*)_handle.AddrOfPinnedObject(), length);
+
+            _data = (byte*) _handle.AddrOfPinnedObject();
+            Length = length;
+            Position = 0;
         }
 
         internal void SetData(IntPtr data, long length)
@@ -95,6 +99,7 @@ namespace ClassicUO.IO
             Position += count;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal byte ReadByte()
         {
             EnsureSize(1);
@@ -192,6 +197,7 @@ namespace ClassicUO.IO
             return data;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize(int size)
         {
             if (Position + size > Length)

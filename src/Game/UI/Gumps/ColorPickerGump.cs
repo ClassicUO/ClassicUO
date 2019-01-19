@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -33,27 +34,30 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StaticPic _dyeTybeImage;
         private readonly Action<ushort> _okClicked;
 
-        public ColorPickerGump(int x, int y, Action<ushort> okClicked) : base(0, 0)
+        private readonly Graphic _graphic;
+
+        public ColorPickerGump(Serial serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(serial, 0)
         {
+            _graphic = graphic;
             CanMove = true;
             AcceptMouseInput = false;
             X = x;
             Y = y;
-            AddChildren(new GumpPic(0, 0, 0x0906, 0));
+            Add(new GumpPic(0, 0, 0x0906, 0));
 
-            AddChildren(new Button(0, 0x0907, 0x0908, 0x909)
+            Add(new Button(0, 0x0907, 0x0908, 0x909)
             {
                 X = 208, Y = 138, ButtonAction = ButtonAction.Activate
             });
             HSliderBar slider;
-            AddChildren(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
+            Add(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
             slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
-            AddChildren(_box = new ColorPickerBox(34, 34));
+            Add(_box = new ColorPickerBox(34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = (ushort) (_box.SelectedHue + 1); };
 
-            AddChildren(_dyeTybeImage = new StaticPic(0x0FAB, 0)
+            Add(_dyeTybeImage = new StaticPic(0x0FAB, 0)
             {
-                X = 208 - 10, Y = _box.Y + (_box.Height >> 1) - 10
+                X = 200, Y = 58
             });
             _okClicked = okClicked;
         }
@@ -63,7 +67,10 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0:
-                    _okClicked((ushort) (_box.SelectedHue + 1));
+                    ushort hue = (ushort) (_box.SelectedHue + 1);
+                    if (LocalSerial != 0)
+                        NetClient.Socket.Send(new PDyeDataResponse(LocalSerial, _graphic, hue));
+                    _okClicked?.Invoke(hue);
                     Dispose();
 
                     break;

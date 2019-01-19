@@ -331,6 +331,8 @@ namespace ClassicUO.Game.GameObjects
                     mobile.AnimIndex = 0;
                 }
 
+               
+
                 if (mobile.Race == RaceType.GARGOYLE)
                 {
                     if (mobile.IsFlying)
@@ -360,11 +362,35 @@ namespace ClassicUO.Game.GameObjects
                         else if (result >= 200 && result <= 259)
                             result = 75;
                         else if (result >= 260 && result <= 270) result = 75;
+
+
+                        return result;
                     }
                 }
             }
 
+            CorretAnimationByAnimSequence(graphic, ref result);
+
             return result;
+        }
+
+        private static void CorretAnimationByAnimSequence(ushort graphic, ref byte result)
+        {
+            if (FileManager.Animations.IsReplacedByAnimationSequence(graphic, out byte t))
+            {
+                if (result == 4) // people stand
+                    result = 25;
+                else if (
+                        result == 0 || // people walk un armed / high walk
+                        result == 1 || // walk armed / high stand
+                        result == 15)  // walk warmode
+                        result = 22;
+                else if (
+                        result == 2 || // people run unarmed
+                        result == 3 || // people run armed
+                        result == 19)  // high fly
+                    result = 24;
+            }
         }
 
         private static void CorrectAnimationGroup(ushort graphic, ANIMATION_GROUPS group, ref byte animation)

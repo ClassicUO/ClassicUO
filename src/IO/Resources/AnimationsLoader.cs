@@ -166,57 +166,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-            {
-                string[] typeNames = new string[5]
-                {
-                    "monster", "sea_monster", "animal", "human", "equipment"
-                };
-
-                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
-                {
-                    string line;
-
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        line = line.Trim();
-
-                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
-                            continue;
-
-                        string[] parts = line.Split(new[]
-                        {
-                            '\t', ' '
-                        }, StringSplitOptions.RemoveEmptyEntries);
-                        int id = int.Parse(parts[0]);
-
-                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            continue;
-                        string testType = parts[1].ToLower();
-                        int commentIdx = parts[2].IndexOf('#');
-
-                        if (commentIdx > 0)
-                            parts[2] = parts[2].Substring(0, commentIdx - 1);
-                        else if (commentIdx == 0)
-                            continue;
-                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
-                        for (int i = 0; i < 5; i++)
-                        {
-                            if (testType == typeNames[i])
-                            {
-                                ref var index = ref DataIndex[id];
-                                index.Type = (ANIMATION_GROUPS_TYPE)i;
-                                index.Flags = 0x80000000 | number;
-
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-
+           
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
             {
                 while (defReader.Next())
@@ -326,8 +276,16 @@ namespace ClassicUO.IO.Resources
 
                         if (realAnimID >= 200)
                         {
-                            startAnimID = (realAnimID - 200) * 65 + 22000;
-                            groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            if (realAnimID >= 400)
+                            {
+                                startAnimID = (realAnimID - 400) * 175 + 35000;
+                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
+                            }
+                            else
+                            {
+                                startAnimID = (realAnimID - 200) * 65 + 22000;
+                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            }
                         }
                         else
                         {
@@ -470,8 +428,8 @@ namespace ClassicUO.IO.Resources
 
                                         if ((long)aidx >= (long)maxaddress)
                                             break;
-
-                                        if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                       
+                                        if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
                                             DataIndex[index].Groups[j].Direction[d].PatchedAddress = aidx->Position;
                                             DataIndex[index].Groups[j].Direction[d].PatchedSize = aidx->Size;
@@ -653,6 +611,59 @@ namespace ClassicUO.IO.Resources
             }
 
 
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            {
+                string[] typeNames = new string[5]
+                {
+                    "monster", "sea_monster", "animal", "human", "equipment"
+                };
+
+                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
+                {
+                    string line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        line = line.Trim();
+
+                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
+                            continue;
+
+                        string[] parts = line.Split(new[]
+                        {
+                            '\t', ' '
+                        }, StringSplitOptions.RemoveEmptyEntries);
+                        int id = int.Parse(parts[0]);
+
+                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            continue;
+                        string testType = parts[1].ToLower();
+                        int commentIdx = parts[2].IndexOf('#');
+
+                        if (commentIdx > 0)
+                            parts[2] = parts[2].Substring(0, commentIdx - 1);
+                        else if (commentIdx == 0)
+                            continue;
+                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (testType == typeNames[i])
+                            {
+                                ref var index = ref DataIndex[id];
+                                index.Type = (ANIMATION_GROUPS_TYPE)i;
+                                index.Flags = 0x80000000 | number;
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+
             byte maxGroup = 0;
 
             for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
@@ -694,7 +705,7 @@ namespace ClassicUO.IO.Resources
                 {
                     UOFileIndex3D entry = animSeq.Entries[i];
 
-                    if (entry.Length > 0 && entry.Offset > 0)
+                    if (entry.Offset != 0)
                     {
                         animSeq.Seek(entry.Offset);
                         byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
@@ -706,8 +717,8 @@ namespace ClassicUO.IO.Resources
                         uint animID = _reader.ReadUInt();
                         ref IndexAnimation index = ref DataIndex[animID];
 
-	                    if (animID != 729 && animID != 735)
-		                    continue;
+                        //if (animID != 729 && animID != 735)
+                        //    continue;
 
                         _reader.Skip(48);
 
@@ -745,6 +756,16 @@ namespace ClassicUO.IO.Resources
 
                         }
 
+                        if (animID == 0x1b0)
+                        {
+
+                        }
+
+                        if (animID == 1498)
+                        {
+
+                        }
+
                         for (int k = 0; k < replaces; k++)
                         {
                             int oldIdx = _reader.ReadInt();
@@ -754,7 +775,7 @@ namespace ClassicUO.IO.Resources
 
 							//sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-							var hashstring = String.Empty;
+							var hashstring = string.Empty;
 
 	                        if (newIDX >= 0)
 		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
@@ -763,8 +784,16 @@ namespace ClassicUO.IO.Resources
 
 	                        ulong hash = UOFileUop.CreateHash(hashstring);
 
-	                        if (hashes.TryGetValue(hash, out UopFileData data))
-		                        DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
+                            if (hashes.TryGetValue(hash, out UopFileData data))
+                            {
+                                if (frameCount == 0)
+                                {
+                                    if (!_animationSequenceReplacing.ContainsKey((ushort) animID))
+                                        _animationSequenceReplacing.Add((ushort)animID, (byte) replaces);
+                                    DataIndex[animID].Groups[oldIdx].Direction = DataIndex[animID].Groups[newIDX].Direction;
+                                }
+                                DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
+                            }
 
 							/*
                             if (animID == 735)
@@ -933,9 +962,6 @@ namespace ClassicUO.IO.Resources
 			                        {
 
 			                        }
-
-			                        //index.Groups[unknownY_0].UOPAnimData = index.Groups[unknownY_1].UOPAnimData;
-
                                 }
 
 		                        if (unknownZ_3 > 0)
@@ -981,12 +1007,6 @@ namespace ClassicUO.IO.Resources
 			                        {
 
 			                        }
-
-                                    //index.Groups[unknownX_0].UOPAnimData = index.Groups[unknownX_1].UOPAnimData;
-
-                                    //index.Groups[unknownX_0] = index.Groups[unknownX_1];
-                                    //index.Groups[unknownX_0] = index.Groups[unknownX_2];
-
                                 }
 
 		                        if (unknownZ_4 > 0)
@@ -1079,12 +1099,16 @@ namespace ClassicUO.IO.Resources
 
                 //file.Dispose();
                 animSeq.Dispose();
+                _reader.ReleaseData();
             }
-
-	        // Manually set the types for now
-			DataIndex[729].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-	        DataIndex[735].Type = ANIMATION_GROUPS_TYPE.MONSTER;
 		}
+
+        private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
+
+        public bool IsReplacedByAnimationSequence(ushort graphic, out byte type)
+        {
+            return _animationSequenceReplacing.TryGetValue(graphic, out type);
+        }
 
         public override AnimationFrameTexture GetTexture(uint id)
         {

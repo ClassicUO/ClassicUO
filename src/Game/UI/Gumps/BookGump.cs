@@ -60,17 +60,17 @@ namespace ClassicUO.Game.UI.Gumps
         private Button m_Forward, m_Backward;
         private void BuildGump(string[] pages)
         {
-            AddChildren( new GumpPic( 0, 0, 0x1FE, 0 )
+            Add( new GumpPic( 0, 0, 0x1FE, 0 )
             {
                 CanMove = true
             } );
 
-            AddChildren(m_Backward = new Button( (int)Buttons.Backwards, 0x1FF, 0x1FF, 0x1FF )
+            Add(m_Backward = new Button( (int)Buttons.Backwards, 0x1FF, 0x1FF, 0x1FF )
             {
                 ButtonAction = ButtonAction.Activate,
             } );
 
-            AddChildren(m_Forward =  new Button( (int)Buttons.Forward, 0x200, 0x200, 0x200 )
+            Add(m_Forward =  new Button( (int)Buttons.Forward, 0x200, 0x200, 0x200 )
             {
                 X = 356,
                 ButtonAction = ButtonAction.Activate
@@ -95,9 +95,9 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             PageChanged = new bool[BookPageCount + 1];
-            AddChildren( BookTitle, 1);
-            AddChildren( new Label( "by", true, 1 ) { X = BookAuthor.X, Y = BookAuthor.Y - 30 },1);
-            AddChildren( BookAuthor, 1);
+            Add( BookTitle, 1);
+            Add( new Label( "by", true, 1 ) { X = BookAuthor.X, Y = BookAuthor.Y - 30 },1);
+            Add( BookAuthor, 1);
             for ( int k = 1; k <= BookPageCount; k++ )
             {
                 int x = 38;
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Text = pages[k - 1],
                     MaxLines = 8,
                 };
-                AddChildren(tbox, page);
+                Add(tbox, page);
                 m_Pages.Add(tbox);
                 tbox.MouseClick += (sender, e) => {
                     if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
                 tbox.MouseDoubleClick += (sender, e) => {
                     if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
                 };
-                AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
+                Add( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
             }
             _activated = 1;
 

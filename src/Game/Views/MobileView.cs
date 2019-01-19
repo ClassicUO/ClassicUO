@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Views
             byte dir = (byte)mobile.GetDirectionForAnimation();
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            SetupLayers(dir, mobile, out int mountOffset, ref mirror);
+            SetupLayers(dir, mobile, out int mountOffset);
 
             if (mobile.Graphic == 0)
                 return false;
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Views
             if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
         }
 
-        private void SetupLayers(byte dir, Mobile mobile, out int mountOffset, ref bool mirror)
+        private void SetupLayers(byte dir, Mobile mobile, out int mountOffset)
         {
             _layerCount = 0;
             mountOffset = 0;
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Views
                         continue;
 
                     if (layer == Layer.Invalid)
-                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile, ref mirror);
+                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile);
                     else
                     {
                         Item item;
@@ -256,7 +256,7 @@ namespace ClassicUO.Game.Views
 
                                     if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = FileManager.Animations.DataIndex[mountGraphic].MountedHeightOffset;
-                                    AddLayer(dir, mountGraphic, mount.Hue, mobile, ref mirror, true, offsetY: mountOffset);
+                                    AddLayer(dir, mountGraphic, mount.Hue, mobile, offsetY: mountOffset);
                                 }
                             }
                             else
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, mobile, ref mirror, false, convertedItem, item.ItemData.IsPartialHue);
+                                    AddLayer(dir, graphic, hue, mobile, convertedItem, item.ItemData.IsPartialHue);
                                 }
                             }
                         }
@@ -285,10 +285,10 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile, ref mirror);
+                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile);
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, ref bool mirror, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;

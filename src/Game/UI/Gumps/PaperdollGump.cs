@@ -117,40 +117,40 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == World.Player)
             {
-                AddChildren(new GumpPic(0, 0, 0x07d0, 0));
+                Add(new GumpPic(0, 0, 0x07d0, 0));
 
                 //HELP BUTTON
-                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                Add(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
                 {
                     X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate
                 });
 
                 //OPTIONS BUTTON
-                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                Add(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
                 {
                     X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate
                 });
 
                 // LOG OUT BUTTON
-                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                Add(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
                 {
                     X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate
                 });
 
                 // QUESTS BUTTON
-                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                Add(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
                 {
                     X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate
                 });
 
                 // SKILLS BUTTON
-                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                Add(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
                 {
                     X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate
                 });
 
                 // GUILD BUTTON
-                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                Add(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
                 {
                     X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate
                 });
@@ -158,18 +158,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _isWarMode = Mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
 
-                AddChildren(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                Add(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
                 {
                     X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
                 });
 
                 // STATUS BUTTON
-                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
                 {
                     X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
                 });
                 // Virtue menu
-                AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
+                Add(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
 				int profileX = 25;
@@ -177,11 +177,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (World.ClientFlags.PaperdollBooks)
                 {
-                    AddChildren(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
+                    Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
                     if (FileManager.ClientVersion >= ClientVersions.CV_7000)
                     {
-                        AddChildren(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
+                        Add(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
                             if (Engine.UI.GetByLocalSerial<RacialAbilitiesBookGump>() == null)
@@ -193,21 +193,21 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-	            AddChildren(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
+	            Add(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
 	            _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
 
 	            profileX += SCROLLS_STEP;
 
-				AddChildren(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
+				Add(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
 
             }
 	        else
 	        {
-		        AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+		        Add(new GumpPic(0, 0, 0x07d1, 0));
 
 		        // STATUS BUTTON
-		        AddChildren(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+		        Add(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
 		        {
 			        X = 185,
 			        Y = 44 + 27 * 7,
@@ -216,12 +216,12 @@ namespace ClassicUO.Game.UI.Gumps
 	        }
 
 	        // Equipment slots for hat/earrings/neck/ring/bracelet
-            AddChildren(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
-            AddChildren(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
-            AddChildren(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
-            AddChildren(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
-            AddChildren(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
-            AddChildren(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
+            Add(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
+            Add(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
+            Add(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
+            Add(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
+            Add(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
+            Add(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
 
             // Paperdoll control!
             _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
@@ -229,14 +229,14 @@ namespace ClassicUO.Game.UI.Gumps
             //{
             //    OnMouseOver(e.X, e.Y);
             //};
-            AddChildren(_paperDollInteractable);
+            Add(_paperDollInteractable);
 
             // Name and title
             Label titleLabel = new Label(Title, false, 0x0386, 185)
             {
                 X = 39, Y = 262
             };
-            AddChildren(titleLabel);
+            Add(titleLabel);
         }
 
 

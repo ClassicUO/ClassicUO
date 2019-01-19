@@ -39,11 +39,11 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 500;
             Height = 275;
 
-            AddChildren(_trans = new AlphaBlendControl(.3f)
+            Add(_trans = new AlphaBlendControl(.3f)
             {
                 Width = Width , Height = Height
             });
-            AddChildren(_label = new Label("", true, 0x35, font: 1, style: FontStyle.BlackBorder)
+            Add(_label = new Label("", true, 0x35, font: 1, style: FontStyle.BlackBorder)
             {
                 X = 10, Y = 10
             });

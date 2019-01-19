@@ -150,28 +150,28 @@ namespace ClassicUO.Game.UI.Controls
             _needUpdate = true;
         }
 
-        public override void RemoveChildren(Control c)
+        public override void Remove(Control c)
         {
             if (c is ScrollAreaItem)
-                base.RemoveChildren(c);
+                base.Remove(c);
             else
             {
                 // Try to find the wrapped control
                 var wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
-                base.RemoveChildren(wrapper);
+                base.Remove(wrapper);
             }
         }
 
-        public override void AddChildren(Control c, int page = 0)
+        public override void Add(Control c, int page = 0)
         {
             ScrollAreaItem item = new ScrollAreaItem();
-            item.AddChildren(c);
-            base.AddChildren(item, page);
+            item.Add(c);
+            base.Add(item, page);
         }
 
         public void AddChildren(ScrollAreaItem c, int page = 0)
         {
-            base.AddChildren(c, page);
+            base.Add(c, page);
         }
 
         public override void Clear()

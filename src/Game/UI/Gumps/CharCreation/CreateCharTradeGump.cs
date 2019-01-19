@@ -43,36 +43,36 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             foreach (var skill in _character.Skills)
                 _character.UpdateSkill(skill.Index, 0, 0, Lock.Locked, 0);
 
-            AddChildren(new ResizePic(2600)
+            Add(new ResizePic(2600)
             {
                 X = 100, Y = 80, Width = 470, Height = 372
             });
 
             // center menu with fancy top
             // public GumpPic(AControl parent, int x, int y, int gumpID, int hue)
-            AddChildren(new GumpPic(291, 42, 0x0589, 0));
-            AddChildren(new GumpPic(214, 58, 0x058B, 0));
-            AddChildren(new GumpPic(300, 51, 0x15A9, 0));
+            Add(new GumpPic(291, 42, 0x0589, 0));
+            Add(new GumpPic(214, 58, 0x058B, 0));
+            Add(new GumpPic(300, 51, 0x15A9, 0));
 
             // title text
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
-            AddChildren(new Label(FileManager.Cliloc.GetString(3000326), false, 0x0386, font: 2)
+            Add(new Label(FileManager.Cliloc.GetString(3000326), false, 0x0386, font: 2)
             {
                 X = 148, Y = 132
             });
 
             // strength, dexterity, intelligence
-            AddChildren(new Label(FileManager.Cliloc.GetString(3000111), false, 1, font: 1)
+            Add(new Label(FileManager.Cliloc.GetString(3000111), false, 1, font: 1)
             {
                 X = 158, Y = 170
             });
 
-            AddChildren(new Label(FileManager.Cliloc.GetString(3000112), false, 1, font: 1)
+            Add(new Label(FileManager.Cliloc.GetString(3000112), false, 1, font: 1)
             {
                 X = 158, Y = 250
             });
 
-            AddChildren(new Label(FileManager.Cliloc.GetString(3000113), false, 1, font: 1)
+            Add(new Label(FileManager.Cliloc.GetString(3000113), false, 1, font: 1)
             {
                 X = 158, Y = 330
             });
@@ -80,9 +80,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
             var values = FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
-            AddChildren(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, 60, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            AddChildren(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            AddChildren(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, 60, HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
             var skillCount = 3;
             var initialValue = 50;
 
@@ -101,17 +101,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 if (FileManager.ClientVersion < ClientVersions.CV_70160 && i == 2)
                     initialValue = 0;
-                AddChildren(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
-                AddChildren(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, initialValue, HSliderBarStyle.MetalWidgetRecessedBar, true));
+                Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
+                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, initialValue, HSliderBarStyle.MetalWidgetRecessedBar, true));
                 y += 70;
             }
 
-            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+            Add(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
             {
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             });

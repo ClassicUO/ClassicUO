@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (HeldItem.Enabled || (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid))
+            if (HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
             {
                 return;
             }

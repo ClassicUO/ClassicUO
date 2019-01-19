@@ -35,14 +35,14 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
 
 
-            AddChildren(new GumpPic(0, 0, 0x087A, 0));
+            Add(new GumpPic(0, 0, 0x087A, 0));
 
             Label label = new Label(name, false, 0x0386, 170, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 159, Y = 36
             };
             
-            AddChildren(label);
+            Add(label);
 
             HitBox hitbox = new HitBox(15, 170, 80, 80)
             {
@@ -55,10 +55,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, "Date/Time", string.Empty, 0));
             };
-            AddChildren(hitbox);
+            Add(hitbox);
 
             _area = new ScrollArea(127, 162, 241, 155, false);
-            AddChildren(_area);
+            Add(_area);
         }
 
         private void ItemOnDisposed(object sender, EventArgs e)
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            AddChildren(new ExpandableScroll(0, 0, 250)
+            Add(new ExpandableScroll(0, 0, 250)
             {
                 TitleGumpID = 0x0820,
             });
@@ -143,13 +143,13 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 30,
                 Y = 40
             };
-            AddChildren(text);
+            Add(text);
 
             text = new Label(poster, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)9)
             {
                 X = 30 + text.Width, Y = 46 + unicodeFontHeightOffset
             };
-            AddChildren(text);
+            Add(text);
 
 
 
@@ -158,14 +158,14 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 30,
                 Y = 56
             };
-            AddChildren(text);
+            Add(text);
 
             text = new Label(datatime, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)9)
             {
                 X = 30 + text.Width,
                 Y = 62 + unicodeFontHeightOffset
             };
-            AddChildren(text);
+            Add(text);
 
 
             text = new Label("Subject:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 30,
                 Y = 72
             };
-            AddChildren(text);
+            Add(text);
 
           
             ushort subjectColor = textColor;
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
             //AddChildren(hitBox);
 
 
-            AddChildren(_subjectTextbox = new TextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150, isunicode: useUnicode, hue: subjectColor)
+            Add(_subjectTextbox = new TextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150, isunicode: useUnicode, hue: subjectColor)
             {
                 X = 30 + text.Width,
                 Y = 78 + unicodeFontHeightOffset,
@@ -198,9 +198,9 @@ namespace ClassicUO.Game.UI.Gumps
             _subjectTextbox.SetText(subject);
 
             
-            AddChildren(new GumpPicTiled(30 ,100, 204, 4, 0x0835));
+            Add(new GumpPicTiled(30 ,100, 204, 4, 0x0835));
 
-            AddChildren(_textBox = new MultiLineBox(new MultiLineEntry(useUnicode ? unicodeFontIndex : (byte)9, width: 220, maxWidth: 220, hue: textColor, unicode: useUnicode), true)
+            Add(_textBox = new MultiLineBox(new MultiLineEntry(useUnicode ? unicodeFontIndex : (byte)9, width: 220, maxWidth: 220, hue: textColor, unicode: useUnicode), true)
             {
                 X = 40,
                 Y = 120,
@@ -212,8 +212,8 @@ namespace ClassicUO.Game.UI.Gumps
             switch (variant)
             {
                 case 0:
-                    AddChildren(new GumpPic(97, 12, 0x0883, 0));
-                    AddChildren(_buttonPost = new Button((int)ButtonType.Post, 0x0886, 0x0886)
+                    Add(new GumpPic(97, 12, 0x0883, 0));
+                    Add(_buttonPost = new Button((int)ButtonType.Post, 0x0886, 0x0886)
                     {
                         X = 37, Y = Height - 50,
                         ButtonAction = ButtonAction.Activate,
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
                     break;
                 case 1:
-                    AddChildren(_buttonReply = new Button((int)ButtonType.Reply, 0x0884, 0x0884)
+                    Add(_buttonReply = new Button((int)ButtonType.Reply, 0x0884, 0x0884)
                     {
                         X = 37,
                         Y = Height - 50,
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
                     break;
                 case 2:
-                    AddChildren(_buttonRemove = new Button((int)ButtonType.Remove, 0x0885, 0x0885)
+                    Add(_buttonRemove = new Button((int)ButtonType.Remove, 0x0885, 0x0885)
                     {
                         X = 235,
                         Y = Height - 50,
@@ -321,8 +321,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             bool unicode = FileManager.ClientVersion >= ClientVersions.CV_305D;
 
-            AddChildren(new GumpPic(0, 0, 0x1523, 0));
-            AddChildren(new Label(text, unicode, (ushort)(unicode ? 0 : 0x0386), font: (byte)(unicode ? 1 : 9)) { X = Children[Children.Count - 1].Texture.Width + 2 });
+            Add(new GumpPic(0, 0, 0x1523, 0));
+            Add(new Label(text, unicode, (ushort)(unicode ? 0 : 0x0386), font: (byte)(unicode ? 1 : 9)) { X = Children[Children.Count - 1].Texture.Width + 2 });
         }
 
         public Item Item { get; }

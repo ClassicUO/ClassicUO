@@ -380,7 +380,7 @@ namespace ClassicUO.Game.Scenes
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
             {
 	            if (!World.Player.InWarMode)
-		            GameActions.UpdateWarMode(true);
+		            GameActions.SetWarMode(true);
             }
            
         }
@@ -392,7 +392,7 @@ namespace ClassicUO.Game.Scenes
 			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
 			{
 				if (World.Player.InWarMode)
-					GameActions.UpdateWarMode(false);
+					GameActions.SetWarMode(false);
 			}
 		}
     }

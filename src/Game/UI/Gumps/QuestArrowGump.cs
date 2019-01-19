@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 			_direction = direction;
 
 			if (_arrow != null)
-				RemoveChildren(_arrow);
+				Remove(_arrow);
 
 			var graphic = (uint)0x1194;
 
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 			_arrowBounds = FileManager.Gumps.GetTexture(graphic).Bounds;
 
-			AddChildren(_arrow = new GumpPic(0, 0, (Graphic)graphic, 0));
+			Add(_arrow = new GumpPic(0, 0, (Graphic)graphic, 0));
 		}
 
 		public override void Update(double totalMS, double frameMS)
