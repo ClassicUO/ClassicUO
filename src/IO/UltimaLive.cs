@@ -169,7 +169,6 @@ namespace ClassicUO.IO
                         {
                             staticsData[i] = p.ReadByte();
                         }
-                        int index = 0;
                         if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
                         {
                             if (totallen <= 0)
@@ -184,7 +183,7 @@ namespace ClassicUO.IO
                                 uint existingStaticsLength = _filesIdxStatics[mapID].ReadUInt();
 
                                 //Do we have enough room to write the statics into the existing location?
-                                if (existingStaticsLength >= length && lookup != 0xFFFFFFFF)
+                                if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
                                 {
                                     _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
@@ -197,43 +196,28 @@ namespace ClassicUO.IO
                                     _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                                 }
+                                //update lookup AND index length on disk
                                 byte[] idxdata = new byte[8];
                                 idxdata[0] = (byte)lookup;
                                 idxdata[1] = (byte)(lookup >> 8);
                                 idxdata[2] = (byte)(lookup >> 16);
                                 idxdata[3] = (byte)(lookup >> 24);
-                                idxdata[4] = (byte)length;
-                                idxdata[5] = (byte)(length >> 8);
-                                idxdata[6] = (byte)(length >> 16);
-                                idxdata[7] = (byte)(length >> 24);
+                                idxdata[4] = (byte)totallen;
+                                idxdata[5] = (byte)(totallen >> 8);
+                                idxdata[6] = (byte)(totallen >> 16);
+                                idxdata[7] = (byte)(totallen >> 24);
                                 //update lookup AND index length on disk
                                 _filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
                             }
-                            var chunk = World.Map.Chunks[block];
-                            if (chunk != null)
-                            {
-                                for (int i = 0; i < 8; i++)
-                                {
-                                    for (int j = 0; j < 8; j++)
-                                    {
-                                        for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
-                                        {
-                                            if (obj is Static)
-                                                chunk.Tiles[i, j].RemoveGameObject(obj);
-                                        }
-                                    }
-                                }
-                                for (int k = 0; k < length; k++)
-                                {
-                                    Tile t = chunk.Tiles[staticsData[index + 2], staticsData[index + 3]];
-                                    new Static((ushort)(staticsData[index] | (staticsData[index + 1] << 8)), (ushort)(staticsData[index + 5] | (staticsData[index + 6] << 8)), k)
-                                    {
-                                        Position = new Position(t.X, t.Y, (sbyte)staticsData[index + 4])
-                                    }.AddToTile();
-                                    index += 7;
-                                }
-                            }
+                            int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
+                            ushort blockX = (ushort)(block / mapHeightInBlocks);
+                            ushort blockY = (ushort)(block % mapHeightInBlocks);
+                            World.Map.Chunks[block]?.Dispose();
+                            FileManager.Map.ReloadBlock(mapID, block);
+                            World.Map.Chunks[block] = new Chunk(blockX, blockY);
+                            World.Map.Chunks[block].Load(mapID);
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
+                            //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                             MapCRCs[mapID][block] = UInt16.MaxValue;
                         }
                         break;
@@ -280,6 +264,7 @@ namespace ClassicUO.IO
                         {
                             _filesMap[i] = FileManager.Map.UltimaLiveReloadMaps(i);
                             active = _filesMap[i].UltimaLiveReloader() > 0 && _filesIdxStatics[i].UltimaLiveReloader() > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader()) > 0;
+                            FileManager.Map.LoadMap(i);
                         }
                         IsUltimaLiveActive = Directory.Exists(ShardName) && active;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
@@ -316,28 +301,10 @@ namespace ClassicUO.IO
             byte mapID = p.ReadByte();
             if (World.Map == null || mapID != World.Map.Index)
                 return;
-            int index = 0;
+
             if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
                 _filesMap[mapID].WriteArray((block * 196) + 4, landData);
-                for (int i = 0; i < 8; i++)
-                {
-                    for (int j = 0; j < 8; j++)
-                    {
-                        var chunk = World.Map.Chunks[block];
-                        if (chunk != null)
-                        {
-                            for (GameObject obj = chunk.Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
-                            {
-                                if (obj is Land ln)
-                                {
-                                    ln.Graphic = (ushort)(landData[index++] | (landData[index++] << 8));
-                                    ln.Z = (sbyte)landData[index++];
-                                }
-                            }
-                        }
-                    }
-                }
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 MapCRCs[mapID][block] = UInt16.MaxValue;
             }
@@ -348,8 +315,8 @@ namespace ClassicUO.IO
             int mapID = World.Map.Index;
             _filesIdxStatics[mapID].Seek(block * 12);
             uint lookup = _filesIdxStatics[mapID].ReadUInt();
-            int stcount = Math.Max(0, _filesIdxStatics[mapID].ReadInt());
-            byte[] blockData = new byte[LandBlockLenght + (stcount * 7)];
+            int bytecount = Math.Max(0, _filesIdxStatics[mapID].ReadInt());
+            byte[] blockData = new byte[LandBlockLenght + bytecount];
             //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
             _filesMap[mapID].Seek((block * 196) + 4);
             for(int x = 0; x < 192; x++)
@@ -360,7 +327,7 @@ namespace ClassicUO.IO
             }
             /*_filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
             _filesMap[mapID]._Stream.Read(blockData, 0, LandBlockLenght);*/
-            if (lookup != 0xFFFFFFFF && stcount > 0)
+            if (lookup != 0xFFFFFFFF && bytecount > 0)
             {
                 if(lookup < _filesStatics[mapID].Length)
                 {

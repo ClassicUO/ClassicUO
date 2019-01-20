@@ -31,6 +31,7 @@ namespace ClassicUO.IO
 {
     internal static class FileManager
     {
+        public static string UoStaticsMapPath => UltimaLive.IsUltimaLiveActive && !string.IsNullOrWhiteSpace(UltimaLive.ShardName) ? UltimaLive.ShardName : UoFolderPath;
         private static string _uofolderpath;
 
         public static string UoFolderPath
