@@ -188,6 +188,9 @@ namespace ClassicUO.Game.Scenes
                     name = e.Parent.Name;
                     text = $"*{e.Text}*";
 
+                    if (e.Hue == 0)
+                        hue = Engine.Profile.Current.EmoteHue;
+
                     break;
                 case MessageType.Label:
                     name = "You see";
@@ -221,8 +224,12 @@ namespace ClassicUO.Game.Scenes
                     hue = Engine.Profile.Current.GuildMessageHue;
                     break;
                 default:
+                    text = e.Text;
+                    name = e.Parent == null ? string.Empty : e.Parent.Name;
+                    hue = e.Hue;
+
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
-                    return;
+                    break;
             }
 
             _journalManager.Add(text, e.Font, hue, name);
