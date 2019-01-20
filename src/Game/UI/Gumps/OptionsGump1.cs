@@ -368,45 +368,27 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _windowWidth = new TextBox(1, 5, 80, 80, false)
+
+            _windowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
-                Y = 100,
+                Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
+                X = 10,
+                Y = 105,
                 Width = 50,
                 Height = 30
-            }; 
-            _windowWidth.SetText(Engine.Profile.Current.GameWindowSize.X.ToString());
-
-            item.Add(_windowWidth);
-
-            _windowHeight = new TextBox(1, 5, 80, 80, false)
-            {
-                X = 100,
-                Y = 100,
-                Width = 50,
-                Height = 30
-            };
-            _windowHeight.SetText(Engine.Profile.Current.GameWindowSize.Y.ToString());
-
-            item.Add(_windowHeight);
-
-
-
-
-            /*
-            private TextBox _windowWidth;
-            private TextBox _windowHeight;
-            private Combobox _windowFullscreen;
-            private Combobox _windowLock;
-
-            Add(_textboxAccount = new TextBox(5, 32, 190, 190, false)
-            {
-                X = 335,
-                Y = 343,
-                Width = 190,
-                Height = 25,
-                Hue = 0x034F,
             });
-            */
+
+            _windowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
+                X = 80,
+                Y = 105,
+                Width = 50,
+                Height = 30
+            });
+
+
+
 
 
             rightArea.AddChildren(item);
@@ -670,6 +652,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if (_windowWidth.Text != Engine.Profile.Current.GameWindowSize.X.ToString() || _windowHeight.Text != Engine.Profile.Current.GameWindowSize.Y.ToString())
+            {
+                // WorldViewportGump
+
+                Point _lastSize;
+
+                _lastSize.X = int.Parse(_windowWidth.Text);
+                _lastSize.Y = int.Parse(_windowHeight.Text);
+
+                //Engine.Profile.Current.GameWindowSize = _lastSize;
+
+            }
+
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
 
@@ -682,7 +677,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
             Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
         }
-
 
         private enum Buttons
         {
@@ -700,6 +694,22 @@ namespace ClassicUO.Game.UI.Gumps
             CriminalColor,
             EnemyColor,
             MurdererColor
+        }
+
+        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem)
+        {
+            area.Add(new ResizePic(0x0BB8)
+            {
+                X = elem.X - 10,
+                Y = elem.Y - 5,
+                Width = elem.Width + 10,
+                Height = elem.Height - 7
+            });
+
+            //elem.SetText(text);
+            area.Add(elem);
+
+            return elem;
         }
 
         private Checkbox CreateCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
