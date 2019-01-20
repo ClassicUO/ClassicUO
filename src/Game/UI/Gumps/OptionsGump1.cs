@@ -53,13 +53,17 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _debugControls;
         private Combobox _shardType;
 
+        private TextBox _windowWidth;
+        private TextBox _windowHeight;
+        private Combobox _windowFullscreen;
+        private Combobox _windowLock;
+
         // fonts
         private FontSelector _fontSelectorChat;
 
         // combat
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
         private Checkbox _queryBeforAttackCheckbox;
-
 
         public OptionsGump1() : base(0, 0)
         {
@@ -344,7 +348,6 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 3;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
-
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
@@ -360,6 +363,51 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
             item.Add(_shardType);
+
+
+
+
+
+            _windowWidth = new TextBox(1, 5, 80, 80, false)
+            {
+                Y = 100,
+                Width = 50,
+                Height = 30
+            }; 
+            _windowWidth.SetText(Engine.Profile.Current.GameWindowSize.X.ToString());
+
+            item.Add(_windowWidth);
+
+            _windowHeight = new TextBox(1, 5, 80, 80, false)
+            {
+                X = 100,
+                Y = 100,
+                Width = 50,
+                Height = 30
+            };
+            _windowHeight.SetText(Engine.Profile.Current.GameWindowSize.Y.ToString());
+
+            item.Add(_windowHeight);
+
+
+
+
+            /*
+            private TextBox _windowWidth;
+            private TextBox _windowHeight;
+            private Combobox _windowFullscreen;
+            private Combobox _windowLock;
+
+            Add(_textboxAccount = new TextBox(5, 32, 190, 190, false)
+            {
+                X = 335,
+                Y = 343,
+                Width = 190,
+                Height = 25,
+                Hue = 0x034F,
+            });
+            */
+
 
             rightArea.AddChildren(item);
 
