@@ -30,13 +30,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
         private Checkbox _checkboxSaveAccount;
+        private Checkbox _checkboxAutologin;
         private readonly Button _nextArrow0;
 
         private float _time;
 
-
         public override void OnKeyboardReturn(int textID, string text)
         {
+            SaveCheckboxStatus();
             Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 
@@ -45,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
-
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                 // Full background
@@ -104,11 +104,32 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 328,
                 Y = 417
             });
+            Add(new Label("Save Password", false, 0x0386, font: 1)
+            {
+                X = 350,
+                Y = 420
+            });
+
+            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3)
+            {
+                X = 228,
+                Y = 417
+            });
+            Add(new Label("Autologin", false, 0x0386, font: 1)
+            {
+                X = 250,
+                Y = 420
+            });
+
+            _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
+            _checkboxAutologin.IsChecked = Engine.GlobalSettings.AutoLogin;
+
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 
             //g_MainScreen.m_AutoLogin =
             //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
             //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
+
             Add(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
             {
                 X = 253,
@@ -162,6 +183,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _textboxPassword.SetText(Engine.GlobalSettings.Password);
         }
 
+        private void SaveCheckboxStatus()
+        {
+            Engine.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
+            Engine.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
+        }
+
         private ushort _buttonNormal = 0x15A4;
         private ushort _buttonOver = 0x15A5;
 
@@ -202,12 +229,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
             switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
+                    SaveCheckboxStatus();
                     Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
-                    
                     break;
                 case Buttons.Quit:
                     Engine.Quit();
-
                     break;
             }
         }
