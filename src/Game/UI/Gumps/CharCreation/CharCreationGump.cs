@@ -112,16 +112,25 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     ChangePage(2);
 	                break;
-				case CharCreationStep.ChooseCity:
-					existing = Children.FirstOrDefault(page => page.Page == 3);
+                case CharCreationStep.ChooseCity:
+                    if (Engine.GlobalSettings.ShardType == 2)
+                    {
+                        // FIXME: skip city selection on Outlands for now
+                        SetCity(loginScene.Cities[0]);
+                        CreateCharacter();
+                    }
+                    else
+                    {
+                        existing = Children.FirstOrDefault(page => page.Page == 3);
 
-					if (existing != null)
-						Remove(existing);
+                        if (existing != null)
+                            Remove(existing);
 
-					Add(new CreateCharCityGump(), 3);
+                        Add(new CreateCharCityGump(), 3);
 
-					ChangePage(3);
-					break;
+                        ChangePage(3);
+                    }
+                    break;
             }
         }
     }
