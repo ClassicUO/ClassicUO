@@ -44,13 +44,14 @@ namespace ClassicUO.Game.Scenes
             switch (type)
             {
                 case ScenesType.Login:
+                    Engine.IsFullScreen = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
 
                     break;
                 case ScenesType.Game:
-                    Engine.FullScreenMode(2);
+                    Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
 
                     break;
@@ -69,12 +70,13 @@ namespace ClassicUO.Game.Scenes
             switch (scene)
             {
                 case LoginScene login:
+                    Engine.IsFullScreen = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     CurrentScene = login;
                     break;
                 case GameScene game:
-                    Engine.FullScreenMode(2);
+                    Engine.IsFullScreen = true;
                     CurrentScene = game;
                     break;
             }

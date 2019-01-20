@@ -73,7 +73,6 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
         public LoginRejectionReasons? LoginRejectionReason { get; private set; }
@@ -119,7 +118,7 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(0);
 
-            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
@@ -287,6 +286,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
+                Engine.GlobalSettings.LastServerNum = (ushort) ( 1 + ServerIndex) ;
+                Engine.GlobalSettings.Save();
+
                 CurrentLoginStep = LoginStep.LoginInToServer;
                 World.ServerName = Servers[ServerIndex].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
@@ -388,15 +390,19 @@ namespace ClassicUO.Game.Scenes
                     ParseServerList(e);
 
                     // Save credentials to config file
-                    Engine.GlobalSettings.Username = Account;
-                    Engine.GlobalSettings.Password = Password;
-                    Engine.GlobalSettings.Save();
+                    if (Engine.GlobalSettings.SaveAccount)
+                    {
+                        Engine.GlobalSettings.Username = Account;
+                        Engine.GlobalSettings.Password = Password;
+                        Engine.GlobalSettings.Save();
+                    }
+
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
                     {
                         if (Servers.Length != 0)
-                            SelectServer( (byte) Servers[0].Index);
+                            SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                     }
 
                     break;
