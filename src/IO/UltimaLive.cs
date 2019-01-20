@@ -115,8 +115,8 @@ namespace ClassicUO.IO
                                     yBlockItr += mapHeightInBlocks;
                                 }
 
-                                Int32 blocknum = (xBlockItr * mapHeightInBlocks) + yBlockItr;
-                                if (blocknum >= 0 && blocknum < blocks)
+                                uint blocknum = (uint)((xBlockItr * mapHeightInBlocks) + yBlockItr);
+                                if (blocknum < blocks)
                                 {
                                     UInt16 crc = MapCRCs[mapID][blocknum];
                                     if (crc == UInt16.MaxValue)
@@ -174,12 +174,8 @@ namespace ClassicUO.IO
                         {
                             if (totallen <= 0)
                             {
-                                //update index lookup on disk
-                                _filesIdxStatics[mapID]._Stream.Seek(block * 12, SeekOrigin.Begin);
-                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0xFF, 0xFF, 0xFF, 0xFF }, 0, 4);
-                                //update index length on disk
-                                _filesIdxStatics[mapID]._Stream.Write(new byte[4] { 0, 0, 0, 0 }, 0, 4);
-                                _filesIdxStatics[mapID]._Stream.Flush();
+                                //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
+                                _filesIdxStatics[mapID].WriteArray(block * 12, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
                             }
                             else
                             {
@@ -190,29 +186,29 @@ namespace ClassicUO.IO
                                 //Do we have enough room to write the statics into the existing location?
                                 if (existingStaticsLength >= length && lookup != 0xFFFFFFFF)
                                 {
+                                    _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
-                                    _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
-                                    _filesStatics[mapID]._Stream.Write(staticsData, 0, totallen);
                                 }
                                 else
                                 {
                                     lookup = _EOF[mapID];
                                     _EOF[mapID] += (uint)totallen;
                                     _filesStatics[mapID].Resize(_EOF[mapID]);
-                                    _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
-                                    _filesStatics[mapID]._Stream.Write(staticsData, 0, totallen);
+                                    _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                                 }
-                                _filesIdxStatics[mapID]._Stream.Seek(block * 12, SeekOrigin.Begin);
-                                //update lookup
-                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(lookup), 0, sizeof(uint));
-                                //update index length on disk
-                                _filesIdxStatics[mapID]._Stream.Write(BitConverter.GetBytes(length), 0, sizeof(uint));
-
-                                _filesIdxStatics[mapID]._Stream.Flush();
-                                _filesStatics[mapID]._Stream.Flush();
+                                byte[] idxdata = new byte[8];
+                                idxdata[0] = (byte)lookup;
+                                idxdata[1] = (byte)(lookup >> 8);
+                                idxdata[2] = (byte)(lookup >> 16);
+                                idxdata[3] = (byte)(lookup >> 24);
+                                idxdata[4] = (byte)length;
+                                idxdata[5] = (byte)(length >> 8);
+                                idxdata[6] = (byte)(length >> 16);
+                                idxdata[7] = (byte)(length >> 24);
+                                //update lookup AND index length on disk
+                                _filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
                             }
-
                             var chunk = World.Map.Chunks[block];
                             if (chunk != null)
                             {
@@ -282,6 +278,7 @@ namespace ClassicUO.IO
                         _EOF = new uint[maps];
                         for(int i = 0; i < maps && active; i++)
                         {
+                            _filesMap[i] = FileManager.Map.UltimaLiveReloadMaps(i);
                             active = _filesMap[i].UltimaLiveReloader() > 0 && _filesIdxStatics[i].UltimaLiveReloader() > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader()) > 0;
                         }
                         IsUltimaLiveActive = Directory.Exists(ShardName) && active;//after receiving the shardname and map defs, we can consider the system as fully active
@@ -322,9 +319,7 @@ namespace ClassicUO.IO
             int index = 0;
             if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
-                _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
-                _filesMap[mapID]._Stream.Write(landData, 0, landData.Length);
-                _filesMap[mapID]._Stream.Flush();
+                _filesMap[mapID].WriteArray((block * 196) + 4, landData);
                 for (int i = 0; i < 8; i++)
                 {
                     for (int j = 0; j < 8; j++)
@@ -348,19 +343,37 @@ namespace ClassicUO.IO
             }
         }
 
-        internal static UInt16 GetBlockCrc(int block, int xblock, int yblock)
+        internal static UInt16 GetBlockCrc(uint block, int xblock, int yblock)
         {
             int mapID = World.Map.Index;
             _filesIdxStatics[mapID].Seek(block * 12);
             uint lookup = _filesIdxStatics[mapID].ReadUInt();
             int stcount = Math.Max(0, _filesIdxStatics[mapID].ReadInt());
-            byte[] blockData = new byte[LandBlockLenght + stcount];
-            _filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
-            _filesMap[mapID]._Stream.Read(blockData, 0, LandBlockLenght);
+            byte[] blockData = new byte[LandBlockLenght + (stcount * 7)];
+            //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
+            _filesMap[mapID].Seek((block * 196) + 4);
+            for(int x = 0; x < 192; x++)
+            {
+                if (_filesMap[mapID].Position + 1 >= _filesMap[mapID].Length)
+                    break;
+                blockData[x] = _filesMap[mapID].ReadByte();
+            }
+            /*_filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
+            _filesMap[mapID]._Stream.Read(blockData, 0, LandBlockLenght);*/
             if (lookup != 0xFFFFFFFF && stcount > 0)
             {
-                _filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
-                _filesStatics[mapID]._Stream.Read(blockData, LandBlockLenght, stcount);
+                if(lookup < _filesStatics[mapID].Length)
+                {
+                    _filesStatics[mapID].Seek(lookup);
+                    for(int x = LandBlockLenght; x < blockData.Length; x++)
+                    {
+                        if (_filesStatics[mapID].Position + 1 >= _filesStatics[mapID].Length)
+                            break;
+                        blockData[x] = _filesStatics[mapID].ReadByte();
+                    }
+                }
+                /*_filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
+                _filesStatics[mapID]._Stream.Read(blockData, LandBlockLenght, stcount);*/
             }
             ushort crc = Fletcher16(blockData);
             blockData = null;

@@ -65,6 +65,8 @@ namespace ClassicUO.IO.Resources
 
         public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
         {
+            if (baseCliloc == null)
+                return null;
             List<string> arguments = new List<string>();
 
             while (true)
