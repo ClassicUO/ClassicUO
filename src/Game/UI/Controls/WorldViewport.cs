@@ -63,16 +63,5 @@ namespace ClassicUO.Game.UI.Controls
 
             base.OnMouseUp(x, y, button);
         }
-
-        //protected override void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    //if (!(Engine.UI.KeyboardFocusControl is TextBox tb && tb.RootParent is WorldViewportGump))
-        //    //{
-        //    //    Engine.UI.KeyboardFocusControl = Parent
-        //    //                                           .FindControls<SystemChatControl>()
-        //    //                                           .FirstOrDefault()?
-        //    //                                           .GetFirstControlAcceptKeyboardInput();
-        //    //}
-        //}
     }
 }
