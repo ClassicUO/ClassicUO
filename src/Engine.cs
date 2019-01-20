@@ -92,7 +92,6 @@ namespace ClassicUO
         private static int _fpsLimit = 30;
         private static Engine _engine;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
-        private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
         private double _currentFpsTime;
         private ProfileManager _profileManager;
@@ -111,6 +110,7 @@ namespace ClassicUO
         {
             //IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -118,8 +118,6 @@ namespace ClassicUO
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
-            _graphicDeviceManager.PreferredBackBufferWidth = 640;
-            _graphicDeviceManager.PreferredBackBufferHeight = 480;
             _graphicDeviceManager.ApplyChanges();
 
             Window.ClientSizeChanged += (sender, e) =>
@@ -409,7 +407,8 @@ namespace ClassicUO
             OnUpdate(totalms, framems);
             // ###############################
             Profiler.ExitContext("Update");
-            _time += (float) framems;
+
+            _time += (float)framems;
 
             if (_time > IntervalFixedUpdate)
             {
@@ -458,6 +457,9 @@ namespace ClassicUO
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
+            if (!_settings.Profiler)
+                return;
+
             double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
             double timeUpdate = Profiler.GetContext("Update").TimeInContext;
             double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
