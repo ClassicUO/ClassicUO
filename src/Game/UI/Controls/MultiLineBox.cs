@@ -152,6 +152,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else switch (key)
                 {
+                    case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
                         Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                         break;

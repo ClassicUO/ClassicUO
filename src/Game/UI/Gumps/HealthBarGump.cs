@@ -231,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Mobile == null)
                 return;
 
-            if (key == SDL.SDL_Keycode.SDLK_RETURN && _textBox.IsEditable)
+            if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(Mobile, _textBox.Text);
                 _textBox.IsEditable = false;
