@@ -51,12 +51,25 @@ namespace ClassicUO.Game.Scenes
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
+        private float _scale = 1;
 
         public GameScene() : base()
         {
         }
 
-        public float Scale { get; set; } = 1;
+        public float Scale
+        {
+            get => _scale;
+            set
+            {
+
+                if (value < 0.7f)
+                    value = 0.7f;
+                else if (value > 2.3f)
+                    value = 2.3f;
+                _scale = value;              
+            }
+        }
 
         public Texture2D ViewportTexture => _renderTarget;
 
@@ -128,26 +141,26 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseDown += OnMouseDown;
             _viewPortGump.MouseUp += OnMouseUp;
             _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
-            //_viewPortGump.DragBegin += OnMouseDragBegin;
             _viewPortGump.MouseOver += OnMouseMove;
+            _viewPortGump.MouseWheel += (sender, e) =>
+            {
+                if (!Engine.Profile.Current.EnableScaleZoom)
+                    return;
+
+                if (e.Direction == MouseEvent.WheelScrollDown)
+                    Scale += 0.1f;
+                else
+                    Scale -= 0.1f;
+
+                if (Scale < 0.7f)
+                    Scale = 0.7f;
+                else if (Scale > 2.3f)
+                    Scale = 2.3f;               
+            };
 
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
-            //Engine.Input.MouseWheel += (sender, e) =>
-            //{
-            //    if (IsMouseOverWorld)
-            //    {
-            //        if (!e)
-            //            Scale += 0.1f;
-            //        else
-            //            Scale -= 0.1f;
 
-            //        if (Scale < 0.7f)
-            //            Scale = 0.7f;
-            //        else if (Scale > 2.3f)
-            //            Scale = 2.3f;
-            //    }
-            //};
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 

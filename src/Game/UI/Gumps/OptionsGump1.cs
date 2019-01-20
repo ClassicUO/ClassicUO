@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls;
+        private Checkbox _debugControls, _zoom;
         private Combobox _shardType;
 
         // fonts
@@ -346,6 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+            _zoom = CreateCheckBox(rightArea, "Enable scale zoom", Engine.Profile.Current.EnableScaleZoom, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
@@ -516,6 +517,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
+                    _zoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
                     break;
                 case 4: // commands
@@ -608,6 +610,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             // video
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
+            Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
+            Engine.SceneManager.GetScene<GameScene>().Scale = 1;
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
