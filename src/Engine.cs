@@ -115,6 +115,7 @@ namespace ClassicUO
         private Settings _settings;
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
+        private bool _isMaximized;
 
         private Engine()
         {
@@ -182,43 +183,22 @@ namespace ClassicUO
 
         public static uint[] FrameDelay { get; } = new uint[2];
 
-        /*
-         * 1 - Fullscreen (xna)
-         * 2 - Fullscreen Resize (maximize)
-         */
-        public static void FullScreenMode(int mode)
-        {
-            switch (mode)
-            {
-                case 1:
-                {
-                    _engine._graphicDeviceManager.IsFullScreen = true;
-                    _engine._graphicDeviceManager.ApplyChanges();
-
-                    break;
-                }
-                case 2:
-                {
-                    DisplayMode displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
-
-                    _engine._graphicDeviceManager.PreferredBackBufferFormat = displayMode.Format;
-                    _engine._graphicDeviceManager.PreferredBackBufferWidth = (int)(displayMode.Width);
-                    _engine._graphicDeviceManager.PreferredBackBufferHeight = (int)(displayMode.Height) - 60;
-                    _engine._graphicDeviceManager.ApplyChanges();
-
-                    break;
-                }
-            }
-
-        }
-
         public static bool IsFullScreen
         {
-            get => _engine._graphicDeviceManager.IsFullScreen;
+            get => _engine._isMaximized;
             set
             {
-                _engine._graphicDeviceManager.IsFullScreen = value;
-                _engine._graphicDeviceManager.ApplyChanges();
+                if (_engine._isMaximized == value)
+                    return;
+
+                _engine._isMaximized = value;
+
+                IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
+
+                if (value)
+                    SDL.SDL_MaximizeWindow(wnd);
+                else
+                    SDL.SDL_RestoreWindow(wnd);
             }
         }
 
