@@ -2544,6 +2544,8 @@ namespace ClassicUO.Network
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
 
             string text = FileManager.Cliloc.Translate((int)cliloc, arguments);
+            if (text == null)
+                return;
 
             if (!String.IsNullOrWhiteSpace(affix))
             {
