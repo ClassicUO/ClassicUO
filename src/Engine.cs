@@ -141,8 +141,6 @@ namespace ClassicUO
             Window.AllowUserResizing = true;
         }
 
-      //  internal static classicUO_API.NetPipes.Server Server { get; } = new Server();
-
         public static Batcher2D Batcher => _engine._batcher;
 
         protected float IntervalFixedUpdate { get; private set; }

@@ -95,9 +95,6 @@ namespace ClassicUO.Network
             {
                 for (int i = 0; i < _handlers[p.ID].Count; i++)
                 {
-                    //if (Engine.Server.IsConnected)
-                    //    Engine.Server.SendToPlugin(p.ToArray(), p.Length, p.IsDynamic, false);
-
                     p.MoveToData();
                     _handlers[p.ID][i].Callback(p);
                 }
