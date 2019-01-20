@@ -131,7 +131,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
                 _filesMap[mapID].Dispose();
-                _filesMap[mapID] = new UOFileMul(newpath, true, false);
+                _filesMap[mapID] = new UOFileMul(newpath);
             }
             return _filesMap[mapID];
         }
