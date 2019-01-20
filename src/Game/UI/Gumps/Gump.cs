@@ -105,10 +105,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (LocalSerial != 0)
             {
-                if (buttonID == 0) // cancel
-                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID);
-                else
-                {
+                //if (buttonID == 0) // cancel
+                //    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID);
+                //else
+                //{
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
-                }
+                //}
 
                 Engine.UI.SavePosition(ServerSerial, Location);
                 Dispose();

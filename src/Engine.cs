@@ -127,6 +127,7 @@ namespace ClassicUO
                 _graphicDeviceManager.ApplyChanges();
             };
             Window.AllowUserResizing = true;
+            IsMouseVisible = true;
         }
 
         public static Batcher2D Batcher => _engine._batcher;
