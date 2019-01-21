@@ -112,30 +112,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        internal UOFile UltimaLiveReloadMaps(int mapID)
-        {
-            if(_filesMap[mapID] is UOFileUop uop)
-            {
-                string newpath = Path.Combine(UltimaLive.ShardName, $"map{mapID}.mul");
-                if (!File.Exists(newpath))
-                {
-                    Utility.Logging.Log.Message(Utility.Logging.LogTypes.Trace, $"UltimaLive -> converting file:\t{newpath} from {uop.FilePath}");
-                    using (FileStream stream = File.Create(newpath))
-                    {
-                        for (int x = 0; x < uop.Entries.Length; x++)
-                        {
-                            uop.Seek(uop.Entries[x].Offset);
-                            stream.Write(uop.ReadArray(uop.Entries[x].Length), 0, uop.Entries[x].Length);
-                        }
-                        stream.Flush();
-                    }
-                }
-                _filesMap[mapID].Dispose();
-                _filesMap[mapID] = new UOFileMul(newpath);
-            }
-            return _filesMap[mapID];
-        }
-
         private bool LoadDif(ref UOFileMul mul, string path)
         {
             if (!File.Exists(path))

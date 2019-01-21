@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.GameObjects;
@@ -276,8 +277,8 @@ namespace ClassicUO.IO
                         IsUltimaLiveActive = Directory.Exists(ShardName);
                         for (int i = 0; i < maps && IsUltimaLiveActive; i++)
                         {
-                            _filesMap[i] = FileManager.Map.UltimaLiveReloadMaps(i);
-                            _filesStaticsStream[i] = File.Open(Path.Combine(ShardName, Path.GetFileName(_filesStatics[i].FilePath)), FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                            _filesMap[i] = CheckForShardFiles(i);
+                            _filesStaticsStream[i] = File.Open(_filesStatics[i].FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                             IsUltimaLiveActive = _filesMap[i].UltimaLiveReloader(null) > 0 && _filesIdxStatics[i].UltimaLiveReloader(null) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(_filesStaticsStream[i])) > 0;
                             FileManager.Map.LoadMap(i);
                         }
@@ -301,6 +302,52 @@ namespace ClassicUO.IO
                             break;
                         }*/
             }
+        }
+
+        private static UOFile CheckForShardFiles(int mapID)
+        {
+            bool valid = false;
+            if (_filesMap[mapID] is UOFileUop uop)
+            {
+                string newpath = Path.Combine(UltimaLive.ShardName, $"map{mapID}.mul");
+                if (!File.Exists(newpath))
+                {
+                    Utility.Logging.Log.Message(Utility.Logging.LogTypes.Trace, $"UltimaLive -> converting file:\t{newpath} from {uop.FilePath}");
+                    using (FileStream stream = File.Create(newpath))
+                    {
+                        for (int x = 0; x < uop.Entries.Length; x++)
+                        {
+                            uop.Seek(uop.Entries[x].Offset);
+                            stream.Write(uop.ReadArray(uop.Entries[x].Length), 0, uop.Entries[x].Length);
+                        }
+                        stream.Flush();
+                    }
+                }
+                _filesMap[mapID].Dispose();
+                _filesMap[mapID] = new UOFileMul(newpath);
+                valid = _filesMap[mapID] is UOFileMul;
+            }
+            else
+            {
+                valid = CheckFilePresence(_filesMap[mapID]);
+            }
+            valid = valid && CheckFilePresence(_filesIdxStatics[mapID]) && CheckFilePresence(_filesStatics[mapID]);
+
+            return valid ? _filesMap[mapID] : null;
+        }
+
+        private static bool CheckFilePresence(UOFile file)
+        {
+            string oldfile = file.FilePath;
+            file.FilePath = Path.Combine(UltimaLive.ShardName, Path.GetFileName(file.FilePath));
+            if (!Directory.Exists(UltimaLive.ShardName))
+                return false;
+            if (!File.Exists(file.FilePath) || new FileInfo(file.FilePath).Length == 0)
+            {
+                Log.Message(LogTypes.Trace, $"UltimaLive -> copying file:\t{file.FilePath} from {oldfile}");
+                File.Copy(oldfile, file.FilePath, true);
+            }
+            return new FileInfo(file.FilePath).Length > 0;
         }
 
         private static void OnUpdateTerrainPacket(Packet p)

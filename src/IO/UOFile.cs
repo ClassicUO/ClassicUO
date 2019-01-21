@@ -42,19 +42,10 @@ namespace ClassicUO.IO
             FilePath = filepath;
         }
 
-        public string FilePath { get; private set; }
+        public string FilePath { get; internal set; }
 
         internal uint UltimaLiveReloader(FileStream stream)
         {
-            string oldfile = FilePath;
-            FilePath = Path.Combine(UltimaLive.ShardName, Path.GetFileName(FilePath));
-            if (!Directory.Exists(UltimaLive.ShardName))
-                return 0;
-            if (!File.Exists(FilePath) || new FileInfo(FilePath).Length == 0)
-            {
-                Log.Message(LogTypes.Trace, $"UltimaLive -> copying file:\t{FilePath} from {oldfile}");
-                File.Copy(oldfile, FilePath, true);
-            }
             FileInfo fileInfo = new FileInfo(FilePath);
             if (!fileInfo.Exists)
                 return 0;
@@ -66,13 +57,13 @@ namespace ClassicUO.IO
                 if (stream != null)
                 {
                     newmmf = MemoryMappedFile.CreateNew(null, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
-                    using(Stream s = newmmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
+                    using (Stream s = newmmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
                         stream.CopyTo(s);
                 }
                 else
                     newmmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, null, HandleInheritability.None, false);
-                
-                var newam = newmmf.CreateViewAccessor(0, stream!=null ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
+
+                var newam = newmmf.CreateViewAccessor(0, stream != null ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
                 byte* ptr = null;
                 try
                 {
