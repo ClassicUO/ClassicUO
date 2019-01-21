@@ -58,6 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _shardType;
 
         private Checkbox _gameWindowLock;
+        private Checkbox _gameWindowFullsize;
 
         // GameWindowSize
         private TextBox _gameWindowWidth;
@@ -359,8 +360,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
 
-
-
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
             {
@@ -375,11 +374,9 @@ namespace ClassicUO.Game.UI.Gumps
             };
             item.Add(_shardType);
 
-
-
-
-
             _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
+
+            _gameWindowFullSize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -416,9 +413,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30
             });
-
-
-
 
             rightArea.AddChildren(item);
 
@@ -690,8 +684,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            // +
-
             int GameWindowSizeWidth = 640;
             int GameWindowSizeHeight = 480;
 
@@ -706,8 +698,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _gameWindowWidth.Text = n.X.ToString();
                 _gameWindowHeight.Text = n.Y.ToString();
             }
-
-            // +
 
             int GameWindowPositionX = 10;
             int GameWindowPositionY = 10;
@@ -733,8 +723,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.GameWindowPosition = n;
             }
-
-            // +
 
             Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
 
