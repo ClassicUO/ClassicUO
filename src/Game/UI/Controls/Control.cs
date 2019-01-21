@@ -125,16 +125,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool AcceptKeyboardInput
         {
-            get
-            {
-                if (!IsEnabled || IsDisposed || !IsVisible || !IsInitialized)
-                    return false;
-
-                if (_acceptKeyboardInput)
-                    return true;
-
-                return _acceptKeyboardInput; // _children.Any(s => s.AcceptKeyboardInput);
-            }
+            get => IsEnabled && !IsDisposed && IsVisible && IsInitialized && _acceptKeyboardInput;
             set => _acceptKeyboardInput = value;
         }
 
@@ -342,7 +333,20 @@ namespace ClassicUO.Game.UI.Controls
                     });
                 }
 
-                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+                int w, h;
+
+                if (Texture == null)
+                {
+                    w = Width;
+                    h = Height;
+                }
+                else
+                {
+                    w = Texture.Width;
+                    h = Texture.Height;
+                }
+
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, w, h), Vector3.Zero);
             }
         }
 

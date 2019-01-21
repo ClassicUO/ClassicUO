@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Y = 30 * 8, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 8
             });
-            leftArea.AddChildren(item);
+            leftArea.Add(item);
             Add(leftArea);
             int offsetX = 60;
             int offsetY = 60;
@@ -165,14 +165,14 @@ namespace ClassicUO.Game.UI.Gumps
             fpsItem.Add(text);
             _sliderFPS = new HSliderBar(80, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             fpsItem.Add(_sliderFPS);
-            rightArea.AddChildren(fpsItem);
+            rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
             text = new Label("- Login FPS:", true, 1);
             fpsItem.Add(text);
             _sliderFPSLogin = new HSliderBar(80, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             fpsItem.Add(_sliderFPSLogin);
-            rightArea.AddChildren(fpsItem);
+            rightArea.Add(fpsItem);
 
             // Highlight    
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
-            rightArea.AddChildren(hpAreaItem);
+            rightArea.Add(hpAreaItem);
 
             // highlight character by flags
 
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 25, Y = 30, IsChecked = Engine.Profile.Current.HighlightMobilesByFlags
             };
             highlightByFlagsItem.Add(_highlightByState);
-            rightArea.AddChildren(highlightByFlagsItem);
+            rightArea.Add(highlightByFlagsItem);
 
 
             _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             hpAreaItem.Add(_fieldsToTile);
 
-            rightArea.AddChildren(hpAreaItem);
+            rightArea.Add(hpAreaItem);
 
 
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             hpAreaItem.Add(_useCircleOfTransparency);
 
-            rightArea.AddChildren(hpAreaItem);
+            rightArea.Add(hpAreaItem);
             Add(rightArea, PAGE);
         }
 
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.UI.Gumps
             _soundsVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             item.Add(text);
             item.Add(_soundsVolume);
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
 
             _enableMusic = CreateCheckBox(rightArea, "Music", Engine.Profile.Current.EnableMusic, 0, 0);
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item.Add(text);
             item.Add(_musicVolume);
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
@@ -334,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
             _loginMusicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             item.Add(text);
             item.Add(_loginMusicVolume);
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
             Add(rightArea, PAGE);
         }
@@ -362,7 +362,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             item.Add(_shardType);
 
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
             Add(rightArea, PAGE);
         }
@@ -409,13 +409,13 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
             item.Add(_scaleSpeechDelay);
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
             item = new ScrollAreaItem();
             Label text = new Label("- Speech delay:", true, 1);
             item.Add(text);
             _sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             item.Add(_sliderSpeechDelay);
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 30, Engine.Profile.Current.SpeechHue, "Speech color", 20, 30);
             _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote color", 20, 0);
@@ -672,7 +672,7 @@ namespace ClassicUO.Game.UI.Gumps
                 box.Y = y;
                 
                 item.Add(box);
-                area.AddChildren(item);
+                area.Add(item);
             }
             else
             {
@@ -699,7 +699,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = labelX, Y = labelY
             });
-            area.AddChildren(item);
+            area.Add(item);
             return box;
         }
 
