@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" height="330" src="https://i.imgur.com/CgpwyIQ.png">
+  <img width="300" height="320" src="https://i.imgur.com/CgpwyIQ.png">
 </p>
 
 An open source implementation of the Ultima Online Classic Client.
