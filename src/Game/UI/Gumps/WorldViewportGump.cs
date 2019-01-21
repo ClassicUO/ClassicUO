@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             AcceptMouseInput = false;
-            CanMove = true;
+            CanMove = !Engine.Profile.Current.GameWindowLock;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
@@ -67,23 +67,28 @@ namespace ClassicUO.Game.UI.Gumps
             _worldWidth = Engine.Profile.Current.GameWindowSize.X;
             _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
             _button = new Button(0, 0x837, 0x838, 0x838);
+
             _button.MouseDown += (sender, e) =>
             {
-                _clicked = true;
+                if (!Engine.Profile.Current.GameWindowLock)
+                    _clicked = true;
             };
 
             _button.MouseUp += (sender, e) =>
             {
-                Point n = ResizeWindow(_lastSize);
+                if (!Engine.Profile.Current.GameWindowLock)
+                {
+                    Point n = ResizeWindow(_lastSize);
 
-                OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
-                if (options != null)
-                    options.UpdateVideo();
+                    OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+                    if (options != null)
+                        options.UpdateVideo();
 
-                if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                    NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
+                    if (FileManager.ClientVersion >= ClientVersions.CV_200)
+                        NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
 
-                _clicked = false;
+                    _clicked = false;
+                }
             };
 
             _button.SetTooltip("Resize game window");
@@ -160,11 +165,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
+            //Engine.Profile.Current.GameWindowPosition = new Point(x, y);
+
             OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
             if (options != null)
                 options.UpdateVideo();
-
-            base.OnDragEnd(x, y);
         }
 
         private void Resize()

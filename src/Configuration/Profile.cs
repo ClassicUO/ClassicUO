@@ -115,6 +115,7 @@ namespace ClassicUO.Configuration
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        [JsonProperty] public bool GameWindowLock { get; set; } = false;
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;

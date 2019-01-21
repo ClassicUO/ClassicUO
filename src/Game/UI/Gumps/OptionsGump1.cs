@@ -57,6 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _debugControls;
         private Combobox _shardType;
 
+        private Checkbox _gameWindowLock;
+
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private TextBox _gameWindowHeight;
@@ -352,14 +354,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildVideo()
         {
             const int PAGE = 3;
+
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
 
+
+
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
             {
-                Y = 15
+                Y = 30
             };
 
             item.Add(text);
@@ -374,6 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
+            _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -578,6 +584,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowHeight.Text = "480";
                     _gameWindowPositionX.Text = "10";
                     _gameWindowPositionY.Text = "10";
+                    _gameWindowLock.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -722,9 +729,25 @@ namespace ClassicUO.Game.UI.Gumps
                 Point n = new Point(GameWindowPositionX, GameWindowPositionY);
 
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.Location = n; // +, move gump
+                e.Location = n;
 
                 Engine.Profile.Current.GameWindowPosition = n;
+            }
+
+            // +
+
+            Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
+
+            if (_gameWindowLock.IsChecked)
+            {
+                // lock
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.CanMove = false;
+            } else
+            {
+                // unlock
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.CanMove = true;
             }
 
             // fonts
