@@ -57,8 +57,12 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _debugControls;
         private Combobox _shardType;
 
-        private TextBox _windowWidth;
-        private TextBox _windowHeight;
+        // GameWindowSize
+        private TextBox _gameWindowWidth;
+        private TextBox _gameWindowHeight;
+        // GameWindowPosition
+        private TextBox _gameWindowPositionX;
+        private TextBox _gameWindowPositionY;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -355,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
             {
-                Y = 40
+                Y = 15
             };
 
             item.Add(text);
@@ -371,16 +375,16 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _windowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                 X = 10,
                 Y = 105,
                 Width = 50,
                 Height = 30
-            });
+            }, "Game Play Window Size: ");
 
-            _windowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                 X = 80,
@@ -389,6 +393,23 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30
             });
 
+            _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
+                X = 10,
+                Y = 160,
+                Width = 50,
+                Height = 30
+            }, "Game Play Window Position: ");
+
+            _gameWindowPositionY = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
+                X = 80,
+                Y = 160,
+                Width = 50,
+                Height = 30
+            });
 
 
 
@@ -553,8 +574,10 @@ namespace ClassicUO.Game.UI.Gumps
                 case 3: // video
                     _debugControls.IsChecked = false;
                     _shardType.SelectedIndex = 0;
-                    _windowWidth.Text = "640";
-                    _windowHeight.Text = "480";
+                    _gameWindowWidth.Text = "640";
+                    _gameWindowHeight.Text = "480";
+                    _gameWindowPositionX.Text = "10";
+                    _gameWindowPositionY.Text = "10";
                     break;
                 case 4: // commands
 
@@ -660,20 +683,26 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            // +
+
             int GameWindowSizeWidth = 640;
             int GameWindowSizeHeight = 480;
 
-            int.TryParse(_windowWidth.Text, out GameWindowSizeWidth);
-            int.TryParse(_windowHeight.Text, out GameWindowSizeHeight);
+            int.TryParse(_gameWindowWidth.Text, out GameWindowSizeWidth);
+            int.TryParse(_gameWindowHeight.Text, out GameWindowSizeHeight);
 
             if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 Point n = e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
 
-                _windowWidth.Text = n.X.ToString();
-                _windowHeight.Text = n.Y.ToString();
+                _gameWindowWidth.Text = n.X.ToString();
+                _gameWindowHeight.Text = n.Y.ToString();
             }
+
+            // +
+
+
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
@@ -706,7 +735,7 @@ namespace ClassicUO.Game.UI.Gumps
             MurdererColor
         }
 
-        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem)
+        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null)
         {
             area.Add(new ResizePic(0x0BB8)
             {
@@ -716,8 +745,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = elem.Height - 7
             });
 
-            //elem.SetText(text);
             area.Add(elem);
+
+            if (label != null)
+            {
+                Label text = new Label(label, true, 0, 0, 1)
+                {
+                    Y = elem.Y - 30
+                };
+                area.Add(text);
+            }
 
             return elem;
         }
