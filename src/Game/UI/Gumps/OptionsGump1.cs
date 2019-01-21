@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Linq;
 
 using ClassicUO.Game.Scenes;
@@ -30,6 +31,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 using ClassicUO.Network;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -654,43 +656,23 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (_windowWidth.Text != Engine.Profile.Current.GameWindowSize.X.ToString() || _windowHeight.Text != Engine.Profile.Current.GameWindowSize.Y.ToString())
+
+            int GameWindowSizeWidth = 640;
+            int GameWindowSizeHeight = 400;
+
+            int.TryParse(_windowWidth.Text, out GameWindowSizeWidth);
+            int.TryParse(_windowHeight.Text, out GameWindowSizeHeight);
+
+            if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                // WorldViewportGump
-
-                /*
-                WorldViewportGump viewport = Parent.FindControls<WorldViewportGump>().FirstOrDefault();
-                viewport.Width = 800;
-                viewport.Height = 600;
-                */
-
-                // . GetViewPort
-
-                //Engine.Profile.Current.GameWindowSize = new Point(Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y);
-
-                //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-                //gs._viewPortGump.CanMove = false;
-
-                //Engine.UI.Gumps.OfType<WorldViewportGump>().Single().CanMove = false;
-
-                //Engine.UI.Gumps.OfType<WorldViewportGump>().Single().Dispose();
-
-                //WorldViewportGump viewport = new WorldViewportGump(gs);
-                //Engine.UI.Add(viewport);
-
+                Debug.WriteLine("GameWindowSizeWidth = {0}, GameWindowSizeHeight = {1}", GameWindowSizeWidth, GameWindowSizeHeight);
+                Debug.WriteLine("Current.GameWindowSizeX = {0}, Current.GameWindowSizeY = {1}", Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y);
 
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-
-                //e.Location = new Point(0, 0); // +, move gump
-
-                Engine.Profile.Current.GameWindowSize = new Point(640, 400);
-
-
-                //WorldViewportGump viewport = Parent.FindControls<WorldViewportGump>().Single();
-                //viewport.CanMove = false;
-                //viewport
-
+                e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
             }
+
+
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
