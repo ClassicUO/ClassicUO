@@ -1,3 +1,5 @@
+![](https://i.imgur.com/CgpwyIQ.png)
+
 ClassicUO - an open source implementation of the Ultima Online Classic Client.
 
 # Contacts
