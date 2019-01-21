@@ -117,6 +117,11 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList(_mousePicker);
 
             WorldViewportGump viewport = new WorldViewportGump(this);
+
+            // разрбратся чего после перезапуска портится фулскрин
+            //if (Engine.Profile.Current.GameWindowFullSize)
+            //    viewport.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+
             Engine.UI.Add(viewport);
 
             TopBarGump.Create();

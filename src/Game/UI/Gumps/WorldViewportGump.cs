@@ -44,17 +44,6 @@ namespace ClassicUO.Game.UI.Gumps
         private int _worldWidth;
         private Point _lastSize, _savedSize;
 
-        public Point ResizeWindow(Point newSize)
-        {
-            if (newSize.X < 640)
-                newSize.X = 640;
-
-            if (newSize.Y < 480)
-                newSize.Y = 480;
-
-            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
-        }
-
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             AcceptMouseInput = false;
@@ -185,6 +174,18 @@ namespace ClassicUO.Game.UI.Gumps
             _systemChatControl.Resize();
             WantUpdateSize = true;
         }
+
+        public Point ResizeWindow(Point newSize)
+        {
+            if (newSize.X < 640)
+                newSize.X = 640;
+
+            if (newSize.Y < 480)
+                newSize.Y = 480;
+
+            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+        }
+
     }
 
     internal class GameBorder : Control

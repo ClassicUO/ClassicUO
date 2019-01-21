@@ -21,6 +21,7 @@
 
 using System;
 using System.Linq;
+using System.ComponentModel.Design;
 
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -376,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
 
-            _gameWindowFullSize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+            _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -579,6 +580,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowPositionX.Text = "10";
                     _gameWindowPositionY.Text = "10";
                     _gameWindowLock.IsChecked = false;
+                    _gameWindowFullsize.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -737,6 +739,23 @@ namespace ClassicUO.Game.UI.Gumps
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 e.CanMove = true;
             }
+
+            Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
+
+            if (_gameWindowFullsize.IsChecked)
+            {
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                e.Location = new Point(0,0);
+            }
+            else
+            {
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.ResizeWindow(new Point(640,480));
+                e.Location = new Point(10, 10);
+            }
+
+            UpdateVideo();
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
