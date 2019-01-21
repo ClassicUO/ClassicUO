@@ -129,15 +129,7 @@ namespace ClassicUO.Game.Map
 
         public void ClearBockAccess()
         {
-            unsafe
-            {
-                fixed (bool* ptr = _blockAccessList)
-                {
-                    byte* start = (byte*)ptr;
-                    byte* end = start + _blockAccessList.Length;
-                    while (&start[0] != &end[0]) *start++ = 0;
-                }
-            }
+            Array.Clear(_blockAccessList, 0, _blockAccessList.Length);
         }
 
         public sbyte CalculateNearZ(sbyte defaultZ, int x, int y, int z)

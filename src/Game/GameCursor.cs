@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Configuration;
@@ -256,8 +257,9 @@ namespace ClassicUO.Game
 
                 ref CursorInfo info = ref _cursorPixels[war, id];
 
+
                 fixed (ushort* ptr = info.Pixels)
-                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr)ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
+                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
 
 
                 int hotX = - _cursorOffset[0, id];
@@ -265,6 +267,9 @@ namespace ClassicUO.Game
 
                 _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
                 SDL.SDL_SetCursor(_cursor);
+
+                if (_surface != IntPtr.Zero)
+                    SDL.SDL_FreeSurface(_surface);
             }
 
             //Texture.Ticks = (long) totalMS;

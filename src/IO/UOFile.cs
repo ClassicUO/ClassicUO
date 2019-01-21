@@ -22,6 +22,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using ClassicUO.IO.Resources;
@@ -144,7 +145,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal void Fill(byte[] buffer, int count)
+        internal void Fill(ref byte[] buffer, int count)
         {
             fixed (byte* ptr = buffer)
             {
