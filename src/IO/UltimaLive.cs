@@ -277,9 +277,10 @@ namespace ClassicUO.IO
                         IsUltimaLiveActive = Directory.Exists(ShardName);
                         for (int i = 0; i < maps && IsUltimaLiveActive; i++)
                         {
+                            bool uop = _filesMap[i] is UOFileUop;
                             _filesMap[i] = CheckForShardFiles(i);
                             _filesStaticsStream[i] = File.Open(_filesStatics[i].FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                            IsUltimaLiveActive = _filesMap[i].UltimaLiveReloader(null) > 0 && _filesIdxStatics[i].UltimaLiveReloader(null) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(_filesStaticsStream[i])) > 0;
+                            IsUltimaLiveActive = (uop ? true : _filesMap[i].UltimaLiveReloader(null) > 0) && _filesIdxStatics[i].UltimaLiveReloader(null) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(_filesStaticsStream[i])) > 0;
                             FileManager.Map.LoadMap(i);
                         }
                         break;
