@@ -702,7 +702,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             // +
 
+            int GameWindowPositionX = 10;
+            int GameWindowPositionY = 10;
 
+            int.TryParse(_gameWindowPositionX.Text, out GameWindowPositionX);
+            int.TryParse(_gameWindowPositionY.Text, out GameWindowPositionY);
+
+            if (GameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || GameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
+            {
+                if (GameWindowPositionX < 0)
+                {
+                    GameWindowPositionX = 0;
+                }
+                if (GameWindowPositionY < 0)
+                {
+                    GameWindowPositionY = 0;
+                }
+
+                Point n = new Point(GameWindowPositionX, GameWindowPositionY);
+
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.Location = n; // +, move gump
+
+                Engine.Profile.Current.GameWindowPosition = n;
+            }
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();

@@ -158,6 +158,15 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GameWindowPosition = position;
         }
 
+        protected override void OnDragEnd(int x, int y)
+        {
+            OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+            if (options != null)
+                options.UpdateVideo();
+
+            base.OnDragEnd(x, y);
+        }
+
         private void Resize()
         {
             _border.Width = Width;
@@ -208,7 +217,6 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
             //dx
             batcher.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
-
             return base.Draw(batcher, position, hue);
         }
     }
