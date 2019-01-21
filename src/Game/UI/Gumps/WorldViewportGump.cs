@@ -91,7 +91,6 @@ namespace ClassicUO.Game.UI.Gumps
             _savedSize = _lastSize = Engine.Profile.Current.GameWindowSize;
         }
 
-
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)

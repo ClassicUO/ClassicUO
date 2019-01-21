@@ -29,6 +29,8 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
+using ClassicUO.Network;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class OptionsGump1 : Gump
@@ -656,12 +658,37 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 // WorldViewportGump
 
-                Point _lastSize;
+                /*
+                WorldViewportGump viewport = Parent.FindControls<WorldViewportGump>().FirstOrDefault();
+                viewport.Width = 800;
+                viewport.Height = 600;
+                */
 
-                _lastSize.X = int.Parse(_windowWidth.Text);
-                _lastSize.Y = int.Parse(_windowHeight.Text);
+                // . GetViewPort
 
-                //Engine.Profile.Current.GameWindowSize = _lastSize;
+                //Engine.Profile.Current.GameWindowSize = new Point(Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y);
+
+                //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                //gs._viewPortGump.CanMove = false;
+
+                //Engine.UI.Gumps.OfType<WorldViewportGump>().Single().CanMove = false;
+
+                //Engine.UI.Gumps.OfType<WorldViewportGump>().Single().Dispose();
+
+                //WorldViewportGump viewport = new WorldViewportGump(gs);
+                //Engine.UI.Add(viewport);
+
+
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+
+                //e.Location = new Point(0, 0); // +, move gump
+
+                Engine.Profile.Current.GameWindowSize = new Point(640, 400);
+
+
+                //WorldViewportGump viewport = Parent.FindControls<WorldViewportGump>().Single();
+                //viewport.CanMove = false;
+                //viewport
 
             }
 

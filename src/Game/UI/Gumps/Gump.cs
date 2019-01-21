@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class Gump : Control
+    internal class Gump : Control           
     {
         public Gump(Serial local, Serial server)
         {

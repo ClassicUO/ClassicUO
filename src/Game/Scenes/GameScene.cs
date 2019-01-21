@@ -241,7 +241,6 @@ namespace ClassicUO.Game.Scenes
             }
 
         }
-       
 
         public override void Unload()
         {
