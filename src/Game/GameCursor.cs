@@ -240,13 +240,9 @@ namespace ClassicUO.Game
                 //Texture = FileManager.Art.GetTexture(Graphic);
                 _needGraphicUpdate = false;
 
-                //if (_surface != IntPtr.Zero)
-                //    SDL.SDL_FreeSurface(_surface);
-
                 if (_cursor != IntPtr.Zero)
                     SDL.SDL_FreeCursor(_cursor);
 
-                //ushort[] pix = FileManager.Art.ReadStaticArt(Graphic, out short w, out short h, out _);
                 ushort id = Graphic;
 
                 if (id < 0x206A)
@@ -257,19 +253,18 @@ namespace ClassicUO.Game
 
                 ref CursorInfo info = ref _cursorPixels[war, id];
 
-
                 fixed (ushort* ptr = info.Pixels)
                     _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
 
-
-                int hotX = - _cursorOffset[0, id];
-                int hotY = - _cursorOffset[1, id];
-
-                _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
-                SDL.SDL_SetCursor(_cursor);
-
                 if (_surface != IntPtr.Zero)
+                {
+                    int hotX = -_cursorOffset[0, id];
+                    int hotY = -_cursorOffset[1, id];
+
+                    _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
+                    SDL.SDL_SetCursor(_cursor);
                     SDL.SDL_FreeSurface(_surface);
+                }
             }
 
             //Texture.Ticks = (long) totalMS;
@@ -278,12 +273,6 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        //private readonly RenderedText _text = new RenderedText()
-        //{
-        //    Font = 1,
-        //    FontStyle = FontStyle.BlackBorder,
-        //    IsUnicode =  true,         
-        //};
 
         public void Draw(Batcher2D sb)
         {

@@ -295,6 +295,7 @@ namespace ClassicUO
 
             if (_settings == null)
             {
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
                 Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
                 _settings = new Settings();
                 _settings.Save();
