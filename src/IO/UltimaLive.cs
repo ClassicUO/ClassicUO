@@ -41,10 +41,12 @@ namespace ClassicUO.IO
         internal static string ShardName = null;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
+
         private static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
         private static UOFile[] _filesMap;
         private static UOFileMul[] _filesStatics;
         private static UOFileMul[] _filesIdxStatics;
+        private static FileStream[] _filesStaticsStream;
         private static uint[] _EOF;
         //WrapMapSize includes 2 different kind of values at each side of the array:
         //left - mapID (zero based value), so first map is at ZERO
@@ -171,6 +173,21 @@ namespace ClassicUO.IO
                         }
                         if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
                         {
+                            var chunk = World.Map.Chunks[block];
+                            if (chunk != null)
+                            {
+                                for (int x = 0; x < 8; x++)
+                                {
+                                    for (int y = 0; y < 8; y++)
+                                    {
+                                        for (GameObject obj = chunk.Tiles[x, y].FirstNode; obj != null; obj = obj.Right)
+                                        {
+                                            if (obj is Land || obj is Static)
+                                                obj.Dispose();
+                                        }
+                                    }
+                                }
+                            }
                             if (totallen <= 0)
                             {
                                 //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
@@ -185,17 +202,18 @@ namespace ClassicUO.IO
                                 //Do we have enough room to write the statics into the existing location?
                                 if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
                                 {
-                                    _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
                                 }
                                 else
                                 {
                                     lookup = _EOF[mapID];
                                     _EOF[mapID] += (uint)totallen;
-                                    _filesStatics[mapID].Resize(_EOF[mapID]);
-                                    _filesStatics[mapID].WriteArray(lookup, staticsData);
                                     Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                                 }
+                                _filesStatics[mapID].WriteArray(lookup, staticsData);
+                                _filesStaticsStream[mapID].Seek(lookup, SeekOrigin.Begin);
+                                _filesStaticsStream[mapID].Write(staticsData, 0, staticsData.Length);
+                                _filesStaticsStream[mapID].Flush();
                                 //update lookup AND index length on disk
                                 byte[] idxdata = new byte[8];
                                 idxdata[0] = (byte)lookup;
@@ -209,13 +227,8 @@ namespace ClassicUO.IO
                                 //update lookup AND index length on disk
                                 _filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
                             }
-                            int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
-                            ushort blockX = (ushort)(block / mapHeightInBlocks);
-                            ushort blockY = (ushort)(block % mapHeightInBlocks);
-                            World.Map.Chunks[block]?.Dispose();
                             FileManager.Map.ReloadBlock(mapID, block);
-                            World.Map.Chunks[block] = new Chunk(blockX, blockY);
-                            World.Map.Chunks[block].Load(mapID);
+                            chunk?.Load(mapID);
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                             //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                             MapCRCs[mapID][block] = UInt16.MaxValue;
@@ -254,19 +267,20 @@ namespace ClassicUO.IO
                             WrapMapSize[mapnum,2] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,0]);
                             WrapMapSize[mapnum,3] = Math.Min(p.ReadUShort(), WrapMapSize[mapnum,1]);
                         }
-                        bool active = true;
                         var refs = FileManager.Map.GetFileReferences;
                         _filesMap = refs.Item1;
                         _filesStatics = refs.Item2;
                         _filesIdxStatics = refs.Item3;
                         _EOF = new uint[maps];
-                        for(int i = 0; i < maps && active; i++)
+                        _filesStaticsStream = new FileStream[maps];
+                        IsUltimaLiveActive = Directory.Exists(ShardName);
+                        for (int i = 0; i < maps && IsUltimaLiveActive; i++)
                         {
                             _filesMap[i] = FileManager.Map.UltimaLiveReloadMaps(i);
-                            active = _filesMap[i].UltimaLiveReloader() > 0 && _filesIdxStatics[i].UltimaLiveReloader() > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader()) > 0;
+                            _filesStaticsStream[i] = File.Open(Path.Combine(ShardName, Path.GetFileName(_filesStatics[i].FilePath)), FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                            IsUltimaLiveActive = _filesMap[i].UltimaLiveReloader(null) > 0 && _filesIdxStatics[i].UltimaLiveReloader(null) > 0 && (_EOF[i] = _filesStatics[i].UltimaLiveReloader(_filesStaticsStream[i])) > 0;
                             FileManager.Map.LoadMap(i);
                         }
-                        IsUltimaLiveActive = Directory.Exists(ShardName) && active;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
                     }
                 case 0x02://Live login confirmation
@@ -304,7 +318,24 @@ namespace ClassicUO.IO
 
             if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
+                var chunk = World.Map.Chunks[block];
+                if (chunk != null)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        for (int y = 0; y < 8; y++)
+                        {
+                            for (GameObject obj = chunk.Tiles[x, y].FirstNode; obj != null; obj = obj.Right)
+                            {
+                                if (obj is Land || obj is Static)
+                                    obj.Dispose();
+                            }
+                        }
+                    }
+                }
                 _filesMap[mapID].WriteArray((block * 196) + 4, landData);
+                FileManager.Map.ReloadBlock(mapID, block);
+                chunk?.Load(mapID);
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 MapCRCs[mapID][block] = UInt16.MaxValue;
             }
@@ -371,6 +402,17 @@ namespace ClassicUO.IO
                 WriteByte(mapid);
                 for (int i = 0; i < CRCLength; i++)
                     WriteUShort(crcs[i]);
+            }
+        }
+
+        public static void Dispose()
+        {
+            if(_filesStaticsStream!=null)
+            {
+                for (int i = _filesStaticsStream.Length - 1; i >= 0; --i)
+                {
+                    _filesStaticsStream[i]?.Dispose();
+                }
             }
         }
 
