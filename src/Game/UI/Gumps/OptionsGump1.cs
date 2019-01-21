@@ -59,8 +59,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private TextBox _windowWidth;
         private TextBox _windowHeight;
-        private Combobox _windowFullscreen;
-        private Combobox _windowLock;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -551,6 +549,8 @@ namespace ClassicUO.Game.UI.Gumps
                 case 3: // video
                     _debugControls.IsChecked = false;
                     _shardType.SelectedIndex = 0;
+                    _windowWidth.Text = "640";
+                    _windowHeight.Text = "480";
                     break;
                 case 4: // commands
 
@@ -656,23 +656,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
             int GameWindowSizeWidth = 640;
-            int GameWindowSizeHeight = 400;
+            int GameWindowSizeHeight = 480;
 
             int.TryParse(_windowWidth.Text, out GameWindowSizeWidth);
             int.TryParse(_windowHeight.Text, out GameWindowSizeHeight);
 
             if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                Debug.WriteLine("GameWindowSizeWidth = {0}, GameWindowSizeHeight = {1}", GameWindowSizeWidth, GameWindowSizeHeight);
-                Debug.WriteLine("Current.GameWindowSizeX = {0}, Current.GameWindowSizeY = {1}", Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y);
-
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
+                _windowWidth.Text = Engine.Profile.Current.GameWindowSize.X.ToString();
+                _windowHeight.Text = Engine.Profile.Current.GameWindowSize.Y.ToString();
             }
-
-
 
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
