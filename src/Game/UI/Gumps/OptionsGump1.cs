@@ -474,6 +474,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        public void UpdateVideo()
+        {
+            BuildVideo();
+        }
 
         public override void OnButtonClick(int buttonID)
         {

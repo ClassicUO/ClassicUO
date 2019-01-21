@@ -27,6 +27,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -74,6 +75,10 @@ namespace ClassicUO.Game.UI.Gumps
             _button.MouseUp += (sender, e) =>
             {
                 Point n = ResizeWindow(_lastSize);
+
+                OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+                if (options != null)
+                    options.UpdateVideo();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_200)
                     NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
