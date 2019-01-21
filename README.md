@@ -1,6 +1,8 @@
-![](https://i.imgur.com/CgpwyIQ.png)
+<p align="center">
+  <img width="300" height="330" src="https://i.imgur.com/CgpwyIQ.png">
+</p>
 
-ClassicUO - an open source implementation of the Ultima Online Classic Client.
+An open source implementation of the Ultima Online Classic Client.
 
 # Contacts
 Join [Discord channel](https://discord.gg/VdyCpjQ)
