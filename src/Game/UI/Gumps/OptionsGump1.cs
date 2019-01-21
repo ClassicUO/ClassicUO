@@ -665,9 +665,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
-                _windowWidth.Text = Engine.Profile.Current.GameWindowSize.X.ToString();
-                _windowHeight.Text = Engine.Profile.Current.GameWindowSize.Y.ToString();
+                Point n = e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
+
+                _windowWidth.Text = n.X.ToString();
+                _windowHeight.Text = n.Y.ToString();
             }
 
             // fonts

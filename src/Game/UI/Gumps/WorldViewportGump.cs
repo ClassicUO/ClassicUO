@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _worldWidth;
         private Point _lastSize, _savedSize;
 
-        public void ResizeWindow(Point newSize)
+        public Point ResizeWindow(Point newSize)
         {
             if (newSize.X < 640)
                 newSize.X = 640;
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (newSize.Y < 480)
                 newSize.Y = 480;
 
-            _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
         }
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
@@ -73,16 +73,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _button.MouseUp += (sender, e) =>
             {
-                if (_lastSize.X < 640)
-                    _lastSize.X = 640;
-
-                if (_lastSize.Y < 480)
-                    _lastSize.Y = 480;
-
-                _savedSize = Engine.Profile.Current.GameWindowSize = _lastSize;
+                Point n = ResizeWindow(_lastSize);
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                    NetClient.Socket.Send(new PGameWindowSize((uint) _lastSize.X, (uint) _lastSize.Y));
+                    NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
 
                 _clicked = false;
             };
