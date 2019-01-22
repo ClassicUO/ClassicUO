@@ -53,6 +53,7 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = new LoginScene();
 
                     break;
+
                 case ScenesType.Game:
                     Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
@@ -62,7 +63,6 @@ namespace ClassicUO.Game.Scenes
                         WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                         e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
                     }
-
                     break;
             }
 
