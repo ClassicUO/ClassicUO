@@ -101,7 +101,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseCircleOfTransparency { get; set; } = false;
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
         [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
-
+        [JsonProperty] public bool SaveScalaAfterClose { get; set; } = false;
+        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;

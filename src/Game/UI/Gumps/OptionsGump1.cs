@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom;
+        private Checkbox _debugControls, _zoom, _savezoom;
         private Combobox _shardType;
 
         private Checkbox _gameWindowLock;
@@ -360,6 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
             _zoom = CreateCheckBox(rightArea, "Enable scale zoom", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScalaAfterClose, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
@@ -575,6 +576,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 3: // video
                     _debugControls.IsChecked = false;
                     _zoom.IsChecked = false;
+                    _savezoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
                     _gameWindowWidth.Text = "640";
                     _gameWindowHeight.Text = "480";
@@ -582,6 +584,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowPositionY.Text = "10";
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
                 case 4: // commands
 
@@ -674,7 +677,6 @@ namespace ClassicUO.Game.UI.Gumps
             // video
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
             Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
-            Engine.SceneManager.GetScene<GameScene>().Scale = 1;
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
@@ -752,6 +754,14 @@ namespace ClassicUO.Game.UI.Gumps
                     e.Location = new Point(20, 20);
                 }
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
+            }
+
+            if (_savezoom.IsChecked != Engine.Profile.Current.SaveScalaAfterClose)
+            {
+                if (!_savezoom.IsChecked)
+                    Engine.Profile.Current.ScaleZoom = 1f;
+
+                Engine.Profile.Current.SaveScalaAfterClose = _savezoom.IsChecked;
             }
 
             UpdateVideo();

@@ -155,7 +155,10 @@ namespace ClassicUO.Game.Scenes
                 if (Scale < 0.7f)
                     Scale = 0.7f;
                 else if (Scale > 2.3f)
-                    Scale = 2.3f;               
+                    Scale = 2.3f;
+
+                if (Engine.Profile.Current.SaveScalaAfterClose)
+                    Engine.Profile.Current.ScaleZoom = Scale;
             };
 
             Engine.Input.KeyDown += OnKeyDown;
