@@ -123,6 +123,9 @@ namespace ClassicUO.Game
                     //text = $"[Alliance][{parent.Name}]: {text}";
 
                     break;
+                default:
+                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+                    break;
 			}
 
 			Message.Raise(new UOMessageEventArgs(parent, text, hue, type, font, unicode, lang), parent ?? _system);

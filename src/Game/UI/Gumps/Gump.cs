@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class Gump : Control
+    internal class Gump : Control           
     {
         public Gump(Serial local, Serial server)
         {
@@ -105,28 +105,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (LocalSerial != 0)
             {
-                if (buttonID == 0) // cancel
-                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID);
-                else
+                List<Serial> switches = new List<Serial>();
+                List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
+
+                foreach (Control control in Children)
                 {
-                    List<Serial> switches = new List<Serial>();
-                    List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
-
-                    foreach (Control control in Children)
+                    switch (control)
                     {
-                        switch (control)
-                        {
-                            case Checkbox checkbox when checkbox.IsChecked: switches.Add(control.LocalSerial);
+                        case Checkbox checkbox when checkbox.IsChecked: switches.Add(control.LocalSerial);
 
-                                break;
-                            case TextBox textBox: entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+                            break;
+                        case TextBox textBox: entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
-                                break;
-                        }
+                            break;
                     }
-
-                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
+
+                GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
 
                 Engine.UI.SavePosition(ServerSerial, Location);
                 Dispose();

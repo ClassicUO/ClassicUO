@@ -18,32 +18,24 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Audio;
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
-
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
@@ -865,22 +857,39 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            //item.EnableCallBackForItemsUpdate(true);
-            var serial = p.ReadUInt();
+            Serial serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
 
             Engine.UI.GetByLocalSerial(serial)?.Dispose();
 
             if (graphic == 0x30) // vendor
             {
-                var mobile = World.Mobiles.Get(serial);
-                var itemList = mobile.Items
-                    .Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy)
-                    .SelectMany(o => o.Items)
-                    .OrderBy(o => o.Serial.Value)
-                    .ToArray();
+                Mobile vendor = World.Mobiles.Get(serial);
+                if (vendor == null)
+                    return;
 
-                Engine.UI.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
+                var gump = new ShopGump(serial, true, 150, 5);
+
+                for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
+                {
+                    Item item = vendor.Equipment[(int) layer];
+
+                    Item a = item?.Items.FirstOrDefault();
+
+                    if (a == null)
+                        continue;
+
+                    var list = item.Items.OrderBy(s => s.Serial.Value).Reverse();
+
+                    foreach (var i in list)
+                    {
+                        Console.WriteLine(i.Position);
+                        gump.AddItem(i);
+                    }
+
+                }
+
+                Engine.UI.Add(gump);
             }
             else
             {
@@ -904,15 +913,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    ContainerGump container = new ContainerGump(item, graphic);
-
-                    //if (!Engine.UI.GetGumpCachePosition(item, out Point location))
-                    //{
-                    //    location = Engine.UI.GetContainerPosition();
-                    //}
-
-                    //container.Location = location;
-                    Engine.UI.Add(container);
+                    Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
         }
@@ -1193,7 +1194,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < count; i++)
                 ReadContainerContent(p, items);
 
-            if (items.Count > 0)
+            if (items.Count != 0)
             {
                 Item container = World.Items.Get(items[0].Container);
 
@@ -1548,26 +1549,61 @@ namespace ClassicUO.Network
 
         private static void BuyList(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Item container = World.Items.Get(p.ReadUInt());
 
             if (container == null) return;
             Mobile vendor = World.Mobiles.Get(container.Container);
 
             if (vendor == null) return;
-            var count = p.ReadByte();
 
-            //Server sends items ordered by serial
-            foreach (var item in container.Items.OrderBy(o => o.Serial.Value))
+
+            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>();
+
+            if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
             {
-                item.Price = p.ReadUInt();
-                var nameLen = p.ReadByte();
-                var name = p.ReadASCII(nameLen);
-                int cliloc = 0;
+                gump.Dispose();
+                gump = null;
+            }
 
-                if (int.TryParse(name, out cliloc))
-                    item.Name = FileManager.Cliloc.GetString(cliloc);
-                else
-                    item.Name = name;
+            if (gump == null)
+            {
+                gump = new ShopGump(vendor, true, 150, 5);
+                Engine.UI.Add(gump);
+            }
+
+            if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
+            {
+                byte count = p.ReadByte();
+
+                Item a = container.Items.FirstOrDefault();
+
+                if (a == null)
+                    return;
+
+                bool reverse = a.X > 1;
+
+                var list = reverse ? 
+                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
+                               :
+                               container.Items.OrderBy(s => s.Serial.Value);
+
+                foreach (Item it in list.Take(count))
+                {
+                    it.Price = p.ReadUInt();
+                    byte nameLen = p.ReadByte();
+                    string name = p.ReadASCII(nameLen);
+
+                    if (int.TryParse(name, out int cliloc))
+                    {
+                        it.Name = FileManager.Cliloc.GetString(cliloc);
+                    }
+                    else
+                        it.Name = name;
+
+                }
             }
         }
 
@@ -1636,6 +1672,7 @@ namespace ClassicUO.Network
 
             if (p.ID != 0x78)
                 p.Skip(6);
+
             uint itemSerial;
 
             while ((itemSerial = p.ReadUInt()) != 0)
@@ -1643,7 +1680,7 @@ namespace ClassicUO.Network
                 Item item = World.GetOrCreateItem(itemSerial);
                 Graphic itemGraphic = p.ReadUShort();
                 item.Layer = (Layer)p.ReadByte();
-
+           
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                     item.Hue = p.ReadUShort();
                 else if ((itemGraphic & 0x8000) != 0)
@@ -1942,7 +1979,7 @@ namespace ClassicUO.Network
             }
 
             UIManager ui = Engine.UI;
-            ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
+            //ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
         private static void UpdateHitpoints(Packet p)
@@ -2544,6 +2581,8 @@ namespace ClassicUO.Network
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
 
             string text = FileManager.Cliloc.Translate((int)cliloc, arguments);
+            if (text == null)
+                return;
 
             if (!String.IsNullOrWhiteSpace(affix))
             {
@@ -2613,7 +2652,13 @@ namespace ClassicUO.Network
 
         private static void MegaCliloc(Packet p)
         {
-            p.Skip(2);
+            if (!World.InGame)
+                return;
+
+            ushort unknown = p.ReadUShort();
+            if (unknown > 1)
+                return;
+
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null) return;
@@ -2979,12 +3024,13 @@ namespace ClassicUO.Network
             item.Amount = Math.Max(p.ReadUShort(), (ushort)1);
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
-            if (FileManager.ClientVersion >= ClientVersions.CV_6017) p.ReadByte(); //gridnumber - useless?
+            if (FileManager.ClientVersion >= ClientVersions.CV_6017) 
+                p.Skip(1);
             item.Container = p.ReadUInt();
             item.Position = new Position(x, y);
             item.Hue = p.ReadUShort();
+
             items.Add(item);
-            Entity entity = World.Get(item.Container);
 
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
@@ -2993,24 +3039,40 @@ namespace ClassicUO.Network
                 gs.HeldItem.Clear();
             }
 
+            Entity entity = World.Get(item.Container);
+
             if (entity != null)
             {
-                entity.Items.Add(item);
 
-                foreach (Item i in World.ToAdd.Where(i => i.Container == item))
-                {
-                    item.Items.Add(i);
-                    World.Items.Add(i);
-                }
-
-                World.ToAdd.ExceptWith(item.Items);
-                item.ProcessDelta();
+                entity.Items.Remove(item);
                 entity.ProcessDelta();
 
-                return World.Items.Add(item);
+                entity.Items.Add(item);
+                World.Items.Add(item);
+
+                item.ProcessDelta();
+                entity.ProcessDelta();
+                return true;
             }
 
-            World.ToAdd.Add(item);
+            //if (entity != null)
+            //{
+            //    entity.Items.Add(item);
+
+            //    foreach (Item i in World.ToAdd.Where(i => i.Container == item))
+            //    {
+            //        item.Items.Add(i);
+            //        World.Items.Add(i);
+            //    }
+
+            //    World.ToAdd.ExceptWith(item.Items);
+            //    item.ProcessDelta();
+            //    entity.ProcessDelta();
+
+            //    return World.Items.Add(item);
+            //}
+
+            //World.ToAdd.Add(item);
             item.ProcessDelta();
 
             return false;

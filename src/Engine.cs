@@ -131,6 +131,7 @@ namespace ClassicUO
                 _graphicDeviceManager.ApplyChanges();
             };
             Window.AllowUserResizing = true;
+            IsMouseVisible = true;
         }
 
         public static Batcher2D Batcher => _engine._batcher;
@@ -289,6 +290,7 @@ namespace ClassicUO
 
             if (_settings == null)
             {
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
                 Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
                 _settings = new Settings();
                 _settings.Save();
@@ -354,6 +356,8 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
             PacketHandlers.Load();
+            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
+            UltimaLive.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();

@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void Add(BulletinBoardObject obj)
         {
-            _area.AddChildren(obj);
+            _area.Add(obj);
         }
 
         public override void Dispose()
@@ -124,8 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 TitleGumpID = 0x0820,
             });
-            _scrollBar = new ScrollFlag(this, 0, 0, Height);
-
+            _scrollBar = new ScrollFlag( 0, 0, Height);
+            Add(_scrollBar);
             bool useUnicode = FileManager.ClientVersion >= ClientVersions.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;

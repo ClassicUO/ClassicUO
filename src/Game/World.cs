@@ -40,7 +40,7 @@ namespace ClassicUO.Game
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 
-        public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
+        //public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
 
@@ -202,7 +202,7 @@ namespace ClassicUO.Game
 
             if (item == null)
             {
-                ToAdd.RemoveWhere(i => i == serial);
+                //ToAdd.RemoveWhere(i => i == serial);
 
                 return false;
             }
@@ -252,7 +252,7 @@ namespace ClassicUO.Game
             Player = null;
             Map.Dispose();
             Map = null;
-            ToAdd.Clear();
+            //ToAdd.Clear();
             IO.UltimaLive.IsUltimaLiveActive = false;
             IO.UltimaLive.ShardName = null;
             ClientFlags.SetFlags(0);

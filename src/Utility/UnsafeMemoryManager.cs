@@ -27,20 +27,20 @@ namespace ClassicUO.Utility
 {
     public static unsafe class UnsafeMemoryManager
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void* AsPointer<T>(ref T v)
-        {
-            TypedReference t = __makeref(v);
-            return (void*)*((IntPtr*)&t + (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0) );
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static void* AsPointer<T>(ref T v)
+        //{
+        //    TypedReference t = __makeref(v);
+        //    return (void*)*((IntPtr*)&t + (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0) );
+        //}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(object v)
-        {
-            int size = SizeOf<T>();
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static T As<T>(object v)
+        //{
+        //    int size = SizeOf<T>();
 
-            return Reinterpret<object, T>(v, size);
-        }
+        //    return Reinterpret<object, T>(v, size);
+        //}
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,70 +48,70 @@ namespace ClassicUO.Utility
         {
             return Marshal.SizeOf<T>();
 
-            DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
+            //DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
 
-            TypedReference tRef0 = __makeref(doubleStruct.First);
-            TypedReference tRef1 = __makeref(doubleStruct.Second);
+            //TypedReference tRef0 = __makeref(doubleStruct.First);
+            //TypedReference tRef1 = __makeref(doubleStruct.Second);
 
-            // NB: Mono doesn't like these... LOL
-            //TypedReference* address0 = &tRef0;
-            //TypedReference* address1 = &tRef1;
+            //// NB: Mono doesn't like these... LOL
+            ////TypedReference* address0 = &tRef0;
+            ////TypedReference* address1 = &tRef1;
 
-            bool use2nd = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
+            //bool use2nd = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
 
-            IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
-            IntPtr secondValueAddress0 = *(IntPtr*)&tRef0 + 1;
-            IntPtr firstValueAddress1 = *(IntPtr*)&tRef1;
-            IntPtr secondValueAddress1 = *((IntPtr*)&tRef1 + 1);
+            //IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
+            //IntPtr secondValueAddress0 = *(IntPtr*)&tRef0 + 1;
+            //IntPtr firstValueAddress1 = *(IntPtr*)&tRef1;
+            //IntPtr secondValueAddress1 = *((IntPtr*)&tRef1 + 1);
 
-            int size = 0;
+            //int size = 0;
 
-            if (use2nd/* firstValueAddress0 == firstValueAddress1 */ )
-                size = (int)((byte*)secondValueAddress1 - (byte*)secondValueAddress0);
-            else
-                size = (int)((byte*)firstValueAddress1 - (byte*)firstValueAddress0);
+            //if (use2nd/* firstValueAddress0 == firstValueAddress1 */ )
+            //    size = (int)((byte*)secondValueAddress1 - (byte*)secondValueAddress0);
+            //else
+            //    size = (int)((byte*)firstValueAddress1 - (byte*)firstValueAddress0);
 
-            return size;
+            //return size;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
-        {
-            TOut result = default;
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
+        //{
+        //    TOut result = default;
 
-            //SingleStruct<TIn> inS = SingleStruct<TIn>.Value;
-            //SingleStruct<TOut> outS = SingleStruct<TOut>.Value;
+        //    //SingleStruct<TIn> inS = SingleStruct<TIn>.Value;
+        //    //SingleStruct<TOut> outS = SingleStruct<TOut>.Value;
 
-            TypedReference resultRef = __makeref(result);
-            TypedReference curValueRef = __makeref(curValue);
+        //    TypedReference resultRef = __makeref(result);
+        //    TypedReference curValueRef = __makeref(curValue);
 
 
-            int offset = (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0);
+        //    int offset = (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0);
 
-            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + offset);
-            byte* curValuePtr = (byte*)*((IntPtr*)&curValueRef + offset);
+        //    byte* resultPtr = (byte*)*((IntPtr*)&resultRef + offset);
+        //    byte* curValuePtr = (byte*)*((IntPtr*)&curValueRef + offset);
 
-            //for (int i = 0; i < sizeBytes; ++i)
-            //    resultPtr[i] = curValuePtr[i];
+        //    //for (int i = 0; i < sizeBytes; ++i)
+        //    //    resultPtr[i] = curValuePtr[i];
 
-            Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
+        //    Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleStruct<T> //where T : struct
-        {
-            public T First;
-            public T Second;
-            public static readonly DoubleStruct<T> Value;
-        }
+        //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+        //private struct DoubleStruct<T> //where T : struct
+        //{
+        //    public T First;
+        //    public T Second;
+        //    public static readonly DoubleStruct<T> Value;
+        //}
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct SingleStruct<T> //where T : struct
-        {
-            public T First;
-            public static readonly SingleStruct<T> Value;
-        }
+        //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+        //private struct SingleStruct<T> //where T : struct
+        //{
+        //    public T First;
+        //    public static readonly SingleStruct<T> Value;
+        //}
     }
 }

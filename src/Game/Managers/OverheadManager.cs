@@ -169,8 +169,6 @@ namespace ClassicUO.Game.Managers
                 last.Right = overhead;
                 overhead.Left = last;
             }
-
-            //_allOverheads.Add(Tuple.Create(overhead, position));
         }
 
         

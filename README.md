@@ -1,4 +1,8 @@
-ClassicUO - an open source implementation of the Ultima Online Classic Client.
+<p align="center">
+  <img width="300" height="320" src="https://i.imgur.com/CgpwyIQ.png">
+</p>
+
+An open source implementation of the Ultima Online Classic Client.
 
 # Contacts
 Join [Discord channel](https://discord.gg/VdyCpjQ)

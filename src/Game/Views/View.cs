@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -96,61 +98,50 @@ namespace ClassicUO.Game.Views
                 float cosx = (float) Math.Cos(Rotation) * w;
                 float siny = (float) Math.Sin(Rotation) * h;
                 float cosy = (float) Math.Cos(Rotation) * h;
-                vertex = SpriteVertex.PolyBufferFlipped;
 
-                fixed (SpriteVertex* ptr = vertex)
-                {
-                    ptr[0].Position = center;
-                    ptr[0].Position.X += cosx - -siny;
-                    ptr[0].Position.Y -= sinx + -cosy;
-                    ptr[1].Position = center;
-                    ptr[1].Position.X += cosx - siny;
-                    ptr[1].Position.Y += -sinx + -cosy;
-                    ptr[2].Position = center;
-                    ptr[2].Position.X += -cosx - -siny;
-                    ptr[2].Position.Y += sinx + cosy;
-                    ptr[3].Position = center;
-                    ptr[3].Position.X += -cosx - siny;
-                    ptr[3].Position.Y += sinx + -cosy;
-                }
+                vertex = SpriteVertex.PolyBufferFlipped;            
+                vertex[0].Position = center;
+                vertex[0].Position.X += cosx - -siny;
+                vertex[0].Position.Y -= sinx + -cosy;
+                vertex[1].Position = center;
+                vertex[1].Position.X += cosx - siny;
+                vertex[1].Position.Y += -sinx + -cosy;
+                vertex[2].Position = center;
+                vertex[2].Position.X += -cosx - -siny;
+                vertex[2].Position.Y += sinx + cosy;
+                vertex[3].Position = center;
+                vertex[3].Position.X += -cosx - siny;
+                vertex[3].Position.Y += sinx + -cosy;                
             }
             else if (IsFlipped)
             {
                 vertex = SpriteVertex.PolyBufferFlipped;
-
-                fixed (SpriteVertex* ptr = vertex)
-                {
-                    ptr[0].Position = position;
-                    ptr[0].Position.X += Bounds.X + 44f;
-                    ptr[0].Position.Y -= Bounds.Y;
-                    ptr[0].TextureCoordinate.Y = 0;
-                    ptr[1].Position = vertex[0].Position;
-                    ptr[1].Position.Y += Bounds.Height;
-                    ptr[2].Position = vertex[0].Position;
-                    ptr[2].Position.X -= Bounds.Width;
-                    ptr[2].TextureCoordinate.Y = 0;
-                    ptr[3].Position = vertex[1].Position;
-                    ptr[3].Position.X -= Bounds.Width;
-                }
+                vertex[0].Position = position;
+                vertex[0].Position.X += Bounds.X + 44f;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.Y += Bounds.Height;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.X -= Bounds.Width;
+                vertex[2].TextureCoordinate.Y = 0;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.X -= Bounds.Width;              
             }
             else
             {
                 vertex = SpriteVertex.PolyBuffer;
-
-                fixed (SpriteVertex* ptr = vertex)
-                {
-                    ptr[0].Position = position;
-                    ptr[0].Position.X -= Bounds.X;
-                    ptr[0].Position.Y -= Bounds.Y;
-                    ptr[0].TextureCoordinate.Y = 0;
-                    ptr[1].Position = vertex[0].Position;
-                    ptr[1].Position.X += Bounds.Width;
-                    ptr[1].TextureCoordinate.Y = 0;
-                    ptr[2].Position = vertex[0].Position;
-                    ptr[2].Position.Y += Bounds.Height;
-                    ptr[3].Position = vertex[1].Position;
-                    ptr[3].Position.Y += Bounds.Height;
-                }
+                vertex[0].Position = position;
+                vertex[0].Position.X -= Bounds.X;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.X += Bounds.Width;
+                vertex[1].TextureCoordinate.Y = 0;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.Y += Bounds.Height;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.Y += Bounds.Height;               
             }
 
             if (Engine.Profile.Current.HighlightGameObjects)

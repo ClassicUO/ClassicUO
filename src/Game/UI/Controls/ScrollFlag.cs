@@ -38,20 +38,28 @@ namespace ClassicUO.Game.UI.Controls
         private Rectangle _rect;
         private int _sliderExtentTop, _sliderExtentHeight;
         private float _sliderPosition;
-        private SpriteTexture _texture;
         private float _value;
 
-        public ScrollFlag(Control parent, int x, int y, int height) : this(parent)
+        public ScrollFlag(int x, int y, int height) : this()
         {
-            Location = new Point(x, y);
+            X = x;
+            Y = Y;
             _sliderExtentTop = y;
             _sliderExtentHeight = height;
         }
 
-        public ScrollFlag(Control parent) : base(parent)
+        public ScrollFlag() : base()
         {
             AcceptMouseInput = true;
+
+            Texture = FileManager.Gumps.GetTexture(0x0828);
+            Width = Texture.Width;
+            Height = Texture.Height;
+
+            WantUpdateSize = false;
         }
+
+        protected override ClickPriority Priority { get; } = ClickPriority.High;
 
         public event EventHandler ValueChanged;
 
@@ -102,14 +110,6 @@ namespace ClassicUO.Game.UI.Controls
             return Contains(x, y);
         }
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            _texture = FileManager.Gumps.GetTexture(0x0828);
-            Width = _texture.Width;
-            Height = _texture.Height;
-        }
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -117,15 +117,16 @@ namespace ClassicUO.Game.UI.Controls
             if (MaxValue <= MinValue || MinValue >= MaxValue)
                 Value = MaxValue = MinValue;
             _sliderPosition = GetSliderYPosition();
-            _texture.Ticks = (long) totalMS;
+            Texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
             if (MaxValue != MinValue)
-                batcher.Draw2D(_texture, new Point(position.X - 5, (int) (position.Y + _sliderPosition)), Vector3.Zero);
+                batcher.Draw2D(Texture, p, Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, p, hue);
         }
 
         private float GetSliderYPosition()
@@ -138,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private float GetScrollableArea()
         {
-            return Height - _texture.Height;
+            return Height - Texture.Height;
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
@@ -193,12 +194,16 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            x -= 5;
-            _rect.Y = (int) _sliderPosition;
-            _rect.Width = _texture.Width;
-            _rect.Height = _texture.Height;
+            y -= (int)_sliderPosition;
 
-            return _rect.Contains(x, y);
+            return Texture.Contains(x, y);
+            //x -= 5;
+            //_rect.X = -5;
+            //_rect.Y = (int)_sliderPosition;
+            //_rect.Width = Texture.Width;
+            //_rect.Height = Texture.Height;
+
+            //return _rect.Contains(x, y);
         }
     }
 }

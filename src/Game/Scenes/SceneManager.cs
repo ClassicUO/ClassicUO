@@ -20,7 +20,8 @@
 #endregion
 using System;
 
-using ClassicUO.Utility.Logging;
+using ClassicUO.Game.UI.Gumps;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -50,10 +51,16 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = new LoginScene();
 
                     break;
+
                 case ScenesType.Game:
                     Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
 
+                    if (Engine.Profile.Current.GameWindowFullSize)
+                    {
+                        WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                        e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                    }
                     break;
             }
 
