@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Diagnostics;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -128,6 +130,25 @@ namespace ClassicUO.Game.UI.Controls
             TxEntry.InsertString(c);
         }
 
+        public TextBox NextElement()
+        {
+            TextBox next = this;
+            bool fThis = false;
+            foreach (TextBox t in Parent?.FindControls<TextBox>())
+            {
+                if (fThis)
+                {
+                    next = t;
+                    break;
+                }
+                if (t == this)
+                    fThis = true;
+                if (!fThis)
+                    next = t;
+            }
+            return next;
+        }
+
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             string s=null;
@@ -151,8 +172,8 @@ namespace ClassicUO.Game.UI.Controls
                        Parent?.OnKeyboardReturn(0, s);
                     break;
                 case SDL.SDL_Keycode.SDLK_TAB:
-                    NextFocus.SetKeyboardFocus();
-                    break;
+                        NextElement().SetKeyboardFocus();
+                        break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                         TxEntry.RemoveChar(true);
@@ -175,7 +196,6 @@ namespace ClassicUO.Game.UI.Controls
                     TxEntry.SetCaretPosition(Text.Length - 1);
                     break;
             }
-
 
             base.OnKeyDown(key, mod);
         }
