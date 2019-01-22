@@ -15,7 +15,6 @@ namespace ClassicUO.IO.Resources
     {
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
-        public static int LastStatic { get; private set; }
 
         public override void Load()
         {
@@ -32,7 +31,6 @@ namespace ClassicUO.IO.Resources
             tiledata.Seek(0);
             LandData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
             StaticData = new StaticTiles[staticscount * 32];
-            LastStatic = StaticData.Length;
             byte[] bufferString = new byte[20];
 
             for (int i = 0; i < 512; i++)
