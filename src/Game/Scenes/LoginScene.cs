@@ -41,16 +41,6 @@ namespace ClassicUO.Game.Scenes
 {
     internal sealed class LoginScene : Scene
     {
-        public enum LoginRejectionReasons : byte
-        {
-            InvalidAccountPassword = 0x00,
-            AccountInUse = 0x01,
-            AccountBlocked = 0x02,
-            BadPassword = 0x03,
-            IdleExceeded = 0xFE,
-            BadCommuncation = 0xFF,
-        }
-
         public enum LoginStep
         {
             Main,
@@ -75,7 +65,6 @@ namespace ClassicUO.Game.Scenes
 
         public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
-        public LoginRejectionReasons? LoginRejectionReason { get; private set; }
 
         public ServerListEntry[] Servers { get; private set; }
 
@@ -197,36 +186,7 @@ namespace ClassicUO.Game.Scenes
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
 
-            if (LoginRejectionReason.HasValue)
-            {
-                switch (LoginRejectionReason.Value)
-                {
-                    case LoginRejectionReasons.BadPassword:
-                    case LoginRejectionReasons.InvalidAccountPassword:
-                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
-
-                        break;
-                    case LoginRejectionReasons.AccountInUse:
-                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
-
-                        break;
-                    case LoginRejectionReasons.AccountBlocked:
-                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
-
-                        break;
-                    case LoginRejectionReasons.IdleExceeded:
-                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
-
-                        break;
-                    case LoginRejectionReasons.BadCommuncation:
-                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
-
-                        break;
-                }
-
-                showButtons = LoadingGump.Buttons.OK;
-            }
-            else if (!string.IsNullOrEmpty(PopupMessage))
+            if (!string.IsNullOrEmpty(PopupMessage))
             {
                 labelText = PopupMessage;
                 showButtons = LoadingGump.Buttons.OK;
@@ -332,7 +292,6 @@ namespace ClassicUO.Game.Scenes
 
         public void StepBack()
         {
-            LoginRejectionReason = null;
             PopupMessage = null;
 
             switch (CurrentLoginStep)
@@ -423,6 +382,7 @@ namespace ClassicUO.Game.Scenes
                     Engine.UI.Add(_currentGump = new CharacterSelectionGump());
 
 					break;
+
 				case 0xA9: // ReceiveCharacterList
                     ParseCharacterList(e);
 					ParseCities(e);
@@ -452,11 +412,13 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0x82: // ReceiveLoginRejection
-                    HandleLoginRejection(e);
-
-                    break;
+                case 0x85: // character list notification
                 case 0x53: // Error Code
-                    HandleErrorCode(e);
+                    //HandleErrorCode(e);
+                    byte code = e.ReadByte();
+
+                    PopupMessage = ServerErrorMessages.GetError(e.ID, code);
+                    CurrentLoginStep = LoginStep.PopUpMessage;
 
                     break;
             }
@@ -641,19 +603,6 @@ namespace ClassicUO.Game.Scenes
 	    {
 		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
 		}
-
-        private void HandleErrorCode(Packet reader)
-        {
-            PopupMessage = ServerErrorMessages.LoginErrors[reader.ReadByte()];
-            CurrentLoginStep = LoginStep.PopUpMessage;
-        }
-
-        private void HandleLoginRejection(Packet reader)
-        {
-            reader.MoveToData();
-            byte reasonId = reader.ReadByte();
-            LoginRejectionReason = (LoginRejectionReasons)reasonId;
-        }
     }
 
     internal class ServerListEntry

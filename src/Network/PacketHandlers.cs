@@ -1027,7 +1027,7 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, ServerErrorMessages.PickUpErrors[code], 0, MessageType.System, MessageFont.Normal);
+                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), 0, MessageType.System, MessageFont.Normal);
             }
         }
 
