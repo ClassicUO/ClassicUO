@@ -32,6 +32,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 using ClassicUO.Network;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -40,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -200,6 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
+            _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
 
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -545,6 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sliderFPS.Value = 60;
                     _sliderFPSLogin.Value = 60;
                     _highlightObjects.IsChecked = true;
+                    _enableTopbar.IsChecked = false;
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
@@ -631,6 +634,20 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
+
+            if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
+            {
+                if (_enableTopbar.IsChecked)
+                {
+                    TopBarGump gump = Engine.UI.GetByLocalSerial<TopBarGump>();
+                    if (gump != null)
+                        gump.Dispose();
+                }
+                else
+                    TopBarGump.Create();
+
+                Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
+            }
 
             if (Engine.Profile.Current.TreeToStumps != _treeToStumps.IsChecked)
             {
