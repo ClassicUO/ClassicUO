@@ -20,9 +20,7 @@
 #endregion
 using System;
 
-using ClassicUO.Utility.Logging;
 using ClassicUO.Game.UI.Gumps;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Scenes

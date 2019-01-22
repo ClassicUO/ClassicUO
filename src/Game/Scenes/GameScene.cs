@@ -38,8 +38,6 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using System.Diagnostics;
-
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
