@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
         private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private float _timeUntilNextClick;
 
-        public ScrollBar(Control parent, int x, int y, int height) : base(parent)
+        public ScrollBar(int x, int y, int height) : base()
         {
             Height = height;
             Location = new Point(x, y);

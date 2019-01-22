@@ -59,7 +59,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
-                string path = Path.Combine(FileManager.UoFolderPath, $"map{i}LegacyMUL.uop");
+                string path = Path.Combine(FileManager.UoStaticsMapPath, $"map{i}LegacyMUL.uop");
 
                 if (File.Exists(path))
                 {
@@ -68,7 +68,7 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    path = Path.Combine(FileManager.UoFolderPath, $"map{i}.mul");
+                    path = Path.Combine(FileManager.UoStaticsMapPath, $"map{i}.mul");
 
                     if (File.Exists(path))
                     {
@@ -76,22 +76,22 @@ namespace ClassicUO.IO.Resources
                         foundedOneMap = true;
                     }
 
-                    path = Path.Combine(FileManager.UoFolderPath, $"mapdifl{i}.mul");
+                    path = Path.Combine(FileManager.UoStaticsMapPath, $"mapdifl{i}.mul");
 
                     if (File.Exists(path))
                     {
                         _mapDifl[i] = new UOFileMul(path);
-                        _mapDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"mapdif{i}.mul"));
+                        _mapDif[i] = new UOFileMul(Path.Combine(FileManager.UoStaticsMapPath, $"mapdif{i}.mul"));
 
-                        _staDifl[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifl{i}.mul"));
-                        _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifi{i}.mul"));
-                        _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadif{i}.mul"));
+                        _staDifl[i] = new UOFileMul(Path.Combine(FileManager.UoStaticsMapPath, $"stadifl{i}.mul"));
+                        _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoStaticsMapPath, $"stadifi{i}.mul"));
+                        _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoStaticsMapPath, $"stadif{i}.mul"));
                     }
                 }
 
-                path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
+                path = Path.Combine(FileManager.UoStaticsMapPath, $"statics{i}.mul");
                 if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path, false);
-                path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
+                path = Path.Combine(FileManager.UoStaticsMapPath, $"staidx{i}.mul");
                 if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
             }
 
@@ -196,6 +196,64 @@ namespace ClassicUO.IO.Resources
 
                 BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
             }
+        }
+
+        internal unsafe void ReloadBlock(int map, int blocknum)
+        {
+            int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
+            int staticidxblocksize = UnsafeMemoryManager.SizeOf<StaidxBlock>();
+            int staticblocksize = UnsafeMemoryManager.SizeOf<StaticsBlock>();
+            UOFile file = _filesMap[map];
+            UOFile fileidx = _filesIdxStatics[map];
+            UOFile staticfile = _filesStatics[map];
+            ulong staticidxaddress = (ulong)fileidx.StartAddress;
+            ulong endstaticidxaddress = staticidxaddress + (ulong)fileidx.Length;
+            ulong staticaddress = (ulong)staticfile.StartAddress;
+            ulong endstaticaddress = staticaddress + (ulong)staticfile.Length;
+            ulong mapddress = (ulong)file.StartAddress;
+            ulong endmapaddress = mapddress + (ulong)file.Length;
+            ulong uopoffset = 0;
+            int fileNumber = -1;
+            bool isuop = file is UOFileUop;
+            ulong realmapaddress = 0, realstaticaddress = 0;
+            uint realstaticcount = 0;
+            int block = blocknum;
+
+            if (isuop)
+            {
+                blocknum &= 4095;
+                int shifted = block >> 12;
+
+                if (fileNumber != shifted)
+                {
+                    fileNumber = shifted;
+
+                    if (shifted < file.Entries.Length)
+                        uopoffset = (ulong)file.Entries[shifted].Offset;
+                }
+            }
+
+            ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
+
+            if (address < endmapaddress)
+                realmapaddress = address;
+            ulong stidxaddress = staticidxaddress + (ulong)(block * staticidxblocksize);
+            StaidxBlock* bb = (StaidxBlock*)stidxaddress;
+
+            if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
+            {
+                ulong address1 = staticaddress + bb->Position;
+
+                if (address1 < endstaticaddress)
+                {
+                    realstaticaddress = address1;
+                    realstaticcount = (uint)(bb->Size / staticblocksize);
+
+                    if (realstaticcount > 1024)
+                        realstaticcount = 1024;
+                }
+            }
+            BlockData[map][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
         }
 
         public void UnloadMap(int i)

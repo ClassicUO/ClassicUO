@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
                     areaItem.Add(label);
                     areaItem.Add(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
 
-                    _scrollArea.AddChildren(areaItem);
+                    _scrollArea.Add(areaItem);
                 }
             }
 

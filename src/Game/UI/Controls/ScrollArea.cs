@@ -42,17 +42,20 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
 
             if (normalScrollbar)
-                _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                _scrollBar = new ScrollBar( Width - 14, 0, Height);
             else
             {
-                _scrollBar = new ScrollFlag(this)
+                _scrollBar = new ScrollFlag()
                 {
-                    X = Width - 14, Height = h
+                    X = Width - 19, Height = h
                 };
+                Width = Width + 15;
             }
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
+
+            Add((Control)_scrollBar);
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
@@ -169,7 +172,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Add(item, page);
         }
 
-        public void AddChildren(ScrollAreaItem c, int page = 0)
+        public void Add(ScrollAreaItem c, int page = 0)
         {
             base.Add(c, page);
         }

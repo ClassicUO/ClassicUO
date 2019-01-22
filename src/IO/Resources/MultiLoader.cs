@@ -20,8 +20,6 @@ namespace ClassicUO.IO.Resources
 
         public int Count { get; private set; }
 
-        private GCHandle _handle;
-
         public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
