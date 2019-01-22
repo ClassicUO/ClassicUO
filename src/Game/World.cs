@@ -54,6 +54,8 @@ namespace ClassicUO.Game
 
         public static Serial LastAttack { get; set; }
 
+        public static bool SkillsRequested { get; set; }
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;

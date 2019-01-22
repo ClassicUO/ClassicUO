@@ -1128,6 +1128,21 @@ namespace ClassicUO.Network
 
         private static void UpdateSkills(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            if (World.SkillsRequested)
+            {
+                World.SkillsRequested = false;
+                SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
+
+                if (gumpSkills == null)
+                    Engine.UI.Add(new SkillGumpAdvanced()
+                    {
+                        X = 100, Y = 100
+                    });
+            }
+
             ushort id;
 
             switch (p.ReadByte())
