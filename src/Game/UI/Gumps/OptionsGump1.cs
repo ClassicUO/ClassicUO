@@ -359,8 +359,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
-            _zoom = CreateCheckBox(rightArea, "Enable scale zoom", Engine.Profile.Current.EnableScaleZoom, 0, 0);
-            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScalaAfterClose, 0, 0);
+            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
@@ -756,12 +756,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
-            if (_savezoom.IsChecked != Engine.Profile.Current.SaveScalaAfterClose)
+            if (_savezoom.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
             {
                 if (!_savezoom.IsChecked)
                     Engine.Profile.Current.ScaleZoom = 1f;
 
-                Engine.Profile.Current.SaveScalaAfterClose = _savezoom.IsChecked;
+                Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
             }
 
             UpdateVideo();

@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case GameScene game:
 
-                    if (Engine.Profile.Current.SaveScalaAfterClose)
+                    if (Engine.Profile.Current.SaveScaleAfterClose)
                         game.Scale = Engine.Profile.Current.ScaleZoom;
                     else
                         game.Scale = 1f; // hard return to 1.0f
