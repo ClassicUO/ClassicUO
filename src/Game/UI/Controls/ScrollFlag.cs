@@ -32,20 +32,29 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollFlag : Control, IScrollBar
     {
-        private bool _btnSliderClicked;
+        private const int TIME_BETWEEN_CLICKS = 500;
+
         private Point _clickPosition;
         private int _max, _min;
-        private Rectangle _rect;
-        private int _sliderExtentTop, _sliderExtentHeight;
         private float _sliderPosition;
         private float _value;
+        private float _timeUntilNextClick;
+        private readonly SpriteTexture _upButton;
+        private SpriteTexture _downButton;
+        private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
-        public ScrollFlag(int x, int y, int height) : this()
+        private Rectangle _rectUpButton, _rectDownButton;
+
+        private bool _showButtons;
+
+        public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
             X = x;
-            Y = Y;
-            _sliderExtentTop = y;
-            _sliderExtentHeight = height;
+            Y = y;
+            Height = height;
+            
+            //TODO:
+            _showButtons = false; // showbuttons;
         }
 
         public ScrollFlag() : base()
@@ -55,6 +64,12 @@ namespace ClassicUO.Game.UI.Controls
             Texture = FileManager.Gumps.GetTexture(0x0828);
             Width = Texture.Width;
             Height = Texture.Height;
+
+            _upButton = FileManager.Gumps.GetTexture(0x0824);
+            _downButton = FileManager.Gumps.GetTexture(0x0825);
+
+            _rectUpButton = new Rectangle(0, 0, _upButton.Width, _upButton.Height);
+            _rectDownButton = new Rectangle(0, Height, _downButton.Width, _downButton.Height);
 
             WantUpdateSize = false;
         }
@@ -117,7 +132,24 @@ namespace ClassicUO.Game.UI.Controls
             if (MaxValue <= MinValue || MinValue >= MaxValue)
                 Value = MaxValue = MinValue;
             _sliderPosition = GetSliderYPosition();
-            Texture.Ticks = (long) totalMS;
+
+
+            if (_btUpClicked || _btDownClicked)
+            {
+                if (_timeUntilNextClick <= 0f)
+                {
+                    _timeUntilNextClick += TIME_BETWEEN_CLICKS;
+                    if (_btUpClicked)
+                        Value -= ScrollStep;
+
+                    if (_btDownClicked)
+                        Value += ScrollStep;
+                }
+                _timeUntilNextClick -= (float)totalMS;
+            }
+
+
+            Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
@@ -125,6 +157,12 @@ namespace ClassicUO.Game.UI.Controls
             Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
             if (MaxValue != MinValue)
                 batcher.Draw2D(Texture, p, Vector3.Zero);
+
+            if (_showButtons)
+            {
+                batcher.Draw2D(_upButton, position, Vector3.Zero);
+                batcher.Draw2D(_downButton, new Point(position.X, position.Y + Height), Vector3.Zero);
+            }
 
             return base.Draw(batcher, p, hue);
         }
@@ -144,7 +182,20 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (Contains(x, y))
+            if (button != MouseButton.Left)
+                return;
+
+            _timeUntilNextClick = 0f;
+
+            if (_showButtons && _rectDownButton.Contains(x, y))
+            {
+                _btDownClicked = true;
+            }
+            else if (_showButtons && _rectUpButton.Contains(x, y))
+            {
+                _btUpClicked = true;
+            }
+            else if (Contains(x, y))
             {
                 _btnSliderClicked = true;
                 _clickPosition = new Point(x, y);
@@ -153,6 +204,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return;
+
+            _btDownClicked = false;
+            _btUpClicked = false;
             _btnSliderClicked = false;
         }
 
@@ -197,13 +253,6 @@ namespace ClassicUO.Game.UI.Controls
             y -= (int)_sliderPosition;
 
             return Texture.Contains(x, y);
-            //x -= 5;
-            //_rect.X = -5;
-            //_rect.Y = (int)_sliderPosition;
-            //_rect.Width = Texture.Width;
-            //_rect.Height = Texture.Height;
-
-            //return _rect.Contains(x, y);
         }
     }
 }

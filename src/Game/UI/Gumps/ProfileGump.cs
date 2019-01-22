@@ -26,7 +26,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = true;
 
             Add(_background = new ExpandableScroll(0, 0, 300));
-            _scrollBar = new ScrollFlag( 0, 0, Height);
+            _scrollBar = new ScrollFlag( 0, 0, Height, true);
             Add(_scrollBar);
             AddHorizontalBar(92, 40, 40, 220);
             Add(new Label(header, true, 0, font: 1, maxwidth: 140)

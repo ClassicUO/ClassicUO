@@ -883,7 +883,6 @@ namespace ClassicUO.Network
 
                     foreach (var i in list)
                     {
-                        Console.WriteLine(i.Position);
                         gump.AddItem(i);
                     }
 

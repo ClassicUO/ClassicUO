@@ -79,6 +79,14 @@ namespace ClassicUO.Game.UI.Controls
             base.OnInitialize();
         }
 
+        public void Scroll(bool isup)
+        {
+            if (isup)
+                _scrollBar.Value -= _scrollBar.ScrollStep;
+            else
+                _scrollBar.Value += _scrollBar.ScrollStep;
+        }
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
