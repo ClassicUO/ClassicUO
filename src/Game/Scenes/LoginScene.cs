@@ -432,17 +432,22 @@ namespace ClassicUO.Game.Scenes
 				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
 				    {
 				        _isFirstLogin = false;
+                        bool haveAnyCharacter = false;
 
                         for (byte i = 0; i < Characters.Length; i++)
-				        {
-				            if (Characters[i].Length > 0 && Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                        {
+                            if (Characters[i].Length > 0)
 				            {
-				                SelectCharacter(i);
-                                return;
+                                haveAnyCharacter = true;
+                                if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                                {
+                                    SelectCharacter(i);
+                                    return;
+                                }
 				            }
 				        }
 
-                        if (Characters.Length != 0)
+                        if (haveAnyCharacter)
                             SelectCharacter(0);
 				    }
 
