@@ -23,8 +23,6 @@ using System;
 using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
 
-using System.Diagnostics;
-
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -51,19 +49,16 @@ namespace ClassicUO.Game.Scenes
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
-
                     break;
 
                 case ScenesType.Game:
                     Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
-
                     if (Engine.Profile.Current.GameWindowFullSize)
                     {
                         WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                         e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
                     }
-
                     break;
             }
 
