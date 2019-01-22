@@ -19,7 +19,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Linq;
+using System.ComponentModel.Design;
 
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -28,6 +30,8 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -53,13 +57,22 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _debugControls, _zoom;
         private Combobox _shardType;
 
+        private Checkbox _gameWindowLock;
+        private Checkbox _gameWindowFullsize;
+
+        // GameWindowSize
+        private TextBox _gameWindowWidth;
+        private TextBox _gameWindowHeight;
+        // GameWindowPosition
+        private TextBox _gameWindowPositionX;
+        private TextBox _gameWindowPositionY;
+
         // fonts
         private FontSelector _fontSelectorChat;
 
         // combat
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
         private Checkbox _queryBeforAttackCheckbox;
-
 
         public OptionsGump1() : base(0, 0)
         {
@@ -342,8 +355,8 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildVideo()
         {
             const int PAGE = 3;
-            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
             _zoom = CreateCheckBox(rightArea, "Enable scale zoom", Engine.Profile.Current.EnableScaleZoom, 0, 0);
@@ -351,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
             {
-                Y = 40
+                Y = 30
             };
 
             item.Add(text);
@@ -361,6 +374,46 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
             item.Add(_shardType);
+
+            _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
+
+            _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+
+            _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
+                X = 10,
+                Y = 105,
+                Width = 50,
+                Height = 30
+            }, "Game Play Window Size: ");
+
+            _gameWindowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
+                X = 80,
+                Y = 105,
+                Width = 50,
+                Height = 30
+            });
+
+            _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
+                X = 10,
+                Y = 160,
+                Width = 50,
+                Height = 30
+            }, "Game Play Window Position: ");
+
+            _gameWindowPositionY = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            {
+                Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
+                X = 80,
+                Y = 160,
+                Width = 50,
+                Height = 30
+            });
 
             rightArea.Add(item);
 
@@ -443,6 +496,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        public void UpdateVideo()
+        {
+            BuildVideo();
+        }
 
         public override void OnButtonClick(int buttonID)
         {
@@ -519,6 +576,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _debugControls.IsChecked = false;
                     _zoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
+                    _gameWindowWidth.Text = "640";
+                    _gameWindowHeight.Text = "480";
+                    _gameWindowPositionX.Text = "10";
+                    _gameWindowPositionY.Text = "10";
+                    _gameWindowLock.IsChecked = false;
+                    _gameWindowFullsize.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -626,6 +689,73 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            int GameWindowSizeWidth = 640;
+            int GameWindowSizeHeight = 480;
+
+            int.TryParse(_gameWindowWidth.Text, out GameWindowSizeWidth);
+            int.TryParse(_gameWindowHeight.Text, out GameWindowSizeHeight);
+
+            if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
+            {
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                Point n = e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
+
+                _gameWindowWidth.Text = n.X.ToString();
+                _gameWindowHeight.Text = n.Y.ToString();
+            }
+
+            int GameWindowPositionX = 20;
+            int GameWindowPositionY = 20;
+
+            int.TryParse(_gameWindowPositionX.Text, out GameWindowPositionX);
+            int.TryParse(_gameWindowPositionY.Text, out GameWindowPositionY);
+
+            if (GameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || GameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
+            {
+                Point n = new Point(GameWindowPositionX, GameWindowPositionY);
+
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                e.Location = n;
+
+                Engine.Profile.Current.GameWindowPosition = n;
+            }
+
+            if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
+            {
+                if (_gameWindowLock.IsChecked)
+                {
+                    // lock
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.CanMove = false;
+                }
+                else
+                {
+                    // unlock
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.CanMove = true;
+                }
+                Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
+            }
+            
+            if (_gameWindowFullsize.IsChecked != Engine.Profile.Current.GameWindowFullSize)
+            {
+                if (_gameWindowFullsize.IsChecked)
+                {
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                    e.Location = new Point(-5, -5);
+                }
+                else
+                {
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.ResizeWindow(new Point(640, 480));
+                    e.Location = new Point(20, 20);
+                }
+                Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
+            }
+
+            UpdateVideo();
+
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
 
@@ -638,7 +768,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
             Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
         }
-
 
         private enum Buttons
         {
@@ -656,6 +785,30 @@ namespace ClassicUO.Game.UI.Gumps
             CriminalColor,
             EnemyColor,
             MurdererColor
+        }
+
+        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null)
+        {
+            area.Add(new ResizePic(0x0BB8)
+            {
+                X = elem.X - 10,
+                Y = elem.Y - 5,
+                Width = elem.Width + 10,
+                Height = elem.Height - 7
+            });
+
+            area.Add(elem);
+
+            if (label != null)
+            {
+                Label text = new Label(label, true, 0, 0, 1)
+                {
+                    Y = elem.Y - 30
+                };
+                area.Add(text);
+            }
+
+            return elem;
         }
 
         private Checkbox CreateCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)

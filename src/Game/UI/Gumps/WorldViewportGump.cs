@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             AcceptMouseInput = false;
-            CanMove = true;
+            CanMove = !Engine.Profile.Current.GameWindowLock;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
@@ -55,25 +55,28 @@ namespace ClassicUO.Game.UI.Gumps
             _worldWidth = Engine.Profile.Current.GameWindowSize.X;
             _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
             _button = new Button(0, 0x837, 0x838, 0x838);
+
             _button.MouseDown += (sender, e) =>
             {
-                _clicked = true;
+                if (!Engine.Profile.Current.GameWindowLock)
+                    _clicked = true;
             };
 
             _button.MouseUp += (sender, e) =>
             {
-                if (_lastSize.X < 640)
-                    _lastSize.X = 640;
+                if (!Engine.Profile.Current.GameWindowLock)
+                {
+                    Point n = ResizeWindow(_lastSize);
 
-                if (_lastSize.Y < 480)
-                    _lastSize.Y = 480;
+                    OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+                    if (options != null)
+                        options.UpdateVideo();
 
-                _savedSize = Engine.Profile.Current.GameWindowSize = _lastSize;
+                    if (FileManager.ClientVersion >= ClientVersions.CV_200)
+                        NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
 
-                if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                    NetClient.Socket.Send(new PGameWindowSize((uint) _lastSize.X, (uint) _lastSize.Y));
-
-                _clicked = false;
+                    _clicked = false;
+                }
             };
 
             _button.SetTooltip("Resize game window");
@@ -90,7 +93,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _savedSize = _lastSize = Engine.Profile.Current.GameWindowSize;
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -149,6 +151,13 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GameWindowPosition = position;
         }
 
+        protected override void OnDragEnd(int x, int y)
+        {
+            OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+            if (options != null)
+                options.UpdateVideo();
+        }
+
         private void Resize()
         {
             _border.Width = Width;
@@ -162,6 +171,18 @@ namespace ClassicUO.Game.UI.Gumps
             _systemChatControl.Resize();
             WantUpdateSize = true;
         }
+
+        public Point ResizeWindow(Point newSize)
+        {
+            if (newSize.X < 640)
+                newSize.X = 640;
+
+            if (newSize.Y < 480)
+                newSize.Y = 480;
+
+            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+        }
+
     }
 
     internal class GameBorder : Control
@@ -199,7 +220,6 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
             //dx
             batcher.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
-
             return base.Draw(batcher, position, hue);
         }
     }
