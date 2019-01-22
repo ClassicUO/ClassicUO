@@ -122,6 +122,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;
+        [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

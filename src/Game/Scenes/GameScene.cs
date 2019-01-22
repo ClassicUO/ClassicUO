@@ -132,7 +132,8 @@ namespace ClassicUO.Game.Scenes
             WorldViewportGump viewport = new WorldViewportGump(this);
             Engine.UI.Add(viewport);
 
-            TopBarGump.Create();
+            if (! Engine.Profile.Current.TopbarGumpIsDisabled)
+                TopBarGump.Create();
 
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
