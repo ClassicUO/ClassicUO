@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.PacketReceived += NetClient_PacketReceived;
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
-            NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
             string[] parts = Engine.GlobalSettings.ClientVersion.Split(new[]
             {
@@ -337,8 +337,16 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_Disconnected(object sender, EventArgs e)
         {
-            Log.Message(LogTypes.Warning, "Disconnected!");
-            // TODO: Reset
+            Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+            Characters = null;
+            Servers = null;
+            PopupMessage = "Connection lost";
+            CurrentLoginStep = LoginStep.PopUpMessage;
+        }
+
+        private void Login_NetClient_Disconnected(object sender, EventArgs e)
+        {
+            Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)
