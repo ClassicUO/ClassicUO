@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30
             });
 
-            rightArea.AddChildren(item);
+            rightArea.Add(item);
 
             Add(rightArea, PAGE);
         }
