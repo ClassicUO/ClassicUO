@@ -582,6 +582,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowPositionY.Text = "10";
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
                 case 4: // commands
 
@@ -674,7 +675,6 @@ namespace ClassicUO.Game.UI.Gumps
             // video
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
             Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
-            Engine.SceneManager.GetScene<GameScene>().Scale = 1;
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
