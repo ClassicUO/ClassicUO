@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public ServerEntryGump(ServerListEntry entry)
             {
                 _buttonId = entry.Index;
-                _labelName = CreateRenderedText(entry.Name + _buttonId);
+                _labelName = CreateRenderedText(entry.Name);
                 _labelPing = CreateRenderedText("-");
                 _labelPacketLoss = CreateRenderedText("-");
                 _labelName.CreateTexture();
