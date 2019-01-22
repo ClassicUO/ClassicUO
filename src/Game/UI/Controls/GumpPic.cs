@@ -104,6 +104,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, Alpha, true));
 
             return base.Draw(batcher, position, hue);
