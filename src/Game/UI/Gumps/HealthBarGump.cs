@@ -90,47 +90,47 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (World.Party.GetPartyMember(_partyMemeberSerial) != null)
             {
-                AddChildren(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0) { IsVisible = false });
+                Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0) { IsVisible = false });
 
                 if (CanBeSaved)
                 {
-                    AddChildren(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 16, Y = -2});
+                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 16, Y = -2});
                 }
                 else
                 {
-                    AddChildren(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile.NotorietyFlag), 150, 1, FontStyle.Fixed)
+                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile.NotorietyFlag), 150, 1, FontStyle.Fixed)
                     {
                         X = 16, Y = -2
                     });
                 }
 
-                AddChildren(_buttonHeal1 = new Button((int)ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 16, Y = 20 });
-                AddChildren(_buttonHeal2 = new Button((int)ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) { ButtonAction = ButtonAction.Activate, X = 16, Y = 33 });
+                Add(_buttonHeal1 = new Button((int)ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 16, Y = 20 });
+                Add(_buttonHeal2 = new Button((int)ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) { ButtonAction = ButtonAction.Activate, X = 16, Y = 33 });
 
-                AddChildren(_hpLineRed = new GumpPic(34, 20, LINE_RED_PARTY, 0));
-                AddChildren(_manaLineRed = new GumpPic(34, 33, LINE_RED_PARTY, 0));
-                AddChildren(_stamLineRed = new GumpPic(34, 45, LINE_RED_PARTY, 0));
+                Add(_hpLineRed = new GumpPic(34, 20, LINE_RED_PARTY, 0));
+                Add(_manaLineRed = new GumpPic(34, 33, LINE_RED_PARTY, 0));
+                Add(_stamLineRed = new GumpPic(34, 45, LINE_RED_PARTY, 0));
 
-                AddChildren(_bars[0] = new GumpPicWithWidth(34, 20, LINE_BLUE_PARTY, 0, 96));
-                AddChildren(_bars[1] = new GumpPicWithWidth(34, 33, LINE_BLUE_PARTY, 0, 96));
-                AddChildren(_bars[2] = new GumpPicWithWidth(34, 45, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[0] = new GumpPicWithWidth(34, 20, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[1] = new GumpPicWithWidth(34, 33, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[2] = new GumpPicWithWidth(34, 45, LINE_BLUE_PARTY, 0, 96));
             }
             else
             {
                 if (CanBeSaved)
                 {
                     _oldWarMode = World.Player.InWarMode;
-                    AddChildren(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0));
+                    Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0));
 
                     // add backgrounds
-                    AddChildren(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));
-                    AddChildren(new GumpPic(34, 25, LINE_RED, 0));
-                    AddChildren(new GumpPic(34, 38, LINE_RED, 0));
+                    Add(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));
+                    Add(new GumpPic(34, 25, LINE_RED, 0));
+                    Add(new GumpPic(34, 38, LINE_RED, 0));
 
                     // add over
-                    AddChildren(_bars[0] = new GumpPicWithWidth(34, 12, LINE_BLUE, 0, 109));
-                    AddChildren(_bars[1] = new GumpPicWithWidth(34, 25, LINE_BLUE, 0, 109));
-                    AddChildren(_bars[2] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
+                    Add(_bars[0] = new GumpPicWithWidth(34, 12, LINE_BLUE, 0, 109));
+                    Add(_bars[1] = new GumpPicWithWidth(34, 25, LINE_BLUE, 0, 109));
+                    Add(_bars[2] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
                 }
                 else
                 {
@@ -152,11 +152,11 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    AddChildren(_background = new GumpPic(0, 0, 0x0804, color));
-                    AddChildren(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
-                    AddChildren(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
+                    Add(_background = new GumpPic(0, 0, 0x0804, color));
+                    Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
+                    Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
 
-                    AddChildren(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
+                    Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
                     {
                         X = 16,
                         Y = 14,
@@ -217,12 +217,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Engine.UI.Add(new StatusGump
-                    {
-                        X = ScreenCoordinateX,
-                        Y = ScreenCoordinateY
-                    });
-                    Dispose();
+                     StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
+                     Dispose();
                 }
             }
 
@@ -235,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Mobile == null)
                 return;
 
-            if (key == SDL.SDL_Keycode.SDLK_RETURN && _textBox.IsEditable)
+            if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(Mobile, _textBox.Text);
                 _textBox.IsEditable = false;

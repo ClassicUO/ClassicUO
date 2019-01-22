@@ -49,14 +49,14 @@ namespace ClassicUO.Game.GameObjects
 
         public void ProcessDelta()
         {
-            if (_added.Count > 0)
+            if (_added.Count != 0)
             {
                 CollectionChangedEventArgs<T> list = new CollectionChangedEventArgs<T>(_added);
                 _added.Clear();
                 Added.Raise(list);
             }
 
-            if (_removed.Count > 0)
+            if (_removed.Count != 0)
             {
                 CollectionChangedEventArgs<T> list = new CollectionChangedEventArgs<T>(_removed);
                 _removed.Clear();

@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //if (g.Y >= 150)
                 //    g.Y = 120;
 
-                _myBox.AddChildren(g);
+                _myBox.Add(g);
             }
         }
 
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //if (g.Y >= 150)
                 //    g.Y = 120;
 
-                _hisBox.AddChildren(g);
+                _hisBox.Add(g);
             }
         }
 
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
             _myCheckbox.ValueChanged -= MyCheckboxOnValueChanged;
             _myCheckbox.ValueChanged += MyCheckboxOnValueChanged;
 
-            AddChildren(_myCheckbox);
+            Add(_myCheckbox);
 
 
             if (HeIsAccepting)
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _hisPic = new GumpPic(266, 160, 0x0867, 0);
             }
 
-            AddChildren(_hisPic);
+            Add(_hisPic);
 
 
         }
@@ -191,34 +191,34 @@ namespace ClassicUO.Game.UI.Gumps
         {
             //Clear();
 
-            AddChildren(new GumpPic(0, 0, 0x0866, 0));
+            Add(new GumpPic(0, 0, 0x0866, 0));
 
             if (FileManager.ClientVersion < ClientVersions.CV_500A)
             {
                 // TODO: implement
             }
 
-            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
+            Add(new Label(World.Player.Name, false, 0x0386, font: 1)
                             { X = 84, Y = 40 });
 
             int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
 
-            AddChildren(new Label(_name, false, 0x0386, font: 1)
+            Add(new Label(_name, false, 0x0386, font: 1)
                             { X = fontWidth, Y = 170 });
 
-            AddChildren(_myBox = new DataBox(45, 70, 110, 80));
-            AddChildren(_hisBox = new DataBox(192, 70, 110, 80));
+            Add(_myBox = new DataBox(45, 70, 110, 80));
+            Add(_hisBox = new DataBox(192, 70, 110, 80));
 
             SetCheckboxes();
 
             foreach (Item item in _entity1.Items)
             {
-                _myBox.AddChildren(new ItemGump(item));
+                _myBox.Add(new ItemGump(item));
             }
 
             foreach (Item item in _entity2.Items)
             {
-                _hisBox.AddChildren(new ItemGump(item));
+                _hisBox.Add(new ItemGump(item));
             }
 
             _myBox.MouseUp += (sender, e) =>
@@ -253,9 +253,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (y < 0)
                         y = 0;
 
-                    GameActions.DropItem(gs.HeldItem, x, y, 0, ID1);
-                    gs.ClearHolding();
-                    Mouse.CancelDoubleClick = true;
+                    GameActions.DropItem(gs.HeldItem.Serial, x, y, 0, ID1);
+                    gs.HeldItem.Dropped = true;
+                    gs.HeldItem.Enabled = false;
+                    //Mouse.CancelDoubleClick = true;
                 }
             };
         }

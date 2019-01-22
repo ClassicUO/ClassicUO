@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (value != _mobile)
                 {
                     _mobile = value;
-                    OnEntityUpdated(_mobile);
+                    UpdateEntity();
                 }
             }
         }
@@ -74,28 +75,11 @@ namespace ClassicUO.Game.UI.Controls
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            //foreach (Item item in e)
-            //{
-            //    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile));
-            //}
-
-            //for (int i = 0; i < _layerOrder.Length; i++)
-            //{
-            //    int layerIndex = (int) _layerOrder[i];
-            //    Item item = _mobile.Equipment[layerIndex];
-
-            //    if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
-            //    {
-            //        ItemGumpPaperdoll c = Children.OfType<ItemGumpPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
-            //        RemoveChildren(c);
-            //    }
-            //}
-
             if (_fakeItem != null)
             {
                 foreach (Item item in e)
@@ -108,7 +92,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
         private void MobileOnDisposed(object sender, EventArgs e)
@@ -118,7 +102,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Update()
         {
-            OnEntityUpdated(Mobile);
+            UpdateEntity();
         }
 
 
@@ -127,16 +111,16 @@ namespace ClassicUO.Game.UI.Controls
             if (item == null && _fakeItem != null)
             {
                 _fakeItem = null;
-                OnEntityUpdated(Mobile);
+                UpdateEntity();
             }
             else if (item != null && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
-                OnEntityUpdated(Mobile);
+                UpdateEntity();
             }
         }
 
-        private void OnEntityUpdated(Entity entity)
+        private void UpdateEntity()
         {
             Clear();
 
@@ -205,13 +189,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (isGM)
             {
-                AddChildren(new GumpPic(0, 0, body, 0x03EA)
+                Add(new GumpPic(0, 0, body, 0x03EA)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
                     IsPartialHue = true
                 });
-                AddChildren(new GumpPic(0, 0, 0xC72B, 0)
+                Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
@@ -220,7 +204,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
+                Add(new GumpPic(0, 0, body, _mobile.Hue)
                 {
                     AcceptMouseInput = true,
                     IsPaperdoll = true,
@@ -251,7 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                     }
 
-                    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                    Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                     {
                         SlotIndex = i, CanPickUp = canPickUp
                     });
@@ -263,7 +247,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int)Layer.Backpack];
 
-                AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
+                Add(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
                 {
                     AcceptMouseInput = true
                 });
@@ -274,7 +258,13 @@ namespace ClassicUO.Game.UI.Controls
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
         {
             Item backpack = _mobile.Equipment[(int)Layer.Backpack];
-            GameActions.DoubleClick(backpack);
+
+            ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+
+            if (backpackGump == null)
+                GameActions.DoubleClick(backpack);
+            else 
+                backpackGump.BringOnTop();
         }
 
     }

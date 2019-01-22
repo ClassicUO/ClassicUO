@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Scenes
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
 
+	    private bool _isShiftDown;
 
         private void MoveCharacterByInputs()
         {
@@ -65,7 +66,7 @@ namespace ClassicUO.Game.Scenes
 
                 float distanceFromCenter = Utility.MathHelper.GetDistance(center, Mouse.Position);
 
-                bool run = distanceFromCenter >= 190.0f;
+                bool run = distanceFromCenter >= 150.0f;
 
                 World.Player.Walk(direction, run);
             }
@@ -103,6 +104,9 @@ namespace ClassicUO.Game.Scenes
         {
             if (e.Button == MouseButton.Left)
             {
+                if (_dragginObject != null)
+                    _dragginObject = null;
+
                 if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                     return;
 
@@ -162,11 +166,14 @@ namespace ClassicUO.Game.Scenes
                                 {
                                     SelectedObject = item;
 
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && dyn1.ItemData.IsStackable)
+                                    if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                         MergeHeldItem(item);
                                     else
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                                 }
+                                break;
+                            case Multi multi:
+                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
                                 break;
                             case Static st:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
@@ -180,7 +187,9 @@ namespace ClassicUO.Game.Scenes
 
                                 return;
                         }
-                    }                    
+                    }
+                    else
+                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
                 }
                 else
                 {                 
@@ -289,13 +298,15 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void OnMouseDragBegin(object sender, MouseEventArgs e)
+        private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (Mouse.LButtonPressed && !IsHoldingItem)
             {
-                if (!IsHoldingItem)
+                Point offset = Mouse.LDroppedOffset;
+
+                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE)
                 {
-                    GameObject obj = _mousePicker.MouseOverObject;
+                    GameObject obj = _dragginObject;
 
                     switch (obj)
                     {
@@ -305,7 +316,7 @@ namespace ClassicUO.Game.Scenes
                             Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
-                                Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+                                StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
@@ -319,6 +330,44 @@ namespace ClassicUO.Game.Scenes
 
                             break;
                     }
+
+                    _dragginObject = null;
+                }
+            }
+        }
+
+        private void OnMouseDragBegin(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left)
+            {
+                if (!IsHoldingItem)
+                {
+                    GameObject obj = _dragginObject;
+
+                    switch (obj)
+                    {
+                        case Mobile mobile:
+                            GameActions.RequestMobileStatus(mobile);
+
+                            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
+
+                            if (mobile == World.Player)
+                                StatusGumpBase.GetStatusGump()?.Dispose();
+
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                            HealthBarGump currentHealthBarGump;
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+
+
+                            break;
+                        case Item item:
+							PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+
+                            break;
+                    }
+
+                    _dragginObject = null;
                 }
             }
         }
@@ -329,52 +378,25 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
             {
-
-                foreach (Mobile mobile in World.Mobiles)
-                {
-                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
-                }
-
-                //Task.Run(async () =>
-                //{
-                //    while (true)
-                //    {
-                //        await Task.Delay(1);
-                //        GameActions.CastSpell(205);
-                //    }
-
-                //});
+	            if (!World.Player.InWarMode)
+		            GameActions.SetWarMode(true);
             }
-            // TEST PURPOSE
-            /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            {
-
-                bool first = false;
-
-                string tobrit = "[go britain";
-                string toluna = "[go luna";
-
-                Task.Run(async () =>
-               {
-
-                   while (true)
-                   {
-                       await Task.Delay(500);
-
-                       NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
-
-                       first = !first;
-
-
-                   }
-               });
-            }*/
+           
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
-        {
-        }
+		{
+			_isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+
+			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+			{
+				if (World.Player.InWarMode)
+					GameActions.SetWarMode(false);
+			}
+		}
     }
 }

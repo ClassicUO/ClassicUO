@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -113,28 +113,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsTransparent { get; set; }
 
-        public float Alpha { get; set; } = .5f;
+        public float Alpha { get; set; }
 
         public IReadOnlyList<Control> Children => _children;
 
         public object Tag { get; set; }
 
-        public string Tooltip { get; private set; }
+        public object Tooltip { get; private set; }
 
-        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
+        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && Tooltip != null;
 
         public virtual bool AcceptKeyboardInput
         {
-            get
-            {
-                if (!IsEnabled || IsDisposed || !IsVisible || !IsInitialized)
-                    return false;
-
-                if (_acceptKeyboardInput)
-                    return true;
-
-                return _acceptKeyboardInput; // _children.Any(s => s.AcceptKeyboardInput);
-            }
+            get => IsEnabled && !IsDisposed && IsVisible && IsInitialized && _acceptKeyboardInput;
             set => _acceptKeyboardInput = value;
         }
 
@@ -254,12 +245,19 @@ namespace ClassicUO.Game.UI.Controls
             set => _handlesKeyboardFocus = value;
         }
 
+        public virtual void OnPageChanged()
+        {
+
+        }
+
         public int ActivePage
         {
             get => _activePage;
             set
             {              
                 _activePage = value;
+
+                OnPageChanged();
 
                 if (Engine.UI.KeyboardFocusControl != null)
                 {
@@ -310,10 +308,19 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         Point offset = new Point(c.X + position.X, c.Y + position.Y);
                         c.Draw(batcher, offset, hue);
+
+                        //DrawDebug(batcher, position);
                     }
                 }
             }
 
+            DrawDebug(batcher, position);
+
+            return true;
+        }
+
+        private void DrawDebug(Batcher2D batcher, Point position)
+        {
             if (IsVisible && Engine.GlobalSettings.Debug)
             {
                 if (_debugTexture == null)
@@ -326,10 +333,21 @@ namespace ClassicUO.Game.UI.Controls
                     });
                 }
 
-                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-            }
+                int w, h;
 
-            return true;
+                if (Texture == null)
+                {
+                    w = Width;
+                    h = Height;
+                }
+                else
+                {
+                    w = Texture.Width;
+                    h = Texture.Height;
+                }
+
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, w, h), Vector3.Zero);
+            }
         }
 
         public virtual void Update(double totalMS, double frameMS)
@@ -379,18 +397,31 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void SetTooltip(string c, int maxWidth = 0)
+        public void BringOnTop()
         {
-            if (string.IsNullOrEmpty(c))
-                ClearTooltip();
-            else
+            Engine.UI.MakeTopMostGump(this);
+        }
+      
+        public void SetTooltip(string text, int maxWidth = 0)
+        {
+	        ClearTooltip();
+
+			if (!String.IsNullOrEmpty(text))
             {
-                Tooltip = c;
+                Tooltip = text;
                 TooltipMaxLength = maxWidth;
             }
         }
 
-        public int TooltipMaxLength { get; private set; }
+	    public void SetTooltip(Entity entity)
+	    {
+		    ClearTooltip();
+
+		    if (entity != null & !entity.IsDisposed)
+			    Tooltip = entity;
+	    }
+
+		public int TooltipMaxLength { get; private set; }
 
         public void ClearTooltip()
         {
@@ -449,7 +480,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
      
-        public IReadOnlyList<Control> HitTest(Point position)
+        public Control[] HitTest(Point position)
         {
             List<Control> results = new List<Control>();
             //Stack<Control> results = new Stack<Control>();
@@ -459,12 +490,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Add(this);
-                       //results.Insert(0, this);  //results.Push(this);
+                        results.Insert(0, this);
+                    //results.Add(this);
+                    //results.Insert(0, this);  //results.Push(this);
 
-                    for (int j = 0; j < Children.Count; j++)
+                    for (int i = 0; i < Children.Count; i++)
                     {
-                        Control c = Children[j];
+                        Control c = Children[i];
 
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
@@ -472,18 +504,9 @@ namespace ClassicUO.Game.UI.Controls
 
                             if (cl != null)
                             {
-                                //for (int i = cl.Length - 1; i >= 0; i--)
-                                //    results.Push(cl[i]);
-
-
-                                //foreach (Control control in cl)
-                                //{
-                                //    results.Push(control);
-                                //}
-
-                                //for (int i = cl.Count - 1; i >= 0; i--)
-                                //    results.Insert(0, cl[i]);
-                                results.AddRange(cl);
+                                for (int j = cl.Length - 1; j >= 0; j--)
+                                    results.Insert(0, cl[j]);
+                                //results.AddRange(cl);
                             }
                         }
                     }
@@ -492,9 +515,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (results.Count != 0)
             {
-                results.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+                results.Sort((a, b) => a.Priority.CompareTo(b.Priority));
 
-                return results;
+                return results.ToArray();
             }
 
             return null;
@@ -521,14 +544,14 @@ namespace ClassicUO.Game.UI.Controls
             return null;
         }
 
-        public virtual void AddChildren(Control c, int page = 0)
+        public virtual void Add(Control c, int page = 0)
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
         }
 
-        public virtual void RemoveChildren(Control c)
+        public virtual void Remove(Control c)
         {
             if (c == null)
                 return;
@@ -567,9 +590,12 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
+            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);   
+        }
 
-            if (button == MouseButton.Right && CanCloseWithRightClick)
+        public void InvokeMouseCloseGumpWithRClick()
+        {
+            if (CanCloseWithRightClick)
                 CloseWithRightClick();
         }
 
@@ -681,10 +707,24 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseOver(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag && Mouse.LDroppedOffset != Point.Zero)
+            //if (_mouseIsDown && !_attempToDrag 
+            //                 && (Math.Abs(Mouse.LDroppedOffset.X) > _minimumDistanceForDrag 
+            //                     || Math.Abs(Mouse.LDroppedOffset.Y) > _minimumDistanceForDrag))
+            //{
+            //    InvokeDragBegin(new Point(x, y));
+            //    _attempToDrag = true;
+            //}
+
+            if (_mouseIsDown && !_attempToDrag)
             {
-                InvokeDragBegin(new Point(x, y));
-                _attempToDrag = true;
+                Point offset = Mouse.LDroppedOffset;
+                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
+                    || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+
+                {
+                    InvokeDragBegin(new Point(x, y));
+                    _attempToDrag = true;
+                }
             }
         }
 
@@ -714,6 +754,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnDragEnd(int x, int y)
         {
+            _mouseIsDown = false;
         }
 
         protected virtual void OnTextInput(string c)

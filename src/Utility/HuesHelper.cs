@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace ClassicUO.Utility
             0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B, 0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (byte, byte, byte, byte) GetBGRA(uint cl)
         {
             return ((byte)(cl & 0xFF), // B
@@ -22,6 +24,7 @@ namespace ClassicUO.Utility
                    );
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint RgbaToArgb(uint rgba)
         {
             return (rgba >> 8) | (rgba << 24);

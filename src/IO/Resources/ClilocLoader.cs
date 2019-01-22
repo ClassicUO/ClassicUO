@@ -58,48 +58,58 @@ namespace ClassicUO.IO.Resources
             return res;
         }
 
-        public string Translate(int baseCliloc, string arg = null, bool capitalize = false)
+        public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
         {
             return Translate(GetString(baseCliloc), arg, capitalize);
         }
 
-        public string Translate(string baseCliloc, string arg = null, bool capitalize = false)
+        public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
         {
-            if (string.IsNullOrEmpty(baseCliloc))
-                return string.Empty;
+            if (baseCliloc == null)
+                return null;
+            List<string> arguments = new List<string>();
 
-            if (string.IsNullOrEmpty(arg))
-                return capitalize ? StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
-
-            string[] args = arg.Split(new[]
+            while (true)
             {
-                '\t'
-            }, StringSplitOptions.RemoveEmptyEntries);
+                int pos = arg.IndexOf('\t');
 
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i].Length > 0 && args[i][0] == '#')
+                if (pos != -1)
                 {
-                    args[i] = GetString(int.Parse(args[i].Substring(1)));
+                    arguments.Add(arg.Substring(0, pos));
+                    arg = arg.Substring(pos + 1);
+                }
+                else
+                {
+                    arguments.Add(arg);
+
+                    break;
                 }
             }
 
-            string construct = baseCliloc;
-
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 0; i < arguments.Count; i++)
             {
-                int begin = construct.IndexOf('~', 0);
-                int end = construct.IndexOf('~', begin + 1);
+                int pos = baseCliloc.IndexOf('~');
 
-                if (begin != -1 && end != -1)
-                    construct = construct.Substring(0, begin) + args[i] + construct.Substring(end + 1, construct.Length - end - 1);
-                else
-                    construct = baseCliloc;
+                if (pos == -1)
+                    break;
+
+                int pos2 = baseCliloc.IndexOf('~', pos + 1);
+
+                if (pos2 == -1)
+                    break;
+
+                string a = arguments[i];
+
+                if (a.Length > 1 && a[0] == '#')
+                {
+                    int id1 = int.Parse(a.Substring(1));
+                    arguments[i] = GetString(id1);
+                }
+
+                baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);
             }
 
-            construct = construct.Trim(' ');
-
-            return capitalize ? StringHelper.CapitalizeFirstCharacter(construct) : construct;
+            return baseCliloc;
         }
     }
 

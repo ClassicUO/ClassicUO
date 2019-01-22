@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public QuestionGump(string message, Action<bool> result) : base(0, 0)
         {
-            AddChildren(new GumpPic(0, 0, 0x0816, 0));
+            Add(new GumpPic(0, 0, 0x0816, 0));
 
             SpriteTexture t = FileManager.Gumps.GetTexture(0x0816);
 
@@ -42,17 +42,17 @@ namespace ClassicUO.Game.UI.Gumps
             Height = t.Height;
 
 
-            AddChildren(new Label(message, false, 0x0386, 165)
+            Add(new Label(message, false, 0x0386, 165)
             {
                 X = 33, Y = 30
             });
 
-            AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)
+            Add(new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)
             {
                 X = 37, Y = 75, ButtonAction = ButtonAction.Activate
             });
 
-            AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B, 0x081C)
+            Add(new Button((int) Buttons.Ok, 0x81A, 0x81B, 0x081C)
             {
                 X = 100, Y = 75, ButtonAction = ButtonAction.Activate
             });

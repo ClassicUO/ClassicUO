@@ -42,17 +42,20 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
 
             if (normalScrollbar)
-                _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                _scrollBar = new ScrollBar( Width - 14, 0, Height);
             else
             {
-                _scrollBar = new ScrollFlag(this)
+                _scrollBar = new ScrollFlag()
                 {
-                    X = Width - 14, Height = h
+                    X = Width - 19, Height = h
                 };
+                Width = Width + 15;
             }
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
+
+            Add((Control)_scrollBar);
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
@@ -76,12 +79,20 @@ namespace ClassicUO.Game.UI.Controls
             base.OnInitialize();
         }
 
+        public void Scroll(bool isup)
+        {
+            if (isup)
+                _scrollBar.Value -= _scrollBar.ScrollStep;
+            else
+                _scrollBar.Value += _scrollBar.ScrollStep;
+        }
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
             _rect.Y = position.Y;
-            _rect.Width = Width;
+            _rect.Width = Width - 14;
             _rect.Height = Height;
             Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
@@ -150,28 +161,32 @@ namespace ClassicUO.Game.UI.Controls
             _needUpdate = true;
         }
 
-        public override void RemoveChildren(Control c)
+        public override void Remove(Control c)
         {
             if (c is ScrollAreaItem)
-                base.RemoveChildren(c);
+                base.Remove(c);
             else
             {
                 // Try to find the wrapped control
                 var wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
-                base.RemoveChildren(wrapper);
+                base.Remove(wrapper);
             }
         }
 
-        public override void AddChildren(Control c, int page = 0)
+        public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem();
-            item.AddChildren(c);
-            base.AddChildren(item, page);
+            ScrollAreaItem item = new ScrollAreaItem()
+            {
+                CanMove = true
+            };
+            item.Add(c);
+            base.Add(item, page);
         }
 
-        public void AddChildren(ScrollAreaItem c, int page = 0)
+        public void Add(ScrollAreaItem c, int page = 0)
         {
-            base.AddChildren(c, page);
+            c.CanMove = true;
+            base.Add(c, page);
         }
 
         public override void Clear()

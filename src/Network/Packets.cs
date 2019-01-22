@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -121,7 +122,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(PlayerMobile character, uint clientIP, int serverIndex, uint slot) : base(0x00)
+        public PCreateCharacter(PlayerMobile character, CityInfo startingCity, uint clientIP, int serverIndex, uint slot) : base(0x00)
         {
             int skillcount = 3;
 
@@ -189,11 +190,14 @@ namespace ClassicUO.Network
             }
 
             WriteByte((byte) serverIndex);
-            var location = 0; // TODO: write the city index
+
+            var location = startingCity.Index; // City
 
             if (FileManager.ClientVersion < ClientVersions.CV_70130)
                 location--;
-            WriteByte((byte) location); //location
+
+            WriteByte((byte) location);
+
             WriteUInt(slot);
             WriteUInt(clientIP);
             WriteUShort(character.Equipment[(int) Layer.Shirt].Hue);
@@ -243,14 +247,18 @@ namespace ClassicUO.Network
 
     internal sealed class PDropRequestOld : PacketWriter
     {
-        public PDropRequestOld(Serial serial, Position position, Serial container) : base(0x08)
+        public PDropRequestOld(Serial serial, ushort x, ushort y, sbyte z, Serial container) : base(0x08)
         {
             WriteUInt(serial);
-            WriteUShort(position.X);
-            WriteUShort(position.Y);
-            WriteSByte(position.Z);
+            WriteUShort(x);
+            WriteUShort(y);
+            WriteSByte(z);
             WriteUInt(container);
         }
+
+        public PDropRequestOld(Serial serial, Position position, Serial container) : this (serial, position.X, position.Y, position.Z, container)
+        {
+        } 
     }
 
     internal sealed class PDropRequestNew : PacketWriter
@@ -499,30 +507,21 @@ namespace ClassicUO.Network
             WriteUInt(server);
             WriteUInt((uint) buttonID);
 
-            if (switches == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) switches.Length);
+            WriteUInt((uint)switches.Length);
 
-                for (int i = 0; i < switches.Length; i++)
-                    WriteUInt(switches[i]);
+            for (int i = switches.Length - 1; i >= 0; i--)
+                WriteUInt(switches[i]);
+
+            WriteUInt((uint)entries.Length);
+
+            for (int i = entries.Length - 1; i >= 0; i--)
+            {
+                int length = Math.Min(239, entries[i].Item2.Length);
+                WriteUShort(entries[i].Item1);
+                WriteUShort((ushort)length);
+                WriteUnicode(entries[i].Item2, length);
             }
 
-            if (entries == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) entries.Length);
-
-                for (int i = 0; i < entries.Length; i++)
-                {
-                    int length = entries[i].Item2.Length;
-                    WriteUShort(entries[i].Item1);
-                    WriteUShort((ushort) length);
-                    WriteUnicode(entries[i].Item2, entries[i].Item2.Length);
-                }
-            }
         }
     }
 
@@ -570,9 +569,15 @@ namespace ClassicUO.Network
 
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse() : base(0xAC)
+        public PTextEntryDialogResponse(Serial serial, byte button, string text, bool code) : base(0xAC)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteByte(button);
+            WriteByte(0);
+            WriteBool(code);
+
+            WriteUShort((ushort)(text.Length + 1));
+            WriteASCII(text, text.Length + 1);
         }
     }
 
@@ -650,15 +655,27 @@ namespace ClassicUO.Network
         }
     }
 
-    /*internal sealed class PASCIIPromptResponse : PacketWriter
+    internal sealed class PASCIIPromptResponse : PacketWriter
     {
-        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)
+        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x9A)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint) (cancel ? 0 : 1));
+
+            WriteASCII(text, len);
+        }
     }
 
     internal sealed class PUnicodePromptResponse : PacketWriter
     {
-        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base()
-    }*/
+        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base(0xC2)
+        {
+            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteUInt((uint)(cancel ? 0 : 1));
+            WriteASCII(lang, 3);
+            WriteUnicode(text, len);
+        }
+    }
 
     internal sealed class PDyeDataResponse : PacketWriter
     {
@@ -691,7 +708,16 @@ namespace ClassicUO.Network
         }
     }
 
-    internal sealed class PCloseStatusBarGump : PacketWriter
+	internal sealed class PClickQuestArrow : PacketWriter
+	{
+		public PClickQuestArrow(bool rightClick) : base(0xBF)
+		{
+			WriteUShort(0x07);
+			WriteBool(rightClick);
+		}
+	}
+
+	internal sealed class PCloseStatusBarGump : PacketWriter
     {
         public PCloseStatusBarGump(Serial serial) : base(0xBF)
         {
@@ -875,8 +901,10 @@ namespace ClassicUO.Network
             WriteUShort(0x0F);
             WriteByte(0x0A);
             uint clientFlag = 0;
-            /*IFOR(i, 0, g_CharacterList.ClientFlag)
-                clientFlag |= (1 << i);*/
+
+            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
+                clientFlag |= (uint) (1 << i);
+
             WriteUInt(clientFlag);
         }
     }
@@ -1327,9 +1355,10 @@ namespace ClassicUO.Network
     {
         public PClientViewRange(byte range) : base(0xC8)
         {
-            if (range < 5)
-                range = 5;
-            else if (range > 24) range = 24;
+            if (range < Constants.MIN_VIEW_RANGE)
+                range = Constants.MIN_VIEW_RANGE;
+            else if (range > Constants.MAX_VIEW_RANGE)
+                range = Constants.MAX_VIEW_RANGE;
             WriteByte(range);
         }
     }

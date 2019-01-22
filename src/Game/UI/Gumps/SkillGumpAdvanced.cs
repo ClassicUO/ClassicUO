@@ -48,54 +48,56 @@ namespace ClassicUO.Game.UI.Gumps
             CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = false;
-            AddChildren(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
+            Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
 
-            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
-            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
-            AddChildren(_scrollArea);
+            Add(_scrollArea);
 
-            AddChildren(new Label("Skill", true, 1153)
+            Add(new Label("Skill", true, 1153)
             {
                 X = 20, Y = 25
             });
 
-            AddChildren(new Label("Real", true, 1153)
+            Add(new Label("Real", true, 1153)
             {
                 X = 220, Y = 25
             });
 
-            AddChildren(new Label("Base", true, 1153)
+            Add(new Label("Base", true, 1153)
             {
                 X = 300, Y = 25
             });
 
-            AddChildren(new Label("Cap", true, 1153)
+            Add(new Label("Cap", true, 1153)
             {
                 X = 380, Y = 25
             });
 
             //======================================================================================
-            AddChildren(new Line(20, 60, 435, 1, 0xFFFFFFFF));
-            AddChildren(new Line(20, 310, 435, 1, 0xFFFFFFFF));
+            Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
+            Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
 
-            AddChildren(new Label("Total Skill(Real): ", true, 1153)
+            Add(new Label("Total Skill(Real): ", true, 1153)
             {
                 X = 30, Y = 320
             });
 
-            AddChildren(new Label("Total Skill(Base): ", true, 1153)
+            Add(new Label("Total Skill(Base): ", true, 1153)
             {
                 X = 30, Y = 345
             });
@@ -127,14 +129,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
             }
 
-            for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.AddChildren(_skillListEntries[i]);
+            for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.Add(_skillListEntries[i]);
 
-            AddChildren(new Label(_totalReal.ToString(), true, 1153)
+            Add(new Label(_totalReal.ToString(), true, 1153)
             {
                 X = 170, Y = 320
             });
 
-            AddChildren(new Label(_totalValue.ToString(), true, 1153)
+            Add(new Label(_totalValue.ToString(), true, 1153)
             {
                 X = 170, Y = 345
             });
@@ -180,24 +182,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (skill.IsClickable)
             {
-                AddChildren(_activeUse = new Button((int) Buttons.ActiveSkillUse, 0x837, 0x838)
+                Add(_activeUse = new Button((int) Buttons.ActiveSkillUse, 0x837, 0x838)
                 {
                     X = 0, Y = 4, ButtonAction = ButtonAction.Activate
                 });
             }
 
-            AddChildren(skillName);
+            Add(skillName);
             //======================
             skillValueBase.X = 200;
-            AddChildren(skillValueBase);
+            Add(skillValueBase);
             //======================
             skillValue.X = 280;
-            AddChildren(skillValue);
+            Add(skillValue);
             //======================
             skillCap.X = 360;
-            AddChildren(skillCap);
+            Add(skillCap);
             GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
-            AddChildren(loc);
+            Add(loc);
 
             loc.MouseClick += (sender, e) =>
             {

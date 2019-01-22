@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Views
 {
     internal class MovingEffectView : View
     {
-        private Graphic _displayedGraphic = Graphic.Invalid;
+        private Graphic _displayedGraphic = Graphic.INVALID;
 
         public MovingEffectView(MovingEffect effect) : base(effect)
         {

@@ -24,6 +24,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -37,7 +38,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class MiniMapGump : Gump
     {
-        private static MiniMapGump _self;
         private SpriteTexture _gumpTexture, _mapTexture;
         private bool _forceUpdate;
         private Texture2D _playerIndicator, _mobilesIndicator;
@@ -55,19 +55,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public static void Toggle(GameScene scene)
-        {
-            if (Engine.UI.GetByLocalSerial<MiniMapGump>() == null)
-            {
-                Engine.UI.Add(_self = new MiniMapGump());
-            }
-            else
-            {
-                _self.Dispose();
-            }
-
-        }
-
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -77,7 +64,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            _self = this;
             _useLargeMap = reader.ReadBoolean();
             _forceUpdate = true;
         }
@@ -167,6 +153,8 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
+        public void ForceUpdate() => _forceUpdate = true;
+
         private void CreateMiniMapTexture()
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
@@ -231,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!mbbv.HasValue)
                         break;
                     RadarMapBlock mb = mbbv.Value;
-                    //Chunk block = World.Map.Chunks[blockIndex];
+                    Chunk block = World.Map.Chunks[blockIndex];
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 
@@ -247,10 +235,23 @@ namespace ClassicUO.Game.UI.Gumps
                             uint color = mb.Cells[x, y].Graphic;
                             bool island = mb.Cells[x, y].IsLand;
 
-                            //if (block != null)
-                            //{
-                            //    ushort multicolor = block.get
-                            //}
+                            if (block != null)
+                            {
+                                GameObject obj = block.Tiles[x, y].FirstNode;
+
+                                while (obj?.Right != null)
+                                    obj = obj.Right;
+
+                                for (; obj != null; obj = obj.Left)
+                                {
+                                    if (obj is Multi)
+                                    {
+                                        color = obj.Graphic;
+                                        island = false;
+                                        break;
+                                    }
+                                }
+                            }
 
                             if (!island)
                                 color += 0x4000;

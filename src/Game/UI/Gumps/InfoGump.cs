@@ -42,24 +42,26 @@ namespace ClassicUO.Game.UI.Gumps
             Y = 200;
             CanMove = true;
             AcceptMouseInput = false;
-            AddChildren(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
+            Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
 
-            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
 
-            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true
+                IsTransparent = true,
+                Alpha = 0.5f,
             });
-            AddChildren(new Label("Object Information", true, 1153, font: 3) { X = 20, Y = 20 });
-            AddChildren(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));
+            Add(new Label("Object Information", true, 1153, font: 3) { X = 20, Y = 20 });
+            Add(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 510, true)
             {
                 AcceptMouseInput = true
             };
-            AddChildren(_scrollArea);
+            Add(_scrollArea);
 
             Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(obj);
 
@@ -74,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = 2
                     };
-                    areaItem.AddChildren(label);
+                    areaItem.Add(label);
 
                     int height = label.Height;
 
@@ -86,10 +88,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (label.Height > 0)
                         height = label.Height;
 
-                    areaItem.AddChildren(label);
-                    areaItem.AddChildren(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
+                    areaItem.Add(label);
+                    areaItem.Add(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
 
-                    _scrollArea.AddChildren(areaItem);
+                    _scrollArea.Add(areaItem);
                 }
             }
 
@@ -104,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Entry = entry;
             Entry.X = 20;
-            AddChildren(Entry);
+            Add(Entry);
 
         }
 

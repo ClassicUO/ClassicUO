@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
+using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -260,6 +261,10 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
+        public long LastStepSoundTime { get; set; }
+
+        public int StepSoundOffset { get; set; }
+
         protected virtual bool IsWalking => LastStepTime > Engine.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
@@ -458,6 +463,51 @@ namespace ClassicUO.Game.GameObjects
             return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
         }
 
+        private void ProcessFootstepsSound()
+        {
+            if (Engine.Profile.Current.EnableFootstepsSound && IsHuman && !IsHidden)
+            {
+                long ticks = Engine.Ticks;
+
+                if (IsMoving && LastStepSoundTime < ticks)
+                {
+                    int incID = StepSoundOffset;
+                    int soundID = 0x012B;
+                    int delaySound = 400;
+
+                    if (IsMounted)
+                    {
+                        if (Steps.Back().Run)
+                        {
+                            soundID = 0x0129;
+                            delaySound = 150;
+                        }
+                        else
+                        {
+                            incID = 0;
+                            delaySound = 350;
+                        }
+                    }
+
+                    delaySound = delaySound * 13 / 10;
+
+                    soundID += incID;
+
+                    StepSoundOffset = (incID + 1) % 2;
+
+                    float soundByRange = Engine.Profile.Current.SoundVolume / (float) World.ViewRange;
+                    soundByRange *= Distance;
+                    float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 100f;
+
+                    if (volume > 0 && volume < 0.01f)
+                        volume = 0.01f;
+
+                    Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
+                    LastStepSoundTime = ticks + delaySound;
+                }
+            }
+        }
+
         public override void ProcessAnimation()
         {
             byte dir = (byte) GetDirectionForAnimation();
@@ -470,11 +520,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Step step = Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run); // - (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
-                    if (Position.X != step.X || Position.Y != step.Y)
+                    //if ((byte) Direction == step.Direction)
+                    if (X != step.X || Y != step.Y)
                     {     
                         float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                         float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
@@ -482,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
                         float y = frameOffset;
 
                         MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Z) * frameOffset * (4.0f / framesPerTile)));
                      
                         turnOnly = false;
                     }
@@ -496,13 +547,14 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (this == World.Player)
                         {
-                            if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
-                            {
-                            }
+                            //if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
+                            //{
+                            //}
 
                             if (Position.Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
+                                AddOverhead(MessageType.Label, "Ouch!");
                             }
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -534,11 +586,14 @@ namespace ClassicUO.Game.GameObjects
                         IsRunning = step.Run;
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();
+                        CalculateRandomIdleTime();
                         LastStepTime = Engine.Ticks;
                         ProcessDelta();
                     }
-                } while (Steps.Count > 0 && turnOnly);
+                } while (Steps.Count != 0 && turnOnly);
             }
+
+            ProcessFootstepsSound();
 
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {
@@ -657,6 +712,148 @@ namespace ClassicUO.Game.GameObjects
                 LastAnimationChangeTime = Engine.Ticks + currentDelay;
             }
         }
+
+        /* public int IsSitting
+        {
+            get
+            {
+                int result = 0;
+
+                if (IsHuman && !IsMounted)
+                {
+                    GameObject start = World.Map.GetTile(X, Y).FirstNode;
+
+                    while (start != null && result == 0 && !TestStepNoChangeDirection(this, GetGroupForAnimation(this)))
+                    {
+                        if (GameObjectHelper.TryGetStaticData(start, out var itemdata) && Math.Abs(Z - start.Z) <= 1)
+                        {
+                            ushort graphic = start.Graphic;
+
+                            if (start is Multi)
+                                graphic = 0;
+
+                            switch (graphic)
+                            {
+                                case 0x0459:
+                                case 0x045A:
+                                case 0x045B:
+                                case 0x045C:
+                                case 0x0A2A:
+                                case 0x0A2B:
+                                case 0x0B2C:
+                                case 0x0B2D:
+                                case 0x0B2E:
+                                case 0x0B2F:
+                                case 0x0B30:
+                                case 0x0B31:
+                                case 0x0B32:
+                                case 0x0B33:
+                                case 0x0B4E:
+                                case 0x0B4F:
+                                case 0x0B50:
+                                case 0x0B51:
+                                case 0x0B52:
+                                case 0x0B53:
+                                case 0x0B54:
+                                case 0x0B55:
+                                case 0x0B56:
+                                case 0x0B57:
+                                case 0x0B58:
+                                case 0x0B59:
+                                case 0x0B5A:
+                                case 0x0B5B:
+                                case 0x0B5C:
+                                case 0x0B5D:
+                                case 0x0B5E:
+                                case 0x0B5F:
+                                case 0x0B60:
+                                case 0x0B61:
+                                case 0x0B62:
+                                case 0x0B63:
+                                case 0x0B64:
+                                case 0x0B65:
+                                case 0x0B66:
+                                case 0x0B67:
+                                case 0x0B68:
+                                case 0x0B69:
+                                case 0x0B6A:
+                                case 0x0B91:
+                                case 0x0B92:
+                                case 0x0B93:
+                                case 0x0B94:
+                                case 0x0CF3:
+                                case 0x0CF4:
+                                case 0x0CF6:
+                                case 0x0CF7:
+                                case 0x11FC:
+                                case 0x1218:
+                                case 0x1219:
+                                case 0x121A:
+                                case 0x121B:
+                                case 0x1527:
+                                case 0x1771:
+                                case 0x1776:
+                                case 0x1779:
+                                case 0x1DC7:
+                                case 0x1DC8:
+                                case 0x1DC9:
+                                case 0x1DCA:
+                                case 0x1DCB:
+                                case 0x1DCC:
+                                case 0x1DCD:
+                                case 0x1DCE:
+                                case 0x1DCF:
+                                case 0x1DD0:
+                                case 0x1DD1:
+                                case 0x1DD2:
+                                case 0x2A58:
+                                case 0x2A59:
+                                case 0x2A5A:
+                                case 0x2A5B:
+                                case 0x2A7F:
+                                case 0x2A80:
+                                case 0x2DDF:
+                                case 0x2DE0:
+                                case 0x2DE3:
+                                case 0x2DE4:
+                                case 0x2DE5:
+                                case 0x2DE6:
+                                case 0x2DEB:
+                                case 0x2DEC:
+                                case 0x2DED:
+                                case 0x2DEE:
+                                case 0x2DF5:
+                                case 0x2DF6:
+                                case 0x3088:
+                                case 0x3089:
+                                case 0x308A:
+                                case 0x308B:
+                                case 0x35ED:
+                                case 0x35EE:
+                                case 0x3DFF:
+                                case 0x3E00:
+
+                                    for (int i = 0; i < 98; i++)
+                                    {
+                                        if (FileManager.Animations.SittingInfos[i].Graphic == graphic)
+                                        {
+                                            result = i + 1;
+
+                                            break;
+                                        }
+                                    }
+
+                                    break;
+                            }
+                        }
+
+                        start = start.Right;
+                    }
+                }
+
+                return result;
+            }
+        } */
 
         public override void Dispose()
         {

@@ -33,12 +33,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class HtmlGump : Control
+    internal class HtmlControl : Control
     {
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlGump(string[] parts, string[] lines) : this()
+        public HtmlControl(string[] parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0, bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
+        public HtmlControl(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0, bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
             X = x;
             Y = y;
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
             InternalBuild(text, hue);
         }
 
-        public HtmlGump()
+        public HtmlControl()
         {
             _gameText = new RenderedText
             {
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (HasBackground)
             {
-                AddChildren(new ResizePic(0x2486)
+                Add(new ResizePic(0x2486)
                 {
                     Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
                 });
@@ -149,18 +149,20 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (UseFlagScrollbar)
                 {
-                    _scrollBar = new ScrollFlag(this)
+                    _scrollBar = new ScrollFlag()
                     {
                         Location = new Point(Width - 14, 0)
                     };
                 }
                 else
-                    _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                    _scrollBar = new ScrollBar(Width - 14, 0, Height);
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*//* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
+
+                Add((Control)_scrollBar);
             }
 
             //if (Width != _gameText.Width)
@@ -193,7 +195,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _scrollBar.Height = Height;
                     _scrollBar.MinValue = 0;
-                    _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
+                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height +(HasBackground ? 8 : 0);
                     //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                     WantUpdateSize = false;
                 }

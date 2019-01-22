@@ -12,10 +12,9 @@ using ClassicUO.Utility;
 namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
-    {    
+    {
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
-
 
         public override void Load()
         {
@@ -45,7 +44,7 @@ namespace ClassicUO.IO.Resources
                     int idx = i * 32 + j;
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     ushort textId = tiledata.ReadUShort();
-                    tiledata.Fill(bufferString, 20);
+                    tiledata.Fill(ref bufferString, 20);
                     string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
                     LandData[idx] = new LandTiles(flags, textId, name);
                 }
@@ -73,7 +72,7 @@ namespace ClassicUO.IO.Resources
                     ushort hue = tiledata.ReadUShort();
                     ushort lightIndex = tiledata.ReadUShort();
                     byte height = tiledata.ReadByte();
-                    tiledata.Fill(bufferString, 20);
+                    tiledata.Fill(ref bufferString, 20);
                     string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
                     StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
@@ -82,6 +81,138 @@ namespace ClassicUO.IO.Resources
 
         END_2:
             tiledata.Dispose();
+
+
+
+            //path = Path.Combine(FileManager.UoFolderPath, "tileart.uop");
+
+            //if (File.Exists(path))
+            //{
+            //    UOFileUop uop = new UOFileUop(path, ".bin");
+            //    DataReader reader = new DataReader();
+            //    for (int i = 0; i < uop.Entries.Length; i++)
+            //    {
+            //        long offset = uop.Entries[i].Offset;
+            //        int csize = uop.Entries[i].Length;
+            //        int dsize = uop.Entries[i].DecompressedLength;
+
+            //        if (offset == 0)
+            //            continue;
+
+            //        uop.Seek(offset);
+            //        byte[] cdata = uop.ReadArray<byte>(csize);
+            //        byte[] ddata = new byte[dsize];
+
+            //        ZLib.Decompress(cdata, 0, ddata, dsize);
+
+            //        reader.SetData(ddata, dsize);
+
+            //        ushort version = reader.ReadUShort();
+            //        uint stringDicOffset = reader.ReadUInt();
+            //        uint tileID = reader.ReadUInt();
+
+            //        reader.Skip(1 + // bool unk
+            //                    1 + // unk
+            //                    4 + // float unk
+            //                    4 + // float unk
+            //                    4 + // fixed zero ?
+            //                    4 + // old id ?
+            //                    4 + // unk
+            //                    4 + // unk
+            //                    1 + // unk
+            //                    4 + // 3F800000
+            //                    4 + // unk
+            //                    4 + // float light
+            //                    4 + // float light
+            //                    4   // unk
+            //                    );
+
+            //        ulong flags = reader.ReadULong();
+            //        ulong flags2 = reader.ReadULong();
+
+            //        reader.Skip(4); // unk
+
+            //        reader.Skip(24); // EC IMAGE OFFSET
+            //        byte[] imageOffset = reader.ReadArray(24); // 2D IMAGE OFFSET
+
+
+            //        if (tileID + 0x4000 == 0xa28d)
+            //        {
+            //            TileFlag f = (TileFlag) flags;
+
+            //        }
+
+            //        int count = reader.ReadByte();
+            //        for (int j = 0; j < count; j++)
+            //        {
+            //            byte prop = reader.ReadByte();
+            //            uint value = reader.ReadUInt();
+            //        }
+
+            //        count = reader.ReadByte();
+            //        for (int j = 0; j < count; j++)
+            //        {
+            //            byte prop = reader.ReadByte();
+            //            uint value = reader.ReadUInt();
+            //        }
+
+            //        count = reader.ReadInt(); // Gold Silver
+            //        for (int j = 0; j < count; j++)
+            //        {
+            //            uint amount = reader.ReadUInt();
+            //            uint id = reader.ReadUInt();
+            //        }
+
+            //        count = reader.ReadInt();
+
+            //        for (int j = 0; j < count; j++)
+            //        {
+            //            byte val = reader.ReadByte();
+
+            //            if (val != 0)
+            //            {
+            //                if (val == 1)
+            //                {
+            //                    byte unk = reader.ReadByte();
+            //                    uint unk1 = reader.ReadUInt();
+            //                }
+
+            //            }
+            //            else
+            //            {
+            //                int subCount = reader.ReadInt();
+
+            //                for (int k = 0; k < subCount; k++)
+            //                {
+            //                    uint unk = reader.ReadUInt();
+            //                    uint unk1 = reader.ReadUInt();
+            //                }
+            //            }
+            //        }
+
+            //        count = reader.ReadByte();
+
+            //        if (count != 0)
+            //        {
+            //            uint unk = reader.ReadUInt();
+            //            uint unk1 = reader.ReadUInt();
+            //            uint unk2 = reader.ReadUInt();
+            //            uint unk3 = reader.ReadUInt();
+            //        }
+
+
+
+            //        if (StaticData[tileID].AnimID == 0)
+            //        {
+            //            //StaticData[tileID] = new StaticTiles(flags, 0, 0, 0, );
+            //        }
+                   
+                  
+            //    }
+
+            //    uop.Dispose();
+            //    reader.ReleaseData();
+            //}
 
             //string pathdef = Path.Combine(FileManager.UoFolderPath, "FileManager.Art.def");
             //if (!File.Exists(pathdef))

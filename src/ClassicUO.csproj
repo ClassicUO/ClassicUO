@@ -79,6 +79,9 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="cuoapi, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
@@ -114,11 +117,14 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\Layers.cs" />
+    <Compile Include="Game\Data\MapMessageType.cs" />
     <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
+    <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RacialAbilityData.cs" />
+    <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -127,10 +133,19 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
+    <Compile Include="Game\Managers\AudioManager.cs" />
+    <Compile Include="Game\UI\AbstractEntry.cs" />
+    <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
+    <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
+    <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
+    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
     <Compile Include="Game\UI\Gumps\DebugGump.cs" />
@@ -141,12 +156,66 @@
     <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
+    <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
+    <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
     <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
+    <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
+    <Compile Include="Game\UI\MultiLineEntry.cs" />
     <Compile Include="Game\Views\MultiView.cs" />
     <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
+    <Compile Include="IO\Audio\Sound.cs" />
+    <Compile Include="IO\Audio\AudioEffects.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Buffer16BitStereo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\ABuffer.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitReserve.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Bitstream.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitstreamErrors.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitstreamException.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\CircularByteBuffer.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Crc16.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoder.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\DecoderErrors.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\DecoderException.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\ASubband.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\IFrameDecoder.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIDecoder.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIIDecoder.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIIIDecoder.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ChannelData.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\GranuleInfo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\Layer3SideInfo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\SBI.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ScaleFactorData.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ScaleFactorTable.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2IntensityStereo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2Stereo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1IntensityStereo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1Stereo.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Equalizer.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Header.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\Huffman.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\OutputChannels.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\OutputChannelsEnum.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\PushbackStream.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\SampleBuffer.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Decoding\SynthesisFilter.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\IO\RandomAccessFileStream.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\IO\RiffFile.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\IO\WaveFile.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\IO\WaveFileBuffer.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\MP3SharpException.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\MP3Stream.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\SoundFormat.cs" />
+    <Compile Include="IO\Audio\MP3Sharp\Support\SupportClass.cs" />
+    <Compile Include="IO\Audio\UOMusic.cs" />
+    <Compile Include="IO\Audio\UOSound.cs" />
+    <Compile Include="IO\Audio\VolumeState.cs" />
     <Compile Include="IO\DefReader.cs" />
     <Compile Include="IO\ResourceLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
@@ -159,6 +228,7 @@
     <Compile Include="IO\Resources\LightsLoader.cs" />
     <Compile Include="IO\Resources\MapLoader.cs" />
     <Compile Include="IO\Resources\MultiLoader.cs" />
+    <Compile Include="IO\Resources\MultiMapLoader.cs" />
     <Compile Include="IO\Resources\SkillsLoader.cs" />
     <Compile Include="IO\Resources\SoundsLoader.cs" />
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
@@ -270,7 +340,7 @@
     <Compile Include="Game\UI\Controls\GumpPicContainer.cs" />
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
-    <Compile Include="Game\UI\Controls\HtmlGump.cs" />
+    <Compile Include="Game\UI\Controls\HtmlControl.cs" />
     <Compile Include="Game\UI\Controls\IScrollBar.cs" />
     <Compile Include="Game\UI\Controls\ItemGump.cs" />
     <Compile Include="Game\UI\Controls\ItemGumpPaperdoll.cs" />
@@ -290,7 +360,7 @@
     <Compile Include="Game\UI\Gumps\ContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\Gump.cs" />
     <Compile Include="Game\UI\Gumps\JournalGump.cs" />
-    <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\WorldMapGump.cs" />
     <Compile Include="Game\UI\Gumps\MiniMapGump.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PaperdollGump.cs" />
@@ -315,7 +385,7 @@
     <Compile Include="Game\Serial.cs" />
     <Compile Include="Game\Views\AnimatedEffectView.cs" />
     <Compile Include="Game\Views\ItemView.cs" />
-    <Compile Include="Game\Views\LayerOrder.cs" />
+    <Compile Include="Game\Data\LayerOrder.cs" />
     <Compile Include="Game\Views\MobileView.cs" />
     <Compile Include="Game\Views\StaticView.cs" />
     <Compile Include="Game\Views\TextOverHeadView.cs" />
@@ -451,6 +521,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="cuoicon.ico" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

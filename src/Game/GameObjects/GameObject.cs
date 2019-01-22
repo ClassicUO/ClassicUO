@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
-        private Position _position = Position.Invalid;
+        private Position _position = Position.INVALID;
         private View _view;
         public Vector3 Offset;
         private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
@@ -73,6 +73,7 @@ namespace ClassicUO.Game.GameObjects
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
+                    OnPositionChanged();
                 }
             }
         }
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {         
                     
-                if (World.Player.Steps.Count > 0)
+                if (World.Player.IsMoving && this != World.Player)
                 {
                     Mobile.Step step = World.Player.Steps.Back();
 
@@ -167,10 +168,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                //if (_tile != null && _tile.X == x && _tile.Y == y)
-                //    return;
-
-                if (Position != Position.Invalid)
+                if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
                 _tile = World.Map.GetTile(x, y);
@@ -179,9 +177,21 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public void AddToTile() => AddToTile(X, Y);
+
+        public void AddToTile(Tile tile)
+        {
+            if (World.Map != null)
+            {
+                if (Position != Position.INVALID)
+                    _tile?.RemoveGameObject(this);
+
+                _tile = tile;
+                _tile?.AddGameObject(this);
+            }
+        }
       
 
-        public event EventHandler Disposed;
+        public event EventHandler Disposed, OverheadAdded;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
@@ -195,6 +205,11 @@ namespace ClassicUO.Game.GameObjects
         protected virtual View CreateView()
         {
             return null;
+        }
+
+        public TextOverhead AddOverhead(MessageType type, string message)
+        {
+            return AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
         public TextOverhead AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
@@ -241,6 +256,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+            OverheadAdded?.Raise(overhead);
+
             return overhead;
         }
 
@@ -281,8 +298,6 @@ namespace ClassicUO.Game.GameObjects
 
             _tile?.RemoveGameObject(this);
             _tile = null;
-
-            //Tile = null;
 
             foreach (TextOverhead textOverhead in _overHeads)
             {

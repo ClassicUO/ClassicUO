@@ -35,6 +35,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly TextBox _textBox;
         private readonly Point _offsert;
 
+        private bool _firstChange;
+
         public SplitMenuGump(Item item, Point offset) : base(item, 0)
         {
             Item = item;
@@ -44,11 +46,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
 
             GumpPic background = new GumpPic(0, 0, 0x085C, 0);
-            AddChildren(background);
-            AddChildren(_slider = new HSliderBar(29, 16, 105, 0, item.Amount,item.Amount, HSliderBarStyle.BlueWidgetNoBar));
+            Add(background);
+            Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount,item.Amount, HSliderBarStyle.BlueWidgetNoBar));
             _lastValue = _slider.Value;
 
-            AddChildren(_okButton = new Button(0, 0x085d, 0x085e, 0x085f)
+            Add(_okButton = new Button(0, 0x085d, 0x085e, 0x085f)
             {
                 ButtonAction = ButtonAction.Default,
                 X = 102, Y = 37
@@ -56,9 +58,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _okButton.MouseClick += OkButtonOnMouseClick;
 
-            AddChildren(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
+            Add(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
             {
                 X = 29, Y = 42,
+                Width = 60,
                 NumericOnly = true,
             });
             _textBox.SetText(item.Amount.ToString());
@@ -107,7 +110,14 @@ namespace ClassicUO.Game.UI.Gumps
                             _slider.Value = textValue;
                         else
                         {
-                            _slider.Value = _slider.MaxValue;
+                            if (!_firstChange)
+                            {
+                                string last = _textBox.Text[_textBox.Text.Length - 1].ToString();
+                                _slider.Value = int.Parse(last);
+                                _firstChange = true;
+                            }
+                            else
+                                _slider.Value = _slider.MaxValue;
                             _textBox.SetText(_slider.Value.ToString());
                         }
                     }

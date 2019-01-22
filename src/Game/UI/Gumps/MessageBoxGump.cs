@@ -44,19 +44,19 @@ namespace ClassicUO.Game.UI.Gumps
             Height = h;
             _action = action;
 
-            AddChildren(new ResizePic(0x0A28)
+            Add(new ResizePic(0x0A28)
             {
                 Width = w, Height = h
             });
 
-            AddChildren(new Label(message, false, 0x0386, Width - 90, 1)
+            Add(new Label(message, false, 0x0386, Width - 90, 1)
             {
                 X = 40,
                 Y = 45
             });
 
             // OK
-            AddChildren(new Button(0, 0x0481, 0x0482, 0x0483)
+            Add(new Button(0, 0x0481, 0x0482, 0x0483)
             {
                 X = 100,
                 Y = 75,

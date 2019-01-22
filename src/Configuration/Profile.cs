@@ -100,7 +100,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
         [JsonProperty] public bool UseCircleOfTransparency { get; set; } = false;
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
-
+        [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
+        [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
+        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;
@@ -115,7 +117,13 @@ namespace ClassicUO.Configuration
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        [JsonProperty] public bool GameWindowLock { get; set; } = false;
+        [JsonProperty] public bool GameWindowFullSize { get; set; } = false;
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
+        [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;
+        [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
+
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
 

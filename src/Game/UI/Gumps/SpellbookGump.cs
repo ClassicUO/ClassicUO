@@ -77,6 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
             _spellBook.Disposed += SpellBookOnDisposed;
 
             OnEntityUpdate(_spellBook);
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         private void SpellBookOnDisposed(object sender, EventArgs e)
@@ -89,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+
             Engine.UI.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -108,13 +112,13 @@ namespace ClassicUO.Game.UI.Gumps
             Clear();
             _pageCornerLeft = _pageCornerRight = null;
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount);
-            AddChildren(new GumpPic(0, 0, bookGraphic, 0));
-            AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            Add(new GumpPic(0, 0, bookGraphic, 0));
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
             _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
-            AddChildren(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseClick += PageCornerOnMouseClick;
@@ -141,42 +145,42 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 isMageSpellbook = true;
 
-                AddChildren(new Button((int) ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
+                Add(new Button((int) ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
                 {
                     X = 58, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 1
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
+                Add(new Button((int) ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
                 {
                     X = 93, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 1
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
+                Add(new Button((int) ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
                 {
                     X = 130, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 2
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
+                Add(new Button((int) ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
                 {
                     X = 164, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 2
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
+                Add(new Button((int) ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
                 {
                     X = 227, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 3
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
+                Add(new Button((int) ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
                 {
                     X = 260, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 3
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
+                Add(new Button((int) ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
                 {
                     X = 297, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 4
                 });
 
-                AddChildren(new Button((int) ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
+                Add(new Button((int) ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
                 {
                     X = 332, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 4
                 });
@@ -195,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             X = 62, Y = 162
                         };
-                        AddChildren(label, page);
+                        Add(label, page);
                     }
 
                     int indexX = 106;
@@ -214,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = indexX, Y = 10
                     };
-                    AddChildren(text, page);
+                    Add(text, page);
 
                     if (isMageSpellbook)
                     {
@@ -222,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             X = dataX, Y = 30
                         };
-                        AddChildren(text, page);
+                        Add(text, page);
                     }
 
 
@@ -254,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 HoveredLabel l = (HoveredLabel) sender;
                                 SetActivePage((int) l.LocalSerial.Value);
                             };
-                            AddChildren(text, page);
+                            Add(text, page);
                             y += 15;
                         }
 
@@ -307,13 +311,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = topTextX, Y = topTextY
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
 
                     text = new Label(name, false, 0x0288, 80, 6)
                     {
                         X = iconTextX, Y = 34
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
                     int abbreviatureY = 26;
 
                     if (text.Height < 24)
@@ -324,7 +328,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = iconTextX, Y = abbreviatureY
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
                 }
                 else
                 {
@@ -332,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = topTextX, Y = topTextY
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
 
                     if (haveAbbreviature)
                     {
@@ -340,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             X = iconTextX, Y = 34
                         };
-                        AddChildren(text, page1);
+                        Add(text, page1);
                     }
                 }
 
@@ -397,23 +401,23 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.UI.Add(gump);
                     Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
                 };
-                AddChildren(icon, page1);
+                Add(icon, page1);
 
                 if (haveReagents)
                 {
-                    AddChildren(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
+                    Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
 
                     Label text = new Label("Reagents:", false, 0x0288, font: 6)
                     {
                         X = iconX, Y = 92
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
 
                     text = new Label(reagents, false, 0x0288, font: 9)
                     {
                         X = iconX, Y = 114
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
                 }
 
                 if (!isMageSpellbook)
@@ -424,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = iconX, Y = requiriesY
                     };
-                    AddChildren(text, page1);
+                    Add(text, page1);
                 }
             }
 
@@ -620,13 +624,15 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
+
+            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
         {
             if (_spellBookType == SpellBookType.Magery)
             {
-                AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
+                Add(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
                 {
                     X = isright ? 64 + 162 : 85, Y = 10
                 }, page);
@@ -649,19 +655,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.UI.Add(gump);
                 Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             };
-            AddChildren(spellImage, page);
+            Add(spellImage, page);
 
             Label spellnameLabel = new Label(spell.Name, false, 0x0288, 80, 6)
             {
                 X = isright ? 275 : 112, Y = 34
             };
-            AddChildren(spellnameLabel, page);
+            Add(spellnameLabel, page);
 
             if (spell.Regs.Length > 0)
             {
-                AddChildren(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
+                Add(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
 
-                AddChildren(new Label("Reagents:", false, 0x0288, font: 6)
+                Add(new Label("Reagents:", false, 0x0288, font: 6)
                 {
                     X = isright ? 225 : 62, Y = 92
                 }, page);
@@ -672,13 +678,13 @@ namespace ClassicUO.Game.UI.Gumps
                     int y = spellnameLabel.Height < 24 ? 31 : 24;
                     y += spellnameLabel.Height;
 
-                    AddChildren(new Label(SpellsMagery.SpecialReagentsChars[spell.ID - 1][1], false, 0x0288, font: 8)
+                    Add(new Label(SpellsMagery.SpecialReagentsChars[spell.ID - 1][1], false, 0x0288, font: 8)
                     {
                         X = isright ? 275 : 112, Y = y
                     }, page);
                 }
 
-                AddChildren(new Label(reagList, false, 0x0288, font: 9)
+                Add(new Label(reagList, false, 0x0288, font: 9)
                 {
                     X = isright ? 225 : 62, Y = 114
                 }, page);

@@ -60,12 +60,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AddChildren(_background = new GumpPic(0, 0, _graphic, 0)
+            Add(_background = new GumpPic(0, 0, _graphic, 0)
             {
                 LocalSerial = 1
             });
 
-            AddChildren(_button = new Button(0, 0x7585, 0x7589, 0x7589)
+            Add(_button = new Button(0, 0x7585, 0x7589, 0x7589)
             {
                 X = -2,
                 Y = 36,
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
             _direction = GumpDirection.LEFT_HORIZONTAL;
 
             foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
-                AddChildren(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
+                Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
             UpdateElements();
         }
 
@@ -110,13 +110,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddBuff(Graphic graphic)
         {
-            AddChildren(new BuffControlEntry(World.Player.BuffIcons[graphic]));
+            Add(new BuffControlEntry(World.Player.BuffIcons[graphic]));
             UpdateElements();
         }
 
         public void RemoveBuff(Graphic graphic)
         {
-            RemoveChildren(Children.OfType<BuffControlEntry>().FirstOrDefault(s => s.Icon.Graphic == graphic));
+            Remove(Children.OfType<BuffControlEntry>().FirstOrDefault(s => s.Icon.Graphic == graphic));
             UpdateElements();
         }
 

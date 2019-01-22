@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
+        //public int SittingValue { get; set; }
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
         public IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
@@ -69,55 +71,6 @@ namespace ClassicUO.IO.Resources
                     {
                         _filesUop[i - 1] = new UOFileUopNoFormat(pathuop, i - 1);
                         _filesUop[i - 1].LoadEx(ref hashes);
-                    }
-                }
-            }
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-            {
-                string[] typeNames = new string[5]
-                {
-                    "monster", "sea_monster", "animal", "human", "equipment"
-                };
-
-                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
-                {
-                    string line;
-
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        line = line.Trim();
-
-                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
-                            continue;
-
-                        string[] parts = line.Split(new[]
-                        {
-                            '\t', ' '
-                        }, StringSplitOptions.RemoveEmptyEntries);
-                        int id = int.Parse(parts[0]);
-
-                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            continue;
-                        string testType = parts[1].ToLower();
-                        int commentIdx = parts[2].IndexOf('#');
-
-                        if (commentIdx > 0)
-                            parts[2] = parts[2].Substring(0, commentIdx - 1);
-                        else if (commentIdx == 0)
-                            continue;
-                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
-                        for (int i = 0; i < 5; i++)
-                        {
-                            if (testType == typeNames[i])
-                            {
-                                DataIndex[id].Type = (ANIMATION_GROUPS_TYPE)i;
-                                DataIndex[id].Flags = 0x80000000 | number;
-
-                                break;
-                            }
-                        }
                     }
                 }
             }
@@ -213,7 +166,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-
+           
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
             {
                 while (defReader.Next())
@@ -323,8 +276,16 @@ namespace ClassicUO.IO.Resources
 
                         if (realAnimID >= 200)
                         {
-                            startAnimID = (realAnimID - 200) * 65 + 22000;
-                            groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            if (realAnimID >= 400)
+                            {
+                                startAnimID = (realAnimID - 400) * 175 + 35000;
+                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
+                            }
+                            else
+                            {
+                                startAnimID = (realAnimID - 200) * 65 + 22000;
+                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            }
                         }
                         else
                         {
@@ -467,8 +428,8 @@ namespace ClassicUO.IO.Resources
 
                                         if ((long)aidx >= (long)maxaddress)
                                             break;
-
-                                        if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                       
+                                        if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
                                             DataIndex[index].Groups[j].Direction[d].PatchedAddress = aidx->Position;
                                             DataIndex[index].Groups[j].Direction[d].PatchedSize = aidx->Size;
@@ -567,7 +528,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
+  
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
             {
                 while (defReader.Next())
@@ -650,6 +611,59 @@ namespace ClassicUO.IO.Resources
             }
 
 
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            {
+                string[] typeNames = new string[5]
+                {
+                    "monster", "sea_monster", "animal", "human", "equipment"
+                };
+
+                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
+                {
+                    string line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        line = line.Trim();
+
+                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
+                            continue;
+
+                        string[] parts = line.Split(new[]
+                        {
+                            '\t', ' '
+                        }, StringSplitOptions.RemoveEmptyEntries);
+                        int id = int.Parse(parts[0]);
+
+                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            continue;
+                        string testType = parts[1].ToLower();
+                        int commentIdx = parts[2].IndexOf('#');
+
+                        if (commentIdx > 0)
+                            parts[2] = parts[2].Substring(0, commentIdx - 1);
+                        else if (commentIdx == 0)
+                            continue;
+                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (testType == typeNames[i])
+                            {
+                                ref var index = ref DataIndex[id];
+                                index.Type = (ANIMATION_GROUPS_TYPE)i;
+                                index.Flags = 0x80000000 | number;
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+
             byte maxGroup = 0;
 
             for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
@@ -687,11 +701,11 @@ namespace ClassicUO.IO.Resources
 
                 //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
 
-                for (int i = 0; i < animSeq.Entries.Length; i++)
+				for (int i = 0; i < animSeq.Entries.Length; i++)
                 {
                     UOFileIndex3D entry = animSeq.Entries[i];
 
-                    if (entry.Length > 0 && entry.Offset > 0)
+                    if (entry.Offset != 0)
                     {
                         animSeq.Seek(entry.Offset);
                         byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
@@ -703,109 +717,398 @@ namespace ClassicUO.IO.Resources
                         uint animID = _reader.ReadUInt();
                         ref IndexAnimation index = ref DataIndex[animID];
 
-                        if (!index.IsUOP)
-                            continue;
+                        //if (animID != 729 && animID != 735)
+                        //    continue;
+
                         _reader.Skip(48);
+
                         int replaces = _reader.ReadInt();
 
-                        if (replaces == 48 || replaces == 68)
-                            continue;
+                        StringBuilder sb = new StringBuilder();
+                        //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
 
-                        //StringBuilder sb = new StringBuilder();
-                        //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
-
-                        //switch (replaces)
+                        //if (index.IsUOP)
                         //{
-                        //    case 29:
-                        //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                        //        break;
-                        //    case 31: // what is this?
-                        //        break;
-                        //    case 32:
-                        //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
-                        //        break;
-                        //    case 48:
-                        //    case 68:
-                        //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                        //        break;
+                        //    switch (replaces)
+                        //    {
+                        //        case 29:
+                        //            index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                        //            break;
+                        //        case 31: // what is this?
+                        //            break;
+                        //        case 32:
+                        //            index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
+                        //            break;
+                        //        case 48:
+                        //        case 68:
+                        //            index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                        //            break;
+                        //    }
                         //}
+
+                        if (animID == 735)
+                        {
+
+                        }
+
+                        if (animID == 0x2E)
+                        {
+
+                        }
+
+                        if (animID == 0x1b0)
+                        {
+
+                        }
+
+                        if (animID == 1498)
+                        {
+
+                        }
 
                         for (int k = 0; k < replaces; k++)
                         {
                             int oldIdx = _reader.ReadInt();
                             uint frameCount = _reader.ReadUInt();
                             int newIDX = _reader.ReadInt();
+	                        int unknown = _reader.ReadInt();
 
-                            //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+							//sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-                            if (frameCount == 0)
-                                index.Groups[oldIdx] = index.Groups[newIDX];
-                            else
+							var hashstring = string.Empty;
+
+	                        if (newIDX >= 0)
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
+	                        else
+		                        hashstring = $"build/animationlegacyframe/{animID:D6}/{oldIdx:D2}.bin";
+
+	                        ulong hash = UOFileUop.CreateHash(hashstring);
+
+                            if (hashes.TryGetValue(hash, out UopFileData data))
                             {
-                                //int offset = 64;
-                                if (animID == 0x02df)
+                                if (frameCount == 0)
                                 {
+                                    if (!_animationSequenceReplacing.ContainsKey((ushort) animID))
+                                        _animationSequenceReplacing.Add((ushort)animID, (byte) replaces);
+                                    DataIndex[animID].Groups[oldIdx].Direction = DataIndex[animID].Groups[newIDX].Direction;
                                 }
-
-                                //_reader.Skip(40);
-
-                                //byte[] unk = new byte[20];
-
-                                //for (int o = 0; o < 20; o++)
-                                //{
-                                //    unk[o] = _reader.ReadByte();
-                                //}
-
-                                //for (int j = 0; j < 5; j++)
-                                //{
-                                //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
-                                //}
+                                DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
                             }
 
-                            _reader.Skip(60);
+							/*
+                            if (animID == 735)
+                            {
+
+                               
+                                if (oldIdx == 4)
+                                {
+                                    //newIDX = 25;
+                                }
+
+                                if (newIDX == 4)
+                                {
+
+                                }
+                            }
+
+                            if (frameCount == 0 && index.IsUOP)
+                            {
+                                index.Groups[oldIdx] = index.Groups[newIDX];
+                            }
+							*/
+							
+                            _reader.Skip(48);
+
+							var unknownA = _reader.ReadInt();
+
+	                        //sb.AppendLine($"\t\t\t\t UnknownA: {unknownA}");
+
+							if (unknownA > 0)
+							{
+								for (int x = 0; x < unknownA; x++)
+								{
+									var unknownB = _reader.ReadInt();
+									var effectCount = _reader.ReadInt();
+
+									//sb.AppendLine($"\t\t\t\t\t\t UnknownB: {unknownB}\t\t EffectCount: {effectCount}");
+
+									for (int e = 0; e < effectCount; e++)
+									{
+										var effectUnknownA = _reader.ReadInt();
+	
+										var effectUnknownB = _reader.ReadInt();
+
+										// loop here, but no data read
+
+										var effectUnknownC = _reader.ReadInt();
+
+										//sb.AppendLine($"\t\t\t\t\t\t\t\t effectUnknownA: {effectUnknownA}\t\t effectUnknownB: {effectUnknownB}\t\t effectUnknownC: {effectUnknownC}");
+
+										for (int z = 0; z < effectUnknownC; z++)
+										{
+											var effectUnknownD = _reader.ReadInt();
+
+											var effectUnknownE = _reader.ReadInt();
+
+											//sb.AppendLine($"\t\t\t\t\t\t\t\t\t\t effectUnknownD: {effectUnknownD}\t\t effectUnknownE: {effectUnknownE}\t\t");
+										}
+
+
+										//				loop back to function here
+										
+										var unknownF = _reader.ReadInt();
+									}
+
+	
+								}
+							}
+
+	                        var unknownC = _reader.ReadInt();
+
+	                        //sb.AppendLine($"\t\t\t\t UnknownC: {unknownC}");
+
+							if (unknownC > 0)
+	                        {
+		                        for (int x = 0; x < unknownC; x++)
+		                        {
+			                        var unknownD = _reader.ReadInt();
+
+			                       //sb.AppendLine($"\t\t\t\t\t\t unknownD: {unknownD}");
+								}
+	                        }
+                        }
+
+                        var a = sb.ToString();
+                        sb.Clear();
+	                    var unknownZ = _reader.ReadInt();
+
+	                    if (unknownZ > 0)
+	                    {
+	                        const int TO_CHECK = 24;
+	                        const int ID = 735;
+
+	                        if (animID == ID)
+	                            sb.AppendLine("count unknownZ: " + unknownZ);
+
+	                        
+
+		                    for (int z = 0; z < unknownZ; z++)
+		                    {
+			                    var unknownZ_0 = _reader.ReadByte();
+			                    var unknownZ_1 = _reader.ReadByte();
+			                    var unknownZ_2 = _reader.ReadInt();
+
+		                        int indent = 1;
+                                string tab = new string('\t', indent);
+
+		                        if (animID == ID)
+		                        {
+		                            sb.AppendLine(tab + "unknownZ_0: " + unknownZ_0);
+		                            sb.AppendLine(tab + "unknownZ_1: " + unknownZ_1);
+		                            sb.AppendLine(tab + "unknownZ_2: " + unknownZ_2);
+		                            sb.AppendLine();
+                                }
+
+                                if (unknownZ_0 == TO_CHECK && animID == ID)
+		                        {
+
+                                }
+
+		                        if (unknownZ_1 == TO_CHECK && animID == ID)
+		                        {
+
+		                        }
+
+		                        if (unknownZ_2 == TO_CHECK && animID == ID)
+		                        {
+
+		                        }
+
+                                // I don't know yet
+                                {
+				                    var unknown_float_A = 0.0;
+
+				                    if (unknownZ_1 < 0)
+					                    unknown_float_A = 0.0;
+                                }
+
+		                        /////////////////////////////////////////////////////////
+                                var unknownZ_3 = _reader.ReadInt();
+
+		                        if (unknownZ_3 >= 0)
+		                        {
+		                            sb.AppendLine(tab + "count unknownZ_3: " + unknownZ_3);
+                                    tab = new string('\t', ++indent);
+		                        }
+                                
+		                        for (int y = 0; y < unknownZ_3; y++)
+			                    {
+				                    var unknownY_0 = _reader.ReadByte();
+				                    var unknownY_1 = _reader.ReadInt();
+
+			                        if (animID == ID)
+			                        {
+			                            sb.AppendLine(tab + "unknownY_0: " + unknownY_0);
+			                            sb.AppendLine(tab + "unknownY_1: " + unknownY_1);
+			                            sb.AppendLine();
+                                    }
+
+                                    if (unknownY_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownY_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+                                }
+
+		                        if (unknownZ_3 > 0)
+		                            indent--;
+                                /////////////////////////////////////////////////////////
+
+
+
+		                        /////////////////////////////////////////////////////////
+                                var unknownZ_4 = _reader.ReadInt();
+
+		                        if (unknownZ_4 >= 0)
+		                        {
+		                            sb.AppendLine(tab + "count unknownZ_4: " + unknownZ_4);
+                                    tab = new string('\t', ++indent);
+		                        }
+
+                                for (int x = 0; x < unknownZ_4; x++)
+			                    {
+				                    var unknownX_0 = _reader.ReadByte();
+				                    var unknownX_1 = _reader.ReadInt();
+				                    var unknownX_2 = _reader.ReadInt();
+
+			                        if (animID == ID)
+			                        {
+			                            sb.AppendLine(tab + "unknownX_0: " + unknownX_0);
+			                            sb.AppendLine(tab + "unknownX_1: " + unknownX_1);
+			                            sb.AppendLine(tab + "unknownX_2: " + unknownX_2);
+			                            sb.AppendLine();
+                                    }
+
+                                    if (unknownX_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownX_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownX_2 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+                                }
+
+		                        if (unknownZ_4 > 0)
+		                            indent--;
+                                /////////////////////////////////////////////////////////
+
+
+
+		                        /////////////////////////////////////////////////////////
+                                var unknownZ_5 = _reader.ReadInt();
+
+		                        if (unknownZ_5 >= 0)
+		                        {
+		                            sb.AppendLine(tab + "count unknownZ_5: " + unknownZ_5);
+                                    tab = new string('\t', ++indent);
+		                        }
+
+                                for (int w = 0; w < unknownZ_5; w++)
+			                    {
+				                    var unknownW_0 = _reader.ReadByte();
+				                    var unknownW_1 = _reader.ReadByte();
+
+			                        if (animID == ID)
+			                        {
+			                            sb.AppendLine(tab + "unknownW_0: " + unknownW_0);
+			                            sb.AppendLine(tab + "unknownW_1: " + unknownW_1);
+			                            sb.AppendLine();
+                                    }
+
+                                    if (unknownW_0 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        if (unknownW_1 == TO_CHECK && animID == ID)
+			                        {
+
+			                        }
+
+			                        var unknownW_2 = _reader.ReadInt();
+
+
+			                        if (unknownW_2 >= 0)
+			                        {
+			                            sb.AppendLine(tab + "count unknownW_2: " + unknownW_2);
+                                        tab = new string('\t', ++indent);
+			                        }
+
+                                    for (int v = 0; v < unknownW_2; v++)
+				                    {
+					                    var unknownV_0 = _reader.ReadInt();
+
+				                        if (animID == ID)
+				                        {
+				                            sb.AppendLine(tab + "unknownV_0: " + unknownV_0);
+				                            sb.AppendLine();
+				                        }
+
+                                        if (unknownV_0 == TO_CHECK && animID == ID)
+				                        {
+
+				                        }
+
+                                    }
+
+			                        if (unknownW_2 > 0)
+			                        {
+			                            indent--;
+			                        }
+                                }
+
+		                        if (unknownZ_5 > 0)
+		                            indent--;
+		                        /////////////////////////////////////////////////////////
+
+                            }
                         }
 
                         int toread = (int)(_reader.Length - _reader.Position);
-                        byte[] data = _reader.ReadArray(toread);
-                        _reader.SetData(data, toread);
 
-                        if (animID == 0x02df)
-                        {
-                            //int len = entry.Length;
-                            //byte[] decc = new byte[len];
+                        if (animID == 735)
+                            a = sb.ToString();
 
-                            //ZLib.Compress(decbuffer, ref decc);
+	                    if (toread > 0)
+		                    throw new Exception("More data");
 
-                            // ZLib.Pack(decc, ref len, decbuffer, decLen);
-                        }
-
-                        //if (!Directory.Exists("files"))
-                        //    Directory.CreateDirectory("files");
-
-                        //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
-                        //{
-                        //    writer.Write(data);
-                        //}
-                        //sb.AppendLine("Data len: " + toread);
-                        //for (int ii = 0; ii < toread; ii++)
-                        //{
-                        //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
-                        //}
-                        uint unk0 = _reader.ReadUInt();
-                        _reader.Skip(1);
-                        uint unk1 = _reader.ReadUInt();
-                        //uint unk2 = _reader.ReadUInt();
-                        //uint unk3 = _reader.ReadUInt();
-                        //file.WriteAsync(sb.ToString());
+                       // file.WriteAsync(sb.ToString());
                     }
                 }
 
                 //file.Dispose();
                 animSeq.Dispose();
+                _reader.ReleaseData();
             }
+		}
+
+        private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
+
+        public bool IsReplacedByAnimationSequence(ushort graphic, out byte type)
+        {
+            return _animationSequenceReplacing.TryGetValue(graphic, out type);
         }
-
-
 
         public override AnimationFrameTexture GetTexture(uint id)
         {
@@ -880,6 +1183,135 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        /* public readonly struct SittingInfoData
+        {
+            public SittingInfoData(ushort graphic, sbyte d1,
+                                   sbyte d2, sbyte d3, sbyte d4,
+                                   sbyte offsetY,
+                                   sbyte mirrorOffsetY,
+                                   bool drawback)
+            {
+                Graphic = graphic;
+                Direction1 = d1;
+                Direction2 = d2;
+                Direction3 = d3;
+                Direction4 = d4;
+                OffsetY = offsetY;
+                MirrorOffsetY = mirrorOffsetY;
+                DrawBack = drawback;
+            }
+
+            public readonly ushort Graphic;
+            public readonly sbyte Direction1, Direction2, Direction3, Direction4;
+            public readonly sbyte OffsetY, MirrorOffsetY;
+            public readonly bool DrawBack;
+        }
+
+        public SittingInfoData[] SittingInfos { get; } =
+        {
+            new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x045B, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0A2A, 0, 2, 4, 6, -4, -4, false),
+            new SittingInfoData(0x0A2B, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B2C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0B2D, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x0B2E, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B2F, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B30, 6, 6, 6, 6, -8, 8, true),
+            new SittingInfoData(0x0B31, 0, 0, 0, 0, 0, 4, true),
+            new SittingInfoData(0x0B32, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B33, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4E, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4F, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B50, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B51, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B52, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B53, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B54, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B55, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B56, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x0B57, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x0B58, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x0B59, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5A, 2, 2, 2, 2, 8, 8, false),
+            new SittingInfoData(0x0B5B, 4, 4, 4, 4, 8, 8, false),
+            new SittingInfoData(0x0B5C, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5D, 6, 6, 6, 6, 0 ,8, true),
+            new SittingInfoData(0x0B5E, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B5F, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B60, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B61, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B62, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B63, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B64, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B65, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B66, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B67, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B68, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B69, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B6A, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B91, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0CF3, -1, 2, -1 , 6, 2, 8, false),
+            new SittingInfoData(0x0CF4, -1, 2, -1 , 6, 2, 8, false),
+            new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
+            new SittingInfoData(0x1218, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x1219, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x121A, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x121B, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x1527, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x1771, 0, 2, 4, 6, 0 , 0, false),
+            new SittingInfoData(0x1776, 0, 2, 4, 6, 0 , 0, false),
+            new SittingInfoData(0x1779, 0, 2, 4, 6, 0 , 0, false),       
+            new SittingInfoData(0x1DC7, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC8, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC9, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCA, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCB, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCC, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCD, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCE, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCF, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DD0, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD1, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD2, -1, 2, -1, 6, 3, 10, false),
+
+            new SittingInfoData(0x2A58, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x2A59, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x2A5A, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A5B, 0, 2, 4, 6, 10, 10, false),
+            new SittingInfoData(0x2A7F, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A80, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2DDF, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE0, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE3, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DE4, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DE5, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DE6, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEB, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEC, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DED, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DEE, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DF5, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x2DF6, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3088, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3089, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308A, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308B, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x35ED, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
+
+            new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
+        };
+       
+
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
             switch (dir)
@@ -906,6 +1338,115 @@ namespace ClassicUO.IO.Resources
                     break;
             }
         }
+
+
+        public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
+        {
+            ref var data = ref SittingInfos[SittingValue - 1];
+
+            switch (Direction)
+            {
+                case 7:
+                case 0:
+                {
+                    if (data.Direction1 == -1)
+                    {
+                        if (Direction == 7)
+                            Direction = (byte) data.Direction4;
+                        else
+                            Direction = (byte) data.Direction2;
+                    }
+                    else
+                        Direction = (byte) data.Direction1;
+
+                    break;
+                }
+                case 1:
+                case 2:
+                {
+                    if (data.Direction2 == -1)
+                    {
+                        if (Direction == 1)
+                            Direction = (byte) data.Direction1;
+                        else
+                            Direction = (byte) data.Direction3;
+                    }
+                    else
+                        Direction = (byte) data.Direction2;
+
+                    break;
+                }
+                case 3:
+                case 4:
+                {
+                    if (data.Direction3 == -1)
+                    {
+                        if (Direction == 3)
+                            Direction = (byte) data.Direction2;
+                        else
+                            Direction = (byte) data.Direction4;
+                    }
+                    else
+                        Direction = (byte) data.Direction3;
+
+                    break;
+                }
+                case 5:
+                case 6:
+                {
+                    if (data.Direction4 == -1)
+                    {
+                        if (Direction == 5)
+                            Direction = (byte) data.Direction3;
+                        else
+                            Direction = (byte) data.Direction1;
+                    }
+                    else
+                        Direction = (byte) data.Direction4;
+
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            layerDirection = Direction;
+            byte dir = Direction;
+            GetSittingAnimDirection(ref dir, ref mirror, ref x, ref y);
+            Direction = dir;
+
+            const int SITTING_OFFSET_X = 8;
+
+            int offsX = SITTING_OFFSET_X;
+
+            if (mirror)
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x += offsX - 4;
+                }
+                else
+                {
+                    y += data.OffsetY + 9;
+                }
+            }
+            else
+            {
+                if (Direction == 3)
+                {
+                    y += 23 + data.MirrorOffsetY;
+                    x -= 3;
+                }
+                else
+                {
+                    y += 9 + data.OffsetY;
+                    x -= offsX + 1;
+                }
+            }
+        }
+        
+       */
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
@@ -956,7 +1497,7 @@ namespace ClassicUO.IO.Resources
 
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
-                AnimationDirection d = DataIndex[graphic].Groups[group].Direction[0];
+                ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
                 result = d.Address != 0 || d.IsUOP;
             }
 
@@ -976,6 +1517,7 @@ namespace ClassicUO.IO.Resources
             _reader.SetData(file.StartAddress + (int)animDir.Address, animDir.Size);
             ReadFramesPixelData(ref animDir);
 
+            _reader.ReleaseData();
             return true;
         }
 
@@ -1007,29 +1549,31 @@ namespace ClassicUO.IO.Resources
             int frameCount = _reader.ReadInt();
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
-            List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
+            //List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
+
+            UOPFrameData[] pixelDataOffsets = new UOPFrameData[frameCount];
 
             for (int i = 0; i < frameCount; i++)
             {
                 IntPtr dataStart1 = _reader.PositionAddress;
-                _reader.Skip(2);
+                ushort group = _reader.ReadUShort();
                 short frameID = _reader.ReadShort();
                 _reader.Skip(8);
                 uint pixelOffset = _reader.ReadUInt();
-                int vsize = pixelDataOffsets.Count;
+                //int vsize = pixelDataOffsets.Count;
 
                 UOPFrameData data = new UOPFrameData(dataStart1, frameID, pixelOffset);
+                pixelDataOffsets[i] = data;
+                //if (vsize + 1 < data.FrameID)
+                //{
+                //    while (vsize + 1 != data.FrameID)
+                //    {
+                //        pixelDataOffsets.Add(new UOPFrameData());
+                //        vsize++;
+                //    }
+                //}
 
-                if (vsize + 1 < data.FrameID)
-                {
-                    while (vsize + 1 != data.FrameID)
-                    {
-                        pixelDataOffsets.Add(new UOPFrameData());
-                        vsize++;
-                    }
-                }
-
-                pixelDataOffsets.Add(data);
+                //pixelDataOffsets.Add(data);
             }
 
             //int vectorSize = pixelDataOffsets.Count;
@@ -1042,7 +1586,7 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
+            animDirection.FrameCount = (byte)(pixelDataOffsets.Length / 5);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
             if (animDirection.FramesHashes != null && animDirection.FramesHashes.Length > 0)
@@ -1123,6 +1667,8 @@ namespace ClassicUO.IO.Resources
             }
 
             _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
+
+            _reader.ReleaseData();
 
             return true;
         }
@@ -1254,7 +1800,7 @@ namespace ClassicUO.IO.Resources
                         _reader.SetData(file.StartAddress + (int)direction1.Address, direction1.Size);
                         ReadFrameDimensionData(frameIndex, out x, out y, out w, out h);
                         _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
-
+                        _reader.ReleaseData();
                         return;
                     }
                 }
@@ -1294,7 +1840,7 @@ namespace ClassicUO.IO.Resources
                         w = _reader.ReadShort();
                         h = _reader.ReadShort();
                         _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
-
+                        _reader.ReleaseData();
                         return;
                     }
                 }

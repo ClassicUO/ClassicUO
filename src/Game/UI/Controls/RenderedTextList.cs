@@ -37,7 +37,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             _scrollBar = scrollBarControl;
             _scrollBar.IsVisible = false;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
+            CanMove = true;
             X = x;
             Y = y;
             Width = width;
@@ -94,7 +95,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            _scrollBar.Location = new Point(X + Width - 14, Y);
+            _scrollBar.Location = new Point(X + Width - 19, Y);
             _scrollBar.Height = Height;
             CalculateScrollBarMaxValue();
             _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;

@@ -95,11 +95,8 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < _sklls.Length; i++)
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
-                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
-            }
-
-            if (serial.IsValid)
-                NetClient.Socket.Send(new PSkillsRequest(this));
+                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
+            }                
         }
 
         public IReadOnlyList<Skill> Skills => _sklls;
@@ -772,18 +769,30 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StatsChanged, SkillsChanged;
 
-        public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap)
+        public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
         {
-            if (id < _sklls.Length)
-            {
-                Skill skill = _sklls[id];
-                skill.ValueFixed = realValue;
-                skill.BaseFixed = baseValue;
-                skill.Lock = @lock;
-                skill.CapFixed = cap;
-                _delta |= Delta.Skills;
-            }
-        }
+			if (id < _sklls.Length)
+			{
+			    Skill skill = _sklls[id];
+			
+			    if (displayMessage && skill.ValueFixed != realValue)
+			    {
+			        var delta = (realValue - skill.ValueFixed);
+			        var direction = (delta < 0 ? "decreased" : "increased");
+			
+			        if (displayMessage)
+				        Chat.OnMessage(this,
+					        $"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.",
+					        0x57, MessageType.System, MessageFont.Normal, true);
+			    }
+			
+			    skill.ValueFixed = realValue;
+			    skill.BaseFixed = baseValue;
+			    skill.Lock = @lock;
+			    skill.CapFixed = cap;
+			    _delta |= Delta.Skills;
+			}
+		}
 
         public void UpdateSkillLock(int id, Lock @lock)
         {
@@ -1659,7 +1668,7 @@ namespace ClassicUO.Game.GameObjects
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun)
+            if (SpeedMode >= CharacterSpeedType.CantRun || (Stamina <= 1 && !IsDead))
                 run = false;
             else if (!run)
                 run = Engine.Profile.Current.AlwaysRun;

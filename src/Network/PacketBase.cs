@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Network
 {
@@ -144,14 +145,20 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
 
-            if (value.Length > length) throw new ArgumentOutOfRangeException();
+            //the string is automatically resized based on length provided
+            /*if (value.Length > length)
+                throw new ArgumentOutOfRangeException();*/
 
             fixed (char* ptr = value)
             {
                 short* buff = (short*) ptr;
+                int pos = 0;
 
-                while (*buff != 0)
-                    WriteUShort((ushort) *buff++);
+                while (*buff != 0 && pos < length)
+                {
+                    WriteUShort((ushort)*buff++);
+                    pos++;
+                }
             }
 
             if (value.Length < length)

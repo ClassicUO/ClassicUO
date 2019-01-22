@@ -56,7 +56,7 @@ namespace ClassicUO.IO.Resources
 
                     uint id = _reader.ReadUInt();
 
-                    if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT)
+                    if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT && id < _file.Entries.Length)
                     {
                         ref UOFileIndex3D index = ref _file.Entries[id];
                         int count = _reader.ReadInt();
@@ -64,12 +64,14 @@ namespace ClassicUO.IO.Resources
                         index = new UOFileIndex3D(offset, csize, dsize, (int)MathHelper.Combine(count, index.Extra));
                     }
                 }
+
+                _reader.ReleaseData();
             }
         }
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            // do nothing
         }
 
         public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags)
@@ -89,6 +91,8 @@ namespace ClassicUO.IO.Resources
 
                 if (clilocsCount != 0)
                     _reader.Skip( (int) (clilocsCount * 4));
+
+                _reader.ReleaseData();
             }
             else
             {
@@ -104,27 +108,32 @@ namespace ClassicUO.IO.Resources
 
         public int GetCount(int graphic, out bool uopValid)
         {
-            ref UOFileIndex3D index = ref _file.Entries[graphic];
+            int count;
 
-            MathHelper.GetNumbersFromCombine((ulong)index.Extra, out int count, out _);
-
-            if (_fileUop != null && count > 0)
+            if (graphic < _file.Entries.Length)
             {
-                uopValid = true;
+                ref UOFileIndex3D index = ref _file.Entries[graphic];
 
-                long offset = index.Offset;
-                int csize = index.Length;
-                int dsize = index.DecompressedLength;
+                MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 
-                _fileUop.Seek(offset);
-                byte[] cdata = _fileUop.ReadArray<byte>(csize);
-                byte[] ddata = new byte[dsize];
-                ZLib.Decompress(cdata, 0, ddata, dsize);
+                if (_fileUop != null && count > 0)
+                {
+                    uopValid = true;
 
-                _reader.SetData(ddata, dsize);               
-                _reader.Skip(8);
+                    long offset = index.Offset;
+                    int csize = index.Length;
+                    int dsize = index.DecompressedLength;
 
-                return count;
+                    _fileUop.Seek(offset);
+                    byte[] cdata = _fileUop.ReadArray<byte>(csize);
+                    byte[] ddata = new byte[dsize];
+                    ZLib.Decompress(cdata, 0, ddata, dsize);
+
+                    _reader.SetData(ddata, dsize);
+                    _reader.Skip(8);
+
+                    return count;
+                }
             }
 
             uopValid = false;

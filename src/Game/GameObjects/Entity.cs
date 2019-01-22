@@ -72,9 +72,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort fixedColor = (ushort) (value & 0x3FFF);
 
-                if (fixedColor > 0)
+                if (fixedColor != 0)
                 {
-                    if (fixedColor >= 0x0BB8) fixedColor = 1;
+                    if (fixedColor >= 0x0BB8)
+                        fixedColor = 1;
                     fixedColor |= (ushort) (value & 0xC000);
                 }
                 else
@@ -100,6 +101,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
+
+        public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
         //public override Position Position
         //{

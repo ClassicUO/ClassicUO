@@ -19,10 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.Data
 {
     internal static class LayerOrder
     {

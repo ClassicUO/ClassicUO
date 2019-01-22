@@ -46,9 +46,10 @@ namespace ClassicUO.IO.Resources
             radarcol.Dispose();
         }
 
+
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            // nothing to clear
         }
 
         public void CreateHuesPalette()
@@ -80,38 +81,39 @@ namespace ClassicUO.IO.Resources
             uint[] hues = new uint[32 * 2 * HuesCount];
             int len = HuesRange.Length;
 
+            int idx = 0;
             for (int r = 0; r < len; r++)
             {
                 for (int y = 0; y < 8; y++)
                 {
                     for (int x = 0; x < 32; x++)
                     {
-                        int idx = r * 8 * 32 + y * 32 + x;
-                        hues[idx] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                        hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]) ;
                     }
+
                 }
             }
 
             return hues;
         }
 
-        public float[] GetColorForShader(ushort color)
-        {
-            if (color != 0)
-            {
-                if (color >= HuesCount)
-                {
-                    color %= (ushort)HuesCount;
+        //public float[] GetColorForShader(ushort color)
+        //{
+        //    if (color != 0)
+        //    {
+        //        if (color >= HuesCount)
+        //        {
+        //            color %= (ushort)HuesCount;
 
-                    if (color <= 0)
-                        color = 1;
-                }
+        //            if (color <= 0)
+        //                color = 1;
+        //        }
 
-                return Palette[color - 1].Palette;
-            }
+        //        return Palette[color - 1].Palette;
+        //    }
 
-            return null;
-        }
+        //    return _empty;
+        //}
 
         //public static void SetHuesBlock(int index, IntPtr ptr)
         //{
@@ -211,22 +213,22 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct HuesBlock
+    internal struct HuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly ushort[] ColorTable;
-        public readonly ushort TableStart;
-        public readonly ushort TableEnd;
+        public ushort[] ColorTable;
+        public ushort TableStart;
+        public ushort TableEnd;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public readonly char[] Name;
+        public char[] Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct HuesGroup
+    internal struct HuesGroup
     {
-        public readonly uint Header;
+        public uint Header;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public readonly HuesBlock[] Entries;
+        public HuesBlock[] Entries;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

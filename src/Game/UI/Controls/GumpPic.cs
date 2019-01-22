@@ -78,25 +78,39 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Graphic = graphic;
+
             Hue = hue;
 
             Texture = FileManager.Gumps.GetTexture(Graphic);
+
+            if (Texture == null)
+                Dispose();
         }
 
-        public GumpPic()
+        private static ushort TransformHue(ushort hue)
         {
+            
+            if (hue <= 2)
+                hue = 0;
 
+            //if (hue < 2)
+            //    hue = 1;
+            return hue;
         }
 
         public bool IsPartialHue { get; set; }
 
-        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
+        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Length > 4 ? TransformHue( (ushort )( Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
+
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, 0, false));
+            if (IsDisposed)
+                return false;
+
+            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, Alpha, true));
 
             return base.Draw(batcher, position, hue);
         }

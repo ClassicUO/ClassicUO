@@ -34,8 +34,8 @@ namespace ClassicUO.Game.Data
         Skirt = 0x17,
         Legs = 0x18,
         Mount = 0x19,
-        ShopBuy = 0x1A,
-        ShopResale = 0x1B,
+        ShopBuyRestock = 0x1A,
+        ShopBuy = 0x1B,
         ShopSell = 0x1C,
         Bank = 0x1D
     }

@@ -31,9 +31,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private float _alpha;
         private readonly RenderedText _gText;
-        private float _timeToLive;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
         {
             if (font == 0xFF) font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
 
@@ -50,7 +49,6 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
             Width = _gText.Width;
             Height = _gText.Height;
-            _timeToLive = timeToLive;
         }
 
         public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
@@ -83,43 +81,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public bool FadeOut { get; set; }
-
-        private static Hue TransformHue(Hue hue)
-        {
-            if (hue > 1)
-                hue -= 2;
-
-            if (hue < 2)
-                hue = 1;
-
-            return hue;
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (IsDisposed)
-                return;
-
-            if (FadeOut)
-            {
-                _timeToLive -= (float) frameMS;
-
-                if (_timeToLive <= 0.0f)
-                    Dispose();
-                else
-                    _alpha = 1 - _timeToLive / 1000.0f;
-            }
-
-            base.Update(totalMS, frameMS);
-        }
-
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
-            if (FadeOut)
-                hue = ShaderHuesTraslator.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
             _gText.Draw(batcher, position, hue);
 
             return base.Draw(batcher, position, hue);

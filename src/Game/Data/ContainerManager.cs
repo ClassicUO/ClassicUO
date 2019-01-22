@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Data
                 0x10E, new ContainerData(0x010E, 0x002F, 0x002E, 0, 20, 168, 115)
             },
             {
-                0x102, new ContainerData(0x0102, 0x004F, 0x0058, 15, 10, 245, 120)
+                0x102, new ContainerData(0x0102, 0x004F, 0x0058, 15, 10, 210, 110)
             },
             {
                 0x11B, new ContainerData(0x011B, 0x004F, 0x0058, 15, 10, 220, 120)

@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Views
 {
     internal class StaticView : View
     {
-        private readonly bool _isFoliage, _isPartialHue;
+        private readonly bool _isFoliage, _isPartialHue, _isTransparent;
         private float _alpha;
         private float _timeToProcessAlpha;
         private readonly int _canBeTransparent;
@@ -44,9 +44,11 @@ namespace ClassicUO.Game.Views
         {
             _isFoliage = st.ItemData.IsFoliage;
             _isPartialHue = st.ItemData.IsPartialHue;
+            _isTransparent = st.ItemData.IsTranslucent;
+
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
-            if (st.ItemData.IsTranslucent)
+            if (_isTransparent)
                 _alpha = 0.5f;
 
             if (st.ItemData.Height > 5)
@@ -133,26 +135,40 @@ namespace ClassicUO.Game.Views
                     }
                 }
             }
+            else if (_isTransparent && _alpha != 0.5f)
+                _alpha = 0.5f;
 
+            
             if (Engine.Profile.Current.UseCircleOfTransparency)
             {
                 int z = World.Player.Z + 5;
 
-                if (!(GameObject.Z <= z - st.ItemData.Height || (z < st.Z && (_canBeTransparent & 0xFF) == 0)))
+                bool r = true;
+
+                if (!_isFoliage)
+                {
+                    if (st.Z <= z - st.ItemData.Height)
+                        r = false;
+                    else if (z < st.Z && (_canBeTransparent & 0xFF) == 0)
+                        r = false;
+                }
+
+                if (r)
                 {
                     int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
                     int distance = GameObject.Distance;
 
                     if (distance <= distanceMax)
                         _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
-                    else if (_alpha != 0.0f)
-                        _alpha = 0;
+                    else if (_alpha != 0)
+                        _alpha = _isTransparent ? .5f : 0;
                 }
-                else if (_alpha != 0.0f)
-                    _alpha = 0;
+                else if (_alpha != 0)
+                    _alpha = _isTransparent ? .5f : 0;
             }
-            else if (!_isFoliage && _alpha != 0.0f)
-                _alpha = 0;
+            else if (!_isFoliage && _alpha != 0)
+                _alpha = _isTransparent ? .5f : 0;
+            
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);

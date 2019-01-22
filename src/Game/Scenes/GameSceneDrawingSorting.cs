@@ -155,18 +155,9 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
-        private bool _updateDrawPosition, _changeTreeToStumps = true;
+        private bool _updateDrawPosition;
 
-        public bool ChangeTreeToStumps
-        {
-            get => _changeTreeToStumps;
-            set
-            {
-                _changeTreeToStumps = value;
-                _updateDrawPosition = true;
-            }
-        }
-
+      
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
@@ -191,7 +182,8 @@ namespace ClassicUO.Game.Scenes
                 int maxObjectZ = obj.PriorityZ;
 
                 bool ismobile = false;
-                StaticTiles itemData = StaticTiles.Empty;
+
+                StaticTiles itemData = default;
 
                 switch (obj)
                 {

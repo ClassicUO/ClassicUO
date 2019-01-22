@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 
 using Microsoft.Xna.Framework;
 
@@ -39,7 +40,7 @@ namespace ClassicUO.Game
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 
-        public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
+        //public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
 
@@ -49,9 +50,11 @@ namespace ClassicUO.Game
 
         public static Map.Map Map { get; private set; }
 
-        public static byte ViewRange { get; set; } = 24;
+        public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static Serial LastAttack { get; set; }
+
+        public static bool SkillsRequested { get; set; }
 
         public static int MapIndex
         {
@@ -201,7 +204,7 @@ namespace ClassicUO.Game
 
             if (item == null)
             {
-                ToAdd.RemoveWhere(i => i == serial);
+                //ToAdd.RemoveWhere(i => i == serial);
 
                 return false;
             }
@@ -251,7 +254,7 @@ namespace ClassicUO.Game
             Player = null;
             Map.Dispose();
             Map = null;
-            ToAdd.Clear();
+            //ToAdd.Clear();
             IO.UltimaLive.IsUltimaLiveActive = false;
             IO.UltimaLive.ShardName = null;
             ClientFlags.SetFlags(0);
@@ -259,7 +262,8 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
-            LastAttack = 0;        
+            LastAttack = 0;
+            Chat.PromptData = default;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

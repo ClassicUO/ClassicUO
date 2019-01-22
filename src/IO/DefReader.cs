@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
@@ -27,11 +28,13 @@ namespace ClassicUO.IO
         private StreamReader _reader;
         private List<string[]> _parts = new List<string[]>();
         private List<string[]> _groups = new List<string[]>();
+        private string _file;
 
         private readonly int _minSize;
 
         public DefReader(string file, int minsize = 2)
         {
+            _file = file;
             _reader = new StreamReader(File.OpenRead(file));
             Line = -1;
             Position = 0;
@@ -167,7 +170,8 @@ namespace ClassicUO.IO
                                 .ToArray();
 
                     }
-                    throw new Exception("Wrong def file");
+
+                    Log.Message(LogTypes.Error, $"Missing }} at line {Line + 1}, in '{_file}'");
                 }
             }
 

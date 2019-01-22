@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsEnabled { get; set; }
 
-        public Graphic AnimationGraphic { get; set; } = Graphic.Invalid;
+        public Graphic AnimationGraphic { get; set; } = Graphic.INVALID;
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
 

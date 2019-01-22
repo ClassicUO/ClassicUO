@@ -47,11 +47,13 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 1;
+
         [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = "7.0.59.8";
+        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
-        //[JsonProperty(PropertyName = "maxfps")]public int MaxFPS { get; set; } = 144;
+        [JsonProperty(PropertyName = "login_fps")]public int MaxLoginFPS { get; set; } = 60;
 
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; } = true;
 
@@ -59,7 +61,18 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "preload_maps")] public bool PreloadMaps { get; set; }
 
-        [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; }
+        [JsonProperty(PropertyName = "saveaccount")] public bool SaveAccount { get; set; } = false;
+
+        [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; } = false;
+
+        [JsonProperty(PropertyName = "login_music")]
+        public bool LoginMusic { get; set; } = true;
+
+        [JsonProperty(PropertyName = "login_music_volume")]
+        public int LoginMusicVolume { get; set; } = 100;
+
+        [JsonProperty(PropertyName = "shard_type")]
+        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = outlands, 2 = ??
 
         public void Save()
         {

@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             _expandableScrollHeight = height;
             _isResizable = isResizable;
             CanMove = true;
+            AcceptMouseInput = true;
         }
 
         private int _gumplingMidY => _gumpTop.Height;
@@ -73,13 +74,13 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnInitialize()
         {
-            AddChildren(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
-            AddChildren(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, 0x0822));
-            AddChildren(_gumpBottom = new GumpPic(0, 0, 0x0823, 0));
+            Add(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
+            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, 0x0822));
+            Add(_gumpBottom = new GumpPic(0, 0, 0x0823, 0));
 
             if (_isResizable)
             {
-                AddChildren(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
+                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
                 {
                     ButtonAction = ButtonAction.Activate, X = 0, Y = 0
                 });
@@ -138,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (_gumplingTitle != null)
                     _gumplingTitle.Dispose();
-                AddChildren(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
+                Add(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
             }
 
             if (!_gumpTop.IsInitialized)

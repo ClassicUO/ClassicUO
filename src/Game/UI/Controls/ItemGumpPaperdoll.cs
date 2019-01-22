@@ -34,9 +34,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump
     {
-        private readonly bool _isTransparent;
+        private readonly bool _isPartialHue;
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
+
+        private Point _clickedPoint;
 
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
@@ -44,7 +46,11 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Mobile = owner;
             HighlightOnMouseOver = false;
-            _isTransparent = transparent;
+
+            if (transparent)
+                Alpha = 0.5f;
+
+            _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
 
@@ -79,10 +85,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsDisposed)
                 return;
 
-            base.Update(totalMS, frameMS);
             Texture.Ticks = (long) totalMS;
         }
 
@@ -91,13 +98,47 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, Item.ItemData.IsPartialHue, _isTransparent ? .5f : 0, false));
+            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
+        }
+
+        protected override void UpdateLabel()
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            if (!Item.IsDisposed && Item.Overheads.Count > 0)
+            {
+                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+                if (container == null)
+                {
+                    container = new LabelContainer(Item);
+                    Engine.UI.Add(container);
+                }
+
+                container.X = ScreenCoordinateX + _clickedPoint.X /*- (container.Width >> 1)*/;
+                container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
+
+                Engine.UI.MakeTopMostGumpOverAnother(container, this);
+            }
         }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
-            //return FileManager.Gumps.Contains(_gumpIndex, x, y);
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            base.OnMouseClick(x, y, button);
+
+            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+                return;
+
+            if (!_clickedCanDrag)
+            {
+                _clickedPoint = new Point(x, y);
+            }
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -105,13 +146,15 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                    return;
 
-                if (gs.HeldItem.ItemData.IsWearable)
+                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 {
-                    gs.WearHeldItem(Mobile);                   
-                }       
+                    return;
+                }
+
+
+                gs.WearHeldItem(Mobile);                   
+                   
             }
         }
     }

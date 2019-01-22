@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Map
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
 
-                        Tiles[x, y].AddGameObject(land);
+                        land.AddToTile(Tiles[x, y]);
                     }
                 }
 
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Map
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
                                 else
-                                    Tiles[x, y].AddGameObject(staticObject);
+                                    staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
                     }
@@ -137,6 +137,94 @@ namespace ClassicUO.Game.Map
 
 
                 //CreateLand();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void LoadStatics(int map)
+        {
+            IndexMap im = GetIndex(map);
+
+            if (im.MapAddress != 0)
+            {
+                int bx = X * 8;
+                int by = Y * 8;
+
+                if (im.StaticAddress != 0)
+                {
+                    StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
+
+                    if (sb != null)
+                    {
+                        int count = (int)im.StaticCount;
+
+                        for (int i = 0; i < count; i++, sb++)
+                        {
+                            if (sb->Color != 0 && sb->Color != 0xFFFF)
+                            {
+                                ushort x = sb->X;
+                                ushort y = sb->Y;
+                                int pos = y * 8 + x;
+
+                                if (pos >= 64)
+                                    continue;
+                                sbyte z = sb->Z;
+
+                                ushort staticX = (ushort)(bx + x);
+                                ushort staticY = (ushort)(by + y);
+
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                {
+                                    Position = new Position(staticX, staticY, z)
+                                };
+
+                                if (staticObject.ItemData.IsAnimated)
+                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
+                                else
+                                    staticObject.AddToTile(Tiles[x, y]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void LoadLand(int map)
+        {
+            IndexMap im = GetIndex(map);
+
+            if (im.MapAddress != 0)
+            {
+                MapBlock* block = (MapBlock*)im.MapAddress;
+                MapCells* cells = (MapCells*)&block->Cells;
+                int bx = X * 8;
+                int by = Y * 8;
+
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        int pos = y * 8 + x;
+                        ushort tileID = (ushort)(cells[pos].TileID & 0x3FFF);
+                        sbyte z = cells[pos].Z;
+
+                        Land land = new Land(tileID)
+                        {
+                            Graphic = tileID,
+                            AverageZ = z,
+                            MinZ = z,
+                        };
+
+                        ushort tileX = (ushort)(bx + x);
+                        ushort tileY = (ushort)(by + y);
+
+                        land.Calculate(tileX, tileY, z);
+                        land.Position = new Position(tileX, tileY, z);
+
+                        land.AddToTile(Tiles[x, y]);
+                    }
+                }
             }
         }
 
@@ -168,7 +256,7 @@ namespace ClassicUO.Game.Map
         //                sbyte tileZ = tile.Z;
 
         //                tile.Calculate(tileX, tileY, tileZ);
-                        
+
         //                t.AddGameObject(tile);
         //            }
 

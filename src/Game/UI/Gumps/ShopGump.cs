@@ -30,40 +30,46 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private readonly Label _playerGoldLabel;
+        private readonly Label _totalLabel, _playerGoldLabel;
         private readonly Dictionary<Item, ShopItem> _shopItems;
-        private readonly ScrollArea _shopScrollArea;
-        private readonly Label _totalLabel;
         private readonly Dictionary<Item, TransactionItem> _transactionItems;
-        private readonly ScrollArea _transactionScrollArea;
-        private readonly bool _isBuyGump;
-        private bool updateTotal;
+        private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
+        private bool _updateTotal;
         
-        public ShopGump(Serial serial, Item[] itemList, bool isBuyGump, int x, int y) : base(serial, 0)
+        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0)
         {
-            _transactionItems = new Dictionary<Item, TransactionItem>();
-            _shopItems = new Dictionary<Item, ShopItem>();
-            _isBuyGump = isBuyGump;
-            updateTotal = false;
             X = x;
             Y = y;
+            AcceptMouseInput = false;
+            AcceptKeyboardInput = true;
+            CanMove = true;
+
+            IsBuyGump = isBuyGump;
+
+            _transactionItems = new Dictionary<Item, TransactionItem>();
+            _shopItems = new Dictionary<Item, ShopItem>();
+            _updateTotal = false;
+          
 
             if (isBuyGump)
-                AddChildren(new GumpPic(0, 0, 0x0870, 0));
+                Add(new GumpPic(0, 0, 0x0870, 0));
             else
-                AddChildren(new GumpPic(0, 0, 0x0872, 0));
+                Add(new GumpPic(0, 0, 0x0872, 0));
 
             if (isBuyGump)
-                AddChildren(new GumpPic(170, 214, 0x0871, 0));
+                Add(new GumpPic(170, 214, 0x0871, 0));
             else
-                AddChildren(new GumpPic(170, 214, 0x0873, 0));
+                Add(new GumpPic(170, 214, 0x0873, 0));
 
             HitBox boxAccept = new HitBox(200, 406, 34, 30)
             {
@@ -77,65 +83,156 @@ namespace ClassicUO.Game.UI.Gumps
 
             boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
             boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
-            AddChildren(boxAccept);
-            AddChildren(boxClear);
+            Add(boxAccept);
+            Add(boxClear);
 
             if (isBuyGump)
             {
-                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
                     X = 240, Y = 385
                 });
 
-                AddChildren(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
+                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
                 {
                     X = 358, Y = 385
                 });
             }
             else
-                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
                     X = 358, Y = 386
                 });
 
-            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 5)
+            Add(new Label(World.Player.Name, false, 0x0386, font: 5)
             {
                 X = 242, Y = 408
-            });
-            
-            _shopScrollArea = new ScrollArea(20, 60, 235, 150, false);
-            
-            foreach (var item in itemList)
+            }); 
+               
+            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 130, false));
+            Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+
+
+            HitBox upButton = new HitBox(233, 50, 18, 16)
             {
-                ShopItem shopItem;
+                Alpha = 1
+            };
+            upButton.MouseDown += (sender, e) =>
+            {
+                _isUpDOWN = true;
+            };
+            upButton.MouseUp += (sender, e) => { _isUpDOWN = false; };
 
-                _shopScrollArea.AddChildren(shopItem = new ShopItem(item)
-                {
-                    X = 5, Y = 5
-                });
+            Add(upButton);
 
-                _shopScrollArea.AddChildren(new ResizePicLine(0x39)
-                {
-                    X = 10, Width = 210
-                });
-                shopItem.MouseClick += ShopItem_MouseClick;
-                shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
-                _shopItems.Add(item, shopItem);
-            }
+            HitBox downButton = new HitBox(233, 190, 18, 16)
+            {
+                Alpha = 1
+            };
+            downButton.MouseDown += (sender, e) =>
+            {
+                _isDownDOWN = true;
+            };
+            downButton.MouseUp += (sender, e) => { _isDownDOWN = false; };
+            Add(downButton);
 
-            AddChildren(_shopScrollArea);
-            AddChildren(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
 
-            AcceptMouseInput = true;
-            CanMove = true;
+
+
+
+
+            HitBox upButtonT = new HitBox(403, 265, 18, 16)
+            {
+                Alpha = 1
+            };
+            upButtonT.MouseDown += (sender, e) =>
+            {
+                _isUpDOWN_T = true;
+            };
+            upButtonT.MouseUp += (sender, e) => { _isUpDOWN_T = false; };
+
+            Add(upButtonT);
+
+            HitBox downButtonT = new HitBox(403, 370, 18, 16)
+            {
+                Alpha = 1
+            };
+            downButtonT.MouseDown += (sender, e) =>
+            {
+                _isDownDOWN_T = true;
+            };
+            downButtonT.MouseUp += (sender, e) => { _isDownDOWN_T = false; };
+            Add(downButtonT);
+
+            Engine.Input.KeyDown += InputOnKeyDown;
+            Engine.Input.KeyUp += InputOnKeyUp;
         }
 
+        private bool _isUpDOWN, _isDownDOWN;
+        private bool _isUpDOWN_T, _isDownDOWN_T;
+
+        private bool _shiftPressed;
+
+        private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
+        {
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_LSHIFT)
+                _shiftPressed = false;
+        }
+
+        private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
+        {
+            if (e.keysym.mod == SDL.SDL_Keymod.KMOD_LSHIFT)
+                _shiftPressed = true;
+        }
+
+        public override void Dispose()
+        {
+            Engine.Input.KeyDown -= InputOnKeyDown;
+            Engine.Input.KeyUp -= InputOnKeyUp;
+            base.Dispose();
+        }
+
+
+        public bool IsBuyGump { get; }
+
+        public void AddItem(Item item)
+        {
+            ShopItem shopItem;
+
+            _shopScrollArea.Add(shopItem = new ShopItem(item)
+            {
+                X = 5,
+                Y = 5
+            });
+
+            _shopScrollArea.Add(new ResizePicLine(0x39)
+            {
+                X = 10,
+                Width = 190
+            });
+            shopItem.MouseClick += ShopItem_MouseClick;
+            shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
+            _shopItems.Add(item, shopItem);
+        }
+        
         public override void Update(double totalMS, double frameMS)
         {
-            if (updateTotal)
+            if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
+            {
+                if (_isDownDOWN)
+                    _shopScrollArea.Scroll(false);
+                else if (_isUpDOWN)
+                    _shopScrollArea.Scroll(true);
+                else if (_isDownDOWN_T)
+                    _transactionScrollArea.Scroll(false);
+                else 
+                    _transactionScrollArea.Scroll(true);
+            }
+
+            if (_updateTotal)
             {
                 _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Key.Price).ToString();
-                updateTotal = false;
+                _updateTotal = false;
             }
 
             if (_playerGoldLabel != null)
@@ -147,38 +244,43 @@ namespace ClassicUO.Game.UI.Gumps
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             var shopItem = (ShopItem) sender;
-            TransactionItem transactionItem;
 
             if (shopItem.Amount <= 0)
                 return;
 
-            if (_transactionItems.TryGetValue(shopItem.Item, out transactionItem))
-                transactionItem.Amount++;
+
+            int total = _shiftPressed ? shopItem.Amount : 1;
+
+            if (_transactionItems.TryGetValue(shopItem.Item, out TransactionItem transactionItem))
+                transactionItem.Amount += total;
             else
             {
-                transactionItem = new TransactionItem(shopItem.Item);
+                transactionItem = new TransactionItem(shopItem.Item, total);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
-                _transactionScrollArea.AddChildren(transactionItem);
+                _transactionScrollArea.Add(transactionItem);
                 _transactionItems.Add(shopItem.Item, transactionItem);
             }
 
-            shopItem.Amount--;
-            updateTotal = true;
+            shopItem.Amount -= total;
+            _updateTotal = true;
         }
 
         private void TransactionItem_OnDecreaseButtomClicked(object sender, EventArgs e)
         {
             var transactionItem = (TransactionItem) sender;
 
+            int total = _shiftPressed ? transactionItem.Amount : 1;
+
             if (transactionItem.Amount > 0)
             {
-                _shopItems[transactionItem.Item].Amount++;
-                transactionItem.Amount--;
+                _shopItems[transactionItem.Item].Amount += total;
+                transactionItem.Amount -= total;
             }
 
-            if (transactionItem.Amount <= 0) RemoveTransactionItem(transactionItem);
-            updateTotal = true;
+            if (transactionItem.Amount <= 0)
+                RemoveTransactionItem(transactionItem);
+            _updateTotal = true;
         }
 
         private void RemoveTransactionItem(TransactionItem transactionItem)
@@ -187,8 +289,8 @@ namespace ClassicUO.Game.UI.Gumps
             transactionItem.OnIncreaseButtomClicked -= TransactionItem_OnIncreaseButtomClicked;
             transactionItem.OnDecreaseButtomClicked -= TransactionItem_OnDecreaseButtomClicked;
             _transactionItems.Remove(transactionItem.Item);
-            _transactionScrollArea.RemoveChildren(transactionItem);
-            updateTotal = true;
+            _transactionScrollArea.Remove(transactionItem);
+            _updateTotal = true;
         }
 
         private void TransactionItem_OnIncreaseButtomClicked(object sender, EventArgs e)
@@ -201,7 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
                 transactionItem.Amount++;
             }
 
-            updateTotal = true;
+            _updateTotal = true;
         }
 
         private void ShopItem_MouseClick(object sender, MouseEventArgs e)
@@ -215,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Accept:
                     var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
-                    if (_isBuyGump)
+                    if (IsBuyGump)
                         NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
                     else
                         NetClient.Socket.Send(new PSellRequest(LocalSerial, items));
@@ -245,24 +347,28 @@ namespace ClassicUO.Game.UI.Gumps
             public ShopItem(Item item)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
+                var itemName = StringHelper.CapitalizeAllWords(item.Name);
 
-                AddChildren(new ItemGump(item)
+                Add(new ItemGump(item)
                 {
                     X = 5, Y = 5, Height = 50, AcceptMouseInput = false
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                Label label;
+                Add(label = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
                     Y = 5, X = 65
                 });
 
-                AddChildren(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
+                Add(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
                 {
                     X = 180, Y = 20
                 });
+
                 Width = 220;
-                Height = 30;
+                Height = label.Height;
+
+                WantUpdateSize = false;
             }
 
             public Item Item { get; }
@@ -292,32 +398,93 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly Label _amountLabel;
 
-            public TransactionItem(Item item)
+            public TransactionItem(Item item, int amount)
             {
                 Item = item;
                 var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
 
-                AddChildren(_amountLabel = new Label("1", false, 0x021F, font: 9)
+                Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, font: 9)
                 {
                     X = 5, Y = 5
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
+                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
                 {
                     X = 30, Y = 5
                 });
 
-                AddChildren(new Button(0, 0x37, 0x37)
+                Button buttonAdd;
+                Add(buttonAdd = new Button(0, 0x37, 0x37)
                 {
-                    X = 170, Y = 5, ButtonAction = ButtonAction.Activate
+                    X = 170, Y = 5, ButtonAction = ButtonAction.Activate, ContainsByBounds = true
                 }); // Plus
 
-                AddChildren(new Button(1, 0x38, 0x38)
+                int status = 0;
+
+                float t0 = Engine.Ticks;
+
+                buttonAdd.MouseOver += (sender, e) =>
                 {
-                    X = 190, Y = 5, ButtonAction = ButtonAction.Activate
+                    if (status == 2)
+                    {
+                        if (Mouse.LButtonPressed && Engine.Ticks > t0)
+                        {
+                            t0 = Engine.Ticks + 50;
+                            OnButtonClick(0);
+                        }
+                    }
+                    else if (Engine.Ticks > t0)
+                    {
+                        status = 2;
+                        t0 = 0;
+                    }
+                };
+
+                buttonAdd.MouseDown += (sender, e) =>
+                {
+                    status = 1;
+                    t0 = Engine.Ticks + 200;
+                };
+                buttonAdd.MouseUp += (sender, e) => { status = 0; };
+
+
+                Button buttonRemove;
+                Add(buttonRemove = new Button(1, 0x38, 0x38)
+                {
+                    X = 190, Y = 5, ButtonAction = ButtonAction.Activate,
+                    ContainsByBounds = true
                 }); // Minus
+
+                float t1 = Engine.Ticks;
+
+                buttonRemove.MouseOver += (sender, e) =>
+                {
+                    if (status == 2)
+                    {
+                        if (Mouse.LButtonPressed && Engine.Ticks > t1)
+                        {
+                            t1 = Engine.Ticks + 50;
+                            OnButtonClick(1);
+                        }
+                    }
+                    else if (Engine.Ticks > t1)
+                    {
+                        status = 2;
+                        t1 = 0;
+                    }
+                };
+
+                buttonRemove.MouseDown += (sender, e) =>
+                {
+                    status = 1;
+                    t1 = Engine.Ticks + 200;
+                };
+                buttonRemove.MouseUp += (sender, e) => { status = 0; };
+
+
                 Width = 220;
                 Height = 30;
+                WantUpdateSize = false;
             }
 
             public Item Item { get; }
@@ -337,11 +504,11 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (buttonID)
                 {
                     case 0:
-                        OnIncreaseButtomClicked?.Invoke(this, new EventArgs());
+                        OnIncreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
                         break;
                     case 1:
-                        OnDecreaseButtomClicked?.Invoke(this, new EventArgs());
+                        OnDecreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
                         break;
                 }

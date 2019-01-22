@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Views
 {
     internal class AnimatedEffectView : View
     {
-        private Graphic _displayedGraphic = Graphic.Invalid;
+        private Graphic _displayedGraphic = Graphic.INVALID;
 
         public AnimatedEffectView(AnimatedItemEffect effect) : base(effect)
         {
@@ -98,12 +98,11 @@ namespace ClassicUO.Game.Views
                 return false;
             AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
 
-            if (effect.AnimationGraphic == Graphic.Invalid)
+            if (effect.AnimationGraphic == Graphic.INVALID)
                 return false;
 
             Hue hue = effect.Hue;
-
-            if (effect.Source is Item)
+            if (effect.Source is Item i)
             {
                 if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(effect.AnimationGraphic))
                 {
@@ -137,9 +136,11 @@ namespace ClassicUO.Game.Views
                         hue = 0x038A;
                     }
                 }
+                else if (i.IsHidden)
+                    hue = 0x038E;
             }
 
-            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)
+            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.INVALID)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
@@ -152,12 +153,12 @@ namespace ClassicUO.Game.Views
             StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
 
             bool isPartial = data.IsPartialHue;
-            bool isTransparent = data.IsTransparent;
+            bool isTransparent = data.IsTranslucent;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, isTransparent ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector( hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)
             {

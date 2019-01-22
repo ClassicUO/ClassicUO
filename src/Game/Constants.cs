@@ -34,7 +34,6 @@ namespace ClassicUO.Game
         public const int MAX_SOUND_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 50;
 
-        public const int DRAG_ITEMS_DISTANCE = 3;
 
         public const int MAX_FAST_WALK_STACK_SIZE = 5;
 
@@ -78,5 +77,12 @@ namespace ClassicUO.Game
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;
 
         public const int MAX_ABILITIES_COUNT = 32;
+
+        public const int DRAG_ITEMS_DISTANCE = 3;
+        public const int MIN_GUMP_DRAG_DISTANCE = 0;
+        public const int MIN_PICKUP_DRAG_DISTANCE = 5;
+
+        public const int MIN_VIEW_RANGE = 5;
+        public const int MAX_VIEW_RANGE = 24;
     }
 }

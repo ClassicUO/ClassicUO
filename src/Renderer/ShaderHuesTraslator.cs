@@ -20,6 +20,8 @@
 #endregion
 using System.Runtime.CompilerServices;
 
+using ClassicUO.IO;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -72,7 +74,9 @@ namespace ClassicUO.Renderer
                     type = ShadersEffectType.Hued;
             }
             else
+            {
                 type = ShadersEffectType.None;
+            }
 
             return new Vector3(hue, (int) type, alpha);
         }

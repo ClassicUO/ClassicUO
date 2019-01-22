@@ -55,7 +55,7 @@ namespace ClassicUO.IO
                 _count = count;
             Entries = new UOFileIndex3D[_count];
             Dictionary<ulong, int> hashes = new Dictionary<ulong, int>();
-            string pattern = System.IO.Path.GetFileNameWithoutExtension(Path).ToLowerInvariant();
+            string pattern = System.IO.Path.GetFileNameWithoutExtension(FilePath).ToLowerInvariant();
 
             for (int i = 0; i < _count; i++)
             {
@@ -109,8 +109,8 @@ namespace ClassicUO.IO
                             Seek(curpos);
                         }
                     }
-                    else
-                        throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
+                    //else
+                    //    throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
                 }
 
                 Seek(nextBlock);

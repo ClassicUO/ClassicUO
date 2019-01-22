@@ -51,12 +51,25 @@ namespace ClassicUO.Game.Scenes
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
+        private float _scale = 1;
 
         public GameScene() : base()
         {
         }
 
-        public float Scale { get; set; } = 1;
+        public float Scale
+        {
+            get => _scale;
+            set
+            {
+
+                if (value < 0.7f)
+                    value = 0.7f;
+                else if (value > 2.3f)
+                    value = 2.3f;
+                _scale = value;              
+            }
+        }
 
         public Texture2D ViewportTexture => _renderTarget;
 
@@ -91,7 +104,6 @@ namespace ClassicUO.Game.Scenes
 
         public OverheadManager Overheads => _overheadManager;
 
-
         public void DoubleClickDelayed(Serial serial)
             => _useItemQueue.Add(serial);
 
@@ -110,6 +122,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            HeldItem = new ItemHold();
             _journalManager = new JournalManager();
             _overheadManager = new OverheadManager();
 
@@ -118,7 +131,10 @@ namespace ClassicUO.Game.Scenes
 
             WorldViewportGump viewport = new WorldViewportGump(this);
             Engine.UI.Add(viewport);
-            Engine.UI.Add(new TopBarGump(this));
+
+            if (! Engine.Profile.Current.TopbarGumpIsDisabled)
+                TopBarGump.Create();
+
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);
@@ -126,35 +142,29 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseDown += OnMouseDown;
             _viewPortGump.MouseUp += OnMouseUp;
             _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
-            _viewPortGump.DragBegin += OnMouseDragBegin;
-            //_viewPortGump.Keyboard += OnKeyboard;
+            _viewPortGump.MouseOver += OnMouseMove;
+            _viewPortGump.MouseWheel += (sender, e) =>
+            {
+                if (!Engine.Profile.Current.EnableScaleZoom)
+                    return;
 
-            //Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            //Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            //Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            //Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
-            //Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
-            //Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            //Engine.Input.DragBegin += OnMouseDragBegin;
-            //Engine.Input.MouseDragging += OnMouseDragging;
-            //Engine.Input.MouseMoving += OnMouseMoving;
+                if (e.Direction == MouseEvent.WheelScrollDown)
+                    Scale += 0.1f;
+                else
+                    Scale -= 0.1f;
+
+                if (Scale < 0.7f)
+                    Scale = 0.7f;
+                else if (Scale > 2.3f)
+                    Scale = 2.3f;
+
+                if (Engine.Profile.Current.SaveScaleAfterClose)
+                    Engine.Profile.Current.ScaleZoom = Scale;
+            };
+
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
-            //Engine.Input.MouseWheel += (sender, e) =>
-            //{
-            //    if (IsMouseOverWorld)
-            //    {
-            //        if (!e)
-            //            Scale += 0.1f;
-            //        else
-            //            Scale -= 0.1f;
 
-            //        if (Scale < 0.7f)
-            //            Scale = 0.7f;
-            //        else if (Scale > 2.3f)
-            //            Scale = 2.3f;
-            //    }
-            //};
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
@@ -172,11 +182,13 @@ namespace ClassicUO.Game.Scenes
             string name;
             string text;
 
+            Hue hue = e.Hue;
+
             switch (e.Type)
             {
                 case MessageType.Regular:
 
-                    if (e.Parent == null || e.Parent.Serial == Serial.Invalid)
+                    if (e.Parent == null || e.Parent.Serial == Serial.INVALID)
                         name = "System";
                     else
                         name = e.Parent.Name;
@@ -192,6 +204,9 @@ namespace ClassicUO.Game.Scenes
                 case MessageType.Emote:
                     name = e.Parent.Name;
                     text = $"*{e.Text}*";
+
+                    if (e.Hue == 0)
+                        hue = Engine.Profile.Current.EmoteHue;
 
                     break;
                 case MessageType.Label:
@@ -212,24 +227,29 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case MessageType.Party:
                     text = e.Text;
-                    name = "[Party]";
+                    name = $"[Party][{e.Parent.Name}]";
+                    hue = Engine.Profile.Current.PartyMessageHue;
                     break;
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = "[Alliance]";
-
+                    name = $"[Alliance][{e.Parent.Name}]";
+                    hue = Engine.Profile.Current.AllyMessageHue;
                     break;
                 case MessageType.Guild:
                     text = e.Text;
-                    name = "[Guild]";
-
+                    name = $"[Guild][{e.Parent.Name}]";
+                    hue = Engine.Profile.Current.GuildMessageHue;
                     break;
                 default:
+                    text = e.Text;
+                    name = e.Parent == null ? string.Empty : e.Parent.Name;
+                    hue = e.Hue;
+
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
-                    return;
+                    break;
             }
 
-            _journalManager.Add(text, e.Font, e.Hue, name);
+            _journalManager.Add(text, e.Font, hue, name);
         }
 
         private IEnumerable<IWaitCondition> CastSpell()
@@ -245,10 +265,11 @@ namespace ClassicUO.Game.Scenes
             }
 
         }
-       
 
         public override void Unload()
         {
+            HeldItem.Clear();
+
             Plugin.OnDisconnected();
 
             _renderList = null;
@@ -271,16 +292,6 @@ namespace ClassicUO.Game.Scenes
             Engine.UI.Clear();
             World.Clear();
 
-
-            //Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            //Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            //Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            //Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
-            //Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
-            //Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            //Engine.Input.DragBegin -= OnMouseDragBegin;
-            //Engine.Input.MouseDragging -= OnMouseDragging;
-            //Engine.Input.MouseMoving -= OnMouseMoving;
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
 
@@ -426,6 +437,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long) totalMS + 10000;
             }
 
+
             _useItemQueue.Update(totalMS, frameMS);
         }
 
@@ -474,6 +486,5 @@ namespace ClassicUO.Game.Scenes
             batcher.EnableLight(false);
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
-
     }
 }

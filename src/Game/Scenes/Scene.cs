@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
@@ -35,6 +36,8 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable, IDisposable
     {
+        private AudioManager _audio;
+
         protected Scene()
         {
         }
@@ -48,6 +51,8 @@ namespace ClassicUO.Game.Scenes
 
         public CoroutineManager Coroutines { get; } = new CoroutineManager();
 
+        public AudioManager Audio => _audio;
+
         public virtual void Dispose()
         {
             if (IsDisposed)
@@ -59,17 +64,20 @@ namespace ClassicUO.Game.Scenes
       
         public virtual void Load()
         {
+            _audio = new AudioManager();
             Coroutine.Start(this, CleaningResources(), "cleaning resources");
             IsLoaded = true;
         }
 
         public virtual void Unload()
         {
+            _audio.StopMusic();
             Coroutines.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)
         {
+            _audio.Update();
             Coroutines.Update();
         }
 

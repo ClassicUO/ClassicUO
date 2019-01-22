@@ -19,7 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -30,22 +34,13 @@ using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Scenes
 {
     internal sealed class LoginScene : Scene
     {
-        public enum LoginRejectionReasons : byte
-        {
-            InvalidAccountPassword = 0x00,
-            AccountInUse = 0x01,
-            AccountBlocked = 0x02,
-            BadPassword = 0x03,
-            IdleExceeded = 0xFE,
-            BadCommuncation = 0xFF,
-        }
-
         public enum LoginStep
         {
             Main,
@@ -60,38 +55,22 @@ namespace ClassicUO.Game.Scenes
         }
 
         private byte[] _clientVersionBuffer;
-        private LoginRejectionReasons? _loginRejectionReason;
-        private LoginStep _loginStep = LoginStep.Main;
         private Gump _currentGump;
-
+        private LoginStep _lastLoginStep;
+        private static bool _isFirstLogin = true;
 
         public LoginScene() : base()
         {
         }
 
-        private LoginStep _lastLoginStep;
+        public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
-        public LoginStep CurrentLoginStep
-        {
-            get => _loginStep;
-            private set
-            {
-                _loginStep = value;
-
-             
-
-            }
-        }
-
-        public LoginRejectionReasons? LoginRejectionReason
-        {
-            get => _loginRejectionReason;
-            private set => _loginRejectionReason = value;
-        }
 
         public ServerListEntry[] Servers { get; private set; }
 
-        public string[] Characters { get; private set; }
+	    public CityInfo[] Cities { get; set; }
+
+		public string[] Characters { get; private set; }
 
         public string PopupMessage { get; private set; }
 
@@ -105,7 +84,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.FpsLimit = 60;
+            Engine.FpsLimit = Engine.GlobalSettings.MaxLoginFPS;
 
             Engine.UI.Add(new LoginBackground());
             Engine.UI.Add(_currentGump = new LoginGump());
@@ -114,7 +93,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.PacketReceived += NetClient_PacketReceived;
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
-            NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
             string[] parts = Engine.GlobalSettings.ClientVersion.Split(new[]
             {
@@ -125,12 +104,23 @@ namespace ClassicUO.Game.Scenes
             {
                 byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
             };
+
+            Audio.PlayMusic(0);
+
+            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
+            {
+                if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
+                {
+                    Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+                }
+            }
         }
 
 
         public override void Unload()
         {
-            //Engine.UI.Remove<LoginGump>();
+            Audio.StopMusic();
+
             Engine.UI.Remove<LoginBackground>();
             _currentGump?.Dispose();
 
@@ -196,36 +186,7 @@ namespace ClassicUO.Game.Scenes
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
 
-            if (LoginRejectionReason.HasValue)
-            {
-                switch (LoginRejectionReason.Value)
-                {
-                    case LoginRejectionReasons.BadPassword:
-                    case LoginRejectionReasons.InvalidAccountPassword:
-                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
-
-                        break;
-                    case LoginRejectionReasons.AccountInUse:
-                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
-
-                        break;
-                    case LoginRejectionReasons.AccountBlocked:
-                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
-
-                        break;
-                    case LoginRejectionReasons.IdleExceeded:
-                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
-
-                        break;
-                    case LoginRejectionReasons.BadCommuncation:
-                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
-
-                        break;
-                }
-
-                showButtons = LoadingGump.Buttons.OK;
-            }
-            else if (!string.IsNullOrEmpty(PopupMessage))
+            if (!string.IsNullOrEmpty(PopupMessage))
             {
                 labelText = PopupMessage;
                 showButtons = LoadingGump.Buttons.OK;
@@ -276,9 +237,20 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.ServerSelection)
             {
-                ServerIndex = index;
+                for (byte i = 0; i < Servers.Length; i++)
+                {
+                    if (Servers[i].Index == index)
+                    {
+                        ServerIndex = i;
+                        break;
+                    }
+                }
+
+                Engine.GlobalSettings.LastServerNum = (ushort) ( 1 + ServerIndex) ;
+                Engine.GlobalSettings.Save();
+
                 CurrentLoginStep = LoginStep.LoginInToServer;
-                World.ServerName = Servers[index].Name;
+                World.ServerName = Servers[ServerIndex].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
             }
         }
@@ -300,7 +272,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character)
+        public void CreateCharacter(PlayerMobile character, CityInfo startingCity)
         {
             int i = 0;
 
@@ -310,7 +282,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
+            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
         }
 
         public void DeleteCharacter(uint index)
@@ -320,7 +292,6 @@ namespace ClassicUO.Game.Scenes
 
         public void StepBack()
         {
-            _loginRejectionReason = null;
             PopupMessage = null;
 
             switch (CurrentLoginStep)
@@ -366,8 +337,16 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_Disconnected(object sender, EventArgs e)
         {
-            Log.Message(LogTypes.Warning, "Disconnected!");
-            // TODO: Reset
+            Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+            Characters = null;
+            Servers = null;
+            PopupMessage = "Connection lost";
+            CurrentLoginStep = LoginStep.PopUpMessage;
+        }
+
+        private void Login_NetClient_Disconnected(object sender, EventArgs e)
+        {
+            Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)
@@ -378,10 +357,20 @@ namespace ClassicUO.Game.Scenes
                     ParseServerList(e);
 
                     // Save credentials to config file
-                    Engine.GlobalSettings.Username = Account;
-                    Engine.GlobalSettings.Password = Password;
-                    Engine.GlobalSettings.Save();
+                    if (Engine.GlobalSettings.SaveAccount)
+                    {
+                        Engine.GlobalSettings.Username = Account;
+                        Engine.GlobalSettings.Password = Password;
+                        Engine.GlobalSettings.Save();
+                    }
+
                     CurrentLoginStep = LoginStep.ServerSelection;
+
+                    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+                    {
+                        if (Servers.Length != 0)
+                            SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
+                    }
 
                     break;
                 case 0x8C: // ReceiveServerRelay
@@ -392,9 +381,43 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0x86: // UpdateCharacterList
-                case 0xA9: // ReceiveCharacterList
+	                ParseCharacterList(e);
+
+					Engine.UI.Remove<CharacterSelectionGump>();
+
+                    _currentGump?.Dispose();
+
+                    Engine.UI.Add(_currentGump = new CharacterSelectionGump());
+
+					break;
+
+				case 0xA9: // ReceiveCharacterList
                     ParseCharacterList(e);
+					ParseCities(e);
+					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
+
+				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+				    {
+				        _isFirstLogin = false;
+                        bool haveAnyCharacter = false;
+
+                        for (byte i = 0; i < Characters.Length; i++)
+                        {
+                            if (Characters[i].Length > 0)
+				            {
+                                haveAnyCharacter = true;
+                                if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                                {
+                                    SelectCharacter(i);
+                                    return;
+                                }
+				            }
+				        }
+
+                        if (haveAnyCharacter)
+                            SelectCharacter(0);
+				    }
 
                     break;
                 case 0xBD: // ReceiveVersionRequest
@@ -402,15 +425,13 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0x82: // ReceiveLoginRejection
-                    HandleLoginRejection(e);
-
-                    break;
+                case 0x85: // character list notification
                 case 0x53: // Error Code
-                    HandleErrorCode(e);
+                    //HandleErrorCode(e);
+                    byte code = e.ReadByte();
 
-                    break;
-                default:
-                    Log.Message(LogTypes.Debug, e.ID.ToString());
+                    PopupMessage = ServerErrorMessages.GetError(e.ID, code);
+                    CurrentLoginStep = LoginStep.PopUpMessage;
 
                     break;
             }
@@ -439,8 +460,8 @@ namespace ClassicUO.Game.Scenes
             byte flags = reader.ReadByte();
             ushort count = reader.ReadUShort();
             Servers = new ServerListEntry[count];
-            for (ushort i = 0; i < count; i++
-                 ) Servers[i] = new ServerListEntry(reader);
+            for (ushort i = 0; i < count; i++)
+                Servers[i] = new ServerListEntry(reader);
         }
 
         private void ParseCharacterList(Packet p)
@@ -454,49 +475,147 @@ namespace ClassicUO.Game.Scenes
                 Characters[i] = p.ReadASCII(30);
                 p.Skip(30);
             }
-
-            count = p.ReadByte();
-
-            // TODO: implemnet city infos
-            if (FileManager.ClientVersion >= ClientVersions.CV_70130)
-            {
-                for (int i = 0; i < count; i++)
-                    p.Skip(1 +32 +32 + 4 + 4 + 4 + 4 + 4 + 4);
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                    p.Skip(1 + 31 + 31);
-            }
-
-            World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
         }
 
-        private void HandleErrorCode(Packet reader)
+	    private void ParseCities(Packet p)
+	    {
+		    var count = p.ReadByte();
+		    var cities = new CityInfo[count];
+
+	        bool isNew = FileManager.ClientVersion >= ClientVersions.CV_70130;
+	        string[] descriptions = null;
+
+	        if (!isNew)
+	            descriptions = ReadCityTextFile(count);
+
+
+            for (int i = 0; i < count; i++)
+		    {
+			    var cityInfo = default(CityInfo);
+
+			    if (isNew)
+			    {
+				    var cityIndex = p.ReadByte();
+				    var cityName = p.ReadASCII(32);
+				    var cityBuilding = p.ReadASCII(32);
+				    var cityPosition = new Position((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
+				    var cityMapIndex = p.ReadUInt();
+				    var cityDescription = p.ReadUInt();
+				    p.ReadUInt();
+
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex);
+			    }
+			    else
+			    {
+				    var cityIndex = p.ReadByte();
+				    var cityName = p.ReadASCII(31);
+				    var cityBuilding = p.ReadASCII(31);
+
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.INVALID, 0);
+			    }
+
+			    cities[i] = cityInfo;
+		    }
+
+		    Cities = cities;
+		}
+
+        private string[] ReadCityTextFile(int count)
         {
-            string[] messages = {
-                "Incorrect password",
-                "This character does not exist any more!",
-                "This character already exists.",
-                "Could not attach to game server.",
-                "Could not attach to game server.",
-                "A character is already logged in.",
-                "Synchronization Error.",
-                "You have been idle for to long.",
-                "Could not attach to game server.",
-                "Character transfer in progress."
-            };
-            
-            PopupMessage = messages[reader.ReadByte()];
-            CurrentLoginStep = LoginStep.PopUpMessage;
+            string path = Path.Combine(FileManager.UoFolderPath, "citytext.enu");
+            if (!File.Exists(path))
+                return null;
+
+            string[] descr = new string[count];
+
+            byte[] data = new byte[4];
+
+            StringBuilder name = new StringBuilder();
+            StringBuilder text = new StringBuilder();
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                int cityIndex = 0;
+                while (stream.Position < stream.Length)
+                {
+                    int r = stream.Read(data, 0, 4);
+
+                    if (r == -1)
+                        break;
+
+                    string dataText = Encoding.UTF8.GetString(data, 0, 4);
+
+                    if (dataText == "END\0")
+                    {
+                        name.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b = (char) stream.ReadByte();
+
+                            if (b == '<')
+                            {
+                                stream.Position -= 1;
+                                break;
+                            }
+
+                            name.Append(b);
+                        }
+
+                        text.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b;
+
+                            while ((b = (char) stream.ReadByte()) != '\0')
+                            {
+                                text.Append(b);
+                            }
+
+                            if (text.Length != 0)
+                            {
+                                string t = text.ToString();
+                                text.Clear();
+                                //text.AppendLine();
+                                //text.AppendLine();
+                                text.Append(t);
+                            }
+
+                            long pos = stream.Position;
+                            byte end = (byte) stream.ReadByte();
+                            stream.Position = pos;
+
+                            if (end == 0x2E)
+                                break;
+
+                            int r1 = stream.Read(data, 0, 4);
+                            stream.Position = pos;
+
+                            if (r1 == -1)
+                                break;
+
+                            string dataText1 = Encoding.UTF8.GetString(data, 0, 4);
+
+                            if (dataText1 == "END\0")
+                                break;
+                        }
+
+                        descr[cityIndex++] = text.ToString();
+
+                    }
+                    else
+                        stream.Position -= 3;
+                }
+            }
+
+            return descr;
         }
 
-        private void HandleLoginRejection(Packet reader)
-        {
-            reader.MoveToData();
-            byte reasonId = reader.ReadByte();
-            LoginRejectionReason = (LoginRejectionReasons)reasonId;
-        }
+	    private void ParseFlags(Packet p)
+	    {
+		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
+		}
     }
 
     internal class ServerListEntry
@@ -510,10 +629,30 @@ namespace ClassicUO.Game.Scenes
         public ServerListEntry(Packet reader)
         {
             Index = reader.ReadUShort();
-            Name = reader.ReadASCII(32);
+            Name = reader.ReadASCII(32).MakeSafe();
             PercentFull = reader.ReadByte();
             Timezone = reader.ReadByte();
             Address = reader.ReadUInt();
         }
     }
+
+	internal class CityInfo
+	{
+		public readonly int Index;
+		public readonly string City;
+		public readonly string Building;
+		public readonly string Description;
+		public readonly Position Position;
+		public readonly uint Map;
+
+		public CityInfo(int index, string city, string building, string description, Position position, uint map)
+		{
+			Index = index;
+			City = city;
+			Building = building;
+			Description = description;
+			Position = position;
+			Map = map;
+		}
+	}
 }

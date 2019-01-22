@@ -130,7 +130,9 @@ namespace ClassicUO.Network
                 if (c != '\0')
                     sb.Append(c);
                 else if (exitIfNull)
+                {
                     break;
+                }
             }
 
             return sb.ToString();

@@ -25,11 +25,8 @@ namespace ClassicUO.Game
 {
     internal struct Hue : IComparable, IComparable<ushort>
     {
-        public const ushort Invalid = 0xFFFF;
-        public static Hue SystemCol = new Hue(0x3B2);
-        public static Hue Good = new Hue(68);
-        public static Hue Error = new Hue(37);
-        public static Hue Warning = new Hue(1174);
+        public const ushort INVALID = 0xFFFF;
+       
         private readonly ushort _value;
 
         public Hue(ushort hue)
@@ -89,10 +86,12 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Hue hue) return _value == hue._value;
-            if (obj is ushort @ushort) return _value == @ushort;
-
-            return false;
+            switch (obj)
+            {
+                case Hue hue: return _value == hue._value;
+                case ushort @ushort: return _value == @ushort;
+                default: return false;
+            }
         }
 
         public static Hue Parse(string str)

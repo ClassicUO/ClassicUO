@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true
             };
             _button.MouseDoubleClick += ButtonOnMouseDoubleClick;
-            AddChildren(_button);
+            Add(_button);
 
             WantUpdateSize = true;
         }
@@ -79,6 +79,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
+            if (IsDisposed)
+                return;
+
             int index = ((byte) World.Player.Abilities[_isPrimary ? 0 : 1] & 0x7F) - 1;
 
             AbilityDefinition def = AbilityData.Abilities[index];
@@ -92,6 +95,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             byte index = (byte) World.Player.Abilities[_isPrimary ? 0 : 1];
 
             if ((index & 0x80) != 0)

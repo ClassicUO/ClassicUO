@@ -59,7 +59,14 @@ namespace ClassicUO.Game.Views
             {
                 int z = World.Player.Z + 5;
 
-                if (!(GameObject.Z <= z - st.ItemData.Height || (z < st.Z && (_canBeTransparent & 0xFF) == 0)))
+                bool r = true;
+
+                if (st.Z <= z - st.ItemData.Height)
+                    r = false;
+                else if (z < st.Z && (_canBeTransparent & 0xFF) == 0)
+                    r = false;
+
+                if (r)
                 {
                     int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
                     int distance = GameObject.Distance;

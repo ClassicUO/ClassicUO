@@ -28,22 +28,20 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class TextBox : Control
+    internal class TextBox : AbstractTextBox
     {
-        public bool MultiLineInputAllowed { get; set; } = false;
-        public TextEntry _entry { get; private set; }
-
+        public TextEntry TxEntry { get; private set; }
 
         public TextBox(TextEntry txentry, bool editable)
         {
-            _entry = txentry;
+            TxEntry = txentry;
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = editable;
         }
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
+            TxEntry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
@@ -59,84 +57,60 @@ namespace ClassicUO.Game.UI.Controls
             SetText(lines[int.Parse(parts[7])]);
         }
 
-        public bool IsChanged => _entry.IsChanged;
+        public bool IsChanged => TxEntry.IsChanged;
 
         public Hue Hue
         {
-            get => _entry.Hue;
-            set => _entry.Hue = value;
+            get => TxEntry.Hue;
+            set => TxEntry.Hue = value;
         }
-
-        public int MaxCharCount { get; set; }
 
         public bool IsPassword
         {
-            get => _entry.IsPassword;
-            set => _entry.IsPassword = value;
+            get => TxEntry.IsPassword;
+            set => TxEntry.IsPassword = value;
         }
 
         public bool NumericOnly
         {
-            get => _entry.NumericOnly;
-            set => _entry.NumericOnly = value;
+            get => TxEntry.NumericOnly;
+            set => TxEntry.NumericOnly = value;
         }
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
-        public string Text { get => _entry.Text; set => SetText(value); }
-
-        public int LinesCount => _entry.GetLinesCharsCount().Length;
-        public int GetCharsOnLine(int line)
-        {
-            int[] lnch = _entry.GetLinesCharsCount();
-            if (line < lnch.Length)
-                return lnch[line];
-            return 0;
-        }
+        public string Text { get => TxEntry.Text; set => SetText(value); }
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
-        public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
-
-        public int MaxLines { get => _entry.MaxLines; set => _entry.MaxLines = value; }
-        public const int PasteCommandID = 0x10000000;
-        public const int RetrnCommandID = 0x20000000;
-        public const int PasteRetnCmdID = 0x30000000;
-
         public void SetText(string text, bool append = false)
         {
-            if (append)
-            {
-                text = _entry.InsertString(text);
-                Parent?.OnKeyboardReturn(PasteCommandID, text);
-            }
-            else
-                _entry.SetText(text);
+            int oldidx = TxEntry.CaretIndex;
+            TxEntry.SetText(text);
+            TxEntry.SetCaretPosition(oldidx + text.Length);
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
                 return;
 
-            //multiline input is fixed height, unmodifiable
-            if(!MultiLineInputAllowed && Height != _entry.Height)
-                Height = _entry.Height;
+            if(Height != TxEntry.Height)
+                Height = TxEntry.Height;
 
-            if (_entry.IsChanged)
-                _entry.UpdateCaretPosition();
+            if (TxEntry.IsChanged)
+                TxEntry.UpdateCaretPosition();
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            _entry.RenderText.Draw(batcher, new Point(position.X + _entry.Offset, position.Y));
+            TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
 
             if (IsEditable)
             {
                 if (HasKeyboardFocus)
-                    _entry.RenderCaret.Draw(batcher, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
+                    TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
             }
 
             return base.Draw(batcher, position, hue);
@@ -144,75 +118,57 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-            _entry.InsertString(c);
+			if (ReplaceDefaultTextOnFirstKeyPress)
+            {
+                TxEntry.Clear();
+				ReplaceDefaultTextOnFirstKeyPress = false;
+            }
+            TxEntry.InsertString(c);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             string s=null;
-            int oldidx = _entry.CaretIndex;
+            int oldidx = TxEntry.CaretIndex;
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
+                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                    return;
+
                 s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))
                 {
-                    if(!MultiLineInputAllowed)
-                        s = _entry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
-                    Parent?.OnKeyboardReturn(PasteCommandID, s);
+                    TxEntry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
                     return;
                 }
             }
             else switch (key)
             {
+                case SDL.SDL_Keycode.SDLK_KP_ENTER:
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                    if (MultiLineInputAllowed)
-                    {
-                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
-                    }
-                    else
-                    {
-                        s = _entry.Text;
+                        s = TxEntry.Text;
                        Parent?.OnKeyboardReturn(0, s);
-                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
-                    {
-                        if (Parent is Gumps.BookGump bbook)
-                            bbook.ScaleOnBackspace(_entry);
-                        _entry.RemoveChar(true);
-                    }
+                        TxEntry.RemoveChar(true);
                     else
                         ReplaceDefaultTextOnFirstKeyPress = false;
                      break;
-                case SDL.SDL_Keycode.SDLK_UP when MultiLineInputAllowed:
-                    _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y - (_entry.RenderCaret.Height >> 1));
-                    break;
-                case SDL.SDL_Keycode.SDLK_DOWN when MultiLineInputAllowed:
-                    _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y + _entry.RenderCaret.Height);
-                    break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
-                    _entry.SeekCaretPosition(-1);
+                    TxEntry.SeekCaretPosition(-1);
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
-                    _entry.SeekCaretPosition(1);
+                    TxEntry.SeekCaretPosition(1);
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
-                    if (Parent is Gumps.BookGump dbook)
-                        dbook.ScaleOnDelete(_entry);
-                    _entry.RemoveChar(false);
+                    TxEntry.RemoveChar(false);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
-                    if (Parent is Gumps.BookGump hbook)
-                        hbook.OnHomeOrEnd(_entry, true);
-                    else
-                        _entry.SetCaretPosition(0);
+                    TxEntry.SetCaretPosition(0);
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
-                    if (Parent is Gumps.BookGump ebook)
-                        ebook.OnHomeOrEnd(_entry, false);
-                    else
-                        _entry.SetCaretPosition(Text.Length - 1);
+                    TxEntry.SetCaretPosition(Text.Length - 1);
                     break;
             }
 
@@ -224,20 +180,14 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButton.Left)
             {
-                _entry.OnMouseClick(x, y);
+                TxEntry.OnMouseClick(x, y);
             } 
-        }
-
-        protected override void OnMouseDown(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-                SetKeyboardFocus();
         }
 
         public override void Dispose()
         {
-            _entry?.Dispose();
-            _entry = null;
+            TxEntry?.Dispose();
+            TxEntry = null;
             base.Dispose();
         }
     }

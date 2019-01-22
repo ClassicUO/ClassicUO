@@ -28,11 +28,11 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    internal class TextEntry : IDisposable
+    internal class TextEntry : AbstractEntry
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
+        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF) : base(maxcharlength, width, maxWidth)
         {
             RenderText = new RenderedText
             {
@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI
                 Font = font,
                 MaxWidth = width,
                 FontStyle = style,
-                Hue = hue
+                Hue = hue,
+                Text = string.Empty
             };
 
             if (maxWidth > 0)
@@ -54,18 +55,7 @@ namespace ClassicUO.Game.UI
                 FontStyle = (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
                 Text = "_"
             };
-            MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
-            Width = width;
-            MaxWidth = maxWidth;
-            MaxLines = 0;
         }
-
-        public int MaxCharCount { get; }
-
-        public int Width { get; }
-        public int Height => RenderText.Height < 20 ? 20 : RenderText.Height;
-
-        public int MaxWidth { get; }
 
         public bool IsPassword { get; set; }
 
@@ -85,19 +75,7 @@ namespace ClassicUO.Game.UI
             } 
         }
 
-        public bool IsChanged { get; private set; }
-
-        public int Offset { get; set; }
-
-        public Point CaretPosition { get; set; }
-
-        public int CaretIndex { get; protected set; }
-
-        public RenderedText RenderText { get; private set; }
-
-        public RenderedText RenderCaret { get; private set; }
-
-        public string Text
+        public override string Text
         {
             get => IsPassword ? _plainText : RenderText.Text;
             set
@@ -108,21 +86,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        public int MaxLines { get; internal set; }
-
-        public void Dispose()
-        {
-            RenderText?.Dispose();
-            RenderText = null;
-            RenderCaret?.Dispose();
-            RenderCaret = null;
-        }
-
-        protected virtual void OnTextChanged()
-        {
-        }
-
-        public string InsertString(string c)
+        public void InsertString(string c)
         {
             if (CaretIndex < 0)
                 CaretIndex = 0;
@@ -138,41 +102,18 @@ namespace ClassicUO.Game.UI
                     s = s.Insert(CaretIndex, c);
 
                     if (!int.TryParse(s, out int value) || value >= MaxCharCount)
-                        return c;
+                        return;
                 }
                 else if (Text.Length >= MaxCharCount)
                 {
-                    return c;
+                    return;
                 }
             }
 
             string text = Text.Insert(CaretIndex, c);
-            int count = c.Length;
-            if (MaxLines > 0)
-            {
-                var newlines = GetLinesCharsCount(text);
-                if (newlines.Length > MaxLines)
-                {
-                    for (int l = 0; l + 1 < newlines.Length; l++)
-                        newlines[l]++;
-                    count = newlines.Length - MaxLines;
-                    for (int l = newlines.Length - 1; l >= MaxLines; --l)
-                        count += newlines[l];
-                    c = text;
-                    text = text.Remove(text.Length - count);
-                    c = c.Substring(Math.Min(c.Length - 1, text.Length + 1));
-                    count -= c.Length - 1;
-                }
-                else
-                    c = null;
-            }
-            else
-                c = null;
-
-            count = CaretIndex += count;
+            int count = CaretIndex + c.Length;
             SetText(text);
-            CaretIndex = count;
-            return c;
+            CaretIndex = Math.Min(count, text.Length);
         }
 
         public void SetText(string text)
@@ -219,107 +160,7 @@ namespace ClassicUO.Game.UI
                     width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
-            CaretIndex = text.Length;
             Text = text;
-        }
-
-        public void RemoveChar(bool fromleft)
-        {
-            if (fromleft)
-            {
-                if (CaretIndex < 1)
-                    return;
-                CaretIndex--;
-            }
-            else
-            {
-                if (CaretIndex >= Text.Length)
-                    return;
-            }
-
-            if (CaretIndex < Text.Length)
-                Text = Text.Remove(CaretIndex, 1);
-            else if (CaretIndex > Text.Length)
-                Text = Text.Remove(Text.Length - 1);
-        }
-
-        public void SeekCaretPosition(int value)
-        {
-            CaretIndex += value;
-
-            if (CaretIndex < 0)
-                CaretIndex = 0;
-
-            if (CaretIndex > Text.Length)
-                CaretIndex = Text.Length;
-            IsChanged = true;
-        }
-
-        public void SetCaretPosition(int value)
-        {
-            CaretIndex = value;
-
-            if (CaretIndex < 0)
-                CaretIndex = 0;
-
-            if (CaretIndex > Text.Length)
-                CaretIndex = Text.Length;
-            IsChanged = true;
-        }
-
-        public void UpdateCaretPosition()
-        {
-            int x, y;
-
-            if (RenderText.IsUnicode)
-                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-            else
-                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-            CaretPosition = new Point(x, y);
-
-            if (Offset > 0)
-            {
-                if (CaretPosition.X + Offset < 0)
-                    Offset = -CaretPosition.X;
-                else if (Width + -Offset < CaretPosition.X)
-                    Offset = Width - CaretPosition.X;
-            }
-            else if (Width + Offset < CaretPosition.X)
-                Offset = Width - CaretPosition.X;
-            else
-                Offset = 0;
-
-            if (IsChanged)
-                IsChanged = false;
-        }
-
-        public void OnMouseClick(int x, int y)
-        {
-            int oldPos = CaretIndex;
-
-            if (RenderText.IsUnicode)
-                CaretIndex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-            else
-                CaretIndex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-
-            if (oldPos != CaretIndex)
-                UpdateCaretPosition();
-        }
-
-        public int[] GetLinesCharsCount()
-        {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
-        }
-        public int[] GetLinesCharsCount(string text)
-        {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : FileManager.Fonts.GetLinesCharsCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
-        }
-        public void Clear()
-        {
-            Text = string.Empty;
-            Offset = 0;
-            CaretPosition = Point.Zero;
-            CaretIndex = 0;
         }
     }
 }
