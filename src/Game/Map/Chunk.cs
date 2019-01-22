@@ -168,7 +168,7 @@ namespace ClassicUO.Game.Map
         //                sbyte tileZ = tile.Z;
 
         //                tile.Calculate(tileX, tileY, tileZ);
-                        
+
         //                t.AddGameObject(tile);
         //            }
 

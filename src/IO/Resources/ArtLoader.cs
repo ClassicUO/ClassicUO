@@ -110,7 +110,7 @@ namespace ClassicUO.IO.Resources
                 });
         }
 
-        private unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
+        public unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
             //if (Engine.Profile != null && Engine.Profile.Current != null && Engine.Profile.Current.TreeToStumps && StaticFilters.IsTree(graphic))
             //{

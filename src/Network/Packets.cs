@@ -507,30 +507,21 @@ namespace ClassicUO.Network
             WriteUInt(server);
             WriteUInt((uint) buttonID);
 
-            if (switches == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) switches.Length);
+            WriteUInt((uint)switches.Length);
 
-                for (int i = switches.Length - 1; i >= 0; i--)
-                    WriteUInt(switches[i]);
+            for (int i = switches.Length - 1; i >= 0; i--)
+                WriteUInt(switches[i]);
+
+            WriteUInt((uint)entries.Length);
+
+            for (int i = entries.Length - 1; i >= 0; i--)
+            {
+                int length = Math.Min(239, entries[i].Item2.Length);
+                WriteUShort(entries[i].Item1);
+                WriteUShort((ushort)length);
+                WriteUnicode(entries[i].Item2, length);
             }
 
-            if (entries == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) entries.Length);
-
-                for (int i = entries.Length - 1; i >= 0 ; i--)
-                {
-                    int length = Math.Min(239, entries[i].Item2.Length);
-                    WriteUShort(entries[i].Item1);
-                    WriteUShort((ushort) length);
-                    WriteUnicode(entries[i].Item2, length);
-                }
-            }
         }
     }
 

@@ -188,9 +188,7 @@ namespace ClassicUO.IO
             byte[] data = new byte[count];
 
             fixed (byte* ptr = data)
-            {
                 Buffer.MemoryCopy(&_data[Position], ptr, count, count);
-            }
 
             Position += count;
 

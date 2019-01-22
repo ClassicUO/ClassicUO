@@ -110,29 +110,24 @@ namespace ClassicUO.Game.Views
                     _storedHue = Vector3.Zero;
                 }
             }
+           
+            _vertex[0].Position = position + _vertex0_yOffset;
+            _vertex[1].Position = position + _vertex1_yOffset;
+            _vertex[2].Position = position + _vertex2_yOffset;
+            _vertex[3].Position = position + _vertex3_yOffset;
 
-            fixed (SpriteVertex* ptr = _vertex)
+            _vertex[0].Position.Y += z;
+            _vertex[1].Position.Y += z;
+            _vertex[2].Position.Y += z;
+            _vertex[3].Position.Y += z;
+
+            if (HueVector != _vertex[0].Hue)
             {
-                ptr[0].Position = position + _vertex0_yOffset;
-                ptr[1].Position = position + _vertex1_yOffset;
-                ptr[2].Position = position + _vertex2_yOffset;
-                ptr[3].Position = position + _vertex3_yOffset;
-
-                ptr[0].Position.Y += z;
-                ptr[1].Position.Y += z;
-                ptr[2].Position.Y += z;
-                ptr[3].Position.Y += z;
-
-                if (HueVector != ptr[0].Hue)
-                {
-                    ptr[0].Hue = HueVector;
-                    ptr[1].Hue = HueVector;
-                    ptr[2].Hue = HueVector;
-                    ptr[3].Hue = HueVector;
-                }
-            }
-
-            
+                _vertex[0].Hue = HueVector;
+                _vertex[1].Hue = HueVector;
+                _vertex[2].Hue = HueVector;
+                _vertex[3].Hue = HueVector;
+            }     
 
             if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
