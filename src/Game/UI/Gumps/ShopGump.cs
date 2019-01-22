@@ -30,6 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -280,14 +281,15 @@ namespace ClassicUO.Game.UI.Gumps
             public ShopItem(Item item)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
+                var itemName = StringHelper.CapitalizeAllWords(item.Name);
 
                 Add(new ItemGump(item)
                 {
                     X = 5, Y = 5, Height = 50, AcceptMouseInput = false
                 });
 
-                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                Label label;
+                Add(label = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
                     Y = 5, X = 65
                 });
@@ -298,7 +300,9 @@ namespace ClassicUO.Game.UI.Gumps
                 });
 
                 Width = 220;
-                Height = 30;
+                Height = label.Height;
+
+                WantUpdateSize = false;
             }
 
             public Item Item { get; }

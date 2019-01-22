@@ -869,65 +869,25 @@ namespace ClassicUO.Network
                     return;
 
                 var gump = new ShopGump(serial, true, 150, 5);
-                //var itemList = vendor.Items
-                //                     .Where(s => s.Layer == Layer.ShopResale || s.Layer == Layer.ShopBuy)
-                //                     .SelectMany(s => s.Items)
-                //                     .ToArray();
-
-
-                //if (itemList.Length > 0 && itemList[0].X > 1)
-                //    Array.Reverse(itemList);
-
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.Equipment[(int) layer];
 
-                    if (item == null)
-                        continue;
-
-                    Item a = item.Items.FirstOrDefault();
+                    Item a = item?.Items.FirstOrDefault();
 
                     if (a == null)
                         continue;
 
-                    bool reverse = a.X > 1;
-
-                    //var list = item.Items.ToArray();
-
-
-                    //if (reverse)
-                    //{
-                    //    for (int i = list.Length - 1; i >= 0; i--)
-                    //    {
-                    //        gump.AddItem(list[i]);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    for (int i = 0; i < list.Length; i++)
-                    //    {
-                    //        gump.AddItem(list[i]);
-                    //    }
-                    //}
-
-                    var list = (reverse ? item.Items.Reverse() : item.Items);
+                    var list = item.Items.OrderBy(s => s.Serial.Value).Reverse();
 
                     foreach (var i in list)
+                    {
+                        Console.WriteLine(i.Position);
                         gump.AddItem(i);
+                    }
 
                 }
-
-                //var itemList = vendor.Items
-                //    .Where(o => o.Layer == Layer.ShopBuyRestock || o.Layer == Layer.ShopBuy)
-                //    .SelectMany(o => o.Items)
-                //    .OrderBy(o => o.X > 1)
-                //    .ToArray();
-
-                //foreach (Item item in itemList)
-                //{
-                //    gump.AddItem(item);
-                //}
 
                 Engine.UI.Add(gump);
             }
@@ -1589,6 +1549,9 @@ namespace ClassicUO.Network
 
         private static void BuyList(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Item container = World.Items.Get(p.ReadUInt());
 
             if (container == null) return;
@@ -1597,9 +1560,9 @@ namespace ClassicUO.Network
             if (vendor == null) return;
 
 
-            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(vendor);
+            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>();
 
-            if (gump != null && !gump.IsBuyGump)
+            if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
             {
                 gump.Dispose();
                 gump = null;
@@ -1615,22 +1578,21 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                Item item = container.Items.FirstOrDefault();
+                Item a = container.Items.FirstOrDefault();
 
-                if (item == null)
+                if (a == null)
                     return;
 
-                bool reverse = item.X > 1;
+                bool reverse = a.X > 1;
 
-                var list = (reverse ? item.Items.Reverse() : item.Items).ToArray();
-                if (list.Length == 0)
-                    return;
+                var list = reverse ? 
+                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
+                               :
+                               container.Items.OrderBy(s => s.Serial.Value);
 
-                for (int i = 0; i < count; i++)
+                foreach (Item it in list.Take(count))
                 {
-                    Item it = list[i];
                     it.Price = p.ReadUInt();
-
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
 
@@ -1640,6 +1602,7 @@ namespace ClassicUO.Network
                     }
                     else
                         it.Name = name;
+
                 }
             }
         }
@@ -2689,7 +2652,13 @@ namespace ClassicUO.Network
 
         private static void MegaCliloc(Packet p)
         {
-            p.Skip(2);
+            if (!World.InGame)
+                return;
+
+            ushort unknown = p.ReadUShort();
+            if (unknown > 1)
+                return;
+
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null) return;
