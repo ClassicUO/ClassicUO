@@ -175,13 +175,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem();
+            ScrollAreaItem item = new ScrollAreaItem()
+            {
+                CanMove = true
+            };
             item.Add(c);
             base.Add(item, page);
         }
 
         public void Add(ScrollAreaItem c, int page = 0)
         {
+            c.CanMove = true;
             base.Add(c, page);
         }
 

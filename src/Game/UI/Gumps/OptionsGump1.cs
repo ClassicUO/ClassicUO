@@ -378,9 +378,10 @@ namespace ClassicUO.Game.UI.Gumps
             };
             item.Add(_shardType);
 
-            _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
-
             _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+
+
+            item = new ScrollAreaItem();
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -400,6 +401,15 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30
             });
 
+            _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", 1)
+            {
+                X = 140,
+                Y = 100,
+                IsChecked = Engine.Profile.Current.GameWindowLock
+            };
+
+            item.Add(_gameWindowLock);
+
             _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
@@ -417,6 +427,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30
             });
+
+
 
             rightArea.Add(item);
 
