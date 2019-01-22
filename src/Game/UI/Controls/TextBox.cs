@@ -132,19 +132,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public TextBox NextElement()
         {
-            TextBox next = this;
-            bool fThis = false;
+            TextBox next = null;
+            bool findThisElement = false;
             foreach (TextBox t in Parent?.FindControls<TextBox>())
             {
-                if (fThis)
+                if (findThisElement)
                 {
                     next = t;
                     break;
                 }
-                if (t == this)
-                    fThis = true;
-                if (!fThis)
+                if (next == null)
                     next = t;
+                if (t == this)
+                    findThisElement = true;
             }
             return next;
         }
@@ -168,18 +168,18 @@ namespace ClassicUO.Game.UI.Controls
             else switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                        s = TxEntry.Text;
-                       Parent?.OnKeyboardReturn(0, s);
+                    s = TxEntry.Text;
+                    Parent?.OnKeyboardReturn(0, s);
                     break;
                 case SDL.SDL_Keycode.SDLK_TAB:
-                        NextElement().SetKeyboardFocus();
-                        break;
+                    NextElement().SetKeyboardFocus();
+                    break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (!ReplaceDefaultTextOnFirstKeyPress)
                         TxEntry.RemoveChar(true);
                     else
                         ReplaceDefaultTextOnFirstKeyPress = false;
-                     break;
+                    break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     TxEntry.SeekCaretPosition(-1);
                     break;
