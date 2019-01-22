@@ -157,7 +157,8 @@ namespace ClassicUO.Game.Scenes
                 else if (Scale > 2.3f)
                     Scale = 2.3f;
 
-                Engine.Profile.Current.ScaleZoom = Scale;
+                if (Engine.Profile.Current.SaveScalaAfterClose)
+                    Engine.Profile.Current.ScaleZoom = Scale;
             };
 
             Engine.Input.KeyDown += OnKeyDown;

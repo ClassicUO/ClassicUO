@@ -81,7 +81,12 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = login;
                     break;
                 case GameScene game:
-                    game.Scale = Engine.Profile.Current.ScaleZoom;
+
+                    if (Engine.Profile.Current.SaveScalaAfterClose)
+                        game.Scale = Engine.Profile.Current.ScaleZoom;
+                    else
+                        game.Scale = 1f; // hard return to 1.0f
+
                     Engine.IsFullScreen = true;
                     CurrentScene = game;
                     break;
