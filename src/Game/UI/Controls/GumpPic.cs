@@ -82,6 +82,9 @@ namespace ClassicUO.Game.UI.Controls
             Hue = hue;
 
             Texture = FileManager.Gumps.GetTexture(Graphic);
+
+            if (Texture == null)
+                Dispose();
         }
 
         private static ushort TransformHue(ushort hue)
@@ -104,6 +107,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, Alpha, true));
 
             return base.Draw(batcher, position, hue);
