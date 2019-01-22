@@ -716,33 +716,38 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.GameWindowPosition = n;
             }
 
-            Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
-
-            if (_gameWindowLock.IsChecked)
+            if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
             {
-                // lock
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.CanMove = false;
-            } else
-            {
-                // unlock
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.CanMove = true;
+                if (_gameWindowLock.IsChecked)
+                {
+                    // lock
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.CanMove = false;
+                }
+                else
+                {
+                    // unlock
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.CanMove = true;
+                }
+                Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
             }
-
-            Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
-
-            if (_gameWindowFullsize.IsChecked)
+            
+            if (_gameWindowFullsize.IsChecked != Engine.Profile.Current.GameWindowFullSize)
             {
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                e.Location = new Point(-5,-5);
-            }
-            else
-            {
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.ResizeWindow(new Point(640,480));
-                e.Location = new Point(20, 20);
+                if (_gameWindowFullsize.IsChecked)
+                {
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                    e.Location = new Point(-5, -5);
+                }
+                else
+                {
+                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    e.ResizeWindow(new Point(640, 480));
+                    e.Location = new Point(20, 20);
+                }
+                Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
             UpdateVideo();
