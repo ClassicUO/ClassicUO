@@ -104,6 +104,9 @@ namespace ClassicUO.Game.Scenes
         {
             if (e.Button == MouseButton.Left)
             {
+                if (_dragginObject != null)
+                    _dragginObject = null;
+
                 if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                     return;
 
