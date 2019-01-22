@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
+                    _itemData = FileManager.TileData.StaticData[Graphic & TileDataLoader.LastStatic];
                 return _itemData.Value;
             }
         }

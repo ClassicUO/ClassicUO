@@ -94,9 +94,7 @@ namespace ClassicUO.Game.Map
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
 
-                        //Tiles[x, y].AddGameObject(land);
-
-                        land.AddToTile(Tiles[x, y]);
+                        Tiles[x, y].AddGameObject(land);
                     }
                 }
 
@@ -131,8 +129,7 @@ namespace ClassicUO.Game.Map
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
                                 else
-                                    staticObject.AddToTile(Tiles[x, y]);
-                                //iles[x, y].AddGameObject(staticObject);
+                                    Tiles[x, y].AddGameObject(staticObject);
                             }
                         }
                     }
