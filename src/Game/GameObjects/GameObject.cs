@@ -177,6 +177,18 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public void AddToTile() => AddToTile(X, Y);
+
+        public void AddToTile(Tile tile)
+        {
+            if (World.Map != null)
+            {
+                if (Position != Position.INVALID)
+                    _tile?.RemoveGameObject(this);
+
+                _tile = tile;
+                _tile?.AddGameObject(this);
+            }
+        }
       
 
         public event EventHandler Disposed, OverheadAdded;
@@ -286,8 +298,6 @@ namespace ClassicUO.Game.GameObjects
 
             _tile?.RemoveGameObject(this);
             _tile = null;
-
-            //Tile = null;
 
             foreach (TextOverhead textOverhead in _overHeads)
             {
