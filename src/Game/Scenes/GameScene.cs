@@ -38,6 +38,8 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System.Diagnostics;
+
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
@@ -117,11 +119,6 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList(_mousePicker);
 
             WorldViewportGump viewport = new WorldViewportGump(this);
-
-            // разрбратся чего после перезапуска портится фулскрин
-            //if (Engine.Profile.Current.GameWindowFullSize)
-            //    viewport.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-
             Engine.UI.Add(viewport);
 
             TopBarGump.Create();
@@ -138,6 +135,7 @@ namespace ClassicUO.Game.Scenes
 
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
+
             //Engine.Input.MouseWheel += (sender, e) =>
             //{
             //    if (IsMouseOverWorld)
@@ -146,13 +144,13 @@ namespace ClassicUO.Game.Scenes
             //            Scale += 0.1f;
             //        else
             //            Scale -= 0.1f;
-
             //        if (Scale < 0.7f)
             //            Scale = 0.7f;
             //        else if (Scale > 2.3f)
             //            Scale = 2.3f;
             //    }
             //};
+
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 

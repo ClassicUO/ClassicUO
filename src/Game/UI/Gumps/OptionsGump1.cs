@@ -701,23 +701,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _gameWindowHeight.Text = n.Y.ToString();
             }
 
-            int GameWindowPositionX = 10;
-            int GameWindowPositionY = 10;
+            int GameWindowPositionX = 20;
+            int GameWindowPositionY = 20;
 
             int.TryParse(_gameWindowPositionX.Text, out GameWindowPositionX);
             int.TryParse(_gameWindowPositionY.Text, out GameWindowPositionY);
 
             if (GameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || GameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
             {
-                if (GameWindowPositionX < 0)
-                {
-                    GameWindowPositionX = 0;
-                }
-                if (GameWindowPositionY < 0)
-                {
-                    GameWindowPositionY = 0;
-                }
-
                 Point n = new Point(GameWindowPositionX, GameWindowPositionY);
 
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
@@ -746,13 +737,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                e.Location = new Point(0,0);
+                e.Location = new Point(-5,-5);
             }
             else
             {
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 e.ResizeWindow(new Point(640,480));
-                e.Location = new Point(10, 10);
+                e.Location = new Point(20, 20);
             }
 
             UpdateVideo();

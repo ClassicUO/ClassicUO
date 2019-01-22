@@ -27,7 +27,6 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -154,8 +153,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            //Engine.Profile.Current.GameWindowPosition = new Point(x, y);
-
             OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
             if (options != null)
                 options.UpdateVideo();
