@@ -72,7 +72,7 @@ namespace ClassicUO.Configuration
         public int LoginMusicVolume { get; set; } = 100;
 
         [JsonProperty(PropertyName = "shard_type")]
-        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = outlands, 2 = ??
+        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
 
         public void Save()
         {
