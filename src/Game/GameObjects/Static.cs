@@ -59,13 +59,13 @@ namespace ClassicUO.Game.GameObjects
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
-            _itemData = null;
+            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
-            _itemData = null;
+            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         protected override View CreateView() => new StaticView(this);

@@ -2874,10 +2874,8 @@ namespace ClassicUO.Network
             {
                 clen = p.ReadUInt() - 4;
                 dlen = (int)p.ReadUInt();
-                data = new byte[clen];
+                data = p.ReadArray((int) clen);
 
-                for (int i = 0; i < clen; i++)
-                    data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
                 lines = new string[linesNum];
