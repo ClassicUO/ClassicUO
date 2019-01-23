@@ -19,14 +19,17 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
     public enum TargetType
     {
-        Nothing = -1,
+        Invalid = -1,
         Object = 0,
         Position = 1,
         MultiPlacement = 2,
@@ -41,27 +44,32 @@ namespace ClassicUO.Game.Managers
         private static int _multiModel;
 
         
-        public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
+        public static TargetType TargetingState { get; private set; } = TargetType.Invalid;
 
         public static GameObject LastGameObject { get; set; }
 
-        public static bool IsTargeting => TargetingState != TargetType.Nothing && _targetCursorType < 3;
+        public static bool IsTargeting { get; private set; }
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
-            TargetingState = TargetType.Nothing;
+            IsTargeting = false;
         }
 
         public static void SetTargeting(TargetType targeting, Serial cursorID, byte cursorType)
         {
-            if (TargetingState != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
-            {
-                if (targeting == TargetType.Nothing)
-                    GameActions.TargetCancel(_targetCursorId, _targetCursorType);
-                TargetingState = targeting;
-                _targetCursorId = cursorID;
-                _targetCursorType = cursorType;
-            }
+            if (targeting == TargetType.Invalid)
+                throw new Exception("Invalid target type");
+    
+            TargetingState = targeting;
+            _targetCursorId = cursorID;
+            _targetCursorType = cursorType;
+            IsTargeting = cursorType < 3;            
+        }
+
+        public static void CancelTarget()
+        {
+            GameActions.TargetCancel(TargetingState, _targetCursorId, _targetCursorType);
+            IsTargeting = false;
         }
 
         public static void SetTargetingMulti(Serial deedSerial, int model, byte targetType)
@@ -87,7 +95,7 @@ namespace ClassicUO.Game.Managers
 
         public static void TargetGameObject(GameObject selectedEntity)
         {
-            if (selectedEntity == null)
+            if (selectedEntity == null || !IsTargeting)
                 return;
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
