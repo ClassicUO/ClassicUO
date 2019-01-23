@@ -68,6 +68,8 @@ namespace ClassicUO.Renderer
 
         public bool IsHTML { get; set; }
 
+        public bool RecalculateWidthByInfo { get; set; }
+
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
         public Hue Hue { get; set; }
@@ -165,6 +167,9 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+
+            FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+
             bool ispartial = false;
 
             if (IsUnicode)
@@ -182,6 +187,7 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(false);
+            FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Dispose()
