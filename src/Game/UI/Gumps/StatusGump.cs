@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 using ClassicUO;
 using ClassicUO.Game;
@@ -72,30 +73,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (_useUOPGumps)
+                if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
-                    {
-                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        //list.Add(World.Player);
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-
-                        //if (dict.ContainsKey(World.Player))
-                        //{
-                        //    Engine.UI.Remove<HealthBarGump>(World.Player);
-                        //}
-                        Dispose();
-                    }
-                }
-                else
-                {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
-                    {
-                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        //list.Add(World.Player);
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                        Dispose();
-                    }
+                    Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                    Dispose();
                 }
             }
         }
@@ -115,7 +96,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
 
                 default:
-                    throw new NotImplementedException();
+
+                    return Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
             }
         }
 
@@ -307,7 +289,13 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-       
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 1)
+                Dispose();
+        }
 
         private enum MobileStats
         {
@@ -666,7 +654,14 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-    
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 0)
+                Dispose();
+        }
+
         private enum MobileStats
         {
             Name,
@@ -1060,6 +1055,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _labels[(int) stat] = label;
             Add(label);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 2)
+                Dispose();
         }
 
         private enum MobileStats
