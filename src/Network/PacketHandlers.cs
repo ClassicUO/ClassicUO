@@ -2176,10 +2176,14 @@ namespace ClassicUO.Network
 
         private static void CharacterProfile(Packet p)
         {
-            var serial = p.ReadUInt();
-            var header = p.ReadASCII();
-            var footer = p.ReadUnicode();
-            var body = p.ReadUnicode();
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            string header = p.ReadASCII();
+            string footer = p.ReadUnicode();
+            
+            string body = p.Position < p.Length ? p.ReadUnicode() : string.Empty;
 
             Engine.UI.GetByLocalSerial<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, (serial == World.Player.Serial)));
