@@ -326,6 +326,8 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
+        public void Update() => _paperDollInteractable.Update();
+
         public override void OnButtonClick(int buttonID)
         {
 	        switch ((Buttons)buttonID)

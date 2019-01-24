@@ -50,7 +50,11 @@ namespace ClassicUO.Game.GameObjects
 
         public bool HasEquipment => _equipment != null;
 
-        public Item[] Equipment => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
+        public Item[] Equipment
+        {
+            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
+            set => _equipment = value;
+        }
 
         public Serial Serial { get; }
 

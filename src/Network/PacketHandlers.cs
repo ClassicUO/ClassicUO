@@ -1690,6 +1690,9 @@ namespace ClassicUO.Network
 
             uint itemSerial;
 
+            // reset equipment
+            mobile.Equipment = null;
+
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
@@ -1759,6 +1762,8 @@ namespace ClassicUO.Network
 
             if (mobile != World.Player)
                 NetClient.Socket.Send(new PClickRequest(mobile));
+
+            Engine.UI.GetByLocalSerial<PaperDollGump>(mobile)?.Update();
         }
 
         private static void OpenMenu(Packet p)
@@ -2474,9 +2479,8 @@ namespace ClassicUO.Network
                             break;
                         case 5:
                             Mobile character = World.Mobiles.Get(serial);
-
-                            if (character == null) return;
-                            if (p.Length == 19) dead = p.ReadBool();
+                            if (character != null && p.Length == 19)
+                                character.IsDead = p.ReadBool();
 
                             break;
                     }
