@@ -146,7 +146,7 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
+                            if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

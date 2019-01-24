@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in _item.Items)
+            foreach (Item i in _item.Items.Where(s => s.Layer != Layer.Hair && s.Layer != Layer.Beard && s.Layer != Layer.Face))
                 Add(new ItemGump(i));
         }
 
@@ -148,8 +148,43 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item item in e)
             {
+                CheckItemPosition(item);
                 Add(new ItemGump(item));
             }
+        }
+
+        private void CheckItemPosition(Item item)
+        {
+            int x = item.X;
+            int y = item.Y;
+
+            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+
+            if (texture != null && !texture.IsDisposed)
+            {
+                if (x < _data.Bounds.X)
+                    x = _data.Bounds.X;
+
+                if (y < _data.Bounds.Y)
+                    y = _data.Bounds.Y;
+
+                if (x + texture.Width > _data.Bounds.Right)
+                    x = _data.Bounds.Right - texture.Width;
+
+                if (y + texture.Height > _data.Bounds.Bottom)
+                    y = _data.Bounds.Bottom - texture.Height;
+            }
+            else
+            {
+                x = _data.Bounds.X;
+                y = _data.Bounds.Y;
+            }
+
+            if (x != item.X || y != item.Y)
+            {
+                item.Position = new Position((ushort)x, (ushort)y);
+            }
+
         }
 
         public override void Dispose()

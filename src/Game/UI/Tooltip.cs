@@ -71,27 +71,37 @@ namespace ClassicUO.Game.UI
                     Font = 1,
                     IsUnicode = true,
                     IsHTML = true,
+                    RecalculateWidthByInfo = true,
                     Cell = 5,
                     FontStyle = FontStyle.BlackBorder,
                 };
             }
             else if (_renderedText.Text != Text)
             {
-                FileManager.Fonts.RecalculateWidthByInfo = true;
-
-                if (_maxWidth <= 0)
+                if (_maxWidth == 0)
                 {
+                    FileManager.Fonts.SetUseHTML(true);
+                    FileManager.Fonts.RecalculateWidthByInfo = true;
+
                     int width = FileManager.Fonts.GetWidthUnicode(1, Text);
 
                     if (width > 600)
                         width = 600;
+
+                    width = FileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                   
+                    if (width > 600)
+                        width = 600;
+
                     _renderedText.MaxWidth = width;
+
+                    FileManager.Fonts.RecalculateWidthByInfo = false;
+                    FileManager.Fonts.SetUseHTML(false);
                 }
                 else
                     _renderedText.MaxWidth = _maxWidth;
 
                 _renderedText.Text = _textHTML;
-                FileManager.Fonts.RecalculateWidthByInfo = false;
             }
 
 

@@ -174,29 +174,32 @@ namespace ClassicUO.IO
                         }
                         if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
                         {
-                            var chunk = World.Map.Chunks[block];
+                            Chunk chunk = World.Map.Chunks[block];
                             if (chunk != null)
                             {
                                 for (int x = 0; x < 8; x++)
                                 {
                                     for (int y = 0; y < 8; y++)
                                     {
-                                        for (GameObject obj = chunk.Tiles[x, y].FirstNode; obj != null; obj = obj.Right)
+                                        GameObject obj = chunk.Tiles[x, y].FirstNode;
+                                        for(GameObject right = obj.Right; obj!=null; obj = right, right = right?.Right)
                                         {
-                                            if (obj is Land || obj is Static)
+                                            if (obj is Static)
                                                 obj.Dispose();
                                         }
                                     }
                                 }
                             }
+                            int index = block * 12;
                             if (totallen <= 0)
                             {
                                 //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
-                                _filesIdxStatics[mapID].WriteArray(block * 12, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
+                                _filesIdxStatics[mapID].WriteArray(index, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
+                                Log.Message(LogTypes.Trace, $"writing zero length statics to index at 0x{index:X8}");
                             }
                             else
                             {
-                                _filesIdxStatics[mapID].Seek(block * 12);
+                                _filesIdxStatics[mapID].Seek(index);
                                 uint lookup = _filesIdxStatics[mapID].ReadUInt();
                                 uint existingStaticsLength = _filesIdxStatics[mapID].ReadUInt();
 
@@ -229,7 +232,7 @@ namespace ClassicUO.IO
                                 _filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
                             }
                             FileManager.Map.ReloadBlock(mapID, block);
-                            chunk?.Load(mapID);
+                            chunk?.LoadStatics(mapID);
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                             //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                             MapCRCs[mapID][block] = UInt16.MaxValue;
@@ -366,24 +369,24 @@ namespace ClassicUO.IO
 
             if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
             {
-                var chunk = World.Map.Chunks[block];
+                Chunk chunk = World.Map.Chunks[block];
                 if (chunk != null)
                 {
                     for (int x = 0; x < 8; x++)
                     {
                         for (int y = 0; y < 8; y++)
                         {
-                            for (GameObject obj = chunk.Tiles[x, y].FirstNode; obj != null; obj = obj.Right)
+                            GameObject obj = chunk.Tiles[x, y].FirstNode;
+                            for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                             {
-                                if (obj is Land || obj is Static)
+                                if (obj is Land)
                                     obj.Dispose();
                             }
                         }
                     }
                 }
                 _filesMap[mapID].WriteArray((block * 196) + 4, landData);
-                FileManager.Map.ReloadBlock(mapID, block);
-                chunk?.Load(mapID);
+                chunk?.LoadLand(mapID);
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 MapCRCs[mapID][block] = UInt16.MaxValue;
             }

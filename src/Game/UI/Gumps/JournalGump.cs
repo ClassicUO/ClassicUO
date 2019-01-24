@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
                 TitleGumpID = 0x82A
             });
 
-            _scrollBar = new ScrollFlag(-25, 0, Height);
+            _scrollBar = new ScrollFlag(-25, 0, Height, true);
             
             Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
 

@@ -132,7 +132,8 @@ namespace ClassicUO.Game.Scenes
             WorldViewportGump viewport = new WorldViewportGump(this);
             Engine.UI.Add(viewport);
 
-            TopBarGump.Create();
+            if (! Engine.Profile.Current.TopbarGumpIsDisabled)
+                TopBarGump.Create();
 
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
@@ -155,7 +156,10 @@ namespace ClassicUO.Game.Scenes
                 if (Scale < 0.7f)
                     Scale = 0.7f;
                 else if (Scale > 2.3f)
-                    Scale = 2.3f;               
+                    Scale = 2.3f;
+
+                if (Engine.Profile.Current.SaveScaleAfterClose)
+                    Engine.Profile.Current.ScaleZoom = Scale;
             };
 
             Engine.Input.KeyDown += OnKeyDown;

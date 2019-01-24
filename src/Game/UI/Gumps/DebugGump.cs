@@ -16,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _label;
         private readonly AlphaBlendControl _trans;
 
-        private const string DEBUG_STRING_0 = "- FPS: {0}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS);
+            _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
             _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
             _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
             _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));

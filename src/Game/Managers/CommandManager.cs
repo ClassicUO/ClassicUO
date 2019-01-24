@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
                 }
                 else
                 {
-                    TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
+                    TargetManager.CancelTarget();
                 }
             });
         }

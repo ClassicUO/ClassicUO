@@ -326,6 +326,9 @@ namespace ClassicUO.IO.Resources
                     var difl = _mapDifl[i];
                     var dif = _mapDif[i];
 
+                    if (difl == null || dif == null)
+                        continue;
+
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
 
                     difl.Seek(0);
@@ -349,6 +352,10 @@ namespace ClassicUO.IO.Resources
                 {
                     var difl = _staDifl[i];
                     var difi = _staDifi[i];
+
+                    if (difl == null || difi == null || _staDif[i] == null)
+                        continue;
+
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
                     staticPatchesCount = Math.Min(staticPatchesCount, (int) (difl.Length / 4));

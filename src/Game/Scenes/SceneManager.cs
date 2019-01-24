@@ -49,13 +49,11 @@ namespace ClassicUO.Game.Scenes
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
-
                     break;
 
                 case ScenesType.Game:
                     Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
-
                     if (Engine.Profile.Current.GameWindowFullSize)
                     {
                         WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
@@ -83,6 +81,12 @@ namespace ClassicUO.Game.Scenes
                     CurrentScene = login;
                     break;
                 case GameScene game:
+
+                    if (Engine.Profile.Current.SaveScaleAfterClose)
+                        game.Scale = Engine.Profile.Current.ScaleZoom;
+                    else
+                        game.Scale = 1f; // hard return to 1.0f
+
                     Engine.IsFullScreen = true;
                     CurrentScene = game;
                     break;

@@ -79,13 +79,21 @@ namespace ClassicUO.Game.UI.Controls
             base.OnInitialize();
         }
 
+        public void Scroll(bool isup)
+        {
+            if (isup)
+                _scrollBar.Value -= _scrollBar.ScrollStep;
+            else
+                _scrollBar.Value += _scrollBar.ScrollStep;
+        }
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
-            _rect.Y = position.Y;
+            _rect.Y = position.Y + 20;
             _rect.Width = Width - 14;
-            _rect.Height = Height;
+            _rect.Height = Height - 40;
             Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
@@ -167,13 +175,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem();
+            ScrollAreaItem item = new ScrollAreaItem()
+            {
+                CanMove = true
+            };
             item.Add(c);
             base.Add(item, page);
         }
 
         public void Add(ScrollAreaItem c, int page = 0)
         {
+            c.CanMove = true;
             base.Add(c, page);
         }
 

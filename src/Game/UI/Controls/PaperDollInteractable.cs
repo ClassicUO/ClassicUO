@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             mobile.Items.Removed += ItemsOnRemoved;
             mobile.Disposed += MobileOnDisposed;
         }
-
+        
         public Mobile Mobile
         {
             get => _mobile;

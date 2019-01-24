@@ -45,15 +45,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _buttonClick = buttonClick;
 
 
+            Label label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = 162,
+                Y = 178
+            };
+
             Add(new ResizePic(0x0A28)
             {
-                X = 142, Y = 134, Width = 356, Height = 212
+                X = 142, Y = 134, Width = 366, Height = 212
             });
 
-            Add(new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 162, Y = 178
-            });
+            Add(label);
 
             if (showButtons == Buttons.OK)
             {

@@ -134,7 +134,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
         public bool IsMinimized { get; private set; }
        
         protected override void OnMouseClick(int x, int y, MouseButton button)
@@ -157,7 +156,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnDragEnd(x, y);
             Engine.Profile.Current.TopbarGumpPosition = Location;
         }
-
 
         public override void OnButtonClick(int buttonID)
         {

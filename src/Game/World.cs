@@ -54,6 +54,8 @@ namespace ClassicUO.Game
 
         public static Serial LastAttack { get; set; }
 
+        public static bool SkillsRequested { get; set; }
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
@@ -207,10 +209,11 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
+            if (item.Layer != Layer.Invalid && item.RootContainer.IsValid)
             {
-                Mobile mobile = Mobiles.Get(item.RootContainer);
-                if (mobile != null) mobile.Equipment[(int) item.Layer] = null;
+                Entity e = Get(item.RootContainer);
+                if (e != null && e.HasEquipment)
+                    e.Equipment[(int) item.Layer] = null;
             }
 
             foreach (Item i in item.Items)

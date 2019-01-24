@@ -219,8 +219,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPoisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
 
-        public bool IsHidden => ((byte) Flags & 0x80) != 0;
-
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
 
         public bool IsDead
@@ -240,8 +238,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
-
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
 
         public bool IsMounted => Equipment[(int) Layer.Mount] != null;
 

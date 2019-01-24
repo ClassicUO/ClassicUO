@@ -58,6 +58,9 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
+            if (World.Player.IsDead)
+                return;
+
             if (!_isShiftDown && !amount.HasValue && !item.IsCorpse && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
@@ -79,7 +82,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
+            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
             {
                 return;
             }
@@ -95,9 +98,9 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 entity.Items.Remove(item);
 
-                if (item.Container.IsMobile)
+                if (entity.HasEquipment)
                 {
-                    ((Mobile)entity).Equipment[item.ItemData.Layer] = null;
+                    entity.Equipment[item.ItemData.Layer] = null;
                 }
 
                 entity.Items.ProcessDelta();
@@ -179,6 +182,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
+
                 }
                 else
                 {

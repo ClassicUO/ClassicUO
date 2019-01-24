@@ -333,20 +333,20 @@ namespace ClassicUO.Game.UI.Controls
                     });
                 }
 
-                int w, h;
+                //int w, h;
 
-                if (Texture == null)
-                {
-                    w = Width;
-                    h = Height;
-                }
-                else
-                {
-                    w = Texture.Width;
-                    h = Texture.Height;
-                }
+                //if (Texture == null)
+                //{
+                //    w = Width;
+                //    h = Height;
+                //}
+                //else
+                //{
+                //    w = Texture.Width;
+                //    h = Texture.Height;
+                //}
 
-                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, w, h), Vector3.Zero);
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
         }
 
@@ -852,6 +852,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             IsDisposed = true;
+
         }
     }
 }

@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 TitleGumpID = 0x0820,
             });
-            _scrollBar = new ScrollFlag( 0, 0, Height);
+            _scrollBar = new ScrollFlag( 0, 0, Height, true);
             Add(_scrollBar);
             bool useUnicode = FileManager.ClientVersion >= ClientVersions.CV_305D;
             byte unicodeFontIndex = 1;

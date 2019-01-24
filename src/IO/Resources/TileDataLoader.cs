@@ -12,10 +12,9 @@ using ClassicUO.Utility;
 namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
-    {    
+    {
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
-
 
         public override void Load()
         {

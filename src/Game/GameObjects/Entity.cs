@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         private Flags _flags;
         private Hue _hue;
         private string _name;
-
+        private Item[] _equipment;
 
         protected Entity(Serial serial)
         {
@@ -47,6 +47,14 @@ namespace ClassicUO.Game.GameObjects
         protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; }
+
+        public bool HasEquipment => _equipment != null;
+
+        public Item[] Equipment
+        {
+            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
+            set => _equipment = value;
+        }
 
         public Serial Serial { get; }
 
@@ -182,6 +190,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
+            _equipment = null;
             _properties.Clear();
             base.Dispose();
         }

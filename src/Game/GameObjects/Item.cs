@@ -103,8 +103,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
-
         public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
@@ -156,14 +154,14 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags);
+                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                                 if (x < minX) minX = x;
                                 if (x > maxX) maxX = x;
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
-                                if (flags != 0)
+                                if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
                                     {
@@ -171,6 +169,8 @@ namespace ClassicUO.Game.GameObjects
                                     });
                                 }                              
                             }
+
+                            FileManager.Multi.ReleaseLastMultiDataRead();
 
                             MultiInfo = new MultiInfo((short) X, (short) Y)
                             {
@@ -555,10 +555,6 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
 
         public override void ProcessAnimation()
         {

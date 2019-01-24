@@ -125,9 +125,6 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             break;
-                        case TargetType.Nothing:
-
-                            break;
                         case TargetType.SetTargetClientSide:
 
                             obj = SelectedObject;
@@ -376,7 +373,7 @@ namespace ClassicUO.Game.Scenes
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
-                TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
+                TargetManager.CancelTarget();
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 

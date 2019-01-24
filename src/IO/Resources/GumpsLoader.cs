@@ -52,7 +52,7 @@ namespace ClassicUO.IO.Resources
                     //        ingump -= 50000;
                     //}
 
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || _file.Entries[ingump].DecompressedLength != 0)
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT /*|| _file.Entries[ingump].DecompressedLength != 0*/)
                         continue;
 
                     int outgump = defReader.ReadGroupInt();
@@ -65,7 +65,7 @@ namespace ClassicUO.IO.Resources
                     //        outgump -= 50000;
                     //}
 
-                    if (outgump < 0 || outgump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || _file.Entries[outgump].DecompressedLength != 0)
+                    if (outgump < 0 || outgump >= Constants.MAX_GUMP_DATA_INDEX_COUNT /*|| _file.Entries[outgump].DecompressedLength != 0*/)
                         continue;
 
                     _file.Entries[ingump] = _file.Entries[outgump];

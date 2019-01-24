@@ -195,9 +195,9 @@ namespace ClassicUO.Game
             Socket.Send(new PStatusRequest(serial));
         }
 
-        public static void TargetCancel(Serial cursorID, byte cursorType)
+        public static void TargetCancel(TargetType type, Serial cursorID, byte cursorType)
         {
-            Socket.Send(new PTargetCancel(cursorID, cursorType));
+            Socket.Send(new PTargetCancel(type, cursorID, cursorType));
         }
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)

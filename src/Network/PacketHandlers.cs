@@ -246,6 +246,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xAB, TextEntryDialog);
             /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
             ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
+            ToClient.Add(0xAF, DisplayDeath);
             ToClient.Add(0xAE, UnicodeTalk);
             ToClient.Add(0xB0, OpenGump);
             //ToServer.Add(0xB1, GumpMenuSelection);
@@ -883,7 +884,6 @@ namespace ClassicUO.Network
 
                     foreach (var i in list)
                     {
-                        Console.WriteLine(i.Position);
                         gump.AddItem(i);
                     }
 
@@ -997,8 +997,6 @@ namespace ClassicUO.Network
 
                                     mob.Equipment[(int) hold.Layer] = item;
 
-                                    World.Items.Add(item);
-
                                     mob.ProcessDelta();
                                 }
                                 else
@@ -1013,6 +1011,10 @@ namespace ClassicUO.Network
                         }
                         else 
                             item.AddToTile();
+
+                        World.Items.Add(item);
+                        item.ProcessDelta();
+                        World.Items.ProcessDelta();
                     }
                 }
 
@@ -1027,7 +1029,7 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, ServerErrorMessages.PickUpErrors[code], 0, MessageType.System, MessageFont.Normal);
+                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), 0, MessageType.System, MessageFont.Normal);
             }
         }
 
@@ -1129,6 +1131,21 @@ namespace ClassicUO.Network
 
         private static void UpdateSkills(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            if (World.SkillsRequested)
+            {
+                World.SkillsRequested = false;
+                SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
+
+                if (gumpSkills == null)
+                    Engine.UI.Add(new SkillGumpAdvanced()
+                    {
+                        X = 100, Y = 100
+                    });
+            }
+
             ushort id;
 
             switch (p.ReadByte())
@@ -1675,6 +1692,9 @@ namespace ClassicUO.Network
 
             uint itemSerial;
 
+            // reset equipment
+            mobile.Equipment = null;
+
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
@@ -1744,6 +1764,8 @@ namespace ClassicUO.Network
 
             if (mobile != World.Player)
                 NetClient.Socket.Send(new PClickRequest(mobile));
+
+            Engine.UI.GetByLocalSerial<PaperDollGump>(mobile)?.Update();
         }
 
         private static void OpenMenu(Packet p)
@@ -1798,19 +1820,23 @@ namespace ClassicUO.Network
 
         private static void CorpseEquipment(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Entity corpse = World.Get(p.ReadUInt());
-            Layer layer = (Layer)p.ReadByte();
+            Layer layer = (Layer)p.ReadByte() - 1;
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
                 Item item = World.Items.Get(p.ReadUInt());
-
+                
                 if (item != null && item.Container == corpse)
                 {
-                    // put equip
+                    item.Layer = layer;
+                    corpse.Equipment[(int) layer] = item;
                 }
 
-                layer = (Layer)p.ReadByte();
+                layer = (Layer)p.ReadByte() - 1;
             }
         }
 
@@ -2115,6 +2141,25 @@ namespace ClassicUO.Network
             Chat.OnMessage(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
         }
 
+        private static void DisplayDeath(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            Serial corpseSerial = p.ReadUInt();
+            Serial running = p.ReadUInt();
+
+            Mobile owner = World.Mobiles.Get(serial);
+
+            if (owner == null)
+                return;
+
+            serial |= 0x80000000;
+
+            //TODO:
+        }
+
         private static void OpenGump(Packet p)
         {
             if (World.Player == null)
@@ -2162,10 +2207,14 @@ namespace ClassicUO.Network
 
         private static void CharacterProfile(Packet p)
         {
-            var serial = p.ReadUInt();
-            var header = p.ReadASCII();
-            var footer = p.ReadUnicode();
-            var body = p.ReadUnicode();
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            string header = p.ReadASCII();
+            string footer = p.ReadUnicode();
+            
+            string body = p.Position < p.Length ? p.ReadUnicode() : string.Empty;
 
             Engine.UI.GetByLocalSerial<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, (serial == World.Player.Serial)));
@@ -2432,9 +2481,8 @@ namespace ClassicUO.Network
                             break;
                         case 5:
                             Mobile character = World.Mobiles.Get(serial);
-
-                            if (character == null) return;
-                            if (p.Length == 19) dead = p.ReadBool();
+                            if (character != null && p.Length == 19)
+                                character.IsDead = p.ReadBool();
 
                             break;
                     }
@@ -2856,10 +2904,8 @@ namespace ClassicUO.Network
             {
                 clen = p.ReadUInt() - 4;
                 dlen = (int)p.ReadUInt();
-                data = new byte[clen];
+                data = p.ReadArray((int) clen);
 
-                for (int i = 0; i < clen; i++)
-                    data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
                 lines = new string[linesNum];

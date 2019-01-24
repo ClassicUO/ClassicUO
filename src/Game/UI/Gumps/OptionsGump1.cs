@@ -32,6 +32,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 using ClassicUO.Network;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -40,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom;
+        private Checkbox _debugControls, _zoom, _savezoom;
         private Combobox _shardType;
 
         private Checkbox _gameWindowLock;
@@ -200,6 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
+            _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
 
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -359,7 +361,10 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
-            _zoom = CreateCheckBox(rightArea, "Enable scale zoom", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
+            _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+
 
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, 0, 0, 1)
@@ -374,10 +379,10 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
             item.Add(_shardType);
+            rightArea.Add(item);
 
-            _gameWindowLock = CreateCheckBox(rightArea, "Lock game window moving and resizing", Engine.Profile.Current.GameWindowLock, 0, 0);
 
-            _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+            item = new ScrollAreaItem();
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -397,6 +402,15 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30
             });
 
+            _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", 1)
+            {
+                X = 140,
+                Y = 100,
+                IsChecked = Engine.Profile.Current.GameWindowLock
+            };
+
+            item.Add(_gameWindowLock);
+
             _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
@@ -414,6 +428,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30
             });
+
+
 
             rightArea.Add(item);
 
@@ -544,6 +560,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sliderFPS.Value = 60;
                     _sliderFPSLogin.Value = 60;
                     _highlightObjects.IsChecked = true;
+                    _enableTopbar.IsChecked = false;
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
@@ -575,6 +592,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 3: // video
                     _debugControls.IsChecked = false;
                     _zoom.IsChecked = false;
+                    _savezoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
                     _gameWindowWidth.Text = "640";
                     _gameWindowHeight.Text = "480";
@@ -582,6 +600,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowPositionY.Text = "10";
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
                 case 4: // commands
 
@@ -629,6 +648,20 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
 
+            if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
+            {
+                if (_enableTopbar.IsChecked)
+                {
+                    TopBarGump gump = Engine.UI.GetByLocalSerial<TopBarGump>();
+                    if (gump != null)
+                        gump.Dispose();
+                }
+                else
+                    TopBarGump.Create();
+
+                Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
+            }
+
             if (Engine.Profile.Current.TreeToStumps != _treeToStumps.IsChecked)
             {
                 Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
@@ -674,7 +707,6 @@ namespace ClassicUO.Game.UI.Gumps
             // video
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
             Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
-            Engine.SceneManager.GetScene<GameScene>().Scale = 1;
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
@@ -752,6 +784,14 @@ namespace ClassicUO.Game.UI.Gumps
                     e.Location = new Point(20, 20);
                 }
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
+            }
+
+            if (_savezoom.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
+            {
+                if (!_savezoom.IsChecked)
+                    Engine.Profile.Current.ScaleZoom = 1f;
+
+                Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
             }
 
             UpdateVideo();

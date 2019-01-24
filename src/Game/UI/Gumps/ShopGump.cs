@@ -113,9 +113,63 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
 
 
+            HitBox upButton = new HitBox(233, 50, 18, 16)
+            {
+                Alpha = 1
+            };
+            upButton.MouseDown += (sender, e) =>
+            {
+                _isUpDOWN = true;
+            };
+            upButton.MouseUp += (sender, e) => { _isUpDOWN = false; };
+
+            Add(upButton);
+
+            HitBox downButton = new HitBox(233, 190, 18, 16)
+            {
+                Alpha = 1
+            };
+            downButton.MouseDown += (sender, e) =>
+            {
+                _isDownDOWN = true;
+            };
+            downButton.MouseUp += (sender, e) => { _isDownDOWN = false; };
+            Add(downButton);
+
+
+
+
+
+
+            HitBox upButtonT = new HitBox(403, 265, 18, 16)
+            {
+                Alpha = 1
+            };
+            upButtonT.MouseDown += (sender, e) =>
+            {
+                _isUpDOWN_T = true;
+            };
+            upButtonT.MouseUp += (sender, e) => { _isUpDOWN_T = false; };
+
+            Add(upButtonT);
+
+            HitBox downButtonT = new HitBox(403, 370, 18, 16)
+            {
+                Alpha = 1
+            };
+            downButtonT.MouseDown += (sender, e) =>
+            {
+                _isDownDOWN_T = true;
+            };
+            downButtonT.MouseUp += (sender, e) => { _isDownDOWN_T = false; };
+            Add(downButtonT);
+
             Engine.Input.KeyDown += InputOnKeyDown;
             Engine.Input.KeyUp += InputOnKeyUp;
         }
+
+        private bool _isUpDOWN, _isDownDOWN;
+        private bool _isUpDOWN_T, _isDownDOWN_T;
 
         private bool _shiftPressed;
 
@@ -163,6 +217,18 @@ namespace ClassicUO.Game.UI.Gumps
         
         public override void Update(double totalMS, double frameMS)
         {
+            if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
+            {
+                if (_isDownDOWN)
+                    _shopScrollArea.Scroll(false);
+                else if (_isUpDOWN)
+                    _shopScrollArea.Scroll(true);
+                else if (_isDownDOWN_T)
+                    _transactionScrollArea.Scroll(false);
+                else 
+                    _transactionScrollArea.Scroll(true);
+            }
+
             if (_updateTotal)
             {
                 _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Key.Price).ToString();

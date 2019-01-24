@@ -181,9 +181,7 @@ namespace ClassicUO.Game.UI.Controls
                             }
 
                             break;
-                        case TargetType.Nothing:
 
-                            break;
                         case TargetType.SetTargetClientSide:
                             gs.SelectedObject = Item;
 

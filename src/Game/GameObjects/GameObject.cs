@@ -281,10 +281,10 @@ namespace ClassicUO.Game.GameObjects
                 _view = null;
         }
 
-        //~GameObject()
-        //{
-        //    Dispose();
-        //}
+        ~GameObject()
+        {
+            Dispose();
+        }
 
         public virtual void Dispose()
         {
@@ -305,7 +305,7 @@ namespace ClassicUO.Game.GameObjects
             }
             _overHeads.Clear();
 
-            //GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
     }
 }

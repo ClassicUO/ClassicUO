@@ -318,11 +318,11 @@ namespace ClassicUO
             {
                 FileManager.UoFolderPath = _settings.UltimaOnlineDirectory;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
 
-                throw e;
+                throw;
             }
 
             Log.Message(LogTypes.Trace, "Done!");          
