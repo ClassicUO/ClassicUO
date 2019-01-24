@@ -108,7 +108,18 @@ namespace ClassicUO
 
         private Engine()
         {
-            LoadSettings();
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+
+            if (_settings == null)
+            {
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
+                _settings = new Settings();
+                _settings.Save();
+                Quit();
+
+                return;
+            }
 
             if (_settings.FixedTimeStep)
                 TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
@@ -282,24 +293,6 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
-
-
-        protected void LoadSettings()
-        {
-            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
-
-            if (_settings == null)
-            {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
-                _settings = new Settings();
-                _settings.Save();
-                Quit();
-
-                return;
-            }
-        }
-
 
         protected override void Initialize()
         {
