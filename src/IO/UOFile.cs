@@ -33,60 +33,15 @@ namespace ClassicUO.IO
 {
     internal unsafe class UOFile : DataReader
     {
-        private const int STATICS_MEMORY_SIZE = 200000000;
-        private MemoryMappedViewAccessor _accessor;
-        private MemoryMappedFile _file;
+        private protected MemoryMappedViewAccessor _accessor;
+        private protected MemoryMappedFile _file;
 
         public UOFile(string filepath)
         {
             FilePath = filepath;
         }
 
-        public string FilePath { get; internal set; }
-
-        internal uint UltimaLiveReloader(FileStream stream)
-        {
-            FileInfo fileInfo = new FileInfo(FilePath);
-            if (!fileInfo.Exists)
-                return 0;
-            uint size = (uint)fileInfo.Length;
-            Log.Message(LogTypes.Trace, $"UltimaLive -> ReLoading file:\t{FilePath}");
-            if (size > 0)
-            {
-                MemoryMappedFile newmmf = null;
-                if (stream != null)
-                {
-                    newmmf = MemoryMappedFile.CreateNew(null, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
-                    using (Stream s = newmmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
-                        stream.CopyTo(s);
-                }
-                else
-                    newmmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, null, HandleInheritability.None, false);
-
-                var newam = newmmf.CreateViewAccessor(0, stream != null ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
-                byte* ptr = null;
-                try
-                {
-                    newam.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                    SetData(ptr, (long)newam.SafeMemoryMappedViewHandle.ByteLength);
-                }
-                catch
-                {
-                    newmmf.Dispose();
-                    newam.SafeMemoryMappedViewHandle.ReleasePointer();
-                    newam.Dispose();
-                    UltimaLive.IsUltimaLiveActive = false;
-                    stream?.Dispose();
-                    return 0;
-                }
-                _file?.Dispose();
-                _file = newmmf;
-                _accessor?.SafeMemoryMappedViewHandle.ReleasePointer();
-                _accessor?.Dispose();
-                _accessor = newam;
-            }
-            return size;
-        }
+        public string FilePath { get; private protected set; }
 
         public UOFileIndex3D[] Entries { get; protected set; }
 
@@ -128,7 +83,6 @@ namespace ClassicUO.IO
             _accessor.Dispose();
             _file.Dispose();
             UnloadEntries();
-            UltimaLive.Dispose();
             Log.Message(LogTypes.Trace, $"Unloaded:\t\t{FilePath}");
         }
 
@@ -194,14 +148,6 @@ namespace ClassicUO.IO
             Seek(e.Offset);
 
             return (length, extra, false);
-        }
-
-        internal void WriteArray(long position, byte[] array)
-        {
-            if (!_accessor.CanWrite)
-                return;
-            _accessor.WriteArray(position, array, 0, array.Length);
-            _accessor.Flush();
         }
     }
 }

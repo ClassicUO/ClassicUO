@@ -31,7 +31,6 @@ namespace ClassicUO.IO
 {
     internal static class FileManager
     {
-        public static string UoStaticsMapPath => UltimaLive.IsUltimaLiveActive && !string.IsNullOrWhiteSpace(UltimaLive.ShardName) ? UltimaLive.ShardName : UoFolderPath;
         private static string _uofolderpath;
 
         public static string UoFolderPath
@@ -197,6 +196,12 @@ namespace ClassicUO.IO
 
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
+        }
+
+        internal static void MapLoaderReLoad(MapLoader newloader)
+        {
+            Map?.Dispose();
+            Map = newloader;
         }
     }
 }
