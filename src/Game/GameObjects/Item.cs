@@ -154,14 +154,14 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags);
+                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                                 if (x < minX) minX = x;
                                 if (x > maxX) maxX = x;
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
-                                if (flags != 0)
+                                if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
                                     {
@@ -169,6 +169,8 @@ namespace ClassicUO.Game.GameObjects
                                     });
                                 }                              
                             }
+
+                            FileManager.Multi.ReleaseLastMultiDataRead();
 
                             MultiInfo = new MultiInfo((short) X, (short) Y)
                             {

@@ -74,7 +74,7 @@ namespace ClassicUO.IO.Resources
             // do nothing
         }
 
-        public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags)
+        public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out bool add)
         {
             if (_fileUop != null && uopValid)
             {             
@@ -82,17 +82,14 @@ namespace ClassicUO.IO.Resources
                 x = _reader.ReadShort();
                 y = _reader.ReadShort();
                 z = _reader.ReadShort();
-                flags = _reader.ReadUShort();
+                ushort flags = _reader.ReadUShort();
 
-                if (flags == 0)
-                    flags = 1;
-
+                add = flags == 0;
+              
                 uint clilocsCount = _reader.ReadUInt();
 
                 if (clilocsCount != 0)
                     _reader.Skip( (int) (clilocsCount * 4));
-
-                _reader.ReleaseData();
             }
             else
             {
@@ -102,10 +99,15 @@ namespace ClassicUO.IO.Resources
                 x = block->X;
                 y = block->Y;
                 z = block->Z;
-                flags = block->Flags;
+                uint flags = block->Flags;
+
+                add = flags == 0;
             }
         }
 
+        public void ReleaseLastMultiDataRead() => _reader?.ReleaseData();
+
+    
         public int GetCount(int graphic, out bool uopValid)
         {
             int count;
