@@ -266,10 +266,10 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        ~GameObject()
-        {
-            Dispose();
-        }
+        //~GameObject()
+        //{
+        //    Dispose();
+        //}
 
         public virtual void Dispose()
         {

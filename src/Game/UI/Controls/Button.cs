@@ -101,7 +101,17 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-            ButtonAction = parts.Length >= 6 ? (ButtonAction) int.Parse(parts[5]) : 0;
+
+            if (parts.Length >= 6)
+            {
+                int action = int.Parse(parts[5]);
+
+                if (action == 0)
+                    ButtonAction = ButtonAction.SwitchPage;
+                else
+                    ButtonAction = ButtonAction.Activate;
+            }
+            
             ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
         }
 
