@@ -130,6 +130,9 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList(_mousePicker);
 
             WorldViewportGump viewport = new WorldViewportGump(this);
+            if (Engine.Profile.Current.GameWindowFullSize)
+                viewport.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+
             Engine.UI.Add(viewport);
 
             if (! Engine.Profile.Current.TopbarGumpIsDisabled)
@@ -169,6 +172,12 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
             Chat.Message += ChatOnMessage;
+
+            if (Engine.Profile.Current.SaveScaleAfterClose)
+                Scale = Engine.Profile.Current.ScaleZoom;
+            else
+                Scale = 1f; // hard return to 1.0f
+
 
             Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());

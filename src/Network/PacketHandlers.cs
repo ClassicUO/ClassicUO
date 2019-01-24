@@ -1300,9 +1300,7 @@ namespace ClassicUO.Network
         {
             if (World.Player != null)
             {
-                GameScene scene = new GameScene();
-                Engine.SceneManager.ChangeScene(scene);
-
+                Engine.SceneManager.ChangeScene(ScenesType.Game);
 
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
@@ -1314,7 +1312,6 @@ namespace ClassicUO.Network
                 //    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
-                scene.Load();
 
                 Engine.Profile.Current.ReadGumps()?.ForEach(Engine.UI.Add);
             }
