@@ -997,8 +997,6 @@ namespace ClassicUO.Network
 
                                     mob.Equipment[(int) hold.Layer] = item;
 
-                                    World.Items.Add(item);
-
                                     mob.ProcessDelta();
                                 }
                                 else
@@ -1013,6 +1011,10 @@ namespace ClassicUO.Network
                         }
                         else 
                             item.AddToTile();
+
+                        World.Items.Add(item);
+                        item.ProcessDelta();
+                        World.Items.ProcessDelta();
                     }
                 }
 
