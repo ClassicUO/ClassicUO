@@ -825,6 +825,27 @@ namespace ClassicUO.Game.UI.Controls
                 Parent.CloseWithRightClick();
         }
 
+        public void KeyboardTabToNextFocus(Control c)
+        {
+            int startIndex = _children.IndexOf(c);
+            for (int i = startIndex + 1; i < _children.Count; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+            for (int i = 0; i < startIndex; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+        }
+
         public virtual void OnButtonClick(int buttonID)
         {
             Parent?.OnButtonClick(buttonID);

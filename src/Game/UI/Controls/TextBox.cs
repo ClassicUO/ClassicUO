@@ -170,6 +170,9 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_END:
                     TxEntry.SetCaretPosition(Text.Length - 1);
                     break;
+                case SDL.SDL_Keycode.SDLK_TAB:
+                    Parent.KeyboardTabToNextFocus(this);
+                    break;
             }
 
 
