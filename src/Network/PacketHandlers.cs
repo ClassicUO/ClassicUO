@@ -246,6 +246,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xAB, TextEntryDialog);
             /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
             ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
+            ToClient.Add(0xAF, DisplayDeath);
             ToClient.Add(0xAE, UnicodeTalk);
             ToClient.Add(0xB0, OpenGump);
             //ToServer.Add(0xB1, GumpMenuSelection);
@@ -2131,6 +2132,25 @@ namespace ClassicUO.Network
             }
 
             Chat.OnMessage(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
+        }
+
+        private static void DisplayDeath(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            Serial corpseSerial = p.ReadUInt();
+            Serial running = p.ReadUInt();
+
+            Mobile owner = World.Mobiles.Get(serial);
+
+            if (owner == null)
+                return;
+
+            serial |= 0x80000000;
+
+            //TODO:
         }
 
         private static void OpenGump(Packet p)

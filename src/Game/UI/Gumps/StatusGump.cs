@@ -60,7 +60,12 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.BuffIcon:
-                    BuffGump.Toggle();
+
+                    BuffGump gump = Engine.UI.GetByLocalSerial<BuffGump>();
+                    if (gump == null)
+                        Engine.UI.Add(new BuffGump(100, 100));
+                    else
+                        gump.BringOnTop();
 
                     break;
                 default:
@@ -335,7 +340,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_5020)
                 {
-                    Add(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7538)
+                    Add(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7539, 0x7539)
                     {
                         X = 40,
                         Y = 50,

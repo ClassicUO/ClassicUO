@@ -219,8 +219,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPoisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
 
-        public bool IsHidden => ((byte) Flags & 0x80) != 0;
-
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
 
         public bool IsDead

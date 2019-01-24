@@ -852,6 +852,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             IsDisposed = true;
+
         }
     }
 }
