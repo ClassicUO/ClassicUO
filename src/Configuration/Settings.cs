@@ -74,6 +74,8 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "shard_type")]
         public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
 
+        [JsonProperty(PropertyName = "fixedtimestep")] public bool FixedTimeStep { get; set; } = true;
+
         public void Save()
         {
             ConfigurationResolver.Save(this, Path.Combine(Engine.ExePath, "settings.json"));
