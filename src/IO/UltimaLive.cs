@@ -56,8 +56,8 @@ namespace ClassicUO.IO
         private uint[] _EOF;
         //WrapMapSize includes 2 different kind of values at each side of the array:
         //left - mapID (zero based value), so first map is at ZERO
-        //right- we have the size of the map, values in index 0 and 1 are wrapsize x and y
-        //       values in index 2 and 3 is for the total size of map, x and y
+        //right- we have the size of the map, values in index 0 and 1 are map REAL size x and y
+        //       values in index 2 and 3 is for the wrap size of map (virtual size), x and y
         private UInt16[,] MapSizeWrapSize;
 
         //The UltimaLive packets could be also used for other things than maps and statics
@@ -390,8 +390,7 @@ namespace ClassicUO.IO
                     break;
                 blockData[x] = _UL._filesMap[mapID].ReadByte();
             }
-            /*_filesMap[mapID]._Stream.Seek((block * 196) + 4, SeekOrigin.Begin);
-            _filesMap[mapID]._Stream.Read(blockData, 0, LandBlockLenght);*/
+
             if (lookup != 0xFFFFFFFF && bytecount > 0)
             {
                 if(lookup < _UL._filesStatics[mapID].Length)
@@ -404,8 +403,6 @@ namespace ClassicUO.IO
                         blockData[x] = _UL._filesStatics[mapID].ReadByte();
                     }
                 }
-                /*_filesStatics[mapID]._Stream.Seek(lookup, SeekOrigin.Begin);
-                _filesStatics[mapID]._Stream.Read(blockData, LandBlockLenght, stcount);*/
             }
             ushort crc = Fletcher16(blockData);
             blockData = null;
@@ -456,50 +453,6 @@ namespace ClassicUO.IO
             //since we are using only ascii (8bit) charset, send only normal letters! in this case we return null and invalidate ultimalive request
             return null;
         }
-
-        /*private unsafe uint UltimaLiveReloader(FileStream stream)
-        {
-            FileInfo fileInfo = new FileInfo(FilePath);
-            if (!fileInfo.Exists)
-                return 0;
-            uint size = (uint)fileInfo.Length;
-            Log.Message(LogTypes.Trace, $"UltimaLive -> ReLoading file:\t{FilePath}");
-            if (size > 0)
-            {
-                MemoryMappedFile newmmf = null;
-                if (stream != null)
-                {
-                    newmmf = MemoryMappedFile.CreateNew(null, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
-                    using (Stream s = newmmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
-                        stream.CopyTo(s);
-                }
-                else
-                    newmmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, null, HandleInheritability.None, false);
-
-                var newam = newmmf.CreateViewAccessor(0, stream != null ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
-                byte* ptr = null;
-                try
-                {
-                    newam.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                    SetData(ptr, (long)newam.SafeMemoryMappedViewHandle.ByteLength);
-                }
-                catch
-                {
-                    newmmf.Dispose();
-                    newam.SafeMemoryMappedViewHandle.ReleasePointer();
-                    newam.Dispose();
-                    UltimaLive.IsUltimaLiveActive = false;
-                    stream?.Dispose();
-                    return 0;
-                }
-                _file?.Dispose();
-                _file = newmmf;
-                _accessor?.SafeMemoryMappedViewHandle.ReleasePointer();
-                _accessor?.Dispose();
-                _accessor = newam;
-            }
-            return size;
-        }*/
 
         internal class ULFileMul : UOFileMul
         {
