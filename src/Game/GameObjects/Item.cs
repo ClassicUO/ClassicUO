@@ -24,7 +24,6 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -33,7 +32,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class Item : Entity
+    internal partial class Item : Entity
     {
         private ushort _amount;
         private Serial _container;
@@ -193,6 +192,8 @@ namespace ClassicUO.Game.GameObjects
                         MultiInfo = null;
                     }
                 }
+
+                AllowedToDraw = !_isMulti;
             }
         }
 
@@ -232,7 +233,28 @@ namespace ClassicUO.Game.GameObjects
                     base.Graphic = value;
                     _itemData = null;
                     Name = ItemData.Name;
+
+                    CheckGraphicChange();
                 }
+            }
+        }
+
+        private void CheckGraphicChange()
+        {
+            if (!IsCorpse)
+                AllowedToDraw = Graphic > 2 && DisplayedGraphic > 2 && !GameObjectHelper.IsNoDrawable(Graphic) && !IsMulti;
+            else
+            {
+                if ((Direction & Direction.Running) != 0)
+                {
+                    UsedLayer = true;
+                    Direction &= (Direction)0x7F;
+                }
+                else
+                    UsedLayer = false;
+
+                Layer = (Layer)Direction;
+                AllowedToDraw = true;
             }
         }
 
@@ -250,8 +272,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public event EventHandler OwnerChanged;
-
-        protected override View CreateView() => new ItemView(this);
 
         public override void Update(double totalMS, double frameMS)
         {

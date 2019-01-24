@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
@@ -70,6 +69,9 @@ namespace ClassicUO.Game.GameObjects
         {
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
+
+            _frames = new ViewLayer[(int)Layer.Legs];
+            HasShadow = true;
         }
 
         private void CalculateRandomIdleTime()
@@ -187,19 +189,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //public bool WarMode
-        //{
-        //    get { return _warMode; }
-        //    set
-        //    {
-        //        if (_warMode != value)
-        //        {
-        //            _warMode = value;
-        //            _delta |= Delta.Attributes;
-        //        }
-        //    }
-        //}
-
         public bool IsRenamable
         {
             get => _isRenamable;
@@ -273,10 +262,6 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StaminaChanged;
 
-        protected override View CreateView()
-        {
-            return new MobileView(this);
-        }
 
         public void SetSAPoison(bool value)
         {

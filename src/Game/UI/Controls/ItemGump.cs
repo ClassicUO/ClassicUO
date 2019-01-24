@@ -79,7 +79,6 @@ namespace ClassicUO.Game.UI.Controls
 
             TextOverhead overhead = (TextOverhead) sender;
 
-            overhead.Initialized = true;
             overhead.TimeToLive = 4000;
 
             FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);

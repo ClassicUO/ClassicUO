@@ -31,56 +31,36 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class ItemView : View
+    internal partial class Item
     {
         private Graphic _originalGraphic;
 
-        public ItemView(Item item) : base(item)
-        {
-            if (!item.IsCorpse)
-                AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && ! GameObjectHelper.IsNoDrawable(item.Graphic) && !item.IsMulti;
-            else
-            {
-                if ((item.Direction & Direction.Running) != 0)
-                {
-                    item.UsedLayer = true;
-                    item.Direction &= (Direction) 0x7F;
-                }
-                else
-                    item.UsedLayer = false;
-
-                item.Layer = (Layer) item.Direction;
-                AllowedToDraw = true;
-            }
-        }
-
-
+       
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if (!AllowedToDraw || IsDisposed)
                 return false;
-            Item item = (Item) GameObject;
 
             Engine.DebugInfo.ItemsRendered++;
 
-            if (item.IsCorpse)
+            if (IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
-            if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
+            if (_originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                _originalGraphic = item.DisplayedGraphic;
+                _originalGraphic = DisplayedGraphic;
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : item.IsHidden ? 0x038E : item.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
 
-            if (item.Amount > 1 && item.ItemData.IsStackable && item.DisplayedGraphic == GameObject.Graphic)
+            if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
             {
                 Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                 base.Draw(batcher, offsetDrawPosition, objectList);
@@ -94,16 +74,15 @@ namespace ClassicUO.Game.Views
 
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (GameObject.IsDisposed)
+            if (IsDisposed)
                 return false;
-            Item item = (Item) GameObject;
 
-            byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
+            byte dir = (byte) ((byte) Layer & 0x7F & 7);
             bool mirror = false;
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
             FileManager.Animations.Direction = dir;
-            byte animIndex = (byte) GameObject.AnimIndex;
+            byte animIndex = (byte) AnimIndex;
 
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
@@ -116,14 +95,14 @@ namespace ClassicUO.Game.Views
 
                 if (layer == Layer.Invalid)
                 {
-                    graphic = item.GetGraphicForAnimation();
+                    graphic = GetGraphicForAnimation();
                     //graphic = item.DisplayedGraphic;
-                    FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(item.GetGraphicForAnimation(), item.UsedLayer);
-                    color = GameObject.Hue;
+                    FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(GetGraphicForAnimation(), UsedLayer);
+                    color = Hue;
                 }
-                else
+                else if (HasEquipment)
                 {
-                    Item itemEquip = item.Equipment[(int) layer];
+                    Item itemEquip = Equipment[(int) layer];
 
                     if (itemEquip == null) continue;
                     graphic = itemEquip.ItemData.AnimID;
@@ -136,6 +115,8 @@ namespace ClassicUO.Game.Views
 
                     color = itemEquip.Hue;
                 }
+                else 
+                    continue;
 
                 FileManager.Animations.AnimID = graphic;
                 ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
@@ -160,7 +141,7 @@ namespace ClassicUO.Game.Views
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                    if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                    if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                         HueVector = new Vector3(0x038E, 1, HueVector.Z);
                     else
                         HueVector = ShaderHuesTraslator.GetHueVector(color);
@@ -186,7 +167,7 @@ namespace ClassicUO.Game.Views
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
             //if (FileManager.Animations.Contains(id, x, y))
             if (texture.Contains(x, y))
-                list.Add(GameObject, drawPosition);
+                list.Add(this, drawPosition);
         }
 
         protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)
@@ -201,7 +182,7 @@ namespace ClassicUO.Game.Views
 
             //if (FileManager.Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
             if (Texture.Contains(x, y))
-                objectList.Add(GameObject, vertex[0].Position);
+                objectList.Add(this, vertex[0].Position);
         }
     }
 }

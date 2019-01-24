@@ -431,15 +431,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
             {
-                Mobile.View.IsSelected = true;
+                Mobile.IsSelected = true;
             }
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile != null && Mobile.View.IsSelected)
+            if (Mobile != null && Mobile.IsSelected)
             {
-                Mobile.View.IsSelected = false;
+                Mobile.IsSelected = false;
             }
         }
 

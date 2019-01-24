@@ -32,7 +32,7 @@ namespace ClassicUO.Network
 {
     internal sealed class NetClient
     {
-        private const int BUFF_SIZE = 0x30000;
+        private const int BUFF_SIZE = 0x80000;
         private readonly object _sendLock = new object();
         private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;

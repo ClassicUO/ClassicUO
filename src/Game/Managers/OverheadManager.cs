@@ -25,7 +25,6 @@ using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -78,14 +77,12 @@ namespace ClassicUO.Game.Managers
                     //else if (owner is Static st)
                     //    position.Y -= st.ItemData.Height /*((ArtTexture)st.View.Texture).ImageRectangle.Height / 2*/;
 
-                    View v = overhead.View;
-                    Rectangle current = new Rectangle((int) position.X - v.Bounds.X, (int) position.Y - v.Bounds.Y, v.Bounds.Width, v.Bounds.Height);
+                    Rectangle current = new Rectangle((int) position.X - overhead.Bounds.X, (int) position.Y - overhead.Bounds.Y, overhead.Bounds.Width, overhead.Bounds.Height);
 
                     if (skip == 0)
                     {
                         for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead) ov.Right)
                         {
-                            View b = ov.View;
                             Vector3 pos2 = ov.Parent.RealScreenPosition;
 
                             if (ov.Parent is Mobile mm)
@@ -100,7 +97,7 @@ namespace ClassicUO.Game.Managers
                                 };
                             }
 
-                            Rectangle next = new Rectangle((int) pos2.X - b.Bounds.X, (int) pos2.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
+                            Rectangle next = new Rectangle((int) pos2.X - ov.Bounds.X, (int) pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
 
                             overhead.IsOverlapped = current.Intersects(next);
 
@@ -126,7 +123,7 @@ namespace ClassicUO.Game.Managers
                     else
                         skip--;
 
-                    v.Draw(batcher, position, list);
+                    overhead.Draw(batcher, position, list);
                 }
 
                 GameObject last = _firstNode;
@@ -238,7 +235,7 @@ namespace ClassicUO.Game.Managers
                 }
  
                 foreach (DamageOverhead damageOverhead in deque)                  
-                    damageOverhead.View.Draw(batcher, position, list);              
+                    damageOverhead.Draw(batcher, position, list);              
             }
 
             return true;
@@ -264,14 +261,12 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        View v = obj.View;
+                        obj.Bounds.X = (obj.Texture.Width >> 1) - 22;
+                        obj.Bounds.Y = offY + obj.Texture.Height - obj.OffsetY;
+                        obj.Bounds.Width = obj.Texture.Width;
+                        obj.Bounds.Height = obj.Texture.Height;
 
-                        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                        v.Bounds.Y = offY + v.Texture.Height - obj.OffsetY;
-                        v.Bounds.Width = v.Texture.Width;
-                        v.Bounds.Height = v.Texture.Height;
-
-                        offY += v.Texture.Height;
+                        offY += obj.Texture.Height;
                     }
                 }
 

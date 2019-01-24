@@ -26,7 +26,6 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -39,10 +38,9 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract partial class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
-        private View _view;
         public Vector3 Offset;
         private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
         private Tile _tile;
@@ -100,8 +98,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual Graphic Graphic { get; set; }
        
-        public View View => _view ?? (_view = CreateView());
-
         public sbyte AnimIndex { get; set; }
 
         public int CurrentRenderIndex { get; set; }
@@ -202,11 +198,6 @@ namespace ClassicUO.Game.GameObjects
 
         public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
 
-        protected virtual View CreateView()
-        {
-            return null;
-        }
-
         public TextOverhead AddOverhead(MessageType type, string message)
         {
             return AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
@@ -275,12 +266,6 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        protected void DisposeView()
-        {
-            if (_view != null)
-                _view = null;
-        }
-
         ~GameObject()
         {
             Dispose();
@@ -293,8 +278,6 @@ namespace ClassicUO.Game.GameObjects
             IsDisposed = true;
 
             Disposed.Raise();
-
-            DisposeView();
 
             _tile?.RemoveGameObject(this);
             _tile = null;

@@ -31,9 +31,9 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class TileView : View
+    internal partial class Land
     {
         private readonly Vector3[] _normals = new Vector3[4];
         private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
@@ -43,44 +43,40 @@ namespace ClassicUO.Game.Views
         private Vector3 _storedHue;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
-        public TileView(Land tile) : base(tile)
-        {
-            AllowedToDraw = tile.Graphic > 2;
-        }
 
         protected override bool CanProcessAlpha => false;
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if (!AllowedToDraw || IsDisposed)
                 return false;
-            Land tile = (Land) GameObject;
+
             Engine.DebugInfo.LandsRendered++;
             if (Texture == null || Texture.IsDisposed)
             {
-                if (tile.IsStretched)
-                    Texture = FileManager.Textmaps.GetTexture(tile.TileData.TexID);
+                if (IsStretched)
+                    Texture = FileManager.Textmaps.GetTexture(TileData.TexID);
                 else
                 {
-                    Texture = FileManager.Art.GetLandTexture(GameObject.Graphic);
+                    Texture = FileManager.Art.GetLandTexture(Graphic);
                     Bounds = new Rectangle(0, 0, 44, 44);
                 }
             }
 
-            if (tile.IsStretched)
+            if (IsStretched)
             {
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(0x038E, 1, HueVector.Z);
                 else
-                    HueVector = GetHueVector(GameObject.Hue, true);
+                    HueVector = GetHueVector(Hue, true);
 
                 return Draw3DStretched(batcher, position, objectList);
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = GetHueVector(GameObject.Hue, false);
+                HueVector = GetHueVector(Hue, false);
 
             return base.Draw(batcher, position, objectList);
         }
@@ -94,7 +90,7 @@ namespace ClassicUO.Game.Views
         {
             Texture.Ticks = Engine.Ticks;
 
-            int z = GameObject.Position.Z * 4;
+            int z = Z * 4;
 
             if (Engine.Profile.Current.HighlightGameObjects)
             {
@@ -133,7 +129,7 @@ namespace ClassicUO.Game.Views
                 return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))
-                objectList.Add(GameObject, _vertex[0].Position);
+                objectList.Add(this, _vertex[0].Position);
 
             return true;
         }
@@ -144,23 +140,22 @@ namespace ClassicUO.Game.Views
             int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+                list.Add(this, vertex[0].Position);
         }
 
-        public void UpdateStreched(int x, int y, sbyte z)
+        private void UpdateStreched(int x, int y, sbyte z)
         {
-            Land tile = (Land) GameObject;
             Map.Map map = World.Map;
 
-            if (tile.IsStretched || FileManager.Textmaps.GetTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
+            if (IsStretched || FileManager.Textmaps.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
-                tile.IsStretched = false;
-                tile.MinZ = z;
+                IsStretched = false;
+                MinZ = z;
             }
             else
             {
-                tile.IsStretched = true;
-                tile.UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
+                IsStretched = true;
+                UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
 
                 Vector3[,,] vec = new Vector3[3, 3, 4];
                 int i;
@@ -217,13 +212,13 @@ namespace ClassicUO.Game.Views
                 _vertex[1].Normal = _normals[1];
                 _vertex[3].Normal = _normals[2];
                 _vertex[2].Normal = _normals[3];
-                _vertex0_yOffset = new Vector3(22, -tile.Rectangle.Left, 0);
-                _vertex1_yOffset = new Vector3(44, 22 - tile.Rectangle.Bottom, 0);
-                _vertex2_yOffset = new Vector3(0, 22 - tile.Rectangle.Top, 0);
-                _vertex3_yOffset = new Vector3(22, 44 - tile.Rectangle.Right, 0);
+                _vertex0_yOffset = new Vector3(22, -Rectangle.Left, 0);
+                _vertex1_yOffset = new Vector3(44, 22 - Rectangle.Bottom, 0);
+                _vertex2_yOffset = new Vector3(0, 22 - Rectangle.Top, 0);
+                _vertex3_yOffset = new Vector3(22, 44 - Rectangle.Right, 0);
             }
 
-            Vector3 hue = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
+            Vector3 hue = ShaderHuesTraslator.GetHueVector(Hue);
 
             if (_vertex[0].Hue != hue)
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;

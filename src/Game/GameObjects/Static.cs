@@ -21,14 +21,14 @@
 
 using System.Runtime.CompilerServices;
 
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class Static : GameObject
+    internal partial class Static : GameObject
     {
         private StaticTiles? _itemData;
 
@@ -37,6 +37,24 @@ namespace ClassicUO.Game.GameObjects
             Graphic = OriginalGraphic = graphic;
             Hue = hue;
             Index = index;
+
+            _isFoliage = ItemData.IsFoliage;
+            _isPartialHue = ItemData.IsPartialHue;
+            _isTransparent = ItemData.IsTranslucent;
+
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+
+            if (_isTransparent)
+                _alpha = 0.5f;
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || (ItemData.IsSurface && ItemData.IsBackground) || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
         }
 
         public int Index { get; }
@@ -67,7 +85,5 @@ namespace ClassicUO.Game.GameObjects
             Graphic = OriginalGraphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
         }
-
-        protected override View CreateView() => new StaticView(this);
     }
 }

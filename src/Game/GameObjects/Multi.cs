@@ -22,17 +22,28 @@
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed class Multi : GameObject
+    internal sealed partial class Multi : GameObject
     {
         public Multi(Graphic graphic)
         {
             Graphic = graphic;
+
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || (ItemData.IsSurface && ItemData.IsBackground) || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
         }
 
         public string Name => ItemData.Name;
@@ -49,7 +60,5 @@ namespace ClassicUO.Game.GameObjects
                 return _itemData.Value;
             }
         }
-
-        protected override View CreateView() => new MultiView(this);
     }
 }

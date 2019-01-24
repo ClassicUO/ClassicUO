@@ -18,11 +18,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class AnimatedItemEffect : GameEffect
+    internal partial class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {
@@ -76,11 +75,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
                 SetSource(sourceX, sourceY, sourceZ);
-        }
-
-        protected override View CreateView()
-        {
-            return new AnimatedEffectView(this);
         }
 
         public override void Update(double totalMS, double frameMS)

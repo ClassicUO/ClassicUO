@@ -31,72 +31,24 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class TextOverheadView : View
+    internal partial class TextOverhead
     {
         private readonly RenderedText _text;
 
         protected bool EdgeDetection { get; set; }
 
-        public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
-        {
-            _text = new RenderedText
-            {
-                MaxWidth = maxwidth,
-                Hue = hue,
-                Font = font,
-                IsUnicode = isunicode,
-                FontStyle = style,
-                SaveHitMap = true,
-                Text = parent.Text
-            };
-            Texture = _text.Texture;
-
-            //Bounds.X = (Texture.Width >> 1) - 22;
-            //Bounds.Y = Texture.Height;
-            //Bounds.Width = Texture.Width;
-            //Bounds.Height = Texture.Height;
-
-            if (Engine.Profile.Current.ScaleSpeechDelay)
-            {
-                int delay = Engine.Profile.Current.SpeechDelay;
-
-                if (delay < 10)
-                    delay = 10;
-
-                if (parent.TimeToLive <= 0.0f)
-                    parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
-            }
-            else
-            {
-                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
-
-                if (parent.TimeToLive <= 0.0f)
-                    parent.TimeToLive = (delay >> 31) + delay;
-            }
-
-
-            parent.Initialized = true;
-            parent.Disposed += ParentOnDisposed;
-            EdgeDetection = true;
-        }
-
-        private void ParentOnDisposed(object sender, EventArgs e)
-        {
-            GameObject.Disposed -= ParentOnDisposed;
-            _text?.Dispose();
-        }
+       
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if (!AllowedToDraw || IsDisposed)
             {
                 return false;
             }
 
             Texture.Ticks = Engine.Ticks;
-            TextOverhead overhead = (TextOverhead) GameObject;
 
             if (IsSelected && _text.Hue != 0x0035)
             {
@@ -104,15 +56,15 @@ namespace ClassicUO.Game.Views
                 _text.CreateTexture();
                 Texture = _text.Texture;
             }
-            else if (!IsSelected && overhead.Hue != _text.Hue)
+            else if (!IsSelected && Hue != _text.Hue)
             {
-                _text.Hue = overhead.Hue;
+                _text.Hue = Hue;
                 _text.CreateTexture();
                 Texture = _text.Texture;
             }
 
 
-            HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
+            HueVector = ShaderHuesTraslator.GetHueVector(0, false, Alpha, true);
 
             if (EdgeDetection)
             {
@@ -154,15 +106,7 @@ namespace ClassicUO.Game.Views
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
 
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);            
-        }
-    }
-
-    internal class DamageOverheadView : TextOverheadView
-    {
-        public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
-        {
-            EdgeDetection = false;
+                list.Add(this, vertex[0].Position);            
         }
     }
 }

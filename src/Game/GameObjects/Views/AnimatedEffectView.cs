@@ -31,22 +31,18 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class AnimatedEffectView : View
+    internal partial class AnimatedItemEffect
     {
         private Graphic _displayedGraphic = Graphic.INVALID;
-
-        public AnimatedEffectView(AnimatedItemEffect effect) : base(effect)
-        {
-        }
 
         private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.Zero;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.SourceColor;
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
 
             return state;
         });
@@ -55,8 +51,8 @@ namespace ClassicUO.Game.Views
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.One;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.One;
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
 
             return state;
         });
@@ -65,8 +61,8 @@ namespace ClassicUO.Game.Views
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.DestinationColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.InverseSourceAlpha;
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
 
             return state;
         });
@@ -75,8 +71,8 @@ namespace ClassicUO.Game.Views
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.DestinationColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.SourceColor;
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
 
             return state;
         });
@@ -85,8 +81,8 @@ namespace ClassicUO.Game.Views
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.SourceColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.InverseSourceColor;
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor;
             state.AlphaBlendFunction = state.ColorBlendFunction = BlendFunction.ReverseSubtract;
 
             return state;
@@ -94,45 +90,44 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (GameObject.IsDisposed)
-                return false;
-            AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
-
-            if (effect.AnimationGraphic == Graphic.INVALID)
+            if (IsDisposed)
                 return false;
 
-            Hue hue = effect.Hue;
-            if (effect.Source is Item i)
+            if (AnimationGraphic == Graphic.INVALID)
+                return false;
+
+            Hue hue = Hue;
+            if (Source is Item i)
             {
-                if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(effect.AnimationGraphic))
+                if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(AnimationGraphic))
                 {
-                    effect.AnimIndex = 0;
+                    AnimIndex = 0;
                 }
                 else if (Engine.Profile.Current.FieldsType == 2)
                 {
-                    if (StaticFilters.IsFireField(effect.Graphic))
+                    if (StaticFilters.IsFireField(Graphic))
                     {
-                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x0020;
                     }
-                    else if (StaticFilters.IsParalyzeField(effect.Graphic))
+                    else if (StaticFilters.IsParalyzeField(Graphic))
                     {
-                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x0058;
                     }
-                    else if (StaticFilters.IsEnergyField(effect.Graphic))
+                    else if (StaticFilters.IsEnergyField(Graphic))
                     {
-                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x0070;
                     } 
-                    else if (StaticFilters.IsPoisonField(effect.Graphic))
+                    else if (StaticFilters.IsPoisonField(Graphic))
                     {
-                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x0044;
                     }
-                    else if (StaticFilters.IsWallOfStone(effect.Graphic))
+                    else if (StaticFilters.IsWallOfStone(Graphic))
                     {
-                        effect.AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x038A;
                     }
                 }
@@ -140,27 +135,27 @@ namespace ClassicUO.Game.Views
                     hue = 0x038E;
             }
 
-            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.INVALID)
+            if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)
             {
-                _displayedGraphic = effect.AnimationGraphic;
-                Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
+                _displayedGraphic = AnimationGraphic;
+                Texture = FileManager.Art.GetTexture(AnimationGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = (Texture.Width >> 1) - 22 - (int)effect.Offset.X;
-            Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
+            Bounds.X = (Texture.Width >> 1) - 22 - (int)Offset.X;
+            Bounds.Y = Texture.Height - 44 + (int)(Offset.Z - Offset.Y);
 
             StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
 
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector( hue, isPartial, isTransparent ? .5f : 0, false);
 
-            switch (effect.Blend)
+            switch (Blend)
             {
                 case GraphicEffectBlendMode.Multiply:
                     batcher.SetBlendState(_multiplyBlendState.Value);
@@ -203,7 +198,7 @@ namespace ClassicUO.Game.Views
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+                list.Add(this, vertex[0].Position);
         }
     }
 }

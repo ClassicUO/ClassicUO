@@ -85,17 +85,17 @@ namespace ClassicUO.Game.Scenes
 
                 if (value == null)
                 {
-                    _selectedObject.View.IsSelected = false;
+                    _selectedObject.IsSelected = false;
                     _selectedObject = null;
                 }
                 else
                 {
-                    if (_selectedObject != null && _selectedObject.View.IsSelected)
-                        _selectedObject.View.IsSelected = false;
+                    if (_selectedObject != null && _selectedObject.IsSelected)
+                        _selectedObject.IsSelected = false;
                     _selectedObject = value;
 
                     
-                    _selectedObject.View.IsSelected = true;
+                    _selectedObject.IsSelected = true;
                 }
             }
         }
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.Scenes
                 //Vector3 v = obj.RealScreenPosition;
                 //v.Z = 1 - (i / 1000000.0f);
 
-                if (obj.Z <= _maxGroundZ && obj.View.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                if (obj.Z <= _maxGroundZ && obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;
             }
 

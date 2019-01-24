@@ -29,9 +29,9 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class StaticView : View
+    internal partial class Static
     {
         private readonly bool _isFoliage, _isPartialHue, _isTransparent;
         private float _alpha;
@@ -40,39 +40,17 @@ namespace ClassicUO.Game.Views
 
         private Graphic _oldGraphic;
 
-        public StaticView(Static st) : base(st)
-        {
-            _isFoliage = st.ItemData.IsFoliage;
-            _isPartialHue = st.ItemData.IsPartialHue;
-            _isTransparent = st.ItemData.IsTranslucent;
-
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
-
-            if (_isTransparent)
-                _alpha = 0.5f;
-
-            if (st.ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (st.ItemData.IsRoof || (st.ItemData.IsSurface && st.ItemData.IsBackground) || st.ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (st.ItemData.Height == 5 && st.ItemData.IsSurface && !st.ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
-
+   
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if (!AllowedToDraw || IsDisposed)
                 return false;
 
-            Static st = (Static) GameObject;
-
-            if (Texture == null || Texture.IsDisposed || _oldGraphic != GameObject.Graphic)
+            if (Texture == null || Texture.IsDisposed || _oldGraphic != Graphic)
             {
-                _oldGraphic = GameObject.Graphic;
+                _oldGraphic = Graphic;
 
-                ArtTexture texture = FileManager.Art.GetTexture(GameObject.Graphic);
+                ArtTexture texture = FileManager.Art.GetTexture(Graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
@@ -84,15 +62,15 @@ namespace ClassicUO.Game.Views
 
             if (_isFoliage)
             {
-                bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
+                bool check = World.Player.X <= X && World.Player.Y <= Y;
                 bool isnrect = false;
 
                 if (!check)
                 {
-                    check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
+                    check = World.Player.Y <= Y && World.Player.Position.X <= X + 1;
 
                     if (!check)
-                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                        check = World.Player.X <= X && World.Player.Y <= Y + 1;
                 }
 
                 if (check)
@@ -104,7 +82,7 @@ namespace ClassicUO.Game.Views
                     fol.Width = FrameInfo.Width;
                     fol.Height = FrameInfo.Height;
 
-                    if (fol.InRect(World.Player.View.GetOnScreenRectangle()))
+                    if (fol.InRect(World.Player.GetOnScreenRectangle()))
                     {
                         isnrect = true;
 
@@ -147,16 +125,16 @@ namespace ClassicUO.Game.Views
 
                 if (!_isFoliage)
                 {
-                    if (st.Z <= z - st.ItemData.Height)
+                    if (Z <= z - ItemData.Height)
                         r = false;
-                    else if (z < st.Z && (_canBeTransparent & 0xFF) == 0)
+                    else if (z < Z && (_canBeTransparent & 0xFF) == 0)
                         r = false;
                 }
 
                 if (r)
                 {
                     int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
-                    int distance = GameObject.Distance;
+                    int distance = Distance;
 
                     if (distance <= distanceMax)
                         _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
@@ -170,10 +148,10 @@ namespace ClassicUO.Game.Views
                 _alpha = _isTransparent ? .5f : 0;
             
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, _isPartialHue, _alpha, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.StaticsRendered++;
             return base.Draw(batcher, position, objectList);
@@ -184,7 +162,7 @@ namespace ClassicUO.Game.Views
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
             if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+                list.Add(this, vertex[0].Position);
         }
     }
 }

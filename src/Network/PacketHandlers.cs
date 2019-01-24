@@ -606,7 +606,7 @@ namespace ClassicUO.Network
 
             if (item.ItemData.IsAnimated)
             {
-                item.View.AllowedToDraw = false;
+                item.AllowedToDraw = false;
 
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
@@ -3046,7 +3046,7 @@ namespace ClassicUO.Network
 
             if (item.ItemData.IsAnimated)
             {
-                item.View.AllowedToDraw = false;
+                item.AllowedToDraw = false;
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
 

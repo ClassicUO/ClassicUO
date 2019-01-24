@@ -35,9 +35,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 using IDrawable = ClassicUO.Interfaces.IDrawable;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class View : IDrawable
+    internal abstract partial class GameObject : IDrawable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
@@ -47,15 +47,15 @@ namespace ClassicUO.Game.Views
         private float _processAlpha = 1;
         private long _processAlphaTime = -1; // Constants.ALPHA_OBJECT_TIME;
 
-        protected View(GameObject parent)
-        {
-            GameObject = parent;
-            AllowedToDraw = true;
-        }
+        //protected View(GameObject parent)
+        //{
+        //    GameObject = parent;
+        //    AllowedToDraw = true;
+        //}
 
         protected virtual bool CanProcessAlpha { get; private set; } = true;
 
-        public GameObject GameObject { get; }
+        //public GameObject GameObject { get; }
 
         protected bool HasShadow { get; set; }
 
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Views
 
         public Vector3 HueVector;
 
-        public bool AllowedToDraw { get; set; }
+        public bool AllowedToDraw { get; set; } = true;
 
         public SpriteTexture Texture { get; set; }
 
@@ -75,8 +75,8 @@ namespace ClassicUO.Game.Views
         {
             Rectangle prect = Rectangle.Empty;
 
-            prect.X = (int) (GameObject.RealScreenPosition.X - FrameInfo.X + 22 + GameObject.Offset.X);
-            prect.Y = (int) (GameObject.RealScreenPosition.Y - FrameInfo.Y + 22 + (GameObject.Offset.Y - GameObject.Offset.Z));
+            prect.X = (int) (RealScreenPosition.X - FrameInfo.X + 22 + Offset.X);
+            prect.Y = (int) (RealScreenPosition.Y - FrameInfo.Y + 22 + (Offset.Y - Offset.Z));
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 
@@ -213,16 +213,16 @@ namespace ClassicUO.Game.Views
 
         protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
         {
-            if (GameObject.Overheads != null)
+            if (Overheads != null)
             {
-                for (int i = 0; i < GameObject.Overheads.Count; i++)
+                for (int i = 0; i < Overheads.Count; i++)
                 {
-                    View v = GameObject.Overheads[i].View;
+                    var v = Overheads[i];
                     v.Bounds.X = (v.Texture.Width >> 1) - 22;
                     v.Bounds.Y = offY + v.Texture.Height;
                     v.Bounds.Width = v.Texture.Width;
                     v.Bounds.Height = v.Texture.Height;
-                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(GameObject.Overheads[i], position);
+                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
                     offY += v.Texture.Height;
                 }
             }
