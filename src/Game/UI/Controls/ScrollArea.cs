@@ -91,9 +91,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
-            _rect.Y = position.Y;
+            _rect.Y = position.Y + 20;
             _rect.Width = Width - 14;
-            _rect.Height = Height;
+            _rect.Height = Height - 40;
             Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
