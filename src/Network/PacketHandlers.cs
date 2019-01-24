@@ -916,6 +916,23 @@ namespace ClassicUO.Network
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
+
+            if (graphic != 0x0030)
+            {
+                Item item = World.Items.Get(serial);
+
+                if (item != null)
+                {
+                    if (!item.IsCorpse)
+                    {
+                        foreach (Item itemItem in item.Items)
+                        {
+                            item.Items.Remove(itemItem);
+                            World.Items.Remove(itemItem);
+                        }
+                    }
+                }
+            }
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -923,10 +940,21 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            List<Item> items = new List<Item>();
+            Serial serial = p.ReadUInt();
+            Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+            ushort amount = Math.Max((ushort) 1, p.ReadUShort());
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
 
-            if (ReadContainerContent(p, items))
-                World.Items.ProcessDelta();
+            if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+                p.Skip(1);
+
+            Serial containerSerial = p.ReadUInt();
+            Hue hue = p.ReadUShort();
+
+            AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+
+            World.Items.ProcessDelta();
         }
 
         private static void KickPlayer(Packet p)
@@ -1205,27 +1233,68 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
+
             ushort count = p.ReadUShort();
-            List<Item> items = new List<Item>(count);
+
+            Entity container = null;
 
             for (int i = 0; i < count; i++)
-                ReadContainerContent(p, items);
-
-            if (items.Count != 0)
             {
-                Item container = World.Items.Get(items[0].Container);
+                Serial serial = p.ReadUInt();
+                Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+                ushort amount = Math.Max(p.ReadUShort(), (ushort)1);
+                ushort x = p.ReadUShort();
+                ushort y = p.ReadUShort();
+                if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+                    p.Skip(1);
+                Serial containerSerial = p.ReadUInt();
+                Hue hue = p.ReadUShort();
 
-                if (container != null && container.IsSpellBook && SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
+                if (i == 0)
                 {
-                    SpellbookData.GetData(container, out ulong field, out SpellBookType type);
+                    container = World.Get(containerSerial);
 
-                    if (container.FillSpellbook(type, field))
+                    if (container != null)
                     {
-                        SpellbookGump gump = Engine.UI.GetByLocalSerial<SpellbookGump>(container);
-                        gump?.Update();
+                        if (container.Graphic == 0x2006)
+                        {
+                            foreach (Item it in container.Items)
+                            {
+                                if (it.Layer == Layer.Invalid)
+                                {
+                                    container.Items.Remove(it);
+                                    World.Items.Remove(it);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (Item it in container.Items)
+                            {
+                                container.Items.Remove(it);
+                                World.Items.Remove(it);
+                            }
+                        }
+
+                        container.ProcessDelta();
+                        World.Items.ProcessDelta();
                     }
                 }
+
+                AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
+
+
+            if (container is Item itemContainer && itemContainer.IsSpellBook && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
+            {
+                SpellbookData.GetData(itemContainer, out ulong field, out SpellBookType type);
+
+                if (itemContainer.FillSpellbook(type, field))
+                {
+                    Engine.UI.GetByLocalSerial<SpellbookGump>(itemContainer)?.Update();
+                }
+            }
+
 
             World.Items.ProcessDelta();
         }
@@ -3060,66 +3129,44 @@ namespace ClassicUO.Network
                 return;
         }
 
-        private static bool ReadContainerContent(Packet p, List<Item> items)
+        private static void AddItemToContainer(Serial serial, Graphic graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
         {
-            Item item = World.GetOrCreateItem(p.ReadUInt());
-            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
-            item.Amount = Math.Max(p.ReadUShort(), (ushort)1);
-            ushort x = p.ReadUShort();
-            ushort y = p.ReadUShort();
-            if (FileManager.ClientVersion >= ClientVersions.CV_6017) 
-                p.Skip(1);
-            item.Container = p.ReadUInt();
-            item.Position = new Position(x, y);
-            item.Hue = p.ReadUShort();
-
-            items.Add(item);
-
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs != null && gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
-            {
+            if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
                 gs.HeldItem.Clear();
-            }
 
-            Entity entity = World.Get(item.Container);
+            Entity container = World.Get(containerSerial);
 
-            if (entity != null)
+            Item item = World.Items.Get(serial);
+
+            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
+                Entity initcontainer = World.Get(item.Container);
 
-                entity.Items.Remove(item);
-                entity.ProcessDelta();
+                if (initcontainer != null)
+                {
+                    initcontainer.Items.Remove(item);
+                    initcontainer.ProcessDelta();
+                }
 
-                entity.Items.Add(item);
-                World.Items.Add(item);
-
-                item.ProcessDelta();
-                entity.ProcessDelta();
-                return true;
+                World.Items.Remove(item);
+                World.Items.ProcessDelta();
             }
 
-            //if (entity != null)
-            //{
-            //    entity.Items.Add(item);
+            item = World.GetOrCreateItem(serial);
+            item.Graphic = graphic;
+            item.Amount = amount;
+            item.Hue = hue;
+            item.Position = new Position(x, y);
+            item.Container = container;
 
-            //    foreach (Item i in World.ToAdd.Where(i => i.Container == item))
-            //    {
-            //        item.Items.Add(i);
-            //        World.Items.Add(i);
-            //    }
+            container.Items.Add(item);
+            World.Items.Add(item);
 
-            //    World.ToAdd.ExceptWith(item.Items);
-            //    item.ProcessDelta();
-            //    entity.ProcessDelta();
-
-            //    return World.Items.Add(item);
-            //}
-
-            //World.ToAdd.Add(item);
-            item.ProcessDelta();
-
-            return false;
+            container.ProcessDelta();
         }
+
 
         private static IEnumerable<Property> ReadProperties(Packet p)
         {
