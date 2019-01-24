@@ -646,6 +646,8 @@ namespace ClassicUO.IO.Resources
                             continue;
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
 
+                        //if (id == )
+
                         for (int i = 0; i < 5; i++)
                         {
                             if (testType == typeNames[i])
