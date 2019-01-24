@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e)
+            foreach (Item item in e.Where(s => s.Layer != Layer.Hair && s.Layer != Layer.Beard && s.Layer != Layer.Face))
             {
                 CheckItemPosition(item);
                 Add(new ItemGump(item));
