@@ -237,7 +237,7 @@ namespace ClassicUO.Game.GameObjects
                         continue;
 
                     if (layer == Layer.Invalid)
-                        AddLayer(dir, mobile.GetGraphicForAnimation(), mobile.Hue, mobile);
+                        AddLayer(dir, mobile.GetGraphicForAnimation(), mobile.Hue, mobile, ispartial: true);
                     else
                     {
                         Item item;
