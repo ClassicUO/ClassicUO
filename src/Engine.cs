@@ -140,6 +140,11 @@ namespace ClassicUO
                 _graphicDeviceManager.PreferredBackBufferWidth = Window.ClientBounds.Width;
                 _graphicDeviceManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
                 _graphicDeviceManager.ApplyChanges();
+
+                WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
+
+                if (gump != null && _profileManager.Current.GameWindowFullSize)
+                    gump.ResizeWindow(new Point(WindowWidth, WindowHeight));
             };
             Window.AllowUserResizing = true;
             IsMouseVisible = true;

@@ -379,8 +379,6 @@ namespace ClassicUO.Network
 
                 Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
-
-            //World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -610,8 +608,6 @@ namespace ClassicUO.Network
 
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
-            //item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
-
             if (item.OnGround)
                 item.AddToTile();
         }
@@ -1118,6 +1114,9 @@ namespace ClassicUO.Network
 
         private static void EquipItem(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Item item = World.GetOrCreateItem(p.ReadUInt());
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer)p.ReadByte();

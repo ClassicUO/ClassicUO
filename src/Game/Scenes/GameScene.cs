@@ -130,9 +130,7 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList(_mousePicker);
 
             WorldViewportGump viewport = new WorldViewportGump(this);
-            if (Engine.Profile.Current.GameWindowFullSize)
-                viewport.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-
+            
             Engine.UI.Add(viewport);
 
             if (! Engine.Profile.Current.TopbarGumpIsDisabled)
