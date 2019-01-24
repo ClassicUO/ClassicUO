@@ -350,7 +350,7 @@ namespace ClassicUO
             Log.PushIndent();
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
-            UltimaLive.Load();
+            UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
