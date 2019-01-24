@@ -241,8 +241,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Exists => World.Contains(Serial);
 
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
-
         public bool IsMounted => Equipment[(int) Layer.Mount] != null;
 
         public bool IsRunning { get; internal set; }

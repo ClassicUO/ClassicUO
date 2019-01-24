@@ -1812,6 +1812,9 @@ namespace ClassicUO.Network
 
         private static void CorpseEquipment(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Entity corpse = World.Get(p.ReadUInt());
             Layer layer = (Layer)p.ReadByte();
 
@@ -1822,6 +1825,7 @@ namespace ClassicUO.Network
                 if (item != null && item.Container == corpse)
                 {
                     // put equip
+                    
                 }
 
                 layer = (Layer)p.ReadByte();
