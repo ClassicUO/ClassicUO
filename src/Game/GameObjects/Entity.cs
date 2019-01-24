@@ -48,6 +48,8 @@ namespace ClassicUO.Game.GameObjects
 
         public EntityCollection<Item> Items { get; }
 
+        public bool HasEquipment => _equipment != null;
+
         public Item[] Equipment => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
 
         public Serial Serial { get; }
@@ -184,6 +186,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
+            _equipment = null;
             _properties.Clear();
             base.Dispose();
         }

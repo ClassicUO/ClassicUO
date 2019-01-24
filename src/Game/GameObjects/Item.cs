@@ -553,10 +553,6 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
 
         public override void ProcessAnimation()
         {

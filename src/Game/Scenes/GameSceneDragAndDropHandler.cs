@@ -95,9 +95,9 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 entity.Items.Remove(item);
 
-                if (item.Container.IsMobile)
+                if (entity.HasEquipment)
                 {
-                    ((Mobile)entity).Equipment[item.ItemData.Layer] = null;
+                    entity.Equipment[item.ItemData.Layer] = null;
                 }
 
                 entity.Items.ProcessDelta();
@@ -179,6 +179,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
+
                 }
                 else
                 {

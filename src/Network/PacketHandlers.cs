@@ -1816,19 +1816,19 @@ namespace ClassicUO.Network
                 return;
 
             Entity corpse = World.Get(p.ReadUInt());
-            Layer layer = (Layer)p.ReadByte();
+            Layer layer = (Layer)p.ReadByte() - 1;
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
                 Item item = World.Items.Get(p.ReadUInt());
-
+                
                 if (item != null && item.Container == corpse)
                 {
-                    // put equip
-                    
+                    item.Layer = layer;
+                    corpse.Equipment[(int) layer] = item;
                 }
 
-                layer = (Layer)p.ReadByte();
+                layer = (Layer)p.ReadByte() - 1;
             }
         }
 

@@ -92,7 +92,6 @@ namespace ClassicUO.Game.Views
             return ok;
         }
 
-        // TODO: add clothes
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
@@ -169,8 +168,6 @@ namespace ClassicUO.Game.Views
                     base.Draw(batcher, position, objectList);
                     Pick(frame, Bounds, position, objectList);
                 }
-
-                break;
             }
 
             MessageOverHead(batcher, position, Bounds.Y);
