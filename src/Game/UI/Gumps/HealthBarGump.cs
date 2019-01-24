@@ -197,7 +197,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (_canChangeName)
                 _textBox.IsEditable = false;
-
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)

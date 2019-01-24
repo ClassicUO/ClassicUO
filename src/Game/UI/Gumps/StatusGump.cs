@@ -78,7 +78,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+                if (TargetManager.IsTargeting)
+                {
+                    if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                    {
+                        TargetManager.TargetGameObject(World.Player);
+                        Mouse.LastLeftButtonClickTime = 0;
+                    }
+                }
+                else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
                     Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                     Dispose();

@@ -125,6 +125,13 @@ namespace ClassicUO.Game.Managers
                     if (st.ItemData.IsSurface)
                         z += st.ItemData.Height;
                 }
+                else if (selectedEntity is Multi m)
+                {
+                    modelNumber = m.Graphic;
+
+                    if (m.ItemData.IsSurface)
+                        z += m.ItemData.Height;
+                }
 
                 GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
                 Mouse.CancelDoubleClick = true;
