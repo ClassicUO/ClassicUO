@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Managers
 
                 if (selectedEntity is Static st)
                 {
-                    modelNumber = selectedEntity.Graphic;
+                    modelNumber = st.OriginalGraphic;
 
                     if (st.ItemData.IsSurface)
                         z += st.ItemData.Height;
