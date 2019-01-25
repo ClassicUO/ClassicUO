@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (!child.IsVisible)
                         continue;
-                    child.Y = height - _scrollBar.Value;
+                    child.Y = height - _scrollBar.Value + 20;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
