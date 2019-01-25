@@ -324,6 +324,9 @@ namespace ClassicUO.Game.Scenes
             }));
         }
 
+        private bool _alphaChanged;
+        private long _alphaTimer;
+
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             base.FixedUpdate(totalMS, frameMS);
@@ -331,8 +334,12 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            GetViewPort();
+            _alphaChanged = _alphaTimer < Engine.Ticks;
 
+            if (_alphaChanged)
+                _alphaTimer = Engine.Ticks + 50;
+
+            GetViewPort();
 
             UpdateMaxDrawZ();
             _renderListCount = 0;

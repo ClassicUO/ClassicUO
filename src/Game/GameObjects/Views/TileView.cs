@@ -44,8 +44,6 @@ namespace ClassicUO.Game.GameObjects
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
-        protected override bool CanProcessAlpha => false;
-
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || IsDisposed)
@@ -116,6 +114,8 @@ namespace ClassicUO.Game.GameObjects
             _vertex[1].Position.Y += z;
             _vertex[2].Position.Y += z;
             _vertex[3].Position.Y += z;
+
+            HueVector.Z = 1f - (AlphaHue / 255f);
 
             if (HueVector != _vertex[0].Hue)
             {

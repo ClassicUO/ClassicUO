@@ -28,6 +28,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -42,13 +43,13 @@ namespace ClassicUO.Game.Scenes
         private sbyte _maxGroundZ;
         private bool _noDrawRoofs;
 
-        private void UpdateMaxDrawZ()
+        public void UpdateMaxDrawZ(bool force = false)
         {
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ && _noDrawRoofs != Engine.Profile.Current.DrawRoofs)
+            if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ && !force)
                 return;
 
             _oldPlayerX = playerX;
@@ -157,7 +158,7 @@ namespace ClassicUO.Game.Scenes
         private int _maxZ;
         private bool _updateDrawPosition;
 
-      
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
@@ -184,6 +185,7 @@ namespace ClassicUO.Game.Scenes
                 bool ismobile = false;
 
                 StaticTiles itemData = default;
+                bool changinAlpha = false;
 
                 switch (obj)
                 {
@@ -207,8 +209,25 @@ namespace ClassicUO.Game.Scenes
                                 }                               
                             }
 
-                            if (_noDrawRoofs && itemData.IsRoof || (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic)))
+                            if (_noDrawRoofs && itemData.IsRoof)
+                            {
+                                if (_alphaChanged)
+                                {
+                                    changinAlpha = obj.ProcessAlpha(0);
+                                }
+                                else
+                                {
+                                    changinAlpha = obj.AlphaHue != 0;
+                                }
+
+
+                                if (!changinAlpha)
+                                    continue;                                                  
+                            }
+                        
+                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
+
                             maxObjectZ += itemData.Height;
                         }
                         break;
@@ -232,7 +251,20 @@ namespace ClassicUO.Game.Scenes
 
                 if (!island && z >= _maxZ)
                 {
-                    continue;
+                    if (!changinAlpha)
+                    {
+                        if (_alphaChanged)
+                        {
+                            changinAlpha = obj.ProcessAlpha(0);
+                        }
+                        else
+                        {
+                            changinAlpha = obj.AlphaHue != 0;
+                        }
+
+                        if (!changinAlpha)
+                            continue;
+                    } 
                 }
 
                 int testMinZ = (int) drawY + z * 4;
@@ -254,7 +286,37 @@ namespace ClassicUO.Game.Scenes
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
+                else if (itemData.IsFoliage && obj is Static st)
+                {
+                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+                    if (!check)
+                    {
+                        check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
 
+                        if (!check)
+                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                    }
+
+                    if (check)
+                    {
+                        
+                        Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X + 22,
+                                                       (int) drawY - st.FrameInfo.Y + 22,
+                                                       st.FrameInfo.Width, 
+                                                       st.FrameInfo.Height);
+
+
+                        check = rect.InRect(World.Player.GetOnScreenRectangle());
+                    }
+
+                    st.CharacterIsBehindFoliage = check;
+                }
+
+                if (_alphaChanged && !changinAlpha)
+                {
+                    if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
+                        obj.ProcessAlpha(0xFF);
+                }
 
                 if (_renderListCount >= _renderList.Length)
                 {

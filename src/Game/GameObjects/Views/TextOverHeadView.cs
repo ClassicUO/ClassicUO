@@ -48,6 +48,8 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
+            ProcessAlpha(0xFF);
+
             Texture.Ticks = Engine.Ticks;
 
             if (IsSelected && _text.Hue != 0x0035)
