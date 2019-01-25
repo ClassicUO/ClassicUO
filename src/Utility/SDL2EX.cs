@@ -19,8 +19,13 @@ namespace ClassicUO.Utility
 
         static SDL2EX()
         {
-            IntPtr sdl;          
-            if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix)
+            IntPtr sdl;
+
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                sdl = Native.LoadLibrary("libSDL2-2.0.0.dylib");
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 sdl = Native.LoadLibrary("libSDL2-2.0.so.0");
             }
