@@ -76,13 +76,9 @@ namespace ClassicUO.Game.GameObjects
 
         public GameObject Parent { get; }
 
-        public bool IsPersistent { get; set; }
-
         public float TimeToLive { get; set; }
 
         public MessageType MessageType { get; set; }
-
-        public float Alpha { get; private set; }
 
         public bool IsUnicode { get; }
 
@@ -105,34 +101,29 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
          
-            if (IsPersistent)
+
+            TimeToLive -= (float)frameMS;
+
+            if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
             {
-                if (IsOverlapped && Alpha <= 0.0f)
-                    Alpha = 0.5f;
-                else if (!IsOverlapped && Alpha != 0.0f)
-                    Alpha = 0;
+                // start alpha decreasing
+
+                //if (Engine.Ticks > _fadeOut)
+                //{
+                //    _fadeOut = Engine.Ticks + 55;
+                //    ProcessAlpha(0);
+                //}
+                //if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
+                //    Alpha = alpha;
             }
-            else
+            else if (TimeToLive <= 0.0f)
             {
-                TimeToLive -= (float)frameMS;
-
-                if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                {
-                    // start alpha decreasing
-                    float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
-
-                    if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
-                        Alpha = alpha;
-                }
-                else if (TimeToLive <= 0.0f)
-                {
-                    Dispose();
-                }
-                else if (IsOverlapped && Alpha <= 0.0f)
-                    Alpha = 0.5f;
-                else if (!IsOverlapped && Alpha != 0.0f)
-                    Alpha = 0;
-            }                     
+                Dispose();
+            }
+            else if (IsOverlapped && AlphaHue != 75)
+                AlphaHue = 75;
+            //else if (!IsOverlapped && AlphaHue != 0xFF)
+            //    AlphaHue = 0xFF;                  
         }
     }
 

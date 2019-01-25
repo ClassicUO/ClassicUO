@@ -337,7 +337,7 @@ namespace ClassicUO.Game.Scenes
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
             if (_alphaChanged)
-                _alphaTimer = Engine.Ticks + 15;
+                _alphaTimer = Engine.Ticks + 20;
 
             GetViewPort();
 
@@ -475,18 +475,6 @@ namespace ClassicUO.Game.Scenes
             batcher.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
 
-            for (int i = 0; i < _renderListCount; i++)
-            {
-                GameObject obj = _renderList[i];
-                //Vector3 v = obj.RealScreenPosition;
-                //v.Z = 1 - (i / 1000000.0f);
-
-                if (obj.Z <= _maxGroundZ && obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
-                    RenderedObjectsCount++;
-            }
-
-            // Draw in game overhead text messages
-            _overheadManager.Draw(batcher, _mouseOverList, _offset);
 
 
             //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
@@ -495,6 +483,28 @@ namespace ClassicUO.Game.Scenes
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(100);
             //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
+
+            int z = World.Player.Z + 5;
+
+            for (int i = 0; i < _renderListCount; i++)
+            {
+                GameObject obj = _renderList[i];
+                if (obj.Z <= _maxGroundZ)
+                {
+                    obj.DrawTransparent = Engine.Profile.Current.UseCircleOfTransparency && obj.TransparentTest(z);
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                    {
+                        RenderedObjectsCount++;
+                    }
+
+                }
+            }
+
+            // Draw in game overhead text messages
+            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
+
 
             batcher.End();
             batcher.EnableLight(false);

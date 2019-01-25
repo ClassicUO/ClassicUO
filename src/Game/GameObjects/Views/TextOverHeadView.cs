@@ -48,8 +48,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ProcessAlpha(0xFF);
-
             Texture.Ticks = Engine.Ticks;
 
             if (IsSelected && _text.Hue != 0x0035)
@@ -66,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            HueVector = ShaderHuesTraslator.GetHueVector(0, false, Alpha, true);
+            HueVector = ShaderHuesTraslator.GetHueVector(0);
 
             if (EdgeDetection)
             {
