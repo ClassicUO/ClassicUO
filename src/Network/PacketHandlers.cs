@@ -3158,12 +3158,12 @@ namespace ClassicUO.Network
             item.Amount = amount;
             item.Hue = hue;
             item.Position = new Position(x, y);
-            item.Container = container;
+            item.Container = containerSerial;
 
-            container.Items.Add(item);
+            container?.Items.Add(item);
             World.Items.Add(item);
 
-            container.ProcessDelta();
+            container?.ProcessDelta();
         }
 
 
