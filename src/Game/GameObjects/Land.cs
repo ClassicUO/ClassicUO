@@ -38,6 +38,8 @@ namespace ClassicUO.Game.GameObjects
             IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
             AllowedToDraw = Graphic > 2;
+
+            AlphaHue = 255;
         }
 
         private LandTiles? _tileData;

@@ -646,15 +646,18 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
-            Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
+
+            if (Engine.Profile.Current.DrawRoofs != _drawRoofs.IsChecked)
+            {
+                Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
+                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+            }
 
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
                 {
-                    TopBarGump gump = Engine.UI.GetByLocalSerial<TopBarGump>();
-                    if (gump != null)
-                        gump.Dispose();
+                    Engine.UI.GetByLocalSerial<TopBarGump>()?.Dispose();
                 }
                 else
                     TopBarGump.Create();

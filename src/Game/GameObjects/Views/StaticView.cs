@@ -40,6 +40,7 @@ namespace ClassicUO.Game.GameObjects
 
         private Graphic _oldGraphic;
 
+        public bool CharacterIsBehindFoliage { get; set; }
    
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
@@ -54,98 +55,116 @@ namespace ClassicUO.Game.GameObjects
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                FrameInfo.X = texture.ImageRectangle.X;
-                FrameInfo.Y = texture.ImageRectangle.Y;
+                //FrameInfo.X = texture.ImageRectangle.X;
+                //FrameInfo.Y = texture.ImageRectangle.Y;
                 FrameInfo.Width = texture.ImageRectangle.Width;
                 FrameInfo.Height = texture.ImageRectangle.Height;
+
+                FrameInfo.X = Bounds.X + texture.ImageRectangle.X;
+                FrameInfo.Y = Bounds.Y + texture.ImageRectangle.Y;
             }
 
             if (_isFoliage)
             {
-                bool check = World.Player.X <= X && World.Player.Y <= Y;
-                bool isnrect = false;
-
-                if (!check)
+                if (CharacterIsBehindFoliage)
                 {
-                    check = World.Player.Y <= Y && World.Player.Position.X <= X + 1;
-
-                    if (!check)
-                        check = World.Player.X <= X && World.Player.Y <= Y + 1;
+                    
+                        ProcessAlpha(76);
+                        //CharacterIsBehindFoliage = false;
+                    
                 }
-
-                if (check)
+                else
                 {
-                    Rectangle fol = Rectangle.Empty;
-                    fol.X = (int) position.X - Bounds.X + 22;
-                    fol.Y = (int) position.Y - Bounds.Y + 22;
-
-                    fol.Width = FrameInfo.Width;
-                    fol.Height = FrameInfo.Height;
-
-                    if (fol.InRect(World.Player.GetOnScreenRectangle()))
-                    {
-                        isnrect = true;
-
-                        if (_timeToProcessAlpha < Engine.Ticks)
-                        {
-                            _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
-
-                            _alpha += .1f;
-
-                            if (_alpha >= Constants.FOLIAGE_ALPHA)
-                            {
-                                _alpha = Constants.FOLIAGE_ALPHA;
-                            }
-                        }
-                    }
-                }
-
-                if (_alpha > 0.0f && !isnrect)
-                {
-                    if (_timeToProcessAlpha < Engine.Ticks)
-                    {
-                        _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
-
-                        _alpha -= .1f;
-
-                        if (_alpha < 0.0f)
-                            _alpha = 0;
-                    }
+                    ProcessAlpha(0xFF);
                 }
             }
-            else if (_isTransparent && _alpha != 0.5f)
-                _alpha = 0.5f;
+
+            //if (_isFoliage)
+            //{
+            //    bool check = World.Player.X <= X && World.Player.Y <= Y;
+            //    bool isnrect = false;
+
+            //    if (!check)
+            //    {
+            //        check = World.Player.Y <= Y && World.Player.Position.X <= X + 1;
+
+            //        if (!check)
+            //            check = World.Player.X <= X && World.Player.Y <= Y + 1;
+            //    }
+
+            //    if (check)
+            //    {
+            //        Rectangle fol = Rectangle.Empty;
+            //        fol.X = (int) position.X - Bounds.X + 22;
+            //        fol.Y = (int) position.Y - Bounds.Y + 22;
+
+            //        fol.Width = FrameInfo.Width;
+            //        fol.Height = FrameInfo.Height;
+
+            //        if (fol.InRect(World.Player.GetOnScreenRectangle()))
+            //        {
+            //            isnrect = true;
+
+            //            if (_timeToProcessAlpha < Engine.Ticks)
+            //            {
+            //                _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
+
+            //                _alpha += .1f;
+
+            //                if (_alpha >= Constants.FOLIAGE_ALPHA)
+            //                {
+            //                    _alpha = Constants.FOLIAGE_ALPHA;
+            //                }
+            //            }
+            //        }
+            //    }
+
+            //    if (_alpha > 0.0f && !isnrect)
+            //    {
+            //        if (_timeToProcessAlpha < Engine.Ticks)
+            //        {
+            //            _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
+
+            //            _alpha -= .1f;
+
+            //            if (_alpha < 0.0f)
+            //                _alpha = 0;
+            //        }
+            //    }
+            //}
+            //else if (_isTransparent && _alpha != 0.5f)
+            //    _alpha = 0.5f;
 
             
-            if (Engine.Profile.Current.UseCircleOfTransparency)
-            {
-                int z = World.Player.Z + 5;
+            //if (Engine.Profile.Current.UseCircleOfTransparency)
+            //{
+            //    int z = World.Player.Z + 5;
 
-                bool r = true;
+            //    bool r = true;
 
-                if (!_isFoliage)
-                {
-                    if (Z <= z - ItemData.Height)
-                        r = false;
-                    else if (z < Z && (_canBeTransparent & 0xFF) == 0)
-                        r = false;
-                }
+            //    if (!_isFoliage)
+            //    {
+            //        if (Z <= z - ItemData.Height)
+            //            r = false;
+            //        else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+            //            r = false;
+            //    }
 
-                if (r)
-                {
-                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
-                    int distance = Distance;
+            //    if (r)
+            //    {
+            //        int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+            //        int distance = Distance;
 
-                    if (distance <= distanceMax)
-                        _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
-                    else if (_alpha != 0)
-                        _alpha = _isTransparent ? .5f : 0;
-                }
-                else if (_alpha != 0)
-                    _alpha = _isTransparent ? .5f : 0;
-            }
-            else if (!_isFoliage && _alpha != 0)
-                _alpha = _isTransparent ? .5f : 0;
+            //        if (distance <= distanceMax)
+            //            _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
+            //        else if (_alpha != 0)
+            //            _alpha = _isTransparent ? .5f : 0;
+            //    }
+            //    else if (_alpha != 0)
+            //        _alpha = _isTransparent ? .5f : 0;
+            //}
+            //else if (!_isFoliage && _alpha != 0)
+            //    _alpha = _isTransparent ? .5f : 0;
             
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)

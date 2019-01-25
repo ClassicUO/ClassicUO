@@ -44,18 +44,9 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
-        private float _processAlpha = 1;
-        private long _processAlphaTime = -1; // Constants.ALPHA_OBJECT_TIME;
+        //private float _processAlpha = 1;
+        //private long _processAlphaTime = -1;
 
-        //protected View(GameObject parent)
-        //{
-        //    GameObject = parent;
-        //    AllowedToDraw = true;
-        //}
-
-        protected virtual bool CanProcessAlpha { get; private set; } = true;
-
-        //public GameObject GameObject { get; }
 
         protected bool HasShadow { get; set; }
 
@@ -83,7 +74,38 @@ namespace ClassicUO.Game.GameObjects
             return prect;
         }
 
-        public virtual unsafe bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
+        public byte AlphaHue { get; set; }
+
+        public bool ProcessAlpha(int max)
+        {
+            bool result = false;
+
+            int alpha = (int) AlphaHue;
+
+            if (alpha > max)
+            {
+                alpha -= 25;
+
+                if (alpha < max)
+                    alpha = max;
+
+                result = true;
+            }
+            else if (alpha < max)
+            {
+                alpha += 25;
+
+                if (alpha > max)
+                    alpha = max;
+
+                result = true;
+            }
+
+            AlphaHue = (byte) alpha;
+            return result;
+        }
+
+        public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
             //if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
             Texture.Ticks = Engine.Ticks;
@@ -159,31 +181,38 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-           
-            if (CanProcessAlpha)
-            {
-                long ticks = Engine.Ticks;
 
-                if (_processAlphaTime == -1)
-                    _processAlphaTime = ticks + Constants.ALPHA_OBJECT_TIME;
-                else
-                    ticks -= Constants.ALPHA_OBJECT_TIME;
+            //if (CanProcessAlpha)
+            //{
+            //    long ticks = Engine.Ticks;
 
-                if (_processAlphaTime < ticks) // finished!
-                {
-                    _processAlpha = 0;
-                    CanProcessAlpha = false;
-                }
-                else
-                {
-                    _processAlpha = ((_processAlphaTime - Engine.Ticks) / Constants.ALPHA_OBJECT_VALUE);
-                }
+            //    if (_processAlphaTime == -1)
+            //        _processAlphaTime = ticks + Constants.ALPHA_OBJECT_TIME;
+            //    else
+            //        ticks -= Constants.ALPHA_OBJECT_TIME;
 
-                if (HueVector.Z < _processAlpha)
-                    HueVector.Z = _processAlpha;
-            }
+            //    if (_processAlphaTime < ticks) // finished!
+            //    {
+            //        _processAlpha = _isAlphaReverse ? 1 : 0;
+            //        CanProcessAlpha = false;
+            //        _isAlphaReverse = !_isAlphaReverse;
+            //    }
+            //    else
+            //    {
+            //        if (_isAlphaReverse)
+            //            _processAlpha = 1.0f - ((_processAlphaTime - Engine.Ticks) / (float)Constants.ALPHA_OBJECT_TIME);
+            //        else
+            //            _processAlpha = ((_processAlphaTime - Engine.Ticks) / (float) Constants.ALPHA_OBJECT_TIME);
+            //    }
 
-  
+            //    if (HueVector.Z < _processAlpha)
+            //        HueVector.Z = _processAlpha;
+            //}
+
+
+            //if (HueVector.Z != Alpha)
+            HueVector.Z = 1f - (AlphaHue / 255f);
+
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
@@ -202,6 +231,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!batcher.DrawSprite(Texture, vertex))
                 return false;
+
             MousePick(list, vertex);
 
             return true;
@@ -217,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 for (int i = 0; i < Overheads.Count; i++)
                 {
-                    var v = Overheads[i];
+                    TextOverhead v = Overheads[i];
                     v.Bounds.X = (v.Texture.Width >> 1) - 22;
                     v.Bounds.Y = offY + v.Texture.Height;
                     v.Bounds.Width = v.Texture.Width;
