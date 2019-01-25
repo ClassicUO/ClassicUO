@@ -351,6 +351,7 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_PacketReceived(object sender, Packet e)
         {
+            e.MoveToData();
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
@@ -466,7 +467,6 @@ namespace ClassicUO.Game.Scenes
 
         private void ParseCharacterList(Packet p)
         {
-            p.MoveToData();
             int count = p.ReadByte();
             Characters = new string[count];
 
