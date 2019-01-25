@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in _item.Items.Where(s => s.Layer != Layer.Hair && s.Layer != Layer.Beard && s.Layer != Layer.Face))
+            foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
                 Add(new ItemGump(i));
         }
 
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e.Where(s => s.Layer != Layer.Hair && s.Layer != Layer.Beard && s.Layer != Layer.Face))
+            foreach (Item item in e.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
             {
                 CheckItemPosition(item);
                 Add(new ItemGump(item));

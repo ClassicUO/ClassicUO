@@ -97,209 +97,108 @@ namespace ClassicUO.Network
         {
             ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0x82, LoginError);
-            ToClient.Add(0x86, ResendCharacterList);
-            ToClient.Add(0x8C, RelayServer);
-            ToClient.Add(0xA8, ServerList);
-            ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
             ToClient.Add(0x03, ClientTalk);
-            /*ToServer.Add(0x00, CreateCharacter);
-            ToServer.Add(0x01, Disconnect);
-            ToServer.Add(0x02, MoveRequest);
-            ToServer.Add(0x03, TalkRequest);
-            ToServer.Add(0x04, RequestGodMode);
-            ToServer.Add(0x05, RequestAttack);
-            ToServer.Add(0x06, DoubleClick);
-            ToServer.Add(0x07, PickUpItem);
-            ToServer.Add(0x08, DropItem);
-            ToServer.Add(0x09, SingleClick);
-            ToServer.Add(0x0A, EditGodMode);*/
             ToClient.Add(0x0B, Damage);
-            ToClient.Add(0x0C, EditTileDataGodClientR); /*ToServer.Add(0x0C, EditTileDataGodClientS);*/
             ToClient.Add(0x11, CharacterStatus);
-            /* ToServer.Add(0x12, RequestSkill);
-             ToServer.Add(0x13, WearItem);
-             ToServer.Add(0x14, SendElevationGodClient);
-             ToServer.Add(0x15 FollowS);*/
             ToClient.Add(0x15, FollowR);
-            ToClient.Add(0x16, /*NewHealthBarStatusUpdateSA*/ NewHealthbarUpdate);
+            ToClient.Add(0x16, NewHealthbarUpdate);
             ToClient.Add(0x17, NewHealthbarUpdate);
             ToClient.Add(0x1A, UpdateItem);
-            // *** ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x1C, Talk);
             ToClient.Add(0x1D, DeleteObject);
-            ToClient.Add(0x1F, Explosion);
             ToClient.Add(0x20, UpdatePlayer);
             ToClient.Add(0x21, DenyWalk);
-            ToClient.Add(0x22, ConfirmWalk); /*ToServer.Add(0x22, ResyncRequest);*/
+            ToClient.Add(0x22, ConfirmWalk);
             ToClient.Add(0x23, DragAnimation);
             ToClient.Add(0x24, OpenContainer);
             ToClient.Add(0x25, UpdateContainedItem);
-            ToClient.Add(0x26, KickPlayer);
             ToClient.Add(0x27, DenyMoveItem);
             ToClient.Add(0x28, EndDraggingItem);
             ToClient.Add(0x29, DropItemAccepted);
-            ToClient.Add(0x2A, Blood);
-            ToClient.Add(0x2B, GodMode);
             ToClient.Add(0x2C, DeathScreen);
             ToClient.Add(0x2D, MobileAttributes);
             ToClient.Add(0x2E, EquipItem);
-            ToClient.Add(0x2F, FightOccuring);
-            ToClient.Add(0x30, AttackOK);
-            ToClient.Add(0x31, AttackEnded);
             ToClient.Add(0x32, p => { }); // unknown
-            ToClient.Add(0x33, PauseControl);
-            /*ToServer.Add(0x34, GetPlayerStatus);
-            ToServer.Add(0x35, AddResourceGodClient);*/
-            ToClient.Add(0x36, ResourceTileDataGodClient);
             ToClient.Add(0x38, Pathfinding);
-            /*ToServer.Add(0x37, MoveItemGodClient);
-            ToServer.Add(0x38, PathfindingInClient);
-            ToServer.Add(0x39, RemoveGroupS);*/
-            ToClient.Add(0x39, RemoveGroupR);
-            /*ToServer.Add(0x3A, SendSkills);*/
             ToClient.Add(0x3A, UpdateSkills);
-            //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
-            ToClient.Add(0x3E, VersionGodClient);
-            /*ToServer.Add(0x45, VersionOK);
-            ToServer.Add(0x46, NewArtwork);
-            ToServer.Add(0x47, NewTerrain);
-            ToServer.Add(0x48, NewAnimation);
-            ToServer.Add(0x49, NewHues);
-            ToServer.Add(0x4A, DeleteArt);
-            ToServer.Add(0x4B, CheckClientVersion);
-            ToServer.Add(0x4C, ScriptNames);
-            ToServer.Add(0x4D, EditScriptFile);*/
             ToClient.Add(0x4E, PersonalLightLevel);
-            ToClient.Add(0x4F, LightLevel);
-            /*ToServer.Add(0x50, BoardHeader);
-            ToServer.Add(0x51, BoardMessage);
-            ToServer.Add(0x52, BoardPostMessage);*/
-            ToClient.Add(0x53, ErrorCode);
+            ToClient.Add(0x4F, LightLevel);         
             ToClient.Add(0x54, PlaySoundEffect);
-            // *** ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0x56, MapData); //ToServer.Add(0x56, MapPacketTreauseCartographyS);
-            /*ToServer.Add(0x57, UpdateRegions);
-            ToServer.Add(0x58, AddRegion);
-            ToServer.Add(0x59, NewContextFX);
-            ToServer.Add(0x5A, UpdateContextFX);*/
+            ToClient.Add(0x56, MapData);
             ToClient.Add(0x5B, SetTime);
-            /*ToServer.Add(0x5C, RestartVersion);
-            ToServer.Add(0x5D, LoginCharacter);
-            ToServer.Add(0x5E, ServerListing);
-            ToServer.Add(0x5F, ServerListAddEntry);
-            ToServer.Add(0x60, ServerListRemoveEntry);
-            ToServer.Add(0x61, RemoveStaticObject);
-            ToServer.Add(0x62, MoveStaticObject);
-            ToServer.Add(0x63, LoadArea);
-            ToServer.Add(0x64, LoadAreaRequest);*/
             ToClient.Add(0x65, SetWeather);
-            ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
-            //ToServer.Add(0x69, ChangeText);
+            ToClient.Add(0x66, BookData);
             ToClient.Add(0x6C, TargetCursor);
             ToClient.Add(0x6D, PlayMusic);
             ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
-            ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
-            ToClient.Add(0x72, Warmode); // ToServer.Add(0x72, RequestWarMode);
-            ToClient.Add(0x73, Ping); //ToServer.Add(0x73, PingS);
+            ToClient.Add(0x71, BulletinBoardData);
+            ToClient.Add(0x72, Warmode);
+            ToClient.Add(0x73, Ping);
             ToClient.Add(0x74, BuyList);
-            //ToServer.Add(0x75, RenameCharacter);
-            ToClient.Add(0x76, NewSubServer);
             ToClient.Add(0x77, UpdateCharacter);
             ToClient.Add(0x78, UpdateObject);
-            ToClient.Add(0x7C, OpenMenu);
-            /*ToServer.Add(0x7D, ResponseToDialogBox);
-            ToServer.Add(0x80, LoginRequest);*/
-            // *** ToClient.Add(0x82, LoginError);
-            //ToServer.Add(0x83, DeleteCharacter);
-            // *** ToClient.Add(0x86, ResendCharacterList);
+            ToClient.Add(0x7C, OpenMenu);       
             ToClient.Add(0x88, OpenPaperdoll);
             ToClient.Add(0x89, CorpseEquipment);
-            // *** ToClient.Add(0x8C, RelayServer);
             ToClient.Add(0x90, DisplayMap);
-            //ToServer.Add(0x91, GameServerLogin);
-            ToClient.Add(0x93, OpenBook); //ToServer.Add(0x93, BookHeaderOldS);
-            ToClient.Add(0x95, DyeData); //ToServer.Add(0x95, DyeWindowS);
+            ToClient.Add(0x93, OpenBook);
+            ToClient.Add(0x95, DyeData);
             ToClient.Add(0x97, MovePlayer);
-            ToClient.Add(0x98, AllNames3DGameOnlyR); //ToServer.Add(0x98, AllNames3DGameOnlyS);
-            ToClient.Add(0x99, MultiPlacement); //ToServer.Add(0x99, RequestBoatAndHousePlacement);
-            ToClient.Add(0x9A, ASCIIPrompt); //ToServer.Add(0x9A, ConsoleEntryPromptS);
-            //ToServer.Add(0x9B, RequestHelp);
-            ToClient.Add(0x9C, RequestAssistance);
-            ToClient.Add(0x9E, SellList);
-            /*ToServer.Add(0x9F, SellListReply);
-            ToServer.Add(0xA0, SelectServer);*/
+            ToClient.Add(0x99, MultiPlacement);
+            ToClient.Add(0x9A, ASCIIPrompt);
+            ToClient.Add(0x9E, SellList);      
             ToClient.Add(0xA1, UpdateHitpoints);
             ToClient.Add(0xA2, UpdateMana);
             ToClient.Add(0xA3, UpdateStamina);
-            //ToServer.Add(0xA4, ClientSpy);
             ToClient.Add(0xA5, OpenUrl);
             ToClient.Add(0xA6, TipWindow);
-            //ToServer.Add(0xA7, RequestNoticeWindow);
-            // *** ToClient.Add(0xA8, ServerList);
-            // *** ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xAA, AttackCharacter);
             ToClient.Add(0xAB, TextEntryDialog);
-            /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
-            ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
             ToClient.Add(0xAF, DisplayDeath);
             ToClient.Add(0xAE, UnicodeTalk);
             ToClient.Add(0xB0, OpenGump);
-            //ToServer.Add(0xB1, GumpMenuSelection);
             ToClient.Add(0xB2, ChatMessage);
-            /*ToServer.Add(0xB3, ChatText);
-            ToServer.Add(0xB5, OpenChatWindow);
-            ToServer.Add(0xB6, SendHelpRequest);*/
             ToClient.Add(0xB7, Help);
-            ToClient.Add(0xB8, CharacterProfile); //ToServer.Add(0xB8, RequestCharProfile);
+            ToClient.Add(0xB8, CharacterProfile);
             ToClient.Add(0xB9, EnableLockedFeatures);
             ToClient.Add(0xBA, DisplayQuestArrow);
-            ToClient.Add(0xBB, UltimaMessengerR); //ToServer.Add(0xBB, UltimaMessengerS);
+            ToClient.Add(0xBB, UltimaMessengerR);
             ToClient.Add(0xBC, Season);
-            // *** ToClient.Add(0xBD, ClientVersion); //ToServer.Add(0xBD, ClientVersionS);
-            ToClient.Add(0xBE, AssistVersion); // ToServer.Add(0xBE, AssistVersionS);
-            ToClient.Add(0xBF, ExtendedCommand); //ToServer.Add(0xBF, GeneralInformationPacketS);
+            ToClient.Add(0xBE, AssistVersion);
+            ToClient.Add(0xBF, ExtendedCommand);
             ToClient.Add(0xC0, GraphicEffect);
             ToClient.Add(0xC1, DisplayClilocString);
-            ToClient.Add(0xC2, UnicodePrompt); //ToServer.Add(0xC2, UnicodeTextEntryS);
+            ToClient.Add(0xC2, UnicodePrompt);
             ToClient.Add(0xC4, Semivisible);
-            //ToServer.Add(0xC5, validMapRequest);
             ToClient.Add(0xC6, InvalidMapEnable);
             ToClient.Add(0xC7, GraphicEffect);
             ToClient.Add(0xC8, ClientViewRange);
-            ToClient.Add(0xCA, GetUserServerPingGodClientR); //ToServer.Add(0xCA, GetUserServerPingGodClientS);
+            ToClient.Add(0xCA, GetUserServerPingGodClientR);
             ToClient.Add(0xCB, GlobalQueCount);
             ToClient.Add(0xCC, DisplayClilocString);
-            ToClient.Add(0xD0, ConfigurationFileR); //ToServer.Add(0xD0, ConfigurationFileS);
-            ToClient.Add(0xD1, Logout); //ToServer.Add(0xD1, LogoutStatusS);
+            ToClient.Add(0xD0, ConfigurationFileR);
+            ToClient.Add(0xD1, Logout);
             ToClient.Add(0xD2, UpdateCharacter);
             ToClient.Add(0xD3, UpdateObject);
-            ToClient.Add(0xD4, OpenBook); //ToServer.Add(0xD4, BookHeaderNewS);
-            ToClient.Add(0xD6, MegaCliloc); //ToServer.Add(0xD6, MegaClilocS);
-            ToClient.Add(0xD7, GenericAOSCommandsR); //ToServer.Add(0xD7, GenericAOSCommandsS);
+            ToClient.Add(0xD4, OpenBook); 
+            ToClient.Add(0xD6, MegaCliloc);
+            ToClient.Add(0xD7, GenericAOSCommandsR);
             ToClient.Add(0xD8, CustomHouse);
-            //ToServer.Add(0xD9, SpyOnClient);
             ToClient.Add(0xDB, CharacterTransferLog);
             ToClient.Add(0xDC, OPLInfo);
             ToClient.Add(0xDD, OpenCompressedGump);
             ToClient.Add(0xDE, UpdateMobileStatus);
             ToClient.Add(0xDF, BuffDebuff);
-            /*ToServer.Add(0xE0, BugReportKR);
-            ToServer.Add(0xE1, ClientTypeKRSA);*/
             ToClient.Add(0xE2, NewCharacterAnimation);
             ToClient.Add(0xE3, KREncryptionResponse);
-            /*ToServer.Add(0xEC, EquipMacroKR);
-            ToServer.Add(0xED, UnequipItemMacroKR);
-            ToServer.Add(0xEF, KR2DClientLoginSeed);*/
             ToClient.Add(0xF0, KrriosClientSpecial);
-            ToClient.Add(0xF1, FreeshardListR); //ToServer.Add(0xF1, FreeshardListS);
+            ToClient.Add(0xF1, FreeshardListR);
             ToClient.Add(0xF3, UpdateItemSA);
             ToClient.Add(0xF5, DisplayMap);
-            //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
             ToClient.Add(0xF7, PacketList);
         }
 
@@ -379,10 +278,6 @@ namespace ClassicUO.Network
 
                 Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
-        }
-
-        private static void EditTileDataGodClientR(Packet p)
-        {
         }
 
         private static void CharacterStatus(Packet p)
@@ -718,10 +613,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void Explosion(Packet p)
-        {
-        }
-
         private static void UpdatePlayer(Packet p)
         {
             if (World.Player == null) return;
@@ -953,10 +844,6 @@ namespace ClassicUO.Network
             World.Items.ProcessDelta();
         }
 
-        private static void KickPlayer(Packet p)
-        {
-        }
-
         private static void DenyMoveItem(Packet p)
         {
             if (!World.InGame)
@@ -1077,14 +964,6 @@ namespace ClassicUO.Network
             scene.HeldItem.Dropped = false;
         }
 
-        private static void Blood(Packet p)
-        {
-        }
-
-        private static void GodMode(Packet p)
-        {
-        }
-
         private static void DeathScreen(Packet p)
         {
             // todo
@@ -1144,18 +1023,6 @@ namespace ClassicUO.Network
                 gs.HeldItem.Clear();
         }
 
-        private static void FightOccuring(Packet p)
-        {
-        }
-
-        private static void AttackOK(Packet p)
-        {
-        }
-
-        private static void AttackEnded(Packet p)
-        {
-        }
-
         private static void UpdateSkills(Packet p)
         {
             if (!World.InGame)
@@ -1204,14 +1071,6 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
         }
 
-        private static void RemoveGroupR(Packet p)
-        {
-        }
-
-        private static void PauseControl(Packet p)
-        {
-        }
-
         private static void Pathfinding(Packet p)
         {
             if (!World.InGame)
@@ -1222,10 +1081,6 @@ namespace ClassicUO.Network
             ushort z = p.ReadUShort();
 
             Pathfinder.WalkTo(x, y, z, 0);
-        }
-
-        private static void ResourceTileDataGodClient(Packet p)
-        {
         }
 
         private static void UpdateContainedItems(Packet p)
@@ -1298,14 +1153,6 @@ namespace ClassicUO.Network
             World.Items.ProcessDelta();
         }
 
-        private static void VersionGodClient(Packet p)
-        {
-        }
-
-        private static void UpdateStaticsGodClient(Packet p)
-        {
-        }
-
         private static void PersonalLightLevel(Packet p)
         {
             if (!World.InGame)
@@ -1330,10 +1177,6 @@ namespace ClassicUO.Network
                 level = 0x1F;
 
             //World.Light.Overall = level;
-        }
-
-        private static void ErrorCode(Packet p)
-        {
         }
 
         private static void PlaySoundEffect(Packet p)
@@ -1689,10 +1532,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void NewSubServer(Packet p)
-        {
-        }
-
         private static void UpdateCharacter(Packet p)
         {
             if (World.Player == null)
@@ -1840,29 +1679,10 @@ namespace ClassicUO.Network
             //string name = p.ReadASCII(p.ReadByte());
             //int count = p.ReadByte();
             // to finish
+
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
         }
 
-        private static void LoginError(Packet p)
-        {
-        }
-
-        private static void ResendCharacterList(Packet p)
-        {
-            int slots = p.ReadByte();
-
-            if (slots > 0)
-            {
-                for (int i = 0; i < slots; i++)
-                {
-                    string name = p.ReadASCII(30);
-                    p.Skip(30);
-
-                    if (name.Length > 0)
-                    {
-                    }
-                }
-            }
-        }
 
         private static void OpenPaperdoll(Packet p)
         {
@@ -1905,9 +1725,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void RelayServer(Packet p)
-        {
-        }
 
         private static void DisplayMap(Packet p)
         {
@@ -2015,12 +1832,9 @@ namespace ClassicUO.Network
             World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
-        private static void AllNames3DGameOnlyR(Packet p)
-        {
-        }
-
         private static void MultiPlacement(Packet p)
         {
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `MultiPlacement` not implemented yet.");
         }
 
         private static void ASCIIPrompt(Packet p)
@@ -2037,10 +1851,6 @@ namespace ClassicUO.Network
             };       
         }
 
-        private static void RequestAssistance(Packet p)
-        {
-        }
-
         private static void SellList(Packet p)
         {
             Mobile vendor = World.Mobiles.Get(p.ReadUInt());
@@ -2049,8 +1859,6 @@ namespace ClassicUO.Network
             ushort countItems = p.ReadUShort();
 
             if (countItems <= 0) return;
-
-            List<Item> itemList = new List<Item>(countItems);
 
             for (int i = 0; i < countItems; i++)
             {
@@ -2065,12 +1873,7 @@ namespace ClassicUO.Network
                     name = FileManager.Cliloc.GetString(clilocnum);
 
                 item.Name = name;
-
-                itemList.Add(item);
             }
-
-            UIManager ui = Engine.UI;
-            //ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
         private static void UpdateHitpoints(Packet p)
@@ -2129,14 +1932,8 @@ namespace ClassicUO.Network
                 Serial serial = p.ReadUInt();
                 string str = p.ReadASCII(p.ReadUShort());
             }
-        }
 
-        private static void ServerList(Packet p)
-        {
-        }
-
-        private static void CharacterList(Packet p)
-        {
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `TipWindow` not implemented yet.");
         }
 
         private static void AttackCharacter(Packet p)
@@ -2150,11 +1947,6 @@ namespace ClassicUO.Network
                 if (mob != null && mob.HitsMax <= 0)
                     NetClient.Socket.Send(new PStatusRequest(World.LastAttack));
             }
-            //Mobile lastattackedmobile = World.Mobiles.Get(p.ReadUInt());
-
-            //if (lastattackedmobile != null)
-            //{
-            //}
         }
 
         private static void TextEntryDialog(Packet p)
@@ -2222,7 +2014,29 @@ namespace ClassicUO.Network
 
             serial |= 0x80000000;
 
-            //TODO:
+
+            World.Mobiles.Remove(owner);
+            World.Mobiles.ProcessDelta();
+
+            Mobile newOwner = World.GetOrCreateMobile(serial);
+
+            foreach (Item i in owner.Items)
+            {
+                i.Container = serial;
+                newOwner.Items.Add(i); // item duping?
+            }
+
+            newOwner.ProcessDelta();
+            World.Mobiles.ProcessDelta();
+
+            if (corpseSerial.IsValid)
+            {
+
+            }
+
+            byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
+
+            owner.SetAnimation(group, 0, 5, 1);
         }
 
         private static void OpenGump(Packet p)
