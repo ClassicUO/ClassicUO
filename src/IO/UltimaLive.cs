@@ -20,7 +20,10 @@
 #endregion
 using System;
 using System.IO;
+using System.Threading;
 using System.IO.MemoryMappedFiles;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.GameObjects;
@@ -50,7 +53,7 @@ namespace ClassicUO.IO
         private ULFileMul[] _filesMap;
         private ULFileMul[] _filesStatics;
         private ULFileMul[] _filesIdxStatics;
-        private FileStream[] _filesStaticsStream;
+        private ConcurrentQueue<(int, long, byte[])> _writequeue;
         private ULMapLoader _ULMap;
         private UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
         private uint[] _EOF;
@@ -191,7 +194,7 @@ namespace ClassicUO.IO
                                         GameObject obj = chunk.Tiles[x, y].FirstNode;
                                         for(GameObject right = obj.Right; obj!=null; obj = right, right = right?.Right)
                                         {
-                                            if (obj is Static)
+                                            if (obj is Static || (obj is AnimatedItemEffect ef && ef.Source is Static))
                                                 obj.Dispose();
                                         }
                                     }
@@ -223,7 +226,7 @@ namespace ClassicUO.IO
                                 }
                                 
                                 _UL._filesStatics[mapID].WriteArray(lookup, staticsData);
-                                _UL._ULMap.WriteArray(mapID, lookup, staticsData);
+                                _UL._writequeue.Enqueue((mapID, lookup, staticsData));
                                 //update lookup AND index length on disk
                                 byte[] idxdata = new byte[8];
                                 idxdata[0] = (byte)lookup;
@@ -300,15 +303,14 @@ namespace ClassicUO.IO
                             _UL._filesMap = new ULFileMul[maps];
                             _UL._filesIdxStatics = new ULFileMul[maps];
                             _UL._filesStatics = new ULFileMul[maps];
-                            _UL._filesStaticsStream = new FileStream[maps];
                             var refs = loader.GetFilesReference;
                             for (int i = 0; i < maps; i++)
                             {
                                 _UL._filesMap[i] = refs.Item1[i] as ULFileMul;
                                 _UL._filesIdxStatics[i] = refs.Item2[i] as ULFileMul;
                                 _UL._filesStatics[i] = refs.Item3[i] as ULFileMul;
-                                _UL._filesStaticsStream[i] = refs.Item4[i];
                             }
+                            _UL._writequeue = loader._writer._toWrite;
                         }
                         break;
                     }
@@ -322,10 +324,14 @@ namespace ClassicUO.IO
                         //from byte 0x03 to 0x14 data is unused
                         p.Seek(15);
                         string name = ValidatePath(p.ReadASCII());
+                        if (string.IsNullOrWhiteSpace(name))
+                            _UL = null;
                         if (_UL != null && _UL.ShardName == name)
                             return;
-                        _UL = new UltimaLive();
-                        _UL.ShardName = name;
+                        _UL = new UltimaLive
+                        {
+                            ShardName = name
+                        };
                         //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                         break;
                     }
@@ -336,6 +342,7 @@ namespace ClassicUO.IO
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void OnUpdateTerrainPacket(Packet p)
         {
             int block = (int)p.ReadUInt();
@@ -348,30 +355,47 @@ namespace ClassicUO.IO
             byte mapID = p.ReadByte();
             if (World.Map == null || mapID != World.Map.Index)
                 return;
-
-            if (block >= 0 && block < (FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1]))
+            int mapWidthInBlocks = FileManager.Map.MapBlocksSize[mapID, 0];
+            int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
+            if (block >= 0 && block < (mapWidthInBlocks * mapHeightInBlocks))
             {
-                Chunk chunk = World.Map.Chunks[block];
-                if (chunk != null)
-                {
-                    for (int x = 0; x < 8; x++)
-                    {
-                        for (int y = 0; y < 8; y++)
-                        {
-                            GameObject obj = chunk.Tiles[x, y].FirstNode;
-                            for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
-                            {
-                                if (obj is Land)
-                                    obj.Dispose();
-                            }
-                        }
-                    }
-                }
                 _UL._filesMap[mapID].WriteArray((block * 196) + 4, landData);
-                chunk?.LoadLand(mapID);
-                Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapID][block] = UInt16.MaxValue;
+                Chunk[] chunks = new Chunk[9];
+                int blockX = block / mapHeightInBlocks, blockY = block % mapHeightInBlocks;
+                int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
+                blockX = Math.Min(mapWidthInBlocks, blockX + 1);
+                blockY = Math.Min(mapHeightInBlocks, blockY + 1);
+                int pos = 0;
+                for (; blockX >= minx; --blockX)
+                {
+                    for (int y = blockY; y >= miny; --y)
+                    {
+                        block = blockX * mapHeightInBlocks + y;
+                        chunks[pos++] = World.Map.Chunks[block];
+                    }
+                }
+                for (--pos; pos>=0; --pos)
+                {
+                    Chunk c = chunks[pos];
+                    if (c != null)
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                for (GameObject obj = c.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
+                                {
+                                    if (obj is Land ln)
+                                        ln.Dispose();
+                                }
+                            }
+                        }
+                        c.LoadLand(mapID);
+                    }
+                }
+                Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
             }
         }
 
@@ -516,14 +540,15 @@ namespace ClassicUO.IO
                     return;
                 _accessor.WriteArray(position, array, 0, array.Length);
                 _accessor.Flush();
-
             }
         }
 
         internal class ULMapLoader : MapLoader
         {
+            private Thread _twriter;
+            internal AsyncWriterThread _writer;
             private FileStream[] _filesStaticsStream;
-            internal (UOFile[], UOFileMul[], UOFileMul[], FileStream[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics, _filesStaticsStream);
+            internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
             internal uint NumMaps { get; private set; }
             public ULMapLoader(uint maps)
             {
@@ -537,6 +562,9 @@ namespace ClassicUO.IO
                     for (int x = 0; x < 2; x++)
                         MapsDefaultSize[i, x] = i < old.Length ? old[i, x] : old[0, x];
                 }
+                _writer = new AsyncWriterThread(this);
+                _twriter = new Thread(new ThreadStart(_writer.Loop)) {Name = "UL_File_Writer", IsBackground = true };
+                _twriter.Start();
             }
 
             protected override void CleanResources()
@@ -549,13 +577,35 @@ namespace ClassicUO.IO
                     }
                     _filesStaticsStream = null;
                 }
+                try { _twriter?.Abort(); }catch{ }
             }
-
-            internal void WriteArray(int map, long position, byte[] array)
+            
+            internal class AsyncWriterThread
             {
-                _filesStaticsStream[map].Seek(position, SeekOrigin.Begin);
-                _filesStaticsStream[map].Write(array, 0, array.Length);
-                _filesStaticsStream[map].Flush();
+                private ULMapLoader _Map;
+                internal ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
+                private AutoResetEvent m_Signal = new AutoResetEvent(false);
+                public AsyncWriterThread(ULMapLoader map)
+                {
+                    _Map = map;
+                }
+
+                public void Loop()
+                {
+                    while (_UL != null && !_Map.IsDisposed)
+                    {
+                        while (_toWrite.TryDequeue(out (int, long, byte[]) deq))
+                            WriteArray(deq.Item1, deq.Item2, deq.Item3);
+                        m_Signal.WaitOne(25, false);
+                    }
+                }
+
+                internal void WriteArray(int map, long position, byte[] array)
+                {
+                    _Map._filesStaticsStream[map].Seek(position, SeekOrigin.Begin);
+                    _Map._filesStaticsStream[map].Write(array, 0, array.Length);
+                    _Map._filesStaticsStream[map].Flush();
+                }
             }
 
             public override void Load()

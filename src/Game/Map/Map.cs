@@ -61,18 +61,6 @@ namespace ClassicUO.Game.Map
 
         public Point Center { get; set; }
 
-        public Chunk GetMapChunk(int rblock, int blockX, int blockY)
-        {
-            ref Chunk chunk = ref Chunks[rblock];
-            if (chunk == null)
-            {
-                _usedIndices.Add(rblock);
-                chunk = new Chunk((ushort)blockX, (ushort)blockY);
-                chunk.Load(Index);
-            }
-            return chunk;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
