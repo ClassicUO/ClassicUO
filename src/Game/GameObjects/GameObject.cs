@@ -154,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var overhead = _overHeads[i];
                 overhead.Update(totalMS, frameMS);
-                
+
                 if (overhead.IsDisposed)
                     _overHeads.RemoveAt(i--);
             }

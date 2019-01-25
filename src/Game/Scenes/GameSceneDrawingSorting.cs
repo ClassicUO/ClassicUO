@@ -182,16 +182,22 @@ namespace ClassicUO.Game.Scenes
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
+                bool mounted = false;
                 bool ismobile = false;
+                bool isitem = false;
 
                 StaticTiles itemData = default;
                 bool changinAlpha = false;
 
                 switch (obj)
                 {
-                    case Mobile _:
+                    case Mobile mob:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
+                        mounted = mob.IsMounted;
+                        break;
+                    case Item _:
+                        isitem = true;
 
                         break;
                     default:
@@ -284,37 +290,73 @@ namespace ClassicUO.Game.Scenes
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
+                
+                if (obj.Overheads != null)
+                {
+                    int offY = mounted ? 0 : -22;
+                    for (int i = 0; i < obj.Overheads.Count; i++)
+                    {
+                        TextOverhead v = obj.Overheads[i];
+                        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                        v.Bounds.Y = offY + v.Texture.Height;
+                        v.Bounds.Width = v.Texture.Width;
+                        v.Bounds.Height = v.Texture.Height;
+                        Overheads.AddOverhead(v, new Vector3(drawX + 22, drawY + 22, 0));
+                        offY += v.Texture.Height;
+
+                        if (_alphaChanged)
+                        {
+                            if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
+                            {
+                                if (!v.IsOverlapped)
+                                    v.ProcessAlpha(0);
+                            }
+                            else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
+                            {
+                                v.ProcessAlpha(0xFF);
+                            }
+                        }
+                    }
+                }
+                
+
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (itemData.IsFoliage && obj is Static st)
+                else if (obj is Static st)
                 {
-                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-                    if (!check)
-                    {
-                        check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
+                   if (itemData.IsFoliage)
+                   {
+                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                         if (!check)
-                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                    }
+                        {
+                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
 
-                    if (check)
-                    {
-                        
-                        Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X + 22,
-                                                       (int) drawY - st.FrameInfo.Y + 22,
-                                                       st.FrameInfo.Width, 
-                                                       st.FrameInfo.Height);
+                            if (!check)
+                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                        }
+
+                        if (check)
+                        {
+
+                            Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X + 22,
+                                                           (int) drawY - st.FrameInfo.Y + 22,
+                                                           st.FrameInfo.Width,
+                                                           st.FrameInfo.Height);
 
 
-                        check = rect.InRect(World.Player.GetOnScreenRectangle());
-                    }
+                            check = rect.InRect(World.Player.GetOnScreenRectangle());
+                        }
 
-                    st.CharacterIsBehindFoliage = check;
+                        st.CharacterIsBehindFoliage = check;
+                   }                    
                 }
 
                 if (_alphaChanged && !changinAlpha)
                 {
-                    if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
+                    if (itemData.IsTranslucent)
+                        obj.ProcessAlpha(178);
+                    else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
                         obj.ProcessAlpha(0xFF);
                 }
 
@@ -329,6 +371,7 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {

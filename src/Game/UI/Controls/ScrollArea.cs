@@ -91,9 +91,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
-            _rect.Y = position.Y + 20;
+            _rect.Y = position.Y;
             _rect.Width = Width - 14;
-            _rect.Height = Height - 40;
+            _rect.Height = Height;
             Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
@@ -102,6 +102,8 @@ namespace ClassicUO.Game.UI.Controls
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
                 bool drawOnly1 = true;
+
+                position = _rect.Location;
 
                 for (int i = 1; i < Children.Count; i++)
                 {

@@ -126,6 +126,7 @@ namespace ClassicUO.Game.Managers
                     overhead.Draw(batcher, position, list);
                 }
 
+
                 GameObject last = _firstNode;
 
                 while (last != null)
@@ -138,6 +139,7 @@ namespace ClassicUO.Game.Managers
                     last = temp;
                 }
 
+                _firstNode.Left = _firstNode.Right = null;
                 _firstNode = null;
 
             }
@@ -148,23 +150,21 @@ namespace ClassicUO.Game.Managers
             if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
                 _staticToUpdate.Add(overhead.Parent);
 
-
-            overhead.Right = null;
+            overhead.Left = overhead.Right = null;
 
             if (_firstNode == null)
             {
-                overhead.Left = null;
                 _firstNode = overhead;
             }
             else
             {
-                var last = (GameObject) _firstNode;
+                GameObject last = _firstNode;
 
                 while (last.Right != null)
                     last = last.Right;
 
                 last.Right = overhead;
-                overhead.Left = last;
+                overhead.Right = null;
             }
         }
 

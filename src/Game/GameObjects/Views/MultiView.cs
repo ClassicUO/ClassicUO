@@ -21,6 +21,18 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly int _canBeTransparent;
 
+        public override bool TransparentTest(int z)
+        {
+            bool r = true;
+
+            if (Z <= z - ItemData.Height)
+                r = false;
+            else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+                r = false;
+
+            return r;
+        }
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || IsDisposed)
@@ -38,32 +50,40 @@ namespace ClassicUO.Game.GameObjects
                 FrameInfo.Height = texture.ImageRectangle.Height;
             }
 
-            float alpha = 0;
+            int distance = Distance;
+
             if (Engine.Profile.Current.UseCircleOfTransparency)
             {
                 int z = World.Player.Z + 5;
 
                 bool r = true;
-
+                
                 if (Z <= z - ItemData.Height)
                     r = false;
                 else if (z < Z && (_canBeTransparent & 0xFF) == 0)
                     r = false;
-
+            
                 if (r)
                 {
-                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
-                    int distance = Distance;
+                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
 
                     if (distance <= distanceMax)
-                        alpha = 1.0f - 1.0f / (distanceMax / (float)distance);
+                    {
+                        if (distance <= 0)
+                            distance = 1;
+
+                        ProcessAlpha((byte)(235 - (200 / distance)));
+                    }
+                    else if (AlphaHue != 0xFF)
+                        ProcessAlpha(0xFF);
                 }
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue, false, alpha, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.MultiRendered++;
             return base.Draw(batcher, position, objectList);

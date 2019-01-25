@@ -43,10 +43,7 @@ namespace ClassicUO.Game.GameObjects
             _isTransparent = ItemData.IsTranslucent;
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-            if (_isTransparent)
-                _alpha = 0.5f;
-
+       
             if (ItemData.Height > 5)
                 _canBeTransparent = 1;
             else if (ItemData.IsRoof || (ItemData.IsSurface && ItemData.IsBackground) || ItemData.IsWall)

@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -29,19 +32,33 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
+using MathHelper = Microsoft.Xna.Framework.MathHelper;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Static
     {
         private readonly bool _isFoliage, _isPartialHue, _isTransparent;
-        private float _alpha;
-        private float _timeToProcessAlpha;
         private readonly int _canBeTransparent;
 
         private Graphic _oldGraphic;
 
         public bool CharacterIsBehindFoliage { get; set; }
-   
+
+
+        public override bool TransparentTest(int z)
+        {
+            bool r = true;
+
+            if (Z <= z - ItemData.Height)
+                r = false;
+            else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+                r = false;
+
+            return r;
+        }
+
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || IsDisposed)
@@ -55,8 +72,6 @@ namespace ClassicUO.Game.GameObjects
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                //FrameInfo.X = texture.ImageRectangle.X;
-                //FrameInfo.Y = texture.ImageRectangle.Y;
                 FrameInfo.Width = texture.ImageRectangle.Width;
                 FrameInfo.Height = texture.ImageRectangle.Height;
 
@@ -67,11 +82,8 @@ namespace ClassicUO.Game.GameObjects
             if (_isFoliage)
             {
                 if (CharacterIsBehindFoliage)
-                {
-                    
-                        ProcessAlpha(76);
-                        //CharacterIsBehindFoliage = false;
-                    
+                {               
+                    ProcessAlpha(76);                    
                 }
                 else
                 {
@@ -79,63 +91,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            //if (_isFoliage)
-            //{
-            //    bool check = World.Player.X <= X && World.Player.Y <= Y;
-            //    bool isnrect = false;
+            //int distance = Distance;
 
-            //    if (!check)
-            //    {
-            //        check = World.Player.Y <= Y && World.Player.Position.X <= X + 1;
-
-            //        if (!check)
-            //            check = World.Player.X <= X && World.Player.Y <= Y + 1;
-            //    }
-
-            //    if (check)
-            //    {
-            //        Rectangle fol = Rectangle.Empty;
-            //        fol.X = (int) position.X - Bounds.X + 22;
-            //        fol.Y = (int) position.Y - Bounds.Y + 22;
-
-            //        fol.Width = FrameInfo.Width;
-            //        fol.Height = FrameInfo.Height;
-
-            //        if (fol.InRect(World.Player.GetOnScreenRectangle()))
-            //        {
-            //            isnrect = true;
-
-            //            if (_timeToProcessAlpha < Engine.Ticks)
-            //            {
-            //                _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
-
-            //                _alpha += .1f;
-
-            //                if (_alpha >= Constants.FOLIAGE_ALPHA)
-            //                {
-            //                    _alpha = Constants.FOLIAGE_ALPHA;
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    if (_alpha > 0.0f && !isnrect)
-            //    {
-            //        if (_timeToProcessAlpha < Engine.Ticks)
-            //        {
-            //            _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
-
-            //            _alpha -= .1f;
-
-            //            if (_alpha < 0.0f)
-            //                _alpha = 0;
-            //        }
-            //    }
-            //}
-            //else if (_isTransparent && _alpha != 0.5f)
-            //    _alpha = 0.5f;
-
-            
             //if (Engine.Profile.Current.UseCircleOfTransparency)
             //{
             //    int z = World.Player.Z + 5;
@@ -152,29 +109,30 @@ namespace ClassicUO.Game.GameObjects
 
             //    if (r)
             //    {
-            //        int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
-            //        int distance = Distance;
+            //        int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
 
             //        if (distance <= distanceMax)
-            //            _alpha = 1.0f - 1.0f / (distanceMax / (float) distance);
-            //        else if (_alpha != 0)
-            //            _alpha = _isTransparent ? .5f : 0;
+            //        {
+            //            if (distance <= 0)
+            //                distance = 1;
+
+            //            ProcessAlpha((byte) (235 - (200 / distance)));
+            //        }
+            //        else if (AlphaHue != 0xFF)
+            //            ProcessAlpha(0xFF);
             //    }
-            //    else if (_alpha != 0)
-            //        _alpha = _isTransparent ? .5f : 0;
             //}
-            //else if (!_isFoliage && _alpha != 0)
-            //    _alpha = _isTransparent ? .5f : 0;
-            
+
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, _alpha, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.StaticsRendered++;
             return base.Draw(batcher, position, objectList);
         }
+
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

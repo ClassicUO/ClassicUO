@@ -74,6 +74,11 @@ namespace ClassicUO.Game.GameObjects
             return prect;
         }
 
+        public virtual bool TransparentTest(int z)
+        {
+            return false;
+        }
+
         public byte AlphaHue { get; set; }
 
         public bool ProcessAlpha(int max)
@@ -105,9 +110,51 @@ namespace ClassicUO.Game.GameObjects
             return result;
         }
 
+        public bool DrawTransparent { get; set; }
+
+
+
+        private readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState();
+
+            state.DepthBufferEnable = true;
+            state.StencilEnable = true;
+            //state.StencilFunction = CompareFunction.Always;
+            //state.ReferenceStencil = 1;
+            //state.StencilMask = 1;
+
+            //state.StencilFail = StencilOperation.Keep;
+            //state.StencilDepthBufferFail = StencilOperation.Keep;
+            //state.StencilPass = StencilOperation.Replace;
+            //state.TwoSidedStencilMode = false;
+
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceAlpha;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
+
+            return state;
+        });
+
+        //private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        //{
+        //    BlendState state = new BlendState();
+
+        //    state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceAlpha;
+        //    state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
+
+        //    return state;
+        //});
+
+
         public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            //if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
             Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
@@ -182,35 +229,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            //if (CanProcessAlpha)
-            //{
-            //    long ticks = Engine.Ticks;
-
-            //    if (_processAlphaTime == -1)
-            //        _processAlphaTime = ticks + Constants.ALPHA_OBJECT_TIME;
-            //    else
-            //        ticks -= Constants.ALPHA_OBJECT_TIME;
-
-            //    if (_processAlphaTime < ticks) // finished!
-            //    {
-            //        _processAlpha = _isAlphaReverse ? 1 : 0;
-            //        CanProcessAlpha = false;
-            //        _isAlphaReverse = !_isAlphaReverse;
-            //    }
-            //    else
-            //    {
-            //        if (_isAlphaReverse)
-            //            _processAlpha = 1.0f - ((_processAlphaTime - Engine.Ticks) / (float)Constants.ALPHA_OBJECT_TIME);
-            //        else
-            //            _processAlpha = ((_processAlphaTime - Engine.Ticks) / (float) Constants.ALPHA_OBJECT_TIME);
-            //    }
-
-            //    if (HueVector.Z < _processAlpha)
-            //        HueVector.Z = _processAlpha;
-            //}
-
-
-            //if (HueVector.Z != Alpha)
             HueVector.Z = 1f - (AlphaHue / 255f);
 
             if (vertex[0].Hue != HueVector)
@@ -229,8 +247,32 @@ namespace ClassicUO.Game.GameObjects
             //    batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + GameObject.Offset.Y - GameObject.Offset.Z + 22), IsFlipped, ShadowZDepth);
             //}
 
+            //if (DrawTransparent)
+            //{
+            //    batcher.SetBlendState(_checkerBlend.Value);
+            //    batcher.DrawSprite(Texture, vertex);
+            //    batcher.SetBlendState(null, true);
+
+            //    batcher.SetStencil(_stencil.Value);
+            //    batcher.DrawSprite(Texture, vertex);
+            //    batcher.SetStencil(null);
+            //}
+            //else
+            //{
+            //    batcher.DrawSprite(Texture, vertex);
+            //}
+
+            //if (DrawTransparent)
+            //{
+            //    vertex[0].Hue.Z = vertex[1].Hue.Z = vertex[2].Hue.Z = vertex[3].Hue.Z = 0.5f;
+
+            //    batcher.SetStencil(_stencil.Value);
+            //    batcher.DrawSprite(Texture, vertex);
+            //    batcher.SetStencil(null);
+            //}
             if (!batcher.DrawSprite(Texture, vertex))
                 return false;
+            
 
             MousePick(list, vertex);
 
@@ -243,19 +285,19 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
         {
-            if (Overheads != null)
-            {
-                for (int i = 0; i < Overheads.Count; i++)
-                {
-                    TextOverhead v = Overheads[i];
-                    v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                    v.Bounds.Y = offY + v.Texture.Height;
-                    v.Bounds.Width = v.Texture.Width;
-                    v.Bounds.Height = v.Texture.Height;
-                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
-                    offY += v.Texture.Height;
-                }
-            }
+            //if (Overheads != null)
+            //{
+            //    for (int i = 0; i < Overheads.Count; i++)
+            //    {
+            //        TextOverhead v = Overheads[i];
+            //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+            //        v.Bounds.Y = offY + v.Texture.Height;
+            //        v.Bounds.Width = v.Texture.Width;
+            //        v.Bounds.Height = v.Texture.Height;
+            //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
+            //        offY += v.Texture.Height;
+            //    }
+            //}
         } 
     }
 }
