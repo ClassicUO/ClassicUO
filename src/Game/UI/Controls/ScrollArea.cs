@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Controls
             for (int i = 1; i < Children.Count; i++) height += Children[i].Height;
             height -= _scrollBar.Height;
 
-            height += 20;
+            height += 40;
             if (height > 0)
             {
                 _scrollBar.MaxValue = height;
