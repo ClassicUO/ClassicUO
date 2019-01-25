@@ -1114,7 +1114,8 @@ namespace ClassicUO.IO.Resources
 
         public override AnimationFrameTexture GetTexture(uint id)
         {
-            return ResourceDictionary[id];
+            ResourceDictionary.TryGetValue(id, out AnimationFrameTexture aft);
+            return aft;
         }
 
         public override void CleanResources()
