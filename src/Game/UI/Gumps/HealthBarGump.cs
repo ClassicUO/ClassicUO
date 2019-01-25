@@ -128,9 +128,9 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(new GumpPic(34, 38, LINE_RED, 0));
 
                     // add over
-                    Add(_bars[0] = new GumpPicWithWidth(34, 12, LINE_BLUE, 0, 109));
-                    Add(_bars[1] = new GumpPicWithWidth(34, 25, LINE_BLUE, 0, 109));
-                    Add(_bars[2] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
+                    Add(_bars[0] = new GumpPicWithWidth(34, 12, LINE_BLUE, 0, 0));
+                    Add(_bars[1] = new GumpPicWithWidth(34, 25, LINE_BLUE, 0, 0));
+                    Add(_bars[2] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
                 }
                 else
                 {
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_background = new GumpPic(0, 0, 0x0804, color));
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
-                    Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 109));
+                    Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
 
                     Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
                     {
