@@ -101,7 +101,7 @@ namespace ClassicUO.IO.Resources
                 z = block->Z;
                 uint flags = block->Flags;
 
-                add = flags == 0;
+                add = flags != 0;
             }
         }
 

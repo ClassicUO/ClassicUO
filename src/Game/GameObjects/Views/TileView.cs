@@ -115,7 +115,7 @@ namespace ClassicUO.Game.GameObjects
             _vertex[2].Position.Y += z;
             _vertex[3].Position.Y += z;
 
-            HueVector.Z = 1f - (AlphaHue / 255f);
+            //HueVector.Z = 1f - (AlphaHue / 255f);
 
             if (HueVector != _vertex[0].Hue)
             {
