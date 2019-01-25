@@ -337,7 +337,7 @@ namespace ClassicUO.Game.Scenes
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
             if (_alphaChanged)
-                _alphaTimer = Engine.Ticks + 50;
+                _alphaTimer = Engine.Ticks + 15;
 
             GetViewPort();
 
