@@ -2963,7 +2963,7 @@ namespace ClassicUO.Network
 
             Item item = World.Items.Get(serial);
 
-            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
+            if (item != null && ((container != null && container.Graphic != 0x2006) || item.Layer == Layer.Invalid))
             {
                 Entity initcontainer = World.Get(item.Container);
 
