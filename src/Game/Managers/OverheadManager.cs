@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void AddOverhead(TextOverhead overhead, Vector3 position)
+        public void AddOverhead(TextOverhead overhead)
         {
             if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
                 _staticToUpdate.Add(overhead.Parent);

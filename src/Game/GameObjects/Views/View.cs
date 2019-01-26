@@ -213,6 +213,19 @@ namespace ClassicUO.Game.GameObjects
                 vertex[3].Position.Y += Bounds.Height;               
             }
 
+            if (DrawTransparent)
+            {
+                int dist = Distance;
+                int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+
+                if (dist <= maxDist)
+                    HueVector.Z = 1f - (dist / (float)maxDist);
+                else
+                    HueVector.Z = 1f - AlphaHue / 255f;
+            }
+            else
+                HueVector.Z = 1f - AlphaHue / 255f;
+
             if (Engine.Profile.Current.HighlightGameObjects)
             {
                 if (IsSelected)
@@ -227,9 +240,6 @@ namespace ClassicUO.Game.GameObjects
                     _storedHue = Vector3.Zero;
                 }
             }
-
-
-            HueVector.Z = 1f - (AlphaHue / 255f);
 
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;

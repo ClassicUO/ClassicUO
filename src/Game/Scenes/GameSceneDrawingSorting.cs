@@ -296,7 +296,7 @@ namespace ClassicUO.Game.Scenes
                         v.Bounds.Y = offY + v.Texture.Height;
                         v.Bounds.Width = v.Texture.Width;
                         v.Bounds.Height = v.Texture.Height;
-                        Overheads.AddOverhead(v, new Vector3(drawX + 22, drawY + 22, 0));
+                        Overheads.AddOverhead(v);
                         offY += v.Texture.Height;
 
                         if (_alphaChanged)
