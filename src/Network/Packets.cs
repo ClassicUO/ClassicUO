@@ -650,8 +650,6 @@ namespace ClassicUO.Network
             WriteByte(cursorType);
             WriteUInt(0);
             WriteUInt(0xFFFF_FFFF);
-            //WriteUShort(0xFFFF);
-            //WriteUShort(0xFFFF);
             WriteByte(0);
             WriteByte(0);
             WriteUShort(0);
