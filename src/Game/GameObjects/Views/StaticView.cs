@@ -31,6 +31,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
@@ -75,19 +76,21 @@ namespace ClassicUO.Game.GameObjects
                 FrameInfo.Width = texture.ImageRectangle.Width;
                 FrameInfo.Height = texture.ImageRectangle.Height;
 
-                FrameInfo.X = Bounds.X + texture.ImageRectangle.X;
-                FrameInfo.Y = Bounds.Y + texture.ImageRectangle.Y;
+                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
             }
 
             if (_isFoliage)
             {
                 if (CharacterIsBehindFoliage)
-                {               
-                    ProcessAlpha(76);                    
+                {      
+                    if (AlphaHue != 76)
+                        ProcessAlpha(76);                    
                 }
                 else
                 {
-                    ProcessAlpha(0xFF);
+                    if (AlphaHue != 0xFF)
+                        ProcessAlpha(0xFF);
                 }
             }
 
@@ -130,8 +133,22 @@ namespace ClassicUO.Game.GameObjects
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.StaticsRendered++;
-            return base.Draw(batcher, position, objectList);
+            base.Draw(batcher, position, objectList);
+            //if (_isFoliage)
+            //{
+            //    if (_texture == null)
+            //    {
+            //        _texture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            //        _texture.SetData(new Color[] {Color.Red});
+            //    }
+
+            //    batcher.DrawRectangle(_texture, new Rectangle( (int) position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height), Vector3.Zero);
+            //}
+
+            return true;
         }
+
+        //private static Texture2D _texture;
 
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
