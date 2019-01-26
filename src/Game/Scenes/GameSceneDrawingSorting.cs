@@ -334,8 +334,8 @@ namespace ClassicUO.Game.Scenes
                         if (check)
                         {
 
-                            Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X + 22,
-                                                           (int) drawY - st.FrameInfo.Y + 22,
+                            Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X,
+                                                           (int) drawY - st.FrameInfo.Y,
                                                            st.FrameInfo.Width,
                                                            st.FrameInfo.Height);
 
