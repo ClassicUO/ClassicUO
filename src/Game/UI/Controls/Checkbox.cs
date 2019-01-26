@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
         private bool _isChecked;
 
-        public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
+        public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true)
         {
             _textures[INACTIVE] = FileManager.Gumps.GetTexture(inactive);
             _textures[ACTIVE] = FileManager.Gumps.GetTexture(active);
@@ -56,8 +56,9 @@ namespace ClassicUO.Game.UI.Controls
 
             _text = new RenderedText
             {
-                Font = font, Hue = color, IsUnicode = true, Text = text
+                Font = font, Hue = color, IsUnicode = isunicode, Text = text
             };
+            Width += _text.Width;
             CanMove = false;
             AcceptMouseInput = true;
         }
