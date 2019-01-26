@@ -274,14 +274,14 @@ namespace ClassicUO.Game.Map
                 {
                     Tile tile = Tiles[i, j];
 
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    GameObject obj = Tiles[i, j].FirstNode;
+                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
                         if (obj != World.Player)
-                        {
                             obj.Dispose();
-                        }
                     }
 
+                    tile.Clear();
                     Tiles[i, j] = null;
                 }
             }

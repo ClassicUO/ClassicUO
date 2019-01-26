@@ -233,5 +233,20 @@ namespace ClassicUO.Game.Map
             Remove(obj);
         }
 
+
+        public void Clear()
+        {
+            if (_firstNode == null)return;
+
+            GameObject f = _firstNode;
+
+            while (f.Right != null)
+            {
+                f.Left = null;
+                var t = f.Right;
+                f.Right = null;
+                f = t;
+            }
+        }
     }
 }
