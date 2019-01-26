@@ -59,12 +59,21 @@ namespace ClassicUO.Game.UI.Gumps
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
             _updateTotal = false;
-          
+
 
             if (isBuyGump)
                 Add(new GumpPic(0, 0, 0x0870, 0));
             else
                 Add(new GumpPic(0, 0, 0x0872, 0));
+
+
+           
+               
+            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 180, false, 130));
+
+
+
+
 
             if (isBuyGump)
                 Add(new GumpPic(170, 214, 0x0871, 0));
@@ -81,35 +90,40 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 1
             };
 
-            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
-            boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
+            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
+            boxClear.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
             Add(boxAccept);
             Add(boxClear);
+
 
             if (isBuyGump)
             {
                 Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
-                    X = 240, Y = 385
+                    X = 240,
+                    Y = 385
                 });
 
                 Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
                 {
-                    X = 358, Y = 385
+                    X = 358,
+                    Y = 385
                 });
             }
             else
                 Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
-                    X = 358, Y = 386
+                    X = 358,
+                    Y = 386
                 });
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 5)
             {
-                X = 242, Y = 408
-            }); 
-               
-            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 130, false));
+                X = 242,
+                Y = 408
+            });
+
+
             Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
 
 
@@ -349,7 +363,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Item = item;
                 var itemName = StringHelper.CapitalizeAllWords(item.Name);
 
-                Add(new ItemGump(item)
+                ItemGump itemGunp;
+                Add(itemGunp = new ItemGump(item)
                 {
                     X = 5, Y = 5, Height = 50, AcceptMouseInput = false
                 });
@@ -366,7 +381,9 @@ namespace ClassicUO.Game.UI.Gumps
                 });
 
                 Width = 220;
-                Height = label.Height;
+                ArtTexture texture = itemGunp.Texture as ArtTexture;
+                
+                Height = Math.Max(label.Height, texture.ImageRectangle.Height) + 10;
 
                 WantUpdateSize = false;
             }
@@ -401,7 +418,7 @@ namespace ClassicUO.Game.UI.Gumps
             public TransactionItem(Item item, int amount)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
+                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
 
                 Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, font: 9)
                 {
@@ -477,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
                 buttonRemove.MouseDown += (sender, e) =>
                 {
                     status = 1;
-                    t1 = Engine.Ticks + 200;
+                    t1 = Engine.Ticks + 500;
                 };
                 buttonRemove.MouseUp += (sender, e) => { status = 0; };
 
