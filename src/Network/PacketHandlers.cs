@@ -1853,12 +1853,19 @@ namespace ClassicUO.Network
 
         private static void SellList(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Mobile vendor = World.Mobiles.Get(p.ReadUInt());
 
             if (vendor == null) return;
             ushort countItems = p.ReadUShort();
 
             if (countItems <= 0) return;
+
+            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(vendor);          
+            gump?.Dispose();
+            gump = new ShopGump(vendor, false, 100, 0);
 
             for (int i = 0; i < countItems; i++)
             {
@@ -1873,7 +1880,10 @@ namespace ClassicUO.Network
                     name = FileManager.Cliloc.GetString(clilocnum);
 
                 item.Name = name;
+
+                gump.AddItem(item);
             }
+            Engine.UI.Add(gump);
         }
 
         private static void UpdateHitpoints(Packet p)
