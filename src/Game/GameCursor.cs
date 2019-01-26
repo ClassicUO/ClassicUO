@@ -170,19 +170,19 @@ namespace ClassicUO.Game
                                     break;
                             }
 
-                            if (offX == 0 && offY == 0)
-                            {
-                                offX = -1;
-                                offY = -1;
-                            }
+                            //if (offX == 0 && offY == 0)
+                            //{
+                            //    offX = -1;
+                            //    offY = -1;
+                            //}
 
                             _cursorOffset[0, j] = (int) offX;
                             _cursorOffset[1, j] = (int) offY;
                         }
                         else
                         {
-                            _cursorOffset[0, j] = -1;
-                            _cursorOffset[1, j] = -1;
+                            _cursorOffset[0, j] = 0;
+                            _cursorOffset[1, j] = 0;
                         }
                     }
 

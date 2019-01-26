@@ -141,9 +141,6 @@ namespace ClassicUO.Game.Map
                     if (obj is Mobile)
                         continue;
 
-                    //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
-                    //    continue;
-
                     if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
                         continue;
 

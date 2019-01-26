@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture.Contains(x, y))
                 return true;
 
-            if (Item.Amount > 1 && Item.ItemData.IsStackable)
+            if (!Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
             {
                 if (Texture.Contains(x - 5, y - 5))
                     return true;
