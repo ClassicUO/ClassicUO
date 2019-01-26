@@ -153,8 +153,8 @@ namespace ClassicUO.Game.Scenes
                         switch (obj)
                         {
                             case Mobile mobile:
-                                MergeHeldItem(mobile);
-
+                               // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
+                               MergeHeldItem(mobile);
                                 break;
                             case Item item:
                                 if (item.IsCorpse)

@@ -232,7 +232,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     base.Graphic = value;
                     _itemData = null;
-                    Name = ItemData.Name;
+                    //Name = ItemData.Name;
 
                     CheckGraphicChange();
                 }

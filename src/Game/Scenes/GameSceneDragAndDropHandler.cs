@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && HeldItem.Serial != entity)
             {
-                GameActions.DropItem(HeldItem.Serial, entity.Position, entity.Serial);
+                GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, entity.Serial);
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
             }
