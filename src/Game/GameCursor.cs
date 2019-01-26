@@ -181,8 +181,8 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            _cursorOffset[0, j] = 0;
-                            _cursorOffset[1, j] = 0;
+                            _cursorOffset[0, j] = -1;
+                            _cursorOffset[1, j] = -1;
                         }
                     }
 
