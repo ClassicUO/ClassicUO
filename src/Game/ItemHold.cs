@@ -29,18 +29,18 @@ namespace ClassicUO.Game
         public bool Enabled { get; set; }
         public bool Dropped { get; set; }
 
-        public void Set(Item item)
+        public void Set(Item item, ushort amount)
         {
             Enabled = true;
 
             Serial = item.Serial;
             Graphic = item.Graphic;
-            DisplayedGraphic = item.DisplayedGraphic;
+            DisplayedGraphic = item.IsCoin && amount == 1 ? item.Graphic : item.DisplayedGraphic;
             Position = item.Position;
             OnGround = item.OnGround;
             Container = item.Container;
             Hue = item.Hue;
-            Amount = item.Amount;
+            Amount = amount;
             IsStackable = item.ItemData.IsStackable;
             IsPartialHue = item.ItemData.IsPartialHue;
             HasAlpha = item.ItemData.IsTranslucent;

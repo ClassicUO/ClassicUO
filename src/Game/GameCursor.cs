@@ -70,7 +70,6 @@ namespace ClassicUO.Game
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
-                    //Texture2D texture = FileManager.Art.GetTexture(id);
 
                     ushort[] pixels = FileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
 
@@ -171,6 +170,12 @@ namespace ClassicUO.Game
                                     break;
                             }
 
+                            if (offX == 0 && offY == 0)
+                            {
+                                offX = -1;
+                                offY = -1;
+                            }
+
                             _cursorOffset[0, j] = (int) offX;
                             _cursorOffset[1, j] = (int) offY;
                         }
@@ -207,8 +212,6 @@ namespace ClassicUO.Game
                 }
             }
         }
-
-        //public ArtTexture Texture { get; private set; }
 
         private ItemHold _itemHold;
 
@@ -267,8 +270,6 @@ namespace ClassicUO.Game
                 }
             }
 
-            //Texture.Ticks = (long) totalMS;
-
             if (_itemHold != null && _itemHold.Enabled)
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
@@ -290,41 +291,6 @@ namespace ClassicUO.Game
                 }
             }
             DrawToolTip(sb, Mouse.Position);
-
-            //ushort id = Graphic;
-
-            //if (id < 0x206A)
-            //    id -= 0x2053;
-            //else
-            //    id -= 0x206A;
-
-            //if (id < 16)
-            //{
-            //    if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
-            //    {
-            //        Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
-            //        Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
-            //        sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-
-            //        if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
-            //        {
-            //            p.X += 5;
-            //            p.Y += 5;
-            //            sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-            //        }
-            //    }
-            //    DrawToolTip(sb, Mouse.Position);
-
-            //   // Vector3 vec = World.InGame && !World.Player.InWarMode && World.MapIndex != 0 && !(Engine.UI.MouseOverControl is AbstractTextBox) ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
-
-            //    //sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), vec);
-
-            //    //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-            //    //if (gs != null)
-            //    //    _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
-
-            //    //_text.Draw(sb, new Point(Mouse.Position.X, Mouse.Position.Y - 20));
-            //}
         }
 
         private void DrawToolTip(Batcher2D batcher, Point position)
