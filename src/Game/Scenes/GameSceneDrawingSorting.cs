@@ -184,7 +184,6 @@ namespace ClassicUO.Game.Scenes
 
                 bool mounted = false;
                 bool ismobile = false;
-                bool isitem = false;
 
                 StaticTiles itemData = default;
                 bool changinAlpha = false;
@@ -195,10 +194,6 @@ namespace ClassicUO.Game.Scenes
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
                         mounted = mob.IsMounted;
-                        break;
-                    case Item _:
-                        isitem = true;
-
                         break;
                     default:
 

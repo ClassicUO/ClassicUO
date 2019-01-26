@@ -29,8 +29,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
-        private Checkbox _checkboxSaveAccount;
-        private Checkbox _checkboxAutologin;
+        private Checkbox _checkboxSaveAccount, _checkboxAutologin, _cryptPassword;
         private readonly Button _nextArrow0;
 
         private float _time;
@@ -99,30 +98,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 30
             });
 
-            Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3)
+          
+            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
             {
-                X = 328,
+                X = 200,
                 Y = 417
-            });
-            Add(new Label("Save Password", false, 0x0386, font: 1)
-            {
-                X = 350,
-                Y = 420
             });
 
-            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3)
+            Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 1, 0x0386, false)
             {
-                X = 228,
+                X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                 Y = 417
             });
-            Add(new Label("Autologin", false, 0x0386, font: 1)
-            {
-                X = 250,
-                Y = 420
-            });
+
+            //Add(_cryptPassword = new Checkbox(0x00D2, 0x00D3, "Crypt password", 1, 0x0386, false)
+            //{
+            //    X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
+            //    Y = 417
+            //});
+
 
             _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Engine.GlobalSettings.AutoLogin;
+            //_cryptPassword.IsChecked = true;
 
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 

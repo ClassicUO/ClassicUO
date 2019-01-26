@@ -238,6 +238,7 @@
     <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
     <Compile Include="Utility\Coroutines\WaitCondition.cs" />
     <Compile Include="Utility\Coroutines\WaitTime.cs" />
+    <Compile Include="Utility\Crypter.cs" />
     <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\GameObjectHelper.cs" />
     <Compile Include="Utility\HuesHelper.cs" />
