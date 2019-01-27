@@ -180,11 +180,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (needHpLine)
             {
-                position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
-                position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
+                //position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
+                //position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
 
-                TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + Offset.X);
-                TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ Offset.Y - Offset.Z - 3);
+                //TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + Offset.X);
+                //TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ Offset.Y - Offset.Z - 3);
                 TargetLineGump.TTargetLineGump.BackgroudHue = targetColor;
                 
                 if (IsPoisoned)
