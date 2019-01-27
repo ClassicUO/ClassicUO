@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && World.Contains(Mobile))
+            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
             {
                 NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
             }
