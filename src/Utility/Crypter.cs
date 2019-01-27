@@ -5,35 +5,82 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
+using SDL2;
+
 namespace ClassicUO.Utility
 {
     internal static class Crypter
     {
-        public static string Encrypt(string plain, string key)
+        public static string Encrypt(string source)
         {
-            RijndaelManaged aesEncryption = new RijndaelManaged
+            byte[] buff = Encoding.ASCII.GetBytes(source);
+            int kidx = 0;
+            string key = CalculateKey();
+            if (key == string.Empty)
+                return string.Empty;
+            StringBuilder sb = new StringBuilder(source.Length * 2 + 2);
+            sb.Append("1+");
+            for (int i = 0; i < buff.Length; i++)
             {
-                KeySize = 256, BlockSize = 128, Mode = CipherMode.ECB, Padding = PaddingMode.ISO10126
-            };
-            byte[] KeyInBytes = Encoding.UTF8.GetBytes(key);
-            aesEncryption.Key = KeyInBytes;
-            byte[] plainText = Encoding.UTF8.GetBytes(plain);
-            ICryptoTransform crypto = aesEncryption.CreateEncryptor();
-            byte[] cipherText = crypto.TransformFinalBlock(plainText, 0, plainText.Length);
-            return Convert.ToBase64String(cipherText);
+                sb.AppendFormat("{0:X2}", (byte)(buff[i] ^ ((byte)key[kidx++])));
+                if (kidx >= key.Length)
+                    kidx = 0;
+            }
+            return sb.ToString();
         }
 
-        private static string Decrypt(string encryptedText, string keyString)
+        public static string Decrypt(string source)
         {
-            RijndaelManaged aesEncryption = new RijndaelManaged
+            byte[] buff = null;
+
+            if (source.Length > 2 && source[0] == '1' && source[1] == '+')
             {
-                KeySize = 256, BlockSize = 128, Mode = CipherMode.ECB, Padding = PaddingMode.ISO10126
-            };
-            byte[] keyInBytes = Encoding.UTF8.GetBytes(keyString);
-            aesEncryption.Key = keyInBytes;
-            ICryptoTransform decrypto = aesEncryption.CreateDecryptor();
-            byte[] encryptedBytes = Convert.FromBase64CharArray(encryptedText.ToCharArray(), 0, encryptedText.Length);
-            return Encoding.UTF8.GetString(decrypto.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length));
+                buff = new byte[(source.Length - 2) / 2];
+                string key = CalculateKey();
+                if (key == string.Empty)
+                    return string.Empty;
+                int kidx = 0;
+                for (int i = 2; i < source.Length; i += 2)
+                {
+                    byte c;
+                    try
+                    {
+                        c = Convert.ToByte(source.Substring(i, 2), 16);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    buff[(i - 2) / 2] = (byte)(c ^ ((byte)key[kidx++]));
+                    if (kidx >= key.Length)
+                        kidx = 0;
+                }
+            }
+            else
+            {
+                byte key = (byte)(source.Length / 2);
+                buff = new byte[key];
+
+                for (int i = 0; i < source.Length; i += 2)
+                {
+                    byte c;
+                    try
+                    {
+                        c = Convert.ToByte(source.Substring(i, 2), 16);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    buff[i / 2] = (byte)(c ^ key++);
+                }
+            }
+            return Encoding.ASCII.GetString(buff);
+        }
+
+        private static string CalculateKey()
+        {
+            return Environment.MachineName;
         }
     }
 }

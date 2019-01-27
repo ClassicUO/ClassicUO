@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
-                    Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+                    Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
                 }
             }
         }
@@ -361,7 +361,7 @@ namespace ClassicUO.Game.Scenes
                     if (Engine.GlobalSettings.SaveAccount)
                     {
                         Engine.GlobalSettings.Username = Account;
-                        Engine.GlobalSettings.Password = Password;
+                        Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
                         Engine.GlobalSettings.Save();
                     }
 
