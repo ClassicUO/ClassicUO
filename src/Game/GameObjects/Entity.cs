@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         private Flags _flags;
         private Hue _hue;
         private string _name;
-
+        private Item[] _equipment;
 
         protected Entity(Serial serial)
         {
@@ -47,6 +47,14 @@ namespace ClassicUO.Game.GameObjects
         protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; }
+
+        public bool HasEquipment => _equipment != null;
+
+        public Item[] Equipment
+        {
+            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
+            set => _equipment = value;
+        }
 
         public Serial Serial { get; }
 
@@ -103,19 +111,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
-
-        //public override Position Position
-        //{
-        //    get => base.Position;
-        //    set
-        //    {
-        //        if (base.Position != value)
-        //        {
-        //            base.Position = value;
-        //            _delta |= Delta.Position;
-        //        }
-        //    }
-        //}
 
         public Direction Direction
         {
@@ -182,6 +177,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
+            _equipment = null;
             _properties.Clear();
             base.Dispose();
         }

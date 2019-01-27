@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -333,9 +333,9 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
                     if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
-                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, 0, true));
+                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
                     else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
-                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, 0, "ENU", true));
+                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
                     Chat.PromptData = default;
                     break;
             }
@@ -354,9 +354,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (Chat.PromptData.Prompt != ConsolePrompt.None)
             {
                 if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
-                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length, text.Length < 1));
+                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length < 1));
                 else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
-                    NetClient.Socket.Send(new PUnicodePromptResponse(text, text.Length, "ENU", text.Length < 1));
+                    NetClient.Socket.Send(new PUnicodePromptResponse(text, "ENU", text.Length < 1));
 
                 Chat.PromptData = default;
             }

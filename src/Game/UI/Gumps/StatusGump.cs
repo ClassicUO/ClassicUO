@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 using ClassicUO;
 using ClassicUO.Game;
@@ -59,7 +60,12 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.BuffIcon:
-                    BuffGump.Toggle();
+
+                    BuffGump gump = Engine.UI.GetByLocalSerial<BuffGump>();
+                    if (gump == null)
+                        Engine.UI.Add(new BuffGump(100, 100));
+                    else
+                        gump.BringOnTop();
 
                     break;
                 default:
@@ -72,30 +78,18 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (_useUOPGumps)
+                if (TargetManager.IsTargeting)
                 {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+                    if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
                     {
-                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        //list.Add(World.Player);
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-
-                        //if (dict.ContainsKey(World.Player))
-                        //{
-                        //    Engine.UI.Remove<HealthBarGump>(World.Player);
-                        //}
-                        Dispose();
+                        TargetManager.TargetGameObject(World.Player);
+                        Mouse.LastLeftButtonClickTime = 0;
                     }
                 }
-                else
+                else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
-                    {
-                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        //list.Add(World.Player);
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                        Dispose();
-                    }
+                    Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                    Dispose();
                 }
             }
         }
@@ -115,7 +109,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
 
                 default:
-                    throw new NotImplementedException();
+
+                    return Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
             }
         }
 
@@ -307,7 +302,13 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-       
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 1)
+                Dispose();
+        }
 
         private enum MobileStats
         {
@@ -347,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_5020)
                 {
-                    Add(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7538)
+                    Add(new Button((int) ButtonType.BuffIcon, 0x7538, 0x7539, 0x7539)
                     {
                         X = 40,
                         Y = 50,
@@ -666,7 +667,14 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-    
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 0)
+                Dispose();
+        }
+
         private enum MobileStats
         {
             Name,
@@ -1060,6 +1068,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _labels[(int) stat] = label;
             Add(label);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            if (Engine.GlobalSettings.ShardType != 2)
+                Dispose();
         }
 
         private enum MobileStats

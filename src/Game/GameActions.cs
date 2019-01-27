@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -195,9 +195,9 @@ namespace ClassicUO.Game
             Socket.Send(new PStatusRequest(serial));
         }
 
-        public static void TargetCancel(Serial cursorID, byte cursorType)
+        public static void TargetCancel(TargetType type, Serial cursorID, byte cursorType)
         {
-            Socket.Send(new PTargetCancel(cursorID, cursorType));
+            Socket.Send(new PTargetCancel(type, cursorID, cursorType));
         }
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)

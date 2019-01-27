@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -36,6 +36,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class ServerSelectionGump : Gump
     {
+        private const ushort SELECTED_COLOR = 0x0021;
+        private const ushort NORMAL_COLOR = 0x034F;
+
         public ServerSelectionGump() : base(0,0)
         {
             //AddChildren(new LoginBackground(true));
@@ -131,8 +134,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+
             foreach (ServerListEntry server in loginScene.Servers)
                 scrollArea.Add(new ServerEntryGump(server));
+
             Add(scrollArea);
 
             if (loginScene.Servers.Length > 0)
@@ -170,14 +175,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 switch ((Buttons) buttonID)
                 {
                     case Buttons.Next:
-
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer((byte) loginScene.Servers[0].Index);
-
+                            loginScene.SelectServer((byte) loginScene.Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                         break;
                     case Buttons.Prev:
                         loginScene.StepBack();
-
                         break;
                 }
             }
@@ -185,14 +187,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            if (key == SDL.SDL_Keycode.SDLK_RETURN)
+            if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte)loginScene.Servers[0].Index);
+                    loginScene.SelectServer((byte)loginScene.Servers[(Engine.GlobalSettings.LastServerNum - 1)].Index);
             }
         }
-
 
         private enum Buttons
         {
@@ -208,11 +209,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
-            private readonly ushort _hoverColor = 0x0021;
             private readonly RenderedText _labelName;
             private readonly RenderedText _labelPacketLoss;
             private readonly RenderedText _labelPing;
-            private readonly ushort _normalColor = 0x034F;
 
             public ServerEntryGump(ServerListEntry entry)
             {
@@ -241,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Text = text,
                     Font = 5,
                     IsUnicode = false,
-                    Hue = _normalColor,
+                    Hue = _buttonId == Engine.GlobalSettings.LastServerNum ? SELECTED_COLOR : NORMAL_COLOR,
                     Align = TEXT_ALIGN_TYPE.TS_LEFT,
                     MaxWidth = 0
                 };
@@ -260,9 +259,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseOver(int x, int y)
             {
-                _labelName.Hue = _hoverColor;
-                _labelPing.Hue = _hoverColor;
-                _labelPacketLoss.Hue = _hoverColor;
+                _labelName.Hue = SELECTED_COLOR;
+                _labelPing.Hue = SELECTED_COLOR;
+                _labelPacketLoss.Hue = SELECTED_COLOR;
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();
@@ -271,9 +270,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseExit(int x, int y)
             {
-                _labelName.Hue = _normalColor;
-                _labelPing.Hue = _normalColor;
-                _labelPacketLoss.Hue = _normalColor;
+                _labelName.Hue = NORMAL_COLOR;
+                _labelPing.Hue = NORMAL_COLOR;
+                _labelPacketLoss.Hue = NORMAL_COLOR;
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();

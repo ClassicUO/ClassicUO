@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -261,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
                 {
                     Mobile.Serial
-                });
+                }, new Tuple<ushort, string>[0]);
             }
         }
 
@@ -325,6 +326,8 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
+        public void Update() => _paperDollInteractable.Update();
+
         public override void OnButtonClick(int buttonID)
         {
 	        switch ((Buttons)buttonID)
@@ -364,12 +367,8 @@ namespace ClassicUO.Game.UI.Gumps
 			        break;
 		        case Buttons.Skills:
 
-		            SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
-
-                    if (gumpSkills == null)
-				        Engine.UI.Add(new SkillGumpAdvanced());
-			        else
-                        gumpSkills.BringOnTop();
+		            World.SkillsRequested = true;
+                    NetClient.Socket.Send(new PSkillsRequest(World.Player));        
 
                     break;
 		        case Buttons.Guild:

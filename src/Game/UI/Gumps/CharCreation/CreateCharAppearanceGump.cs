@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            Add(_hairLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0x07F4, font: 9)
+            Add(_hairLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
             {
                 X = 98, Y = 142
             }, 1);
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0x07F4, font: 9)
+                Add(_facialLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
                 {
                     X = 98, Y = 186
                 }, 1);
@@ -481,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _columns = columns;
                 _layer = layer;
 
-                Add(new Label(FileManager.Cliloc.GetString(label), false, 0x07F4, font: 9)
+                Add(new Label(FileManager.Cliloc.GetString(label), false, 0, font: 9)
                 {
                     X = 0, Y = 0
                 });

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -108,27 +108,31 @@ namespace ClassicUO.Game.UI.Gumps
             ControlInfo.Layer = UILayer.Over;
         }
 
-        private static TopBarGump _gump;
+        //private static TopBarGump _gump;
 
         public static void Create()
         {
-            if (_gump == null)
+            TopBarGump gump = Engine.UI.GetByLocalSerial<TopBarGump>();
+
+            if (gump == null)
             {
                 if (Engine.Profile.Current.TopbarGumpPosition.X < 0 || Engine.Profile.Current.TopbarGumpPosition.Y < 0)
                     Engine.Profile.Current.TopbarGumpPosition = Point.Zero;
                 
-                Engine.UI.Add(_gump = new TopBarGump()
+                Engine.UI.Add(gump = new TopBarGump()
                 {
                     X = Engine.Profile.Current.TopbarGumpPosition.X,
                     Y = Engine.Profile.Current.TopbarGumpPosition.Y,
                 });
 
                 if (Engine.Profile.Current.TopbarGumpIsMinimized)
-                    _gump.ChangePage(2);
+                    gump.ChangePage(2);
             }
-
+            else
+            {
+                Log.Message(LogTypes.Error, "TopBarGump already exists!!");
+            }
         }
-
 
         public bool IsMinimized { get; private set; }
        
@@ -152,7 +156,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnDragEnd(x, y);
             Engine.Profile.Current.TopbarGumpPosition = Location;
         }
-
 
         public override void OnButtonClick(int buttonID)
         {

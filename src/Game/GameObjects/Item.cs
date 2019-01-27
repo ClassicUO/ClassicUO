@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -24,7 +24,6 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -33,7 +32,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class Item : Entity
+    internal partial class Item : Entity
     {
         private ushort _amount;
         private Serial _container;
@@ -103,8 +102,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
-
         public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
@@ -156,14 +153,14 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags);
+                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                                 if (x < minX) minX = x;
                                 if (x > maxX) maxX = x;
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
-                                if (flags != 0)
+                                if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
                                     {
@@ -171,6 +168,8 @@ namespace ClassicUO.Game.GameObjects
                                     });
                                 }                              
                             }
+
+                            FileManager.Multi.ReleaseLastMultiDataRead();
 
                             MultiInfo = new MultiInfo((short) X, (short) Y)
                             {
@@ -193,6 +192,8 @@ namespace ClassicUO.Game.GameObjects
                         MultiInfo = null;
                     }
                 }
+
+                AllowedToDraw = !_isMulti;
             }
         }
 
@@ -231,8 +232,29 @@ namespace ClassicUO.Game.GameObjects
                 {
                     base.Graphic = value;
                     _itemData = null;
-                    Name = ItemData.Name;
+                    //Name = ItemData.Name;
+
+                    CheckGraphicChange();
                 }
+            }
+        }
+
+        private void CheckGraphicChange()
+        {
+            if (!IsCorpse)
+                AllowedToDraw = Graphic > 2 && DisplayedGraphic > 2 && !GameObjectHelper.IsNoDrawable(Graphic) && !IsMulti;
+            else
+            {
+                if ((Direction & Direction.Running) != 0)
+                {
+                    UsedLayer = true;
+                    Direction &= (Direction)0x7F;
+                }
+                else
+                    UsedLayer = false;
+
+                Layer = (Layer)Direction;
+                AllowedToDraw = true;
             }
         }
 
@@ -250,8 +272,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public event EventHandler OwnerChanged;
-
-        protected override View CreateView() => new ItemView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -555,10 +575,6 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
 
         public override void ProcessAnimation()
         {

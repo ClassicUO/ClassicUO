@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -20,7 +20,8 @@
 #endregion
 using System;
 
-using ClassicUO.Utility.Logging;
+using ClassicUO.Game.UI.Gumps;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -44,40 +45,19 @@ namespace ClassicUO.Game.Scenes
             switch (type)
             {
                 case ScenesType.Login:
+                    Engine.IsFullScreen = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
-
                     break;
-                case ScenesType.Game:
-                    Engine.FullScreenMode(2);
-                    CurrentScene = new GameScene();
 
+                case ScenesType.Game:
+                    Engine.IsFullScreen = true;
+                    CurrentScene = new GameScene();                   
                     break;
             }
 
             CurrentScene.Load();
-        }
-
-        public void ChangeScene(Scene scene)
-        {
-            CurrentScene?.Dispose();
-            CurrentScene = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            switch (scene)
-            {
-                case LoginScene login:
-                    Engine.WindowWidth = 640;
-                    Engine.WindowHeight = 480;
-                    CurrentScene = login;
-                    break;
-                case GameScene game:
-                    Engine.FullScreenMode(2);
-                    CurrentScene = game;
-                    break;
-            }
         }
 
         public T GetScene<T>() where T : Scene

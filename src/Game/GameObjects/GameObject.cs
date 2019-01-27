@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -26,7 +26,6 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -39,10 +38,9 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract partial class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
-        private View _view;
         public Vector3 Offset;
         private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
         private Tile _tile;
@@ -100,8 +98,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual Graphic Graphic { get; set; }
        
-        public View View => _view ?? (_view = CreateView());
-
         public sbyte AnimIndex { get; set; }
 
         public int CurrentRenderIndex { get; set; }
@@ -158,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var overhead = _overHeads[i];
                 overhead.Update(totalMS, frameMS);
-                
+
                 if (overhead.IsDisposed)
                     _overHeads.RemoveAt(i--);
             }
@@ -177,6 +173,18 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public void AddToTile() => AddToTile(X, Y);
+
+        public void AddToTile(Tile tile)
+        {
+            if (World.Map != null)
+            {
+                if (Position != Position.INVALID)
+                    _tile?.RemoveGameObject(this);
+
+                _tile = tile;
+                _tile?.AddGameObject(this);
+            }
+        }
       
 
         public event EventHandler Disposed, OverheadAdded;
@@ -189,11 +197,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
-
-        protected virtual View CreateView()
-        {
-            return null;
-        }
 
         public TextOverhead AddOverhead(MessageType type, string message)
         {
@@ -263,12 +266,6 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        protected void DisposeView()
-        {
-            if (_view != null)
-                _view = null;
-        }
-
         //~GameObject()
         //{
         //    Dispose();
@@ -282,12 +279,8 @@ namespace ClassicUO.Game.GameObjects
 
             Disposed.Raise();
 
-            DisposeView();
-
             _tile?.RemoveGameObject(this);
             _tile = null;
-
-            //Tile = null;
 
             foreach (TextOverhead textOverhead in _overHeads)
             {
@@ -295,7 +288,7 @@ namespace ClassicUO.Game.GameObjects
             }
             _overHeads.Clear();
 
-            //GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -22,6 +22,7 @@
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -29,14 +30,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
-        private Checkbox _checkboxSaveAccount;
+        private Checkbox _checkboxSaveAccount, _checkboxAutologin, _cryptPassword;
         private readonly Button _nextArrow0;
 
         private float _time;
 
-
         public override void OnKeyboardReturn(int textID, string text)
         {
+            SaveCheckboxStatus();
             Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 
@@ -45,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
-
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                 // Full background
@@ -99,16 +99,36 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 30
             });
 
-            Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3)
+          
+            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
             {
-                X = 328,
+                X = 200,
                 Y = 417
             });
+
+            Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 1, 0x0386, false)
+            {
+                X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
+                Y = 417
+            });
+
+            //Add(_cryptPassword = new Checkbox(0x00D2, 0x00D3, "Crypt password", 1, 0x0386, false)
+            //{
+            //    X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
+            //    Y = 417
+            //});
+
+
+            _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
+            _checkboxAutologin.IsChecked = Engine.GlobalSettings.AutoLogin;
+            //_cryptPassword.IsChecked = true;
+
             //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
 
             //g_MainScreen.m_AutoLogin =
             //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
             //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
+
             Add(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
             {
                 X = 253,
@@ -159,7 +179,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 IsPassword = true
             });
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
-            _textboxPassword.SetText(Engine.GlobalSettings.Password);
+            _textboxPassword.SetText( Crypter.Decrypt(Engine.GlobalSettings.Password));
+        }
+
+        private void SaveCheckboxStatus()
+        {
+            Engine.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
+            Engine.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
 
         private ushort _buttonNormal = 0x15A4;
@@ -202,12 +228,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
             switch ((Buttons)buttonID)
             {
                 case Buttons.NextArrow:
+                    SaveCheckboxStatus();
                     Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
-                    
                     break;
                 case Buttons.Quit:
                     Engine.Quit();
-
                     break;
             }
         }

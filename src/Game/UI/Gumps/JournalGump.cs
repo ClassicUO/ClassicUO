@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -34,14 +34,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         public JournalGump() : base(0, 0)
         {
+            Height = 300;
             CanMove = true;
             CanBeSaved = true;
-            Add(_background = new ExpandableScroll(0, 0, 300)
+            Add(_background = new ExpandableScroll(0, 0, Height)
             {
                 TitleGumpID = 0x82A
             });
-            _scrollBar = new ScrollFlag(this, 0, 0, Height);
+
+            _scrollBar = new ScrollFlag(-25, 0, Height, true);
+            
             Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
+
+            Add(_scrollBar);
         }
 
         protected override void OnMouseWheel(MouseEvent delta)

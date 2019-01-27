@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -56,15 +56,12 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, position, hue);
         }
 
-        //protected override void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    //if (!(Engine.UI.KeyboardFocusControl is TextBox tb && tb.RootParent is WorldViewportGump))
-        //    //{
-        //    //    Engine.UI.KeyboardFocusControl = Parent
-        //    //                                           .FindControls<SystemChatControl>()
-        //    //                                           .FirstOrDefault()?
-        //    //                                           .GetFirstControlAcceptKeyboardInput();
-        //    //}
-        //}
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (!(Engine.UI.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))
+                Parent.GetFirstControlAcceptKeyboardInput()?.SetKeyboardFocus();
+
+            base.OnMouseUp(x, y, button);
+        }
     }
 }

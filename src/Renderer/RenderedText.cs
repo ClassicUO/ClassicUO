@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -67,6 +67,8 @@ namespace ClassicUO.Renderer
         public byte Cell { get; set; }
 
         public bool IsHTML { get; set; }
+
+        public bool RecalculateWidthByInfo { get; set; }
 
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
@@ -165,6 +167,9 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+
+            FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+
             bool ispartial = false;
 
             if (IsUnicode)
@@ -182,6 +187,7 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(false);
+            FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Dispose()

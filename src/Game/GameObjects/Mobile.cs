@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
@@ -70,6 +69,9 @@ namespace ClassicUO.Game.GameObjects
         {
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
+
+            _frames = new ViewLayer[(int)Layer.Legs];
+            HasShadow = true;
         }
 
         private void CalculateRandomIdleTime()
@@ -187,19 +189,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //public bool WarMode
-        //{
-        //    get { return _warMode; }
-        //    set
-        //    {
-        //        if (_warMode != value)
-        //        {
-        //            _warMode = value;
-        //            _delta |= Delta.Attributes;
-        //        }
-        //    }
-        //}
-
         public bool IsRenamable
         {
             get => _isRenamable;
@@ -218,8 +207,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
 
         public bool IsPoisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
-
-        public bool IsHidden => ((byte) Flags & 0x80) != 0;
 
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
 
@@ -240,8 +227,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
-
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
 
         public bool IsMounted => Equipment[(int) Layer.Mount] != null;
 
@@ -277,10 +262,6 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StaminaChanged;
 
-        protected override View CreateView()
-        {
-            return new MobileView(this);
-        }
 
         public void SetSAPoison(bool value)
         {

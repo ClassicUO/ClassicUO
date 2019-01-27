@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,26 +32,49 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollFlag : Control, IScrollBar
     {
-        private bool _btnSliderClicked;
+        private const int TIME_BETWEEN_CLICKS = 500;
+
         private Point _clickPosition;
         private int _max, _min;
-        private Rectangle _rect;
-        private int _sliderExtentTop, _sliderExtentHeight;
         private float _sliderPosition;
-        private SpriteTexture _texture;
         private float _value;
+        private float _timeUntilNextClick;
+        private readonly SpriteTexture _upButton;
+        private SpriteTexture _downButton;
+        private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
-        public ScrollFlag(Control parent, int x, int y, int height) : this(parent)
+        private Rectangle _rectUpButton, _rectDownButton;
+
+        private bool _showButtons;
+
+        public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
-            Location = new Point(x, y);
-            _sliderExtentTop = y;
-            _sliderExtentHeight = height;
+            X = x;
+            Y = y;
+            Height = height;
+            
+            //TODO:
+            _showButtons = false; // showbuttons;
         }
 
-        public ScrollFlag(Control parent) : base(parent)
+        public ScrollFlag() : base()
         {
             AcceptMouseInput = true;
+
+            Texture = FileManager.Gumps.GetTexture(0x0828);
+            Width = Texture.Width;
+            Height = Texture.Height;
+
+            _upButton = FileManager.Gumps.GetTexture(0x0824);
+            _downButton = FileManager.Gumps.GetTexture(0x0825);
+
+            _rectUpButton = new Rectangle(0, 0, _upButton.Width, _upButton.Height);
+            _rectDownButton = new Rectangle(0, Height, _downButton.Width, _downButton.Height);
+
+            WantUpdateSize = false;
         }
+
+        protected override ClickPriority Priority { get; } = ClickPriority.High;
 
         public event EventHandler ValueChanged;
 
@@ -102,14 +125,6 @@ namespace ClassicUO.Game.UI.Controls
             return Contains(x, y);
         }
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            _texture = FileManager.Gumps.GetTexture(0x0828);
-            Width = _texture.Width;
-            Height = _texture.Height;
-        }
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -117,15 +132,39 @@ namespace ClassicUO.Game.UI.Controls
             if (MaxValue <= MinValue || MinValue >= MaxValue)
                 Value = MaxValue = MinValue;
             _sliderPosition = GetSliderYPosition();
-            _texture.Ticks = (long) totalMS;
+
+
+            if (_btUpClicked || _btDownClicked)
+            {
+                if (_timeUntilNextClick <= 0f)
+                {
+                    _timeUntilNextClick += TIME_BETWEEN_CLICKS;
+                    if (_btUpClicked)
+                        Value -= ScrollStep;
+
+                    if (_btDownClicked)
+                        Value += ScrollStep;
+                }
+                _timeUntilNextClick -= (float)totalMS;
+            }
+
+
+            Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
             if (MaxValue != MinValue)
-                batcher.Draw2D(_texture, new Point(position.X - 5, (int) (position.Y + _sliderPosition)), Vector3.Zero);
+                batcher.Draw2D(Texture, p, Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            if (_showButtons)
+            {
+                batcher.Draw2D(_upButton, position, Vector3.Zero);
+                batcher.Draw2D(_downButton, new Point(position.X, position.Y + Height), Vector3.Zero);
+            }
+
+            return base.Draw(batcher, p, hue);
         }
 
         private float GetSliderYPosition()
@@ -138,12 +177,25 @@ namespace ClassicUO.Game.UI.Controls
 
         private float GetScrollableArea()
         {
-            return Height - _texture.Height;
+            return Height - Texture.Height;
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (Contains(x, y))
+            if (button != MouseButton.Left)
+                return;
+
+            _timeUntilNextClick = 0f;
+
+            if (_showButtons && _rectDownButton.Contains(x, y))
+            {
+                _btDownClicked = true;
+            }
+            else if (_showButtons && _rectUpButton.Contains(x, y))
+            {
+                _btUpClicked = true;
+            }
+            else if (Contains(x, y))
             {
                 _btnSliderClicked = true;
                 _clickPosition = new Point(x, y);
@@ -152,6 +204,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return;
+
+            _btDownClicked = false;
+            _btUpClicked = false;
             _btnSliderClicked = false;
         }
 
@@ -193,12 +250,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            x -= 5;
-            _rect.Y = (int) _sliderPosition;
-            _rect.Width = _texture.Width;
-            _rect.Height = _texture.Height;
+            y -= (int)_sliderPosition;
 
-            return _rect.Contains(x, y);
+            return Texture.Contains(x, y);
         }
     }
 }

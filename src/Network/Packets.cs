@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -507,30 +508,21 @@ namespace ClassicUO.Network
             WriteUInt(server);
             WriteUInt((uint) buttonID);
 
-            if (switches == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) switches.Length);
+            WriteUInt((uint)switches.Length);
 
-                for (int i = switches.Length - 1; i >= 0; i--)
-                    WriteUInt(switches[i]);
+            for (int i = switches.Length - 1; i >= 0; i--)
+                WriteUInt(switches[i]);
+
+            WriteUInt((uint)entries.Length);
+
+            for (int i = entries.Length - 1; i >= 0; i--)
+            {
+                int length = Math.Min(239, entries[i].Item2.Length);
+                WriteUShort(entries[i].Item1);
+                WriteUShort((ushort)length);
+                WriteUnicode(entries[i].Item2, length);
             }
 
-            if (entries == null)
-                WriteUInt(0);
-            else
-            {
-                WriteUInt((uint) entries.Length);
-
-                for (int i = entries.Length - 1; i >= 0 ; i--)
-                {
-                    int length = Math.Min(239, entries[i].Item2.Length);
-                    WriteUShort(entries[i].Item1);
-                    WriteUShort((ushort) length);
-                    WriteUnicode(entries[i].Item2, length);
-                }
-            }
         }
     }
 
@@ -620,7 +612,7 @@ namespace ClassicUO.Network
     {
         public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            var e = World.Get(entity);
+            Entity e = World.Get(entity);
 
             WriteByte(0x00);
             WriteUInt(cursorID);
@@ -651,38 +643,38 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetCancel : PacketWriter
     {
-        public PTargetCancel(Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetCancel(TargetType type, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            WriteByte(0x00);
+            WriteByte((byte) type);
             WriteUInt(cursorID);
             WriteByte(cursorType);
-            WriteUInt(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
+            WriteUInt(0);
+            WriteUInt(0xFFFF_FFFF);
+            WriteByte(0);
+            WriteByte(0);
+            WriteUShort(0);
         }
     }
 
     internal sealed class PASCIIPromptResponse : PacketWriter
     {
-        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x9A)
+        public PASCIIPromptResponse(string text, bool cancel) : base(0x9A)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
 
-            WriteASCII(text, len);
+            WriteASCII(text);
         }
     }
 
     internal sealed class PUnicodePromptResponse : PacketWriter
     {
-        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base(0xC2)
+        public PUnicodePromptResponse(string text, string lang, bool cancel) : base(0xC2)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
             WriteUInt((uint)(cancel ? 0 : 1));
             WriteASCII(lang, 3);
-            WriteUnicode(text, len);
+            WriteUnicode(text);
         }
     }
 

@@ -110,7 +110,7 @@ namespace ClassicUO.IO.Resources
                 });
         }
 
-        private unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
+        public unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
             //if (Engine.Profile != null && Engine.Profile.Current != null && Engine.Profile.Current.TreeToStumps && StaticFilters.IsTree(graphic))
             //{
@@ -193,7 +193,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
+                if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
                 {
                     for (int i = 0; i < width; i++)
                     {

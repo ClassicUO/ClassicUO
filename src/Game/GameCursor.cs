@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -55,7 +57,7 @@ namespace ClassicUO.Game
         private SpriteTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
         //private Hue _hue;
-        private bool _needGraphicUpdate;
+        private bool _needGraphicUpdate = true;
         private Point _offset;
         private Rectangle _rect;
 
@@ -68,16 +70,17 @@ namespace ClassicUO.Game
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
-                    Texture2D texture = FileManager.Art.GetTexture(id);
+
+                    ushort[] pixels = FileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
 
                     if (i == 0)
                     {
-                        if (texture != null)
+                        if (pixels != null && pixels.Length > 0)
                         {
                             float offX = 0;
                             float offY = 0;
-                            float dw = texture.Width;
-                            float dh = texture.Height;
+                            float dw = w;
+                            float dh = h;
 
                             if (id == 0x206A)
                                 offX = -4f;
@@ -167,6 +170,12 @@ namespace ClassicUO.Game
                                     break;
                             }
 
+                            //if (offX == 0 && offY == 0)
+                            //{
+                            //    offX = -1;
+                            //    offY = -1;
+                            //}
+
                             _cursorOffset[0, j] = (int) offX;
                             _cursorOffset[1, j] = (int) offY;
                         }
@@ -175,6 +184,17 @@ namespace ClassicUO.Game
                             _cursorOffset[0, j] = 0;
                             _cursorOffset[1, j] = 0;
                         }
+                    }
+
+                    if (pixels != null && pixels.Length > 0)
+                    {
+                        _cursorPixels[i, j] = new CursorInfo()
+                        {
+                            Width = w,
+                            Height = h,
+                            Pixels = pixels
+                        }; 
+
                     }
                 }
             }
@@ -193,8 +213,6 @@ namespace ClassicUO.Game
             }
         }
 
-        public ArtTexture Texture { get; private set; }
-
         private ItemHold _itemHold;
 
         public void SetDraggedItem(ItemHold hold)
@@ -205,65 +223,74 @@ namespace ClassicUO.Game
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
         }
 
-        public void Update(double totalMS, double frameMS)
+
+        private IntPtr  _cursor, _surface;
+
+        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
+
+        private struct CursorInfo
+        {
+            public ushort[] Pixels;
+            public int Width, Height;
+        }
+        
+        public unsafe void Update(double totalMS, double frameMS)
         {
             Graphic = AssignGraphicByState();
 
-            if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
+            if (/*Texture == null || Texture.IsDisposed ||*/ _needGraphicUpdate)
             {
-                Texture = FileManager.Art.GetTexture(Graphic);
+                //Texture = FileManager.Art.GetTexture(Graphic);
                 _needGraphicUpdate = false;
-            }
 
-            Texture.Ticks = (long) totalMS;
+                if (_cursor != IntPtr.Zero)
+                    SDL.SDL_FreeCursor(_cursor);
+
+                ushort id = Graphic;
+
+                if (id < 0x206A)
+                    id -= 0x2053;
+                else
+                    id -= 0x206A;
+                int war = World.InGame && World.Player.InWarMode ? 1 : 0;
+
+                ref CursorInfo info = ref _cursorPixels[war, id];
+
+                fixed (ushort* ptr = info.Pixels)
+                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
+
+                if (_surface != IntPtr.Zero)
+                {
+                    int hotX = -_cursorOffset[0, id];
+                    int hotY = -_cursorOffset[1, id];
+
+                    _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
+                    SDL.SDL_SetCursor(_cursor);
+                    SDL.SDL_FreeSurface(_surface);
+                }
+            }
 
             if (_itemHold != null && _itemHold.Enabled)
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        //private readonly RenderedText _text = new RenderedText()
-        //{
-        //    Font = 1,
-        //    FontStyle = FontStyle.BlackBorder,
-        //    IsUnicode =  true,         
-        //};
 
         public void Draw(Batcher2D sb)
         {
-            ushort id = Graphic;
-
-            if (id < 0x206A)
-                id -= 0x2053;
-            else
-                id -= 0x206A;
-
-            if (id < 16)
+            if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
-                if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
+                Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
+                Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                sb.Draw2D(_draggedItemTexture, p, _rect, hue);
+
+                if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
                 {
-                    Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
-                    Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                    p.X += 5;
+                    p.Y += 5;
                     sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-
-                    if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
-                    {
-                        p.X += 5;
-                        p.Y += 5;
-                        sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-                    }
                 }
-                DrawToolTip(sb, Mouse.Position);
-
-                Vector3 vec = World.InGame && !World.Player.InWarMode && World.MapIndex != 0 && !(Engine.UI.MouseOverControl is AbstractTextBox) ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
-
-                sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), vec);
-
-                //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-                //if (gs != null)
-                //    _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
-
-                //_text.Draw(sb, new Point(Mouse.Position.X, Mouse.Position.Y - 20));
             }
+            DrawToolTip(sb, Mouse.Position);
         }
 
         private void DrawToolTip(Batcher2D batcher, Point position)

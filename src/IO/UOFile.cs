@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -22,6 +22,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using ClassicUO.IO.Resources;
@@ -32,70 +33,15 @@ namespace ClassicUO.IO
 {
     internal unsafe class UOFile : DataReader
     {
-        private MemoryMappedViewAccessor _accessor;
-        private MemoryMappedFile _file;
-        internal MemoryMappedViewStream _Stream = null;
+        private protected MemoryMappedViewAccessor _accessor;
+        private protected MemoryMappedFile _file;
 
         public UOFile(string filepath)
         {
             FilePath = filepath;
         }
 
-        public string FilePath { get; private set; }
-
-        internal uint UltimaLiveReloader()
-        {
-            string oldfile = FilePath;
-            FilePath = Path.Combine(UltimaLive.ShardName, Path.GetFileName(FilePath));
-            if (!Directory.Exists(UltimaLive.ShardName))
-                return 0;
-            if ((!File.Exists(FilePath) || new FileInfo(FilePath).Length == 0) && oldfile != FilePath)
-            {
-                Log.Message(LogTypes.Trace, $"UltimaLive -> copying file:\t\t{FilePath} from {oldfile}");
-                File.Copy(oldfile, FilePath, true);
-            }
-            Log.Message(LogTypes.Trace, $"UltimaLive -> ReLoading file:\t\t{FilePath}");
-            FileInfo fileInfo = new FileInfo(FilePath);
-            if (!fileInfo.Exists)
-                return 0;
-            uint size = (uint)fileInfo.Length;
-            if (size > 0)
-            {
-                Resize(size);
-            }
-            else
-                return 0;
-            return _Stream != null ? size : 0;
-        }
-
-        internal void Resize(uint newsize)
-        {
-            var newmmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, newsize, MemoryMappedFileAccess.ReadWrite, null, HandleInheritability.None, false);
-            var newam = newmmf.CreateViewAccessor(0, newsize, MemoryMappedFileAccess.Read);
-            byte* ptr = null;
-
-            try
-            {
-                newam.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-                SetData(ptr, (long)newam.SafeMemoryMappedViewHandle.ByteLength);
-            }
-            catch
-            {
-                newmmf.Dispose();
-                newam.SafeMemoryMappedViewHandle.ReleasePointer();
-                newam.Dispose();
-                _Stream?.Dispose();
-                _Stream = null;
-                UltimaLive.IsUltimaLiveActive = false;
-                return;
-            }
-            _file.Dispose();
-            _file = newmmf;
-            _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-            _accessor.Dispose();
-            _accessor = newam;
-            _Stream = _file.CreateViewStream(0, newsize, MemoryMappedFileAccess.ReadWrite);
-        }
+        public string FilePath { get; private protected set; }
 
         public UOFileIndex3D[] Entries { get; protected set; }
 
@@ -136,7 +82,6 @@ namespace ClassicUO.IO
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
-            _Stream?.Dispose();
             UnloadEntries();
             Log.Message(LogTypes.Trace, $"Unloaded:\t\t{FilePath}");
         }
@@ -149,7 +94,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal void Fill(byte[] buffer, int count)
+        internal void Fill(ref byte[] buffer, int count)
         {
             fixed (byte* ptr = buffer)
             {

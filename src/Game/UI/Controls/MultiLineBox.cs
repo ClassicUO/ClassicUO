@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -152,6 +152,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else switch (key)
                 {
+                    case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
                         Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                         break;
@@ -188,6 +189,9 @@ namespace ClassicUO.Game.UI.Controls
                             ebook.OnHomeOrEnd(TxEntry, false);
                         else
                             TxEntry.SetCaretPosition(Text.Length - 1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_TAB:
+                        Parent.KeyboardTabToNextFocus(this);
                         break;
                 }
 

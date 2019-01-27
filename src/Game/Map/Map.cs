@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -61,18 +61,6 @@ namespace ClassicUO.Game.Map
 
         public Point Center { get; set; }
 
-        public Chunk GetMapChunk(int rblock, int blockX, int blockY)
-        {
-            ref Chunk chunk = ref Chunks[rblock];
-            if (chunk == null)
-            {
-                _usedIndices.Add(rblock);
-                chunk = new Chunk((ushort)blockX, (ushort)blockY);
-                chunk.Load(Index);
-            }
-            return chunk;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
@@ -129,15 +117,7 @@ namespace ClassicUO.Game.Map
 
         public void ClearBockAccess()
         {
-            unsafe
-            {
-                fixed (bool* ptr = _blockAccessList)
-                {
-                    byte* start = (byte*)ptr;
-                    byte* end = start + _blockAccessList.Length;
-                    while (&start[0] != &end[0]) *start++ = 0;
-                }
-            }
+            Array.Clear(_blockAccessList, 0, _blockAccessList.Length);
         }
 
         public sbyte CalculateNearZ(sbyte defaultZ, int x, int y, int z)
@@ -160,9 +140,6 @@ namespace ClassicUO.Game.Map
 
                     if (obj is Mobile)
                         continue;
-
-                    //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
-                    //    continue;
 
                     if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
                         continue;

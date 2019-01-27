@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -125,16 +125,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool AcceptKeyboardInput
         {
-            get
-            {
-                if (!IsEnabled || IsDisposed || !IsVisible || !IsInitialized)
-                    return false;
-
-                if (_acceptKeyboardInput)
-                    return true;
-
-                return _acceptKeyboardInput; // _children.Any(s => s.AcceptKeyboardInput);
-            }
+            get => IsEnabled && !IsDisposed && IsVisible && IsInitialized && _acceptKeyboardInput;
             set => _acceptKeyboardInput = value;
         }
 
@@ -341,6 +332,19 @@ namespace ClassicUO.Game.UI.Controls
                         Color.Green
                     });
                 }
+
+                //int w, h;
+
+                //if (Texture == null)
+                //{
+                //    w = Width;
+                //    h = Height;
+                //}
+                //else
+                //{
+                //    w = Texture.Width;
+                //    h = Texture.Height;
+                //}
 
                 batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
@@ -821,6 +825,27 @@ namespace ClassicUO.Game.UI.Controls
                 Parent.CloseWithRightClick();
         }
 
+        public void KeyboardTabToNextFocus(Control c)
+        {
+            int startIndex = _children.IndexOf(c);
+            for (int i = startIndex + 1; i < _children.Count; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+            for (int i = 0; i < startIndex; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+        }
+
         public virtual void OnButtonClick(int buttonID)
         {
             Parent?.OnButtonClick(buttonID);
@@ -848,6 +873,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             IsDisposed = true;
+
         }
     }
 }

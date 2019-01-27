@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -104,6 +104,9 @@ namespace ClassicUO.Game.Scenes
         {
             if (e.Button == MouseButton.Left)
             {
+                if (_dragginObject != null)
+                    _dragginObject = null;
+
                 if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                     return;
 
@@ -120,9 +123,6 @@ namespace ClassicUO.Game.Scenes
                                 TargetManager.TargetGameObject(obj);
                                 Mouse.LastLeftButtonClickTime = 0;
                             }
-
-                            break;
-                        case TargetType.Nothing:
 
                             break;
                         case TargetType.SetTargetClientSide:
@@ -153,8 +153,8 @@ namespace ClassicUO.Game.Scenes
                         switch (obj)
                         {
                             case Mobile mobile:
-                                MergeHeldItem(mobile);
-
+                               // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
+                               MergeHeldItem(mobile);
                                 break;
                             case Item item:
                                 if (item.IsCorpse)
@@ -373,7 +373,7 @@ namespace ClassicUO.Game.Scenes
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
-                TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
+                TargetManager.CancelTarget();
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -47,6 +47,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 1;
+
         [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
@@ -59,7 +61,9 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "preload_maps")] public bool PreloadMaps { get; set; }
 
-        [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; }
+        [JsonProperty(PropertyName = "saveaccount")] public bool SaveAccount { get; set; } = false;
+
+        [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; } = false;
 
         [JsonProperty(PropertyName = "login_music")]
         public bool LoginMusic { get; set; } = true;
@@ -68,7 +72,9 @@ namespace ClassicUO.Configuration
         public int LoginMusicVolume { get; set; } = 100;
 
         [JsonProperty(PropertyName = "shard_type")]
-        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = outlands, 2 = ??
+        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
+
+        [JsonProperty(PropertyName = "fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 
         public void Save()
         {

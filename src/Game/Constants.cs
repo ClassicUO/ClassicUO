@@ -28,7 +28,7 @@ namespace ClassicUO.Game
 
 
         public const int CLEAR_TEXTURES_DELAY = 3000;
-        public const int MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 5;
+        public const int MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_SOUND_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;

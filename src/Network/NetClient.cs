@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,7 +32,7 @@ namespace ClassicUO.Network
 {
     internal sealed class NetClient
     {
-        private const int BUFF_SIZE = 0x20000;
+        private const int BUFF_SIZE = 0x80000;
         private readonly object _sendLock = new object();
         private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;

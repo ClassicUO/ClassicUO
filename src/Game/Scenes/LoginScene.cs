@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -41,16 +41,6 @@ namespace ClassicUO.Game.Scenes
 {
     internal sealed class LoginScene : Scene
     {
-        public enum LoginRejectionReasons : byte
-        {
-            InvalidAccountPassword = 0x00,
-            AccountInUse = 0x01,
-            AccountBlocked = 0x02,
-            BadPassword = 0x03,
-            IdleExceeded = 0xFE,
-            BadCommuncation = 0xFF,
-        }
-
         public enum LoginStep
         {
             Main,
@@ -73,10 +63,8 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
 
-        public LoginRejectionReasons? LoginRejectionReason { get; private set; }
 
         public ServerListEntry[] Servers { get; private set; }
 
@@ -105,7 +93,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.PacketReceived += NetClient_PacketReceived;
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
-            NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
             string[] parts = Engine.GlobalSettings.ClientVersion.Split(new[]
             {
@@ -119,11 +107,11 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(0);
 
-            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
-                    Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+                    Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
                 }
             }
         }
@@ -198,36 +186,7 @@ namespace ClassicUO.Game.Scenes
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
 
-            if (LoginRejectionReason.HasValue)
-            {
-                switch (LoginRejectionReason.Value)
-                {
-                    case LoginRejectionReasons.BadPassword:
-                    case LoginRejectionReasons.InvalidAccountPassword:
-                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
-
-                        break;
-                    case LoginRejectionReasons.AccountInUse:
-                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
-
-                        break;
-                    case LoginRejectionReasons.AccountBlocked:
-                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
-
-                        break;
-                    case LoginRejectionReasons.IdleExceeded:
-                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
-
-                        break;
-                    case LoginRejectionReasons.BadCommuncation:
-                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
-
-                        break;
-                }
-
-                showButtons = LoadingGump.Buttons.OK;
-            }
-            else if (!string.IsNullOrEmpty(PopupMessage))
+            if (!string.IsNullOrEmpty(PopupMessage))
             {
                 labelText = PopupMessage;
                 showButtons = LoadingGump.Buttons.OK;
@@ -287,6 +246,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
+                Engine.GlobalSettings.LastServerNum = (ushort) ( 1 + ServerIndex) ;
+                Engine.GlobalSettings.Save();
+
                 CurrentLoginStep = LoginStep.LoginInToServer;
                 World.ServerName = Servers[ServerIndex].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
@@ -330,7 +292,6 @@ namespace ClassicUO.Game.Scenes
 
         public void StepBack()
         {
-            LoginRejectionReason = null;
             PopupMessage = null;
 
             switch (CurrentLoginStep)
@@ -376,27 +337,40 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_Disconnected(object sender, EventArgs e)
         {
-            Log.Message(LogTypes.Warning, "Disconnected!");
-            // TODO: Reset
+            Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+            Characters = null;
+            Servers = null;
+            PopupMessage = "Connection lost";
+            CurrentLoginStep = LoginStep.PopUpMessage;
+        }
+
+        private void Login_NetClient_Disconnected(object sender, EventArgs e)
+        {
+            Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)
         {
+            e.MoveToData();
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
                     ParseServerList(e);
 
                     // Save credentials to config file
-                    Engine.GlobalSettings.Username = Account;
-                    Engine.GlobalSettings.Password = Password;
-                    Engine.GlobalSettings.Save();
+                    if (Engine.GlobalSettings.SaveAccount)
+                    {
+                        Engine.GlobalSettings.Username = Account;
+                        Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
+                        Engine.GlobalSettings.Save();
+                    }
+
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
                     {
                         if (Servers.Length != 0)
-                            SelectServer( (byte) Servers[0].Index);
+                            SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                     }
 
                     break;
@@ -417,6 +391,7 @@ namespace ClassicUO.Game.Scenes
                     Engine.UI.Add(_currentGump = new CharacterSelectionGump());
 
 					break;
+
 				case 0xA9: // ReceiveCharacterList
                     ParseCharacterList(e);
 					ParseCities(e);
@@ -426,17 +401,22 @@ namespace ClassicUO.Game.Scenes
 				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
 				    {
 				        _isFirstLogin = false;
+                        bool haveAnyCharacter = false;
 
                         for (byte i = 0; i < Characters.Length; i++)
-				        {
-				            if (Characters[i].Length > 0 && Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                        {
+                            if (Characters[i].Length > 0)
 				            {
-				                SelectCharacter(i);
-                                return;
+                                haveAnyCharacter = true;
+                                if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                                {
+                                    SelectCharacter(i);
+                                    return;
+                                }
 				            }
 				        }
 
-                        if (Characters.Length != 0)
+                        if (haveAnyCharacter)
                             SelectCharacter(0);
 				    }
 
@@ -446,11 +426,13 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0x82: // ReceiveLoginRejection
-                    HandleLoginRejection(e);
-
-                    break;
+                case 0x85: // character list notification
                 case 0x53: // Error Code
-                    HandleErrorCode(e);
+                    //HandleErrorCode(e);
+                    byte code = e.ReadByte();
+
+                    PopupMessage = ServerErrorMessages.GetError(e.ID, code);
+                    CurrentLoginStep = LoginStep.PopUpMessage;
 
                     break;
             }
@@ -485,7 +467,6 @@ namespace ClassicUO.Game.Scenes
 
         private void ParseCharacterList(Packet p)
         {
-            p.MoveToData();
             int count = p.ReadByte();
             Characters = new string[count];
 
@@ -635,19 +616,6 @@ namespace ClassicUO.Game.Scenes
 	    {
 		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
 		}
-
-        private void HandleErrorCode(Packet reader)
-        {
-            PopupMessage = ServerErrorMessages.LoginErrors[reader.ReadByte()];
-            CurrentLoginStep = LoginStep.PopUpMessage;
-        }
-
-        private void HandleLoginRejection(Packet reader)
-        {
-            reader.MoveToData();
-            byte reasonId = reader.ReadByte();
-            LoginRejectionReason = (LoginRejectionReasons)reasonId;
-        }
     }
 
     internal class ServerListEntry

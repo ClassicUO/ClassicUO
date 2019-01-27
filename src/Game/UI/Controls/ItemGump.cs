@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -79,7 +79,6 @@ namespace ClassicUO.Game.UI.Controls
 
             TextOverhead overhead = (TextOverhead) sender;
 
-            overhead.Initialized = true;
             overhead.TimeToLive = 4000;
 
             FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
@@ -137,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture.Contains(x, y))
                 return true;
 
-            if (Item.Amount > 1 && Item.ItemData.IsStackable)
+            if (!Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
             {
                 if (Texture.Contains(x - 5, y - 5))
                     return true;
@@ -181,9 +180,7 @@ namespace ClassicUO.Game.UI.Controls
                             }
 
                             break;
-                        case TargetType.Nothing:
 
-                            break;
                         case TargetType.SetTargetClientSide:
                             gs.SelectedObject = Item;
 

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -24,7 +24,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed class IsometricLight
     {
-        private float _direction = 4.12f;
         private float _height = -0.75f;
         private int _overall = 9;
         private int _personal = 9;
@@ -49,16 +48,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public float Direction
-        {
-            get => _direction;
-            set
-            {
-                _direction = value;
-                Recalculate();
-            }
-        }
-
         public float Height
         {
             get => _height;
@@ -77,14 +66,12 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Personal > Overall)
             {
-                IsometricLevel = 0;
+                IsometricLevel = 1;
 
                 return;
             }
 
             IsometricLevel = (32 - Overall + Personal) / 32.0f;
-            //_direction = 1.2f;
-            //IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
         }
     }
 }

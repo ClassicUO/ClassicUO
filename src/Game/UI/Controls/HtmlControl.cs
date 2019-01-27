@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -149,18 +149,20 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (UseFlagScrollbar)
                 {
-                    _scrollBar = new ScrollFlag(this)
+                    _scrollBar = new ScrollFlag()
                     {
                         Location = new Point(Width - 14, 0)
                     };
                 }
                 else
-                    _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                    _scrollBar = new ScrollBar(Width - 14, 0, Height);
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = /* _gameText.Height*//* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
+
+                Add((Control)_scrollBar);
             }
 
             //if (Width != _gameText.Width)

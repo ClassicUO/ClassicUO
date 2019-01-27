@@ -16,6 +16,7 @@ namespace ClassicUO.Game.Data
         {
             switch (g)
             {
+                // giant holiday tree 0x9DBB
                 case 0x0CCA:
                     case 0x0CCB: case 0x0CCC: case 0x0CCD: case 0x0CD0: case 0x0CD3: case 0x0CD6: case 0x0CD8: case 0x0CDA: case 0x0CDD: case 0x0CE0:
                     case 0x0CE3: case 0x0CE6: case 0x0D41: case 0x0D42: case 0x0D43: case 0x0D44: case 0x0D57: case 0x0D58: case 0x0D59: case 0x0D5A: case 0x0D5B:

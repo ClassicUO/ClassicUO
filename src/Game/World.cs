@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -40,7 +40,7 @@ namespace ClassicUO.Game
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 
-        public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
+        //public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
 
@@ -53,6 +53,8 @@ namespace ClassicUO.Game
         public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static Serial LastAttack { get; set; }
+
+        public static bool SkillsRequested { get; set; }
 
         public static int MapIndex
         {
@@ -202,15 +204,16 @@ namespace ClassicUO.Game
 
             if (item == null)
             {
-                ToAdd.RemoveWhere(i => i == serial);
+                //ToAdd.RemoveWhere(i => i == serial);
 
                 return false;
             }
 
-            if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
+            if (item.Layer != Layer.Invalid && item.RootContainer.IsValid)
             {
-                Mobile mobile = Mobiles.Get(item.RootContainer);
-                if (mobile != null) mobile.Equipment[(int) item.Layer] = null;
+                Entity e = Get(item.RootContainer);
+                if (e != null && e.HasEquipment)
+                    e.Equipment[(int) item.Layer] = null;
             }
 
             foreach (Item i in item.Items)
@@ -252,9 +255,7 @@ namespace ClassicUO.Game
             Player = null;
             Map.Dispose();
             Map = null;
-            ToAdd.Clear();
-            IO.UltimaLive.IsUltimaLiveActive = false;
-            IO.UltimaLive.ShardName = null;
+            //ToAdd.Clear();
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();

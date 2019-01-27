@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -51,6 +51,9 @@ namespace ClassicUO.Utility
 
         public static void BeginFrame()
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return;
+
             if (m_ThisFrameData.Count > 0)
             {
                 for (int i = 0; i < m_ThisFrameData.Count; i++)
@@ -79,17 +82,23 @@ namespace ClassicUO.Utility
 
         public static void EndFrame()
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return;
             LastFrameTimeMS = (_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d / Stopwatch.Frequency;
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
         }
 
         public static void EnterContext(string context_name)
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return;
             m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
         }
 
         public static void ExitContext(string context_name)
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return;
             if (m_Context[m_Context.Count - 1].Name != context_name)
                 Log.Message(LogTypes.Error, "Profiler.ExitProfiledContext: context_name does not match current context.");
             string[] context = new string[m_Context.Count];
@@ -103,6 +112,9 @@ namespace ClassicUO.Utility
 
         public static bool InContext(string context_name)
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return false;
+
             if (m_Context.Count == 0)
                 return false;
 
@@ -111,6 +123,8 @@ namespace ClassicUO.Utility
 
         public static ProfileData GetContext(string context_name)
         {
+            if (!Engine.GlobalSettings.Profiler)
+                return ProfileData.Empty;
             for (int i = 0; i < m_AllFrameData.Count; i++)
             {
                 if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)

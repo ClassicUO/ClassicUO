@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,12 +21,14 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -50,17 +52,22 @@ namespace ClassicUO.Game.UI.Controls
             if (transparent)
                 Alpha = 0.5f;
 
+            if (item.Graphic == 0x26b0)
+            {
+
+            }
+
             _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
 
             ushort id = Item.ItemData.AnimID;
 
-            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
-            {
-                if (dict.TryGetValue(id, out EquipConvData data))
-                    id = data.Gump;
-            }
+            //if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
+            //{
+            //    if (dict.TryGetValue(id, out EquipConvData data))
+            //        id = data.Gump;
+            //}
 
             Texture = FileManager.Gumps.GetTexture( (ushort) (id + offset));
 
@@ -69,6 +76,8 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Texture == null)
             {
+                if (item.Layer != Layer.Face)
+                    Log.Message(LogTypes.Error, $"No texture founded for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
                 return;
             }

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -51,12 +51,25 @@ namespace ClassicUO.Game.Scenes
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
+        private float _scale = 1;
 
         public GameScene() : base()
         {
         }
 
-        public float Scale { get; set; } = 1;
+        public float Scale
+        {
+            get => _scale;
+            set
+            {
+
+                if (value < 0.7f)
+                    value = 0.7f;
+                else if (value > 2.3f)
+                    value = 2.3f;
+                _scale = value;              
+            }
+        }
 
         public Texture2D ViewportTexture => _renderTarget;
 
@@ -72,17 +85,17 @@ namespace ClassicUO.Game.Scenes
 
                 if (value == null)
                 {
-                    _selectedObject.View.IsSelected = false;
+                    _selectedObject.IsSelected = false;
                     _selectedObject = null;
                 }
                 else
                 {
-                    if (_selectedObject != null && _selectedObject.View.IsSelected)
-                        _selectedObject.View.IsSelected = false;
+                    if (_selectedObject != null && _selectedObject.IsSelected)
+                        _selectedObject.IsSelected = false;
                     _selectedObject = value;
 
                     
-                    _selectedObject.View.IsSelected = true;
+                    _selectedObject.IsSelected = true;
                 }
             }
         }
@@ -117,9 +130,11 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList(_mousePicker);
 
             WorldViewportGump viewport = new WorldViewportGump(this);
+            
             Engine.UI.Add(viewport);
 
-            TopBarGump.Create();
+            if (! Engine.Profile.Current.TopbarGumpIsDisabled)
+                TopBarGump.Create();
 
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
@@ -128,30 +143,39 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseDown += OnMouseDown;
             _viewPortGump.MouseUp += OnMouseUp;
             _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
-            //_viewPortGump.DragBegin += OnMouseDragBegin;
             _viewPortGump.MouseOver += OnMouseMove;
+            _viewPortGump.MouseWheel += (sender, e) =>
+            {
+                if (!Engine.Profile.Current.EnableScaleZoom)
+                    return;
+
+                if (e.Direction == MouseEvent.WheelScrollDown)
+                    Scale += 0.1f;
+                else
+                    Scale -= 0.1f;
+
+                if (Scale < 0.7f)
+                    Scale = 0.7f;
+                else if (Scale > 2.3f)
+                    Scale = 2.3f;
+
+                if (Engine.Profile.Current.SaveScaleAfterClose)
+                    Engine.Profile.Current.ScaleZoom = Scale;
+            };
 
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
-            //Engine.Input.MouseWheel += (sender, e) =>
-            //{
-            //    if (IsMouseOverWorld)
-            //    {
-            //        if (!e)
-            //            Scale += 0.1f;
-            //        else
-            //            Scale -= 0.1f;
 
-            //        if (Scale < 0.7f)
-            //            Scale = 0.7f;
-            //        else if (Scale > 2.3f)
-            //            Scale = 2.3f;
-            //    }
-            //};
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
             Chat.Message += ChatOnMessage;
+
+            if (Engine.Profile.Current.SaveScaleAfterClose)
+                Scale = Engine.Profile.Current.ScaleZoom;
+            else
+                Scale = 1f; // hard return to 1.0f
+
 
             Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());
@@ -188,6 +212,9 @@ namespace ClassicUO.Game.Scenes
                     name = e.Parent.Name;
                     text = $"*{e.Text}*";
 
+                    if (e.Hue == 0)
+                        hue = Engine.Profile.Current.EmoteHue;
+
                     break;
                 case MessageType.Label:
                     name = "You see";
@@ -221,8 +248,12 @@ namespace ClassicUO.Game.Scenes
                     hue = Engine.Profile.Current.GuildMessageHue;
                     break;
                 default:
+                    text = e.Text;
+                    name = e.Parent == null ? string.Empty : e.Parent.Name;
+                    hue = e.Hue;
+
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
-                    return;
+                    break;
             }
 
             _journalManager.Add(text, e.Font, hue, name);
@@ -241,7 +272,6 @@ namespace ClassicUO.Game.Scenes
             }
 
         }
-       
 
         public override void Unload()
         {
@@ -294,6 +324,9 @@ namespace ClassicUO.Game.Scenes
             }));
         }
 
+        private bool _alphaChanged;
+        private long _alphaTimer;
+
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             base.FixedUpdate(totalMS, frameMS);
@@ -301,8 +334,12 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            GetViewPort();
+            _alphaChanged = _alphaTimer < Engine.Ticks;
 
+            if (_alphaChanged)
+                _alphaTimer = Engine.Ticks + 20;
+
+            GetViewPort();
 
             UpdateMaxDrawZ();
             _renderListCount = 0;
@@ -438,18 +475,6 @@ namespace ClassicUO.Game.Scenes
             batcher.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
 
-            for (int i = 0; i < _renderListCount; i++)
-            {
-                GameObject obj = _renderList[i];
-                //Vector3 v = obj.RealScreenPosition;
-                //v.Z = 1 - (i / 1000000.0f);
-
-                if (obj.Z <= _maxGroundZ && obj.View.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
-                    RenderedObjectsCount++;
-            }
-
-            // Draw in game overhead text messages
-            _overheadManager.Draw(batcher, _mouseOverList, _offset);
 
 
             //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
@@ -458,6 +483,28 @@ namespace ClassicUO.Game.Scenes
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(100);
             //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
+
+            int z = World.Player.Z + 5;
+
+            for (int i = 0; i < _renderListCount; i++)
+            {
+                GameObject obj = _renderList[i];
+                if (obj.Z <= _maxGroundZ)
+                {
+                    obj.DrawTransparent = Engine.Profile.Current.UseCircleOfTransparency && obj.TransparentTest(z);
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                    {
+                        RenderedObjectsCount++;
+                    }
+
+                }
+            }
+
+            // Draw in game overhead text messages
+            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
+
 
             batcher.End();
             batcher.EnableLight(false);

@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -36,34 +36,32 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class MobileView : View
+    internal partial class Mobile
     {
         private readonly ViewLayer[] _frames;
         private int _layerCount;
 
-        public MobileView(Mobile mobile) : base(mobile)
-        {
-            _frames = new ViewLayer[(int) Layer.Legs];
-            HasShadow = true;
-        }
+        //public MobileView(Mobile mobile) : base(mobile)
+        //{
+            
+        //}
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (GameObject.IsDisposed)
+            if (IsDisposed)
                 return false;
 
-            Mobile mobile = (Mobile)GameObject;
             //mobile.AnimIndex = 0;
 
             bool mirror = false;
-            byte dir = (byte)mobile.GetDirectionForAnimation();
+            byte dir = (byte)GetDirectionForAnimation();
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            SetupLayers(dir, mobile, out int mountOffset);
+            SetupLayers(dir, this, out int mountOffset);
 
-            if (mobile.Graphic == 0)
+            if (Graphic == 0)
                 return false;
 
             AnimationFrameTexture bodyFrame = FileManager.Animations.GetTexture(_frames[0].Hash);
@@ -73,12 +71,12 @@ namespace ClassicUO.Game.Views
 
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = mountOffset + drawCenterY + (int)(mobile.Offset.Z / 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int)(Offset.Z / 4) - 22 - (int)(Offset.Y - Offset.Z - 3);
 
             if (IsFlipped)
-                drawX = -22 + (int)mobile.Offset.X;
+                drawX = -22 + (int)Offset.X;
             else
-                drawX = -22 - (int)mobile.Offset.X;
+                drawX = -22 - (int)Offset.X;
 
 
             /*if (_frames[0].IsSitting)
@@ -93,27 +91,27 @@ namespace ClassicUO.Game.Views
             Hue hue = 0, targetColor = 0;
             if (Engine.Profile.Current.HighlightMobilesByFlags)
             {
-                if (mobile.IsPoisoned)
+                if (IsPoisoned)
                     hue = 0x0044;
 
-                if (mobile.IsParalyzed)
+                if (IsParalyzed)
                     hue = 0x014C;
 
-                if (mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.IsYellowHits)
+                if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
                     hue = 0x0030;
             }
 
-            bool isAttack = mobile.Serial == World.LastAttack;
+            bool isAttack = Serial == World.LastAttack;
             bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
             bool needHpLine = false;
 
-            if (mobile != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == mobile))
+            if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == this))
             {
-                targetColor = Notoriety.GetHue(mobile.NotorietyFlag);
+                targetColor = Notoriety.GetHue(NotorietyFlag);
 
-                if (isAttack || mobile == TargetManager.LastGameObject)
+                if (isAttack || this == TargetManager.LastGameObject)
                 {
-                    if (TargetLineGump.TTargetLineGump?.Mobile != mobile)
+                    if (TargetLineGump.TTargetLineGump?.Mobile != this)
                     {
                         if (TargetLineGump.TTargetLineGump == null || TargetLineGump.TTargetLineGump.IsDisposed)
                         {
@@ -122,7 +120,7 @@ namespace ClassicUO.Game.Views
                         }
                         else
                         {
-                            TargetLineGump.TTargetLineGump.SetMobile(mobile);
+                            TargetLineGump.TTargetLineGump.SetMobile(this);
                         }
                     }
 
@@ -163,10 +161,10 @@ namespace ClassicUO.Game.Views
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
 
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(0x038E, 1, HueVector.Z);
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsPartial, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(this.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsPartial, 0, false);
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }
@@ -178,20 +176,20 @@ namespace ClassicUO.Game.Views
 
 
 
-            MessageOverHead(batcher, position, mobile.IsMounted ? 0 : -22);
+            MessageOverHead(batcher, position, IsMounted ? 0 : -22);
 
             if (needHpLine)
             {
-                position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
-                position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
+                //position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
+                //position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
 
-                TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + GameObject.Offset.X);
-                TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ GameObject.Offset.Y - GameObject.Offset.Z - 3);
+                //TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + Offset.X);
+                //TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ Offset.Y - Offset.Z - 3);
                 TargetLineGump.TTargetLineGump.BackgroudHue = targetColor;
                 
-                if (mobile.IsPoisoned)
+                if (IsPoisoned)
                     TargetLineGump.TTargetLineGump.HpHue = 63;
-                else if (mobile.IsYellowHits)
+                else if (IsYellowHits)
                     TargetLineGump.TTargetLineGump.HpHue = 53;
 
                 else
@@ -221,7 +219,7 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
+            if (texture.Contains(x, y)) list.Add(this, drawPosition);
         }
 
         private void SetupLayers(byte dir, Mobile mobile, out int mountOffset)
@@ -239,7 +237,7 @@ namespace ClassicUO.Game.Views
                         continue;
 
                     if (layer == Layer.Invalid)
-                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile);
+                        AddLayer(dir, mobile.GetGraphicForAnimation(), mobile.Hue, mobile, ispartial: true);
                     else
                     {
                         Item item;
@@ -285,13 +283,13 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile);
+                AddLayer(dir, mobile.Graphic, mobile.IsDead ? (Hue) 0x0386 : mobile.Hue, mobile);
         }
 
         private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
-            sbyte animIndex = GameObject.AnimIndex;
+            sbyte animIndex = mobile.AnimIndex;
 
             /* bool isitting = false;
             if (mobile.IsHuman && !mounted)

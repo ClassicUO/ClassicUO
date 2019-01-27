@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -33,26 +33,35 @@ namespace ClassicUO.Game.UI.Controls
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
         private Rectangle _rect;
+        private bool _isNormalScroll;
+        private int _scrollbarHeight;
 
-        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar)
+        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
             X = x;
             Y = y;
             Width = w;
             Height = h;
-
+            _isNormalScroll = normalScrollbar;
+            _scrollbarHeight = scrollbarHeight;
             if (normalScrollbar)
-                _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                _scrollBar = new ScrollBar( Width - 14, 0, Height);
             else
             {
-                _scrollBar = new ScrollFlag(this)
+                _scrollBar = new ScrollFlag()
                 {
-                    X = Width - 14, Height = h
+                    X = Width - 19, Height = h
                 };
+                Width = Width + 15;
             }
 
+            if (scrollbarHeight < 0)
+                scrollbarHeight = Height;
+
             _scrollBar.MinValue = 0;
-            _scrollBar.MaxValue = Height;
+            _scrollBar.MaxValue = scrollbarHeight;
+
+            Add((Control)_scrollBar);
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
@@ -76,6 +85,14 @@ namespace ClassicUO.Game.UI.Controls
             base.OnInitialize();
         }
 
+        public void Scroll(bool isup)
+        {
+            if (isup)
+                _scrollBar.Value -= _scrollBar.ScrollStep;
+            else
+                _scrollBar.Value += _scrollBar.ScrollStep;
+        }
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
@@ -89,8 +106,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.EnableScissorTest(true);
                 int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
+                int maxheight = _scrollBar.Value + Height;
                 bool drawOnly1 = true;
+
+                position = _rect.Location;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -98,7 +117,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (!child.IsVisible)
                         continue;
-                    child.Y = height - _scrollBar.Value;
+
+                    child.Y = height - _scrollBar.Value + (_isNormalScroll ? 20 : 0);
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -164,13 +184,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem();
+            ScrollAreaItem item = new ScrollAreaItem()
+            {
+                CanMove = true
+            };
             item.Add(c);
             base.Add(item, page);
         }
 
-        public void AddChildren(ScrollAreaItem c, int page = 0)
+        public void Add(ScrollAreaItem c, int page = 0)
         {
+            c.CanMove = true;
             base.Add(c, page);
         }
 
@@ -182,15 +206,20 @@ namespace ClassicUO.Game.UI.Controls
 
         private void CalculateScrollBarMaxValue()
         {
-            _scrollBar.Height = Height;
+            _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
             int height = 0;
-            for (int i = 1; i < Children.Count; i++) height += Children[i].Height;
+            for (int i = 1; i < Children.Count; i++)
+                height += Children[i].Height;
+
             height -= _scrollBar.Height;
+
+            if (_isNormalScroll)
+                height += 40;
 
             if (height > 0)
             {
-                _scrollBar.MaxValue = height;
+                _scrollBar.MaxValue =  height;
 
                 if (maxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;

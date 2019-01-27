@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -518,8 +518,33 @@ namespace ClassicUO.Game.Managers
                             if (World.ClientFlags.TooltipsEnabled)
                             {
                                 string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
-                                Control last = gump.Children.Count > 0 ? gump.Children.Last() : null;
-                                last?.SetTooltip(cliloc);
+
+                                if (gparams.Length > 2 && gparams[2][0] == '@')
+                                {
+                                    string l = gparams[gparams.Length - 1];
+
+                                    if (l.Length > 2)
+                                    {
+                                        if (l[l.Length - 1] == '\'' && l[l.Length - 2] == '@')
+                                        {
+                                            sb = new StringBuilder();
+
+                                            for (int i = 2; i < gparams.Length - 1; i++)
+                                            {
+                                                sb.Append( i == 2 ? gparams[i].Substring(1, gparams[i].Length - 1) : gparams[i]);
+                                                sb.Append(' ');
+                                            }
+
+                                            cliloc = FileManager.Cliloc.Translate(cliloc, sb.ToString());
+                                        }
+                                        else
+                                            Log.Message(LogTypes.Error, $"Missing final ''@' into gump tooltip: {cliloc}");
+                                    }
+                                    else
+                                        Log.Message(LogTypes.Error, $"String '{l}' too short, something wrong with gump tooltip: {cliloc}");
+                                }
+
+                                gump.Children.Last()?.SetTooltip(cliloc);
                             }
 
                             break;

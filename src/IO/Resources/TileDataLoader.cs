@@ -12,10 +12,9 @@ using ClassicUO.Utility;
 namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
-    {    
+    {
         public LandTiles[] LandData { get; private set; }
         public StaticTiles[] StaticData { get; private set; }
-
 
         public override void Load()
         {
@@ -45,7 +44,7 @@ namespace ClassicUO.IO.Resources
                     int idx = i * 32 + j;
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     ushort textId = tiledata.ReadUShort();
-                    tiledata.Fill(bufferString, 20);
+                    tiledata.Fill(ref bufferString, 20);
                     string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
                     LandData[idx] = new LandTiles(flags, textId, name);
                 }
@@ -73,7 +72,7 @@ namespace ClassicUO.IO.Resources
                     ushort hue = tiledata.ReadUShort();
                     ushort lightIndex = tiledata.ReadUShort();
                     byte height = tiledata.ReadByte();
-                    tiledata.Fill(bufferString, 20);
+                    tiledata.Fill(ref bufferString, 20);
                     string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
                     StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);

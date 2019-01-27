@@ -13,11 +13,10 @@ namespace ClassicUO.IO.Resources
 {
     class MapLoader : ResourceLoader
     {
-        internal (UOFile[], UOFileMul[], UOFileMul[]) GetFileReferences => (_filesMap, _filesStatics, _filesIdxStatics);
         internal const int MAPS_COUNT = 6;
-        private readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
-        private readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
+        private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
+        private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
+        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
 
         private readonly UOFileMul[] _mapDifl = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _mapDif = new UOFileMul[MAPS_COUNT];
@@ -26,12 +25,18 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDif = new UOFileMul[MAPS_COUNT];
 
+        protected static UOFile GetMapFile(int map)
+        {
+            if (map < FileManager.Map._filesMap.Length)
+                return FileManager.Map._filesMap[map];
+            return null;
+        }
 
-        public IndexMap[][] BlockData { get; } = new IndexMap[MAPS_COUNT][];
+        public IndexMap[][] BlockData { get; private protected set; } = new IndexMap[MAPS_COUNT][];
 
-        public int[,] MapBlocksSize { get; } = new int[MAPS_COUNT, 2];
+        public int[,] MapBlocksSize { get; private protected set; } = new int[MAPS_COUNT, 2];
 
-        public int[,] MapsDefaultSize { get; } = new int[MAPS_COUNT, 2]
+        public int[,] MapsDefaultSize { get; private protected set; } = new int[MAPS_COUNT, 2]
         {
             {
                 7168, 4096
@@ -122,9 +127,9 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
-            /*for (int i = 0; i < MAPS_COUNT; i++)
-                UnloadMap(i);*/
+            //throw new NotImplementedException();
+            for (int i = 0; i < MAPS_COUNT; i++)
+                UnloadMap(i);
         }
 
 
@@ -268,6 +273,9 @@ namespace ClassicUO.IO.Resources
                     var difl = _mapDifl[i];
                     var dif = _mapDif[i];
 
+                    if (difl == null || dif == null)
+                        continue;
+
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
 
                     difl.Seek(0);
@@ -291,6 +299,10 @@ namespace ClassicUO.IO.Resources
                 {
                     var difl = _staDifl[i];
                     var difi = _staDifi[i];
+
+                    if (difl == null || difi == null || _staDif[i] == null)
+                        continue;
+
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
                     staticPatchesCount = Math.Min(staticPatchesCount, (int) (difl.Length / 4));

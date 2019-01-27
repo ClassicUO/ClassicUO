@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -34,7 +34,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class BuffGump : Gump
     {
-        private static BuffGump _gump;
         private GumpPic _background;
         private Button _button;
         private GumpDirection _direction;
@@ -75,7 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
                 Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
-            UpdateElements();
+
+            Change();
         }
 
 
@@ -98,14 +98,6 @@ namespace ClassicUO.Game.UI.Gumps
         protected override bool Contains(int x, int y)
         {
             return Bounds.Contains(X + x, Y + y);
-        }
-
-        public static void Toggle()
-        {
-            if (Engine.UI.GetByLocalSerial<BuffGump>() == null)
-                Engine.UI.Add(_gump = new BuffGump(100, 100));
-            else
-                _gump.Dispose();
         }
 
         public void AddBuff(Graphic graphic)
@@ -163,45 +155,50 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _graphic++;
 
-                if (_graphic > 0x7582)
-                    _graphic = 0x757F;
-
-                switch (_graphic)
-                {
-                    case 0x7580:
-                        _button.X = -2;
-                        _button.Y = 36;
-                        _direction = GumpDirection.LEFT_HORIZONTAL;
-
-                        break;
-                    case 0x7581:
-                        _button.X = 34;
-                        _button.Y = 78;
-                        _direction = GumpDirection.RIGHT_VERTICAL;
-
-                        break;
-                    case 0x7582:
-                        _button.X = 76;
-                        _button.Y = 36;
-                        _direction = GumpDirection.RIGHT_HORIZONTAL;
-
-                        break;
-                    case 0x757F:
-                    default:
-                        _button.X = 0;
-                        _button.Y = 0;
-                        _direction = GumpDirection.LEFT_VERTICAL;
-
-                        break;
-                }
-
-                _background.Graphic = _graphic;
-                _background.Texture = FileManager.Gumps.GetTexture(_graphic);
-                Width = _background.Texture.Width;
-                Height = _background.Texture.Height;
-
-                UpdateElements();
+                Change();
             }
+        }
+
+        private void Change()
+        {
+            if (_graphic > 0x7582)
+                _graphic = 0x757F;
+
+            switch (_graphic)
+            {
+                case 0x7580:
+                    _button.X = -2;
+                    _button.Y = 36;
+                    _direction = GumpDirection.LEFT_HORIZONTAL;
+
+                    break;
+                case 0x7581:
+                    _button.X = 34;
+                    _button.Y = 78;
+                    _direction = GumpDirection.RIGHT_VERTICAL;
+
+                    break;
+                case 0x7582:
+                    _button.X = 76;
+                    _button.Y = 36;
+                    _direction = GumpDirection.RIGHT_HORIZONTAL;
+
+                    break;
+                case 0x757F:
+                default:
+                    _button.X = 0;
+                    _button.Y = 0;
+                    _direction = GumpDirection.LEFT_VERTICAL;
+
+                    break;
+            }
+
+            _background.Graphic = _graphic;
+            _background.Texture = FileManager.Gumps.GetTexture(_graphic);
+            Width = _background.Texture.Width;
+            Height = _background.Texture.Height;
+
+            UpdateElements();
         }
 
         private enum GumpDirection

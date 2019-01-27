@@ -65,6 +65,13 @@ namespace ClassicUO.IO.Resources
 
         public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
         {
+            if (baseCliloc == null)
+                return null;
+
+
+            while (arg.Length != 0 && arg[0] == '\t')
+                arg = arg.Remove(0, 1);
+
             List<string> arguments = new List<string>();
 
             while (true)
@@ -106,6 +113,9 @@ namespace ClassicUO.IO.Resources
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);
             }
+
+            if (capitalize)
+                baseCliloc = StringHelper.CapitalizeAllWords(baseCliloc);
 
             return baseCliloc;
         }
