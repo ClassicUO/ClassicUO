@@ -22,6 +22,7 @@
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -178,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 IsPassword = true
             });
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
-            _textboxPassword.SetText(Engine.GlobalSettings.Password);
+            _textboxPassword.SetText( Crypter.Decrypt(Engine.GlobalSettings.Password));
         }
 
         private void SaveCheckboxStatus()
