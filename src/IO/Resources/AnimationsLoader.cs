@@ -154,7 +154,7 @@ namespace ClassicUO.IO.Resources
                             if ((long)aidx >= maxAddress0)
                                 break;
 
-                            if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                            if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                             {
                                 DataIndex[i].Groups[j].Direction[d].BaseAddress = aidx->Position;
                                 DataIndex[i].Groups[j].Direction[d].BaseSize = aidx->Size;
@@ -474,20 +474,17 @@ namespace ClassicUO.IO.Resources
                                 count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
                                 ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
                                 ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
-
                                 break;
                             case ANIMATION_GROUPS_TYPE.HUMAN:
                             case ANIMATION_GROUPS_TYPE.EQUIPMENT:
                                 count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
                                 ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
                                 ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
-
                                 break;
                             case ANIMATION_GROUPS_TYPE.ANIMAL:
                                 count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
                                 ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
                                 ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
-
                                 break;
                         }
 
@@ -496,26 +493,32 @@ namespace ClassicUO.IO.Resources
                             if (j == ignoreGroups[0] || j == ignoreGroups[1])
                                 continue;
 
+                            ref AnimationGroup g = ref DataIndex[index].Groups[j];
+                            ref AnimationGroup ng = ref DataIndex[checkIndex].Groups[j];
+
                             for (byte d = 0; d < 5; d++)
                             {
-                                DataIndex[index].Groups[j].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[j].Direction[d].BaseAddress;
-                                DataIndex[index].Groups[j].Direction[d].BaseSize = DataIndex[checkIndex].Groups[j].Direction[d].BaseSize;
-                                DataIndex[index].Groups[j].Direction[d].Address = DataIndex[index].Groups[j].Direction[d].BaseAddress;
-                                DataIndex[index].Groups[j].Direction[d].Size = DataIndex[index].Groups[j].Direction[d].BaseSize;
+                                ref AnimationDirection direction = ref g.Direction[d];
+                                ref AnimationDirection newDirection = ref ng.Direction[d];
 
-                                if (DataIndex[index].Groups[j].Direction[d].PatchedAddress <= 0)
+                                direction.BaseAddress = newDirection.BaseAddress;
+                                direction.BaseSize = newDirection.BaseSize;
+                                direction.Address = direction.BaseAddress;
+                                direction.Size = direction.BaseSize;
+
+                                if (direction.PatchedAddress == 0)
                                 {
-                                    DataIndex[index].Groups[j].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[j].Direction[d].PatchedAddress;
-                                    DataIndex[index].Groups[j].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[j].Direction[d].PatchedSize;
-                                    DataIndex[index].Groups[j].Direction[d].FileIndex = DataIndex[checkIndex].Groups[j].Direction[d].FileIndex;
+                                    direction.PatchedAddress = newDirection.PatchedAddress;
+                                    direction.PatchedSize = newDirection.PatchedSize;
+                                    direction.FileIndex = newDirection.FileIndex;
                                 }
 
-                                if (DataIndex[index].Groups[j].Direction[d].BaseAddress <= 0)
+                                if (direction.BaseAddress == 0)
                                 {
-                                    DataIndex[index].Groups[j].Direction[d].BaseAddress = DataIndex[index].Groups[j].Direction[d].PatchedAddress;
-                                    DataIndex[index].Groups[j].Direction[d].BaseSize = DataIndex[index].Groups[j].Direction[d].PatchedSize;
-                                    DataIndex[index].Groups[j].Direction[d].Address = DataIndex[index].Groups[j].Direction[d].BaseAddress;
-                                    DataIndex[index].Groups[j].Direction[d].Size = DataIndex[index].Groups[j].Direction[d].BaseSize;
+                                    direction.BaseAddress = direction.PatchedAddress;
+                                    direction.BaseSize = direction.PatchedSize;
+                                    direction.Address = direction.BaseAddress;
+                                    direction.Size = direction.BaseSize;
                                 }
                             }
                         }
@@ -764,6 +767,11 @@ namespace ClassicUO.IO.Resources
                         }
 
                         if (animID == 1498)
+                        {
+
+                        }
+
+                        if (animID == 796)
                         {
 
                         }
@@ -1496,15 +1504,13 @@ namespace ClassicUO.IO.Resources
 
         public  bool AnimationExists(ushort graphic, byte group)
         {
-            bool result = false;
-
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
-                result = d.Address != 0 || d.IsUOP;
+                return d.Address != 0 || d.IsUOP;
             }
 
-            return result;
+            return false;
         }
 
         public  bool LoadDirectionGroup(ref AnimationDirection animDir)
