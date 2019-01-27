@@ -119,7 +119,8 @@ namespace ClassicUO.Game.GameObjects
                     continue;
 
                 FileManager.Animations.AnimID = graphic;
-                ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+                ref var index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
+                ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
                 if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                     return false;
@@ -127,6 +128,9 @@ namespace ClassicUO.Game.GameObjects
                 int fc = direction.FrameCount;
                 if (fc > 0 && animIndex >= fc)
                     animIndex = (byte) (fc - 1);
+
+                if (color == 0)
+                    color = index.Color;
 
                 if (animIndex < direction.FrameCount)
                 {
