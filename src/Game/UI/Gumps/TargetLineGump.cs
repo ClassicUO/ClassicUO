@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 
@@ -106,10 +108,48 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile == null || Engine.Profile.Current == null)
                 return false;
 
+            if (Mobile != null && !Mobile.IsDisposed)
+            {
+                var x = Mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 9;
+                var y = Mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y + 30;
+
+                X = (int) (x + Mobile.Offset.X);
+                Y = (int) (y + Mobile.Offset.Y - Mobile.Offset.Z - 3);
+
+                //bool isAttack = Mobile == World.LastAttack;
+                //bool isUnderMouse = Mobile.IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
+                //bool needHpLine = false;
+                //Hue targetColor = 0;
+
+                //if (Mobile != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Mobile))
+                //{
+                //    targetColor = Notoriety.GetHue(Mobile.NotorietyFlag);
+
+                //    if (isAttack || Mobile == TargetManager.LastGameObject)
+                //    {
+                //        if (TargetLineGump.TTargetLineGump?.Mobile != Mobile)
+                //        {
+                //            if (TargetLineGump.TTargetLineGump == null || TargetLineGump.TTargetLineGump.IsDisposed)
+                //            {
+                //                TargetLineGump.TTargetLineGump = new TargetLineGump();
+                //                Engine.UI.Add(TargetLineGump.TTargetLineGump);
+                //            }
+                //            else
+                //            {
+                //                TargetLineGump.TTargetLineGump.SetMobile(this);
+                //            }
+                //        }
+
+                //        needHpLine = true;
+                //    }
+                //}
+            }
+
             if (X < Engine.Profile.Current.GameWindowPosition.X || X + Width > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X)
                 return false;
             if (Y < Engine.Profile.Current.GameWindowPosition.Y || Y + Height > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y)
                 return false;
+
             return base.Draw(batcher, position, hue);
         }
     }
