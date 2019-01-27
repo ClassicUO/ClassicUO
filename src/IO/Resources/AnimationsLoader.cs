@@ -588,14 +588,14 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
 
-                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress <= 0)
+                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress == 0)
                                 {
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
                                 }
 
-                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress <= 0)
+                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress == 0)
                                 {
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
@@ -648,8 +648,6 @@ namespace ClassicUO.IO.Resources
                         else if (commentIdx == 0)
                             continue;
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
-                        //if (id == )
 
                         for (int i = 0; i < 5; i++)
                         {
@@ -1502,7 +1500,7 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public  bool AnimationExists(ushort graphic, byte group)
+        public bool AnimationExists(ushort graphic, byte group)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -1513,7 +1511,7 @@ namespace ClassicUO.IO.Resources
             return false;
         }
 
-        public  bool LoadDirectionGroup(ref AnimationDirection animDir)
+        public bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
             if (animDir.IsUOP)
                 return TryReadUOPAnimDimension(ref animDir);
