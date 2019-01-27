@@ -600,7 +600,7 @@ namespace ClassicUO.Network
                         World.Player.UpdateAbilities();
                     }
 
-                    World.Get(item.Container).Items.Remove(item);
+                    World.Get(item.Container)?.Items.Remove(item);
                 }
 
                 if (World.RemoveItem(serial))
@@ -1274,6 +1274,9 @@ namespace ClassicUO.Network
 
         private static void BookData(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             UIManager ui = Engine.UI;
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
@@ -1358,7 +1361,7 @@ namespace ClassicUO.Network
 
         private static void BulletinBoardData(Packet p)
         {
-            if (World.Player == null)
+            if (!World.InGame)
                 return;
 
             switch (p.ReadByte())
@@ -1461,10 +1464,10 @@ namespace ClassicUO.Network
 
         private static void Warmode(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             World.Player.InWarMode = p.ReadBool();
-            p.ReadByte(); // always 0x00
-            p.ReadByte(); // always 0x32
-            p.ReadByte(); // always 0x00
             World.Player.ProcessDelta();
         }
 
@@ -2025,28 +2028,29 @@ namespace ClassicUO.Network
             serial |= 0x80000000;
 
 
-            World.Mobiles.Remove(owner);
-            World.Mobiles.ProcessDelta();
+            //World.Mobiles.Remove(owner);
+            //World.Mobiles.ProcessDelta();
 
-            Mobile newOwner = World.GetOrCreateMobile(serial);
+            //Mobile newOwner = World.GetOrCreateMobile(serial);
 
-            foreach (Item i in owner.Items)
-            {
-                i.Container = serial;
-                newOwner.Items.Add(i); // item duping?
-            }
+            //foreach (Item i in owner.Items)
+            //{
+            //    i.Container = serial;
+            //    newOwner.Items.Add(i); // item duping?
+            //}
 
-            newOwner.ProcessDelta();
-            World.Mobiles.ProcessDelta();
+            //World.Mobiles.Add(newOwner);
+            //newOwner.ProcessDelta();
+            //World.Mobiles.ProcessDelta();
 
-            if (corpseSerial.IsValid)
-            {
+            //if (corpseSerial.IsValid)
+            //{
 
-            }
+            //}
 
-            byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
+            //byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
 
-            owner.SetAnimation(group, 0, 5, 1);
+            //owner.SetAnimation(group, 0, 5, 1);
         }
 
         private static void OpenGump(Packet p)
