@@ -369,22 +369,36 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            CorretAnimationByAnimSequence(graphic, ref result);
+            CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
 
             return result;
         }
 
-        private static void CorretAnimationByAnimSequence(ushort graphic, ref byte result)
+        private static void CorretAnimationByAnimSequence(ANIMATION_GROUPS type, ushort graphic, ref byte result)
         {
             if (FileManager.Animations.IsReplacedByAnimationSequence(graphic, out byte t))
             {
+
+                //switch (type)
+                //{
+                //    case ANIMATION_GROUPS.AG_NONE:
+                //        break;
+                //    case ANIMATION_GROUPS.AG_LOW:
+                //        break;
+                //    case ANIMATION_GROUPS.AG_HIGHT:
+                //        break;
+                //    case ANIMATION_GROUPS.AG_PEOPLE:
+                //        break;
+                //}
+                
+
                 if (result == 4) // people stand
                     result = 25;
                 else if (
                         result == 0 || // people walk un armed / high walk
                         result == 1 || // walk armed / high stand
                         result == 15)  // walk warmode
-                        result = 22;
+                        result = 25; // 22
                 else if (
                         result == 2 || // people run unarmed
                         result == 3 || // people run armed
