@@ -452,9 +452,7 @@
     <None Include="libs\FNA\FNA.dll.config" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
-    <None Include="shaders\IsometricWorld.fxc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
     <None Include="libs\lib64\libFAudio.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -60,12 +60,11 @@ namespace ClassicUO.Renderer
 
         private int _numSprites;
         private SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
-
-
+      
         public Batcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
-            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Engine.ExePath, "shaders/IsometricWorld.fxc")));
+            _effect = new Effect(GraphicsDevice, Resources.IsometricEffect);
             float f = (float) FileManager.Hues.HuesCount;
             _effect.Parameters["HuesPerTexture"].SetValue(f);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
@@ -590,5 +589,26 @@ namespace ClassicUO.Renderer
 
             return result;
         }
+    }
+
+    class Resources
+    {
+        private static byte[] GetResource(string name)
+        {
+            Stream stream = typeof(Batcher2D).Assembly.GetManifestResourceStream(
+                                                                                 "ClassicUO.shaders." + name + ".fxc"
+                                                                                );
+            using (MemoryStream ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
+
+        private static byte[] _isometricEffect;
+
+
+        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("IsometricWorld"));
     }
 }
