@@ -379,18 +379,23 @@ namespace ClassicUO.Game.GameObjects
             if (FileManager.Animations.IsReplacedByAnimationSequence(graphic, out byte t))
             {
 
-                //switch (type)
-                //{
-                //    case ANIMATION_GROUPS.AG_NONE:
-                //        break;
-                //    case ANIMATION_GROUPS.AG_LOW:
-                //        break;
-                //    case ANIMATION_GROUPS.AG_HIGHT:
-                //        break;
-                //    case ANIMATION_GROUPS.AG_PEOPLE:
-                //        break;
-                //}
-                
+                switch (type)
+                {
+                    case ANIMATION_GROUPS.AG_LOW:
+                        break;
+                    case ANIMATION_GROUPS.AG_HIGHT:
+
+                        if (result == 1)
+                        {
+                            result = 25;
+                            return;
+                        }
+                       
+                        break;
+                    case ANIMATION_GROUPS.AG_PEOPLE:
+                        break;
+                }
+
 
                 if (result == 4) // people stand
                     result = 25;
@@ -398,7 +403,7 @@ namespace ClassicUO.Game.GameObjects
                         result == 0 || // people walk un armed / high walk
                         result == 1 || // walk armed / high stand
                         result == 15)  // walk warmode
-                        result = 25; // 22
+                        result = 22; // 22
                 else if (
                         result == 2 || // people run unarmed
                         result == 3 || // people run armed
