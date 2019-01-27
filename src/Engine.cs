@@ -106,18 +106,19 @@ namespace ClassicUO
         private bool _isRunningSlowly;
         private bool _isMaximized;
 
+        public bool IsQuitted { get; private set; }
+
         private Engine()
         {
             _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
             if (_settings == null)
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, "settings.json file not found");
                 _settings = new Settings();
                 _settings.Save();
-                Quit();
-
+                IsQuitted = true;
                 return;
             }
 
@@ -174,7 +175,7 @@ namespace ClassicUO
             }
         }
 
-        public static Version Version { get; } = new Version(0, 0, 0, 1);
+        public static Version Version { get; } = new Version(0, 0, 1, 0);
 
         public static int CurrentFPS { get; private set; }
 
@@ -257,14 +258,22 @@ namespace ClassicUO
             Configure();
 
             using (_engine = new Engine())
-                _engine.Run();
+            {
+                if (!_engine.IsQuitted)
+                    _engine.Run();
+            }
         }
 
         public static void Quit()
         {
-            _engine.Exit();
+            _engine?.Exit();
         }
 
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            IsQuitted = true;
+            base.OnExiting(sender, args);
+        }
 
 
         private static void Configure()

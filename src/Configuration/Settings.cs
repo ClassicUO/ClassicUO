@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 using ClassicUO.Utility;
@@ -49,7 +50,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 1;
 
-        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
+        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = "Remember\\Double\\Backslashes\\";
 
         [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
