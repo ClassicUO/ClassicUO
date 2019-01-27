@@ -40,11 +40,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 		private static MapInfo[] _mapInfo =
 		{
-			new MapInfo(0, "Felucca",	5593, 0x1400, 0x0000, 0x1000, 0x0000),
-			new MapInfo(1, "Trammel",	5594, 0x1400, 0x0000, 0x1000, 0x0000),
-			new MapInfo(2, "Ilshenar",	5595, 0x0900, 0x0200, 0x0640, 0x0000),
-			new MapInfo(3, "Malas",		5596, 0x0A00, 0x0000, 0x0800, 0x0000),
-			new MapInfo(4, "Tokuno",	5597, 0x05A8, 0x0000, 0x05A8, 0x0000),
+			new MapInfo(0, "Felucca",   5593, 0x1400, 0x0000, 0x1000, 0x0000),
+			new MapInfo(1, "Trammel",   5594, 0x1400, 0x0000, 0x1000, 0x0000),
+			new MapInfo(2, "Ilshenar",  5595, 0x0900, 0x0200, 0x0640, 0x0000),
+			new MapInfo(3, "Malas",     5596, 0x0A00, 0x0000, 0x0800, 0x0000),
+			new MapInfo(4, "Tokuno",    5597, 0x05A8, 0x0000, 0x05A8, 0x0000),
 			new MapInfo(5, "Ter Mur",   5598, 0x0500, 0x0100, 0x1000, 0x0AC0),
 		};
 
@@ -79,7 +79,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			var loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
-			_maps = loginScene.Cities.GroupBy(city => city.Map)
+			if (Engine.GlobalSettings.ShardType == 2)
+			{
+				_maps = new Dictionary<uint, CityCollection>
+				{
+					{ 1, new CityCollection(_mapInfo[1], new CityInfo[0]) { X = 57, Y = 49 } }
+				};
+
+				SelectedMapIndex = 0;
+			}
+			else
+			{
+				_maps = loginScene.Cities.GroupBy(city => city.Map)
 				.ToDictionary(group => group.Key,
 					group => new CityCollection(_mapInfo[group.Key], group.ToArray())
 					{
@@ -89,23 +100,24 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					}
 				);
 
-			SelectedMapIndex = FileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
+				var mapCenterX = (393 / 2) + 57;
 
-			var mapCenterX = (393 / 2) + 57;
+				Add(new Button((int)Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
+				{
+					X = mapCenterX - 65,
+					Y = 440,
+					ButtonAction = ButtonAction.Activate
+				});
 
-			Add(new Button((int)Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
-			{
-				X = mapCenterX - 65,
-				Y = 440,
-				ButtonAction = ButtonAction.Activate
-			});
+				Add(new Button((int)Buttons.NextCollection, 0x15A4, 0x15A6, 0x15A5)
+				{
+					X = mapCenterX + 50,
+					Y = 440,
+					ButtonAction = ButtonAction.Activate
+				});
 
-			Add(new Button((int)Buttons.NextCollection, 0x15A4, 0x15A6, 0x15A5)
-			{
-				X = mapCenterX + 50,
-				Y = 440,
-				ButtonAction = ButtonAction.Activate
-			});
+				SelectedMapIndex = FileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
+			}
 
 			Add(new Button((int)Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
 			{
@@ -145,7 +157,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 		public void SelectCity(CityInfo city)
 		{
-			SelectCity(city.Index);
+			if (city != null)
+				SelectCity(city.Index);
 		}
 
 		public void SelectCity(CitySelector selector)
@@ -195,11 +208,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				var name = map.Name;
 				var nameWidth = FileManager.Fonts.GetWidthASCII(3, name);
 
-				Add(_mapName = new Label(name, false, 1153, font: 3)
+				if (Engine.GlobalSettings.ShardType != 2)
 				{
-					X = 57 + ((393 - nameWidth) / 2),
-					Y = 440,
-				});
+					Add(_mapName = new Label(name, false, 1153, font: 3)
+					{
+						X = 57 + ((393 - nameWidth) / 2),
+						Y = 440,
+					});
+				}
 
 				SelectCity(_selectedMap.FirstOrDefault());
 			}

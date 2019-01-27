@@ -192,7 +192,11 @@ namespace ClassicUO.Network
 
             WriteByte((byte) serverIndex);
 
-            var location = startingCity.Index; // City
+            // Starting location, if applicable
+            var location = 0;
+
+            if (startingCity != null)
+                location = startingCity.Index;
 
             if (FileManager.ClientVersion < ClientVersions.CV_70130)
                 location--;
