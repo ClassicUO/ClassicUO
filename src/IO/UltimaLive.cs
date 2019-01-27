@@ -500,7 +500,7 @@ namespace ClassicUO.IO
                 {
                     if (isstaticmul)
                     {
-                        using (FileStream stream = File.OpenRead(fileInfo.FullName))
+                        using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
                             _file = MemoryMappedFile.CreateNew(null, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
                             using (Stream s = _file.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
