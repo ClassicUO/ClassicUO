@@ -90,6 +90,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				);
 
 			SelectedMapIndex = FileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
+            if(_selectedMap.SkipSection)
+            {
+                SelectCity(_selectedMap.FirstOrDefault());
+                OnButtonClick((int)Buttons.Finish);
+                return;
+            }
 
 			var mapCenterX = (393 / 2) + 57;
 
@@ -235,6 +241,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 		internal class CityCollection : Gump, IEnumerable<CityInfo>
 		{
+            internal bool SkipSection = false;
 			private MapInfo _mapInfo;
 			private CityInfo[] _cities;
 
@@ -247,8 +254,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			{
 				_mapInfo = mapInfo;
 				_cities = cities;
+                if (mapInfo.Index == 0 || mapInfo.Index == 3)
+                {
+                    var texture = FileManager.Gumps.GetTexture(mapInfo.Gump);
+                    if(texture == null)
+                        SkipSection = true;
+                    else
+                        texture.Dispose();
+                }
 
-				Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
+                Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
 				Add(new GumpPic(0, 0, 0x15DF, 0));
 
 				var width = 393;
