@@ -6,6 +6,7 @@ using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -130,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			{
 				case Buttons.PreviousScreen: charCreationGump.StepBack(); break;
 				case Buttons.Finish:
-					if (_selectedCity != null)
+					if (_selectedCity != default)
 						charCreationGump.SetCity(_selectedCity);
 
 					charCreationGump.CreateCharacter();
@@ -243,15 +244,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			public Action<CitySelector> OnSelect { get; set; }
 
-			public CityCollection(MapInfo mapInfo, CityInfo[] cities) : base(0, 0)
-			{
-				_mapInfo = mapInfo;
-				_cities = cities;
+		    public CityCollection(MapInfo mapInfo, CityInfo[] cities) : base(0, 0)
+		    {
+		        _mapInfo = mapInfo;
+		        _cities = cities;
 
-				Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
-				Add(new GumpPic(0, 0, 0x15DF, 0));
+		        if (FileManager.ClientVersion == ClientVersions.CV_70130)
+		        {
+		            Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
+		            Add(new GumpPic(0, 0, 0x15DF, 0));
+		        }
+		        else
+		        {
+		            Add(new GumpPic(0, 0, 0x1598, 0));
+                }
 
-				var width = 393;
+                var width = 393;
 				var height = 393;
 
 				var mapWidth = _mapInfo.Width - _mapInfo.WidthOffset;
@@ -263,8 +271,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				{
 					var city = cities[i];
 
-					var buttonX = ((city.Position.X - _mapInfo.WidthOffset) * width / mapWidth);
-					var buttonY = ((city.Position.Y - _mapInfo.HeightOffset) * height / mapHeight);
+					var buttonX = city.IsNewCity ? ((city.Position.X - _mapInfo.WidthOffset) * width / mapWidth) : city.Position.X - 62;
+					var buttonY = city.IsNewCity ? ((city.Position.Y - _mapInfo.HeightOffset) * height / mapHeight) : city.Position.Y - 54;
 
 					var button = new Button(city.Index, 1209, 1210, 1210)
 					{
@@ -311,8 +319,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			private bool _isSelected;
 
-			private Label _label;
-			private Button _button;
+			private readonly Label _label;
+			private readonly Button _button;
 
 			public int ButtonID => _button.ButtonID;
 
@@ -337,27 +345,33 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			{
 				Add(_button = button);
 				Add(_label = label);
+			    _label.AcceptMouseInput = true;
+                _label.MouseUp += LabelOnMouseUp;
 			}
 
-			public override void Update(double totalMS, double frameMS)
+		    private void LabelOnMouseUp(object sender, MouseEventArgs e)
+		    {
+		        OnClick(this);
+            }
+
+		    public override void Update(double totalMS, double frameMS)
 			{
 				base.Update(totalMS, frameMS);
 
 				if (IsSelected)
 					return;
 
-				var controlUnderMouse = Engine.UI.MouseOverControl;
-
-				if (Children.Contains(controlUnderMouse))
-					_label.Hue = 153;
-				else
-					_label.Hue = 88;
-			}
+			    bool contains = Children.Contains(Engine.UI.MouseOverControl);
+                if (contains && _label.Hue != 153)
+                    _label.Hue = 153;
+                else if (!contains &&_label.Hue != 88)
+                    _label.Hue = 88;
+            }
 
 			public override void OnButtonClick(int buttonID)
 			{
-				if (_button.ButtonID == buttonID && OnClick != null)
-					OnClick(this);
+				if (_button.ButtonID == buttonID)
+					OnClick?.Invoke(this);
 			}
 		}
 	}

@@ -37,6 +37,8 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Scenes
 {
     internal sealed class LoginScene : Scene
@@ -491,6 +493,14 @@ namespace ClassicUO.Game.Scenes
 	        if (!isNew)
 	            descriptions = ReadCityTextFile(count);
 
+	        Position[] oldtowns =
+	        {
+	            new Position(105, 130), new Position(245, 90),
+                new Position(165, 200), new Position(395, 160),
+                new Position(200, 305), new Position(335, 250),
+                new Position(160, 395), new Position(100, 250),
+                new Position(270, 130), new Position(0xFFFF, 0xFFFF), 
+	        };
 
             for (int i = 0; i < count; i++)
 		    {
@@ -506,7 +516,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityDescription = p.ReadUInt();
 				    p.ReadUInt();
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex, isNew);
 			    }
 			    else
 			    {
@@ -514,7 +524,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityName = p.ReadASCII(31);
 				    var cityBuilding = p.ReadASCII(31);
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.INVALID, 0);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, oldtowns[i], 0, isNew);
 			    }
 
 			    cities[i] = cityInfo;
@@ -647,8 +657,9 @@ namespace ClassicUO.Game.Scenes
 		public readonly string Description;
 		public readonly Position Position;
 		public readonly uint Map;
+	    public readonly bool IsNewCity;
 
-		public CityInfo(int index, string city, string building, string description, Position position, uint map)
+		public CityInfo(int index, string city, string building, string description, Position position, uint map, bool isNew)
 		{
 			Index = index;
 			City = city;
@@ -656,6 +667,7 @@ namespace ClassicUO.Game.Scenes
 			Description = description;
 			Position = position;
 			Map = map;
+		    IsNewCity = isNew;
 		}
 	}
 }
