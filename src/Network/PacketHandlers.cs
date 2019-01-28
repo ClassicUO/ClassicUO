@@ -769,13 +769,17 @@ namespace ClassicUO.Network
                     if (a == null)
                         continue;
 
-                    var list = item.Items.OrderBy(s => s.Serial.Value).Reverse();
+                    bool reverse = a.X > 1;
+
+                    var list = reverse ? 
+                                   item.Items.OrderBy(s => s.Serial.Value).Reverse() 
+                                   :
+                                   item.Items.OrderBy(s => s.Serial.Value);
 
                     foreach (var i in list)
                     {
-                        gump.AddItem(i);
+                        gump.AddItem(i, false);
                     }
-
                 }
 
                 Engine.UI.Add(gump);
@@ -1525,14 +1529,16 @@ namespace ClassicUO.Network
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
-
+                    bool fromcliloc = false;
                     if (int.TryParse(name, out int cliloc))
                     {
                         it.Name = FileManager.Cliloc.GetString(cliloc);
+                        fromcliloc = true;
                     }
                     else
                         it.Name = name;
 
+                    gump.SetIfNameIsFromCliloc(it, fromcliloc);
                 }
             }
         }
@@ -1881,12 +1887,16 @@ namespace ClassicUO.Network
                 item.Price = p.ReadUShort();
 
                 string name = p.ReadASCII(p.ReadUShort());
+                bool fromcliloc = false;
                 if (int.TryParse(name, out int clilocnum))
+                {
                     name = FileManager.Cliloc.GetString(clilocnum);
+                    fromcliloc = true;
+                }
 
                 item.Name = name;
 
-                gump.AddItem(item);
+                gump.AddItem(item, fromcliloc);
             }
             Engine.UI.Add(gump);
         }
@@ -2297,6 +2307,12 @@ namespace ClassicUO.Network
                         count++;
                     }
 
+                    if ((count < 20 && count > 0) || (next == 0xFFFFFFFC && count == 0))
+                        strBuffer.Append(']');
+
+                    if (strBuffer.Length != 0)
+                        item.AddOverhead(MessageType.Regular, strBuffer.ToString(), 3, 0x03B2, true);
+                    NetClient.Socket.Send(new PMegaClilocRequestOld(item));
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2602,13 +2618,33 @@ namespace ClassicUO.Network
             if (unknown > 1)
                 return;
 
-            Entity entity = World.Get(p.ReadUInt());
-
-            if (entity == null) return;
+            Serial serial = p.ReadUInt();
             p.Skip(2);
-            entity.PropertiesHash = p.ReadUInt();
-            entity.UpdateProperties(ReadProperties(p));
-            entity.ProcessDelta();
+            uint revision = p.ReadUInt();
+
+            Entity entity = World.Mobiles.Get(serial);
+
+            if (entity == null)
+                entity = World.Items.Get(serial);
+
+            if (entity != null)
+            {
+                entity.PropertiesHash = revision;
+                entity.UpdateProperties(ReadProperties(p));
+                entity.ProcessDelta();
+            }
+
+            if (entity is Item it)
+            {
+                ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(it.RootContainer);
+
+                if (gump != null)
+                {
+                    Property property = it.Properties.FirstOrDefault();
+
+                    gump.SetNameTo(it, FileManager.Cliloc.Translate((int)property.Cliloc, property.Args, true));
+                }
+            }
         }
 
         private static void GenericAOSCommandsR(Packet p)
@@ -2776,7 +2812,8 @@ namespace ClassicUO.Network
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
                 Entity entity = World.Get(serial);
-                if (entity != null && entity.PropertiesHash != revision) NetClient.Socket.Send(new PMegaClilocRequest(entity));
+                if (entity != null && entity.PropertiesHash != revision)
+                    NetClient.Socket.Send(new PMegaClilocRequest(entity));
             }
         }
 

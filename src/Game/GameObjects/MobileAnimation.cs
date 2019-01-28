@@ -382,6 +382,8 @@ namespace ClassicUO.Game.GameObjects
                 switch (type)
                 {
                     case ANIMATION_GROUPS.AG_LOW:
+
+                       
                         break;
                     case ANIMATION_GROUPS.AG_HIGHT:
 
@@ -393,6 +395,11 @@ namespace ClassicUO.Game.GameObjects
                        
                         break;
                     case ANIMATION_GROUPS.AG_PEOPLE:
+                        if (result == 1)
+                        {
+                            result = result;
+                            return;
+                        }
                         break;
                 }
 

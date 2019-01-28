@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
@@ -178,54 +179,95 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-            //if (_firstNode != null)
+            short priorityZ = obj.Position.Z;
+
+            switch (obj)
             {
-                short priorityZ = obj.Position.Z;
+                case Land tile:
 
-                switch (obj)
+                    if (tile.IsStretched)
+                        priorityZ = (short) (tile.AverageZ - 1);
+                    else
+                        priorityZ--;
+
+                    break;
+                case Mobile _:
+                    priorityZ++;
+
+                    break;
+                case Item item when item.IsCorpse:
+                    priorityZ++;
+
+                    break;
+                case GameEffect _:
+                    priorityZ += 2;
+
+                    break;
+                default:
+
                 {
-                    case Land tile:
 
-                        if (tile.IsStretched)
-                            priorityZ = (short) (tile.AverageZ - 1);
-                        else
-                            priorityZ--;
+                    ref StaticTiles data = ref FileManager.TileData.StaticData[obj.Graphic];
 
-                        break;
-                    case Mobile _:
+                    if (data.IsBackground)
+                        priorityZ--;
+
+                    if (data.Height != 0)
                         priorityZ++;
-
-                        break;
-                    case Item item when item.IsCorpse:
-                        priorityZ++;
-
-                        break;
-                    case GameEffect _:
-                        priorityZ += 2;
-
-                        break;
-                    default:
-
-                    {
-
-                        ref StaticTiles data = ref FileManager.TileData.StaticData[obj.Graphic];
-
-                        if (data.IsBackground)
-                            priorityZ--;
-
-                        if (data.Height > 0)
-                            priorityZ++;
-                    }
-
-                        break;
                 }
 
-                obj.PriorityZ = priorityZ;
+                    break;
             }
 
-            Add(obj);
+            obj.PriorityZ = priorityZ;
 
-            _firstNode = TileSorter.Sort(_firstNode);
+
+
+            if (_firstNode == null)
+            {
+                _firstNode = obj;
+                return;
+            }
+
+            GameObject o = _firstNode;
+
+            while (o?.Left != null)
+                o = o.Left;
+
+            GameObject found = null;
+            GameObject start = o;
+
+            while (o != null)
+            {
+                int testPriorityZ = o.PriorityZ;
+
+                if (testPriorityZ > priorityZ || (testPriorityZ == priorityZ && obj is Land && !(o is Land)))
+                    break;
+
+                found = o;
+                o = o.Right;
+            }
+
+            if (found != null)
+            {
+                obj.Left = found;
+                GameObject next = found.Right;
+                obj.Right = next;
+                found.Right = obj;
+
+                if (next != null)
+                    next.Left = obj;
+            }
+            else if (start != null)
+            {
+                obj.Right = start;
+                start.Left = obj;
+                obj.Left = null;
+                _firstNode = obj;
+            }
+
+            //Add(obj);
+            //_firstNode = TileSorter.Sort(_firstNode);
         }
 
         public void RemoveGameObject(GameObject obj)
@@ -234,19 +276,19 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public void Clear()
-        {
-            if (_firstNode == null)return;
+        //public void Clear()
+        //{
+        //    if (_firstNode == null)return;
 
-            GameObject f = _firstNode;
+        //    GameObject f = _firstNode;
 
-            while (f.Right != null)
-            {
-                f.Left = null;
-                var t = f.Right;
-                f.Right = null;
-                f = t;
-            }
-        }
+        //    while (f.Right != null)
+        //    {
+        //        f.Left = null;
+        //        var t = f.Right;
+        //        f.Right = null;
+        //        f = t;
+        //    }
+        //}
     }
 }

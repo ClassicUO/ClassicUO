@@ -214,7 +214,8 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 Item item = this;
-                while (item.Container.IsItem) item = World.Items.Get(item.Container);
+                while (item.Container.IsItem)
+                    item = World.Items.Get(item.Container);
 
                 return item.Container.IsMobile ? item.Container : item;
             }
@@ -231,7 +232,7 @@ namespace ClassicUO.Game.GameObjects
                 if (base.Graphic != value)
                 {
                     base.Graphic = value;
-                    _itemData = null;
+                    _itemData = FileManager.TileData.StaticData[value];
                     //Name = ItemData.Name;
 
                     CheckGraphicChange();

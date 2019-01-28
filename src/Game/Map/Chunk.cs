@@ -272,7 +272,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i, j];
+                    //Tile tile = Tiles[i, j];
 
                     GameObject obj = Tiles[i, j].FirstNode;
                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
@@ -281,7 +281,7 @@ namespace ClassicUO.Game.Map
                             obj.Dispose();
                     }
 
-                    tile.Clear();
+                    //tile.Clear();
                     Tiles[i, j] = null;
                 }
             }
