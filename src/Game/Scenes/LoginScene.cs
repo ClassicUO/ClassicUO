@@ -588,10 +588,9 @@ namespace ClassicUO.Game.Scenes
 
                             if (text.Length != 0)
                             {
-                                string t = text.ToString();
+                                string t = text + "\n\n";
                                 text.Clear();
-                                //text.AppendLine();
-                                //text.AppendLine();
+
                                 text.Append(t);
                             }
 
