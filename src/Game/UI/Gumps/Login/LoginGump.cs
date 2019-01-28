@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
 
             // Text Inputs
-            Add(_textboxAccount = new TextBox(5, 5, 190, 190, false)
+            Add(_textboxAccount = new TextBox(5, 32, 190, 190, false)
             {
                 X = 335,
                 Y = 343,
