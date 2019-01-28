@@ -194,7 +194,7 @@ namespace ClassicUO.Network
 
             var location = startingCity.Index; // City
 
-            if (FileManager.ClientVersion < ClientVersions.CV_70130)
+            if (FileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
                 location--;
 
             WriteByte((byte) location);
