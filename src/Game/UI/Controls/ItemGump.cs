@@ -232,7 +232,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {      
-            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+            if (button != MouseButton.Left)
+                return;
+
+            var gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs == null || gs.IsHoldingItem)
                 return;
 
             if (TargetManager.IsTargeting)

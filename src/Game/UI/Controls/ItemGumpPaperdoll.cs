@@ -52,11 +52,6 @@ namespace ClassicUO.Game.UI.Controls
             if (transparent)
                 Alpha = 0.5f;
 
-            if (item.Graphic == 0x26b0)
-            {
-
-            }
-
             _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
@@ -69,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             //        id = data.Gump;
             //}
 
-            Texture = FileManager.Gumps.GetTexture( (ushort) (id + offset));
+            Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
 
             if (owner.IsFemale && Texture == null)
                 Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
@@ -141,7 +136,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.OnMouseClick(x, y, button);
 
-            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+            if (button != MouseButton.Left)
+                return;
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs == null || gs.IsHoldingItem)
                 return;
 
             if (!_clickedCanDrag)
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
                 {
                     return;
                 }

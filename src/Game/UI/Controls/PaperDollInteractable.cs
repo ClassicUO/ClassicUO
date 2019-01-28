@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Controls
                     int layerIndex = (int) _layerOrder[i];
                     Item item = _mobile.Equipment[layerIndex];
                     bool isfake = false;
-                    bool canPickUp = true;
+                    bool canPickUp = World.InGame;
 
                     if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                     {
