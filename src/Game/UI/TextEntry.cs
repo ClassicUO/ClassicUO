@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI
                     string s = Text;
                     s = s.Insert(CaretIndex, c);
 
-                    if (!int.TryParse(s, out int value) || value >= MaxCharCount)
+                    if (!int.TryParse(s, out int value) || s.Length >= MaxCharCount)
                         return;
                 }
                 else if (Text.Length >= MaxCharCount)
