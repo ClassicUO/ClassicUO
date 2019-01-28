@@ -94,6 +94,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 SelectCity(_selectedMap.FirstOrDefault());
                 OnButtonClick((int)Buttons.Finish);
+                Dispose();
                 return;
             }
 
@@ -257,8 +258,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 if (mapInfo.Index == 0 || mapInfo.Index == 3)
                 {
                     var texture = FileManager.Gumps.GetTexture(mapInfo.Gump);
-                    if(texture == null)
+                    if (texture == null)
+                    {
                         SkipSection = true;
+                        return;
+                    }
                     else
                         texture.Dispose();
                 }
