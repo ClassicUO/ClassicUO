@@ -86,8 +86,6 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graduation = value;
 
-                    //if (_colorTable != null && !_colorTable.IsDisposed)
-                    //    _colorTable.Dispose();
                     _needToFileeBoxes = true;
                     ClearColorBoxes();
 
@@ -105,8 +103,11 @@ namespace ClassicUO.Game.UI.Controls
                 if (value < 0 || value >= _hues.Length)
                     throw new IndexOutOfRangeException();
 
-                _selectedIndex = value;
-                ColorSelectedIndex.Raise();
+                if (_selectedIndex != value)
+                {
+                    _selectedIndex = value;
+                    ColorSelectedIndex.Raise();
+                }
             }
         }
 
@@ -115,64 +116,16 @@ namespace ClassicUO.Game.UI.Controls
             get => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
         }
 
+        private bool _selected;
+
         public void SetHue(ushort hue)
         {
-            uint aa = FileManager.Hues.GetPolygoneColor(12, hue);
-            Console.WriteLine("{0:X8}", aa);
-            uint c = HuesHelper.RgbaToArgb((aa << 8) | 0xFF);
-            Console.WriteLine("{0:X8}", c);
-
-            _hues[SelectedIndex] = hue;
-            //HuesHelper.GetBGRA()
-            //SetHue(c);
-
-
-            Console.WriteLine("{0:X4}", hue);
-            Console.WriteLine("{0:X4} - {1:X4}", (ushort)(HuesHelper.Color32To16(c)), (ushort)(HuesHelper.Color32To16(aa)));
-
-            if (_hues[SelectedIndex] == hue)
-            {
-
-            }
-            else
-            {
-
-            }
-
-            //if (_colorTable != null && !_colorTable.IsDisposed)
-            //    _colorTable.Dispose();
-            //_colorTable = new SpriteTexture(1, 1);
-
-            //uint[] color = new uint[1]
-            //{
-            //    c
-            //};
-            //_colorTable.SetData(color);
-        }
-
-        public void SetHue(uint hue)
-        {
-
-            //_hues[SelectedIndex] = (ushort)(HuesHelper.Color32To16(   hue ));
-
-
-            //if (_colorTable != null && !_colorTable.IsDisposed)
-            //    _colorTable.Dispose();
-            //_colorTable = new SpriteTexture(1, 1);
-
-            //uint[] color = new uint[1]
-            //{
-            //    hue
-            //};
-            //_colorTable.SetData(color);
+            _selected = true;
+            Graduation = hue - 1;
         }
 
         public override void Update(double totalMS, double frameMS)
         {
-            //if (_colorTable == null || _colorTable.IsDisposed)
-            //    CreateTexture();
-            //_colorTable.Ticks = (long) totalMS;
-
             if (_needToFileeBoxes)
                 CreateTexture();
 
@@ -202,8 +155,6 @@ namespace ClassicUO.Game.UI.Controls
                     SelectedIndex = 0;
             }
 
-            //batcher.Draw2D(_colorTable, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
@@ -227,18 +178,22 @@ namespace ClassicUO.Game.UI.Controls
 
         private unsafe void CreateTexture()
         {
-            //if (_colorTable != null && !_colorTable.IsDisposed)
-            //    return;
-
             if (!_needToFileeBoxes)
                 return;
 
             _needToFileeBoxes = false;
 
+
+            if (_customPallete != null && !_selected)
+            {
+                CreateTextureFromCustomPallet();
+                _selected = false;
+                return;
+            }
+
             int offset = Marshal.SizeOf<HuesGroup>() - 4;
             ushort startColor = (ushort) (Graduation + 1);
             _hues = new ushort[_rows * _columns];
-            //uint[] pixels = new uint[_rows * _columns];
             int size = Marshal.SizeOf<HuesGroup>();
             IntPtr ptr = Marshal.AllocHGlobal(size * FileManager.Hues.HuesRange.Length);
             for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
@@ -248,9 +203,7 @@ namespace ClassicUO.Game.UI.Controls
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
-                {
-                    if (_customPallete != null)
-                        startColor = _customPallete[y * _columns + x];
+                {                   
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
                     colorIndex += (colorIndex / offset) << 2;
                     ushort color = *(ushort*) ((IntPtr) huesData + colorIndex);
@@ -264,9 +217,37 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            //Marshal.FreeHGlobal(ptr);
-            //_colorTable = new SpriteTexture(_columns, _rows);
-            //_colorTable.SetData(pixels);
+            _selected = false;
+            Marshal.FreeHGlobal(ptr);
+        }
+
+        private unsafe void CreateTextureFromCustomPallet()
+        {
+            int size = Marshal.SizeOf<HuesGroup>();
+            IntPtr ptr = Marshal.AllocHGlobal(size * FileManager.Hues.HuesRange.Length);
+            for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
+                Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * size, false);
+            byte* huesData = (byte*)(ptr + (32 + 4));
+
+            _hues = new ushort[_rows * _columns];
+            int offset = Marshal.SizeOf<HuesGroup>() - 4;
+
+            for (int y = 0; y < _rows; y++)
+            {
+                for (int x = 0; x < _columns; x++)
+                {
+                    ushort startColor = _customPallete[y * _columns + x];
+                    int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
+                    colorIndex += (colorIndex / offset) << 2;
+                    ushort color = *(ushort*)((IntPtr)huesData + colorIndex);
+                    _hues[y * _columns + x] = startColor;
+
+                    ColorBox box = new ColorBox(_cellWidth, _cellHeight, startColor, HuesHelper.Color16To32(color));
+                    _colorBoxes[y, x] = box;
+                }
+            }
+
+            Marshal.FreeHGlobal(ptr);
         }
 
         private void ClearColorBoxes()

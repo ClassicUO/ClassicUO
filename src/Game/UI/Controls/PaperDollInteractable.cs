@@ -64,6 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+
         public override void Dispose()
         {
             Mobile.Items.Added -= ItemsOnAdded;

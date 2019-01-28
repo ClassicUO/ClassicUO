@@ -52,5 +52,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
         }
+
+        public override void Dispose()
+        {
+            Texture?.Dispose();
+            base.Dispose();
+        }
     }
 }

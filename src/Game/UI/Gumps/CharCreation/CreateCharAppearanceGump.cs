@@ -29,6 +29,9 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -95,9 +98,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 X = 445, Y = 455, ButtonAction = ButtonAction.Activate
             }, 1);
 
-            Add(_nameTextBox = new TextBox(5, 32, 300, 300, false, hue: 1)
+            Add(_nameTextBox = new TextBox(5, 32, 0, 200, false, hue: 1, style: FontStyle.Fixed )
             {
-                X = 257, Y = 65, Width = 300, Height = 20
+                X = 257, Y = 65, Width = 200, Height = 20
             }, 1);
             _nameTextBox.SetText(string.Empty);
 
@@ -158,6 +161,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 Race = race,
             };
+
+            if (isFemale)
+                character.Flags |= Flags.Female;
 
             if (race == RaceType.GARGOYLE)
             {
@@ -267,10 +273,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             foreach (var customPicker in Children.OfType<CustomColorPicker>().ToList())
                 Remove(customPicker);
-            CharacterCreationValues.ComboContent content;
 
             // Hair
-            content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
             Add(_hairLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
             {
@@ -351,11 +356,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CurrentColorOption[e.Layer] = new Tuple<int, Hue>(e.SelectedIndex, e.SelectedHue);
 
             if (e.Layer != Layer.Invalid)
-                _character.Equipment[(int) e.Layer].Hue = e.SelectedHue;
+            {
+                Item item;
+
+                if (_character.Race == RaceType.GARGOYLE && e.Layer == Layer.Shirt)
+                    item = _character.Equipment[(int) Layer.Robe];
+                else
+                    item = _character.Equipment[(int) e.Layer];
+
+                if (item != null)
+                    item.Hue = e.SelectedHue;
+            }
             else
                 _character.Hue = e.SelectedHue;
             _paperDoll.Update();
         }
+
 
         private void Facial_OnOptionSelected(object sender, int e)
         {
@@ -519,16 +535,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add(new Label(FileManager.Cliloc.GetString(label), false, 0, font: 9)
                 {
-                    X = 0, Y = 0
+                    X = 0,
+                    Y = 0
                 });
 
                 Add(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
 
-                //AddChildren(_box = new ColorBox(1, 15, 121,23, ));
-
                 _colorPicker.MouseClick += ColorPicker_MouseClick;
                 _colorPickerBox = new ColorPickerBox(489, 141, rows, columns, _cellW, _cellH, pallet);
-                _colorPickerBox.MouseOver += _colorPicker_MouseMove;
+                _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
+            }
+
+            private void ColorPickerBoxOnMouseUp(object sender, MouseEventArgs e)
+            {
+                int column = e.X / _cellW;
+                int row = e.Y / _cellH;
+                var selectedIndex = row * _columns + column;
+                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
             }
 
             public Hue HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
@@ -541,19 +564,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 ColorPickerBox_Selected(this, new EventArgs());
             }
 
-            private void _colorPicker_MouseMove(object sender, MouseEventArgs e)
-            {
-                int column = e.X / _cellW;
-                int row = e.Y / _cellH;
-                var selectedIndex = row * _columns + column;
-                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
-            }
-
             private void ColorPickerBox_Selected(object sender, EventArgs e)
             {
-                var color = (ushort) (_colorPickerBox.SelectedHue + 1);
-                _colorPicker.SetHue(color);
+                _colorPicker.SetHue(_colorPickerBox.SelectedHue);
                 Parent?.Remove(_colorPickerBox);
+                _colorPickerBox.ColorSelectedIndex -= ColorPickerBox_Selected;
             }
 
             private void ColorPicker_MouseClick(object sender, MouseEventArgs e)
