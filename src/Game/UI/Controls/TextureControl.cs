@@ -16,11 +16,25 @@ namespace ClassicUO.Game.UI.Controls
         {
             CanMove = true;
             AcceptMouseInput = true;
+            ScaleTexture = true;
+        }
+
+        public bool ScaleTexture { get; set; }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Texture != null)
+                Texture.Ticks = Engine.Ticks;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), Vector3.Zero);
+            if (ScaleTexture)
+                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), Vector3.Zero);
+            else
+                return batcher.Draw2D(Texture, position, Vector3.Zero);
         }
     }
 }

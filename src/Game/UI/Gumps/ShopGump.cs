@@ -418,28 +418,34 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 5, Y = 5,
                         AcceptMouseInput = false,
                     });
+
+                    control.Width = control.Texture.Width;
+                    control.Height = control.Texture.Height;
+
+                    if (control.Width > 35)
+                        control.Width = 35;
+
+                    if (control.Height > 35)
+                        control.Height = 35;
                 }
                 else if (item.Serial.IsItem)
                 {
+                    var texture = FileManager.Art.GetTexture(item.Graphic);
                     Add(control = new TextureControl()
                     {
-                        Texture = FileManager.Art.GetTexture(item.Graphic),
+                        Texture = texture,
                         X = 5,
                         Y = 5,
+                        Width = texture.ImageRectangle.Width,
+                        Height = texture.ImageRectangle.Height,
                         AcceptMouseInput = false,
+                        ScaleTexture = false,
                     });
                 }
                 else 
                     return;
 
-                control.Width = control.Texture.Width;
-                control.Height = control.Texture.Height;
-
-                if (control.Width > 35)
-                    control.Width = 35;
-
-                if (control.Height > 35)
-                    control.Height = 35;
+             
 
                 Add(_name = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
@@ -493,26 +499,31 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (Item != null && Item.Serial.IsMobile)
+                if (Item != null)
                 {
-                    byte group = 0;
-
-                    switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
+                    if (Item.Serial.IsMobile)
                     {
-                        case ANIMATION_GROUPS.AG_LOW:
-                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                        byte group = 0;
 
-                            break;
-                        case ANIMATION_GROUPS.AG_HIGHT:
-                            group = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
-                            break;
-                        case ANIMATION_GROUPS.AG_PEOPLE:
-                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                        switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
+                        {
+                            case ANIMATION_GROUPS.AG_LOW:
+                                group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
 
-                            break;
+                                break;
+                            case ANIMATION_GROUPS.AG_HIGHT:
+                                group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+
+                                break;
+                            case ANIMATION_GROUPS.AG_PEOPLE:
+                                group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                                break;
+                        }
+
+                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
+                        direction.LastAccessTime = Engine.Ticks;
                     }
-                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
-                    direction.LastAccessTime = Engine.Ticks;
                 }
             }
 
