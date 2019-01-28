@@ -40,8 +40,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public CharacterSelectionGump() : base(0, 0)
         {
-            //AddChildren(new LoginBackground(true));
-
             bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
             int posInList = 0;
             int yOffset = 150;

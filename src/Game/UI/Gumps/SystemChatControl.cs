@@ -62,11 +62,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly TextBox _textBox;
         private readonly AlphaBlendControl _trans;
 
-        //public override bool AcceptKeyboardInput
-        //{
-        //    get;
-        //    set;
-        //}
 
         public SystemChatControl(int x, int y, int w, int h)
         {
@@ -160,23 +155,30 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ChatOnMessage(object sender, UOMessageEventArgs e)
         {
-            switch (e.Type)
+            if (e.Parent == null || !e.Parent.Serial.IsValid)
+                AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+            else
             {
-                case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
-                case MessageType.System:
-                    AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+                switch (e.Type)
+                {
+                    //case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
+                    case MessageType.System:
+                        AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
 
-                    break;
-                case MessageType.Party:
-                    AddLine($"[Party][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+                        break;
+                    case MessageType.Party:
+                        AddLine($"[Party][{e.Parent.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
 
-                    break;
-                case MessageType.Guild:
-                    AddLine($"[Guild][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
-                    break;
-                case MessageType.Alliance:
-                    AddLine($"[Alliance][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
-                    break;
+                        break;
+                    case MessageType.Guild:
+                        AddLine($"[Guild][{e.Parent.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+
+                        break;
+                    case MessageType.Alliance:
+                        AddLine($"[Alliance][{e.Parent.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+
+                        break;
+                }
             }
         }
 
