@@ -167,6 +167,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
+                SafeCharactersOnly = true
             });
 
             Add(_textboxPassword = new TextBox(5, 32, 190, 190, false)
