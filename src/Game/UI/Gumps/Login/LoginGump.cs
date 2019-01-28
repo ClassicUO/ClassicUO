@@ -177,7 +177,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                IsPassword = true
+                IsPassword = true,
+                SafeCharactersOnly = true
             });
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
             _textboxPassword.SetText( Crypter.Decrypt(Engine.GlobalSettings.Password));
