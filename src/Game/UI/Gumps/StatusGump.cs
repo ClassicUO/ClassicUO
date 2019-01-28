@@ -98,13 +98,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (Engine.GlobalSettings.ShardType)
             {
-                case 0: // modern
+                case Configuration.ShardType.Modern:
 
                     return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpModern>();
-                case 1: // old
+                case Configuration.ShardType.Old:
 
                     return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOld>();
-                case 2: // outlands
+                case Configuration.ShardType.Outlands:
 
                     return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
 
@@ -118,15 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (Engine.GlobalSettings.ShardType)
             {
-                case 0: // modern
+                case Configuration.ShardType.Modern:
 
                     Engine.UI.Add(new StatusGumpModern() { X = x, Y = y });
                     break;
-                case 1: // old
+                case Configuration.ShardType.Old:
 
                     Engine.UI.Add(new StatusGumpOld() { X = x, Y = y });
                     break;
-                case 2: // outlands
+                case Configuration.ShardType.Outlands:
 
                     Engine.UI.Add(new StatusGumpOutlands() { X = x, Y = y });
                     break;
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 1)
+            if (Engine.GlobalSettings.ShardType != Configuration.ShardType.Old)
                 Dispose();
         }
 
@@ -671,7 +671,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 0)
+            if (Engine.GlobalSettings.ShardType != Configuration.ShardType.Modern)
                 Dispose();
         }
 
@@ -1074,7 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 2)
+            if (Engine.GlobalSettings.ShardType != Configuration.ShardType.Outlands)
                 Dispose();
         }
 

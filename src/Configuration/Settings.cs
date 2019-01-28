@@ -31,6 +31,13 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
+    public enum ShardType
+    {
+        Modern,
+        Old,
+        Outlands
+    }
+
     internal sealed class Settings
     {
         [JsonConstructor]
@@ -73,7 +80,7 @@ namespace ClassicUO.Configuration
         public int LoginMusicVolume { get; set; } = 100;
 
         [JsonProperty(PropertyName = "shard_type")]
-        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
+        public ShardType ShardType { get; set; } = ShardType.Modern;
 
         [JsonProperty(PropertyName = "fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 

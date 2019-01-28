@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
             {
-                SelectedIndex = Engine.GlobalSettings.ShardType
+                SelectedIndex = (int)Engine.GlobalSettings.ShardType
             };
             item.Add(_shardType);
             rightArea.Add(item);
@@ -711,11 +711,11 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
             Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
 
-            if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
+            if ((int)Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
                 var status = StatusGumpBase.GetStatusGump();
 
-                Engine.GlobalSettings.ShardType = _shardType.SelectedIndex;
+                Engine.GlobalSettings.ShardType = (Configuration.ShardType)_shardType.SelectedIndex;
 
                 if (status != null)
                 {

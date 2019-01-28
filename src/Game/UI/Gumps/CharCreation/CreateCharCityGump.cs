@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
@@ -79,13 +78,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			var loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
-			if (Engine.GlobalSettings.ShardType == 2)
+			if (Engine.GlobalSettings.ShardType == Configuration.ShardType.Outlands)
 			{
+				
 				_maps = new Dictionary<uint, CityCollection>
 				{
-					{ 1, new CityCollection(_mapInfo[1], new CityInfo[0]) { X = 57, Y = 49 } }
+					// Ignore the CityInfo array returned by the Outlands server when creating the maps collection.
+					// It still sends a list of the original cities, and the Outlands cities are static and drawn onto the map already.
+					// Create a new CityCollection of size 0 to avoid displaying the old cities and their descriptions over the Outlands map.
+					// The map info we choose here isn't significant as none of its info will be displayed.
+					{ 0, new CityCollection(_mapInfo[0], new CityInfo[0]) { X = 57, Y = 49 } }
 				};
 
+				// Select the first (and only) map
 				SelectedMapIndex = 0;
 			}
 			else
@@ -208,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				var name = map.Name;
 				var nameWidth = FileManager.Fonts.GetWidthASCII(3, name);
 
-				if (Engine.GlobalSettings.ShardType != 2)
+				if (Engine.GlobalSettings.ShardType != Configuration.ShardType.Outlands)
 				{
 					Add(_mapName = new Label(name, false, 1153, font: 3)
 					{
