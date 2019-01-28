@@ -23,7 +23,6 @@ namespace ClassicUO.Utility
             switch (obj)
             {
                 case Static st:
-
                     if (st.OriginalGraphic != st.Graphic)
                         itemdata = FileManager.TileData.StaticData[st.OriginalGraphic];
                     else
@@ -34,6 +33,9 @@ namespace ClassicUO.Utility
                     return true;
                 case Multi multi:
                     itemdata = multi.ItemData;
+                    return true;
+                case AnimatedItemEffect ef when ef.Source is Static s:
+                    itemdata = s.ItemData;
                     return true;
                 default:
                     itemdata = default;

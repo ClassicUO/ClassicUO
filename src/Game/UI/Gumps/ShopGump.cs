@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -209,14 +210,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsBuyGump { get; }
 
-        public void AddItem(Item item)
+        public void SetIfNameIsFromCliloc(Item it, bool fromcliloc)
+        {
+            if (_shopItems.TryGetValue(it, out var shopItem))
+            {
+                shopItem.NameFromCliloc = fromcliloc;
+            }
+        }
+
+        public void AddItem(Item item, bool fromcliloc)
         {
             ShopItem shopItem;
 
             _shopScrollArea.Add(shopItem = new ShopItem(item)
             {
                 X = 5,
-                Y = 5
+                Y = 5,
+                NameFromCliloc = fromcliloc
             });
 
             _shopScrollArea.Add(new ResizePicLine(0x39)
@@ -228,7 +238,16 @@ namespace ClassicUO.Game.UI.Gumps
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(item, shopItem);
         }
-        
+
+        public void SetNameTo(Item item, string name)
+        {
+            if (_shopItems.TryGetValue(item, out ShopItem shopItem))
+            {
+                shopItem.SetName(name);
+            }
+        }
+
+
         public override void Update(double totalMS, double frameMS)
         {
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
@@ -354,23 +373,75 @@ namespace ClassicUO.Game.UI.Gumps
             Clear
         }
 
-        private class ShopItem : Control
+        class ShopItem : Control
         {
-            private readonly Label _amountLabel;
+            private readonly Label _amountLabel, _name;
 
+           
             public ShopItem(Item item)
             {
                 Item = item;
-                var itemName = StringHelper.CapitalizeAllWords(item.Name);
+                string itemName = StringHelper.CapitalizeAllWords(item.Name);
 
-                ItemGump itemGunp;
-                Add(itemGunp = new ItemGump(item)
+                TextureControl control;
+
+                if (item.Serial.IsMobile)
                 {
-                    X = 5, Y = 5, Height = 50, AcceptMouseInput = false
-                });
+                    byte group = 0;
 
-                Label label;
-                Add(label = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                    switch (FileManager.Animations.GetGroupIndex(item.Graphic))
+                    {
+                        case ANIMATION_GROUPS.AG_LOW:
+                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+
+                            break;
+                        case ANIMATION_GROUPS.AG_HIGHT:
+                            group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+                            break;
+                        case ANIMATION_GROUPS.AG_PEOPLE:
+                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                            break;
+                    }
+
+                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[item.Graphic].Groups[group].Direction[1];
+                    FileManager.Animations.AnimID = item.Graphic;
+                    FileManager.Animations.AnimGroup = group;
+                    FileManager.Animations.Direction = 1;
+
+                    if (direction.FrameCount == 0)
+                        FileManager.Animations.LoadDirectionGroup(ref direction);
+
+                    Add(control = new TextureControl()
+                    {
+                        Texture = FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        X = 5, Y = 5,
+                        AcceptMouseInput = false,
+                    });
+                }
+                else if (item.Serial.IsItem)
+                {
+                    Add(control = new TextureControl()
+                    {
+                        Texture = FileManager.Art.GetTexture(item.Graphic),
+                        X = 5,
+                        Y = 5,
+                        AcceptMouseInput = false,
+                    });
+                }
+                else 
+                    return;
+
+                control.Width = control.Texture.Width;
+                control.Height = control.Texture.Height;
+
+                if (control.Width > 35)
+                    control.Width = 35;
+
+                if (control.Height > 35)
+                    control.Height = 35;
+
+                Add(_name = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
                     Y = 5, X = 65
                 });
@@ -381,12 +452,12 @@ namespace ClassicUO.Game.UI.Gumps
                 });
 
                 Width = 220;
-                ArtTexture texture = itemGunp.Texture as ArtTexture;
-                
-                Height = Math.Max(label.Height, texture.ImageRectangle.Height) + 10;
 
+
+                Height = Math.Max(_name.Height, control.Height) + 10;
                 WantUpdateSize = false;
             }
+
 
             public Item Item { get; }
 
@@ -405,10 +476,46 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            public bool NameFromCliloc { get; set; }
+
+            public void SetName(string s)
+            {
+                if (NameFromCliloc)
+                    _name.Text = $"{s} at {Item.Price}gp";
+            }
+
             protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
             {
                 return true;
             }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                base.Update(totalMS, frameMS);
+
+                if (Item != null && Item.Serial.IsMobile)
+                {
+                    byte group = 0;
+
+                    switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
+                    {
+                        case ANIMATION_GROUPS.AG_LOW:
+                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+
+                            break;
+                        case ANIMATION_GROUPS.AG_HIGHT:
+                            group = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                            break;
+                        case ANIMATION_GROUPS.AG_PEOPLE:
+                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                            break;
+                    }
+                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
+                    direction.LastAccessTime = Engine.Ticks;
+                }
+            }
+
         }
 
         private class TransactionItem : Control

@@ -46,13 +46,13 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
 
+        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = "Remember\\Double\\Backslashes\\";
+
+        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = "0.0.0.0";
+
         [JsonProperty(PropertyName = "lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 1;
-
-        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = "Remember\\Double\\Backslashes\\";
-
-        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "login_fps")]public int MaxLoginFPS { get; set; } = 60;
 

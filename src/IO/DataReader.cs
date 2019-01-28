@@ -65,7 +65,6 @@ namespace ClassicUO.IO
         {
             ReleaseData();
             _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-
             _data = (byte*) _handle.AddrOfPinnedObject();
             Length = length;
             Position = 0;
