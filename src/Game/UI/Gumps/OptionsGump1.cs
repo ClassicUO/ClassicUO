@@ -390,7 +390,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 10,
                 Y = 105,
                 Width = 50,
-                Height = 30
+                Height = 30,
+                NumericOnly = true
             }, "Game Play Window Size: ");
 
             _gameWindowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
@@ -399,7 +400,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 80,
                 Y = 105,
                 Width = 50,
-                Height = 30
+                Height = 30,
+                NumericOnly = true
             });
 
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", 1)
@@ -417,7 +419,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 10,
                 Y = 160,
                 Width = 50,
-                Height = 30
+                Height = 30,
+                NumericOnly = true
             }, "Game Play Window Position: ");
 
             _gameWindowPositionY = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
@@ -426,7 +429,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 80,
                 Y = 160,
                 Width = 50,
-                Height = 30
+                Height = 30,
+                NumericOnly = true
             });
 
 
