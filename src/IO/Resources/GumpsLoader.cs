@@ -44,32 +44,25 @@ namespace ClassicUO.IO.Resources
                 {
                     int ingump = defReader.ReadInt();
 
-                    //if (ingump >= 50000)
-                    //{
-                    //    if (ingump >= 60000)
-                    //        ingump -= 60000;
-                    //    else
-                    //        ingump -= 50000;
-                    //}
-
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT /*|| _file.Entries[ingump].DecompressedLength != 0*/)
+               
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT 
+                                   || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
 
-                    int outgump = defReader.ReadGroupInt();
+                    int[] group = defReader.ReadGroup();
 
-                    //if (outgump >= 50000)
-                    //{
-                    //    if (outgump >= 60000)
-                    //        outgump -= 60000;
-                    //    else
-                    //        outgump -= 50000;
-                    //}
+                    for (int i = 0; i < group.Length; i++)
+                    {
+                        int checkIndex = group[i];
 
-                    if (outgump < 0 || outgump >= Constants.MAX_GUMP_DATA_INDEX_COUNT /*|| _file.Entries[outgump].DecompressedLength != 0*/)
-                        continue;
+                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || 
+                            _file.Entries[checkIndex].DecompressedLength == 0)
+                            continue;
 
-                    _file.Entries[ingump] = _file.Entries[outgump];
+                        _file.Entries[ingump] = _file.Entries[checkIndex];
 
+                        break;
+                    }
                 }
             }
         }

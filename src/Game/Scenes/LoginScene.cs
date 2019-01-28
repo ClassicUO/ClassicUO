@@ -338,6 +338,10 @@ namespace ClassicUO.Game.Scenes
         private void NetClient_Disconnected(object sender, EventArgs e)
         {
             Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+
+            if (CurrentLoginStep == LoginStep.CharCreation)
+                return;
+
             Characters = null;
             Servers = null;
             PopupMessage = "Connection lost";
@@ -428,7 +432,6 @@ namespace ClassicUO.Game.Scenes
                 case 0x82: // ReceiveLoginRejection
                 case 0x85: // character list notification
                 case 0x53: // Error Code
-                    //HandleErrorCode(e);
                     byte code = e.ReadByte();
 
                     PopupMessage = ServerErrorMessages.GetError(e.ID, code);
