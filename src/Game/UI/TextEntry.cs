@@ -26,8 +26,6 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-using System.Diagnostics;
-
 namespace ClassicUO.Game.UI
 {
     internal class TextEntry : AbstractEntry
