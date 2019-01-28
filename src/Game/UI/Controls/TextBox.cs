@@ -77,6 +77,12 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.NumericOnly = value;
         }
 
+        public bool SafeCharactersOnly
+        {
+            get => TxEntry.SafeCharactersOnly;
+            set => TxEntry.SafeCharactersOnly = value;
+        }
+
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
         public string Text { get => TxEntry.Text; set => SetText(value); }

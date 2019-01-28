@@ -26,6 +26,8 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
+using System.Diagnostics;
+
 namespace ClassicUO.Game.UI
 {
     internal class TextEntry : AbstractEntry
@@ -60,6 +62,8 @@ namespace ClassicUO.Game.UI
         public bool IsPassword { get; set; }
 
         public bool NumericOnly { get; set; }
+
+        public bool SafeCharactersOnly { get; set; }
 
         public ushort Hue
         {
@@ -96,7 +100,13 @@ namespace ClassicUO.Game.UI
 
             if (MaxCharCount > 0)
             {
-                if (NumericOnly)
+                if (SafeCharactersOnly)
+                {
+                    int charCode = (int)Convert.ToChar(c);
+                    if (charCode < 32 || charCode > 126)
+                        return;
+                }
+                else if (NumericOnly)
                 {
                     string s = Text;
                     s = s.Insert(CaretIndex, c);
