@@ -80,13 +80,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			if (Engine.GlobalSettings.ShardType == Configuration.ShardType.Outlands)
 			{
-				
 				_maps = new Dictionary<uint, CityCollection>
 				{
 					// Ignore the CityInfo array returned by the Outlands server when creating the maps collection.
 					// It still sends a list of the original cities, and the Outlands cities are static and drawn onto the map already.
 					// Create a new CityCollection of size 0 to avoid displaying the old cities and their descriptions over the Outlands map.
-					// The map info we choose here isn't significant as none of its info will be displayed.
+					// The map info we choose here isn't significant as none of its city info will be displayed,
+					// but we need at least one to display the map info (most importantly, the Outlands map gump itself).
 					{ 0, new CityCollection(_mapInfo[0], new CityInfo[0]) { X = 57, Y = 49 } }
 				};
 

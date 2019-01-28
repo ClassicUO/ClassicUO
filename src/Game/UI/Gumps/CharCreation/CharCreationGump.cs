@@ -31,17 +31,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     {
         public enum CharCreationStep
         {
-			Appearence = 0,
-			ChooseTrade = 1,
-			ChooseCity = 2,
-		}
+            Appearence = 0,
+            ChooseTrade = 1,
+            ChooseCity = 2,
+        }
 
         private PlayerMobile _character;
         private CharCreationStep _currentStep;
         private LoadingGump _loadingGump;
         private readonly LoginScene loginScene;
 
-	    private CityInfo _startingCity;
+        private CityInfo _startingCity;
 
         public CharCreationGump() : base(0, 0)
         {
@@ -55,19 +55,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _character = character;
             SetStep(CharCreationStep.ChooseTrade);
-		}
+        }
 
-	    public void SetAttributes()
-	    {
-		    SetStep(CharCreationStep.ChooseCity);
-		}
+        public void SetAttributes()
+        {
+            SetStep(CharCreationStep.ChooseCity);
+        }
 
-	    public void SetCity(CityInfo city)
-	    {
-		    _startingCity = city;
-	    }
+        public void SetCity(CityInfo city)
+        {
+            _startingCity = city;
+        }
 
-		public void CreateCharacter()
+        public void CreateCharacter()
         {
             loginScene.CreateCharacter(_character, _startingCity);
         }
@@ -102,15 +102,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(1);
                     break;
                 case CharCreationStep.ChooseTrade:
-					var existing = Children.FirstOrDefault(page => page.Page == 2);
+                    var existing = Children.FirstOrDefault(page => page.Page == 2);
 
-	                if (existing != null)
-		                Remove(existing);
+                    if (existing != null)
+                        Remove(existing);
 
-					Add(new CreateCharTradeGump(_character), 2);
+                    Add(new CreateCharTradeGump(_character), 2);
 
                     ChangePage(2);
-	                break;
+                    break;
                 case CharCreationStep.ChooseCity:
                     existing = Children.FirstOrDefault(page => page.Page == 3);
 
