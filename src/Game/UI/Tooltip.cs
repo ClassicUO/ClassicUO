@@ -104,7 +104,6 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-
             if (position.X < 0)
                 position.X = 0;
             else if (position.X > Engine.WindowWidth - (_renderedText.Width + 8))

@@ -154,6 +154,9 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
+            if (Texture == null)
+                return false;
+
             return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
