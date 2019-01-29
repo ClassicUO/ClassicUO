@@ -90,6 +90,9 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < 224; i++)
                     {
                         FontHeader* fh = (FontHeader*)fonts.PositionAddress;
+
+                        if (fonts.Position + fontHeaderSize >= fonts.Length)
+                            continue;
                         fonts.Skip(fontHeaderSize);
                         int bcount = fh->Width * fh->Height * 2;
 
@@ -127,6 +130,9 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = 0; j < 224; j++)
                 {
+                    if (fonts.Position + 3 >= fonts.Length)
+                        continue;
+
                     byte w = fonts.ReadByte();
                     byte h = fonts.ReadByte();
                     fonts.Skip(1);
