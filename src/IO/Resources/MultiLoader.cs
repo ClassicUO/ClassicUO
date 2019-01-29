@@ -119,7 +119,7 @@ namespace ClassicUO.IO.Resources
 
                 MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 
-                if (_fileUop != null && count != 0)
+                if (_fileUop != null && count > 0)
                 {
                     uopValid = true;
 

@@ -521,6 +521,10 @@ namespace ClassicUO.Network
             if (graphic >= 0x4000)
             {
                 item.Graphic -= 0x4000;
+
+                if (item.IsMulti)
+                    item.IsMulti = false;
+
                 item.IsMulti = true;
             }
 
@@ -3032,6 +3036,9 @@ namespace ClassicUO.Network
 
             if (type == 2)
             {
+                if (item.IsMulti)
+                    item.IsMulti = false;
+
                 item.IsMulti = true;
                 item.Graphic = (ushort)(item.Graphic & 0x3FFF);
             }
