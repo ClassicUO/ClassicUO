@@ -126,6 +126,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_needToFileeBoxes)
                 CreateTexture();
 
@@ -178,7 +181,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private unsafe void CreateTexture()
         {
-            if (!_needToFileeBoxes)
+            if (!_needToFileeBoxes || IsDisposed)
                 return;
 
             _needToFileeBoxes = false;

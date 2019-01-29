@@ -64,6 +64,7 @@ namespace ClassicUO.Game.Managers
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
+
                 if (MouseOverControl != null)
                 {
                     MakeTopMostGump(MouseOverControl);
