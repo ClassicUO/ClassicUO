@@ -50,36 +50,8 @@ namespace ClassicUO.Game.GameObjects
                 FrameInfo.Height = texture.ImageRectangle.Height;
             }
 
-            int distance = Distance;
 
-            if (Engine.Profile.Current.UseCircleOfTransparency)
-            {
-                int z = World.Player.Z + 5;
-
-                bool r = true;
-                
-                if (Z <= z - ItemData.Height)
-                    r = false;
-                else if (z < Z && (_canBeTransparent & 0xFF) == 0)
-                    r = false;
-            
-                if (r)
-                {
-                    int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
-
-                    if (distance <= distanceMax)
-                    {
-                        if (distance <= 0)
-                            distance = 1;
-
-                        ProcessAlpha((byte)(235 - (200 / distance)));
-                    }
-                    else if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
-            }
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue);
