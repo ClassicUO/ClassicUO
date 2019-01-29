@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -170,9 +171,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateValues()
         {
-            var duplicated = _skills.Where(o => o.SelectedIndex != -1).GroupBy(o => o.SelectedIndex).Where(o => o.Count() > 1).Count();
+            if (_skills.All(s => s.SelectedIndex >= 0))
+            {
+                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count<Combobox>() > 1);
 
-            if (duplicated > 0)
+                if (duplicated > 0)
+                {
+                    Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+
+                    return false;
+                }
+            }
+            else
             {
                 Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
