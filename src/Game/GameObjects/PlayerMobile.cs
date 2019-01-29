@@ -781,7 +781,7 @@ namespace ClassicUO.Game.GameObjects
 			        var direction = (delta < 0 ? "decreased" : "increased");
 			
 			        if (displayMessage)
-                        this.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
+                        Chat.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
 			    }
 			
 			    skill.ValueFixed = realValue;

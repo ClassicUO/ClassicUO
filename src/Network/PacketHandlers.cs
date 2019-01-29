@@ -296,9 +296,9 @@ namespace ClassicUO.Network
             if (type > 0)
             {
                 World.Player.Female = p.ReadBool();
-                World.Player.Strength = p.ReadUShort();
-                World.Player.Dexterity = p.ReadUShort();
-                World.Player.Intelligence = p.ReadUShort();
+                ushort str = p.ReadUShort();
+                ushort dex = p.ReadUShort();
+                ushort intell = p.ReadUShort();
                 World.Player.Stamina = p.ReadUShort();
                 World.Player.StaminaMax = p.ReadUShort();
                 World.Player.Mana = p.ReadUShort();
@@ -306,6 +306,31 @@ namespace ClassicUO.Network
                 World.Player.Gold = p.ReadUInt();
                 World.Player.ResistPhysical = p.ReadUShort();
                 World.Player.Weight = p.ReadUShort();
+
+
+                if (World.Player.Strength != 0)
+                {
+                    ushort currentStr = World.Player.Strength;
+                    ushort currentDex = World.Player.Dexterity;
+                    ushort currentInt = World.Player.Intelligence;
+
+                    int deltaStr = str - currentStr;
+                    int deltaDex = dex - currentDex;
+                    int deltaInt = intell - currentInt;
+
+                    if (deltaStr != 0)
+                        Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+
+                    if (deltaDex != 0)
+                        Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+
+                    if (deltaInt != 0)
+                        Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                }
+
+                World.Player.Strength = str;
+                World.Player.Dexterity = dex;
+                World.Player.Intelligence = intell;
 
                 if (type >= 5) //ML
                 {
