@@ -459,7 +459,21 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnect();
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
-            NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
+
+            unsafe
+            {
+                byte* u = (byte*)&seed;
+
+                byte[] ss = new byte[4];
+
+                ss[0] = u[3];
+                ss[1] = u[2];
+                ss[2] = u[1];
+                ss[3] = u[0];
+
+                NetClient.Socket.Send(ss);
+            }
+
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 

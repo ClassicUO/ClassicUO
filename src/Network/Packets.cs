@@ -88,7 +88,7 @@ namespace ClassicUO.Network
         public PSeed(uint v, byte[] version) : base(0xEF)
         {
             WriteUInt(v);
-            for (int i = 0; i < 4; i++) WriteUInt(version[i]);
+            for (int i = 0; i < version.Length && version.Length == 4; i++) WriteUInt(version[i]);
         }
     }
 
