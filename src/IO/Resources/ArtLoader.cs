@@ -169,18 +169,9 @@ namespace ClassicUO.IO.Resources
                         {
                             ushort val = *ptr++;
 
-
-                            if (val > 0)
+                            if (val != 0)
                                 val = (ushort) (0x8000 | val);
                             pixels[pos++] = val;
-
-                            if (val != 0)
-                            {
-                                minX = Math.Min(minX, x);
-                                maxX = Math.Max(maxX, x);
-                                minY = Math.Min(minY, y);
-                                maxY = Math.Max(maxY, y);
-                            }
                         }
 
                         x += run;
@@ -208,22 +199,22 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                //int pos1 = 0;
+                int pos1 = 0;
 
-                //for (y = 0; y < height; y++)
-                //    for (x = 0; x < width; x++)
-                //    {
-                //        if (pixels[pos1++] != 0)
-                //        {
-                //            minX = Math.Min(minX, x);
-                //            maxX = Math.Max(maxX, x);
-                //            minY = Math.Min(minY, y);
-                //            maxY = Math.Max(maxY, y);
-                //        }
-                //    }
+                for (y = 0; y < height; y++)
+                {
+                    for (x = 0; x < width; x++)
+                    {
+                        if (pixels[pos1++] != 0)
+                        {
+                            minX = Math.Min(minX, x);
+                            maxX = Math.Max(maxX, x);
+                            minY = Math.Min(minY, y);
+                            maxY = Math.Max(maxY, y);
+                        }
+                    }
+                }
 
-                //width = (short) (maxX - minX);
-                //height = (short)(maxY - minY);
                 imageRectangle.X = minX;
                 imageRectangle.Y = minY;
                 imageRectangle.Width = maxX - minX;
@@ -249,7 +240,7 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort val = _file.ReadUShort();
 
-                    if (val > 0)
+                    if (val != 0)
                         val = (ushort)(0x8000 | val);
                     pixels[pos++] = val;
                 }
@@ -264,7 +255,7 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort val = _file.ReadUShort();
 
-                    if (val > 0)
+                    if (val != 0)
                         val = (ushort)(0x8000 | val);
                     pixels[pos++] = val;
                 }
