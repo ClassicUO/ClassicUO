@@ -263,6 +263,8 @@ namespace ClassicUO.Game
             ServerName = string.Empty;
             LastAttack = 0;
             Chat.PromptData = default;
+
+            _effectManager.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)

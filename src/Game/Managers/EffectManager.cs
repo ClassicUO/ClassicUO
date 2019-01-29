@@ -120,5 +120,11 @@ namespace ClassicUO.Game.Managers
             if (effect != null)
                 _effects.Add(effect);
         }
+
+        public void Clear()
+        {
+            _effects.ForEach(s => s.Dispose());
+            _effects.Clear();
+        }
     }
 }
