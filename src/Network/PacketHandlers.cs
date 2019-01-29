@@ -205,6 +205,13 @@ namespace ClassicUO.Network
         private static void TargetCursor(Packet p)
         {
             TargetManager.SetTargeting((TargetType)p.ReadByte(), p.ReadUInt(), p.ReadByte());
+
+            if (World.Party.PartyHealTimer < Engine.Ticks && World.Party.PartyHealTarget != 0)
+            {
+                TargetManager.TargetGameObject(World.Get(World.Party.PartyHealTarget));
+                World.Party.PartyHealTimer = 0;
+                World.Party.PartyHealTarget = 0;
+            }
         }
 
         private static void SecureTrading(Packet p)

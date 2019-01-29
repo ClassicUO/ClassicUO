@@ -57,6 +57,10 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public long PartyHealTimer { get; set; }
+
+        public Serial PartyHealTarget { get; set; }
+
         public event EventHandler PartyMemberChanged;
 
         public static void HandlePartyPacket(Packet p)

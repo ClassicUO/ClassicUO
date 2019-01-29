@@ -261,6 +261,9 @@ namespace ClassicUO.Game.UI.Controls
 
                         break;
                 }
+
+                Mouse.LastLeftButtonClickTime = 0;
+                Mouse.CancelDoubleClick = true;
             }
         }
 

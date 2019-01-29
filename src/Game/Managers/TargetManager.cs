@@ -55,15 +55,22 @@ namespace ClassicUO.Game.Managers
             IsTargeting = false;
         }
 
+        private static Action<Serial, Graphic, ushort, ushort, sbyte, bool> _enqueuedAction;
+
         public static void SetTargeting(TargetType targeting, Serial cursorID, byte cursorType)
         {
             if (targeting == TargetType.Invalid)
                 throw new Exception("Invalid target type");
-    
+
             TargetingState = targeting;
             _targetCursorId = cursorID;
             _targetCursorType = cursorType;
             IsTargeting = cursorType < 3;            
+        }
+
+        public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
+        {
+            _enqueuedAction = action;
         }
 
         public static void CancelTarget()
@@ -110,7 +117,12 @@ namespace ClassicUO.Game.Managers
                 if (selectedEntity != World.Player)
                     LastGameObject = selectedEntity;
 
-                GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
+                if (_enqueuedAction != null)
+                {
+                    _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
+                }
+                else
+                    GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
             else

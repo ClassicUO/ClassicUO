@@ -19,11 +19,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -89,33 +91,37 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanBeSaved = _partyMemeberSerial == World.Player;
 
+            WantUpdateSize = false;
 
             if (World.Party.GetPartyMember(_partyMemeberSerial) != null)
             {
                 Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0) { IsVisible = false });
 
+                Width = 115;
+                Height = 55;
+
                 if (CanBeSaved)
                 {
-                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 16, Y = -2});
+                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
                 }
                 else
                 {
-                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile.NotorietyFlag), 150, 1, FontStyle.Fixed)
+                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile.NotorietyFlag), 150, 3, FontStyle.Fixed)
                     {
-                        X = 16, Y = -2
+                        X = 0, Y = -2
                     });
                 }
 
-                Add(_buttonHeal1 = new Button((int)ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 16, Y = 20 });
-                Add(_buttonHeal2 = new Button((int)ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) { ButtonAction = ButtonAction.Activate, X = 16, Y = 33 });
+                Add(_buttonHeal1 = new Button((int)ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 0, Y = 20 });
+                Add(_buttonHeal2 = new Button((int)ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) { ButtonAction = ButtonAction.Activate, X = 0, Y = 33 });
 
-                Add(_hpLineRed = new GumpPic(34, 20, LINE_RED_PARTY, 0));
-                Add(_manaLineRed = new GumpPic(34, 33, LINE_RED_PARTY, 0));
-                Add(_stamLineRed = new GumpPic(34, 45, LINE_RED_PARTY, 0));
+                Add(_hpLineRed = new GumpPic(18, 20, LINE_RED_PARTY, 0));
+                Add(_manaLineRed = new GumpPic(18, 33, LINE_RED_PARTY, 0));
+                Add(_stamLineRed = new GumpPic(18, 45, LINE_RED_PARTY, 0));
 
-                Add(_bars[0] = new GumpPicWithWidth(34, 20, LINE_BLUE_PARTY, 0, 96));
-                Add(_bars[1] = new GumpPicWithWidth(34, 33, LINE_BLUE_PARTY, 0, 96));
-                Add(_bars[2] = new GumpPicWithWidth(34, 45, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[0] = new GumpPicWithWidth(18, 20, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[1] = new GumpPicWithWidth(18, 33, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[2] = new GumpPicWithWidth(18, 45, LINE_BLUE_PARTY, 0, 96));
             }
             else
             {
@@ -157,6 +163,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_background = new GumpPic(0, 0, 0x0804, color));
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
                     Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
+
+                    Width = _background.Texture.Width;
+                    Height = _background.Texture.Height;
+
 
                     Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
                     {
@@ -320,11 +330,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         textColor = color;
                     }
-                    else if (_canChangeName = Mobile.IsRenamable)
+                    else
                     {
-                        textColor = 0x000E;
+                        _canChangeName = Mobile.IsRenamable;
 
-                        _textBox.MouseClick += TextBoxOnMouseClick;
+                        if (_canChangeName)
+                        {
+                            textColor = 0x000E;
+
+                            _textBox.MouseClick += TextBoxOnMouseClick;
+                        }
                     }
 
 
@@ -455,18 +470,25 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
         public override void OnButtonClick(int buttonID)
         {
             switch ((ButtonParty) buttonID)
             {
                 case ButtonParty.Heal1:
+                    GameActions.CastSpell(29);
+                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTarget = LocalSerial;
                     break;
                 case ButtonParty.Heal2:
-
+                    GameActions.CastSpell(11);
+                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTarget = LocalSerial;
                     break;
             }
 
             Mouse.CancelDoubleClick = true;
+            Mouse.LastLeftButtonClickTime = 0;
         }
 
         public override void Save(BinaryWriter writer)
