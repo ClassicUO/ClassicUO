@@ -286,12 +286,11 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
                 
-                if (obj.Overheads != null)
+                if (obj.Overheads != null && obj.Overheads.Count != 0)
                 {
-
                     int offY;
 
-                    if (mounted)
+                    if (ismobile && !mounted)
                         offY = -22;
                     else switch (obj)
                     {
