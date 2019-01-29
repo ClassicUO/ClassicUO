@@ -155,10 +155,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ChatOnMessage(object sender, UOMessageEventArgs e)
         {
-            if (e.Parent == null || !e.Parent.Serial.IsValid)
-                AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
-            else
-            {
+            //if (e.Parent == null || !e.Parent.Serial.IsValid)
+            //    AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+            //else
+            //{
                 switch (e.Type)
                 {
                     //case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                 }
-            }
+            //}
         }
 
         public override void Dispose()
