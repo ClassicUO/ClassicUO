@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Scenes
                     if (e.Parent == null || e.Parent.Serial == Serial.INVALID)
                         name = "System";
                     else
-                        name = e.Parent.Name;
+                        name = e.Name;
 
                     text = e.Text;
                     break;
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.Emote:
-                    name = e.Parent.Name;
+                    name = e.Name;
                     text = $"*{e.Text}*";
 
                     if (e.Hue == 0)
@@ -223,33 +223,27 @@ namespace ClassicUO.Game.Scenes
 
                 case MessageType.Spell:
 
-                    if (e.Parent != null && e.Parent.Serial.IsValid)
-                    {
-                        name = e.Parent.Name;
-                    }
-                    else
-                        name = "<Not found>";
-
+                    name = e.Name;
                     text = e.Text;
                     break;
                 case MessageType.Party:
                     text = e.Text;
-                    name = $"[Party][{e.Parent.Name}]";
+                    name = $"[Party][{e.Name}]";
                     hue = Engine.Profile.Current.PartyMessageHue;
                     break;
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = $"[Alliance][{e.Parent.Name}]";
+                    name = $"[Alliance][{e.Name}]";
                     hue = Engine.Profile.Current.AllyMessageHue;
                     break;
                 case MessageType.Guild:
                     text = e.Text;
-                    name = $"[Guild][{e.Parent.Name}]";
+                    name = $"[Guild][{e.Name}]";
                     hue = Engine.Profile.Current.GuildMessageHue;
                     break;
                 default:
                     text = e.Text;
-                    name = e.Parent == null ? string.Empty : e.Parent.Name;
+                    name = e.Name;
                     hue = e.Hue;
 
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
