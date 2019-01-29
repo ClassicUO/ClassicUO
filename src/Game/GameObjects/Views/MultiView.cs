@@ -12,6 +12,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
@@ -33,6 +34,9 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
+        public bool CharacterIsBehindFoliage { get; set; }
+        private readonly bool _isFoliage;
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || IsDisposed)
@@ -44,22 +48,51 @@ namespace ClassicUO.Game.GameObjects
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                FrameInfo.X = texture.ImageRectangle.X;
-                FrameInfo.Y = texture.ImageRectangle.Y;
                 FrameInfo.Width = texture.ImageRectangle.Width;
                 FrameInfo.Height = texture.ImageRectangle.Height;
+
+                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
             }
 
+            if (_isFoliage)
+            {
+                if (CharacterIsBehindFoliage)
+                {
+                    if (AlphaHue != 76)
+                        ProcessAlpha(76);
+                }
+                else
+                {
+                    if (AlphaHue != 0xFF)
+                        ProcessAlpha(0xFF);
+                }
+            }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue);
 
-            MessageOverHead(batcher, position, Bounds.Y - 44);
+            //MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.MultiRendered++;
-            return base.Draw(batcher, position, objectList);
+
+            base.Draw(batcher, position, objectList);
+            //if (_isFoliage)
+            //{
+            //    if (_texture == null)
+            //    {
+            //        _texture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            //        _texture.SetData(new Color[] { Color.Red });
+            //    }
+
+            //    batcher.DrawRectangle(_texture, new Rectangle((int)position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height), Vector3.Zero);
+            //}
+
+            return true;
         }
+
+       // private static Texture2D _texture;
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

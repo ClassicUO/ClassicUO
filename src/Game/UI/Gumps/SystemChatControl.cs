@@ -155,31 +155,26 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ChatOnMessage(object sender, UOMessageEventArgs e)
         {
-            //if (e.Parent == null || !e.Parent.Serial.IsValid)
-            //    AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
-            //else
-            //{
-                switch (e.Type)
-                {
-                    //case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
-                    case MessageType.System:
-                        AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
+            switch (e.Type)
+            {
+                case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
+                case MessageType.System:
+                    AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
 
-                        break;
-                    case MessageType.Party:
-                        AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+                    break;
+                case MessageType.Party:
+                    AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
 
-                        break;
-                    case MessageType.Guild:
-                        AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+                    break;
+                case MessageType.Guild:
+                    AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
 
-                        break;
-                    case MessageType.Alliance:
-                        AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+                    break;
+                case MessageType.Alliance:
+                    AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
 
-                        break;
-                }
-            //}
+                    break;
+            }
         }
 
         public override void Dispose()

@@ -40,7 +40,6 @@ namespace ClassicUO.Game.GameObjects
 
             _isFoliage = ItemData.IsFoliage;
             _isPartialHue = ItemData.IsPartialHue;
-            _isTransparent = ItemData.IsTranslucent;
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
        

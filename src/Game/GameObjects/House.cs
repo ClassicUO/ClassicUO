@@ -42,13 +42,19 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom { get; set; }
 
-        public void Generate()
+        public void Generate(bool recalculate = false)
         {
+
+            Item item = World.Items.Get(Serial);
+
             Components.ForEach(s =>
             {
+                if (recalculate && item != null)
+                    s.Position = item.Position + s.MultiOffset;
                 s.AddToTile();
             });
         }
+
 
         public bool Equals(Serial other) => Serial == other;
 

@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Static
     {
-        private readonly bool _isFoliage, _isPartialHue, _isTransparent;
+        private readonly bool _isFoliage, _isPartialHue;
         private readonly int _canBeTransparent;
 
         private Graphic _oldGraphic;
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
-            MessageOverHead(batcher, position, Bounds.Y - 44);
+            //MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);
             //if (_isFoliage)

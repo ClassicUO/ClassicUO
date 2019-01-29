@@ -79,17 +79,18 @@ namespace ClassicUO.IO.Resources
             if (_fileUop != null && uopValid)
             {             
                 graphic = _reader.ReadUShort();
+
                 x = _reader.ReadShort();
                 y = _reader.ReadShort();
                 z = _reader.ReadShort();
                 ushort flags = _reader.ReadUShort();
-
-                add = flags == 0;
               
                 uint clilocsCount = _reader.ReadUInt();
 
                 if (clilocsCount != 0)
                     _reader.Skip( (int) (clilocsCount * 4));
+
+                add = flags == 0;
             }
             else
             {
@@ -118,7 +119,7 @@ namespace ClassicUO.IO.Resources
 
                 MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 
-                if (_fileUop != null && count > 0)
+                if (_fileUop != null && count != 0)
                 {
                     uopValid = true;
 

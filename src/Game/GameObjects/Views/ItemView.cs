@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
-            if (_originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
+            if ( _originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _originalGraphic = DisplayedGraphic;
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool ok = base.Draw(batcher, position, objectList);
-            MessageOverHead(batcher, position, Bounds.Y);
+            //MessageOverHead(batcher, position, Bounds.Y);
             
             return ok;
         }
@@ -155,7 +155,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            MessageOverHead(batcher, position, Bounds.Y);
+            //MessageOverHead(batcher, position, Bounds.Y);
 
             return true;
         }

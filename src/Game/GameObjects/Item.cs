@@ -108,13 +108,16 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (_displayedGraphic.HasValue) return _displayedGraphic.Value;
+                if (_displayedGraphic.HasValue)
+                    return _displayedGraphic.Value;
 
                 if (IsCoin)
                 {
                     if (Amount > 5) return (Graphic) (Graphic + 2);
                     if (Amount > 1) return (Graphic) (Graphic + 1);
                 }
+                else if (IsMulti)
+                    return MultiGraphic;
 
                 return Graphic;
             }
@@ -123,18 +126,20 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90;
 
+        public Graphic MultiGraphic { get; private set; }
+
         public bool IsMulti
         {
             get => _isMulti;
             set
             {
-                if (_isMulti != value)
+                //if (_isMulti != value)
                 {
                     _isMulti = value;
 
                     if (value)
                     {
-                        if (MultiDistanceBonus == 0 || MultiInfo == null)
+                        //if (MultiDistanceBonus == 0 || MultiInfo == null)
                         {
                             short minX = 0;
                             short minY = 0;
@@ -160,11 +165,18 @@ namespace ClassicUO.Game.GameObjects
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
+                                if (i == 0)
+                                {
+                                    MultiGraphic = graphic;
+                                }
+
                                 if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
                                     {
-                                        Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z))
+                                        Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z)),
+                                        MultiOffset = new Position((ushort)x, (ushort)y , (sbyte) z),
+                                        AlphaHue = 0xFF
                                     });
                                 }                              
                             }
@@ -193,7 +205,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                AllowedToDraw = !_isMulti;
+                AllowedToDraw = MultiGraphic != 0;
             }
         }
 
@@ -243,7 +255,12 @@ namespace ClassicUO.Game.GameObjects
         private void CheckGraphicChange()
         {
             if (!IsCorpse)
-                AllowedToDraw = Graphic > 2 && DisplayedGraphic > 2 && !GameObjectHelper.IsNoDrawable(Graphic) && !IsMulti;
+            {
+                if (IsMulti)
+                    AllowedToDraw = MultiGraphic != 0;
+                else
+                    AllowedToDraw = Graphic > 2 && DisplayedGraphic > 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+            }
             else
             {
                 if ((Direction & Direction.Running) != 0)

@@ -33,7 +33,7 @@ namespace ClassicUO.Game.GameObjects
         public Multi(Graphic graphic)
         {
             Graphic = graphic;
-
+            _isFoliage = ItemData.IsFoliage;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
             if (ItemData.Height > 5)
@@ -49,6 +49,8 @@ namespace ClassicUO.Game.GameObjects
         public string Name => ItemData.Name;
 
         private StaticTiles? _itemData;
+
+        public Position MultiOffset { get; set; }
 
         public StaticTiles ItemData
         {

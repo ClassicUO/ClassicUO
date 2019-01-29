@@ -176,7 +176,7 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            MessageOverHead(batcher, position, IsMounted ? 0 : -22);
+            //MessageOverHead(batcher, position, IsMounted ? 0 : -22);
 
             if (needHpLine)
             {

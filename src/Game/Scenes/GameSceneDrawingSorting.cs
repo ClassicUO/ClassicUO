@@ -288,7 +288,25 @@ namespace ClassicUO.Game.Scenes
                 
                 if (obj.Overheads != null)
                 {
-                    int offY = mounted ? 0 : -22;
+
+                    int offY;
+
+                    if (mounted)
+                        offY = -22;
+                    else switch (obj)
+                    {
+                        case Multi _:
+                        case Static _: offY = -44;
+
+                            break;
+                        case Item _: offY = 44;
+
+                            break;
+                        default: offY = 0;
+
+                            break;
+                    }
+
                     for (int i = 0; i < obj.Overheads.Count; i++)
                     {
                         TextOverhead v = obj.Overheads[i];
@@ -317,10 +335,11 @@ namespace ClassicUO.Game.Scenes
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (obj is Static st)
+                else if (itemData.IsFoliage)
                 {
-                   if (itemData.IsFoliage)
-                   {
+
+                    if (obj is Static st)
+                    {
                         bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                         if (!check)
@@ -334,8 +353,8 @@ namespace ClassicUO.Game.Scenes
                         if (check)
                         {
 
-                            Rectangle rect = new Rectangle((int) drawX - st.FrameInfo.X,
-                                                           (int) drawY - st.FrameInfo.Y,
+                            Rectangle rect = new Rectangle((int)drawX - st.FrameInfo.X,
+                                                           (int)drawY - st.FrameInfo.Y,
                                                            st.FrameInfo.Width,
                                                            st.FrameInfo.Height);
 
@@ -344,7 +363,34 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         st.CharacterIsBehindFoliage = check;
-                   }                    
+                    }
+                    else if (obj is Multi m)
+                    {
+                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+
+                        if (!check)
+                        {
+                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
+
+                            if (!check)
+                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                        }
+
+                        if (check)
+                        {
+
+                            Rectangle rect = new Rectangle((int)drawX - m.FrameInfo.X,
+                                                           (int)drawY - m.FrameInfo.Y,
+                                                           m.FrameInfo.Width,
+                                                           m.FrameInfo.Height);
+
+
+                            check = rect.InRect(World.Player.GetOnScreenRectangle());
+                        }
+
+                        m.CharacterIsBehindFoliage = check;
+                    }
+
                 }
 
                 if (_alphaChanged && !changinAlpha)

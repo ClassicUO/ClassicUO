@@ -96,7 +96,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (World.Party.GetPartyMember(_partyMemeberSerial) != null)
             {
                 Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0) { IsVisible = false });
-
                 Width = 115;
                 Height = 55;
 
@@ -129,6 +128,9 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _oldWarMode = World.Player.InWarMode;
                     Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0));
+
+                    Width = _background.Texture.Width;
+                    Height = _background.Texture.Height;
 
                     // add backgrounds
                     Add(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));

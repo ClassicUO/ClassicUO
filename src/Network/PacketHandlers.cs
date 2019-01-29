@@ -199,6 +199,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xF1, FreeshardListR);
             ToClient.Add(0xF3, UpdateItemSA);
             ToClient.Add(0xF5, DisplayMap);
+            ToClient.Add(0xF6, BoatMoving);
             ToClient.Add(0xF7, PacketList);
         }
 
@@ -3047,6 +3048,52 @@ namespace ClassicUO.Network
 
             if (item.OnGround)
                 item.AddToTile();
+        }
+
+        private static void BoatMoving(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            byte boatSpeed = p.ReadByte();
+            Direction movingDirection = (Direction) p.ReadByte();
+            Direction facingDirection = (Direction) p.ReadByte();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            ushort z = p.ReadUShort();
+
+            Item item = World.Items.Get(serial);
+
+            if (item == null)
+                return;
+
+            item.Position = new Position(x, y , (sbyte) z);
+            item.AddToTile();
+
+            if (World.HouseManager.TryGetHouse(item, out House house))
+            {
+                house.Generate(true);
+            }
+
+
+            int count = p.ReadUShort();
+
+            for (int i = 0; i < count; i++)
+            {
+                Serial cSerial = p.ReadUInt();
+                ushort cx = p.ReadUShort();
+                ushort cy = p.ReadUShort();
+                ushort cz = p.ReadUShort();
+
+                Entity entity = World.Get(cSerial);
+
+                if (entity != null)
+                {
+                    entity.Position = new Position(cx, cy, (sbyte) cz);
+                    entity.AddToTile();
+                }
+            }
         }
 
         private static void PacketList(Packet p)

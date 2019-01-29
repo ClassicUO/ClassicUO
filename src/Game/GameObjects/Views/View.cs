@@ -293,21 +293,21 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
-        {
-            //if (Overheads != null)
-            //{
-            //    for (int i = 0; i < Overheads.Count; i++)
-            //    {
-            //        TextOverhead v = Overheads[i];
-            //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-            //        v.Bounds.Y = offY + v.Texture.Height;
-            //        v.Bounds.Width = v.Texture.Width;
-            //        v.Bounds.Height = v.Texture.Height;
-            //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
-            //        offY += v.Texture.Height;
-            //    }
-            //}
-        } 
+        //protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
+        //{
+        //    //if (Overheads != null)
+        //    //{
+        //    //    for (int i = 0; i < Overheads.Count; i++)
+        //    //    {
+        //    //        TextOverhead v = Overheads[i];
+        //    //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+        //    //        v.Bounds.Y = offY + v.Texture.Height;
+        //    //        v.Bounds.Width = v.Texture.Width;
+        //    //        v.Bounds.Height = v.Texture.Height;
+        //    //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
+        //    //        offY += v.Texture.Height;
+        //    //    }
+        //    //}
+        //} 
     }
 }
