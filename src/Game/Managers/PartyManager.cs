@@ -91,22 +91,11 @@ namespace ClassicUO.Game.Managers
                     break;
                 case CommandPrivateMessage:
                 case CommandPublicMessage:
-                    Serial partyMemberSerial = p.ReadUInt();
-                    PartyMember partyMember = World.Party.GetPartyMember(partyMemberSerial);
+                    PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
 
                     if (partyMember != null)
                     {
-                        //Entity partyMemberEntity = World.Get(partyMemberSerial);//party messages from players off screen == null
-                        //string partyMemberName = partyMemberEntity.Name; //party messages from players off screen == null
-
-                        string partyMemberName = partyMember.Name;
-                        string partyMessage = "[" + partyMemberName + "]: " + p.ReadUnicode();
-
-                        Hue partyMessagehue = Engine.Profile.Current.PartyMessageHue;
-                        MessageType messageType = MessageType.Party;
-                        MessageFont partyMessageFont = MessageFont.Normal;
-
-                        Chat.OnMessage(null, partyMessage, partyMemberName, partyMessagehue, messageType, partyMessageFont);
+                        Chat.OnMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
                     }
 
                     break;
@@ -114,19 +103,11 @@ namespace ClassicUO.Game.Managers
                     //The packet that arrives in PacketHandlers.DisplayClilocString(Packet p) for party invite does not have the party leader's serial
                     //and therefor it is not handled by Chat.OnMessage because we have no entity and also the packet message type is incorrectly set to .Label
                     //we handle the party invite here because we have the partyLeader's serial and we can appropriately set the MesageType.System
-                    Serial partyLeaderSerial = p.ReadUInt();
-                    Entity partyLeaderEntity = World.Get(partyLeaderSerial);
+                    Entity partyLeaderEntity = World.Get(p.ReadUInt());
 
                     if (partyLeaderEntity != null)
                     {
-                        Hue hue = 0x03B2; //white system
-                        MessageType messageType = MessageType.System;
-                        MessageFont font = MessageFont.Normal;
-                        int cliloc = 1008089; // " : You are invited to join the party. Type /accept to join or /decline to decline the offer."
-                        string clilocString = FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(cliloc));
-                        string clilocMessage = partyLeaderEntity.Name + clilocString;
-
-                        Chat.OnMessage(partyLeaderEntity, clilocMessage, partyLeaderEntity.Name, hue, messageType, font, true);
+                        Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
                     }
 
                     break;
