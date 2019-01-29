@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI
                         if ((int)Convert.ToChar(c) >= 32 && (int)Convert.ToChar(c) <= 126)
                             safeString += c;
                     }
-                    if (safeString.Length >= MaxCharCount)
+                    if (safeString.Length > MaxCharCount)
                         text = safeString.Substring(0, MaxCharCount);
                     else
                         text = safeString;
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI
                             break;
                     }
                 }
-                else if (text.Length >= MaxCharCount)
+                else if (text.Length > MaxCharCount)
                     text = text.Remove(MaxCharCount - 1);
             }
 
