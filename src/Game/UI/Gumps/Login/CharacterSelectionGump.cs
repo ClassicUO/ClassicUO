@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            if (!World.ClientFlags.OnePerson)
+            if (!World.ClientFlags.OnePerson || loginScene.Characters.All(string.IsNullOrEmpty))
             {
                 Add(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
