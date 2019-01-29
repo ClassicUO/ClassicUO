@@ -282,6 +282,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_refreshTime < totalMS)
             {
                 _refreshTime = (long) totalMS + 250;
@@ -604,6 +607,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_refreshTime < totalMS)
             {
                 _refreshTime = (long) totalMS + 250;
@@ -957,6 +963,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_refreshTime < totalMS)
             {
                 _refreshTime = (long) totalMS + 250;
