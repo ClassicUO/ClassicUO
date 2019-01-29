@@ -61,6 +61,8 @@ namespace ClassicUO.Game.UI
 
         public bool NumericOnly { get; set; }
 
+        public bool SafeCharactersOnly { get; set; }
+
         public ushort Hue
         {
             get => RenderText.Hue;
@@ -96,7 +98,12 @@ namespace ClassicUO.Game.UI
 
             if (MaxCharCount > 0)
             {
-                if (NumericOnly)
+                if (SafeCharactersOnly)
+                {
+                    if ((int)Convert.ToChar(c) < 32 || (int)Convert.ToChar(c) > 126)
+                        return;
+                }
+                else if (NumericOnly)
                 {
                     string s = Text;
                     s = s.Insert(CaretIndex, c);
@@ -120,10 +127,23 @@ namespace ClassicUO.Game.UI
         {
             if (MaxCharCount > 0)
             {
-                if (NumericOnly)
+                if (SafeCharactersOnly)
+                {
+                    char[] ch = text.ToCharArray();
+                    string safeString = "";
+                    foreach (char c in ch)
+                    {
+                        if ((int)Convert.ToChar(c) >= 32 && (int)Convert.ToChar(c) <= 126)
+                            safeString += c;
+                    }
+                    if (safeString.Length >= MaxCharCount)
+                        text = safeString.Substring(0, MaxCharCount);
+                    else
+                        text = safeString;
+                }
+                else if (NumericOnly)
                 {
                     string str = text;
-
                     while (true)
                     {
                         int len = str.Length;
