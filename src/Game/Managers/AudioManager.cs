@@ -18,14 +18,16 @@ namespace ClassicUO.Game.Managers
         private UOMusic _currentMusic;
         private int _lastMusicVolume;
 
+        private const float SOUND_DELTA = 250f;
+
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
         {
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
                 return;
 
-            float volume = (Engine.Profile.Current.SoundVolume / 100f);
+            float volume = (Engine.Profile.Current.SoundVolume / SOUND_DELTA);
 
-            if (volume < 0.01f || volume > 1f)
+            if (volume < -1 || volume > 1f)
                 return;
 
             FileManager.Sounds.GetSound(index)?.Play(true, effect, volume, spamCheck);
@@ -36,7 +38,7 @@ namespace ClassicUO.Game.Managers
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
                 return;
 
-            if (volume < 0.01f || volume > 1f)
+            if (volume < -1 || volume > 1f)
                 return;
 
             FileManager.Sounds.GetSound(index)?.Play(true, AudioEffects.PitchVariation, volume, spamCheck);
@@ -51,18 +53,18 @@ namespace ClassicUO.Game.Managers
                 if (!Engine.GlobalSettings.LoginMusic)
                     return;
 
-                volume = Engine.GlobalSettings.LoginMusicVolume / 100f;
+                volume = Engine.GlobalSettings.LoginMusicVolume / SOUND_DELTA;
             }
             else
             {
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
                     return;
 
-                volume = Engine.Profile.Current.MusicVolume / 100f;
+                volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
             }
 
 
-            if (volume < 0.01f || volume > 1f)
+            if (volume < -1 || volume > 1f)
                 return;
 
             Sound m = FileManager.Sounds.GetMusic(music);
@@ -86,8 +88,8 @@ namespace ClassicUO.Game.Managers
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
                     return;
 
-                float volume = Engine.Profile.Current.MusicVolume / 100f;
-                if (volume < 0.01f || volume > 1f)
+                float volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
+                if (volume < -1 || volume > 1f)
                     return;
 
                 _currentMusic.SetVolume(volume);

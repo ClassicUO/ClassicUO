@@ -107,7 +107,9 @@ namespace ClassicUO.Game.Scenes
                 byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
             };
 
-            Audio.PlayMusic(0);
+            int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
+
+            Audio.PlayMusic(music);
 
             if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
             {
