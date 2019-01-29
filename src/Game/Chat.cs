@@ -85,11 +85,11 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
 
         public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(entity, message, hue, type, font, true, "ENU");
+        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
 
         public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
     
-        public static void OnMessage(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
 			switch (type)
 			{
@@ -128,7 +128,7 @@ namespace ClassicUO.Game
                     break;
 			}
 
-			Message.Raise(new UOMessageEventArgs(parent, text, hue, type, font, unicode, lang), parent ?? _system);
+			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
 		}
 
 		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
@@ -140,10 +140,11 @@ namespace ClassicUO.Game
 
 	internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
+            Name = name;
             Hue = hue;
             Type = type;
             Font = font;
@@ -168,6 +169,8 @@ namespace ClassicUO.Game
         public Entity Parent { get; }
 
         public string Text { get; }
+
+        public string Name { get; }
 
         public Hue Hue { get; }
 

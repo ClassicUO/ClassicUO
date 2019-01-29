@@ -571,7 +571,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, font);
+            Chat.OnMessage(entity, text, name, hue, type, font);
         }
 
         private static void DeleteObject(Packet p)
@@ -946,7 +946,7 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), 0, MessageType.System, MessageFont.Normal);
+                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, MessageFont.Normal);
             }
         }
 
@@ -2003,6 +2003,34 @@ namespace ClassicUO.Network
 
         private static void UnicodeTalk(Packet p)
         {
+
+            if (!World.InGame)
+            {
+                LoginScene scene = Engine.SceneManager.GetScene<LoginScene>();
+
+                if (scene != null)
+                {
+                    //Serial serial = p.ReadUInt();
+                    //ushort graphic = p.ReadUShort();
+                    //MessageType type = (MessageType)p.ReadByte();
+                    //Hue hue = p.ReadUShort();
+                    //MessageFont font = (MessageFont)p.ReadUShort();
+                    //string lang = p.ReadASCII(4);
+                    //string name = p.ReadASCII(30);
+                    Log.Message(LogTypes.Warning, "UnicodeTalk received during LoginScene");
+
+                    if (p.Length > 48)
+                    {
+                        p.Seek(48);
+                        Log.PushIndent();
+                        Log.Message(LogTypes.Warning, "Handled UnicodeTalk in LoginScene");
+                        Log.PopIndent();
+                    }
+                }
+
+                return;
+            }
+
             Serial serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
@@ -2015,12 +2043,12 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.Graphic = graphic;
+                //entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
+            Chat.OnMessage(entity, text, name, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -2559,12 +2587,12 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.Graphic = graphic;
+                //entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, font, true);
+            Chat.OnMessage(entity, text, name, hue, type, font, true);
         }
 
         private static void UnicodePrompt(Packet p)
