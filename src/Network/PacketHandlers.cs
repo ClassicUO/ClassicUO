@@ -301,7 +301,7 @@ namespace ClassicUO.Network
             mobile.IsRenamable = p.ReadBool();
             byte type = p.ReadByte();
 
-            if (type > 0)
+            if (type > 0 && p.Position + 1 <= p.Length)
             {
                 mobile.IsFemale = p.ReadBool();
 
