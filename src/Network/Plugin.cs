@@ -124,6 +124,13 @@ namespace ClassicUO.Network
             //Marshal.WriteIntPtr(headerPtr, SDL.SDL_GL_GetCurrentWindow());
             //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getUoFilePath));
 
+            SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
+            SDL.SDL_VERSION(out info.version);
+            SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+
+            IntPtr hwnd = IntPtr.Zero;
+            if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
+                hwnd = info.info.win.window;
 
             PluginHeader header = new PluginHeader
             {
@@ -134,7 +141,7 @@ namespace ClassicUO.Network
                 GetPlayerPosition = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition),
                 CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
                 GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
-                HWND = SDL.SDL_GL_GetCurrentWindow(),
+                HWND = hwnd,
                 GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath)
             };
 
