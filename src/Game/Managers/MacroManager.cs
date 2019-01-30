@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
 
@@ -81,14 +82,7 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-                        {
-                            NetClient.Socket.Send(new PUnicodeSpeechRequest(mos.Text, type, MessageFont.Normal, Engine.Profile.Current.SpeechHue, "ENU"));
-                        }
-                        else
-                        {
-                            NetClient.Socket.Send(new PASCIISpeechRequest(mos.Text, type, MessageFont.Normal, Engine.Profile.Current.SpeechHue));
-                        }
+                        Chat.Say(mos.Text, type: type);
                     }
 
                     break;
@@ -277,11 +271,11 @@ namespace ClassicUO.Game.Managers
 
                     if (TargetManager.LastGameObject is Mobile mob)
                     {
-                        if (mob.HitsMax <= 0)
+                        if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 
-                        //TargetManager.LastGameObject = mob;
-                        // TODO:
+                        TargetManager.LastGameObject = mob;
+                        World.LastAttack = mob.Serial;
                     }
 
                     break;
@@ -293,6 +287,133 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.CircleTrans:
+                    Engine.Profile.Current.UseCircleOfTransparency = !Engine.Profile.Current.UseCircleOfTransparency;
+
+                    break;
+
+                case MacroType.CloseGump:
+
+                    Engine.UI.Gumps
+                          .Where( s=> !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
+                          .ToList()
+                          .ForEach(s => s.Dispose());
+
+                    break;
+
+                case MacroType.AlwaysRun:
+                    Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
+
+                    break;
+                case MacroType.SaveDesktop:
+                    Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+                    break;
+
+                case MacroType.EnableRangeColor:
+                    Engine.Profile.Current.NoColorObjectsOutOfRange = true;
+                    break;
+                case MacroType.DisableRangeColor:
+                    Engine.Profile.Current.NoColorObjectsOutOfRange = false;
+                    break;
+
+                case MacroType.ToggleRangeColor:
+                    Engine.Profile.Current.NoColorObjectsOutOfRange = !Engine.Profile.Current.NoColorObjectsOutOfRange;
+                    break;
+
+                case MacroType.AttackSelectedTarget:
+
+                    break;
+                case MacroType.UseSelectedTarget:
+
+                    break;
+
+                case MacroType.CurrentTarget:
+
+                    break;
+
+                case MacroType.TargetSystemOnOff:
+
+                    break;
+
+                case MacroType.BandageSelf:
+                case MacroType.BandageTarget:
+
+                    if (FileManager.ClientVersion < ClientVersions.CV_5020)
+                    {
+                        
+                    }
+                    break;
+
+                case MacroType.SetUpdateRange:
+                case MacroType.ModifyUpdateRange:
+
+                    if (macro is MacroObjectString moss && !string.IsNullOrEmpty(moss.Text) && byte.TryParse(moss.Text, out byte res))
+                    {
+                        if (res < Constants.MIN_VIEW_RANGE)
+                            res = Constants.MIN_VIEW_RANGE;
+                        else if (res > Constants.MAX_VIEW_RANGE)
+                            res = Constants.MAX_VIEW_RANGE;
+
+                        World.ViewRange = res;
+                    }
+                    break;
+                case MacroType.IncreaseUpdateRange:
+                    World.ViewRange++;
+                    if (World.ViewRange > Constants.MAX_VIEW_RANGE)
+                        World.ViewRange = Constants.MAX_VIEW_RANGE;
+                    break;
+                case MacroType.DecreaseUpdateRange:
+                    World.ViewRange--;
+                    if (World.ViewRange < Constants.MIN_VIEW_RANGE)
+                        World.ViewRange = Constants.MIN_VIEW_RANGE;
+
+                    break;
+
+                case MacroType.MaxUpdateRange:
+                    World.ViewRange = Constants.MAX_VIEW_RANGE;
+
+                    break;
+                case MacroType.MinUpdateRange:
+                    World.ViewRange = Constants.MIN_VIEW_RANGE;
+
+                    break;
+
+                case MacroType.DefaultUpdateRange:
+                    World.ViewRange = Constants.MAX_VIEW_RANGE;
+
+                    break;
+                case MacroType.SelectNext:
+                case MacroType.SelectPrevious:
+                case MacroType.SelectNearest:
+
+                    break;
+
+                case MacroType.ToggleBuiconWindow:
+
+                    break;
+                case MacroType.InvokeVirtue:
+                    byte id = (byte) ( macro.SubCode - MacroSubType.MSC_G5_HONOR + 31);
+                    NetClient.Socket.Send(new PInvokeVirtueRequest(id));
+                    break;
+                case MacroType.PrimaryAbility:
+                    GameActions.UsePrimaryAbility();
+
+                    break;
+                case MacroType.SecondaryAbility:
+                    GameActions.UseSecondaryAbility();
+
+                    break;
+                case MacroType.ToggleGargoyleFly:
+                    if (World.Player.Race == RaceType.GARGOYLE)
+                        NetClient.Socket.Send(new PToggleGargoyleFlying());
+
+                    break;
+                case MacroType.EquipLastWeapon:
+
+                    break;
+                case MacroType.KillGumpOpen:
+
+                    break;
             }
 
 

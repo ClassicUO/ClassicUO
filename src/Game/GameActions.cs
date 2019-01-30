@@ -92,9 +92,19 @@ namespace ClassicUO.Game
             Socket.Send(new PClickRequest(serial));
         }
 
-        public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
         {
-            Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+            if (hue == 0xFFFF)
+                hue = Engine.Profile.Current.SpeechHue;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            {
+                Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+            }
+            else
+            {
+                Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
+            }
         }
 
         public static void SayParty(string message)
@@ -294,8 +304,37 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void UseAbility(byte index)
-            => Socket.Send(new PUseCombatAbility(index));
+        public static void UsePrimaryAbility()
+        {
+            ref Ability ability = ref World.Player.Abilities[0];
+
+            if (((byte) ability & 0x80) == 0)
+            {
+                for (int i = 0; i < 2; i++)
+                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                Socket.Send(new PUseCombatAbility((byte) ability));
+            }
+            else
+                Socket.Send(new PUseCombatAbility(0));
+
+            ability ^= (Ability)0x80;
+        }
+
+        public static void UseSecondaryAbility()
+        {
+            ref Ability ability = ref World.Player.Abilities[1];
+
+            if (((byte)ability & 0x80) == 0)
+            {
+                for (int i = 0; i < 2; i++)
+                    World.Player.Abilities[i] &= (Ability)0x7F;
+                Socket.Send(new PUseCombatAbility((byte)ability));
+            }
+            else
+                Socket.Send(new PUseCombatAbility(0));
+
+            ability ^= (Ability)0x80;
+        }
 
 	    public static void QuestArrow(bool rightClick) => Socket.Send(new PClickQuestArrow(rightClick));
     }
