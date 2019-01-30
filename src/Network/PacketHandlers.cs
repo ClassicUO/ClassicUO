@@ -303,94 +303,98 @@ namespace ClassicUO.Network
 
             if (type > 0)
             {
-                World.Player.Female = p.ReadBool();
-                ushort str = p.ReadUShort();
-                ushort dex = p.ReadUShort();
-                ushort intell = p.ReadUShort();
-                World.Player.Stamina = p.ReadUShort();
-                World.Player.StaminaMax = p.ReadUShort();
-                World.Player.Mana = p.ReadUShort();
-                World.Player.ManaMax = p.ReadUShort();
-                World.Player.Gold = p.ReadUInt();
-                World.Player.ResistPhysical = p.ReadUShort();
-                World.Player.Weight = p.ReadUShort();
+                mobile.IsFemale = p.ReadBool();
 
-
-                if (World.Player.Strength != 0)
+                if (mobile == World.Player)
                 {
-                    ushort currentStr = World.Player.Strength;
-                    ushort currentDex = World.Player.Dexterity;
-                    ushort currentInt = World.Player.Intelligence;
+                    ushort str = p.ReadUShort();
+                    ushort dex = p.ReadUShort();
+                    ushort intell = p.ReadUShort();
+                    World.Player.Stamina = p.ReadUShort();
+                    World.Player.StaminaMax = p.ReadUShort();
+                    World.Player.Mana = p.ReadUShort();
+                    World.Player.ManaMax = p.ReadUShort();
+                    World.Player.Gold = p.ReadUInt();
+                    World.Player.ResistPhysical = p.ReadUShort();
+                    World.Player.Weight = p.ReadUShort();
 
-                    int deltaStr = str - currentStr;
-                    int deltaDex = dex - currentDex;
-                    int deltaInt = intell - currentInt;
 
-                    if (deltaStr != 0)
-                        Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                    if (World.Player.Strength != 0)
+                    {
+                        ushort currentStr = World.Player.Strength;
+                        ushort currentDex = World.Player.Dexterity;
+                        ushort currentInt = World.Player.Intelligence;
 
-                    if (deltaDex != 0)
-                        Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                        int deltaStr = str - currentStr;
+                        int deltaDex = dex - currentDex;
+                        int deltaInt = intell - currentInt;
 
-                    if (deltaInt != 0)
-                        Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
-                }
+                        if (deltaStr != 0)
+                            Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
-                World.Player.Strength = str;
-                World.Player.Dexterity = dex;
-                World.Player.Intelligence = intell;
+                        if (deltaDex != 0)
+                            Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
-                if (type >= 5) //ML
-                {
-                    World.Player.WeightMax = p.ReadUShort();
-                    byte race = p.ReadByte();
-                    if (race <= 0) race = 1;
-                    World.Player.Race = (RaceType)race;
-                }
-                else
-                {
-                    if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-                        World.Player.WeightMax = (ushort)(7 * (World.Player.Strength >> 1) + 40);
+                        if (deltaInt != 0)
+                            Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                    }
+
+                    World.Player.Strength = str;
+                    World.Player.Dexterity = dex;
+                    World.Player.Intelligence = intell;
+
+                    if (type >= 5) //ML
+                    {
+                        World.Player.WeightMax = p.ReadUShort();
+                        byte race = p.ReadByte();
+                        if (race <= 0) race = 1;
+                        World.Player.Race = (RaceType) race;
+                    }
                     else
-                        World.Player.WeightMax = (ushort)(World.Player.Strength * 4 + 25);
-                }
+                    {
+                        if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                            World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
+                        else
+                            World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
+                    }
 
-                if (type >= 3) //Renaissance
-                {
-                    World.Player.StatsCap = p.ReadUShort();
-                    World.Player.Followers = p.ReadByte();
-                    World.Player.FollowersMax = p.ReadByte();
-                }
+                    if (type >= 3) //Renaissance
+                    {
+                        World.Player.StatsCap = p.ReadUShort();
+                        World.Player.Followers = p.ReadByte();
+                        World.Player.FollowersMax = p.ReadByte();
+                    }
 
-                if (type >= 4) //AOS
-                {
-                    World.Player.ResistFire = p.ReadUShort();
-                    World.Player.ResistCold = p.ReadUShort();
-                    World.Player.ResistPoison = p.ReadUShort();
-                    World.Player.ResistEnergy = p.ReadUShort();
-                    World.Player.Luck = p.ReadUShort();
-                    World.Player.DamageMin = p.ReadUShort();
-                    World.Player.DamageMax = p.ReadUShort();
-                    World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
-                }
+                    if (type >= 4) //AOS
+                    {
+                        World.Player.ResistFire = p.ReadUShort();
+                        World.Player.ResistCold = p.ReadUShort();
+                        World.Player.ResistPoison = p.ReadUShort();
+                        World.Player.ResistEnergy = p.ReadUShort();
+                        World.Player.Luck = p.ReadUShort();
+                        World.Player.DamageMin = p.ReadUShort();
+                        World.Player.DamageMax = p.ReadUShort();
+                        World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
+                    }
 
-                if (type >= 6)
-                {
-                    World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    if (type >= 6)
+                    {
+                        World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                    }
                 }
             }
 
