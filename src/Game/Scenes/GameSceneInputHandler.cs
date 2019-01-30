@@ -23,8 +23,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using System.Runtime.InteropServices;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -57,9 +55,6 @@ namespace ClassicUO.Game.Scenes
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
 
 	    private bool _isShiftDown;
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-        public static extern short GetKeyState(int keyCode);
 
         private void MoveCharacterByInputs()
         {
@@ -400,6 +395,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
+            /*
             bool NumLock = (((ushort)GetKeyState(0x90)) & 0xffff) != 0;
 
             if (! NumLock)
@@ -430,6 +426,7 @@ namespace ClassicUO.Game.Scenes
                         World.Player.Walk(Direction.South, false);
                         break;
                 }
+            */
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
