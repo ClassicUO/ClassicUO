@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -78,6 +79,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Add(T entity)
         {
+            if (entity.Serial.IsMobile && typeof(T) == typeof(Item))
+                Log.Message(LogTypes.Warning, "Adding a mobile into this collection");
             if (!_entities.TryAdd(entity.Serial, entity))
                 return false;
             _added.Add(entity);

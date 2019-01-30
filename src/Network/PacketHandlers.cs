@@ -847,22 +847,23 @@ namespace ClassicUO.Network
                 }
             }
 
-            if (graphic != 0x0030)
-            {
-                Item item = World.Items.Get(serial);
+            //if (graphic != 0x0030)
+            //{
+            //    Item item = World.Items.Get(serial);
 
-                if (item != null)
-                {
-                    if (!item.IsCorpse)
-                    {
-                        foreach (Item itemItem in item.Items)
-                        {
-                            item.Items.Remove(itemItem);
-                            World.Items.Remove(itemItem);
-                        }
-                    }
-                }
-            }
+            //    if (item != null)
+            //    {
+            //        if (!item.IsCorpse)
+            //        {
+            //            foreach (Item itemItem in item.Items)
+            //            {
+            //                item.Items.Remove(itemItem);
+            //                World.Items.Remove(itemItem);
+            //            }
+            //        }
+            //    }
+            //}
+
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -1159,6 +1160,7 @@ namespace ClassicUO.Network
                             {
                                 if (it.Layer == Layer.Invalid)
                                 {
+                                    it.Container = Serial.INVALID;
                                     container.Items.Remove(it);
                                     World.Items.Remove(it);
                                 }
@@ -1168,6 +1170,7 @@ namespace ClassicUO.Network
                         {
                             foreach (Item it in container.Items)
                             {
+                                it.Container = Serial.INVALID;
                                 container.Items.Remove(it);
                                 World.Items.Remove(it);
                             }
@@ -2690,7 +2693,11 @@ namespace ClassicUO.Network
             Entity entity = World.Mobiles.Get(serial);
 
             if (entity == null)
+            {
+                if (serial.IsMobile)
+                    Log.Message(LogTypes.Warning, "Searching a mobile into World.Items from MegaCliloc packet");
                 entity = World.Items.Get(serial);
+            }
 
             if (entity != null)
             {
@@ -3118,16 +3125,34 @@ namespace ClassicUO.Network
 
             Entity container = World.Get(containerSerial);
 
+            if (container == null)
+            {
+                Log.Message(LogTypes.Warning, $"No container ({containerSerial}) found");
+                return;
+            }
+           
+
             Item item = World.Items.Get(serial);
 
-            if (item != null && ((container != null && container.Graphic != 0x2006) || item.Layer == Layer.Invalid))
+
+            if (serial.IsMobile)
+            {
+                Log.Message(LogTypes.Warning, $"AddItemToContainer function adds mobile as Item");
+            }
+
+            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
                 {
+                    item.Container = Serial.INVALID;
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
+                }
+                else if (item.Container.IsValid)
+                {
+                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
                 }
 
                 World.Items.Remove(item);
@@ -3141,10 +3166,11 @@ namespace ClassicUO.Network
             item.Position = new Position(x, y);
             item.Container = containerSerial;
 
-            container?.Items.Add(item);
+            container.Items.Add(item);
             World.Items.Add(item);
 
-            container?.ProcessDelta();
+            container.ProcessDelta();
+            World.Items.ProcessDelta();
         }
 
 
