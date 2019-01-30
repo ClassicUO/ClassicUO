@@ -303,7 +303,7 @@ namespace ClassicUO.Game.Map
                         if (obj is GameEffect effect && effect.Source is Static)
                             continue;
 
-                        if (!(obj is Land) && !(obj is Static))
+                        if (!(obj is Land) && !(obj is Static) && !(obj is Multi))
                             return false;
                     }
                 }
