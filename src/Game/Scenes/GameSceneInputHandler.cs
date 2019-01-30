@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using System.Runtime.InteropServices;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -52,10 +54,12 @@ namespace ClassicUO.Game.Scenes
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning;
 
-
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
 
 	    private bool _isShiftDown;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
+        public static extern short GetKeyState(int keyCode);
 
         private void MoveCharacterByInputs()
         {
@@ -369,7 +373,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
@@ -377,14 +380,12 @@ namespace ClassicUO.Game.Scenes
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
-            {
-	            if (!World.Player.InWarMode)
-		            GameActions.SetWarMode(true);
-            }
-
             switch (e.keysym.sym)
             {
+                case SDL.SDL_Keycode.SDLK_TAB:
+                    if (!World.Player.InWarMode)
+                        GameActions.SetWarMode(true);
+                    break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     World.Player.Walk(Direction.Left, false);
                     break;
@@ -398,6 +399,37 @@ namespace ClassicUO.Game.Scenes
                     World.Player.Walk(Direction.Down, false);
                     break;
             }
+
+            bool NumLock = (((ushort)GetKeyState(0x90)) & 0xffff) != 0;
+
+            if (! NumLock)
+                switch (e.keysym.sym)
+                {
+                    case SDL.SDL_Keycode.SDLK_KP_4:
+                        World.Player.Walk(Direction.Left, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_6:
+                        World.Player.Walk(Direction.Right, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_8:
+                        World.Player.Walk(Direction.Up, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_2:
+                        World.Player.Walk(Direction.Down, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_9:
+                        World.Player.Walk(Direction.North, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_3:
+                        World.Player.Walk(Direction.East, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_7:
+                        World.Player.Walk(Direction.West, false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_KP_1:
+                        World.Player.Walk(Direction.South, false);
+                        break;
+                }
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
