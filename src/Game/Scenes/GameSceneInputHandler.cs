@@ -382,7 +382,22 @@ namespace ClassicUO.Game.Scenes
 	            if (!World.Player.InWarMode)
 		            GameActions.SetWarMode(true);
             }
-           
+
+            switch (e.keysym.sym)
+            {
+                case SDL.SDL_Keycode.SDLK_LEFT:
+                    World.Player.Walk(Direction.Left, false);
+                    break;
+                case SDL.SDL_Keycode.SDLK_RIGHT:
+                    World.Player.Walk(Direction.Right, false);
+                    break;
+                case SDL.SDL_Keycode.SDLK_UP:
+                    World.Player.Walk(Direction.Up, false);
+                    break;
+                case SDL.SDL_Keycode.SDLK_DOWN:
+                    World.Player.Walk(Direction.Down, false);
+                    break;
+            }
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
