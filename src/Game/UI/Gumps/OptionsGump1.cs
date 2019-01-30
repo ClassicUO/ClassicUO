@@ -445,6 +445,11 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 4;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
             ScrollAreaItem item = new ScrollAreaItem();
+
+            item.Add(new HotkeyBox());
+
+            rightArea.Add(item);
+
             Add(rightArea, PAGE);
         }
 

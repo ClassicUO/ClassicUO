@@ -136,6 +136,7 @@
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
@@ -242,6 +243,7 @@
     <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\GameObjectHelper.cs" />
     <Compile Include="Utility\HuesHelper.cs" />
+    <Compile Include="Utility\KeysTranslator.cs" />
     <Compile Include="Utility\Platforms\Native.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />

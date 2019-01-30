@@ -8,6 +8,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
 
@@ -15,7 +16,7 @@ namespace ClassicUO.Game.Managers
 {
     class MacroManager
     {
-        private readonly List<Macro> _macros = new List<Macro>();
+        //private readonly List<Macro> _macros = new List<Macro>();
 
         private MacroObject _lastMacro;
 
@@ -39,14 +40,49 @@ namespace ClassicUO.Game.Managers
 
         public long WaitForTargetTimer { get; set; }
 
-        public Macro FindMacro(ushort key, bool alt, bool ctrl, bool shift)
-        {
-            return _macros.FirstOrDefault(s => s.Key == key && s.Alt == alt && s.Shift == shift && s.Ctrl == ctrl);
-        }
+        //public Macro FindMacro(ushort key, bool alt, bool ctrl, bool shift)
+        //{
+        //    return _macros.FirstOrDefault(s => s.Key == key && s.Alt == alt && s.Shift == shift && s.Ctrl == ctrl);
+        //}
 
         public void Update()
         {
 
+        }
+
+        private void Execute()
+        {
+            while (_lastMacro != null)
+            {
+                switch (Process())
+                {
+                    case 2:
+                        _lastMacro = null;
+                        break;
+                    case 1:
+
+                        return;
+                    case 0:
+                        _lastMacro = _lastMacro.Right;
+                        break;
+                }
+            }
+        }
+
+        private long _nextTimer;
+
+        private int Process()
+        {
+            int result;
+
+            if (_lastMacro == null)
+                result = 2;
+            else if (_nextTimer <= Engine.Ticks)
+                result = Process(_lastMacro);
+            else 
+                result = 1;
+
+            return result;
         }
 
         private int Process(MacroObject macro)
@@ -525,7 +561,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class MacroObject
+    class MacroObject : INode<MacroObject>
     {
         public MacroObject(MacroType code, MacroSubType sub)
         {
@@ -580,6 +616,9 @@ namespace ClassicUO.Game.Managers
         public sbyte HasSubMenu { get; set; }
 
         public virtual bool HasString() => false;
+
+        public MacroObject Left { get; set; }
+        public MacroObject Right { get; set; }
     }
 
     class MacroObjectString : MacroObject
