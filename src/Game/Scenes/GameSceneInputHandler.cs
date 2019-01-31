@@ -373,6 +373,10 @@ namespace ClassicUO.Game.Scenes
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+                if (!World.Player.InWarMode)
+                    GameActions.SetWarMode(true);
+
             switch (e.keysym.sym)
             {
                 case SDL.SDL_Keycode.SDLK_TAB:
