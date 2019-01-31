@@ -34,6 +34,7 @@ namespace ClassicUO.Game
     internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
+        private static readonly List<Entity> _toRemove = new List<Entity>();
 
 
         public static PartyManager Party { get; } = new PartyManager();
@@ -118,7 +119,6 @@ namespace ClassicUO.Game
 
         public static string ServerName { get; set; }
 
-        private static List<Entity> _toRemove = new List<Entity>();
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -278,6 +278,7 @@ namespace ClassicUO.Game
             Chat.PromptData = default;
 
             _effectManager.Clear();
+            _toRemove.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)
