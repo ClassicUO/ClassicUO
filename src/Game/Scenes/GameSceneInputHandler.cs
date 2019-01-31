@@ -81,13 +81,11 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-
                     GameObject obj = _mousePicker.MouseOverObject;
                     Point point = _mousePicker.MouseOverObjectPoint;
                     _dragginObject = obj;
                     _dragOffset = point;
                 }
-
             }
             else if (e.Button == MouseButton.Right)
             {
@@ -395,10 +393,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            /*
-            bool NumLock = (((ushort)GetKeyState(0x90)) & 0xffff) != 0;
-
-            if (! NumLock)
+            if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
                 switch (e.keysym.sym)
                 {
                     case SDL.SDL_Keycode.SDLK_KP_4:
@@ -426,7 +421,6 @@ namespace ClassicUO.Game.Scenes
                         World.Player.Walk(Direction.South, false);
                         break;
                 }
-            */
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
