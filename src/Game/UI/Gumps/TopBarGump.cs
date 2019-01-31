@@ -213,13 +213,9 @@ namespace ClassicUO.Game.UI.Gumps
                     DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
 
                     if (debugGump == null)
-                    {
-                        // dont consider this case
-                    }
+                        Engine.UI.Add(new DebugGump());
                     else
-                    {
                         debugGump.IsVisible = !debugGump.IsVisible;
-                    }
 
                     break;
             }

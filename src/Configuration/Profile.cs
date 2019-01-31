@@ -53,8 +53,6 @@ namespace ClassicUO.Configuration
         [JsonProperty]
         public string CharacterName { get; }
 
-
-
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
         [JsonProperty] public int SoundVolume { get; set; } = 100;
@@ -125,7 +123,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
-
 
         public void Save(List<Gump> gumps = null)
         {
