@@ -397,11 +397,11 @@ namespace ClassicUO.Game.Scenes
                 if (!World.Player.InWarMode)
                     GameActions.SetWarMode(true);
 
-            if (!_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
+            if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
                 World.Player.Walk(dWalk, false);
 
             if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
-                if (!_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                     World.Player.Walk(dWalkN, false);
         }
 
