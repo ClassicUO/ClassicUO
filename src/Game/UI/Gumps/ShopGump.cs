@@ -250,6 +250,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (!World.InGame || IsDisposed)
+                return;
+
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
             {
                 if (_isDownDOWN)

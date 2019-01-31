@@ -32,7 +32,7 @@ namespace ClassicUO.Game.GameObjects
     internal class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
-        private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
+        private readonly Dictionary<Serial, T> _entities = new Dictionary<Serial, T>();
 
         public int Count => _entities.Count;
 
@@ -81,8 +81,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (entity.Serial.IsMobile && typeof(T) == typeof(Item))
                 Log.Message(LogTypes.Warning, "Adding a mobile into this collection");
-            if (!_entities.TryAdd(entity.Serial, entity))
+
+            if (_entities.ContainsKey(entity.Serial))
                 return false;
+
+            _entities[entity.Serial] = entity;
             _added.Add(entity);
 
             return true;
@@ -90,9 +93,11 @@ namespace ClassicUO.Game.GameObjects
 
         public T Remove(Serial serial)
         {
-            if (_entities.TryRemove(serial, out T entity))
+            if (_entities.TryGetValue(serial, out T entity))
+            {
+                _entities.Remove(serial);
                 _removed.Add(entity);
-
+            }
             return entity;
         }
 

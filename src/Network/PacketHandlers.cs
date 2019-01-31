@@ -799,23 +799,32 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
-                var gump = new ShopGump(serial, true, 150, 5);
+                ShopGump gump = new ShopGump(serial, true, 150, 5);
+                Engine.UI.Add(gump);
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.Equipment[(int) layer];
 
-                    Item a = item?.Items.FirstOrDefault();
+                    //Item a = item?.Items.FirstOrDefault();
 
-                    if (a == null)
-                        continue;
+                    //if (a == null)
+                    //    continue;
 
-                    bool reverse = a.X > 1;
+                    //bool reverse = a.X > 1;
 
-                    var list = reverse ? 
-                                   item.Items.OrderBy(s => s.Serial.Value).Reverse() 
-                                   :
-                                   item.Items.OrderBy(s => s.Serial.Value);
+                    //var list = reverse ? 
+                    //               item.Items.OrderBy(s => s.Serial.Value).Reverse() 
+                    //               :
+                    //               item.Items.OrderBy(s => s.Serial.Value);
+
+                    var list = item.Items/*.OrderByDescending(s => s.Serial.Value)*/.ToArray();
+
+                    if (list.Length == 0)
+                        return;
+
+                    if (list[0].X > 1)
+                        list = list.Reverse().ToArray();
 
                     foreach (var i in list)
                     {
@@ -823,7 +832,6 @@ namespace ClassicUO.Network
                     }
                 }
 
-                Engine.UI.Add(gump);
             }
             else
             {
@@ -889,6 +897,7 @@ namespace ClassicUO.Network
 
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
 
+            World.Get(containerSerial)?.Items.ProcessDelta();
             World.Items.ProcessDelta();
         }
 
@@ -1056,11 +1065,16 @@ namespace ClassicUO.Network
             {
                 mobile.Equipment[(int)item.Layer] = item;
                 mobile.Items.Add(item);
+                mobile.Items.ProcessDelta();
             }
 
-            item.ProcessDelta();
-            if (World.Items.Add(item)) World.Items.ProcessDelta();
-            mobile?.ProcessDelta();
+            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
+            {
+                item.Items.Clear();
+            }
+
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
 
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
@@ -1143,6 +1157,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < count; i++)
             {
                 Serial serial = p.ReadUInt();
+                Console.WriteLine(serial.ToString());
                 Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
                 ushort amount = Math.Max(p.ReadUShort(), (ushort)1);
                 ushort x = p.ReadUShort();
@@ -1159,25 +1174,27 @@ namespace ClassicUO.Network
                     if (container != null)
                     {
                         if (container.Graphic == 0x2006)
-                        {
-                            foreach (Item it in container.Items)
+                        {                          
+                            container.Items
+                                     .Where( s=> s.Layer == Layer.Invalid)
+                                     .ToList()
+                                     .ForEach(s =>
                             {
-                                if (it.Layer == Layer.Invalid)
-                                {
-                                    it.Container = Serial.INVALID;
-                                    container.Items.Remove(it);
-                                    World.Items.Remove(it);
-                                }
-                            }
+                                s.Container = Serial.INVALID;
+                                container.Items.Remove(s);
+                                World.Items.Remove(s);
+                            });
                         }
                         else
                         {
-                            foreach (Item it in container.Items)
-                            {
-                                it.Container = Serial.INVALID;
-                                container.Items.Remove(it);
-                                World.Items.Remove(it);
-                            }
+                            container.Items
+                                     .ToList()
+                                     .ForEach(s =>
+                                      {
+                                          s.Container = Serial.INVALID;
+                                          container.Items.Remove(s);
+                                          World.Items.Remove(s);
+                                      });
                         }
 
                         container.ProcessDelta();
@@ -1188,6 +1205,7 @@ namespace ClassicUO.Network
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
 
+            container?.Items.ProcessDelta();
 
             if (container is Item itemContainer && itemContainer.IsSpellBook && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
             {
@@ -1556,17 +1574,27 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                Item a = container.Items.FirstOrDefault();
+                //Item a = container.Items.FirstOrDefault();
 
-                if (a == null)
+                //if (a == null)
+                //    return;
+
+                //bool reverse = a.X > 1;
+
+                //var list = reverse ? 
+                //               container.Items.OrderBy(s => s.Serial.Value).Reverse()
+                //               :
+                //               container.Items.OrderBy(s => s.Serial.Value);
+
+
+                var list = container.Items/*.OrderBy(s => s.Serial.Value)*/.ToArray();
+
+                if (list.Length == 0)
                     return;
 
-                bool reverse = a.X > 1;
+                if (list[0].X > 1)
+                    list = list.Reverse().ToArray();
 
-                var list = reverse ? 
-                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
-                               :
-                               container.Items.OrderBy(s => s.Serial.Value);
 
                 foreach (Item it in list.Take(count))
                 {
@@ -3172,9 +3200,6 @@ namespace ClassicUO.Network
 
             container.Items.Add(item);
             World.Items.Add(item);
-
-            container.ProcessDelta();
-            World.Items.ProcessDelta();
         }
 
 
