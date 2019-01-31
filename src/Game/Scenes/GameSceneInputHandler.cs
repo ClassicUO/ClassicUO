@@ -52,6 +52,26 @@ namespace ClassicUO.Game.Scenes
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning;
 
+        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirection = new Dictionary<SDL.SDL_Keycode, Direction>()
+        {
+           { SDL.SDL_Keycode.SDLK_LEFT, Direction.Left },
+           { SDL.SDL_Keycode.SDLK_RIGHT, Direction.Right },
+           { SDL.SDL_Keycode.SDLK_UP, Direction.Up },
+           { SDL.SDL_Keycode.SDLK_DOWN, Direction.Down },
+        };
+
+        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirectionNum = new Dictionary<SDL.SDL_Keycode, Direction>()
+        {
+           { SDL.SDL_Keycode.SDLK_KP_4, Direction.Left },
+           { SDL.SDL_Keycode.SDLK_KP_6, Direction.Right },
+           { SDL.SDL_Keycode.SDLK_KP_8, Direction.Up },
+           { SDL.SDL_Keycode.SDLK_KP_2, Direction.Down },
+           { SDL.SDL_Keycode.SDLK_KP_9, Direction.North },
+           { SDL.SDL_Keycode.SDLK_KP_3, Direction.East },
+           { SDL.SDL_Keycode.SDLK_KP_7, Direction.West },
+           { SDL.SDL_Keycode.SDLK_KP_1, Direction.South },
+        };
+
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
 
 	    private bool _isShiftDown;
