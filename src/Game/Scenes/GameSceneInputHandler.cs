@@ -397,54 +397,12 @@ namespace ClassicUO.Game.Scenes
                 if (!World.Player.InWarMode)
                     GameActions.SetWarMode(true);
 
-            switch (e.keysym.sym)
-            {
-                case SDL.SDL_Keycode.SDLK_TAB:
-                    if (!World.Player.InWarMode)
-                        GameActions.SetWarMode(true);
-                    break;
-                case SDL.SDL_Keycode.SDLK_LEFT:
-                    World.Player.Walk(Direction.Left, false);
-                    break;
-                case SDL.SDL_Keycode.SDLK_RIGHT:
-                    World.Player.Walk(Direction.Right, false);
-                    break;
-                case SDL.SDL_Keycode.SDLK_UP:
-                    World.Player.Walk(Direction.Up, false);
-                    break;
-                case SDL.SDL_Keycode.SDLK_DOWN:
-                    World.Player.Walk(Direction.Down, false);
-                    break;
-            }
+            if (!_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
+                World.Player.Walk(dWalk, false);
 
             if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
-                switch (e.keysym.sym)
-                {
-                    case SDL.SDL_Keycode.SDLK_KP_4:
-                        World.Player.Walk(Direction.Left, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_6:
-                        World.Player.Walk(Direction.Right, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_8:
-                        World.Player.Walk(Direction.Up, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_2:
-                        World.Player.Walk(Direction.Down, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_9:
-                        World.Player.Walk(Direction.North, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_3:
-                        World.Player.Walk(Direction.East, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_7:
-                        World.Player.Walk(Direction.West, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_KP_1:
-                        World.Player.Walk(Direction.South, false);
-                        break;
-                }
+                if (!_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                    World.Player.Walk(dWalkN, false);
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
