@@ -201,7 +201,14 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (obj is Static st)
                             {
-                                if (StaticFilters.IsTree(st.OriginalGraphic))
+                                if (StaticFilters.IsCave(st.OriginalGraphic))
+                                {
+                                    if (Engine.Profile.Current.CaveToTile && st.Graphic != Constants.CAVE_REPLACE_GRAPHIC)
+                                        st.SetGraphic(Constants.CAVE_REPLACE_GRAPHIC);
+                                    else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.CaveToTile)
+                                        st.RestoreOriginalGraphic();
+                                }
+                                else if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
                                     if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
