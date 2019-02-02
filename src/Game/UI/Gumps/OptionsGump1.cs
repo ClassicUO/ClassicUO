@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _caveToTile, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _caveToTile;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -202,6 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
+            _holdDownKeyTab = CreateCheckBox(rightArea, "Hold down TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
 
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -566,6 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sliderFPSLogin.Value = 60;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
+                    _holdDownKeyTab.IsChecked = true;
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
@@ -652,6 +654,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
+            Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
 
             if (Engine.Profile.Current.DrawRoofs != _drawRoofs.IsChecked)
             {

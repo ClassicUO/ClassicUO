@@ -394,7 +394,7 @@ namespace ClassicUO.Game.Scenes
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
-                if (!World.Player.InWarMode)
+                if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
                     GameActions.SetWarMode(true);
 
             if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
@@ -411,8 +411,13 @@ namespace ClassicUO.Game.Scenes
 
 			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
 			{
-				if (World.Player.InWarMode)
-					GameActions.SetWarMode(false);
+                if (Engine.Profile.Current.HoldDownKeyTab)
+                {
+                    if (World.Player.InWarMode)
+                        GameActions.SetWarMode(false);
+                }
+                else
+                    GameActions.ToggleWarMode();
 			}
 		}
     }

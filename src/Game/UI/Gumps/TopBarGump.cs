@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (debugGump == null)
                         Engine.UI.Add(new DebugGump());
                     else
-                        debugGump.IsVisible = !debugGump.IsVisible;
+                        debugGump.Dispose();
 
                     break;
             }

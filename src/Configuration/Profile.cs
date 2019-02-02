@@ -112,6 +112,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnablePathfind { get; set; } = true;
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
+        [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
