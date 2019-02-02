@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _sortAsc;
         private string _sortField;
-        private GumpPic _sortArrow;
+        private GumpPic _sortOrderIndicator;
 
         public SkillGumpAdvanced() : base(0, 0)
         {
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 30, Y = 345
             });
 
-            Add(_sortArrow = new GumpPic(0, 0, 0x985, 0));
+            Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int)Buttons.SortName);
 
             World.Player.SkillsChanged += OnSkillChanged;
@@ -139,10 +139,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Button btn = FindControls<Button>().First(s => s.ButtonID == buttonID);
                 Graphic g = (Graphic)(_sortAsc ? 0x985 : 0x983);
 
-                _sortArrow.Graphic = g;
-                _sortArrow.Texture = FileManager.Gumps.GetTexture(g);
-                _sortArrow.X = btn.X + 65;
-                _sortArrow.Y = btn.Y + 5;
+                _sortOrderIndicator.Graphic = g;
+                _sortOrderIndicator.Texture = FileManager.Gumps.GetTexture(g);
+                _sortOrderIndicator.X = btn.X + 65;
+                _sortOrderIndicator.Y = btn.Y + 5;
             }
 
             _updateSkillsNeeded = true;
