@@ -40,8 +40,6 @@ using Microsoft.Xna.Framework;
 
 using SDL2;
 
-using System.Diagnostics;
-
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Scenes
