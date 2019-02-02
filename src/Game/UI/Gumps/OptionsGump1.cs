@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _caveToTile;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -256,6 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
+            _caveToTile = CreateCheckBox(rightArea, "Cave to floor tile", Engine.Profile.Current.CaveToTile, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
 
             hpAreaItem = new ScrollAreaItem();
@@ -716,6 +717,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _highlightByState.IsChecked = true;
                     _drawRoofs.IsChecked = true;
                     _treeToStumps.IsChecked = false;
+                    _caveToTile.IsChecked = false;
                     _hideVegetation.IsChecked = false;
                     _normalFields.IsChecked = true;
                     _staticFields.IsChecked = false;
@@ -813,16 +815,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            if (Engine.Profile.Current.TreeToStumps != _treeToStumps.IsChecked)
-            {
-                Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
-
-                //FileManager.Art.CleanResources();
-
-                //int mapIndex = World.MapIndex;
-                //World.MapIndex = -1;
-                //World.MapIndex = mapIndex;
-            }
+            Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
+            Engine.Profile.Current.CaveToTile = _caveToTile.IsChecked;
 
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
