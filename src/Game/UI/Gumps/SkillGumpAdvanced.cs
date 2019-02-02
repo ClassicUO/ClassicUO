@@ -76,7 +76,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 25,
                 FontCenter = true,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 4
             });
 
             Add(new Button((int)Buttons.SortReal, 0x98C, 0x98C, 0x98C, "Real", 1, true, 14, 24)
@@ -84,8 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 220,
                 Y = 25,
                 FontCenter = true,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 4
+                ButtonAction = ButtonAction.Activate
             });
 
             Add(new Button((int)Buttons.SortBase, 0x98C, 0x98C, 0x98C, "Base", 1, true, 14, 24)
@@ -93,8 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 300,
                 Y = 25,
                 FontCenter = true,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 4
+                ButtonAction = ButtonAction.Activate
             });
 
             Add(new Button((int)Buttons.SortCap, 0x98C, 0x98C, 0x98C, "Cap", 1, true, 14, 24)
@@ -102,8 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 380,
                 Y = 25,
                 FontCenter = true,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 4
+                ButtonAction = ButtonAction.Activate
             });
 
             //======================================================================================
@@ -197,9 +193,6 @@ namespace ClassicUO.Game.UI.Gumps
             });
         }
 
-
-
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -258,7 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(skillCap);
             GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
             Add(loc);
-
+            
             loc.MouseClick += (sender, e) =>
             {
                 switch (_skill.Lock)
