@@ -21,7 +21,8 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -48,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = false;
+
             Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
 
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
@@ -68,27 +70,44 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_scrollArea);
 
-            Add(new Label("Skill", true, 1153)
+            Add(new Button((int)Buttons.SortName, 0x98C, 0x98C, 0x98C, "Skill", 1, true, 14, 24)
             {
-                X = 20, Y = 25
+                X = 20,
+                Y = 25,
+                FontCenter = true,
+                ButtonAction = ButtonAction.Activate,
+                ToPage = 4
             });
 
-            Add(new Label("Real", true, 1153)
+            Add(new Button((int)Buttons.SortReal, 0x98C, 0x98C, 0x98C, "Real", 1, true, 14, 24)
             {
-                X = 220, Y = 25
+                X = 220,
+                Y = 25,
+                FontCenter = true,
+                ButtonAction = ButtonAction.Activate,
+                ToPage = 4
             });
 
-            Add(new Label("Base", true, 1153)
+            Add(new Button((int)Buttons.SortBase, 0x98C, 0x98C, 0x98C, "Base", 1, true, 14, 24)
             {
-                X = 300, Y = 25
+                X = 300,
+                Y = 25,
+                FontCenter = true,
+                ButtonAction = ButtonAction.Activate,
+                ToPage = 4
             });
 
-            Add(new Label("Cap", true, 1153)
+            Add(new Button((int)Buttons.SortCap, 0x98C, 0x98C, 0x98C, "Cap", 1, true, 14, 24)
             {
-                X = 380, Y = 25
+                X = 380,
+                Y = 25,
+                FontCenter = true,
+                ButtonAction = ButtonAction.Activate,
+                ToPage = 4
             });
 
             //======================================================================================
+
             Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
             Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
 
@@ -101,7 +120,37 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 30, Y = 345
             });
+
             World.Player.SkillsChanged += OnSkillChanged;
+        }
+
+        private enum Buttons
+        {
+            SortName = 1,
+            SortReal = 2,
+            SortBase = 3,
+            SortCap = 4
+        }
+        
+        private bool _sortAsc = false;
+        private string _sortField = "Name";
+
+        private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>()
+        {
+            { Buttons.SortName, "Name" },
+            { Buttons.SortReal, "Base" },
+            { Buttons.SortBase, "Value" },
+            { Buttons.SortCap, "Cap" },
+        };
+
+        public override void OnButtonClick(int buttonID)
+        {
+            _sortAsc = !_sortAsc;
+
+            if (_buttonsToSkillsValues.TryGetValue((Buttons)buttonID, out string fieldValue))
+                _sortField = fieldValue;
+
+            _updateSkillsNeeded = true;
         }
 
         protected override void OnInitialize()
@@ -118,7 +167,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _skillListEntries.Clear();
 
-            foreach (Skill skill in World.Player.Skills)
+            var pi = typeof(Skill).GetProperty(_sortField);
+            List<Skill> sortSkills = new List<Skill>(World.Player.Skills.OrderBy(x => pi.GetValue(x, null)));
+
+            if (_sortAsc)
+                sortSkills.Reverse();
+
+            foreach (Skill skill in sortSkills)
             {
                 _totalReal += skill.Base;
                 _totalValue += skill.Value;
@@ -141,6 +196,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 170, Y = 345
             });
         }
+
+
+
 
         public override void Update(double totalMS, double frameMS)
         {
