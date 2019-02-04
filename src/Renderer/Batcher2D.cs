@@ -13,9 +13,6 @@ using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using System.Diagnostics;
-
 using SDL2;
 
 namespace ClassicUO.Renderer
