@@ -202,9 +202,9 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsCave(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.CaveToTile && st.Graphic != Constants.CAVE_REPLACE_GRAPHIC)
+                                    if (Engine.Profile.Current.EnableCaveBorder)
                                         st.SetBorder(true);
-                                    else if (!Engine.Profile.Current.CaveToTile)
+                                    else if (!Engine.Profile.Current.EnableCaveBorder)
                                         st.SetBorder(false);
                                 }
                                 else if (StaticFilters.IsTree(st.OriginalGraphic))
