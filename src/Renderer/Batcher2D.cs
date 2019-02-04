@@ -261,7 +261,6 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[0].TextureCoordinate.X = minX;
             _vertexBufferUI[0].TextureCoordinate.Y = minY;
             _vertexBufferUI[0].TextureCoordinate.Z = 0;
-
             _vertexBufferUI[1].Position.X = position.X + sourceRect.Width;
             _vertexBufferUI[1].Position.Y = position.Y;
             _vertexBufferUI[1].Position.Z = 0;
@@ -290,7 +289,6 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Y = maxY;
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-            
 
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
@@ -384,52 +382,6 @@ namespace ClassicUO.Renderer
 
         public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
         {
-            /* float drawCountX = destRect.Width / (float)texture.Width;
-            float drawCountY = destRect.Height / (float)texture.Height;
-
-            fixed (SpriteVertex* ptr = _vertexBufferUI)
-            {
-                ptr[0].Position.X = destRect.X;
-                ptr[0].Position.Y = destRect.Y;
-                ptr[0].Position.Z = 0;
-                ptr[0].Normal.X = 0;
-                ptr[0].Normal.Y = 0;
-                ptr[0].Normal.Z = 1;
-                ptr[0].TextureCoordinate = Vector3.Zero;
-
-                ptr[1].Position.X = destRect.Right;
-                ptr[1].Position.Y = destRect.Y;
-                ptr[1].Position.Z = 0;
-                ptr[1].Normal.X = 0;
-                ptr[1].Normal.Y = 0;
-                ptr[1].Normal.Z = 1;
-                ptr[1].TextureCoordinate.X = drawCountX;
-                ptr[1].TextureCoordinate.Y = 0;
-                ptr[1].TextureCoordinate.Z = 0;
-
-                ptr[2].Position.X = destRect.X;
-                ptr[2].Position.Y = destRect.Bottom;
-                ptr[2].Position.Z = 0;
-                ptr[2].Normal.X = 0;
-                ptr[2].Normal.Y = 0;
-                ptr[2].Normal.Z = 1;
-                ptr[2].TextureCoordinate.X = 0;
-                ptr[2].TextureCoordinate.Y = drawCountY;
-                ptr[2].TextureCoordinate.Z = 0;
-
-                ptr[3].Position.X = destRect.Right;
-                ptr[3].Position.Y = destRect.Bottom;
-                ptr[3].Position.Z = 0;
-                ptr[3].Normal.X = 0;
-                ptr[3].Normal.Y = 0;
-                ptr[3].Normal.Z = 1;
-                ptr[3].TextureCoordinate.X = drawCountX;
-                ptr[3].TextureCoordinate.Y = drawCountY;
-                ptr[3].TextureCoordinate.Z = 0;
-                ptr[0].Hue = ptr[1].Hue = ptr[2].Hue = ptr[3].Hue = hue;
-            }
-
-            return DrawSprite(texture, _vertexBufferUI); */
             int y = destRect.Y;
             int h = destRect.Height;
 
@@ -466,20 +418,14 @@ namespace ClassicUO.Renderer
 
         public bool DrawBorder(Texture2D texture, Rectangle r)
         {
-            // => /
-            int[,] posLeftTop = {
+            int[,] posLeftTop = { // => /
                 {r.X + (r.Width / 2) - 3, r.Y},
                 {r.X + r.Width - 3,r.Y + (r.Height / 2)},
                 {r.X + (r.Width / 2) + 2, r.Y + 2},
                 {r.X + r.Width + 2, r.Y + (r.Height / 2) + 2}
             };
 
-            for (int i = 0; i < 4; i++)
-                _vertexBufferUI[i].Position = new Vector3(posLeftTop[i, 0], posLeftTop[i, 1], 0);
-            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
-
-            // => \
-            int[,] poTopRight = {
+            int[,] poTopRight = { // => \
                 {r.X, r.Y + (r.Height / 2)},
                 {r.X + (r.Width / 2), r.Y},
                 {r.X + 2, r.Y + (r.Height / 2) + 2},
@@ -487,8 +433,14 @@ namespace ClassicUO.Renderer
             };
 
             for (int i = 0; i < 4; i++)
+                _vertexBufferUI[i].Position = new Vector3(posLeftTop[i, 0], posLeftTop[i, 1], 0);
+
+            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+
+            for (int i = 0; i < 4; i++)
                 _vertexBufferUI[i].Position = new Vector3(poTopRight[i, 0], poTopRight[i, 1], 0);
-                DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+
+            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
 
             return true;
         }
