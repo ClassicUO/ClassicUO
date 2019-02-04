@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _caveToTile;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
-            _caveToTile = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.CaveToTile, 0, 0);
+            _enableCaveBorder = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
 
             hpAreaItem = new ScrollAreaItem();
@@ -575,7 +575,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _highlightByState.IsChecked = true;
                     _drawRoofs.IsChecked = true;
                     _treeToStumps.IsChecked = false;
-                    _caveToTile.IsChecked = false;
+                    _enableCaveBorder.IsChecked = false;
                     _hideVegetation.IsChecked = false;
                     _normalFields.IsChecked = true;
                     _staticFields.IsChecked = false;
@@ -671,7 +671,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            Engine.Profile.Current.CaveToTile = _caveToTile.IsChecked;
+            Engine.Profile.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
             Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
 
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
