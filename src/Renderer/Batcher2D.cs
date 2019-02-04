@@ -14,6 +14,8 @@ using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System.Diagnostics;
+
 using SDL2;
 
 namespace ClassicUO.Renderer
@@ -262,6 +264,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[0].TextureCoordinate.X = minX;
             _vertexBufferUI[0].TextureCoordinate.Y = minY;
             _vertexBufferUI[0].TextureCoordinate.Z = 0;
+
             _vertexBufferUI[1].Position.X = position.X + sourceRect.Width;
             _vertexBufferUI[1].Position.Y = position.Y;
             _vertexBufferUI[1].Position.Z = 0;
@@ -464,6 +467,34 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        public bool DrawBorder(Texture2D texture, Rectangle r)
+        {
+            // => /
+            int[,] posLeftTop = {
+                {r.X + (r.Width / 2) - 3, r.Y},
+                {r.X + r.Width - 3,r.Y + (r.Height / 2)},
+                {r.X + (r.Width / 2) + 2, r.Y + 2},
+                {r.X + r.Width + 2, r.Y + (r.Height / 2) + 2}
+            };
+
+            for (int i = 0; i < 4; i++)
+                _vertexBufferUI[i].Position = new Vector3(posLeftTop[i, 0], posLeftTop[i, 1], 0);
+            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+
+            // => \
+            int[,] poTopRight = {
+                {r.X, r.Y + (r.Height / 2)},
+                {r.X + (r.Width / 2), r.Y},
+                {r.X + 2, r.Y + (r.Height / 2) + 2},
+                {r.X + (r.Width / 2) + 2, r.Y + 2}
+            };
+
+            for (int i = 0; i < 4; i++)
+                _vertexBufferUI[i].Position = new Vector3(poTopRight[i, 0], poTopRight[i, 1], 0);
+                DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+
+            return true;
+        }
 
         [Conditional("DEBUG")]
         private void EnsureStarted()

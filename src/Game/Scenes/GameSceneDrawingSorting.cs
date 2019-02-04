@@ -204,9 +204,9 @@ namespace ClassicUO.Game.Scenes
                                 if (StaticFilters.IsCave(st.OriginalGraphic))
                                 {
                                     if (Engine.Profile.Current.CaveToTile && st.Graphic != Constants.CAVE_REPLACE_GRAPHIC)
-                                        st.SetGraphic(Constants.CAVE_REPLACE_GRAPHIC);
-                                    else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.CaveToTile)
-                                        st.RestoreOriginalGraphic();
+                                        st.SetBorder(true);
+                                    else if (!Engine.Profile.Current.CaveToTile)
+                                        st.SetBorder(false);
                                 }
                                 else if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
@@ -228,7 +228,6 @@ namespace ClassicUO.Game.Scenes
                                     changinAlpha = obj.AlphaHue != 0;
                                 }
 
-
                                 if (!changinAlpha)
                                     continue;                                                  
                             }
@@ -242,18 +241,14 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 if (maxObjectZ > maxZ)
-                {
                     break;
-                }
 
                 obj.CurrentRenderIndex = _renderIndex;
 
                 bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
                 if (!ismobile && !iscorpse && itemData.IsInternal)
-                {
                     continue;
-                }
 
                 bool island = !ismobile && !iscorpse && obj is Land;
 
