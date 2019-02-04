@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _drawRoofs = CreateCheckBox(rightArea, "Draw roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
-            _caveToTile = CreateCheckBox(rightArea, "Cave to floor tile", Engine.Profile.Current.CaveToTile, 0, 0);
+            _caveToTile = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.CaveToTile, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
 
             hpAreaItem = new ScrollAreaItem();
@@ -806,17 +806,15 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
-                {
                     Engine.UI.GetByLocalSerial<TopBarGump>()?.Dispose();
-                }
                 else
                     TopBarGump.Create();
 
                 Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
             Engine.Profile.Current.CaveToTile = _caveToTile.IsChecked;
+            Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
 
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
