@@ -34,7 +34,6 @@ using Microsoft.Xna.Framework;
 
 using ClassicUO.Network;
 using System.Diagnostics;
-using System.IO;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
