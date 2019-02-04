@@ -63,6 +63,11 @@ namespace ClassicUO.Game.GameObjects
             _border = status;
         }
 
+        public bool IsBordered()
+        {
+            return _border;
+        }
+
         public override bool TransparentTest(int z)
         {
             bool r = true;
