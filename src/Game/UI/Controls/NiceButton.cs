@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Controls
             label.Y = (h - label.Height) / 2;
         }
 
-        public int ToPage { get; set; }
+        public int ButtonParameter { get; set; }
 
         public bool IsSelectable { get; set; } = true;
 
@@ -79,9 +79,9 @@ namespace ClassicUO.Game.UI.Controls
                 IsSelected = true;
 
                 if (_action == ButtonAction.SwitchPage)
-                    ChangePage(ToPage);
+                    ChangePage(ButtonParameter);
                 else
-                    OnButtonClick(ToPage);
+                    OnButtonClick(ButtonParameter);
             }
         }
 

@@ -111,14 +111,14 @@ namespace ClassicUO.Game.UI.Gumps
             tc.Texture.SetData(pixels);
             Add(tc);
          
-            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ToPage = 1 } );
-            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") { ToPage = 2 });
-            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") { ToPage = 3 });
-            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macro") { ToPage = 4 });
-            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") { ToPage = 5 });
-            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") { ToPage = 6 });
-            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") { ToPage = 7 });
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") { ToPage = 8 });
+            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ButtonParameter = 1 } );
+            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") { ButtonParameter = 2 });
+            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") { ButtonParameter = 3 });
+            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macro") { ButtonParameter = 4 });
+            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") { ButtonParameter = 5 });
+            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") { ButtonParameter = 6 });
+            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") { ButtonParameter = 7 });
+            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") { ButtonParameter = 8 });
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
            
@@ -430,7 +430,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 4;
 
             ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
-            NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") { IsSelectable = false, ToPage = (int) Buttons.NewMacro };
+            NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") { IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro };
 
             addButton.MouseClick += (sender, e) =>
             {
@@ -448,7 +448,7 @@ namespace ClassicUO.Game.UI.Gumps
                     NiceButton nb;
                     rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, name)
                     {
-                        ToPage = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                        ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
                     });
 
                     nb.IsSelected = true;
@@ -480,7 +480,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(addButton, PAGE);
 
-            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ToPage = (int) Buttons.DeleteMacro};
+            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
 
             delButton.MouseClick += (ss, ee) =>
             {
@@ -526,7 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NiceButton nb;
                 rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, macro.Name)
                 {
-                    ToPage = (int)Buttons.Last + 1 + rightArea.Children.Count,
+                    ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count,
                 });
 
                 nb.IsSelected = true;
