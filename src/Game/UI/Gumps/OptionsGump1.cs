@@ -33,6 +33,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 using ClassicUO.Network;
+
 using System.Diagnostics;
 
 using ClassicUO.Game.Managers;
