@@ -72,10 +72,10 @@ namespace ClassicUO.Game.Scenes
            { SDL.SDL_Keycode.SDLK_KP_1, Direction.South },
         };
 
+        private bool _isShiftDown;
+
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
-
-	    private bool _isShiftDown;
-
+	    
         private void MoveCharacterByInputs()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
@@ -134,7 +134,6 @@ namespace ClassicUO.Game.Scenes
                         case TargetType.Position:
                         case TargetType.Object:
                             GameObject obj = SelectedObject;
-
                             if (obj != null)
                             {
                                 TargetManager.TargetGameObject(obj);
@@ -142,8 +141,8 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             break;
-                        case TargetType.SetTargetClientSide:
 
+                        case TargetType.SetTargetClientSide:
                             obj = SelectedObject;
                             if (obj != null)
                             {
@@ -153,9 +152,9 @@ namespace ClassicUO.Game.Scenes
 
                             }
                             break;
+
                         default:
                             Log.Message(LogTypes.Warning, "Not implemented.");
-
                             break;
                     }
                 }
@@ -170,9 +169,10 @@ namespace ClassicUO.Game.Scenes
                         switch (obj)
                         {
                             case Mobile mobile:
-                               // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
-                               MergeHeldItem(mobile);
+                                // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
+                                MergeHeldItem(mobile);
                                 break;
+
                             case Item item:
                                 if (item.IsCorpse)
                                     MergeHeldItem(item);
@@ -186,19 +186,21 @@ namespace ClassicUO.Game.Scenes
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                                 }
                                 break;
+
                             case Multi multi:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
                                 break;
+
                             case Static st:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
                                 break;
+
                             case Land _:
                                 DropHeldItemToWorld(obj.Position);
-
                                 break;
+
                             default:
                                 Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
-
                                 return;
                         }
                     }
@@ -212,32 +214,27 @@ namespace ClassicUO.Game.Scenes
                     switch (obj)
                     {
                         case Static st:
-
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-
                             if (obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-
                             break;
+
                         case Multi multi:
                             name = multi.Name;
-
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-
                             if (obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
-                        case Entity entity:
 
+                        case Entity entity:
                             if (!_inqueue)
                             {
                                 _inqueue = true;
                                 _queuedObject = entity;
                                 _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
                                 _queuedAction = () =>
                                 {
                                     if (!World.ClientFlags.TooltipsEnabled)
@@ -245,7 +242,6 @@ namespace ClassicUO.Game.Scenes
                                     GameActions.OpenPopupMenu(_queuedObject);
                                 };
                             }
-
                             break;
                     }
                     
@@ -269,22 +265,21 @@ namespace ClassicUO.Game.Scenes
                     case Item item:
                         e.Result = true;
                         GameActions.DoubleClick(item);
-
                         break;
+
                     case Mobile mob:
                         e.Result = true;
-
                         if (World.Player.InWarMode && World.Player != mob)
                             GameActions.Attack(mob);
                         else
                             GameActions.DoubleClick(mob);
-
                         break;
+
                     case GameEffect effect when effect.Source is Item item:
                         e.Result = true;
                         GameActions.DoubleClick(item);
-
                         break;
+
                     case TextOverhead overhead when overhead.Parent is Entity entity:
                         e.Result = true;
                         GameActions.DoubleClick(entity);
@@ -304,7 +299,6 @@ namespace ClassicUO.Game.Scenes
                         if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
-
                             e.Result = true;
                         }
                     }
@@ -337,11 +331,10 @@ namespace ClassicUO.Game.Scenes
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
 
-
                             break;
+
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-
                             break;
                     }
 
@@ -372,12 +365,10 @@ namespace ClassicUO.Game.Scenes
                             HealthBarGump currentHealthBarGump;
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-
-
                             break;
+
                         case Item item:
 							PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-
                             break;
                     }
 
@@ -446,5 +437,6 @@ namespace ClassicUO.Game.Scenes
                     GameActions.ToggleWarMode();
 			}
 		}
+
     }
 }
