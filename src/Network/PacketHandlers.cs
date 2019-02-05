@@ -965,6 +965,7 @@ namespace ClassicUO.Network
 
                                     mob.Equipment[(int) hold.Layer] = item;
 
+                                    mob.Items.ProcessDelta();
                                     mob.ProcessDelta();
                                 }
                                 else
@@ -1055,28 +1056,27 @@ namespace ClassicUO.Network
 
             Serial serial = p.ReadUInt();
 
-            Item item = World.Items.Get(serial);
+            Item item = World.GetOrCreateItem(serial);
 
-            if (item != null)
+            
+            if (item.Graphic != 0 && item.Layer != Layer.Backpack)
             {
-                if (item.Graphic != 0 && item.Layer != Layer.Backpack)
-                {
-                    item.Items.Clear();
-                }
-
-                if (item.Container != 0)
-                {
-                    Entity cont = World.Get(item.Container);
-                    cont.Items.Remove(item);
-                    cont.Items.ProcessDelta();
-                    item.Container = Serial.INVALID;
-                }
-
-                if (item.Graphic != 0)
-                    World.RemoveItem(item);
+                item.Items.Clear();
             }
-            else
-                item = World.GetOrCreateItem(serial);
+
+            if (item.Container != 0)
+            {
+                Entity cont = World.Get(item.Container);
+                cont.Items.Remove(item);
+                cont.Items.ProcessDelta();
+                item.Container = Serial.INVALID;
+            }
+
+            item.RemoveFromTile();
+
+            //if (item.Graphic != 0)
+            //    World.RemoveItem(item);
+            
 
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer)p.ReadByte();

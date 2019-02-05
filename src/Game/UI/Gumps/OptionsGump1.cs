@@ -242,7 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(highlightByFlagsItem);
 
 
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
+            _drawRoofs = CreateCheckBox(rightArea, "Hide roofs", !Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
             _enableCaveBorder = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);

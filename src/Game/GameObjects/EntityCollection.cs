@@ -81,7 +81,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_entities.ContainsKey(entity.Serial))
                 return false;
-
             _entities[entity.Serial] = entity;
             _added.Add(entity);
 

@@ -185,6 +185,12 @@ namespace ClassicUO.Game.GameObjects
                 _tile?.AddGameObject(this);
             }
         }
+
+        public void RemoveFromTile()
+        {
+            if (World.Map != null && _tile != null)
+                _tile = null;
+        }
       
 
         public event EventHandler Disposed, OverheadAdded;

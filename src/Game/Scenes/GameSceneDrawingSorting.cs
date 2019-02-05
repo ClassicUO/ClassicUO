@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Scenes
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
-            _noDrawRoofs = !Engine.Profile.Current.DrawRoofs;
+            _noDrawRoofs = Engine.Profile.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
             Tile tile = World.Map.GetTile(bx, by, false);

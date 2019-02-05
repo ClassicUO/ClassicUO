@@ -518,6 +518,24 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                     // TODO:
+                    int scantype = macro.SubCode - MacroSubType.Hostile;
+                    int scanRange = macro.Code - MacroType.SelectNext;
+
+
+                    switch (scanRange)
+                    {
+                        case 0:
+
+                            break;
+                        case 1:
+
+                            break;
+                        case 2:
+
+                            break;
+                    }
+                    
+
                     break;
 
                 case MacroType.ToggleBuiconWindow:
