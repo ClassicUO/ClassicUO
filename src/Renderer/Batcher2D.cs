@@ -291,7 +291,6 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Y = maxY;
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-            
 
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
