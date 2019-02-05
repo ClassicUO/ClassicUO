@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (Item child in _item.Items)
                 {
-                    if (child.Container == _item)
+                    if (child.Container == _item && !child.IsDisposed)
                         child.Dispose();
                 }
 
