@@ -577,6 +577,19 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
+        public ChildType GetChildByLocalSerial<ParentType, ChildType>(Serial parentSerial, Serial childSerial) 
+            where ParentType : Control
+            where ChildType : Control
+        {
+            ParentType parent = GetByLocalSerial<ParentType>(parentSerial);
+            if(parent != null)
+            {
+                return parent.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
+            }
+
+            return null;
+        }
+
         public T GetByLocalSerial<T>(Serial? serial = null) where T : Control
         {
             return _gumps.OfType<T>().FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
