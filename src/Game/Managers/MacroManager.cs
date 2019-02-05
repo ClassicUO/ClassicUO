@@ -759,7 +759,7 @@ namespace ClassicUO.Game.Managers
 
         public virtual bool HasString() => false;
 
-        [JsonProperty] public MacroObject Left { get; set; }
+        [JsonIgnore] public MacroObject Left { get; set; }
         [JsonProperty] public MacroObject Right { get; set; }
     }
 
