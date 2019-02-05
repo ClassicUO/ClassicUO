@@ -392,7 +392,7 @@ namespace ClassicUO.Game.Scenes
                 TargetManager.CancelTarget();
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
-            
+
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
                     GameActions.SetWarMode(true);
@@ -411,16 +411,10 @@ namespace ClassicUO.Game.Scenes
             if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                     World.Player.Walk(dWalkN, false);
-            {
-	            if (!World.Player.InWarMode)
-		            GameActions.SetWarMode(true);
-            }
-
 
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
-
 
             Macro macro = _macroManager.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
