@@ -259,7 +259,7 @@ namespace ClassicUO.Game.Managers
                     }
                     break;
                 case MacroType.LastSkill:
-                    // TODO:
+                    GameActions.UseSkill(GameActions.LastSkillIndex);
                     break;
                 case MacroType.CastSpell:
                     int spell = macro.SubCode - MacroSubType.Clumsy + 1;
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.Managers
                     }
                     break;
                 case MacroType.LastSpell:
-                    // TODO:
+                    GameActions.CastSpell(GameActions.LastSpellIndex);
                     break;
                 case MacroType.Bow:
                 case MacroType.Salute:
@@ -301,7 +301,7 @@ namespace ClassicUO.Game.Managers
                     GameActions.EmoteAction(index == 0 ? BOW : SALUTE);
                     break;
                 case MacroType.QuitGame:
-                    // TODO:
+                    Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
                     break;
                 case MacroType.AllNames:
                     GameActions.AllNames();
@@ -453,23 +453,23 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.AttackSelectedTarget:
-
+                    // TODO:
                     break;
                 case MacroType.UseSelectedTarget:
-
+                    // TODO:
                     break;
 
                 case MacroType.CurrentTarget:
-
+                    // TODO:
                     break;
 
                 case MacroType.TargetSystemOnOff:
-
+                    // TODO:
                     break;
 
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
-
+                    // TODO:
                     if (FileManager.ClientVersion < ClientVersions.CV_5020)
                     {
                         
@@ -517,11 +517,11 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-
+                    // TODO:
                     break;
 
                 case MacroType.ToggleBuiconWindow:
-
+                    // TODO:
                     break;
                 case MacroType.InvokeVirtue:
                     byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
@@ -541,7 +541,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.EquipLastWeapon:
-
+                    NetClient.Socket.Send(new PEquipLastWeapon());
                     break;
                 case MacroType.KillGumpOpen:
 

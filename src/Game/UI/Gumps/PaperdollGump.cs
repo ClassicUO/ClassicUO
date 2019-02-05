@@ -354,11 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 		        case Buttons.LogOut:
-			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
-			        {
-				        if (s)
-					        Engine.SceneManager.ChangeScene(ScenesType.Login);
-			        }));
+			       Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
 
 			        break;
 		        case Buttons.Quests:

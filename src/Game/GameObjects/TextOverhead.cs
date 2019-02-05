@@ -129,12 +129,13 @@ namespace ClassicUO.Game.GameObjects
 
     internal class DamageOverhead : TextOverhead
     {
-        private const int DAMAGE_Y_MOVING_TIME = 50;
+        private const int DAMAGE_Y_MOVING_TIME = 25;
 
         private uint _movingTime;
         public DamageOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent, text, maxwidth, hue, font, isunicode, style, timeToLive)
         {
             EdgeDetection = false;
+            AlphaHue = 0xFF;
         }
 
         public int OffsetY { get; private set; }
@@ -146,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
             if (_movingTime < totalMS)
             {
                 _movingTime = (uint) totalMS + DAMAGE_Y_MOVING_TIME;
-                OffsetY -= 2;
+                OffsetY -= 1;
             }          
         }
     }

@@ -329,6 +329,16 @@ namespace ClassicUO.Game.Scenes
         private bool _alphaChanged;
         private long _alphaTimer;
 
+
+        public void RequestQuitGame()
+        {
+            Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
+            {
+                if (s)
+                    Engine.SceneManager.ChangeScene(ScenesType.Login);
+            }));
+        }
+
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             base.FixedUpdate(totalMS, frameMS);

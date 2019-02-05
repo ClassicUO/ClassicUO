@@ -38,7 +38,8 @@ namespace ClassicUO.Game
     {
         private static Action<Item, int, int, int?> _pickUpAction;
 
-        public static SpellDefinition LastSpell;
+        public static int LastSpellIndex { get; set; } = 1;
+        public static int LastSkillIndex { get; set; } = 1;
 
         internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
         {
@@ -243,12 +244,20 @@ namespace ClassicUO.Game
 
         public static void CastSpellFromBook(int index, Serial bookSerial)
         {
-            Socket.Send(new PCastSpellFromBook(index, bookSerial));
+            if (index >= 0)
+            {
+                LastSpellIndex = index;
+                Socket.Send(new PCastSpellFromBook(index, bookSerial));
+            }
         }
 
         public static void CastSpell(int index)
         {
-            Socket.Send(new PCastSpell(index));
+            if (index >= 0)
+            {
+                LastSpellIndex = index;
+                Socket.Send(new PCastSpell(index));
+            }
         }
 
         public static void OpenGuildGump()
@@ -268,7 +277,11 @@ namespace ClassicUO.Game
 
         public static void UseSkill(int index)
         {
-            Socket.Send(new PUseSkill(index));
+            if (index >= 0)
+            {
+                LastSkillIndex = index;
+                Socket.Send(new PUseSkill(index));
+            }
         }
 
         public static void OpenPopupMenu(Serial serial)

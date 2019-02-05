@@ -110,8 +110,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile != null && !Mobile.IsDisposed)
             {
-                var x = Mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 9;
-                var y = Mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y + 30;
+                float x = Mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 9;
+                float y = Mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y + 30;
+
+                //float scale = Engine.Profile.Current.ScaleZoom;
+                
 
                 X = (int) (x + Mobile.Offset.X);
                 Y = (int) (y + Mobile.Offset.Y - Mobile.Offset.Z - 3);
