@@ -19,8 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -30,8 +33,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class TextBox : AbstractTextBox
     {
-        public TextEntry TxEntry { get; private set; }
-
         public TextBox(TextEntry txentry, bool editable)
         {
             TxEntry = txentry;
@@ -56,6 +57,12 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
+
+
+        public event EventHandler TextChanged;
+
+
+        public TextEntry TxEntry { get; private set; }
 
         public bool IsChanged => TxEntry.IsChanged;
 
@@ -105,7 +112,10 @@ namespace ClassicUO.Game.UI.Controls
                 Height = TxEntry.Height;
 
             if (TxEntry.IsChanged)
+            {
                 TxEntry.UpdateCaretPosition();
+                TextChanged.Raise(this);
+            }
             base.Update(totalMS, frameMS);
         }
 

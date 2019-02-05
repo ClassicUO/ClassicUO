@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
             GroupIndex = group;
         }
 
-        public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0) : base(inactive, active, text, font, color)
+        public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true) : base(inactive, active, text, font, color, isunicode)
         {
             GroupIndex = group;
         }

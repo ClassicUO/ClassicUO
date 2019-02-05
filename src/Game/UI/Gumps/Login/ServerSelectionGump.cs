@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 150, Y = 90, Width = 393 - 14, Height = 271
             });
             // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea(150, 80, 383, 271, true);
+            ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)

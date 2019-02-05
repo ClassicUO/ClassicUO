@@ -301,96 +301,100 @@ namespace ClassicUO.Network
             mobile.IsRenamable = p.ReadBool();
             byte type = p.ReadByte();
 
-            if (type > 0)
+            if (type > 0 && p.Position + 1 <= p.Length)
             {
-                World.Player.Female = p.ReadBool();
-                ushort str = p.ReadUShort();
-                ushort dex = p.ReadUShort();
-                ushort intell = p.ReadUShort();
-                World.Player.Stamina = p.ReadUShort();
-                World.Player.StaminaMax = p.ReadUShort();
-                World.Player.Mana = p.ReadUShort();
-                World.Player.ManaMax = p.ReadUShort();
-                World.Player.Gold = p.ReadUInt();
-                World.Player.ResistPhysical = p.ReadUShort();
-                World.Player.Weight = p.ReadUShort();
+                mobile.IsFemale = p.ReadBool();
 
-
-                if (World.Player.Strength != 0)
+                if (mobile == World.Player)
                 {
-                    ushort currentStr = World.Player.Strength;
-                    ushort currentDex = World.Player.Dexterity;
-                    ushort currentInt = World.Player.Intelligence;
+                    ushort str = p.ReadUShort();
+                    ushort dex = p.ReadUShort();
+                    ushort intell = p.ReadUShort();
+                    World.Player.Stamina = p.ReadUShort();
+                    World.Player.StaminaMax = p.ReadUShort();
+                    World.Player.Mana = p.ReadUShort();
+                    World.Player.ManaMax = p.ReadUShort();
+                    World.Player.Gold = p.ReadUInt();
+                    World.Player.ResistPhysical = p.ReadUShort();
+                    World.Player.Weight = p.ReadUShort();
 
-                    int deltaStr = str - currentStr;
-                    int deltaDex = dex - currentDex;
-                    int deltaInt = intell - currentInt;
 
-                    if (deltaStr != 0)
-                        Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                    if (World.Player.Strength != 0)
+                    {
+                        ushort currentStr = World.Player.Strength;
+                        ushort currentDex = World.Player.Dexterity;
+                        ushort currentInt = World.Player.Intelligence;
 
-                    if (deltaDex != 0)
-                        Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                        int deltaStr = str - currentStr;
+                        int deltaDex = dex - currentDex;
+                        int deltaInt = intell - currentInt;
 
-                    if (deltaInt != 0)
-                        Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
-                }
+                        if (deltaStr != 0)
+                            Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
-                World.Player.Strength = str;
-                World.Player.Dexterity = dex;
-                World.Player.Intelligence = intell;
+                        if (deltaDex != 0)
+                            Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
-                if (type >= 5) //ML
-                {
-                    World.Player.WeightMax = p.ReadUShort();
-                    byte race = p.ReadByte();
-                    if (race <= 0) race = 1;
-                    World.Player.Race = (RaceType)race;
-                }
-                else
-                {
-                    if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-                        World.Player.WeightMax = (ushort)(7 * (World.Player.Strength >> 1) + 40);
+                        if (deltaInt != 0)
+                            Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                    }
+
+                    World.Player.Strength = str;
+                    World.Player.Dexterity = dex;
+                    World.Player.Intelligence = intell;
+
+                    if (type >= 5) //ML
+                    {
+                        World.Player.WeightMax = p.ReadUShort();
+                        byte race = p.ReadByte();
+                        if (race <= 0) race = 1;
+                        World.Player.Race = (RaceType) race;
+                    }
                     else
-                        World.Player.WeightMax = (ushort)(World.Player.Strength * 4 + 25);
-                }
+                    {
+                        if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                            World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
+                        else
+                            World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
+                    }
 
-                if (type >= 3) //Renaissance
-                {
-                    World.Player.StatsCap = p.ReadUShort();
-                    World.Player.Followers = p.ReadByte();
-                    World.Player.FollowersMax = p.ReadByte();
-                }
+                    if (type >= 3) //Renaissance
+                    {
+                        World.Player.StatsCap = p.ReadUShort();
+                        World.Player.Followers = p.ReadByte();
+                        World.Player.FollowersMax = p.ReadByte();
+                    }
 
-                if (type >= 4) //AOS
-                {
-                    World.Player.ResistFire = p.ReadUShort();
-                    World.Player.ResistCold = p.ReadUShort();
-                    World.Player.ResistPoison = p.ReadUShort();
-                    World.Player.ResistEnergy = p.ReadUShort();
-                    World.Player.Luck = p.ReadUShort();
-                    World.Player.DamageMin = p.ReadUShort();
-                    World.Player.DamageMax = p.ReadUShort();
-                    World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
-                }
+                    if (type >= 4) //AOS
+                    {
+                        World.Player.ResistFire = p.ReadUShort();
+                        World.Player.ResistCold = p.ReadUShort();
+                        World.Player.ResistPoison = p.ReadUShort();
+                        World.Player.ResistEnergy = p.ReadUShort();
+                        World.Player.Luck = p.ReadUShort();
+                        World.Player.DamageMin = p.ReadUShort();
+                        World.Player.DamageMax = p.ReadUShort();
+                        World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
+                    }
 
-                if (type >= 6)
-                {
-                    World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    if (type >= 6)
+                    {
+                        World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                    }
                 }
             }
 
@@ -795,23 +799,32 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
-                var gump = new ShopGump(serial, true, 150, 5);
+                ShopGump gump = new ShopGump(serial, true, 150, 5);
+                Engine.UI.Add(gump);
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.Equipment[(int) layer];
 
-                    Item a = item?.Items.FirstOrDefault();
+                    //Item a = item?.Items.FirstOrDefault();
 
-                    if (a == null)
-                        continue;
+                    //if (a == null)
+                    //    continue;
 
-                    bool reverse = a.X > 1;
+                    //bool reverse = a.X > 1;
 
-                    var list = reverse ? 
-                                   item.Items.OrderBy(s => s.Serial.Value).Reverse() 
-                                   :
-                                   item.Items.OrderBy(s => s.Serial.Value);
+                    //var list = reverse ? 
+                    //               item.Items.OrderBy(s => s.Serial.Value).Reverse() 
+                    //               :
+                    //               item.Items.OrderBy(s => s.Serial.Value);
+
+                    var list = item.Items/*.OrderByDescending(s => s.Serial.Value)*/.ToArray();
+
+                    if (list.Length == 0)
+                        return;
+
+                    if (list[0].X > 1)
+                        list = list.Reverse().ToArray();
 
                     foreach (var i in list)
                     {
@@ -819,7 +832,6 @@ namespace ClassicUO.Network
                     }
                 }
 
-                Engine.UI.Add(gump);
             }
             else
             {
@@ -847,22 +859,23 @@ namespace ClassicUO.Network
                 }
             }
 
-            if (graphic != 0x0030)
-            {
-                Item item = World.Items.Get(serial);
+            //if (graphic != 0x0030)
+            //{
+            //    Item item = World.Items.Get(serial);
 
-                if (item != null)
-                {
-                    if (!item.IsCorpse)
-                    {
-                        foreach (Item itemItem in item.Items)
-                        {
-                            item.Items.Remove(itemItem);
-                            World.Items.Remove(itemItem);
-                        }
-                    }
-                }
-            }
+            //    if (item != null)
+            //    {
+            //        if (!item.IsCorpse)
+            //        {
+            //            foreach (Item itemItem in item.Items)
+            //            {
+            //                item.Items.Remove(itemItem);
+            //                World.Items.Remove(itemItem);
+            //            }
+            //        }
+            //    }
+            //}
+
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -884,6 +897,7 @@ namespace ClassicUO.Network
 
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
 
+            World.Get(containerSerial)?.Items.ProcessDelta();
             World.Items.ProcessDelta();
         }
 
@@ -1039,7 +1053,31 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Item item = World.GetOrCreateItem(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+
+            Item item = World.Items.Get(serial);
+
+            if (item != null)
+            {
+                if (item.Graphic != 0 && item.Layer != Layer.Backpack)
+                {
+                    item.Items.Clear();
+                }
+
+                if (item.Container != 0)
+                {
+                    Entity cont = World.Get(item.Container);
+                    cont.Items.Remove(item);
+                    cont.Items.ProcessDelta();
+                    item.Container = Serial.INVALID;
+                }
+
+                if (item.Graphic != 0)
+                    World.RemoveItem(item);
+            }
+            else
+                item = World.GetOrCreateItem(serial);
+
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer)p.ReadByte();
             item.Container = p.ReadUInt();
@@ -1051,11 +1089,16 @@ namespace ClassicUO.Network
             {
                 mobile.Equipment[(int)item.Layer] = item;
                 mobile.Items.Add(item);
+                mobile.Items.ProcessDelta();
             }
 
-            item.ProcessDelta();
-            if (World.Items.Add(item)) World.Items.ProcessDelta();
-            mobile?.ProcessDelta();
+            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
+            {
+                item.Items.Clear();
+            }
+
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
 
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
@@ -1154,23 +1197,27 @@ namespace ClassicUO.Network
                     if (container != null)
                     {
                         if (container.Graphic == 0x2006)
-                        {
-                            foreach (Item it in container.Items)
+                        {                          
+                            container.Items
+                                     .Where( s=> s.Layer == Layer.Invalid)
+                                     .ToList()
+                                     .ForEach(s =>
                             {
-                                if (it.Layer == Layer.Invalid)
-                                {
-                                    container.Items.Remove(it);
-                                    World.Items.Remove(it);
-                                }
-                            }
+                                s.Container = Serial.INVALID;
+                                container.Items.Remove(s);
+                                World.Items.Remove(s);
+                            });
                         }
                         else
                         {
-                            foreach (Item it in container.Items)
-                            {
-                                container.Items.Remove(it);
-                                World.Items.Remove(it);
-                            }
+                            container.Items
+                                     .ToList()
+                                     .ForEach(s =>
+                                      {
+                                          s.Container = Serial.INVALID;
+                                          container.Items.Remove(s);
+                                          World.Items.Remove(s);
+                                      });
                         }
 
                         container.ProcessDelta();
@@ -1181,6 +1228,7 @@ namespace ClassicUO.Network
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
 
+            container?.Items.ProcessDelta();
 
             if (container is Item itemContainer && itemContainer.IsSpellBook && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
             {
@@ -1549,17 +1597,27 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                Item a = container.Items.FirstOrDefault();
+                //Item a = container.Items.FirstOrDefault();
 
-                if (a == null)
+                //if (a == null)
+                //    return;
+
+                //bool reverse = a.X > 1;
+
+                //var list = reverse ? 
+                //               container.Items.OrderBy(s => s.Serial.Value).Reverse()
+                //               :
+                //               container.Items.OrderBy(s => s.Serial.Value);
+
+
+                var list = container.Items/*.OrderBy(s => s.Serial.Value)*/.ToArray();
+
+                if (list.Length == 0)
                     return;
 
-                bool reverse = a.X > 1;
+                if (list[0].X > 1)
+                    list = list.Reverse().ToArray();
 
-                var list = reverse ? 
-                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
-                               :
-                               container.Items.OrderBy(s => s.Serial.Value);
 
                 foreach (Item it in list.Take(count))
                 {
@@ -1722,11 +1780,35 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Serial serial = p.ReadUInt();
             uint id = p.ReadUInt();
-            //string name = p.ReadASCII(p.ReadByte());
-            //int count = p.ReadByte();
-            // to finish
+            string name = p.ReadASCII(p.ReadByte());
+            int count = p.ReadByte();
+
+            Graphic menuid = p.ReadUShort();
+            p.Seek(p.Position - 2);
+
+            if (menuid != 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    Graphic graphic = p.ReadUShort();
+                    Hue hue = p.ReadUShort();
+                    name = p.ReadASCII(p.ReadByte());
+
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    p.Skip(4); 
+                    name = p.ReadASCII(p.ReadByte());
+                }
+            }
 
             Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
         }
@@ -2690,7 +2772,11 @@ namespace ClassicUO.Network
             Entity entity = World.Mobiles.Get(serial);
 
             if (entity == null)
+            {
+                if (serial.IsMobile)
+                    Log.Message(LogTypes.Warning, "Searching a mobile into World.Items from MegaCliloc packet");
                 entity = World.Items.Get(serial);
+            }
 
             if (entity != null)
             {
@@ -3118,16 +3204,34 @@ namespace ClassicUO.Network
 
             Entity container = World.Get(containerSerial);
 
+            if (container == null)
+            {
+                Log.Message(LogTypes.Warning, $"No container ({containerSerial}) found");
+                return;
+            }
+           
+
             Item item = World.Items.Get(serial);
 
-            if (item != null && ((container != null && container.Graphic != 0x2006) || item.Layer == Layer.Invalid))
+
+            if (serial.IsMobile)
+            {
+                Log.Message(LogTypes.Warning, $"AddItemToContainer function adds mobile as Item");
+            }
+
+            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
                 {
+                    item.Container = Serial.INVALID;
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
+                }
+                else if (item.Container.IsValid)
+                {
+                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
                 }
 
                 World.Items.Remove(item);
@@ -3141,10 +3245,8 @@ namespace ClassicUO.Network
             item.Position = new Position(x, y);
             item.Container = containerSerial;
 
-            container?.Items.Add(item);
+            container.Items.Add(item);
             World.Items.Add(item);
-
-            container?.ProcessDelta();
         }
 
 

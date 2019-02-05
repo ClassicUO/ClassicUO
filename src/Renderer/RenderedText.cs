@@ -47,6 +47,7 @@ namespace ClassicUO.Renderer
     internal sealed class RenderedText : IDisposable
     {
         private string _text;
+        private byte _font;
 
         public RenderedText()
         {
@@ -56,8 +57,19 @@ namespace ClassicUO.Renderer
 
         public bool IsUnicode { get; set; }
 
-        public byte Font { get; set; }
-
+        public byte Font
+        {
+            get => _font;
+            set
+            {
+                if (_font != value)
+                {
+                    if (value == 0xFF)
+                        value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    _font = value;
+                }
+            }
+        }
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }

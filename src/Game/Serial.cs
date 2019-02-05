@@ -23,8 +23,13 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal struct Serial : IComparable, IComparable<uint>
+    internal readonly struct Serial : IComparable<uint>
     {
+        public bool Equals(Serial other)
+        {
+            return Value == other.Value;
+        }
+
         public const uint INVALID = 0;
         public const uint MINUS_ONE = 0xFFFF_FFFF;
 
@@ -71,11 +76,6 @@ namespace ClassicUO.Game
             return s1.Value > s2.Value;
         }
 
-        public int CompareTo(object obj)
-        {
-            return Value.CompareTo(obj);
-        }
-
         public int CompareTo(uint other)
         {
             return Value.CompareTo(other);
@@ -93,12 +93,9 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            switch (obj)
-            {
-                case Serial serial: return Value == serial.Value;
-                case uint u: return Value == u;
-                default: return false;
-            }
+            if (ReferenceEquals(null, obj)) return false;
+
+            return obj is Serial other && Equals(other);
         }
 
         public static Serial Parse(string str)
