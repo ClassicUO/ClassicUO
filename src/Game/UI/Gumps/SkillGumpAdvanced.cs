@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class SkillGumpAdvanced : Gump
     {
         private const int WIDTH = 500;
-        private const int HEIGHT = 400;
+        private const int HEIGHT = 360;
 
         private readonly ScrollArea _scrollArea;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
@@ -105,16 +105,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
             Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
 
-            Add(new Label("Total Skill(Real): ", true, 1153)
-            {
-                X = 30, Y = 320
-            });
-
-            Add(new Label("Total Skill(Base): ", true, 1153)
-            {
-                X = 30, Y = 345
-            });
-
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int)Buttons.SortName);
 
@@ -169,24 +159,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _totalReal += skill.Base;
                 _totalValue += skill.Value;
-                Label skillName = new Label(skill.Name, true, 1153, font: 3); //3
+
+                Label skillName = new Label(skill.Name, true, 1153, font: 3);
                 Label skillValueBase = new Label(skill.Base.ToString(), true, 1153, font: 3);
                 Label skillValue = new Label(skill.Value.ToString(), true, 1153, font: 3);
                 Label skillCap = new Label(skill.Cap.ToString(), true, 1153, font: 3);
+
                 _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
             }
 
             for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.Add(_skillListEntries[i]);
 
-            Add(new Label(Math.Round(_totalReal, 2).ToString(), true, 1153)
-            {
-                X = 170, Y = 320
-            });
-
-            Add(new Label(Math.Round(_totalValue, 2).ToString(), true, 1153)
-            {
-                X = 170, Y = 345
-            });
+            Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
+            Add(new Label(_totalReal.ToString(), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(_totalValue.ToString(), true, 1153) { X = 300, Y = 320 });
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -195,7 +181,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateSkillsNeeded)
             {
+                foreach (var label in Children.OfType<Label>())
+                    label.Dispose();
+
                 OnInitialize();
+
                 _updateSkillsNeeded = false;
             }
         }
