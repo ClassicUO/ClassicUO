@@ -158,7 +158,6 @@ namespace ClassicUO.Game.Scenes
         private int _maxZ;
         private bool _updateDrawPosition;
 
-
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
@@ -201,7 +200,14 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (obj is Static st)
                             {
-                                if (StaticFilters.IsTree(st.OriginalGraphic))
+                                if (StaticFilters.IsCave(st.OriginalGraphic))
+                                {
+                                    if (Engine.Profile.Current.EnableCaveBorder && !st.IsBordered())
+                                        st.SetBorder(true);
+                                    else if (!Engine.Profile.Current.EnableCaveBorder && st.IsBordered())
+                                        st.SetBorder(false);
+                                }
+                                else if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
                                     if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
@@ -413,7 +419,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {
             int charX = entity.X;
@@ -463,7 +468,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void GetViewPort()
         {
             int oldDrawOffsetX = _offset.X;
@@ -496,16 +500,13 @@ namespace ClassicUO.Game.Scenes
 
             const int MAX = 70;
 
-
             if (width > MAX)
                 width = MAX;
 
             if (height > MAX)
                 height = MAX;
 
-
             int size = Math.Max(width, height);
-
 
             int realMinRangeX = World.Player.Position.X - size;
 
