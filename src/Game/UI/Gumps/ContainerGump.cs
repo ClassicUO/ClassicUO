@@ -197,9 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
                 foreach (Item child in _item.Items)
                 {
                     if (child.Container == _item)
-                        Engine.UI.GetByLocalSerial<ContainerGump>(child)?.Dispose();
-
-                    child.Dispose();
+                        child.Dispose();
                 }
 
                 if (_data.ClosedSound != 0)
