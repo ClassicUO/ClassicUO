@@ -21,15 +21,16 @@ namespace ClassicUO.Game.UI.Controls
         {
             _action = action;
             Label label;
-            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped , TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = -2,
             });
-
             label.Y = (h - label.Height) / 2;
         }
 
+        public int ButtonID { get; set;  }
         public int ToPage { get; set; }
+
         public bool IsSelectable { get; set; } = true;
 
         public bool IsSelected
@@ -81,7 +82,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_action == ButtonAction.SwitchPage)
                     ChangePage(ToPage);
                 else
-                    OnButtonClick(ToPage);
+                    OnButtonClick(ButtonID);
             }
         }
 

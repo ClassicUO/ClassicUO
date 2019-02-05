@@ -27,6 +27,8 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 
+using System.Diagnostics;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -73,36 +75,32 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_scrollArea);
 
-            Add(new Button((int)Buttons.SortName, 0x98C, 0x98C, 0x98C, "Name", 1, true, 1153, 50)
+            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
             {
+                ButtonID = (int)Buttons.SortName,
                 X = 40,
                 Y = 25,
-                FontCenter = true,
-                ButtonAction = ButtonAction.Activate,
             });
 
-            Add(new Button((int)Buttons.SortReal, 0x98C, 0x98C, 0x98C, "Real", 1, true, 1153, 50)
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Real")
             {
+                ButtonID = (int)Buttons.SortReal,
                 X = 220,
                 Y = 25,
-                FontCenter = true,
-                ButtonAction = ButtonAction.Activate
             });
 
-            Add(new Button((int)Buttons.SortBase, 0x98C, 0x98C, 0x98C, "Base", 1, true, 1153, 50)
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Base")
             {
+                ButtonID = (int)Buttons.SortBase,
                 X = 300,
                 Y = 25,
-                FontCenter = true,
-                ButtonAction = ButtonAction.Activate
             });
 
-            Add(new Button((int)Buttons.SortCap, 0x98C, 0x98C, 0x98C, "Cap", 1, true, 1153, 50)
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Cap")
             {
+                ButtonID = (int)Buttons.SortCap,
                 X = 380,
                 Y = 25,
-                FontCenter = true,
-                ButtonAction = ButtonAction.Activate
             });
             
             Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
@@ -126,6 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
+            Debug.WriteLine("OnButtonClick = {0}", buttonID);
+
             if (_buttonsToSkillsValues.TryGetValue((Buttons) buttonID, out string fieldValue))
             {
                 if (_sortField == fieldValue)
@@ -134,14 +134,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _sortField = fieldValue;
             }
 
-            if (FindControls<Button>().Any(s => s.ButtonID == buttonID) == true)
+            if (FindControls<NiceButton>().Any(s => s.ButtonID == buttonID) == true)
             {
-                Button btn = FindControls<Button>().First(s => s.ButtonID == buttonID);
+                NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonID == buttonID);
                 Graphic g = (Graphic)(_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
                 _sortOrderIndicator.Texture = FileManager.Gumps.GetTexture(g);
-                _sortOrderIndicator.X = btn.X + 65;
+                _sortOrderIndicator.X = btn.X + btn.Width - 15;
                 _sortOrderIndicator.Y = btn.Y + 5;
             }
 
