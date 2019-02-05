@@ -1,0 +1,375 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
+
+using SDL2;
+
+namespace ClassicUO.Game.UI.Controls
+{
+    class MacroControl : Control
+    {
+        private readonly MacroCollectionControl _collection;
+
+        public MacroControl(string name)
+        {
+            CanMove = true;
+
+            HotkeyBox box = new HotkeyBox();
+
+            box.HotkeyChanged += BoxOnHotkeyChanged;
+            box.HotkeyCancelled += BoxOnHotkeyCancelled;
+
+
+            Add(box);
+
+            Add(new NiceButton(0, box.Height + 3, 50, 25, ButtonAction.Activate, "Add") { IsSelectable =  false });
+            Add(new NiceButton(52, box.Height + 3, 50, 25, ButtonAction.Activate, "Remove") { ToPage = 1, IsSelectable = false });
+
+
+            Add(_collection = new MacroCollectionControl(name, 280, 280)
+            {
+                Y = box.Height + 25 + 10
+            });
+
+            if (_collection.Macro.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+            {
+                SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+
+                if (_collection.Macro.Alt)
+                    mod |= SDL.SDL_Keymod.KMOD_LALT;
+
+                if (_collection.Macro.Shift)
+                    mod |= SDL.SDL_Keymod.KMOD_LSHIFT;
+
+                if (_collection.Macro.Ctrl)
+                    mod |= SDL.SDL_Keymod.KMOD_LCTRL;
+
+                box.SetKey(_collection.Macro.Key, mod);
+            }
+        }
+
+      
+        private void BoxOnHotkeyChanged(object sender, EventArgs e)
+        {
+            HotkeyBox b = (HotkeyBox) sender;
+
+            bool shift = (b.Mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+            bool alt = (b.Mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+            bool ctrl = (b.Mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+
+            if (Engine.SceneManager.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
+            {
+                MessageBoxGump gump = new MessageBoxGump(250, 250, "This key combination\nalready exists.", s => { b.SetKey(SDL.SDL_Keycode.SDLK_UNKNOWN, SDL.SDL_Keymod.KMOD_NONE); });
+                Engine.UI.Add(gump);
+            }
+            else
+            {
+                Macro m = _collection.Macro;
+                m.Key = b.Key;
+                m.Shift = shift;
+                m.Alt = alt;
+                m.Ctrl = ctrl;
+            }
+        }
+
+        private void BoxOnHotkeyCancelled(object sender, EventArgs e)
+        {
+            Macro m = _collection.Macro;
+            m.Alt = m.Ctrl = m.Shift = false;
+            m.Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            if (buttonID == 0) // add
+            {
+                _collection.AddEmpty();
+            }
+            else if (buttonID == 1) // remove
+            {
+                _collection.RemoveLast();
+            }
+        }
+    }
+
+
+    class MacroCollectionControl : Control
+    {
+        private readonly ScrollArea _scrollArea;
+        private readonly List<Combobox> _comboboxes = new List<Combobox>();
+
+        public MacroCollectionControl(string name, int w, int h)
+        {
+            CanMove = true;
+            _scrollArea = new ScrollArea(0, 50, w, h, true);
+            Add(_scrollArea);
+
+
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            foreach (Macro macro in scene.Macros.GetAllMacros())
+            {
+                if (macro.Name == name)
+                {
+                    Macro = macro;
+
+                    break;
+                }
+            }
+
+            if (Macro == null)
+            {
+                Macro = Macro.CreateEmptyMacro(name);
+                scene.Macros.AppendMacro(Macro);
+
+                CreateCombobox(Macro.FirstNode);
+            }
+            else
+            {
+                MacroObject o = Macro.FirstNode;
+
+                while (o != null)
+                {
+                    CreateCombobox(o);
+                    o = o.Right;
+                }
+            }
+
+        }
+
+        public Macro Macro { get; }
+
+
+        public void AddEmpty()
+        {
+            MacroObject ob = Macro.FirstNode;
+
+            if (ob.Code == MacroType.None)
+                return;
+
+            while (ob.Right != null)
+            {
+                if (ob.Right.Code == MacroType.None)
+                    return;
+
+                ob = ob.Right;
+            }
+
+            MacroObject obj = Macro.Create(MacroType.None);
+
+            ob.Right = obj;
+            obj.Left = ob;
+            obj.Right = null;
+            
+            CreateCombobox(obj);
+        }
+
+        private void CreateCombobox(MacroObject obj)
+        {
+            Combobox box = new Combobox(0, 0, 200, Enum.GetNames(typeof(MacroType)), (int) obj.Code , 300);
+
+            box.OnOptionSelected += (sender, e) =>
+            {
+                Combobox b = (Combobox)sender;
+
+                if (b.SelectedIndex == 0) // MacroType.None
+                {
+                    MacroObject m = (MacroObject)b.Tag;
+
+                    if (Macro.FirstNode == m)
+                        Macro.FirstNode = m.Right;
+
+                    if (m.Right != null)
+                        m.Right.Left = m.Left;
+
+                    if (m.Left != null)
+                        m.Left.Right = m.Right;
+
+                    m.Left = null;
+                    m.Right = null;
+
+                    b.Tag = null;
+
+                    b.Parent.Dispose();
+                    _comboboxes.Remove(b);
+
+                    if (_comboboxes.Count == 0 || _comboboxes.All(s => s.IsDisposed))
+                    {
+                        Macro.FirstNode = Macro.Create(MacroType.None);
+                        CreateCombobox(Macro.FirstNode);
+                    }
+                }
+                else
+                {
+                    MacroType t = (MacroType)b.SelectedIndex;
+
+                    MacroObject m = (MacroObject)b.Tag;
+                    MacroObject newmacro = Macro.Create(t);
+
+                    MacroObject left = m.Left;
+                    MacroObject right = m.Right;
+
+                    if (left != null)
+                        left.Right = newmacro;
+
+                    if (right != null)
+                        right.Left = newmacro;
+
+                    newmacro.Left = left;
+                    newmacro.Right = right;
+
+                    b.Tag = newmacro;
+
+                    if (Macro.FirstNode == m)
+                        Macro.FirstNode = newmacro;
+
+
+                    b.Parent.Children
+                     .Where(s => s != b)
+                     .ToList()
+                     .ForEach(s => s.Dispose());
+
+                    switch (newmacro.HasSubMenu)
+                    {
+                        case 1: // another combo
+                            int count = 0;
+                            int offset = 0;
+
+                            Macro.GetBoundByCode(t, ref count, ref offset);
+
+                            Combobox subBox = new Combobox(20, b.Height + 2, 180, Enum.GetNames(typeof(MacroSubType))
+                                                                                      .Skip(offset)
+                                                                                      .Take(count)
+                                                                                      .ToArray(), 0, 300);
+
+
+                            subBox.OnOptionSelected += (ss, ee) =>
+                            {
+                                Macro.GetBoundByCode(newmacro.Code, ref count, ref offset);
+                                MacroSubType subType = (MacroSubType)(offset + ee);
+                                newmacro.SubCode = subType;
+                            };
+
+                            b.Parent.Add(subBox);
+                            b.Parent.WantUpdateSize = true;
+                            break;
+                        case 2: // string
+
+                            b.Parent.Add(new ResizePic(0x0BB8)
+                            {
+                                X = 20,
+                                Y = b.Height + 2,
+                                Width = 180,
+                                Height = b.Height,
+                            });
+
+                            TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder, 0)
+                            {
+                                X = 22,
+                                Y = b.Height + 5,
+                                Width = 178,
+                                Height = b.Height,
+                            };
+
+                            textbox.TextChanged += (sss, eee) =>
+                            {
+                                if (newmacro.HasString())
+                                    ((MacroObjectString)newmacro).Text = ((TextBox)sss).Text;
+                            };
+
+                            b.Parent.Add(textbox);
+                            b.Parent.WantUpdateSize = true;
+                            break;
+                    }
+                }
+            };
+
+            box.Tag = obj;
+            _scrollArea.Add(box);
+            _comboboxes.Add(box);
+
+
+            if (obj.Code != MacroType.None)
+            {
+                switch (obj.HasSubMenu)
+                {
+                    case 1:
+                        int count = 0;
+                        int offset = 0;
+
+                        Macro.GetBoundByCode(obj.Code, ref count, ref offset);
+
+                        Combobox subBox = new Combobox(20, box.Height + 2, 180, Enum.GetNames(typeof(MacroSubType))
+                                                                                  .Skip(offset)
+                                                                                  .Take(count)
+                                                                                  .ToArray(), (int) (obj.SubCode - offset), 300);
+
+
+                        subBox.OnOptionSelected += (ss, ee) =>
+                        {
+                            Macro.GetBoundByCode(obj.Code, ref count, ref offset);
+                            MacroSubType subType = (MacroSubType)(offset + ee);
+                            obj.SubCode = subType;
+                        };
+
+                        box.Parent.Add(subBox);
+                        box.Parent.WantUpdateSize = true;
+                        break;
+                    case 2:
+                        box.Parent.Add(new ResizePic(0x0BB8)
+                        {
+                            X = 20,
+                            Y = box.Height + 2,
+                            Width = 180,
+                            Height = box.Height,
+                        });
+
+                        TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder, 0)
+                        {
+                            X = 22,
+                            Y = box.Height + 5,
+                            Width = 178,
+                            Height = box.Height,
+                            Text = obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty
+                        };
+
+                        textbox.TextChanged += (sss, eee) =>
+                        {
+                            if (obj.HasString())
+                                ((MacroObjectString)obj).Text = ((TextBox)sss).Text;
+                        };
+
+                        box.Parent.Add(textbox);
+                        box.Parent.WantUpdateSize = true;
+                        break;
+                }
+            }
+        }
+
+
+        public void RemoveLast()
+        {
+            //_scrollArea.Children.LastOrDefault()?.Dispose();
+            //_comboboxes.RemoveAt(_comboboxes.Count - 1);
+
+            //if (_comboboxes.Count == 0)
+            //    AddEmpty();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _comboboxes.ForEach(s => s.Parent?.Dispose());
+            _comboboxes.Clear();
+        }
+    }
+}

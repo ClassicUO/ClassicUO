@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
                 });
                 // Virtue menu
-                Add(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
+                Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
 				int profileX = 25;
@@ -354,11 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 		        case Buttons.LogOut:
-			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
-			        {
-				        if (s)
-					        Engine.SceneManager.ChangeScene(ScenesType.Login);
-			        }));
+			       Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
 
 			        break;
 		        case Buttons.Quests:

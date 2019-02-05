@@ -128,6 +128,7 @@
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\ItemHold.cs" />
+    <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
@@ -136,7 +137,11 @@
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
+    <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
+    <Compile Include="Game\UI\Controls\MacroControl.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
+    <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
@@ -242,6 +247,7 @@
     <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\GameObjectHelper.cs" />
     <Compile Include="Utility\HuesHelper.cs" />
+    <Compile Include="Utility\KeysTranslator.cs" />
     <Compile Include="Utility\Platforms\Native.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
@@ -515,6 +521,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cuoicon.ico" />
+    <EmbeddedResource Include="cuologo.png" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

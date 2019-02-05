@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -93,6 +94,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MobileHPType { get; set; } = 0;
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
         [JsonProperty] public bool TreeToStumps { get; set; } = false;
+        [JsonProperty] public bool EnableCaveBorder { get; set; } = false;
         [JsonProperty] public bool HideVegetation { get; set; } = false;
         [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
@@ -111,6 +113,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnablePathfind { get; set; } = true;
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
+        [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
@@ -123,6 +126,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
+
+        [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
+
 
         public void Save(List<Gump> gumps = null)
         {

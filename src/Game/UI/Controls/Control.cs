@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool AcceptMouseInput
         {
-            get => IsEnabled && !IsDisposed && _acceptMouseInput;
+            get => IsEnabled && !IsDisposed && _acceptMouseInput && IsVisible;
             set => _acceptMouseInput = value;
         }
 
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Controls
         public Control Parent
         {
             get => _parent;
-            private set
+            internal set
             {
                 if (value == null)
                     _parent?._children.Remove(this);
@@ -365,6 +365,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
+                        OnChildRemoved();
                         _children.RemoveAt(i--);
                         continue;  
                     }

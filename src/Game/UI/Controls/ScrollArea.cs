@@ -61,7 +61,11 @@ namespace ClassicUO.Game.UI.Controls
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = scrollbarHeight;
 
-            Add((Control)_scrollBar);
+            //Add((Control)_scrollBar);
+
+            Control c = (Control) _scrollBar;
+            c.Parent = this;
+
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
@@ -118,7 +122,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (!child.IsVisible)
                         continue;
 
-                    child.Y = height - _scrollBar.Value + (_isNormalScroll ? 20 : 0);
+                    child.Y = height - _scrollBar.Value /*+ (_isNormalScroll ? 20 : 0)*/;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -177,7 +181,7 @@ namespace ClassicUO.Game.UI.Controls
             else
             {
                 // Try to find the wrapped control
-                var wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
+                ScrollAreaItem wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
                 base.Remove(wrapper);
             }
         }
@@ -214,8 +218,8 @@ namespace ClassicUO.Game.UI.Controls
 
             height -= _scrollBar.Height;
 
-            if (_isNormalScroll)
-                height += 40;
+            //if (_isNormalScroll)
+            //    height += 40;
 
             if (height > 0)
             {
@@ -234,5 +238,12 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class ScrollAreaItem : Control
     {
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Children.Count == 0)
+                Dispose();
+        }
     }
 }

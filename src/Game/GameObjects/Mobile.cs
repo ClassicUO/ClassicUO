@@ -83,8 +83,22 @@ namespace ClassicUO.Game.GameObjects
 
         public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
-        public bool IsFemale => (Flags & Flags.Female) != 0 || Graphic == 0x0191 || Graphic == 0x0193;
+        private bool _isFemale;
 
+        public bool IsFemale
+        {
+            get => _isFemale || (Flags & Flags.Female) != 0 || Graphic == 0x0191 || Graphic == 0x0193 || Graphic == 0x025E || Graphic == 0x029B;
+            set
+            {
+                if (_isFemale != value)
+                {
+                    _isFemale = value;
+                    _delta |= Delta.Appearance;
+                }
+            }
+        }
+
+      
         public RaceType Race
         {
             get => _race;
@@ -410,7 +424,7 @@ namespace ClassicUO.Game.GameObjects
         {
             CalculateRandomIdleTime();
 
-            if (!IsMounted)
+            if (!IsMounted && !InWarMode)
             {
                 AnimIndex = 0;
                 AnimationFrameCount = 0;

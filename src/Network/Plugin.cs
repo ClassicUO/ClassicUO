@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,7 @@ using ClassicUO.Game;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -78,6 +80,7 @@ namespace ClassicUO.Network
 
         private delegate void OnInstall(ref void* header);
 
+
         public void Load()
         {
             _recv = OnPluginRecv;
@@ -87,8 +90,6 @@ namespace ClassicUO.Network
             _castSpell = GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
-
-
 
             IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
 

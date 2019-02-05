@@ -39,14 +39,22 @@ namespace ClassicUO.Configuration
                 return null;
             }
 
-            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
+            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file), new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+            });
 
             return settings;
         }
 
         public static void Save<T>(T obj, string file) where T : class
         {
-            string t = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            string t = JsonConvert.SerializeObject(obj, Formatting.Indented, new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+            });
             File.WriteAllText(file, t);
         }
     }

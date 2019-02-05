@@ -159,8 +159,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _partyListEntries.Clear();
-            foreach (PartyMember member in World.Party.Members) _partyListEntries.Add(new PartyListEntry(member));
-            for (int i = 0; i < _partyListEntries.Count; i++) _scrollArea.Add(_partyListEntries[i]);
+
+            foreach (PartyMember member in World.Party.Members)
+            {
+                PartyListEntry p = new PartyListEntry(member);
+                _partyListEntries.Add(p);
+                _scrollArea.Add(p);
+            }
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
@@ -226,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
                 case Buttons.Loot:
-                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot ? true : false;
+                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
 
                     break;
                 case Buttons.Message:

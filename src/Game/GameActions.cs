@@ -38,6 +38,9 @@ namespace ClassicUO.Game
     {
         private static Action<Item, int, int, int?> _pickUpAction;
 
+        public static int LastSpellIndex { get; set; } = 1;
+        public static int LastSkillIndex { get; set; } = 1;
+
         internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
         {
             _pickUpAction = onPickUpAction;
@@ -45,10 +48,10 @@ namespace ClassicUO.Game
 
         public static void ToggleWarMode()
         {
-            Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
+            SetWarMode(!World.Player.InWarMode);
         }
 
-	    public static void SetWarMode(bool state)
+        public static void SetWarMode(bool state)
 	    {
 		    Socket.Send(new PChangeWarMode(state));
 	    }
@@ -62,7 +65,7 @@ namespace ClassicUO.Game
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null && World.Player.NotorietyFlag == NotorietyFlag.Innocent && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
 
                     QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
@@ -92,9 +95,19 @@ namespace ClassicUO.Game
             Socket.Send(new PClickRequest(serial));
         }
 
-        public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
         {
-            Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+            if (hue == 0xFFFF)
+                hue = Engine.Profile.Current.SpeechHue;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            {
+                Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+            }
+            else
+            {
+                Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
+            }
         }
 
         public static void SayParty(string message)
@@ -202,6 +215,25 @@ namespace ClassicUO.Game
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
         {
+            if (Engine.Profile.Current.EnabledCriminalActionQuery)
+            {
+                Mobile m = World.Mobiles.Get(entity);
+
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                {
+
+                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                               s =>
+                                                               {
+                                                                   if (s)
+                                                                       Socket.Send(new PTargetObject(entity, cursorID, cursorType));
+                                                               });
+
+                    Engine.UI.Add(messageBox);
+                    return;
+                }
+            }
+
             Socket.Send(new PTargetObject(entity, cursorID, cursorType));
         }
 
@@ -212,12 +244,20 @@ namespace ClassicUO.Game
 
         public static void CastSpellFromBook(int index, Serial bookSerial)
         {
-            Socket.Send(new PCastSpellFromBook(index, bookSerial));
+            if (index >= 0)
+            {
+                LastSpellIndex = index;
+                Socket.Send(new PCastSpellFromBook(index, bookSerial));
+            }
         }
 
         public static void CastSpell(int index)
         {
-            Socket.Send(new PCastSpell(index));
+            if (index >= 0)
+            {
+                LastSpellIndex = index;
+                Socket.Send(new PCastSpell(index));
+            }
         }
 
         public static void OpenGuildGump()
@@ -237,7 +277,11 @@ namespace ClassicUO.Game
 
         public static void UseSkill(int index)
         {
-            Socket.Send(new PUseSkill(index));
+            if (index >= 0)
+            {
+                LastSkillIndex = index;
+                Socket.Send(new PUseSkill(index));
+            }
         }
 
         public static void OpenPopupMenu(Serial serial)
@@ -294,8 +338,37 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void UseAbility(byte index)
-            => Socket.Send(new PUseCombatAbility(index));
+        public static void UsePrimaryAbility()
+        {
+            ref Ability ability = ref World.Player.Abilities[0];
+
+            if (((byte) ability & 0x80) == 0)
+            {
+                for (int i = 0; i < 2; i++)
+                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                Socket.Send(new PUseCombatAbility((byte) ability));
+            }
+            else
+                Socket.Send(new PUseCombatAbility(0));
+
+            ability ^= (Ability)0x80;
+        }
+
+        public static void UseSecondaryAbility()
+        {
+            ref Ability ability = ref World.Player.Abilities[1];
+
+            if (((byte)ability & 0x80) == 0)
+            {
+                for (int i = 0; i < 2; i++)
+                    World.Player.Abilities[i] &= (Ability)0x7F;
+                Socket.Send(new PUseCombatAbility((byte)ability));
+            }
+            else
+                Socket.Send(new PUseCombatAbility(0));
+
+            ability ^= (Ability)0x80;
+        }
 
 	    public static void QuestArrow(bool rightClick) => Socket.Send(new PClickQuestArrow(rightClick));
     }
