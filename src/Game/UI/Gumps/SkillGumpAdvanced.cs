@@ -26,8 +26,10 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -43,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _sortAsc;
         private string _sortField;
-        private GumpPic _sortOrderIndicator;
+        private readonly GumpPic _sortOrderIndicator;
 
         public SkillGumpAdvanced() : base(0, 0)
         {
@@ -51,20 +53,18 @@ namespace ClassicUO.Game.UI.Gumps
             _totalValue = 0;
             CanBeSaved = true;
             CanMove = true;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
+            WantUpdateSize = false;
 
-            Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
+            Width = WIDTH;
+            Height = HEIGHT;
 
-            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+            Add(new AlphaBlendControl(0.05f)
             {
-                IsTransparent = true,
-                Alpha = 0.5f,
-            });
-
-            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
-            {
-                IsTransparent = true,
-                Alpha = 0.5f,
+                X = 1,
+                Y = 1,
+                Width = WIDTH - 2,
+                Height = HEIGHT - 2
             });
 
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
@@ -190,8 +190,24 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        {
+            if (_edge == null)
+            {
+                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                _edge.SetData(new Color[] { Color.Gray });
+            }
+
+            batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+            return base.Draw(batcher, position, hue);
+        }
+
+        private Texture2D _edge;
+
+
         public override void Dispose()
         {
+            _edge?.Dispose();
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
