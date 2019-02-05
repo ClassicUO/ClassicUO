@@ -365,7 +365,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (c is Button)
                                     {
-                                        c.IsVisible = false;
+                                        c.Alpha = 1f;
                                     }
 
 
