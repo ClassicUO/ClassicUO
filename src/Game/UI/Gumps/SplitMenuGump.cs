@@ -125,6 +125,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _lastValue = _slider.Value;
+
+            if (this.Item.IsDisposed)
+            {
+                Dispose();
+            }
         }
 
         public override void Dispose()

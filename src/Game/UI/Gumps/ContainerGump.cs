@@ -198,6 +198,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (child.Container == _item)
                         Engine.UI.GetByLocalSerial<ContainerGump>(child)?.Dispose();
+
+                    child.Dispose();
                 }
 
                 if (_data.ClosedSound != 0)
