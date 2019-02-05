@@ -423,10 +423,10 @@ namespace ClassicUO.Game.Scenes
                 _macroManager.Update();
             }
 
-            if (_hotkeysManager.TryExecuteIfBinded(e.keysym.sym, e.keysym.mod, out Action action))
-            {
-                action();
-            }
+            //if (_hotkeysManager.TryExecuteIfBinded(e.keysym.sym, e.keysym.mod, out Action action))
+            //{
+            //    action();
+            //}
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
