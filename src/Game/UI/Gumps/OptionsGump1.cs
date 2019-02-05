@@ -762,9 +762,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
 
-            if (Engine.Profile.Current.DrawRoofs != _drawRoofs.IsChecked)
+            if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
-                Engine.Profile.Current.DrawRoofs = _drawRoofs.IsChecked;
+                Engine.Profile.Current.DrawRoofs = !_drawRoofs.IsChecked;
                 Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
