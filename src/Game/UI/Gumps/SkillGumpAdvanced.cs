@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
             {
-                ButtonID = (int)Buttons.SortName,
+                ToPage = (int)Buttons.SortName,
                 IsSelected = true,
                 X = 40,
                 Y = 25,
@@ -83,21 +83,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Real")
             {
-                ButtonID = (int)Buttons.SortReal,
+                ToPage = (int)Buttons.SortReal,
                 X = 220,
                 Y = 25,
             });
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Base")
             {
-                ButtonID = (int)Buttons.SortBase,
+                ToPage = (int)Buttons.SortBase,
                 X = 300,
                 Y = 25,
             });
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Cap")
             {
-                ButtonID = (int)Buttons.SortCap,
+                ToPage = (int)Buttons.SortCap,
                 X = 380,
                 Y = 25,
             });
@@ -121,9 +121,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _sortField = fieldValue;
             }
 
-            if (FindControls<NiceButton>().Any(s => s.ButtonID == buttonID) == true)
+            if (FindControls<NiceButton>().Any(s => s.ToPage == buttonID))
             {
-                NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonID == buttonID);
+                NiceButton btn = FindControls<NiceButton>().First(s => s.ToPage == buttonID);
                 Graphic g = (Graphic)(_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
