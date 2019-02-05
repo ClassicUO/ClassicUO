@@ -436,6 +436,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public event EventHandler Disposed;
+
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -874,6 +876,7 @@ namespace ClassicUO.Game.UI.Controls
 
             IsDisposed = true;
 
+            Disposed.Raise();
         }
     }
 }
