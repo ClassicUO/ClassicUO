@@ -241,7 +241,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 TextOverhead over = _overHeads[_overHeads.Count - 1];
 
-                if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
+                //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
                     _overHeads.RemoveFromBack().Dispose();
                 }

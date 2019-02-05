@@ -12,18 +12,26 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
 
+using Newtonsoft.Json;
+
+using SDL2;
+
 namespace ClassicUO.Game.Managers
 {
-    class MacroManager
+    internal class MacroManager
     {
-        //private readonly List<Macro> _macros = new List<Macro>();
-
+        private readonly uint[] _itemsInHand = new uint[2];
         private MacroObject _lastMacro;
+        private Macro _firstNode;
+        private long _nextTimer;
 
-        private readonly byte[] _skillTable = { 1,  2,  35, 4,  6,  12,
+        private readonly byte[] _skillTable = 
+        {
+            1,  2,  35, 4,  6,  12,
             14, 15, 16, 19, 21, 0xFF /*imbuing*/,
             23, 3,  46, 9,  30, 22,
-            48, 32, 33, 47, 36, 38 };
+            48, 32, 33, 47, 36, 38
+        };
 
         private readonly int[] _spellsCountTable =
         {
@@ -36,21 +44,105 @@ namespace ClassicUO.Game.Managers
             Constants.SPELLBOOK_7_SPELLS_COUNT
         };
 
-        private readonly uint[] _itemsInHand = new uint[2];
+
+        public MacroManager(Macro[] macros)
+        {
+            if (macros != null)
+            {
+                foreach (Macro macro in macros)
+                {
+                    AppendMacro(macro);
+                }
+            }
+        }
 
         public long WaitForTargetTimer { get; set; }
 
-        //public Macro FindMacro(ushort key, bool alt, bool ctrl, bool shift)
-        //{
-        //    return _macros.FirstOrDefault(s => s.Key == key && s.Alt == alt && s.Shift == shift && s.Ctrl == ctrl);
-        //}
 
-        public void Update()
+        public void InitMacro(Macro first)
         {
-
+            _firstNode = first;
         }
 
-        private void Execute()
+        public void AppendMacro(Macro macro)
+        {
+            if (_firstNode == null)
+                _firstNode = macro;
+            else
+            {
+                Macro o = _firstNode;
+
+                while (o.Right != null)
+                    o = o.Right;
+
+                o.Right = macro;
+                macro.Left = o;
+                macro.Right = null;
+            }
+        }
+
+        public void RemoveMacro(Macro macro)
+        {
+            if (_firstNode == null || macro == null)
+                return;
+
+            if (_firstNode == macro)
+                _firstNode = macro.Right;
+
+            if (macro.Right != null)
+                macro.Right.Left = macro.Left;
+
+            if (macro.Left != null)
+                macro.Left.Right = macro.Right;
+
+            macro.Left = null;
+            macro.Right = null;
+        }
+
+        public List<Macro> GetAllMacros()
+        {
+            Macro m = _firstNode;
+
+            while (m?.Left != null)
+                m = m.Left;
+
+            List<Macro> macros = new List<Macro>();
+
+            while (true)
+            {
+                if (m != null)
+                    macros.Add(m);
+                else
+                    break;
+
+                m = m.Right;
+            }
+
+            return macros;
+        }
+
+
+        public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
+        {
+            Macro obj = _firstNode;
+
+            while (obj != null)
+            {
+                if (obj.Key == key && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift)
+                    break;
+
+                obj = obj.Right;
+            }
+
+            return obj;
+        }
+
+        public void SetMacroToExecute(MacroObject macro)
+        {
+            _lastMacro = macro;
+        }
+
+        public void Update()
         {
             while (_lastMacro != null)
             {
@@ -69,7 +161,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private long _nextTimer;
 
         private int Process()
         {
@@ -126,7 +217,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Walk:
                     byte dt = (byte) Direction.Up;
 
-                    if (macro.SubCode != MacroSubType.MSC_G1_NW)
+                    if (macro.SubCode != MacroSubType.NW)
                     {
                         dt = (byte) (macro.SubCode - 2);
 
@@ -157,7 +248,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.UseSkill:
-                    int skill = macro.SubCode - MacroSubType.MSC_G3_ANATOMY;
+                    int skill = macro.SubCode - MacroSubType.Anatomy;
 
                     if (skill >= 0 && skill < 24)
                     {
@@ -171,7 +262,7 @@ namespace ClassicUO.Game.Managers
                     // TODO:
                     break;
                 case MacroType.CastSpell:
-                    int spell = macro.SubCode - MacroSubType.MSC_G6_CLUMSY + 1;
+                    int spell = macro.SubCode - MacroSubType.Clumsy + 1;
 
                     if (spell > 0 && spell <= 151)
                     {
@@ -253,7 +344,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.ArmDisarm:
-                    int handIndex = 1 - (macro.SubCode - MacroSubType.MSC_G4_LEFT_HAND);
+                    int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                     if (handIndex < 0 || handIndex > 1 || gs.IsHoldingItem)
@@ -320,6 +411,11 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.Delay:
+                    MacroObjectString mosss = (MacroObjectString) macro;
+                    string str = mosss.Text;
+
+                    if (!string.IsNullOrEmpty(str) && int.TryParse(str, out int rr))
+                        _nextTimer = Engine.Ticks + rr;
 
                     break;
 
@@ -428,7 +524,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.InvokeVirtue:
-                    byte id = (byte) ( macro.SubCode - MacroSubType.MSC_G5_HONOR + 31);
+                    byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
                     NetClient.Socket.Send(new PInvokeVirtueRequest(id));
                     break;
                 case MacroType.PrimaryAbility:
@@ -457,22 +553,30 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class Macro : IEquatable<Macro>
+    [JsonObject]
+    class Macro : IEquatable<Macro>, INode<Macro>
     {
-        public Macro(ushort key, bool alt, bool ctrl, bool shift)
+        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
+            Name = name;
+
             Key = key;
             Alt = alt;
             Ctrl = ctrl;
             Shift = shift;
         }
 
-        public ushort Key { get; set; }
+        public string Name { get; }
+
+        [JsonIgnore] public Macro Left { get; set; }
+        [JsonIgnore] public Macro Right { get; set; }
+
+        public SDL.SDL_Keycode Key { get; set; }
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
 
-        public List<MacroObject> Objects { get; } = new List<MacroObject>();
+        public MacroObject FirstNode { get; set; }
 
         public static MacroObject Create(MacroType code)
         {
@@ -499,10 +603,26 @@ namespace ClassicUO.Game.Managers
             return obj;
         }
 
-        public static Macro CreateEmptyMacro()
+        public static Macro CreateEmptyMacro(string name)
         {
-            Macro macro = new Macro(0, false, false, false);
-            macro.Objects.Add(new MacroObject(MacroType.None, MacroSubType.MSC_NONE));
+            Macro macro = new Macro(name, 0, false, false, false);
+            MacroObject item = new MacroObject(MacroType.None, MacroSubType.MSC_NONE);
+
+
+            if (macro.FirstNode == null)
+            {
+                macro.FirstNode = item;
+            }
+            else
+            {
+                MacroObject o = macro.FirstNode;
+
+                while (o.Right != null)
+                    o = o.Right;
+
+                o.Right = item;
+                item.Left = o;
+            }
 
             return macro;
         }
@@ -512,41 +632,43 @@ namespace ClassicUO.Game.Managers
             switch (code)
             {
                 case MacroType.Walk:
-                    offset = (int) MacroSubType.MSC_G1_NW;
-                    count = (int) MacroSubType.MSC_G2_CONFIGURATION - (int)MacroSubType.MSC_G1_NW;
+                    offset = (int) MacroSubType.NW;
+                    count = (int) MacroSubType.Configuration - (int)MacroSubType.NW;
 
                     break;
                 case MacroType.Open:
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
-                    offset = (int)MacroSubType.MSC_G2_CONFIGURATION;
-                    count = (int)MacroSubType.MSC_G3_ANATOMY - (int)MacroSubType.MSC_G2_CONFIGURATION;
+                    offset = (int)MacroSubType.Configuration;
+                    count = (int)MacroSubType.Anatomy - (int)MacroSubType.Configuration;
 
                     break;
                 case MacroType.UseSkill:
-                    offset = (int)MacroSubType.MSC_G4_LEFT_HAND;
-                    count = (int)MacroSubType.MSC_G5_HONOR - (int)MacroSubType.MSC_G4_LEFT_HAND;
+                    offset = (int)MacroSubType.Anatomy;
+                    count = (int)MacroSubType.LeftHand - (int)MacroSubType.Anatomy;
+
+                    break;
+                case MacroType.ArmDisarm:
+                    offset = (int)MacroSubType.LeftHand;
+                    count = (int)MacroSubType.Honor - (int)MacroSubType.LeftHand;
 
                     break;
                 case MacroType.InvokeVirtue:
-                    offset = (int)MacroSubType.MSC_G5_HONOR;
-                    count = (int)MacroSubType.MSC_G6_CLUMSY - (int)MacroSubType.MSC_G5_HONOR;
+                    offset = (int)MacroSubType.Honor;
+                    count = (int)MacroSubType.Clumsy - (int)MacroSubType.Honor;
 
                     break;
                 case MacroType.CastSpell:
-                    offset = (int)MacroSubType.MSC_G6_CLUMSY;
-                    count = (int)MacroSubType.MSC_G7_HOSTILE - (int)MacroSubType.MSC_G6_CLUMSY;
+                    offset = (int)MacroSubType.Clumsy;
+                    count = (int)MacroSubType.Hostile - (int)MacroSubType.Clumsy;
 
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-                    offset = (int)MacroSubType.MSC_G7_HOSTILE;
-                    count = (int)MacroSubType.MSC_TOTAL_COUNT - (int)MacroSubType.MSC_G7_HOSTILE;
-
-                    break;
-                default:
+                    offset = (int)MacroSubType.Hostile;
+                    count = (int)MacroSubType.MscTotalCount - (int)MacroSubType.Hostile;
 
                     break;
             }
@@ -557,12 +679,14 @@ namespace ClassicUO.Game.Managers
             if (other == null)
                 return false;
 
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Equals(Objects, other.Objects);
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift;
         }
     }
 
+    [JsonObject]
     class MacroObject : INode<MacroObject>
     {
+        [JsonConstructor]
         public MacroObject(MacroType code, MacroSubType sub)
         {
             Code = code;
@@ -611,23 +735,26 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public MacroType Code { get; set; }
-        public MacroSubType SubCode { get; set; }
-        public sbyte HasSubMenu { get; set; }
+        [JsonProperty] public MacroType Code { get; set; }
+        [JsonProperty] public MacroSubType SubCode { get; set; }
+        [JsonProperty] public sbyte HasSubMenu { get; set; }
 
         public virtual bool HasString() => false;
 
-        public MacroObject Left { get; set; }
-        public MacroObject Right { get; set; }
+        [JsonProperty] public MacroObject Left { get; set; }
+        [JsonProperty] public MacroObject Right { get; set; }
     }
 
+    [JsonObject]
     class MacroObjectString : MacroObject
     {
+        [JsonConstructor]
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)
         {
             Text = str;
         }
 
+        [JsonProperty]
         public string Text { get; set; }
 
         public override bool HasString()
@@ -699,218 +826,219 @@ namespace ClassicUO.Game.Managers
         ToggleGargoyleFly
     }
 
-    enum MacroSubType
+    internal enum MacroSubType
     {
         MSC_NONE = 0,
-        MSC_G1_NW, //Walk group
-        MSC_G1_N,
-        MSC_G1_NE,
-        MSC_G1_E,
-        MSC_G1_SE,
-        MSC_G1_S,
-        MSC_G1_SW,
-        MSC_G1_W,
-        MSC_G2_CONFIGURATION, //Open/Close/Minimize/Maximize group
-        MSC_G2_PAPERDOLL,
-        MSC_G2_STATUS,
-        MSC_G2_JOURNAL,
-        MSC_G2_SKILLS,
-        MSC_G2_MAGE_SPELLBOOK,
-        MSC_G2_CHAT,
-        MSC_G2_BACKPACK,
-        MSC_G2_OWERVIEW,
-        MSC_G2_WORLD_MAP,
-        MSC_G2_MAIL,
-        MSC_G2_PARTY_MANIFEST,
-        MSC_G2_PARTY_CHAT,
-        MSC_G2_NECRO_SPELLBOOK,
-        MSC_G2_PALADIN_SPELLBOOK,
-        MSC_G2_COMBAT_BOOK,
-        MSC_G2_BUSHIDO_SPELLBOOK,
-        MSC_G2_NINJITSU_SPELLBOOK,
-        MSC_G2_GUILD,
-        MSC_G2_SPELL_WEAVING_SPELLBOOK,
-        MSC_G2_QUEST_LOG,
-        MSC_G2_MYSTICISM_SPELLBOOK,
-        MSC_G2_RACIAL_ABILITIES_BOOK,
-        MSC_G2_BARD_SPELLBOOK,
-        MSC_G3_ANATOMY, //Skills group
-        MSC_G3_ANIMAL_LORE,
-        MSC_G3_ANIMAL_TAMING,
-        MSC_G3_ARMS_LORE,
-        MSC_G3_BEGGING,
-        MSC_G3_CARTOGRAPHY,
-        MSC_G3_DETECTING_HIDDEN,
-        MSC_G3_ENTICEMENT,
-        MSC_G3_EVALUATING_INTELLIGENCE,
-        MSC_G3_FORENSIC_EVALUATION,
-        MSC_G3_HIDING,
-        MSC_G3_IMBUING,
-        MSC_G3_INSCRIPTION,
-        MSC_G3_ITEM_IDENTIFICATION,
-        MSC_G3_MEDITATION,
-        MSC_G3_PEACEMAKING,
-        MSC_G3_POISONING,
-        MSC_G3_PROVOCATION,
-        MSC_G3_REMOVE_TRAP,
-        MSC_G3_SPIRIT_SPEAK,
-        MSC_G3_STEALING,
-        MSC_G3_STEALTH,
-        MSC_G3_TASTE_IDENTIFICATION,
-        MSC_G3_TRACKING,
-        MSC_G4_LEFT_HAND, ///Arm/Disarm group
-        MSC_G4_RIGHT_HAND,
-        MSC_G5_HONOR, //Invoke Virture group
-        MSC_G5_SACRIFICE,
-        MSC_G5_VALOR,
-        MSC_G6_CLUMSY, //Cast Spell group
-        MSC_G6_CREATE_FOOD,
-        MSC_G6_FEEBLEMIND,
-        MSC_G6_HEAL,
-        MSC_G6_MAGIC_ARROW,
-        MSC_G6_NIGHT_SIGHT,
-        MSC_G6_REACTIVE_ARMOR,
-        MSC_G6_WEAKEN,
-        MSC_G6_AGILITY,
-        MSC_G6_CUNNING,
-        MSC_G6_CURE,
-        MSC_G6_HARM,
-        MSC_G6_MAGIC_TRAP,
-        MSC_G6_MAGIC_UNTRAP,
-        MSC_G6_PROTECTION,
-        MSC_G6_STRENGTH,
-        MSC_G6_BLESS,
-        MSC_G6_FIREBALL,
-        MSC_G6_MAGIC_LOCK,
-        MSC_G6_POISON,
-        MSC_G6_TELEKINESIS,
-        MSC_G6_TELEPORT,
-        MSC_G6_UNLOCK,
-        MSC_G6_WALL_OF_STONE,
-        MSC_G6_ARCH_CURE,
-        MSC_G6_ARCH_PROTECTION,
-        MSC_G6_CURSE,
-        MSC_G6_FIRE_FIELD,
-        MSC_G6_GREATER_HEAL,
-        MSC_G6_LIGHTNING,
-        MSC_G6_MANA_DRAIN,
-        MSC_G6_RECALL,
-        MSC_G6_BLADE_SPIRITS,
-        MSC_G6_DISPELL_FIELD,
-        MSC_G6_INCOGNITO,
-        MSC_G6_MAGIC_REFLECTION,
-        MSC_G6_MIND_BLAST,
-        MSC_G6_PARALYZE,
-        MSC_G6_POISON_FIELD,
-        MSC_G6_SUMMON_CREATURE,
-        MSC_G6_DISPEL,
-        MSC_G6_ENERGY_BOLT,
-        MSC_G6_EXPLOSION,
-        MSC_G6_INVISIBILITY,
-        MSC_G6_MARK,
-        MSC_G6_MASS_CURSE,
-        MSC_G6_PARALYZE_FIELD,
-        MSC_G6_REVEAL,
-        MSC_G6_CHAIN_LIGHTNING,
-        MSC_G6_ENERGY_FIELD,
-        MSC_G6_FLAME_STRIKE,
-        MSC_G6_GATE_TRAVEL,
-        MSC_G6_MANA_VAMPIRE,
-        MSC_G6_MASS_DISPEL,
-        MSC_G6_METEOR_SWARM,
-        MSC_G6_POLYMORPH,
-        MSC_G6_EARTHQUAKE,
-        MSC_G6_ENERGY_VORTEX,
-        MSC_G6_RESURRECTION,
-        MSC_G6_AIR_ELEMENTAL,
-        MSC_G6_SUMMON_DAEMON,
-        MSC_G6_EARTH_ELEMENTAL,
-        MSC_G6_FIRE_ELEMENTAL,
-        MSC_G6_WATER_ELEMENTAL,
-        MSC_G6_ANIMATE_DEAD,
-        MSC_G6_BLOOD_OATH,
-        MSC_G6_CORPSE_SKIN,
-        MSC_G6_CURSE_WEAPON,
-        MSC_G6_EVIL_OMEN,
-        MSC_G6_HORRIFIC_BEAST,
-        MSC_G6_LICH_FORM,
-        MSC_G6_MIND_ROT,
-        MSC_G6_PAIN_SPIKE,
-        MSC_G6_POISON_STRIKE,
-        MSC_G6_STRANGLE,
-        MSC_G6_SUMMON_FAMILAR,
-        MSC_G6_VAMPIRIC_EMBRACE,
-        MSC_G6_VENGEFUL_SPIRIT,
-        MSC_G6_WITHER,
-        MSC_G6_WRAITH_FORM,
-        MSC_G6_EXORCISM,
-        MSC_G6_CLEANCE_BY_FIRE,
-        MSC_G6_CLOSE_WOUNDS,
-        MSC_G6_CONSECRATE_WEAPON,
-        MSC_G6_DISPEL_EVIL,
-        MSC_G6_DIVINE_FURY,
-        MSC_G6_ENEMY_OF_ONE,
-        MSC_G6_HOLY_LIGHT,
-        MSC_G6_NOBLE_SACRIFICE,
-        MSC_G6_REMOVE_CURSE,
-        MSC_G6_SACRED_JOURNEY,
-        MSC_G6_HONORABLE_EXECUTION,
-        MSC_G6_CONFIDENCE,
-        MSC_G6_EVASION,
-        MSC_G6_COUNTER_ATTACK,
-        MSC_G6_LIGHTING_STRIKE,
-        MSC_G6_MOMENTUM_STRIKE,
-        MSC_G6_FOCUS_ATTACK,
-        MSC_G6_DEATH_STRIKE,
-        MSC_G6_ANIMAL_FORM,
-        MSC_G6_KI_ATTACK,
-        MSC_G6_SURPRICE_ATTACK,
-        MSC_G6_BACKSTAB,
-        MSC_G6_SHADOWJUMP,
-        MSC_G6_MIRROR_IMAGE,
-        MSC_G6_ARCANE_CIRCLE,
-        MSC_G6_GIFT_OF_RENEWAL,
-        MSC_G6_IMMOLATING_WEAPON,
-        MSC_G6_ATTUNEMENT,
-        MSC_G6_THUNDERSTORM,
-        MSC_G6_NATURES_FURY,
-        MSC_G6_SUMMON_FEY,
-        MSC_G6_SUMMON_FIEND,
-        MSC_G6_REAPER_FORM,
-        MSC_G6_WILDFIRE,
-        MSC_G6_ESSENCE_OF_WIND,
-        MSC_G6_DRYAD_ALLURE,
-        MSC_G6_ETHEREAL_VOYAGE,
-        MSC_G6_WORD_OF_DEATH,
-        MSC_G6_GIFT_OF_LIFE,
-        MSC_G6_ARCANE_EMPOWERMEN,
-        MSC_G6_NETHER_BOLT,
-        MSC_G6_HEALING_STONE,
-        MSC_G6_PURGE_MAGIC,
-        MSC_G6_ENCHANT,
-        MSC_G6_SLEEP,
-        MSC_G6_EAGLE_STRIKE,
-        MSC_G6_ANIMATED_WEAPON,
-        MSC_G6_STONE_FORM,
-        MSC_G6_SPELL_TRIGGER,
-        MSC_G6_MASS_SLEEP,
-        MSC_G6_CLEANSING_WINDS,
-        MSC_G6_BOMBARD,
-        MSC_G6_SPELL_PLAGUE,
-        MSC_G6_HAIL_STORM,
-        MSC_G6_NETHER_CYCLONE,
-        MSC_G6_RISING_COLOSSUS,
-        MSC_G6_INSPIRE,
-        MSC_G6_INVIGORATE,
-        MSC_G6_RESILIENCE,
-        MSC_G6_PERSEVERANCE,
-        MSC_G6_TRIBULATION,
-        MSC_G6_DESPAIR,
-        MSC_G7_HOSTILE, //Select Next/Preveous/Nearest group
-        MSC_G7_PARTY,
-        MSC_G7_FOLLOWER,
-        MSC_G7_OBJECT,
-        MSC_G7_MOBILE,
-        MSC_TOTAL_COUNT
+        NW, //Walk group
+        N,
+        NE,
+        E,
+        SE,
+        S,
+        SW,
+        W,
+        Configuration, //Open/Close/Minimize/Maximize group
+        Paperdoll,
+        Status,
+        Journal,
+        Skills,
+        MageSpellbook,
+        Chat,
+        Backpack,
+        Owerview,
+        WorldMap,
+        Mail,
+        PartyManifest,
+        PartyChat,
+        NecroSpellbook,
+        PaladinSpellbook,
+        CombatBook,
+        BushidoSpellbook,
+        NinjitsuSpellbook,
+        Guild,
+        SpellWeavingSpellbook,
+        QuestLog,
+        MysticismSpellbook,
+        RacialAbilitiesBook,
+        BardSpellbook,
+        Anatomy, //Skills group
+        AnimalLore,
+        AnimalTaming,
+        ArmsLore,
+        Begging,
+        Cartography,
+        DetectingHidden,
+        Enticement,
+        EvaluatingIntelligence,
+        ForensicEvaluation,
+        Hiding,
+        Imbuing,
+        Inscription,
+        ItemIdentification,
+        Meditation,
+        Peacemaking,
+        Poisoning,
+        Provocation,
+        RemoveTrap,
+        SpiritSpeak,
+        Stealing,
+        Stealth,
+        TasteIdentification,
+        Tracking,
+        LeftHand,
+        ///Arm/Disarm group
+        RightHand,
+        Honor, //Invoke Virture group
+        Sacrifice,
+        Valor,
+        Clumsy, //Cast Spell group
+        CreateFood,
+        Feeblemind,
+        Heal,
+        MagicArrow,
+        NightSight,
+        ReactiveArmor,
+        Weaken,
+        Agility,
+        Cunning,
+        Cure,
+        Harm,
+        MagicTrap,
+        MagicUntrap,
+        Protection,
+        Strength,
+        Bless,
+        Fireball,
+        MagicLock,
+        Poison,
+        Telekinesis,
+        Teleport,
+        Unlock,
+        WallOfStone,
+        ArchCure,
+        ArchProtection,
+        Curse,
+        FireField,
+        GreaterHeal,
+        Lightning,
+        ManaDrain,
+        Recall,
+        BladeSpirits,
+        DispellField,
+        Incognito,
+        MagicReflection,
+        MindBlast,
+        Paralyze,
+        PoisonField,
+        SummonCreature,
+        Dispel,
+        EnergyBolt,
+        Explosion,
+        Invisibility,
+        Mark,
+        MassCurse,
+        ParalyzeField,
+        Reveal,
+        ChainLightning,
+        EnergyField,
+        FlameStrike,
+        GateTravel,
+        ManaVampire,
+        MassDispel,
+        MeteorSwarm,
+        Polymorph,
+        Earthquake,
+        EnergyVortex,
+        Resurrection,
+        AirElemental,
+        SummonDaemon,
+        EarthElemental,
+        FireElemental,
+        WaterElemental,
+        AnimateDead,
+        BloodOath,
+        CorpseSkin,
+        CurseWeapon,
+        EvilOmen,
+        HorrificBeast,
+        LichForm,
+        MindRot,
+        PainSpike,
+        PoisonStrike,
+        Strangle,
+        SummonFamilar,
+        VampiricEmbrace,
+        VengefulSpirit,
+        Wither,
+        WraithForm,
+        Exorcism,
+        CleanceByFire,
+        CloseWounds,
+        ConsecrateWeapon,
+        DispelEvil,
+        DivineFury,
+        EnemyOfOne,
+        HolyLight,
+        NobleSacrifice,
+        RemoveCurse,
+        SacredJourney,
+        HonorableExecution,
+        Confidence,
+        Evasion,
+        CounterAttack,
+        LightingStrike,
+        MomentumStrike,
+        FocusAttack,
+        DeathStrike,
+        AnimalForm,
+        KiAttack,
+        SurpriceAttack,
+        Backstab,
+        Shadowjump,
+        MirrorImage,
+        ArcaneCircle,
+        GiftOfRenewal,
+        ImmolatingWeapon,
+        Attunement,
+        Thunderstorm,
+        NaturesFury,
+        SummonFey,
+        SummonFiend,
+        ReaperForm,
+        Wildfire,
+        EssenceOfWind,
+        DryadAllure,
+        EtherealVoyage,
+        WordOfDeath,
+        GiftOfLife,
+        ArcaneEmpowermen,
+        NetherBolt,
+        HealingStone,
+        PurgeMagic,
+        Enchant,
+        Sleep,
+        EagleStrike,
+        AnimatedWeapon,
+        StoneForm,
+        SpellTrigger,
+        MassSleep,
+        CleansingWinds,
+        Bombard,
+        SpellPlague,
+        HailStorm,
+        NetherCyclone,
+        RisingColossus,
+        Inspire,
+        Invigorate,
+        Resilience,
+        Perseverance,
+        Tribulation,
+        Despair,
+        Hostile, //Select Next/Preveous/Nearest group
+        Party,
+        Follower,
+        Object,
+        Mobile,
+        MscTotalCount
     }
 }

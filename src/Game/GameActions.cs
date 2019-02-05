@@ -38,6 +38,8 @@ namespace ClassicUO.Game
     {
         private static Action<Item, int, int, int?> _pickUpAction;
 
+        public static SpellDefinition LastSpell;
+
         internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
         {
             _pickUpAction = onPickUpAction;
@@ -62,7 +64,7 @@ namespace ClassicUO.Game
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null && World.Player.NotorietyFlag == NotorietyFlag.Innocent && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
 
                     QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
@@ -212,6 +214,25 @@ namespace ClassicUO.Game
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
         {
+            if (Engine.Profile.Current.EnabledCriminalActionQuery)
+            {
+                Mobile m = World.Mobiles.Get(entity);
+
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                {
+
+                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                               s =>
+                                                               {
+                                                                   if (s)
+                                                                       Socket.Send(new PTargetObject(entity, cursorID, cursorType));
+                                                               });
+
+                    Engine.UI.Add(messageBox);
+                    return;
+                }
+            }
+
             Socket.Send(new PTargetObject(entity, cursorID, cursorType));
         }
 

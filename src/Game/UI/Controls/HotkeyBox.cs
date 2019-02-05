@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -63,7 +66,10 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-    
+        public event EventHandler HotkeyChanged, HotkeyCancelled;
+
+        public SDL.SDL_Keycode Key { get; private set; }
+        public SDL.SDL_Keymod Mod { get; private set; }
 
         public bool IsActive
         {
@@ -98,10 +104,28 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsActive)
             {
+                SetKey(key, mod);
+            }
+        }
+
+        public void SetKey(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_UNKNOWN && mod == SDL.SDL_Keymod.KMOD_NONE)
+            {
+                Key = key;
+                Mod = mod;
+                _label.Text = string.Empty;
+            }
+            else
+            {
                 string newvalue = KeysTranslator.TryGetKey(key, mod);
 
-                if (!string.IsNullOrEmpty(newvalue))
+                if (!string.IsNullOrEmpty(newvalue) && key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                {
+                    Key = key;
+                    Mod = mod;
                     _label.Text = newvalue;
+                }
             }
         }
 
@@ -112,14 +136,20 @@ namespace ClassicUO.Game.UI.Controls
 
 
         public override void OnButtonClick(int buttonID)
-        {
+        {     
+
             switch ((ButtonState)buttonID)
             {
                 case ButtonState.Ok:
-
+                    HotkeyChanged.Raise(this);
                     break;
-                case ButtonState.Cancel:                
+                case ButtonState.Cancel:     
                     _label.Text = string.Empty;
+
+                    HotkeyCancelled.Raise(this);
+
+                    Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
+                    Mod = SDL.SDL_Keymod.KMOD_NONE;
                     break;
             }
 

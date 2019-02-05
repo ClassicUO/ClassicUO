@@ -268,11 +268,21 @@ namespace ClassicUO.Utility
             if (_keys.TryGetValue(key, out string value))
             {
                 StringBuilder sb = new StringBuilder();
-                if (_mods.TryGetValue(mod, out string value2))
-                {
-                    sb.Append(value2);
-                    sb.Append(' ');
-                }
+
+                bool isshift = (mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+                bool isctrl = (mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+                bool isalt = (mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+
+
+                if (isshift)
+                    sb.Append("Shift ");
+
+                if (isctrl)
+                    sb.Append("Ctrl ");
+
+                if (isalt)
+                    sb.Append("Alt ");
+            
 
                 sb.Append(value);
                 return sb.ToString();

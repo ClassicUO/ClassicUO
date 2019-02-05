@@ -79,9 +79,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Add(T entity)
         {
-            if (entity.Serial.IsMobile && typeof(T) == typeof(Item))
-                Log.Message(LogTypes.Warning, "Adding a mobile into this collection");
-
             if (_entities.ContainsKey(entity.Serial))
                 return false;
 

@@ -1053,7 +1053,31 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Item item = World.GetOrCreateItem(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+
+            Item item = World.Items.Get(serial);
+
+            if (item != null)
+            {
+                if (item.Graphic != 0 && item.Layer != Layer.Backpack)
+                {
+                    item.Items.Clear();
+                }
+
+                if (item.Container != 0)
+                {
+                    Entity cont = World.Get(item.Container);
+                    cont.Items.Remove(item);
+                    cont.Items.ProcessDelta();
+                    item.Container = Serial.INVALID;
+                }
+
+                if (item.Graphic != 0)
+                    World.RemoveItem(item);
+            }
+            else
+                item = World.GetOrCreateItem(serial);
+
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer)p.ReadByte();
             item.Container = p.ReadUInt();
@@ -1157,7 +1181,6 @@ namespace ClassicUO.Network
             for (int i = 0; i < count; i++)
             {
                 Serial serial = p.ReadUInt();
-                Console.WriteLine(serial.ToString());
                 Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
                 ushort amount = Math.Max(p.ReadUShort(), (ushort)1);
                 ushort x = p.ReadUShort();
@@ -1757,11 +1780,35 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Serial serial = p.ReadUInt();
             uint id = p.ReadUInt();
-            //string name = p.ReadASCII(p.ReadByte());
-            //int count = p.ReadByte();
-            // to finish
+            string name = p.ReadASCII(p.ReadByte());
+            int count = p.ReadByte();
+
+            Graphic menuid = p.ReadUShort();
+            p.Seek(p.Position - 2);
+
+            if (menuid != 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    Graphic graphic = p.ReadUShort();
+                    Hue hue = p.ReadUShort();
+                    name = p.ReadASCII(p.ReadByte());
+
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    p.Skip(4); 
+                    name = p.ReadASCII(p.ReadByte());
+                }
+            }
 
             Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
         }

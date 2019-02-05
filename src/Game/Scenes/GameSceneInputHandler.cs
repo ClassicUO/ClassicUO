@@ -382,7 +382,26 @@ namespace ClassicUO.Game.Scenes
 	            if (!World.Player.InWarMode)
 		            GameActions.SetWarMode(true);
             }
-           
+
+
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+
+
+            Macro macro = _macroManager.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
+            if (macro != null)
+            {
+                _macroManager.SetMacroToExecute(macro.FirstNode);
+                _macroManager.WaitForTargetTimer = 0;
+                _macroManager.Update();
+            }
+
+            if (_hotkeysManager.TryExecuteIfBinded(e.keysym.sym, e.keysym.mod, out Action action))
+            {
+                action();
+            }
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)

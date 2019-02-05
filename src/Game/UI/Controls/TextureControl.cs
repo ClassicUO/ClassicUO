@@ -31,10 +31,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            Vector3 vec = new Vector3(0, 0, Alpha);
+
             if (ScaleTexture)
-                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), Vector3.Zero);
+                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), vec);
             else
-                return batcher.Draw2D(Texture, position, Vector3.Zero);
+                return batcher.Draw2D(Texture, position, vec);
         }
     }
 }
