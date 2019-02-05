@@ -76,6 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
             {
                 ButtonID = (int)Buttons.SortName,
+                IsSelected = true,
                 X = 40,
                 Y = 25,
             });
