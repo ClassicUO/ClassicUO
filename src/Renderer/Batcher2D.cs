@@ -422,8 +422,8 @@ namespace ClassicUO.Renderer
         public bool DrawBorder(Texture2D texture, Rectangle r)
         {
             int[,] posLeftTop = { // => /
-                {r.X + (r.Width / 2) - 3, r.Y},
-                {r.X + r.Width - 3,r.Y + (r.Height / 2)},
+                {r.X + (r.Width / 2) - 2, r.Y},
+                {r.X + r.Width - 2,r.Y + (r.Height / 2)},
                 {r.X + (r.Width / 2) + 2, r.Y + 2},
                 {r.X + r.Width + 2, r.Y + (r.Height / 2) + 2}
             };
@@ -431,8 +431,8 @@ namespace ClassicUO.Renderer
             int[,] poTopRight = { // => \
                 {r.X, r.Y + (r.Height / 2)},
                 {r.X + (r.Width / 2), r.Y},
-                {r.X + 2, r.Y + (r.Height / 2) + 2},
-                {r.X + (r.Width / 2) + 2, r.Y + 2}
+                {r.X + 1, r.Y + (r.Height / 2) + 1},
+                {r.X + (r.Width / 2) + 1, r.Y + 1}
             };
 
             for (int i = 0; i < 4; i++)
