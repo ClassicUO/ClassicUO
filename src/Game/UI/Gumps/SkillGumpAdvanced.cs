@@ -27,8 +27,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 
-using System.Diagnostics;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -124,8 +122,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            Debug.WriteLine("OnButtonClick = {0}", buttonID);
-
             if (_buttonsToSkillsValues.TryGetValue((Buttons) buttonID, out string fieldValue))
             {
                 if (_sortField == fieldValue)
@@ -219,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
             { Buttons.SortName, "Name" },
             { Buttons.SortReal, "Base" },
             { Buttons.SortBase, "Value" },
-            { Buttons.SortCap, "Cap" },
+            { Buttons.SortCap,  "Cap" },
         };
 
         private enum Buttons
@@ -227,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
             SortName = 1,
             SortReal = 2,
             SortBase = 3,
-            SortCap = 4
+            SortCap  = 4
         }
     }
 
@@ -279,12 +275,14 @@ namespace ClassicUO.Game.UI.Gumps
                         loc.Graphic = 0x985;
                         loc.Texture = FileManager.Gumps.GetTexture(0x985);
                         break;
+
                     case Lock.Down:
                         _skill.Lock = Lock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
                         loc.Texture = FileManager.Gumps.GetTexture(0x82C);
                         break;
+
                     case Lock.Locked:
                         _skill.Lock = Lock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
