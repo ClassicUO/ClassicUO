@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
+            LocalSerial = Item.Serial;
 
             Item.Disposed += ItemOnDisposed;
 
