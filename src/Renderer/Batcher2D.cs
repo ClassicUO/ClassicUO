@@ -596,7 +596,7 @@ namespace ClassicUO.Renderer
         private static byte[] GetResource(string name)
         {
             Stream stream = typeof(Batcher2D).Assembly.GetManifestResourceStream(
-                                                                                 "ClassicUO.shaders." + name + ".fxc"
+                                                                                  name
                                                                                 );
             using (MemoryStream ms = new MemoryStream())
             {
@@ -609,6 +609,6 @@ namespace ClassicUO.Renderer
         private static byte[] _isometricEffect;
 
 
-        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("IsometricWorld"));
+        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
     }
 }

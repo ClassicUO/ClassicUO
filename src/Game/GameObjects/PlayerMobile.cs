@@ -46,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
         private ushort _enhancePotions;
         private ushort _fasterCasting;
         private ushort _fasterCastRecovery;
-        private bool _female;
         private byte _followers;
         private byte _followersMax;
         private uint _gold;
@@ -323,19 +322,6 @@ namespace ClassicUO.Game.GameObjects
                 if (_damageMax != value)
                 {
                     _damageMax = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
-
-        public bool Female
-        {
-            get => _female;
-            set
-            {
-                if (_female != value)
-                {
-                    _female = value;
                     _delta |= Delta.Stats;
                 }
             }

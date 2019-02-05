@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -124,6 +125,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
+
+        [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
+
 
         public void Save(List<Gump> gumps = null)
         {

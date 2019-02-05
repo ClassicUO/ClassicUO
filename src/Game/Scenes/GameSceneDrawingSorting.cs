@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     int offY;
 
-                    if (ismobile && !mounted)
+                    if (ismobile && !mounted || iscorpse)
                         offY = -22;
                     else switch (obj)
                     {
@@ -298,9 +298,10 @@ namespace ClassicUO.Game.Scenes
                         case Static _: offY = -44;
 
                             break;
-                        case Item _: offY = 44;
+                        //case Item _:
+                        //    offY = 44;
 
-                            break;
+                            //break;
                         default: offY = 0;
 
                             break;
