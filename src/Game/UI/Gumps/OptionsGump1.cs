@@ -20,35 +20,30 @@
 #endregion
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel.Design;
 
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
-using ClassicUO.IO;
-using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-
-using ClassicUO.Network;
-using System.Diagnostics;
-using System.IO;
-
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using ClassicUO.Network;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class OptionsGump1 : Gump
     {
-
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -88,11 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
         const int WIDTH = 700;
         const int HEIGHT = 500;
 
-
         public OptionsGump1() : base(0, 0)
         {
-          
-
             Add(new AlphaBlendControl(0.05f)
             {
                 X = 1,
@@ -118,7 +110,6 @@ namespace ClassicUO.Game.UI.Gumps
             tc.Texture = new SpriteTexture(w, h);
             tc.Texture.SetData(pixels);
             Add(tc);
-
          
             Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ToPage = 1 } );
             Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") { ToPage = 2 });
@@ -129,13 +120,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") { ToPage = 7 });
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") { ToPage = 8 });
 
-
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
-
            
             int offsetX = 60;
             int offsetY = 60;
-
 
             Add(new Line(160, 405 + 35 + 1, WIDTH - 160, 1, Color.Gray.PackedValue));
 
@@ -257,6 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
             _drawRoofs = CreateCheckBox(rightArea, "Hide roofs", Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
+            _enableCaveBorder = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
 
             hpAreaItem = new ScrollAreaItem();
             text = new Label("- Fields: ", true, HUE_FONT, font: FONT)
@@ -264,8 +253,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 10,
             };
             hpAreaItem.Add(text);
-
-
             _normalFields = new RadioButton(0, 0x00D0, 0x00D1, "Normal fields", FONT, HUE_FONT, true)
             {
                 X = 25,
@@ -290,9 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(hpAreaItem);
 
-
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
-
 
             hpAreaItem = new ScrollAreaItem();
             text = new Label("- Circle of Transparency:", true, HUE_FONT, font: FONT)
@@ -330,9 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_soundsVolume);
             rightArea.Add(item);
 
-
             _enableMusic = CreateCheckBox(rightArea, "Music", Engine.Profile.Current.EnableMusic, 0, 0);
-
            
             item = new ScrollAreaItem();
             text = new Label("- Music volume:", true, HUE_FONT, 0, FONT);
@@ -346,7 +329,6 @@ namespace ClassicUO.Game.UI.Gumps
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
             _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
-
 
             _loginMusic = CreateCheckBox(rightArea, "Login music", Engine.GlobalSettings.LoginMusic, 0, 40);
 
@@ -370,7 +352,6 @@ namespace ClassicUO.Game.UI.Gumps
             _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
             _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
 
-
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
             {
@@ -385,7 +366,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
             item.Add(_shardType);
             rightArea.Add(item);
-
 
             item = new ScrollAreaItem();
 
@@ -438,22 +418,18 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-
-
             rightArea.Add(item);
 
             Add(rightArea, PAGE);
         }
-
 
         private MacroControl _macroControl;
 
         private void BuildCommands()
         {
             const int PAGE = 4;
+
             ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
-
-
             NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") { IsSelectable = false, ToPage = (int) Buttons.NewMacro };
 
             addButton.MouseClick += (sender, e) =>
@@ -468,7 +444,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (macros.Any(s => s.Name == name))
                         return;
-                    
 
                     NiceButton nb;
                     rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, name)
@@ -477,7 +452,6 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     nb.IsSelected = true;
-
 
                     _macroControl?.Dispose();
 
@@ -492,13 +466,11 @@ namespace ClassicUO.Game.UI.Gumps
                     nb.MouseClick += (sss, eee) =>
                     {
                         _macroControl?.Dispose();
-
                         _macroControl = new MacroControl(name)
                         {
                             X = 400,
                             Y = 20,
                         };
-
                         Add(_macroControl, PAGE);
                     };
                 });
@@ -507,7 +479,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             Add(addButton, PAGE);
-
 
             NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ToPage = (int) Buttons.DeleteMacro};
 
@@ -525,7 +496,6 @@ namespace ClassicUO.Game.UI.Gumps
                             return;
 
                         nb.Parent.Dispose();
-
 
                         if (_macroControl != null)
                         {
@@ -548,12 +518,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(delButton, PAGE);
             Add(new Line(190, 52 + 25 + 2, 150, 1, Color.Gray.PackedValue), PAGE);
-
-
             Add(rightArea, PAGE);
-
             Add(new Line(191 + 150, 21, 1, 418, Color.Gray.PackedValue), PAGE);
-
 
             foreach (Macro macro in Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros())
             {
@@ -715,6 +681,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hpComboBox.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
                     _drawRoofs.IsChecked = true;
+                    _enableCaveBorder.IsChecked = false;
                     _treeToStumps.IsChecked = false;
                     _hideVegetation.IsChecked = false;
                     _normalFields.IsChecked = true;
@@ -804,26 +771,15 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
-                {
                     Engine.UI.GetByLocalSerial<TopBarGump>()?.Dispose();
-                }
                 else
                     TopBarGump.Create();
 
                 Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            if (Engine.Profile.Current.TreeToStumps != _treeToStumps.IsChecked)
-            {
-                Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
-
-                //FileManager.Art.CleanResources();
-
-                //int mapIndex = World.MapIndex;
-                //World.MapIndex = -1;
-                //World.MapIndex = mapIndex;
-            }
-
+            Engine.Profile.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
+            Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;

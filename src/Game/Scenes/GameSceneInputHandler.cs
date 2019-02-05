@@ -392,13 +392,21 @@ namespace ClassicUO.Game.Scenes
                 TargetManager.CancelTarget();
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
-
+            
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
                     GameActions.SetWarMode(true);
 
             if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
-                World.Player.Walk(dWalk, false);
+            {
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                if (viewport != null)
+                {
+                    SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (chat != null && chat.textBox.Text.Length == 0)
+                        World.Player.Walk(dWalk, false);
+                }
+            }
 
             if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))

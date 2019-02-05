@@ -44,8 +44,29 @@ namespace ClassicUO.Game.GameObjects
 
         private Graphic _oldGraphic;
 
-        public bool CharacterIsBehindFoliage { get; set; }
+        private bool _border = false;
+        private Texture2D _borderTexture;
+        private Color _borderColor = Color.Black;
 
+        public void SetBorder(bool status, byte width = 3, Color color = default(Color))
+        {
+            if (!status)
+                _borderTexture = null;
+
+            if (object.Equals(color, default(Color)))
+                _borderColor = Color.Black;
+            else
+                _borderColor = color;
+
+            _border = status;
+        }
+
+        public bool IsBordered()
+        {
+            return _border;
+        }
+
+        public bool CharacterIsBehindFoliage { get; set; }
 
         public override bool TransparentTest(int z)
         {
@@ -58,7 +79,6 @@ namespace ClassicUO.Game.GameObjects
 
             return r;
         }
-
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
@@ -94,62 +114,26 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            //int distance = Distance;
-
-            //if (Engine.Profile.Current.UseCircleOfTransparency)
-            //{
-            //    int z = World.Player.Z + 5;
-
-            //    bool r = true;
-
-            //    if (!_isFoliage)
-            //    {
-            //        if (Z <= z - ItemData.Height)
-            //            r = false;
-            //        else if (z < Z && (_canBeTransparent & 0xFF) == 0)
-            //            r = false;
-            //    }
-
-            //    if (r)
-            //    {
-            //        int distanceMax = Engine.Profile.Current.CircleOfTransparencyRadius;
-
-            //        if (distance <= distanceMax)
-            //        {
-            //            if (distance <= 0)
-            //                distance = 1;
-
-            //            ProcessAlpha((byte) (235 - (200 / distance)));
-            //        }
-            //        else if (AlphaHue != 0xFF)
-            //            ProcessAlpha(0xFF);
-            //    }
-            //}
-
-
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(0x038E, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
-            //MessageOverHead(batcher, position, Bounds.Y - 44);
+
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);
-            //if (_isFoliage)
-            //{
-            //    if (_texture == null)
-            //    {
-            //        _texture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-            //        _texture.SetData(new Color[] {Color.Red});
-            //    }
 
-            //    batcher.DrawRectangle(_texture, new Rectangle( (int) position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height), Vector3.Zero);
-            //}
+            if (_border)
+            {
+                if (_borderTexture == null)
+                {
+                    _borderTexture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                    _borderTexture.SetData(new Color[] { _borderColor });
+                }
+                batcher.DrawBorder(_borderTexture, new Rectangle((int)position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height));
+            }
 
             return true;
         }
-
-        //private static Texture2D _texture;
-
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
