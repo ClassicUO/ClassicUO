@@ -43,7 +43,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             _showButtons = showButtons;
             _buttonClick = buttonClick;
-
+            CanCloseWithRightClick = false;
+            CanCloseWithEsc = false;
 
             Label label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {

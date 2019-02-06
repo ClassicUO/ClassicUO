@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 using ClassicUO.Configuration;
@@ -339,7 +340,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
-        private void NetClient_Disconnected(object sender, EventArgs e)
+        private void NetClient_Disconnected(object sender, SocketError e)
         {
             Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
 
@@ -348,13 +349,21 @@ namespace ClassicUO.Game.Scenes
 
             Characters = null;
             Servers = null;
-            PopupMessage = "Connection lost";
+            PopupMessage = $"Connection lost:\n{e}";
             CurrentLoginStep = LoginStep.PopUpMessage;
         }
 
-        private void Login_NetClient_Disconnected(object sender, EventArgs e)
+        private void Login_NetClient_Disconnected(object sender, SocketError e)
         {
             Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
+
+            if ((int) e > 0)
+            {
+                Characters = null;
+                Servers = null;
+                PopupMessage = $"Connection lost:\n`{e}`";
+                CurrentLoginStep = LoginStep.PopUpMessage;
+            }
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)

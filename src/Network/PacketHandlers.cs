@@ -1780,11 +1780,12 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
+            //TODO:
             if (!World.InGame)
                 return;
 
             Serial serial = p.ReadUInt();
-            uint id = p.ReadUInt();
+            ushort id = p.ReadUShort();
             string name = p.ReadASCII(p.ReadByte());
             int count = p.ReadByte();
 
