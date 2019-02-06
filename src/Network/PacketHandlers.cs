@@ -783,46 +783,28 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
-
+            
             Serial serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
 
-            Engine.UI.GetByLocalSerial(serial)?.Dispose();
-
             if (graphic == 0x30) // vendor
             {
-                Mobile vendor = World.Mobiles.Get(serial);
-                if (vendor == null)
-                    return;
-
-                var gump = new ShopGump(serial, true, 150, 5);
-
-                for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
+                foreach (var shop in Engine.UI.Gumps.OfType<ShopGump>())
                 {
-                    Item item = vendor.Equipment[(int) layer];
-
-                    Item a = item?.Items.FirstOrDefault();
-
-                    if (a == null)
-                        continue;
-
-                    bool reverse = a.X > 1;
-
-                    var list = reverse ? 
-                                   item.Items.OrderBy(s => s.Serial.Value).Reverse() 
-                                   :
-                                   item.Items.OrderBy(s => s.Serial.Value);
-
-                    foreach (var i in list)
+                    if (shop.LocalSerial == serial)
                     {
-                        gump.AddItem(i, false);
+                        shop.IsVisible = true;
+                        shop.IsEnabled = true;
+                    }
+                    else
+                    {
+                        shop.Dispose();
                     }
                 }
-
-                Engine.UI.Add(gump);
             }
             else
             {
+                Engine.UI.GetByLocalSerial(serial)?.Dispose();
                 Item item = World.Items.Get(serial);
 
                 if (graphic == 0xFFFF) // spellbook
@@ -1530,36 +1512,30 @@ namespace ClassicUO.Network
 
             if (vendor == null) return;
 
+            Engine.UI.GetByLocalSerial<ShopGump>(vendor)?.Dispose();
 
-            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>();
-
-            if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
+            ShopGump gump = new ShopGump(vendor, true, 150, 5)
             {
-                gump.Dispose();
-                gump = null;
-            }
+                IsEnabled = false,
+                IsVisible = false
+            };
 
-            if (gump == null)
-            {
-                gump = new ShopGump(vendor, true, 150, 5);
-                Engine.UI.Add(gump);
-            }
+            Engine.UI.Add(gump);
 
             if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
             {
                 byte count = p.ReadByte();
 
-                Item a = container.Items.FirstOrDefault();
+                var list = container.Items.OrderBy(s => s.Serial.Value);
+                Item a = list.FirstOrDefault();
 
                 if (a == null)
                     return;
-
-                bool reverse = a.X > 1;
-
-                var list = reverse ? 
-                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
-                               :
-                               container.Items.OrderBy(s => s.Serial.Value);
+                
+                if(a.X > 1)
+                {
+                    list.Reverse();
+                }
 
                 foreach (Item it in list.Take(count))
                 {
@@ -1575,7 +1551,7 @@ namespace ClassicUO.Network
                     else
                         it.Name = name;
 
-                    gump.SetIfNameIsFromCliloc(it, fromcliloc);
+                    gump.AddItem(it, fromcliloc);
                 }
             }
         }
@@ -1911,9 +1887,12 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
-            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(vendor);          
-            gump?.Dispose();
-            gump = new ShopGump(vendor, false, 100, 0);
+            foreach(var shop in Engine.UI.Gumps.OfType<ShopGump>())
+            {
+                shop.Dispose();
+            }
+
+            ShopGump gump = new ShopGump(vendor, false, 100, 0);
 
             for (int i = 0; i < countItems; i++)
             {
