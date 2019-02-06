@@ -189,7 +189,10 @@ namespace ClassicUO.Game.GameObjects
         public void RemoveFromTile()
         {
             if (World.Map != null && _tile != null)
+            {
+                _tile?.RemoveGameObject(this);
                 _tile = null;
+            }
         }
       
 
