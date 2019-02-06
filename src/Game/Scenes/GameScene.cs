@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -317,9 +318,9 @@ namespace ClassicUO.Game.Scenes
             base.Unload();
         }
 
-        private void SocketOnDisconnected(object sender, EventArgs e)
+        private void SocketOnDisconnected(object sender, SocketError e)
         {
-            Engine.UI.Add(new MessageBoxGump(200, 125, "Connection lost", (s) =>
+            Engine.UI.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", (s) =>
             {         
                 if (s)
                     Engine.SceneManager.ChangeScene(ScenesType.Login);

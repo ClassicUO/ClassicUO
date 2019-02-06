@@ -259,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
                 if (IsMulti)
                     AllowedToDraw = MultiGraphic != 0;
                 else
-                    AllowedToDraw = Graphic > 2 && DisplayedGraphic > 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+                    AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
             }
             else
             {

@@ -1309,9 +1309,8 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());
 
-                //TODO: issue with viewrange
-                //if (FileManager.ClientVersion >= ClientVersions.CV_305D)
-                //    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+                if (FileManager.ClientVersion >= ClientVersions.CV_305D)
+                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
 
@@ -1780,11 +1779,12 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
+            //TODO:
             if (!World.InGame)
                 return;
 
             Serial serial = p.ReadUInt();
-            uint id = p.ReadUInt();
+            ushort id = p.ReadUShort();
             string name = p.ReadASCII(p.ReadByte());
             int count = p.ReadByte();
 

@@ -79,7 +79,8 @@ namespace ClassicUO.Network
             }
         }
 
-        public event EventHandler Connected, Disconnected;
+        public event EventHandler Connected;
+        public event EventHandler<SocketError> Disconnected;
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
@@ -154,7 +155,7 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Message(LogTypes.Error, e.SocketError.ToString());
-                    Disconnect();
+                    Disconnect(e.SocketError);
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;
@@ -162,6 +163,11 @@ namespace ClassicUO.Network
         }
 
         public void Disconnect()
+        {
+           Disconnect(SocketError.SocketError);
+        }
+
+        private void Disconnect(SocketError error)
         {
             if (IsDisposed)
                 return;
@@ -207,7 +213,7 @@ namespace ClassicUO.Network
             }
 
             _circularBuffer = null;
-            Disconnected.Raise();
+            Disconnected.Raise(error);
             Statistics.Reset();
         }
 
