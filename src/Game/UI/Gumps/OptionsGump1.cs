@@ -85,13 +85,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public OptionsGump1() : base(0, 0)
         {
-            Add(new AlphaBlendControl(0.05f)
+            Add(new ResizePic(3600)
             {
-                X = 1,
-                Y = 1,
-                Width = WIDTH - 2,
-                Height = HEIGHT - 2
-            });
+                X = -5,
+                Y = -5,
+                Width = WIDTH + 10,
+                Height = HEIGHT + 5
+            }
+            );
+
+            Add(new ResizePic(3500)
+            {
+                X = 10,
+                Y = 10,
+                Width = 150,
+                Height = 475
+            }
+            );
 
             Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
             Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
@@ -110,22 +120,22 @@ namespace ClassicUO.Game.UI.Gumps
             tc.Texture = new SpriteTexture(w, h);
             tc.Texture.SetData(pixels);
             Add(tc);
-         
-            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ButtonParameter = 1 } );
-            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") { ButtonParameter = 2 });
-            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") { ButtonParameter = 3 });
-            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macro") { ButtonParameter = 4 });
-            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") { ButtonParameter = 5 });
-            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") { ButtonParameter = 6 });
-            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") { ButtonParameter = 7 });
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") { ButtonParameter = 8 });
+            
+            Add(new NiceButton(20, 40, 130, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ButtonParameter = 1 } );
+            Add(new NiceButton(20, 40 + 30 * 1, 130, 25, ButtonAction.SwitchPage, "Sounds") { ButtonParameter = 2 });
+            Add(new NiceButton(20, 40 + 30 * 2, 130, 25, ButtonAction.SwitchPage, "Video") { ButtonParameter = 3 });
+            Add(new NiceButton(20, 40 + 30 * 3, 130, 25, ButtonAction.SwitchPage, "Macro") { ButtonParameter = 4 });
+            Add(new NiceButton(20, 40 + 30 * 4, 130, 25, ButtonAction.SwitchPage, "Tooltip") { ButtonParameter = 5 });
+            Add(new NiceButton(20, 40 + 30 * 5, 130, 25, ButtonAction.SwitchPage, "Fonts") { ButtonParameter = 6 });
+            Add(new NiceButton(20, 40 + 30 * 6, 130, 25, ButtonAction.SwitchPage, "Speech") { ButtonParameter = 7 });
+            Add(new NiceButton(20, 40 + 30 * 7, 130, 25, ButtonAction.SwitchPage, "Combat") { ButtonParameter = 8 });
 
-            Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
+            // Add(new Line(155, 12, 1, HEIGHT - 27, Color.Gray.PackedValue));
            
-            int offsetX = 60;
-            int offsetY = 60;
+            int offsetX = 105;
+            int offsetY = 50;
 
-            Add(new Line(160, 405 + 35 + 1, WIDTH - 160, 1, Color.Gray.PackedValue));
+            // Add(new Line(160, 405 + 35 + 1, WIDTH - 160, 1, Color.Gray.PackedValue));
 
             Add(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
             {
@@ -360,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item.Add(text);
 
-            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
+            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands", "Ascension" })
             {
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
