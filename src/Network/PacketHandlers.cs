@@ -1309,9 +1309,8 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());
 
-                //TODO: issue with viewrange
-                //if (FileManager.ClientVersion >= ClientVersions.CV_305D)
-                //    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+                if (FileManager.ClientVersion >= ClientVersions.CV_305D)
+                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
 
