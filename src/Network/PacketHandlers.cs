@@ -1526,18 +1526,14 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var list = container.Items.OrderBy(s => s.Serial.Value);
-                Item a = list.FirstOrDefault();
-
-                if (a == null)
-                    return;
-                
-                if(a.X > 1)
+                IOrderedEnumerable<Item> list = container.Items.OrderBy(s => s.X);
+                if(count != list.Count())
                 {
-                    list.Reverse();
+                    Log.Message(LogTypes.Warning, "Packet 0x74 - Items count mismatch; vendor items will not be loaded.");
+                    return;
                 }
 
-                foreach (Item it in list.Take(count))
+                foreach (Item it in list)
                 {
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
