@@ -72,7 +72,6 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.CastSpell(_spell.ID);
         }
 
-
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -83,12 +82,11 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(_spell.ID); // 4
             writer.Write(_spell.GumpIconID); // 4
             writer.Write(_spell.GumpIconSmallID); // 4
-
             writer.Write(_spell.Regs.Length); // 4
+
             for (int i = 0; i < _spell.Regs.Length; i++)
-            {
                 writer.Write((int)_spell.Regs[i]); // 4
-            }
+
             writer.Write(_spell.ManaCost); // 4
             writer.Write(_spell.MinSkill); // 4
             writer.Write(_spell.PowerWords.Length); // 4
@@ -99,7 +97,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-
          
             string name = reader.ReadUTF8String(reader.ReadInt32());
             int id = reader.ReadInt32();
@@ -110,9 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
             Reagents[] reagents = new Reagents[reagsCount];
 
             for (int i = 0; i < reagsCount; i++)
-            {
                 reagents[i] = (Reagents) reader.ReadInt32();
-            }
 
             int manaCost = reader.ReadInt32();
             int minSkill = reader.ReadInt32();
