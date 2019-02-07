@@ -52,7 +52,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanBeSaved = true;
         }
 
-
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -62,15 +61,12 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-
             Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
-
             Dispose();
         }
 
-
         private void BuildGump()
-        {          
+        {
             LocalSerial = _spellBook.Serial;
             _spellBook.Items.Added += ItemsOnAdded;
             _spellBook.Items.Removed += ItemsOnRemoved;
@@ -92,7 +88,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
-
             Engine.UI.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -138,6 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _maxPage = (dictionaryPagesCount >> 1) + ((totalSpells + 1) >> 1);
+
             int offs = 0;
             bool isMageSpellbook = false;
 
@@ -145,42 +141,42 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 isMageSpellbook = true;
 
-                Add(new Button((int) ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
+                Add(new Button((int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
                 {
                     X = 58, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 1
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
+                Add(new Button((int)ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
                 {
                     X = 93, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 1
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
+                Add(new Button((int)ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
                 {
                     X = 130, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 2
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
+                Add(new Button((int)ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
                 {
                     X = 164, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 2
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
+                Add(new Button((int)ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
                 {
                     X = 227, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 3
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
+                Add(new Button((int)ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
                 {
                     X = 260, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 3
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
+                Add(new Button((int)ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
                 {
                     X = 297, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 4
                 });
 
-                Add(new Button((int) ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
+                Add(new Button((int)ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
                 {
                     X = 332, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 4
                 });
@@ -229,7 +225,6 @@ namespace ClassicUO.Game.UI.Gumps
                         Add(text, page);
                     }
 
-
                     int topage = (dictionaryPagesCount >> 1) + (spellDone >> 1);
 
                     for (int k = 0; k < spellsOnPage; k++)
@@ -237,16 +232,12 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_spells[offs])
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
-
+                            if (spellDone % 2 == 0)
                             {
-                                if (spellDone % 2 == 0)
-                                {
-                                    topage++;
-                                }
+                                topage++;
                             }
 
                             spellDone++;
-
 
                             text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
                             {
@@ -255,8 +246,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             text.MouseClick += (sender, e) =>
                             {
-                                HoveredLabel l = (HoveredLabel) sender;
-                                SetActivePage((int) l.LocalSerial.Value);
+                                HoveredLabel l = (HoveredLabel)sender;
+                                SetActivePage((int)l.LocalSerial.Value);
                             };
                             Add(text, page);
                             y += 15;
@@ -264,7 +255,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                         offs++;
                     }
-
                 }
             }
 
@@ -279,12 +269,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     continue;
                 }
-                
+
                 int iconX = 62;
                 int topTextX = 87;
                 int iconTextX = 112;
-                uint iconSerial = 100 + (uint) i;
-
+                uint iconSerial = 100 + (uint)i;
 
                 if (spellsDone > 0)
                 {
@@ -293,12 +282,12 @@ namespace ClassicUO.Game.UI.Gumps
                         iconX = 225;
                         topTextX = 244 - 20;
                         iconTextX = 275;
-                        iconSerial = 1000 + (uint) i;  
+                        iconSerial = 1000 + (uint)i;
                     }
                     else
                     {
                         page1++;
-                    }                       
+                    }
                 }
 
                 spellsDone++;
@@ -348,59 +337,33 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                GumpPic icon = new GumpPic(iconX, 40, (Graphic) (iconStartGraphic + i), 0)
+                GumpPic icon = new GumpPic(iconX, 40, (Graphic)(iconStartGraphic + i), 0)
                 {
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
 
+                icon.MouseDoubleClick += (sender, e) => {
+                    if (e.Button == MouseButton.Left)
+                    {
+                        SpellDefinition? def = _getSpellDefinition(sender);
+                        if (def != null)
+                            GameActions.CastSpell(def.Value.ID);
+                    }
+                };
+
                 icon.DragBegin += (sender, e) =>
                 {
-                    Control ctrl = (Control) sender;
-                    int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
-                    SpellDefinition? def = null;
-
-                    switch (_spellBookType)
-                    {
-                        case SpellBookType.Magery:
-                            def = SpellsMagery.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Necromancy:
-                            def = SpellsNecromancy.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Chivalry:
-                            def = SpellsChivalry.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Bushido:
-                            def = SpellsBushido.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Ninjitsu:
-                            def = SpellsNinjitsu.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Spellweaving:
-                            def = SpellsSpellweaving.GetSpell(idx);
-
-                            break;
-                        case SpellBookType.Mysticism:
-                            def = SpellsMysticism.GetSpell(idx);
-
-                            break;
-                        default:
-
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    SpellDefinition? def = _getSpellDefinition(sender);
 
                     UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
                         X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                     };
+
                     Engine.UI.Add(gump);
                     Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
                 };
+
                 Add(icon, page1);
 
                 if (haveReagents)
@@ -435,6 +398,48 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
+        private SpellDefinition? _getSpellDefinition(Object sender)
+        {
+            Control ctrl = (Control)sender;
+            int idx = (int)(ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
+            SpellDefinition? def = null;
+
+            switch (_spellBookType)
+            {
+                case SpellBookType.Magery:
+                    def = SpellsMagery.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Necromancy:
+                    def = SpellsNecromancy.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Chivalry:
+                    def = SpellsChivalry.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Bushido:
+                    def = SpellsBushido.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Ninjitsu:
+                    def = SpellsNinjitsu.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Spellweaving:
+                    def = SpellsSpellweaving.GetSpell(idx);
+                    break;
+
+                case SpellBookType.Mysticism:
+                    def = SpellsMysticism.GetSpell(idx);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            return def;
+        }
+
         private void GetBookInfo(SpellBookType type, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount)
         {
             switch (type)
@@ -445,58 +450,57 @@ namespace ClassicUO.Game.UI.Gumps
                     minimizedGraphic = 0x08BA;
                     iconStartGraphic = 0x08C0;
                     spellIndexOffset = 0;
-
                     break;
+
                 case SpellBookType.Necromancy:
                     maxSpellsCount = 17;
                     bookGraphic = 0x2B00;
                     minimizedGraphic = 0x2B03;
                     iconStartGraphic = 0x5000;
                     spellIndexOffset = 64;
-
                     break;
+
                 case SpellBookType.Chivalry:
                     maxSpellsCount = 10;
                     bookGraphic = 0x2B01;
                     minimizedGraphic = 0x2B04;
                     iconStartGraphic = 0x5100;
                     spellIndexOffset = 81;
-
                     break;
+
                 case SpellBookType.Bushido:
                     maxSpellsCount = 6;
                     bookGraphic = 0x2B07;
                     minimizedGraphic = 0x2B09;
                     iconStartGraphic = 0x5400;
                     spellIndexOffset = 91;
-
                     break;
+
                 case SpellBookType.Ninjitsu:
                     maxSpellsCount = 8;
                     bookGraphic = 0x2B06;
                     minimizedGraphic = 0x2B08;
                     iconStartGraphic = 0x5300;
                     spellIndexOffset = 97;
-
                     break;
+
                 case SpellBookType.Spellweaving:
                     maxSpellsCount = 16;
                     bookGraphic = 0x2B2F;
                     minimizedGraphic = 0x2B2D;
                     iconStartGraphic = 0x59D8;
                     spellIndexOffset = 105;
-
                     break;
+
                 case SpellBookType.Mysticism:
                     maxSpellsCount = 16;
                     bookGraphic = 0x2B32;
                     minimizedGraphic = 0; // TODO: i dunno
                     iconStartGraphic = 0x5DC0;
                     spellIndexOffset = 121;
-
                     break;
-                default:
 
+                default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
@@ -516,52 +520,51 @@ namespace ClassicUO.Game.UI.Gumps
                     name = def.Name;
                     abbreviature = SpellsMagery.SpecialReagentsChars[offset][1];
                     reagents = def.CreateReagentListString("\n");
-
                     break;
+
                 case SpellBookType.Necromancy:
                     def = SpellsNecromancy.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = SpellsNecromancy.SpellsSpecialsName[offset][1];
                     reagents = def.CreateReagentListString("\n");
-
                     break;
+
                 case SpellBookType.Chivalry:
                     def = SpellsChivalry.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = string.Empty;
-
                     break;
+
                 case SpellBookType.Bushido:
                     def = SpellsBushido.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = string.Empty;
-
                     break;
+
                 case SpellBookType.Ninjitsu:
                     def = SpellsNinjitsu.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = string.Empty;
-
                     break;
+
                 case SpellBookType.Spellweaving:
                     def = SpellsSpellweaving.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = string.Empty;
-
                     break;
+
                 case SpellBookType.Mysticism:
                     def = SpellsMysticism.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = def.CreateReagentListString("\n");
-
                     break;
-                default:
 
+                default:
                     throw new ArgumentOutOfRangeException();
             }
         }
@@ -578,37 +581,36 @@ namespace ClassicUO.Game.UI.Gumps
                     SpellDefinition def = SpellsNecromancy.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
+
                 case SpellBookType.Chivalry:
                     def = SpellsChivalry.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
+
                 case SpellBookType.Bushido:
                     def = SpellsBushido.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
+
                 case SpellBookType.Ninjitsu:
                     def = SpellsNinjitsu.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
+
                 case SpellBookType.Spellweaving:
                     def = SpellsSpellweaving.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
+
                 case SpellBookType.Mysticism:
                     def = SpellsMysticism.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-
                     break;
             }
 
@@ -621,6 +623,7 @@ namespace ClassicUO.Game.UI.Gumps
                 page = 1;
             else if (page > _maxPage)
                 page = _maxPage;
+
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
@@ -698,31 +701,30 @@ namespace ClassicUO.Game.UI.Gumps
                 default:
                 case 0x0EFA:
                     _spellBookType = SpellBookType.Magery;
-
                     break;
+
                 case 0x2253:
                     _spellBookType = SpellBookType.Necromancy;
-
                     break;
+
                 case 0x2252:
                     _spellBookType = SpellBookType.Chivalry;
-
                     break;
+
                 case 0x238C:
                     _spellBookType = SpellBookType.Bushido;
-
                     break;
+
                 case 0x23A0:
                     _spellBookType = SpellBookType.Ninjitsu;
-
                     break;
+
                 case 0x2D50:
                     _spellBookType = SpellBookType.Spellweaving;
-
                     break;
+
                 case 0x2D9D:
                     _spellBookType = SpellBookType.Mysticism;
-
                     break;
             }
 
@@ -750,19 +752,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonCircle.Circle_1_2:
                     SetActivePage(1);
-
                     break;
+
                 case ButtonCircle.Circle_3_4:
                     SetActivePage(2);
-
                     break;
+
                 case ButtonCircle.Circle_5_6:
                     SetActivePage(3);
-
                     break;
+
                 case ButtonCircle.Circle_7_8:
                     SetActivePage(4);
-
                     break;
             }
         }
