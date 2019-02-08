@@ -137,6 +137,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _isMulti = value;
 
+
                     if (value)
                     {
                         //if (MultiDistanceBonus == 0 || MultiInfo == null)
@@ -152,9 +153,16 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 house = new House(Serial, 0, false);
                                 World.HouseManager.Add(Serial, house);
+
+                                Console.WriteLine("NEW HOUSE");
+
                             }
-                            else 
+                            else
+                            {
+                                Console.WriteLine("ALREADY EXISTRS HOUSE");
+
                                 house.ClearComponents();
+                            }
 
                             for (int i = 0; i < count; i++)
                             {
@@ -165,11 +173,6 @@ namespace ClassicUO.Game.GameObjects
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
-                                if (i == 0)
-                                {
-                                    MultiGraphic = graphic;
-                                }
-
                                 if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
@@ -178,7 +181,11 @@ namespace ClassicUO.Game.GameObjects
                                         MultiOffset = new Position((ushort)x, (ushort)y , (sbyte) z),
                                         AlphaHue = 0xFF
                                     });
-                                }                              
+                                }
+                                else if (i == 0)
+                                {
+                                    MultiGraphic = graphic;
+                                }
                             }
 
                             FileManager.Multi.ReleaseLastMultiDataRead();

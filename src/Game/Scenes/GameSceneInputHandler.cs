@@ -32,6 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -391,12 +392,9 @@ namespace ClassicUO.Game.Scenes
             if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
             {
                 WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                if (viewport != null)
-                {
-                    SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-                    if (chat != null && chat.textBox.Text.Length == 0)
-                        World.Player.Walk(dWalk, false);
-                }
+                SystemChatControl chat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                if (chat != null && chat.textBox.Text.Length == 0)
+                    World.Player.Walk(dWalk, false);
             }
 
             if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)

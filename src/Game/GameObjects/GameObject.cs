@@ -134,8 +134,8 @@ namespace ClassicUO.Game.GameObjects
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
-            {         
-                    
+            {
+
                 if (World.Player.IsMoving && this != World.Player)
                 {
                     Mobile.Step step = World.Player.Steps.Back();

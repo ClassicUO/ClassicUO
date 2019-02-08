@@ -21,10 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
-using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -44,7 +40,6 @@ namespace ClassicUO.Game.GameObjects
 
         public void Generate(bool recalculate = false)
         {
-
             Item item = World.Items.Get(Serial);
 
             Components.ForEach(s =>

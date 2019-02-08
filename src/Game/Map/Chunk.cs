@@ -273,8 +273,11 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     //Tile tile = Tiles[i, j];
-
                     GameObject obj = Tiles[i, j].FirstNode;
+
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
                         if (obj != World.Player)
@@ -297,13 +300,17 @@ namespace ClassicUO.Game.Map
                 {
                     Tile tile = Tiles[i, j];
 
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                    {
+                    GameObject obj = tile.FirstNode;
 
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
+                    for (; obj != null; obj = obj.Right)
+                    {
                         if (obj is GameEffect effect && effect.Source is Static)
                             continue;
 
-                        if (!(obj is Land) && !(obj is Static) && !(obj is Multi))
+                        if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
                             return false;
                     }
                 }
