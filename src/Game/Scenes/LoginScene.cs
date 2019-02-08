@@ -159,6 +159,25 @@ namespace ClassicUO.Game.Scenes
                 _lastLoginStep = CurrentLoginStep;
             }
 
+            if (Reconnect && (CurrentLoginStep == LoginStep.PopUpMessage || CurrentLoginStep == LoginStep.Main))
+            {
+                long rt = (long)totalMS + (Engine.GlobalSettings.ReconnectTime * 1000);
+
+                if (_reconnectTime == null)
+                    _reconnectTime = rt;
+
+                if (_reconnectTime < totalMS)
+                {
+                    if (!string.IsNullOrEmpty(Account))
+                        Connect(Account, Password);
+                    else if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
+                        Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
+
+                    _reconnectTime = rt;
+                    _reconnectTryCounter++;
+                }
+            }
+
             base.Update(totalMS, frameMS);
         }
 
