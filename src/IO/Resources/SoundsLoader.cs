@@ -53,7 +53,7 @@ namespace ClassicUO.IO.Resources
                     {
                         int index = reader.ReadInt();
 
-                        if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || _file.Entries[index].Length == 0)
+                        if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || _file.Entries[index].Length != 0)
                             continue;
 
                         int[] group = reader.ReadGroup();
