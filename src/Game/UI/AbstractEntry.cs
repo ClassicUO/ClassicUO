@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI
 {
     abstract class AbstractEntry : IDisposable
     {
-        public AbstractEntry(int maxcharlength, int width, int maxWidth)
+        protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
             MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
             Width = width;
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI
         public int MaxCharCount { get; }
 
         public int Width { get; }
-        public int Height => RenderText.Height < 20 ? 20 : RenderText.Height;
+        public int Height => RenderText.Height < 25 ? 25 : RenderText.Height;
 
         public int MaxWidth { get; }
 

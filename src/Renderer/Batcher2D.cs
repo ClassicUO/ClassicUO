@@ -51,7 +51,7 @@ namespace ClassicUO.Renderer
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
         private readonly Texture2D[] _textureInfo;
-        private  SpriteVertex[] _vertexInfo;
+        private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly RasterizerState _rasterizerState;
@@ -60,14 +60,14 @@ namespace ClassicUO.Renderer
 
 
         private int _numSprites;
-        private SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
+        private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
       
         public Batcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
             _effect = new Effect(GraphicsDevice, Resources.IsometricEffect);
-            float f = (float) FileManager.Hues.HuesCount;
-            _effect.Parameters["HuesPerTexture"].SetValue(f);
+            //float f = (float) FileManager.Hues.HuesCount;
+            _effect.Parameters["HuesPerTexture"].SetValue(3000.0f);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
             _worldMatrixEffect = _effect.Parameters["WorldMatrix"];

@@ -27,6 +27,7 @@ namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
     {
+        None,
         Login,
         Game
     }
@@ -35,14 +36,32 @@ namespace ClassicUO.Game.Scenes
     {
         public Scene CurrentScene { get; private set; }
 
+        private ScenesType _nextScene, _currentScene;
+
         public void ChangeScene(ScenesType type)
-        {         
-            CurrentScene?.Dispose();
+        {
+            _nextScene = type;
+
+            if (CurrentScene == null)
+                Switch();
+            else
+                CurrentScene.Dispose();
+        }
+
+        public void Switch()
+        {
+            if (_currentScene != ScenesType.None && _nextScene != ScenesType.None && _currentScene == _nextScene)
+            {
+                throw new Exception("Trying to change the same scene");
+            }
+
+            _currentScene = _nextScene;
+
             CurrentScene = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            switch (type)
+            switch (_currentScene)
             {
                 case ScenesType.Login:
                     Engine.IsFullScreen = false;
@@ -53,7 +72,7 @@ namespace ClassicUO.Game.Scenes
 
                 case ScenesType.Game:
                     Engine.IsFullScreen = true;
-                    CurrentScene = new GameScene();                   
+                    CurrentScene = new GameScene();
                     break;
             }
 

@@ -100,8 +100,11 @@ namespace ClassicUO.Game.UI
             {
                 if (SafeCharactersOnly)
                 {
-                    if ((int)Convert.ToChar(c) < 32 || (int)Convert.ToChar(c) > 126)
-                        return;
+                    foreach (char c1 in c)
+                    {
+                        if (c1 < 32 || c1 > 126)
+                            return;
+                    }
                 }
                 else if (NumericOnly)
                 {

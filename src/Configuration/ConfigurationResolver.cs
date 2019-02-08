@@ -30,7 +30,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file) where T : class
+        public static T Load<T>(string file, JsonSerializerSettings jsonsettings = null) where T : class
         {
             if (!File.Exists(file))
             {
@@ -39,22 +39,14 @@ namespace ClassicUO.Configuration
                 return null;
             }
 
-            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file), new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-            });
+            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file), jsonsettings);
 
             return settings;
         }
 
-        public static void Save<T>(T obj, string file) where T : class
+        public static void Save<T>(T obj, string file, JsonSerializerSettings jsonsettings = null) where T : class
         {
-            string t = JsonConvert.SerializeObject(obj, Formatting.Indented, new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-            });
+            string t = JsonConvert.SerializeObject(obj, Formatting.Indented, jsonsettings);
             File.WriteAllText(file, t);
         }
     }

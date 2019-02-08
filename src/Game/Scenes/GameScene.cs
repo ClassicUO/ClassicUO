@@ -129,6 +129,8 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            Engine.UI.Add(new DebugGump());
+
             HeldItem = new ItemHold();
             _journalManager = new JournalManager();
             _overheadManager = new OverheadManager();
@@ -498,13 +500,14 @@ namespace ClassicUO.Game.Scenes
             //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
 
             int z = World.Player.Z + 5;
+            bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
 
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
                 if (obj.Z <= _maxGroundZ)
                 {
-                    obj.DrawTransparent = Engine.Profile.Current.UseCircleOfTransparency && obj.TransparentTest(z);
+                    obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
                     if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
                     {

@@ -28,15 +28,19 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class StaticPic : Control
     {
-        private readonly Graphic _graphic;
         private readonly bool _isPartial;
 
         public StaticPic(Graphic graphic, Hue hue)
         {
-            _graphic = graphic;
             Hue = hue;
-            _isPartial = FileManager.TileData.StaticData[_graphic].IsPartialHue;
+            _isPartial = FileManager.TileData.StaticData[graphic].IsPartialHue;
             CanMove = true;
+
+            Texture = FileManager.Art.GetTexture(graphic);
+            Width = Texture.Width;
+            Height = Texture.Height;
+
+            WantUpdateSize = false;
         }
 
         public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
@@ -49,13 +53,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Texture == null || Texture.IsDisposed)
-            {
-                Texture = FileManager.Art.GetTexture(_graphic);
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-
             Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }

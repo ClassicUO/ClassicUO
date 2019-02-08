@@ -256,11 +256,81 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             Configure();
+            
+            ArgsParser(args);
 
             using (_engine = new Engine())
             {
                 if (!_engine.IsQuitted)
                     _engine.Run();
+            }
+        }
+
+        private static void ArgsParser(string[] args)
+        {
+            for (int i = 0; i < args.Length - 1; i += 2)
+            {
+                string cmd = args[i].ToLower();
+
+                if (cmd.Length <= 1 && cmd[0] != '-')
+                    continue;
+
+                cmd = cmd.Remove(0, 1);
+                string value = args[i + 1];
+
+                switch (cmd)
+                {
+                    case "uopath":
+                        GlobalSettings.UltimaOnlineDirectory = value;
+                        break;
+                    case "ip":
+                        GlobalSettings.IP = value;
+                        break;
+                    case "port":
+                        GlobalSettings.Port = ushort.Parse(value);
+                        break;
+                    case "username":
+                        GlobalSettings.Username = value;
+                        break;
+                    case "password":
+                        GlobalSettings.Password = value;
+                        break;
+                    case "clientversion":
+                        GlobalSettings.ClientVersion = value;
+                        break;
+                    case "lastcharname":
+                        GlobalSettings.LastCharacterName = value;
+                        break;
+                    case "fps":
+                        GlobalSettings.MaxLoginFPS = int.Parse(value);
+                        break;
+                    case "debug":
+                        GlobalSettings.Debug = bool.Parse(value);
+                        break;
+                    case "profiler":
+                        GlobalSettings.Profiler = bool.Parse(value);
+                        break;
+                    case "saveaccount":
+                        GlobalSettings.SaveAccount = bool.Parse(value);
+                        break;
+                    case "autologin":
+                        GlobalSettings.AutoLogin = bool.Parse(value);
+                        break;
+                    case "music":
+                        GlobalSettings.LoginMusic = bool.Parse(value);
+                        break;
+                    case "music_volume":
+                        GlobalSettings.LoginMusicVolume = int.Parse(value);
+                        break;
+                    case "shard":
+                        GlobalSettings.ShardType = int.Parse(value);
+                        break;
+                    case "fixed_time_step":
+                        GlobalSettings.FixedTimeStep = bool.Parse(value);
+                        break;
+                    
+                }
+
             }
         }
 
@@ -310,20 +380,31 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            Log.NewLine();
-            Log.NewLine();
+            Log.NewLine(); Log.NewLine();
 
             Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
 
-            Log.NewLine();
-            Log.NewLine();
+            Log.NewLine(); Log.NewLine();
+
+
+            _batcher = new Batcher2D(GraphicsDevice);
+            _inputManager = new InputManager();
+            _uiManager = new UIManager();
+            _profileManager = new ProfileManager();
+            _sceneManager = new SceneManager();
+            _debugInfo = new DebugInfo();
+
+            FpsLimit = LOGIN_SCREEN_FPS;
+
+
+
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
 
             try
             {
-                FileManager.UoFolderPath = _settings.UltimaOnlineDirectory;
+                FileManager.UoFolderPath = Engine.GlobalSettings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException)
             {
@@ -332,7 +413,7 @@ namespace ClassicUO
                 throw;
             }
 
-            Log.Message(LogTypes.Trace, "Done!");          
+            Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
             Log.PopIndent();
 
@@ -341,10 +422,7 @@ namespace ClassicUO
             FileManager.LoadFiles();
             Log.PopIndent();
 
-
             uint[] hues = FileManager.Hues.CreateShaderColors();
-
-            _batcher = new Batcher2D(GraphicsDevice);
 
             int size = FileManager.Hues.HuesCount;
 
@@ -356,10 +434,6 @@ namespace ClassicUO
             GraphicsDevice.Textures[2] = texture1;
 
 
-            _inputManager = new InputManager();
-            _uiManager = new UIManager();
-            _profileManager = new ProfileManager();
-            _sceneManager = new SceneManager();
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
             PacketHandlers.Load();
@@ -369,10 +443,13 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
 
-            FpsLimit = LOGIN_SCREEN_FPS;
+            _uiManager.InitializeGameCursor();
 
-            _debugInfo = new DebugInfo();
-            _uiManager.Add(new DebugGump());          
+            Log.Message(LogTypes.Trace, "Loading plugins...");
+            Log.PushIndent();
+            Plugin.Create(@".\Assistant\Razor.dll");
+            Log.Message(LogTypes.Trace, "Done!");
+            Log.PopIndent();
 
             base.Initialize();
         }
@@ -380,12 +457,6 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            Log.Message(LogTypes.Trace, "Loading plugins...");
-            Log.PushIndent();
-            Plugin.Create(@".\Assistant\Razor.dll");
-            Log.Message(LogTypes.Trace, "Done!");
-            Log.PopIndent();
-
             _sceneManager.ChangeScene(ScenesType.Login);
             base.LoadContent();           
         }
@@ -458,7 +529,7 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene.IsLoaded)
+            if (_sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.Draw(_batcher);
 
             GraphicsDevice.Clear(Color.Transparent);
@@ -525,13 +596,21 @@ namespace ClassicUO
 
         private void OnUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene.IsLoaded)
-                _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            Scene scene = _sceneManager.CurrentScene;
+
+            if (scene.IsLoaded)
+            {
+                if (scene.IsDisposed)
+                    _sceneManager.Switch();
+                else
+                    scene.Update(totalMS, frameMS);
+            }
+
         }
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene.IsLoaded)
+            if (_sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }

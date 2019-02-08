@@ -56,7 +56,6 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private SpriteTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
-        //private Hue _hue;
         private bool _needGraphicUpdate = true;
         private Point _offset;
         private Rectangle _rect;

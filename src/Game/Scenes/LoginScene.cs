@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
                 case LoginStep.PopUpMessage:
-                    Engine.UI.GameCursor.IsLoading = true;
+                    Engine.UI.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
                     return GetLoadingScreen();
                 case LoginStep.CharacterSelection:
 
@@ -231,8 +231,18 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
+
             Account = account;
             Password = password;
+
+            // Save credentials to config file
+            if (Engine.GlobalSettings.SaveAccount)
+            {
+                Engine.GlobalSettings.Username = Account;
+                Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
+                Engine.GlobalSettings.Save();
+            }
+
             Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
             NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port);
             CurrentLoginStep = LoginStep.Connecting;
@@ -357,7 +367,7 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
 
-            if ((int) e > 0)
+            if (e > 0)
             {
                 Characters = null;
                 Servers = null;
@@ -373,14 +383,6 @@ namespace ClassicUO.Game.Scenes
             {
                 case 0xA8: // ServerListReceived
                     ParseServerList(e);
-
-                    // Save credentials to config file
-                    if (Engine.GlobalSettings.SaveAccount)
-                    {
-                        Engine.GlobalSettings.Username = Account;
-                        Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
-                        Engine.GlobalSettings.Save();
-                    }
 
                     CurrentLoginStep = LoginStep.ServerSelection;
 

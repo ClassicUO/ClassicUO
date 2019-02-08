@@ -39,11 +39,6 @@ namespace ClassicUO.IO
             set
             {
                 _uofolderpath = value;
-                //FileInfo client = new FileInfo(Path.Combine(value, "client.exe"));
-                //if (!client.Exists)
-                //    throw new FileNotFoundException();
-
-                //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
                 if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
                 {

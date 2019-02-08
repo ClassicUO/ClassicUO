@@ -30,6 +30,8 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Coroutines;
 
+using Newtonsoft.Json;
+
 namespace ClassicUO.Configuration
 {
     internal class ProfileManager
@@ -46,7 +48,12 @@ namespace ClassicUO.Configuration
             }
             else
             {
-                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json")) ?? new Profile(username, servername, charactername);
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json"), 
+                new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All,
+                    MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead                
+                }) ?? new Profile(username, servername, charactername);
             }
         }
 

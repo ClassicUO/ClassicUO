@@ -52,8 +52,6 @@ namespace ClassicUO.Game.Managers
 
         public UIManager()
         {
-            GameCursor = new GameCursor();
-
             Engine.Input.MouseDragging += (sender, e) =>
             {
                 if (_isDraggingControl)
@@ -225,7 +223,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
-        public GameCursor GameCursor { get; }
+        public GameCursor GameCursor { get; private set; }
 
         public Control KeyboardFocusControl
         {
@@ -263,19 +261,11 @@ namespace ClassicUO.Game.Managers
         public bool IsDragging => _isDraggingControl && _draggingControl != null;
 
 
-        //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
-        //public void AddInputBlocker(object obj)
-        //{
-        //    if (!_inputBlockingObjects.Contains(obj))
-        //        _inputBlockingObjects.Add(obj);
-        //}
-
-        //public void RemoveInputBlocker(object obj)
-        //{
-        //    if (_inputBlockingObjects.Contains(obj))
-        //        _inputBlockingObjects.Remove(obj);
-        //}
+        public void InitializeGameCursor()
+        {
+            GameCursor = new GameCursor();
+        }
 
         private void CloseIfClickOutGumps()
         {
@@ -333,11 +323,18 @@ namespace ClassicUO.Game.Managers
 
                             break;
                         case "buttontileart":
-                            gump.Add(new Button(gparams), page);
+                            gump.Add(new Button(gparams)
+                            {
+                                //WantUpdateSize = false,
+                                ContainsByBounds = true,
+                            }, page);
 
                             gump.Add(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
                             {
-                                X = int.Parse(gparams[1]) + int.Parse(gparams[10]), Y = int.Parse(gparams[2]) + int.Parse(gparams[11])
+                                X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
+                                Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
+
+                                AcceptMouseInput = true,
                             }, page);
 
                             break;
@@ -621,7 +618,7 @@ namespace ClassicUO.Game.Managers
                     _gumps.RemoveAt(i--);
             }
 
-            GameCursor.Update(totalMS, frameMS);
+            GameCursor?.Update(totalMS, frameMS);
             HandleKeyboardInput();
             HandleMouseInput();
         }
@@ -638,7 +635,7 @@ namespace ClassicUO.Game.Managers
                     g.Draw(batcher, g.Location);
             }
 
-            GameCursor.Draw(batcher);
+            GameCursor?.Draw(batcher);
         }
 
         public void Add(Control gump)
@@ -659,8 +656,7 @@ namespace ClassicUO.Game.Managers
         {
             _gumps.ForEach(s =>
             {
-                if (!(s is DebugGump))
-                    s.Dispose();
+                s.Dispose();
             });
         }
 
