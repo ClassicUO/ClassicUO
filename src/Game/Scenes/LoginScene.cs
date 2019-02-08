@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(music);
 
-            if (Engine.GlobalSettings.AutoLogin && CurrentLoginStep != LoginStep.Main)
+            if ((Engine.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
@@ -390,7 +390,7 @@ namespace ClassicUO.Game.Scenes
 
                     CurrentLoginStep = LoginStep.ServerSelection;
 
-                    if (Engine.GlobalSettings.AutoLogin)
+                    if (Engine.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
                             SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin)
+				    if (Engine.GlobalSettings.AutoLogin || Reconnect)
 				    {
                         bool haveAnyCharacter = false;
 
