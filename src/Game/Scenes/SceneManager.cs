@@ -27,7 +27,6 @@ namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
     {
-        None,
         Login,
         Game
     }
@@ -40,28 +39,19 @@ namespace ClassicUO.Game.Scenes
 
         public void ChangeScene(ScenesType type)
         {
-            _nextScene = type;
+            //_nextScene = type;
 
-            if (CurrentScene == null)
-                Switch();
-            else
-                CurrentScene.Dispose();
-        }
+            //if (CurrentScene == null)
+            //    Switch();
+            //else
+            //    CurrentScene.Dispose();
 
-        public void Switch()
-        {
-            if (_currentScene != ScenesType.None && _nextScene != ScenesType.None && _currentScene == _nextScene)
-            {
-                throw new Exception("Trying to change the same scene");
-            }
-
-            _currentScene = _nextScene;
-
+            CurrentScene?.Dispose();
             CurrentScene = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            switch (_currentScene)
+            switch (type)
             {
                 case ScenesType.Login:
                     Engine.IsFullScreen = false;
@@ -77,6 +67,39 @@ namespace ClassicUO.Game.Scenes
             }
 
             CurrentScene.Load();
+
+
+        }
+
+        public void Switch()
+        {
+            //if (_currentScene != ScenesType.None && _nextScene != ScenesType.None && _currentScene == _nextScene)
+            //{
+            //    throw new Exception("Trying to change the same scene");
+            //}
+
+            //_currentScene = _nextScene;
+
+            //CurrentScene = null;
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
+
+            //switch (_currentScene)
+            //{
+            //    case ScenesType.Login:
+            //        Engine.IsFullScreen = false;
+            //        Engine.WindowWidth = 640;
+            //        Engine.WindowHeight = 480;
+            //        CurrentScene = new LoginScene();
+            //        break;
+
+            //    case ScenesType.Game:
+            //        Engine.IsFullScreen = true;
+            //        CurrentScene = new GameScene();
+            //        break;
+            //}
+
+            //CurrentScene.Load();
         }
 
         public T GetScene<T>() where T : Scene

@@ -133,13 +133,13 @@ namespace ClassicUO.Game.GameObjects
             get => _isMulti;
             set
             {
-                if (_isMulti != value)
+                //if (_isMulti != value)
                 {
                     _isMulti = value;
 
                     if (value)
                     {
-                        if (MultiDistanceBonus == 0 || MultiInfo == null)
+                        //if (MultiDistanceBonus == 0 || MultiInfo == null)
                         {
                             short minX = 0;
                             short minY = 0;

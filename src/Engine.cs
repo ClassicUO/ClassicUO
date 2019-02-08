@@ -256,6 +256,9 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             Configure();
+
+
+            Console.WriteLine(args);
             
             ArgsParser(args);
 
@@ -277,6 +280,8 @@ namespace ClassicUO
 
                 cmd = cmd.Remove(0, 1);
                 string value = args[i + 1];
+
+                Console.WriteLine("ARG: {0}, VALUE: {1}", cmd, value);
 
                 switch (cmd)
                 {

@@ -526,8 +526,8 @@ namespace ClassicUO.Network
             {
                 item.Graphic -= 0x4000;
 
-                if (item.IsMulti)
-                    item.IsMulti = false;
+                //if (item.IsMulti)
+                //    item.IsMulti = false;
 
                 item.IsMulti = true;
             }
@@ -2810,6 +2810,9 @@ namespace ClassicUO.Network
             Item foundation = World.Items.Get(serial);
             uint revision = p.ReadUInt();
 
+            if (foundation == null)
+                return;
+
             MultiInfo multi = foundation.MultiInfo;
             if (!foundation.IsMulti || multi == null)
                 return;
@@ -3122,8 +3125,8 @@ namespace ClassicUO.Network
 
             if (type == 2)
             {
-                if (item.IsMulti)
-                    item.IsMulti = false;
+                //if (item.IsMulti)
+                //    item.IsMulti = false;
 
                 item.IsMulti = true;
                 item.Graphic = (ushort)(item.Graphic & 0x3FFF);
