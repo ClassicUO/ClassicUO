@@ -448,6 +448,7 @@
     <Compile Include="Utility\RandomHelper.cs" />
     <Compile Include="Utility\SDL2EX.cs" />
     <Compile Include="Utility\StringHelper.cs" />
+    <Compile Include="Utility\TextFileParser.cs" />
     <Compile Include="Utility\UnsafeMemoryManager.cs" />
     <Compile Include="Utility\ZLib.cs" />
   </ItemGroup>
