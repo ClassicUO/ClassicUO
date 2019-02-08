@@ -222,7 +222,6 @@ namespace ClassicUO.Game
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
         }
 
-
         private IntPtr  _cursor, _surface;
 
         private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
@@ -273,7 +272,6 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-
         public void Draw(Batcher2D sb)
         {
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
@@ -312,7 +310,6 @@ namespace ClassicUO.Game
                         return;
                     }
 
-
                     if (Engine.UI.IsMouseOverAControl)
                     {
                         Item it = null;
@@ -343,7 +340,6 @@ namespace ClassicUO.Game
                             return;
                         }
                     }
-
                   
                     if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
                     {
@@ -434,52 +430,36 @@ namespace ClassicUO.Game
             switch (hashf)
             {
                 case 111:
-
                     return (int) Direction.West; // W
                 case 112:
-
                     return (int) Direction.Up; // NW
                 case 113:
-
                     return (int) Direction.North; // N
                 case 120:
-
                     return (int) Direction.West; // W
                 case 131:
-
                     return (int) Direction.West; // W
                 case 132:
-
                     return (int) Direction.Left; // SW
                 case 133:
-
                     return (int) Direction.South; // S
                 case 210:
-
                     return (int) Direction.North; // N
                 case 230:
-
                     return (int) Direction.South; // S
                 case 311:
-
                     return (int) Direction.East; // E
                 case 312:
-
                     return (int) Direction.Right; // NE
                 case 313:
-
                     return (int) Direction.North; // N
                 case 320:
-
                     return (int) Direction.East; // E
                 case 331:
-
                     return (int) Direction.East; // E
                 case 332:
-
                     return (int) Direction.Down; // SE
                 case 333:
-
                     return (int) Direction.South; // S
             }
 
