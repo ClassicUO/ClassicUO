@@ -60,7 +60,11 @@ namespace ClassicUO.Game.Scenes
         private byte[] _clientVersionBuffer;
         private Gump _currentGump;
         private LoginStep _lastLoginStep;
-        private static bool _isFirstLogin = true;
+
+        public bool Reconnect { get; set; } = false;
+
+        private long? _reconnectTime = null;
+        private int _reconnectTryCounter = 1;
 
         public LoginScene() : base()
         {
@@ -112,7 +116,7 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(music);
 
-            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
+            if (Engine.GlobalSettings.AutoLogin && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
@@ -386,7 +390,7 @@ namespace ClassicUO.Game.Scenes
 
                     CurrentLoginStep = LoginStep.ServerSelection;
 
-                    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+                    if (Engine.GlobalSettings.AutoLogin)
                     {
                         if (Servers.Length != 0)
                             SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
@@ -417,9 +421,8 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+				    if (Engine.GlobalSettings.AutoLogin)
 				    {
-				        _isFirstLogin = false;
                         bool haveAnyCharacter = false;
 
                         for (byte i = 0; i < Characters.Length; i++)
