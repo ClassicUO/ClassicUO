@@ -397,6 +397,10 @@ namespace ClassicUO.Game
 
             if (!Engine.UI.IsMouseOverWorld)
                 return result;
+
+            if (Engine.Profile.Current == null)
+                return result;
+
             int windowCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
             int windowCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
 

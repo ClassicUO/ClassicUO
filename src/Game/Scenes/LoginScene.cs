@@ -395,6 +395,13 @@ namespace ClassicUO.Game.Scenes
                 Characters = null;
                 Servers = null;
                 PopupMessage = $"Connection lost:\n`{e}`";
+
+                if (Engine.GlobalSettings.Reconnect)
+                {
+                    Reconnect = true;
+                    PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{e}`";
+                }
+
                 CurrentLoginStep = LoginStep.PopUpMessage;
             }
         }

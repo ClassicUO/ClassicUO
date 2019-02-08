@@ -261,24 +261,29 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
-            HouseManager.Clear();
-            Items.Clear();
-            Mobiles.Clear();
-            Player.Dispose();
-            Player = null;
-            Map.Dispose();
-            Map = null;
-            //ToAdd.Clear();
-            ClientFlags.SetFlags(0);
-            ClientLockedFeatures.SetFlags(0);
-            HouseManager.Clear();
-            Party.Members.Clear();
-            ServerName = string.Empty;
-            LastAttack = 0;
-            Chat.PromptData = default;
+            try
+            {
+                HouseManager.Clear();
+                Items.Clear();
+                Mobiles.Clear();
+                Player.Dispose();
+                Player = null;
+                Map.Dispose();
+                Map = null;
+                //ToAdd.Clear();
+                ClientFlags.SetFlags(0);
+                ClientLockedFeatures.SetFlags(0);
+                HouseManager.Clear();
+                Party.Members.Clear();
+                ServerName = string.Empty;
+                LastAttack = 0;
+                Chat.PromptData = default;
 
-            _effectManager.Clear();
-            _toRemove.Clear();
+                _effectManager.Clear();
+                _toRemove.Clear();
+            } catch
+            {
+            }
         }
 
         private static void InternalMapChangeClear(bool noplayer)
