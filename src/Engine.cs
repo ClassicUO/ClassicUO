@@ -534,7 +534,7 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.Draw(_batcher);
 
             GraphicsDevice.Clear(Color.Transparent);
@@ -603,7 +603,7 @@ namespace ClassicUO
         {
             Scene scene = _sceneManager.CurrentScene;
 
-            if (scene.IsLoaded)
+            if (scene != null && scene.IsLoaded)
             {
                 if (scene.IsDisposed)
                     _sceneManager.Switch();
@@ -615,7 +615,7 @@ namespace ClassicUO
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }

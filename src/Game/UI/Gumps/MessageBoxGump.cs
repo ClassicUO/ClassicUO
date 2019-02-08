@@ -56,11 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 45
             });
 
-            
-
             X = (Engine.WindowWidth - Width) >> 1;
             Y = (Engine.WindowHeight - Height) >> 1;
-
 
             // OK
             Button b;

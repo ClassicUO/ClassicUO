@@ -39,6 +39,8 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System.Diagnostics;
+
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
@@ -55,6 +57,7 @@ namespace ClassicUO.Game.Scenes
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private float _scale = 1;
+        private bool _forceStopScene = false;
 
         public GameScene() : base()
         {
@@ -279,6 +282,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            /*
             HeldItem.Clear();
 
             Plugin.OnDisconnected();
@@ -316,22 +320,25 @@ namespace ClassicUO.Game.Scenes
             _hotkeysManager = null;
             _macroManager = null;
             Chat.Message -= ChatOnMessage;
+            */
 
             base.Unload();
         }
 
         private void SocketOnDisconnected(object sender, SocketError e)
         {
+            _forceStopScene = true;
+            /*
             Engine.UI.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", (s) =>
             {         
                 if (s)
                     Engine.SceneManager.ChangeScene(ScenesType.Login);
             }));
+            */
         }
 
         private bool _alphaChanged;
         private long _alphaTimer;
-
 
         public void RequestQuitGame()
         {
@@ -345,6 +352,12 @@ namespace ClassicUO.Game.Scenes
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             base.FixedUpdate(totalMS, frameMS);
+
+            if (_forceStopScene)
+            {
+                Engine.SceneManager.ChangeScene(ScenesType.Login);
+                return;
+            }
 
             if (!World.InGame)
                 return;
@@ -414,6 +427,9 @@ namespace ClassicUO.Game.Scenes
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_forceStopScene)
+                return;
 
             if (!World.InGame)
                 return;
