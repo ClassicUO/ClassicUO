@@ -39,8 +39,6 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using System.Diagnostics;
-
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
@@ -57,6 +55,8 @@ namespace ClassicUO.Game.Scenes
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private float _scale = 1;
+        private bool _alphaChanged;
+        private long _alphaTimer;
         private bool _forceStopScene = false;
 
         public GameScene() : base()
@@ -68,7 +68,6 @@ namespace ClassicUO.Game.Scenes
             get => _scale;
             set
             {
-
                 if (value < 0.7f)
                     value = 0.7f;
                 else if (value > 2.3f)
@@ -189,7 +188,6 @@ namespace ClassicUO.Game.Scenes
             else
                 Scale = 1f; // hard return to 1.0f
 
-
             Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());
         }
@@ -277,7 +275,6 @@ namespace ClassicUO.Game.Scenes
                     mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
                 }
             }
-
         }
 
         public override void Unload()
@@ -324,7 +321,6 @@ namespace ClassicUO.Game.Scenes
 
             } catch
             {
-
             }
 
             base.Unload();
@@ -332,18 +328,17 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, SocketError e)
         {
-            _forceStopScene = true;
-            /*
-            Engine.UI.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", (s) =>
-            {         
-                if (s)
-                    Engine.SceneManager.ChangeScene(ScenesType.Login);
-            }));
-            */
+            if (Engine.GlobalSettings.Reconnect)
+                _forceStopScene = true;
+            else
+            {
+                Engine.UI.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", (s) =>
+                {
+                    if (s)
+                        Engine.SceneManager.ChangeScene(ScenesType.Login);
+                }));
+            }
         }
-
-        private bool _alphaChanged;
-        private long _alphaTimer;
 
         public void RequestQuitGame()
         {
@@ -358,14 +353,19 @@ namespace ClassicUO.Game.Scenes
         {
             base.FixedUpdate(totalMS, frameMS);
 
+            if (!World.InGame)
+                return;
+
             if (_forceStopScene)
             {
                 Engine.SceneManager.ChangeScene(ScenesType.Login);
+
+                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+                if (loginScene != null)
+                    loginScene.Reconnect = true;
+
                 return;
             }
-
-            if (!World.InGame)
-                return;
 
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
@@ -381,7 +381,6 @@ namespace ClassicUO.Game.Scenes
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
-
 
             for (int i = 0; i < 2; i++)
             {
@@ -477,7 +476,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
-            // ===================================
+
             World.Update(totalMS, frameMS);
             _overheadManager.Update(totalMS, frameMS);
 
@@ -486,7 +485,6 @@ namespace ClassicUO.Game.Scenes
                 NetClient.Socket.Send(new PPing());
                 _timePing = (long) totalMS + 10000;
             }
-
 
             _useItemQueue.Update(totalMS, frameMS);
         }
@@ -511,8 +509,6 @@ namespace ClassicUO.Game.Scenes
             batcher.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
 
-
-
             //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
             //int drawY = (Engine.Profile.Current.GameWindowSize.Y >> 1) - 22;
 
@@ -534,14 +530,11 @@ namespace ClassicUO.Game.Scenes
                     {
                         RenderedObjectsCount++;
                     }
-
                 }
             }
 
             // Draw in game overhead text messages
             _overheadManager.Draw(batcher, _mouseOverList, _offset);
-
-
 
             batcher.End();
             batcher.EnableLight(false);
