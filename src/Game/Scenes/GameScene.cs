@@ -281,10 +281,7 @@ namespace ClassicUO.Game.Scenes
         {
             try
             {
-                HeldItem.Clear();
-
-                Engine.UI.Clear();
-                World.Clear();
+                HeldItem?.Clear();
 
                 Plugin.OnDisconnected();
 
@@ -300,6 +297,9 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget?.Dispose();
                 CommandManager.UnRegisterAll();
 
+                Engine.UI?.Clear();
+                World.Clear();
+
                 _viewPortGump.MouseDown -= OnMouseDown;
                 _viewPortGump.MouseUp -= OnMouseUp;
                 _viewPortGump.MouseDoubleClick -= OnMouseDoubleClick;
@@ -308,12 +308,12 @@ namespace ClassicUO.Game.Scenes
                 Engine.Input.KeyDown -= OnKeyDown;
                 Engine.Input.KeyUp -= OnKeyUp;
 
-                _overheadManager.Dispose();
+                _overheadManager?.Dispose();
                 _overheadManager = null;
-                _journalManager.Clear();
+                _journalManager?.Clear();
                 _journalManager = null;
                 _overheadManager = null;
-                _useItemQueue.Clear();
+                _useItemQueue?.Clear();
                 _useItemQueue = null;
                 _hotkeysManager = null;
                 _macroManager = null;
@@ -472,7 +472,7 @@ namespace ClassicUO.Game.Scenes
             }
             else if (SelectedObject != null) SelectedObject = null;
 
-            _mouseOverList.Clear();
+            _mouseOverList?.Clear();
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
