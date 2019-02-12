@@ -192,24 +192,26 @@ namespace ClassicUO.Game.Managers
                     if (!string.IsNullOrEmpty(mos.Text))
                     {
                         MessageType type = MessageType.Regular;
+                        ushort hue = Engine.Profile.Current.SpeechHue;
 
                         switch (macro.Code)
                         {
                             case MacroType.Emote:
                                 type = MessageType.Emote;
-
+                                hue = Engine.Profile.Current.EmoteHue;
                                 break;
+
                             case MacroType.Whisper:
                                 type = MessageType.Whisper;
-
+                                hue = Engine.Profile.Current.WhisperHue;
                                 break;
+
                             case MacroType.Yell:
                                 type = MessageType.Yell;
-
                                 break;
                         }
 
-                        Chat.Say(mos.Text, type: type);
+                        Chat.Say(mos.Text, hue, type);
                     }
 
                     break;
