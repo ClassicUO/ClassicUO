@@ -70,6 +70,7 @@ namespace ClassicUO.Configuration
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
+        [JsonProperty] public ushort WhisperHue { get; set; } = 0x0033;
         [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
