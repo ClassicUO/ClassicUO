@@ -13,6 +13,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 using SDL2;
 
@@ -234,7 +235,21 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.Paste:
-                    // TODO:
+                    if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
+                    {
+                        string s = SDL.SDL_GetClipboardText();
+                        if (!string.IsNullOrEmpty(s))
+                        {
+                            WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                            if (viewport != null)
+                            {
+                                SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                                if (chat != null)
+                                    chat.textBox.Text += s;
+                            }
+                        }
+                    }
+
                     break;
                 case MacroType.Open:
                 case MacroType.Close:
