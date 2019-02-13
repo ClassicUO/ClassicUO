@@ -106,10 +106,10 @@ namespace ClassicUO.Game.GameObjects
 
         public Item FindBandage()
         {
-            Item backpack = World.Player.Equipment[(int)Layer.Backpack];
-            if (backpack != null)
+            if (this == World.Player)
             {
-                if (backpack.Container.IsValid)
+                Item backpack = World.Player.Equipment[(int)Layer.Backpack];
+                if (backpack != null && backpack.Container.IsValid)
                 {
                     foreach (Item i in backpack.Items)
                     {
