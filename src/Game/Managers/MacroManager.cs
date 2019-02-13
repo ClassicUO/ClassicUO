@@ -495,22 +495,7 @@ namespace ClassicUO.Game.Managers
 
                             if (TargetManager.IsTargeting)
                             {
-                                if (macro.Code == MacroType.BandageSelf)
-                                {
-                                    TargetManager.TargetGameObject(World.Player);
-                                }
-                                else // TODO: NewTargetSystem
-                                {
-                                    /*
-                                     else if (
-                                        !g_ConfigManager.DisableNewTargetSystem &&
-                                        (g_NewTargetSystem.Serial != 0u))
-                                     {
-                                        g_Target.SendTargetObject(g_NewTargetSystem.Serial);
-                                     }
-                                    */
-                                }
-
+                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastGameObject);
                                 WaitingBandageTarget = false;
                                 WaitForTargetTimer = 0;
                             }
@@ -546,14 +531,6 @@ namespace ClassicUO.Game.Managers
                             }
                             else // TODO: NewTargetSystem
                             {
-                                /*
-                                 else if (
-                                    !g_ConfigManager.DisableNewTargetSystem &&
-                                    (g_NewTargetSystem.Serial != 0u) && g_NewTargetSystem.Serial < 0x40000000)
-                                 {
-                                    CPacketTargetSelectedObject(bandage->Serial, g_NewTargetSystem.Serial)
-                                        .Send();
-                                */
                             }
                         }
                     }
