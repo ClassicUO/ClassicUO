@@ -213,15 +213,20 @@ namespace ClassicUO.Game.GameObjects
                 vertex[3].Position.Y += Bounds.Height;               
             }
 
+            bool isTransparent = false;
             if (DrawTransparent)
             {
                 int dist = Distance;
                 int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
 
                 if (dist <= maxDist)
+                {
+                    isTransparent = dist <= 3;
                     HueVector.Z = 1f - (dist / (float)maxDist);
+                }
                 else
                     HueVector.Z = 1f - AlphaHue / 255f;
+
             }
             else
                 HueVector.Z = 1f - AlphaHue / 255f;
@@ -284,12 +289,12 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             
 
-            MousePick(list, vertex);
+            MousePick(list, vertex, isTransparent);
 
             return true;
         }
 
-        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
+        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {
         }
 

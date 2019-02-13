@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                _fullDisplayMode = (_fullDisplayMode) ? false : true;
+                _fullDisplayMode = !_fullDisplayMode;
                 return true;
             }
 
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case Item item:
                         return string.Format("Item ({0})  graphic: {1}  flags: {2}  amount: {3}", item.Serial, item.Graphic, item.Flags, item.Amount);
                     case Static st:
-                        return string.Format("Static ({0})  height: {1}  flags: {2}", st.Graphic, st.ItemData.Height, st.ItemData.Flags);
+                        return string.Format("Static ({0})  height: {1}  flags: {2}  Alpha: {3}", st.Graphic, st.ItemData.Height, st.ItemData.Flags, st.AlphaHue);
                     case Multi multi:
                         return string.Format("Multi ({0})  height: {1}  flags: {2}", multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags);
                     case GameEffect effect:

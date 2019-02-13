@@ -174,7 +174,7 @@ namespace ClassicUO.Game.GameObjects
                 list.Add(this, drawPosition);
         }
 
-        protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex, bool istransparent)
         {
             int x = objectList.MousePosition.X - (int) vertex[0].Position.X;
             int y = objectList.MousePosition.Y - (int) vertex[0].Position.Y;
