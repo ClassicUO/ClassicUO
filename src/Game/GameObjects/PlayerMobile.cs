@@ -84,9 +84,7 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-
-      
-
+        
         public PlayerMobile(Serial serial) : base(serial)
         {
             _sklls = new Skill[FileManager.Skills.SkillsCount];
@@ -105,6 +103,23 @@ namespace ClassicUO.Game.GameObjects
         public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
+
+        public Item FindBandage()
+        {
+            Item backpack = World.Player.Equipment[(int)Layer.Backpack];
+            if (backpack != null)
+            {
+                if (backpack.Container.IsValid)
+                {
+                    foreach (Item i in backpack.Items)
+                    {
+                        if (i.IsBandage)
+                            return i;
+                    }
+                }
+            }
+            return null;
+        }
 
         public ushort Strength
         {

@@ -102,6 +102,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
+        public bool IsBandage => Graphic == 0x0E21;
+
         public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic

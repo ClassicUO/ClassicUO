@@ -42,7 +42,6 @@ namespace ClassicUO.Game.Managers
         private static Serial _targetCursorId;
         private static byte _targetCursorType;
         private static int _multiModel;
-
         
         public static TargetType TargetingState { get; private set; } = TargetType.Invalid;
 

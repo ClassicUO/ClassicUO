@@ -59,6 +59,7 @@ namespace ClassicUO.Game.Managers
 
         public long WaitForTargetTimer { get; set; }
 
+        public bool WaitingBandageTarget { get; set; }
 
         public void InitMacro(Macro first)
         {
@@ -162,16 +163,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-
         private int Process()
         {
             int result;
 
-            if (_lastMacro == null)
+            if (_lastMacro == null) // MRC_STOP
                 result = 2;
             else if (_nextTimer <= Engine.Ticks)
                 result = Process(_lastMacro);
-            else 
+            else // MRC_BREAK_PARSER
                 result = 1;
 
             return result;
@@ -486,10 +486,76 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
-                    // TODO:
                     if (FileManager.ClientVersion < ClientVersions.CV_5020)
                     {
-                        
+                        if (WaitingBandageTarget)
+                        {
+                            if (WaitForTargetTimer == 0)
+                                WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+
+                            if (TargetManager.IsTargeting)
+                            {
+                                if (macro.Code == MacroType.BandageSelf)
+                                {
+                                    TargetManager.TargetGameObject(World.Player);
+                                }
+                                else // TODO: NewTargetSystem
+                                {
+                                    /*
+                                     else if (
+                                        !g_ConfigManager.DisableNewTargetSystem &&
+                                        (g_NewTargetSystem.Serial != 0u))
+                                     {
+                                        g_Target.SendTargetObject(g_NewTargetSystem.Serial);
+                                     }
+                                    */
+                                }
+
+                                WaitingBandageTarget = false;
+                                WaitForTargetTimer = 0;
+                            }
+                            else if (WaitForTargetTimer < Engine.Ticks)
+                            {
+                                WaitingBandageTarget = false;
+                                WaitForTargetTimer = 0;
+                            }
+                            else
+                            {
+                                result = 1;
+                            }
+                        }
+                        else
+                        {
+                            var bandage = World.Player.FindBandage();
+                            if (bandage != null)
+                            {
+                                WaitingBandageTarget = true;
+                                GameActions.DoubleClick(bandage);
+                                result = 1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var bandage = World.Player.FindBandage();
+                        if (bandage != null)
+                        {
+                            if (macro.Code == MacroType.BandageSelf)
+                            {
+                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+                            }
+                            else // TODO: NewTargetSystem
+                            {
+                                /*
+                                 else if (
+                                    !g_ConfigManager.DisableNewTargetSystem &&
+                                    (g_NewTargetSystem.Serial != 0u) && g_NewTargetSystem.Serial < 0x40000000)
+                                 {
+                                    CPacketTargetSelectedObject(bandage->Serial, g_NewTargetSystem.Serial)
+                                        .Send();
+                                */
+                            }
+                        }
                     }
                     break;
 
