@@ -104,6 +104,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
         [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
+        [JsonProperty] public bool BandageSelfOld { get; set; } = true;
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;

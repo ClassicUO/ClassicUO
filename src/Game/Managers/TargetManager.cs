@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Managers
 
     internal static class TargetManager
     {
-        private static Serial _targetCursorId;
+        public static Serial _targetCursorId;
         private static byte _targetCursorType;
         private static int _multiModel;
         

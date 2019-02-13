@@ -13,7 +13,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 
 using Newtonsoft.Json;
-using System.Diagnostics;
+using ClassicUO.Utility.Logging;
 
 using SDL2;
 
@@ -486,7 +486,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
-                    if (FileManager.ClientVersion < ClientVersions.CV_5020)
+
+                    if (FileManager.ClientVersion < ClientVersions.CV_5020 || Engine.Profile.Current.BandageSelfOld)
                     {
                         if (WaitingBandageTarget)
                         {
@@ -494,20 +495,12 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                            {
                                 TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastGameObject);
-                                WaitingBandageTarget = false;
-                                WaitForTargetTimer = 0;
-                            }
-                            else if (WaitForTargetTimer < Engine.Ticks)
-                            {
-                                WaitingBandageTarget = false;
-                                WaitForTargetTimer = 0;
-                            }
                             else
-                            {
                                 result = 1;
-                            }
+
+                            WaitingBandageTarget = false;
+                            WaitForTargetTimer = 0;
                         }
                         else
                         {
@@ -526,14 +519,15 @@ namespace ClassicUO.Game.Managers
                         if (bandage != null)
                         {
                             if (macro.Code == MacroType.BandageSelf)
-                            {
                                 NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
-                            }
-                            else // TODO: NewTargetSystem
+                            else
                             {
+                                // TODO: NewTargetSystem
+                                Log.Message(LogTypes.Warning, $"BandageTarget (NewTargetSystem) not implemented yet.");
                             }
                         }
                     }
+
                     break;
 
                 case MacroType.SetUpdateRange:
