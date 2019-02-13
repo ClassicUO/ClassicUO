@@ -301,7 +301,7 @@ namespace ClassicUO
 
                             break;
                         case "password":
-                            settings.Password = value;
+                            settings.Password = Crypter.Encrypt(value);
 
                             break;
                         case "clientversion":

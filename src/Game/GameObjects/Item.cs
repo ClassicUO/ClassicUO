@@ -153,14 +153,9 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 house = new House(Serial, 0, false);
                                 World.HouseManager.Add(Serial, house);
-
-                                Console.WriteLine("NEW HOUSE");
-
                             }
                             else
                             {
-                                Console.WriteLine("ALREADY EXISTRS HOUSE");
-
                                 house.ClearComponents();
                             }
 
