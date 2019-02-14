@@ -104,17 +104,6 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
-        public Item FindBandage()
-        {
-            Item backpack = Equipment[(int)Layer.Backpack];
-            Item item = null;
-
-            if (backpack != null)
-                item = backpack.FindItem(0x0E21);
-            
-            return item;
-        }
-
         public ushort Strength
         {
             get => _strength;
@@ -751,6 +740,17 @@ namespace ClassicUO.Game.GameObjects
         public Lock IntLock { get; set; }
 
         protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
+
+        public Item FindBandage()
+        {
+            Item backpack = Equipment[(int)Layer.Backpack];
+            Item item = null;
+
+            if (backpack != null)
+                item = backpack.FindItem(0x0E21);
+
+            return item;
+        }
 
         public void AddBuff(Graphic graphic, uint time, string text)
         {
