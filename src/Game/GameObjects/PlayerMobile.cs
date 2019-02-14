@@ -507,7 +507,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //====================================================
         public ushort ReflectPhysicalDamage
         {
             get => _reflectPhysicalDamage;
