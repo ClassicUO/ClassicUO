@@ -97,7 +97,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
       
         public RaceType Race
         {

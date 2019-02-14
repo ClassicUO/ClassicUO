@@ -107,15 +107,12 @@ namespace ClassicUO.Game.GameObjects
         public Item FindBandage()
         {
             Item backpack = Equipment[(int)Layer.Backpack];
-            if (backpack != null && backpack.Container.IsValid)
-            {
-                foreach (Item i in backpack.Items)
-                {
-                    if (i.IsBandage)
-                        return i;
-                }
-            }
-            return null;
+            Item item = null;
+
+            if (backpack != null)
+                item = backpack.FindItem(0x0E21);
+            
+            return item;
         }
 
         public ushort Strength
