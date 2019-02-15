@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom, _savezoom;
+        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect;
         private Combobox _shardType;
 
         private Checkbox _gameWindowLock;
@@ -351,6 +351,9 @@ namespace ClassicUO.Game.UI.Gumps
             _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
             _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
             _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+
+            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
+            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
