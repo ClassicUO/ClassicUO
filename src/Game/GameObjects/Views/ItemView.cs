@@ -54,9 +54,11 @@ namespace ClassicUO.Game.GameObjects
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
-
+            
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            else if (World.Player.IsDead)
+                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
 
@@ -145,8 +147,11 @@ namespace ClassicUO.Game.GameObjects
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+                    
                     if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                        HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                        HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                    else if (World.Player.IsDead)
+                        HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                     else
                         HueVector = ShaderHuesTraslator.GetHueVector(color);
 

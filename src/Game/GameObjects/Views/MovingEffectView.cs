@@ -48,10 +48,14 @@ namespace ClassicUO.Game.GameObjects
             Bounds.X = (int)-Offset.X;
             Bounds.Y = (int)(Offset.Z - Offset.Y);
             Rotation = AngleToTarget;
+            
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            else if (World.Player.IsDead)
+                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+
             Engine.DebugInfo.EffectsRendered++;
             return base.Draw(batcher, position, list);
         }
