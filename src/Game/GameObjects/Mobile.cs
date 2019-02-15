@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
-        public long WaitDeathScreenTimer { get; set; }
+        public long DeathScreenTimer { get; set; }
 
         public Mobile(Serial serial) : base(serial)
         {

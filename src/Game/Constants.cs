@@ -87,5 +87,7 @@ namespace ClassicUO.Game
 
         public const int OUT_RANGE_COLOR = 0x038B;
         public const int DEAD_RANGE_COLOR = 0x038E;
+
+        public const int DEATH_SCREEN_TIMER = 1500;
     }
 }
