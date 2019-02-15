@@ -160,11 +160,14 @@ namespace ClassicUO.Game.GameObjects
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-
+                
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                else if (World.Player.IsDead)
+                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
                     HueVector = ShaderHuesTraslator.GetHueVector(this.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsPartial, 0, false);
+
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }

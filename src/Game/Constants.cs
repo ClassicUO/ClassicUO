@@ -84,5 +84,8 @@ namespace ClassicUO.Game
 
         public const int MIN_VIEW_RANGE = 5;
         public const int MAX_VIEW_RANGE = 24;
+
+        public const int OUT_RANGE_COLOR = 0x038B;
+        public const int DEAD_RANGE_COLOR = 0x038E;
     }
 }
