@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Scenes
             // NetClient.Socket.Connected -= NetClient_Connected;
             NetClient.Socket.Disconnected -= NetClient_Disconnected;
             NetClient.LoginSocket.Connected -= NetClient_Connected;
-            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
             Engine.UI.GameCursor.IsLoading = false;
@@ -404,6 +404,7 @@ namespace ClassicUO.Game.Scenes
 
                 CurrentLoginStep = LoginStep.PopUpMessage;
             }
+
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)
