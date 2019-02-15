@@ -210,7 +210,6 @@ namespace ClassicUO.Game.Managers
         public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
         {
             DrawTextOverheads(batcher, list);
-          
 
             foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
             {

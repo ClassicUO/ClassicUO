@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -38,6 +39,8 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using System.Diagnostics;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -489,11 +492,37 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue.Update(totalMS, frameMS);
         }
 
+        private Label _deathWindowText;
+
         public override bool Draw(Batcher2D batcher)
         {
             if (!World.InGame)
                 return false;
+
+            if (Engine.Profile.Current.DieTest)
+            {
+                if (World.Player.WaitDeathScreenTimer > Engine.Ticks)
+                {
+                    if (_deathWindowText == null || _deathWindowText.IsDisposed)
+                    {
+                        Engine.UI.Add(_deathWindowText = new Label("You are dead.", false, 999, 200, 3)
+                        {
+                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
+                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
+                              X = Engine.WindowWidth / 2 - 50,
+                              Y = Engine.WindowHeight / 2 - 50
+                        });
+                    }
+                }
+                else
+                {
+                    if (_deathWindowText != null)
+                        _deathWindowText.Dispose();
+                }
+            }
+
             DrawWorld(batcher);
+
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 
             return base.Draw(batcher);
@@ -503,38 +532,37 @@ namespace ClassicUO.Game.Scenes
         {
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+
             batcher.Begin();
+
             batcher.EnableLight(true);
             batcher.SetLightIntensity(World.Light.IsometricLevel);
             batcher.SetLightDirection(World.Light.IsometricDirection);
-            RenderedObjectsCount = 0;
 
-            //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
-            //int drawY = (Engine.Profile.Current.GameWindowSize.Y >> 1) - 22;
-
-            //if (CircleOfTransparency.Circle == null)
-            //    CircleOfTransparency.Create(100);
-            //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
-
-            int z = World.Player.Z + 5;
-            bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
-
-            for (int i = 0; i < _renderListCount; i++)
+            if (_deathWindowText == null || _deathWindowText.IsDisposed)
             {
-                GameObject obj = _renderList[i];
-                if (obj.Z <= _maxGroundZ)
-                {
-                    obj.DrawTransparent = usecircle && obj.TransparentTest(z);
+                RenderedObjectsCount = 0;
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                int z = World.Player.Z + 5;
+                bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
+
+                for (int i = 0; i < _renderListCount; i++)
+                {
+                    GameObject obj = _renderList[i];
+                    if (obj.Z <= _maxGroundZ)
                     {
-                        RenderedObjectsCount++;
+                        obj.DrawTransparent = usecircle && obj.TransparentTest(z);
+
+                        if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                        {
+                            RenderedObjectsCount++;
+                        }
                     }
                 }
-            }
 
-            // Draw in game overhead text messages
-            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+                // Draw in game overhead text messages
+                _overheadManager.Draw(batcher, _mouseOverList, _offset);
+            }
 
             batcher.End();
             batcher.EnableLight(false);
