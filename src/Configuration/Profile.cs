@@ -55,8 +55,6 @@ namespace ClassicUO.Configuration
         public string CharacterName { get; }
 
         // sounds
-        [JsonProperty] public bool DieTest { get; set; } = false;
-
         [JsonProperty] public bool EnableSound { get; set; } = true;
         [JsonProperty] public int SoundVolume { get; set; } = 100;
         [JsonProperty] public bool EnableMusic { get; set; } = true;
