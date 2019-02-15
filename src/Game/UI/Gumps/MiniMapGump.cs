@@ -144,19 +144,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            Engine.Profile.Current.DieTest = !Engine.Profile.Current.DieTest;
-            World.Player.WaitDeathScreenTimer = Engine.Ticks + 1500;
-
-            return false;
-
             if (button == MouseButton.Left)
             {
                 _useLargeMap = !_useLargeMap;
                 _forceUpdate = true;
-
                 return true;
             }
-
             return false;
         }
 

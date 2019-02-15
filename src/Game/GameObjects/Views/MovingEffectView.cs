@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
             
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
-            else if (World.Player.IsDead || Engine.Profile.Current.DieTest)
+            else if (World.Player.IsDead)
                 HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue);
