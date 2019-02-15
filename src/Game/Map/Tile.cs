@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Map
                     priorityZ++;
 
                     break;
-                case GameEffect _:
+                case GameEffect effect when effect.Source == null || !effect.IsItemEffect:
                     priorityZ += 2;
 
                     break;
