@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -43,7 +44,7 @@ namespace ClassicUO.Game.Managers
 
         public Serial Leader { get; private set; }
 
-        public string LeaderName => Leader != null && Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
+        public string LeaderName => Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
 
         public List<PartyMember> Members { get; } = new List<PartyMember>();
 
@@ -107,16 +108,22 @@ namespace ClassicUO.Game.Managers
                     //The packet that arrives in PacketHandlers.DisplayClilocString(Packet p) for party invite does not have the party leader's serial
                     //and therefor it is not handled by Chat.OnMessage because we have no entity and also the packet message type is incorrectly set to .Label
                     //we handle the party invite here because we have the partyLeader's serial and we can appropriately set the MesageType.System
-                    Entity partyLeaderEntity = World.Get(p.ReadUInt());
+                    Serial serial = p.ReadUInt();
+                    Mobile partyLeaderEntity = World.Mobiles.Get(serial);
 
                     if (partyLeaderEntity != null)
                     {
                         Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
                     }
 
+                    World.Party.SetPartyLeader(serial);
+
                     break;
             }
         }
+
+        private void SetPartyLeader(Serial s)
+            => Leader = s;
 
         public void ReceivePartyMemberList(Serial[] mobileSerials)
         {
@@ -152,7 +159,7 @@ namespace ClassicUO.Game.Managers
 
         private void AddPartyMember(Serial mobileSerial)
         {
-            if (!Members.Any(p => p.Serial == mobileSerial))
+            if (Members.All(p => p.Serial != mobileSerial))
             {
                 Members.Add(new PartyMember(mobileSerial));
                 GameActions.RequestMobileStatus(mobileSerial);
@@ -177,7 +184,7 @@ namespace ClassicUO.Game.Managers
 
         public void AcceptPartyInvite()
         {
-            GameActions.RequestPartyAccept(World.Player.Serial);
+            GameActions.RequestPartyAccept(Leader);
         }
 
         public void DeclinePartyInvite()

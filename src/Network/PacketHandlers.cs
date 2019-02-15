@@ -205,7 +205,7 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(Packet p)
         {
-            TargetManager.SetTargeting((TargetType)p.ReadByte(), p.ReadUInt(), p.ReadByte());
+            TargetManager.SetTargeting((CursorTarget)p.ReadByte(), p.ReadUInt(), (TargetType)p.ReadByte());
 
             if (World.Party.PartyHealTimer < Engine.Ticks && World.Party.PartyHealTarget != 0)
             {

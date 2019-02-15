@@ -64,25 +64,6 @@ namespace ClassicUO
         }
     }
 
-    //internal class Window
-    //{
-    //    private Engine _engine;
-
-    //    public Window(Engine engine)
-    //    {
-    //        _engine = engine;
-    //    }
-
-    //    public int X
-    //    {
-    //        get => _engine.Window.ClientBounds.X;
-    //        set
-    //        {
-    //            _engine.Window.
-    //        }
-    //    }
-    //}
-
     internal class Engine : Microsoft.Xna.Framework.Game
     { 
         private const int MIN_FPS = 15;
@@ -101,10 +82,11 @@ namespace ClassicUO
         private float _time;
         private int _totalFrames;
         private UIManager _uiManager;
-        private Settings _settings;
+        private readonly Settings _settings;
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private bool _isMaximized;
+        private bool _isHighDPI;
 
         public bool IsQuitted { get; private set; }
 
@@ -134,10 +116,21 @@ namespace ClassicUO
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
             _graphicDeviceManager.ApplyChanges();
 
+            _isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+
             Window.ClientSizeChanged += (sender, e) =>
             {
-                _graphicDeviceManager.PreferredBackBufferWidth = Window.ClientBounds.Width;
-                _graphicDeviceManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
+                int width = Window.ClientBounds.Width;
+                int height = Window.ClientBounds.Height;
+
+                if (_isHighDPI)
+                {
+                    width *= 2;
+                    height *= 2;
+                }
+
+                _graphicDeviceManager.PreferredBackBufferWidth = width;
+                _graphicDeviceManager.PreferredBackBufferHeight = height;
                 _graphicDeviceManager.ApplyChanges();
 
                 WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
@@ -173,7 +166,7 @@ namespace ClassicUO
             }
         }
 
-        public static Version Version { get; } = new Version(0, 0, 1, 0);
+        public static Version Version { get; } = new Version(0, 0, 1, 1);
 
         public static int CurrentFPS { get; private set; }
 

@@ -132,8 +132,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     switch (TargetManager.TargetingState)
                     {
-                        case TargetType.Position:
-                        case TargetType.Object:
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
                             GameObject obj = SelectedObject;
                             if (obj != null)
                             {
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Scenes
 
                             break;
 
-                        case TargetType.SetTargetClientSide:
+                        case CursorTarget.SetTargetClientSide:
                             obj = SelectedObject;
                             if (obj != null)
                             {

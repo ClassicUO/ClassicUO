@@ -643,7 +643,7 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetCancel : PacketWriter
     {
-        public PTargetCancel(TargetType type, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetCancel(CursorTarget type, Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte((byte) type);
             WriteUInt(cursorID);

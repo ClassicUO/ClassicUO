@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
                 {
                     TargetManager.TargetGameObject(Mobile);
                     Mouse.LastLeftButtonClickTime = 0;
