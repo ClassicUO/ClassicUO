@@ -106,6 +106,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
 
+        [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
+        [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
+
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;
         [JsonProperty] public int DelayShowTooltip { get; set; } = 250;

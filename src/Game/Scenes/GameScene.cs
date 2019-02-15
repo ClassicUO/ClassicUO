@@ -500,24 +500,27 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return false;
 
-            if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
+            if (Engine.Profile.Current.EnableDeathScreen)
             {
-                if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
+                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
                 {
-                    Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
+                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
                     {
-                        //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
-                        //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
-                        X = Engine.WindowWidth / 2 - 50,
-                        Y = Engine.WindowHeight / 2 - 50
-                    });
-                    _deathScreenActive = true;
+                        Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
+                        {
+                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
+                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
+                            X = Engine.WindowWidth / 2 - 50,
+                            Y = Engine.WindowHeight / 2 - 50
+                        });
+                        _deathScreenActive = true;
+                    }
                 }
-            } 
-            else if (World.Player.DeathScreenTimer < Engine.Ticks)
-            {
-                _deathScreenActive = false;
-                _deathScreenLabel.Dispose();
+                else if (World.Player.DeathScreenTimer < Engine.Ticks)
+                {
+                    _deathScreenActive = false;
+                    _deathScreenLabel.Dispose();
+                }
             }
 
             DrawWorld(batcher);
@@ -538,7 +541,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetLightIntensity(World.Light.IsometricLevel);
             batcher.SetLightDirection(World.Light.IsometricDirection);
 
-            if (!_deathScreenActive)
+            if (Engine.Profile.Current.EnableDeathScreen && !_deathScreenActive)
             {
                 RenderedObjectsCount = 0;
 
