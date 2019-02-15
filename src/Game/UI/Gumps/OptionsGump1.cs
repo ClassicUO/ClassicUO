@@ -717,6 +717,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowPositionY.Text = "10";
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
+                    _enableDeathScreen.IsChecked = true;
+                    _enableBlackWhiteEffect.IsChecked = true;
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
                 case 4: // commands
@@ -815,6 +817,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
 
             // video
+            Engine.Profile.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
+            Engine.Profile.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
+
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
             Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
 
