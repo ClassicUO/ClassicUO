@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead)
+            if (World.Player.IsDead || item == null)
                 return;
 
             if (!_isShiftDown && !amount.HasValue && !item.IsCorpse && item.Amount > 1 && item.ItemData.IsStackable)
