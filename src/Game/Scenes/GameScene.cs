@@ -502,7 +502,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
             {
-                if (World.Player.IsDead && World.Player.WaitDeathScreenTimer > Engine.Ticks)
+                if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
                 {
                     Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                     {
@@ -514,7 +514,7 @@ namespace ClassicUO.Game.Scenes
                     _deathScreenActive = true;
                 }
             } 
-            else if (World.Player.WaitDeathScreenTimer < Engine.Ticks)
+            else if (World.Player.DeathScreenTimer < Engine.Ticks)
             {
                 _deathScreenActive = false;
                 _deathScreenLabel.Dispose();

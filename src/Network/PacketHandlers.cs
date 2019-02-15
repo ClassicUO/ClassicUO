@@ -1030,7 +1030,7 @@ namespace ClassicUO.Network
             if (action != 1)
             {
                 Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
-
+                World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
                 GameActions.SetWarMode(false);
             }
         }
