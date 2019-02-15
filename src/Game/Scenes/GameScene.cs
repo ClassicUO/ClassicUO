@@ -499,27 +499,21 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return false;
 
-            if (Engine.Profile.Current.DieTest)
+            if (_deathWindowText == null || _deathWindowText.IsDisposed)
             {
-                if (World.Player.WaitDeathScreenTimer > Engine.Ticks)
+                if (World.Player.IsDead && World.Player.WaitDeathScreenTimer > Engine.Ticks)
                 {
-                    if (_deathWindowText == null || _deathWindowText.IsDisposed)
+                    Engine.UI.Add(_deathWindowText = new Label("You are dead.", false, 999, 200, 3)
                     {
-                        Engine.UI.Add(_deathWindowText = new Label("You are dead.", false, 999, 200, 3)
-                        {
-                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
-                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
-                              X = Engine.WindowWidth / 2 - 50,
-                              Y = Engine.WindowHeight / 2 - 50
-                        });
-                    }
+                        //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
+                        //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
+                        X = Engine.WindowWidth / 2 - 50,
+                        Y = Engine.WindowHeight / 2 - 50
+                    });
                 }
-                else
-                {
-                    if (_deathWindowText != null)
-                        _deathWindowText.Dispose();
-                }
-            }
+            } 
+            else if (World.Player.WaitDeathScreenTimer < Engine.Ticks)
+                _deathWindowText.Dispose();
 
             DrawWorld(batcher);
 
