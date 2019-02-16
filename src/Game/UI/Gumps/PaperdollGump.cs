@@ -338,11 +338,11 @@ namespace ClassicUO.Game.UI.Gumps
 			        break;
 		        case Buttons.Options:
 
-		            OptionsGump1 gump = Engine.UI.GetByLocalSerial<OptionsGump1>();
+		            OptionsGump gump = Engine.UI.GetByLocalSerial<OptionsGump>();
 
                     if (gump == null)
 			        {
-				        Engine.UI.Add(new OptionsGump1
+				        Engine.UI.Add(new OptionsGump
 				        {
 					        X = Engine.WindowWidth / 2 - 300,
 					        Y = Engine.WindowHeight / 2 - 250

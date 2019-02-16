@@ -60,6 +60,12 @@ namespace ClassicUO.Game.GameObjects
 
         public bool AllowedToDraw { get; set; } = true;
 
+        public bool UseObjectHandles { get; set; }
+
+        public bool ClosedObjectHandles { get; set; }
+
+        public bool ObjectHandlesOpened { get; set; }
+
         public SpriteTexture Texture { get; set; }
 
         public Rectangle GetOnScreenRectangle()
@@ -287,7 +293,7 @@ namespace ClassicUO.Game.GameObjects
             //}
             if (!batcher.DrawSprite(Texture, vertex))
                 return false;
-            
+
 
             MousePick(list, vertex, isTransparent);
 

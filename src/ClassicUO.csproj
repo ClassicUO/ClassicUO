@@ -156,6 +156,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\NameOverheadGump.cs" />
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
@@ -271,9 +272,8 @@
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\OptionsGump1.cs" />
+    <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
-    <Compile Include="Game\UI\Gumps\PartyMemberGump.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
     <Compile Include="Game\UI\Gumps\SkillButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\SplitMenuGump.cs" />
@@ -363,7 +363,6 @@
     <Compile Include="Game\UI\Gumps\JournalGump.cs" />
     <Compile Include="Game\UI\Gumps\WorldMapGump.cs" />
     <Compile Include="Game\UI\Gumps\MiniMapGump.cs" />
-    <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PaperdollGump.cs" />
     <Compile Include="Game\UI\Gumps\SkillGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\SpellbookGump.cs" />

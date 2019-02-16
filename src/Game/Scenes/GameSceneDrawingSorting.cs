@@ -413,6 +413,18 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
+                
+                if (_useObjectHandles)
+                    obj.UseObjectHandles = (ismobile || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
+                else if (obj.ClosedObjectHandles)
+                    obj.ClosedObjectHandles = false;
+                else if (obj.UseObjectHandles)
+                {
+                    obj.ObjectHandlesOpened = false;
+                    obj.UseObjectHandles = false;
+                }
+                
+
                 _renderList[_renderListCount] = obj;
                 //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;

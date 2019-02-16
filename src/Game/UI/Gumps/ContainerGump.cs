@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_item.OnGround && _item.Distance > 3)
+            if (_item == null|| (_item.OnGround && _item.Distance > 3))
                 Dispose();
 
             if (IsDisposed)

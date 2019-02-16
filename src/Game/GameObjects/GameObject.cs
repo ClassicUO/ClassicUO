@@ -135,6 +135,8 @@ namespace ClassicUO.Game.GameObjects
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
+                if (World.Player == null)
+                    return ushort.MaxValue;
 
                 if (World.Player.IsMoving && this != World.Player)
                 {

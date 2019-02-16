@@ -43,7 +43,7 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+
         }
 
         public string GetString(int number)

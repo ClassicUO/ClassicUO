@@ -419,7 +419,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile != null)
                         {
-                            AddTileToRenderList(tile.FirstNode, x, y, false, 150);
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150);
                         }
                         x++;
                         y--;
