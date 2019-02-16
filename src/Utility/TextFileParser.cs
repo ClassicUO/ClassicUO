@@ -38,6 +38,11 @@ namespace ClassicUO.Utility
             return result;
         }
 
+        internal bool IsEOF()
+        {
+            return _Pos >= _String.Length;
+        }
+
         private void GetEOL()
         {
             for(int i = _Pos; i < _String.Length; i++)
