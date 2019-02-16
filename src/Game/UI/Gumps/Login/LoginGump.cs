@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
@@ -38,7 +40,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+            LoginScene ls = Engine.SceneManager.GetScene<LoginScene>();
+            if (ls.CurrentLoginStep == LoginScene.LoginStep.Main)
+                ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 
         public LoginGump() : base(0, 0)

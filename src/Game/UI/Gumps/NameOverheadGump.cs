@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,9 +22,10 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class NameOverheadGump : Gump
     {
-        private readonly Label _label;
+       // private readonly Label _label;
         private readonly AlphaBlendControl _background;
 
+        private readonly RenderedText _renderedText;
 
         public NameOverheadGump(Entity entity) : base(entity.Serial, 0)
         {
@@ -33,19 +36,31 @@ namespace ClassicUO.Game.UI.Gumps
 
             Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)999;
 
-            _label = new Label(string.Empty, true, hue, style: FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            //_label = new Label(string.IsNullOrEmpty(entity.Name) ? "" : entity.Name, true, hue, style: FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            //{
+            //    X = 2,
+            //    Y = 2,
+            //};
+
+
+            _renderedText = new RenderedText()
             {
-                X = 2,
-                Y = 2,
+                IsUnicode = true,
+                Font = 0xFF,
+                Hue = hue,
+                FontStyle = FontStyle.BlackBorder,
+                Align = TEXT_ALIGN_TYPE.TS_CENTER,
+                IsHTML = true,
             };
+
 
             Add(_background = new AlphaBlendControl(.3f)
             {
                 WantUpdateSize = false,
-                Width = _label.Width + 4,
-                Height = _label.Height + 4
+                //Width = _label.Width + 4,
+                //Height = _label.Height + 4
             });
-            Add(_label);
+           // Add(_label);
 
             X = (int) entity.RealScreenPosition.X;
             Y = (int) entity.RealScreenPosition.Y; 
@@ -53,29 +68,67 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Entity Entity { get; }
 
-        private void SetName()
+        private bool SetName()
         {
-            if (string.IsNullOrEmpty(_label.Text))
+            if (string.IsNullOrEmpty(_renderedText.Text))
             {
-                if (Entity is Item item && item.Properties.Any())
+                if (Entity is Item item)
                 {
-                    Property prop = item.Properties.FirstOrDefault();
-                    _label.Text = FileManager.Cliloc.Translate((int)prop.Cliloc, prop.Args, true);
+                    string t;
 
-                    _background.Width = _label.Width + 4;
-                    _background.Height = _label.Height + 4;
+                    if (item.Properties.Any())
+                    {
+                        Property prop = item.Properties.FirstOrDefault();
+                        t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
+                    }
+                    else
+                    {
+                        t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+                    }
+
+                    FileManager.Fonts.SetUseHTML(true);
+                    FileManager.Fonts.RecalculateWidthByInfo = true;
+
+                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+
+                    if (width > 200)
+                        width = 200;
+
+                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+
+                    if (width > 200)
+                        width = 200;
+
+                    _renderedText.MaxWidth = width;
+
+                    FileManager.Fonts.RecalculateWidthByInfo = false;
+                    FileManager.Fonts.SetUseHTML(false);
+
+                    _renderedText.Text = t;
+                   
+                    _background.Width = _renderedText.Width + 4;
+                    _background.Height = _renderedText.Height + 4;
 
                     WantUpdateSize = true;
+
+                    return true;
                 }
-                else if (!string.IsNullOrEmpty(Entity.Name))
+
+                if (!string.IsNullOrEmpty(Entity.Name))
                 {
-                    _label.Text = Entity.Name;
-                    _background.Width = _label.Width + 4;
-                    _background.Height = _label.Height + 4;
+                    _renderedText.Text = Entity.Name;
+                    _background.Width = _renderedText.Width + 4;
+                    _background.Height = _renderedText.Height + 4;
 
                     WantUpdateSize = true;
+
+                    return true;
                 }
+
+                return false;
             }
+
+            return true;
         }
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
@@ -115,6 +168,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.UI.Add(currentHealthBarGump = new HealthBarGump((Mobile) Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
+            else
+            {
+                GameActions.PickUp(Entity);
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -135,17 +192,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Dispose();
             }
-            else
-            {
-                SetName();
-            }
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (IsDisposed || !SetName())
+                return false;
+
             Point gWinPos = Engine.Profile.Current.GameWindowPosition;
             Point gWinSize = Engine.Profile.Current.GameWindowSize;
-            float scale = Engine.Profile.Current.ScaleZoom;
+            float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
 
             if (Entity is Mobile m)
@@ -160,8 +216,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                X = (int)Entity.RealScreenPosition.X;
-                Y = (int)Entity.RealScreenPosition.Y;
+                X = (int)(Entity.RealScreenPosition.X / scale);
+                Y = (int)(Entity.RealScreenPosition.Y / scale);
             }
 
             if (_edge == null)
@@ -170,15 +226,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _edge.SetData(new Color[] { Color.Gray });
             }
 
+
             batcher.DrawRectangle(_edge, new Rectangle(position.X - 1, position.Y - 1, Width + 1, Height + 1), Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            base.Draw(batcher, position, hue);
+            return _renderedText.Draw(batcher, new Rectangle(position.X + 2, position.Y + 2, Width, Height), 0, 0);
         }
 
         private Texture2D _edge;
 
         public override void Dispose()
         {
+            _renderedText?.Dispose();
             _edge?.Dispose();
             base.Dispose();
         }

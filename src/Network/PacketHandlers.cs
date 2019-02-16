@@ -2786,6 +2786,13 @@ namespace ClassicUO.Network
                 entity.PropertiesHash = revision;
                 entity.UpdateProperties(ReadProperties(p));
                 entity.ProcessDelta();
+
+                if (serial.IsItem && entity.Properties.Any())
+                {
+                    Property property = entity.Properties.FirstOrDefault();
+                    entity.Name = FileManager.Cliloc.Translate((int)property.Cliloc, property.Args, true);
+                }
+
             }
 
             if (entity is Item it)
