@@ -152,6 +152,7 @@ namespace ClassicUO.Game.Scenes
 
         private int _renderIndex = 1;
         private int _renderListCount;
+        private int _objectHandlesCount;
         private GameObject[] _renderList = new GameObject[2000];
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
@@ -413,9 +414,11 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
-                
-                if (_useObjectHandles)
+                if (useObjectHandles)
+                {
                     obj.UseObjectHandles = (ismobile || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
+                    _objectHandlesCount++;
+                }
                 else if (obj.ClosedObjectHandles)
                     obj.ClosedObjectHandles = false;
                 else if (obj.UseObjectHandles)
@@ -430,6 +433,7 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {

@@ -177,6 +177,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Texture2D _edge;
 
-
+        public override void Dispose()
+        {
+            _edge?.Dispose();
+            base.Dispose();
+        }
     }
 }

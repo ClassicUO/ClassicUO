@@ -382,6 +382,7 @@ namespace ClassicUO.Game.Scenes
 
             UpdateMaxDrawZ();
             _renderListCount = 0;
+            _objectHandlesCount = 0;
 
             int minX = _minTile.X;
             int minY = _minTile.Y;
