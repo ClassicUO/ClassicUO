@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly PlayerMobile _character;
         private readonly Combobox[] _skills;
 
-        public CreateCharTradeGump(PlayerMobile character) : base(0, 0)
+        public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
             _character = character;
 
@@ -107,7 +108,80 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 y += 70;
             }
 
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+			if (profession.Skills.Any())
+			{
+				for (int i = 0; i < skillCount; i++)
+					_skillSliders[i].Value = 0;
+
+				int GetSkillIndex(string name)
+				{
+					/* Not sure if other cases exist. 
+					 * 7.0.20.0 has a specific function to convert string -> index for each skill in prof.txt. */
+					if (String.Equals(name, "Blacksmith", StringComparison.CurrentCulture))
+						name = "Blacksmithy";
+					else if (String.Equals(name, "AnimalLore", StringComparison.CurrentCulture))
+						name = "Animal Lore";
+					else if (String.Equals(name, "ItemID", StringComparison.CurrentCulture))
+						name = "Item Identification";
+					else if (String.Equals(name, "ArmsLore", StringComparison.CurrentCulture))
+						name = "Arms Lore";
+					else if (String.Equals(name, "Bowcraft", StringComparison.CurrentCulture))
+						name = "Bowcraft/Fletching";
+					else if (String.Equals(name, "DetectHidden", StringComparison.CurrentCulture))
+						name = "Detecting Hidden";
+					else if (String.Equals(name, "Enticement", StringComparison.CurrentCulture))
+						name = "Discordance";
+					else if (String.Equals(name, "EvaluateIntelligence", StringComparison.CurrentCulture))
+						name = "Evaluating Intelligence";
+					else if (String.Equals(name, "ForensicEvaluation", StringComparison.CurrentCulture))
+						name = "Forensic Evaluation";
+					else if (String.Equals(name, "ResistingSpells", StringComparison.CurrentCulture))
+						name = "Resisting Spells";
+					else if (String.Equals(name, "SpiritSpeak", StringComparison.CurrentCulture))
+						name = "Spirit Speak";
+					else if (String.Equals(name, "AnimalTaming", StringComparison.CurrentCulture))
+						name = "Animal Taming";
+					else if (String.Equals(name, "TasteIdentification", StringComparison.CurrentCulture))
+						name = "Taste Identification";
+					else if (String.Equals(name, "MaceFighting", StringComparison.CurrentCulture))
+						name = "Mace Fighting";
+					else if (String.Equals(name, "Disarm", StringComparison.CurrentCulture))
+						name = "Remove Trap";
+
+					return Array.IndexOf(skillList, name);
+				}
+
+				var skillIndex = 0;
+				foreach (var skillKVP in profession.Skills)
+				{
+					var skillCombo = _skills[skillIndex];
+					var skillSlider = _skillSliders[skillIndex];
+
+					var index = GetSkillIndex(skillKVP.Key);
+
+					if (index > 0)
+					{
+						skillCombo.SelectedIndex = index;
+						skillSlider.Value = skillKVP.Value;
+					}
+
+					skillIndex++;
+				}
+			}
+
+			if (profession.Stats.Count > 0)
+			{
+				if (profession.Stats.TryGetValue("Str", out var str))
+					_attributeSliders[0].Value = str;
+
+				if (profession.Stats.TryGetValue("Dex", out var dex))
+					_attributeSliders[1].Value = dex;
+
+				if (profession.Stats.TryGetValue("Int", out var intell))
+					_attributeSliders[2].Value = intell;
+			}
+
+			Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
             });

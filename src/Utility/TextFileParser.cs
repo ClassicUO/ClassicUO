@@ -17,8 +17,10 @@ namespace ClassicUO.Utility
 
         public TextFileParser(FileInfo file, char[] delimiters, char[] comments, char[] quotes)
         {
+			/*
             if (file.Length > 1M)
                 throw new InternalBufferOverflowException();
+			*/
             _Delimiters = delimiters;
             _Comments = comments;
             _Quotes = quotes;
