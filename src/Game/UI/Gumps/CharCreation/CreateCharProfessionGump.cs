@@ -51,24 +51,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				Graphic = 5504,
 			});
 
-			X = 100;
-			Y = 80;
-
 			/* Build the gump */
 			Add(new ResizePic(2600)
 			{
+				X = 100, Y = 80,
 				Width = 470, Height = 372,
 			});
 
-			Add(new GumpPic(113, -23, 1419, 0));
-			Add(new GumpPic(190, -36, 1417, 0));
-			Add(new GumpPic(199, -27, 5546, 0));
+			Add(new GumpPic(291, 42, 0x0589, 0));
+			Add(new GumpPic(214, 58, 0x058B, 0));
+			Add(new GumpPic(300, 51, 0x15A9, 0));
 
 			var localization = FileManager.Cliloc;
 
 			Add(new Label(localization.Translate(3000326), false, 0, font: 2)
 			{
-				X = 58, Y = 52,
+				X = 158, Y = 132,
 			});
 
 			for (int i = 0; i < professions.Count; i++)
@@ -78,8 +76,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 				Add(new ProfessionInfoGump(professions[i])
 				{
-					X = 45 + (cx * 195),
-					Y = 88 + (cy * 70),
+					X = 145 + (cx * 195),
+					Y = 168 + (cy * 70),
 
 					Selected = SelectProfession,
 				});
@@ -129,12 +127,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			_info = info;
 
-			Add(new ResizePic(3000)
-			{
-				Width = 175, Height = 34,
-			});
-
 			var localization = FileManager.Cliloc;
+
+			var background = new ResizePic(3000)
+			{
+				Width = 175,
+				Height = 34,
+			};
+			background.SetTooltip(localization.Translate(info.Description));
+
+			Add(background);
 
 			Add(new Label(localization.Translate(info.Localization), true, 0x00, font: 1)
 			{
@@ -142,8 +144,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			});
 
 			Add(new GumpPic(121, -12, info.Graphic, 0));
-
-			SetTooltip(localization.Translate(info.Description));
 		}
 
 		protected override void OnMouseClick(int x, int y, MouseButton button)
