@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			var localization = FileManager.Cliloc;
 
-			Add(new Label(localization.Translate(3000326), false, 0, font: 2)
+			Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
 			{
 				X = 158,
 				Y = 132,
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				Width = 175,
 				Height = 34,
 			};
-			background.SetTooltip(localization.Translate(info.Description));
+			background.SetTooltip(localization.Translate(info.Description), 250);
 
 			Add(background);
 

@@ -246,11 +246,11 @@ namespace ClassicUO.Game.GameObjects
                 MessageType = type
             };
 
-            InsertGameText(overhead);
+            _overHeads.AddToFront(overhead);
 
-            if (_overHeads.Count > 5)
+            while (_overHeads.Count > 5)
             {
-                TextOverhead over = _overHeads[_overHeads.Count - 1];
+                //TextOverhead over = _overHeads[_overHeads.Count - 1];
 
                 //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
@@ -263,14 +263,15 @@ namespace ClassicUO.Game.GameObjects
             return overhead;
         }
 
-        private void InsertGameText(TextOverhead gameText)
-        {
-            if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
-                _overHeads.AddToFront(gameText);
-            else 
-                _overHeads.Insert(1, gameText);
-            //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
-        }
+        //private void InsertGameText(TextOverhead gameText)
+        //{
+        //    if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
+        //        _overHeads.AddToFront(gameText);
+        //    else 
+        //        _overHeads.Insert(1, gameText);
+
+        //    //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+        //}
 
         protected virtual void OnPositionChanged()
         {
