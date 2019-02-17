@@ -213,8 +213,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 X = (int)(x + m.Offset.X) - Width / 2 + 22;
                 Y = (int)(y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - Height / 2 + (m.IsMounted ? 0 : 22);
-
-                Console.WriteLine(Location);
             }
             else
             {
