@@ -221,19 +221,19 @@ namespace ClassicUO.Game.GameObjects
 
             TextOverhead overhead;
 
-            //for (int i = 0; i < _overHeads.Value.Count; i++)
-            //{
-            //    overhead = _overHeads.Value[i];
+            for (int i = 0; i < _overHeads.Count; i++)
+            {
+                overhead = _overHeads[i];
 
-            //    if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
-            //    {
-            //        overhead.Hue = hue;
-            //        _overHeads.Value.RemoveAt(i);
-            //        InsertGameText(overhead);
+                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
+                {
+                    overhead.Hue = hue;
+                    _overHeads.RemoveAt(i);
+                    InsertGameText(overhead);
 
-            //        return overhead;
-            //    }
-            //}
+                    return overhead;
+                }
+            }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
                 MessageType = type
             };
 
-            _overHeads.AddToFront(overhead);
+            InsertGameText(overhead);
 
             while (_overHeads.Count > 5)
             {
@@ -263,15 +263,15 @@ namespace ClassicUO.Game.GameObjects
             return overhead;
         }
 
-        //private void InsertGameText(TextOverhead gameText)
-        //{
-        //    if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
-        //        _overHeads.AddToFront(gameText);
-        //    else 
-        //        _overHeads.Insert(1, gameText);
+        private void InsertGameText(TextOverhead gameText)
+        {
+            if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
+                _overHeads.AddToFront(gameText);
+            else
+                _overHeads.Insert(1, gameText);
 
-        //    //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
-        //}
+            //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+        }
 
         protected virtual void OnPositionChanged()
         {
