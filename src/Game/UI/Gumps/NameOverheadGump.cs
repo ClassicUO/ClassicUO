@@ -62,8 +62,8 @@ namespace ClassicUO.Game.UI.Gumps
             });
            // Add(_label);
 
-            X = (int) entity.RealScreenPosition.X;
-            Y = (int) entity.RealScreenPosition.Y; 
+            //X = (int) entity.RealScreenPosition.X;
+            //Y = (int) entity.RealScreenPosition.Y; 
         }
 
         public Entity Entity { get; }
@@ -106,10 +106,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _renderedText.Text = t;
                    
-                    _background.Width = _renderedText.Width + 4;
-                    _background.Height = _renderedText.Height + 4;
+                    Width = _background.Width = _renderedText.Width + 4;
+                    Height = _background.Height = _renderedText.Height + 4;
 
-                    WantUpdateSize = true;
+                    WantUpdateSize = false;
 
                     return true;
                 }
@@ -117,10 +117,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
                     _renderedText.Text = Entity.Name;
-                    _background.Width = _renderedText.Width + 4;
-                    _background.Height = _renderedText.Height + 4;
+                    Width = _background.Width = _renderedText.Width + 4;
+                    Height = _background.Height = _renderedText.Height + 4;
 
-                    WantUpdateSize = true;
+                    WantUpdateSize = false;
 
                     return true;
                 }
@@ -213,6 +213,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 X = (int)(x + m.Offset.X) - Width / 2 + 22;
                 Y = (int)(y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - Height / 2 + (m.IsMounted ? 0 : 22);
+
+                Console.WriteLine(Location);
             }
             else
             {
@@ -226,6 +228,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _edge.SetData(new Color[] { Color.Gray });
             }
 
+            position.X = X;
+            position.Y = Y;
 
             batcher.DrawRectangle(_edge, new Rectangle(position.X - 1, position.Y - 1, Width + 1, Height + 1), Vector3.Zero);
 
