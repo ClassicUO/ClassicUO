@@ -183,6 +183,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             string name = string.Empty;
             string trueName = string.Empty;
             int nameClilocID = 0;
+            int descriptionClilocID = 0;
             int descriptionIndex = 0;
             ushort gump = 0;
             bool topLevel = false;
@@ -253,8 +254,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     }
                     case PM_CODE.CHILDREN:
                     {
-                        /*IFOR(j, 1, (int)strings.size())
-                        childrens.push_back(strings[j]);*/
+                        for(int j = 1; j < strings.Count; j++)
+                            childrens.Add(strings[j]);
 
                         break;
                     }
@@ -307,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     }
                     case PM_CODE.DESCRIPTION_CLILOC_ID:
                     {
-                        //descriptionClilocID = atoi(strings[1].c_str());
+                        int.TryParse(strings[1], out descriptionClilocID);
                         break;
                     }
                     default:

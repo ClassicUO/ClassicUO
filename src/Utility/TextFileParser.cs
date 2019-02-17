@@ -17,9 +17,8 @@ namespace ClassicUO.Utility
 
         public TextFileParser(FileInfo file, char[] delimiters, char[] comments, char[] quotes)
         {
-            // TODO:
-            //if (file.Length > 1M)
-            //    throw new InternalBufferOverflowException();
+            if (file.Length > 0x100000)//1megabyte limit of string file
+                throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
 
             _delimiters = delimiters;
             _comments = comments;
