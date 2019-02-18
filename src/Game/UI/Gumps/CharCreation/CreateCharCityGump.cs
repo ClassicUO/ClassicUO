@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 		private int _selectedMapIndex;
 
+        private byte _selectedProfession;
 		private CityCollection _selectedMap;
 		private CityInfo _selectedCity;
 
@@ -76,8 +77,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			}
 		}
 
-		public CreateCharCityGump() : base(0, 0)
+		public CreateCharCityGump(byte profession) : base(0, 0)
 		{
+            _selectedProfession = profession;
 			var loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
 			_maps = loginScene.Cities.GroupBy(city => city.Map)
@@ -141,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					if (_selectedCity != default)
 						charCreationGump.SetCity(_selectedCity);
 
-					charCreationGump.CreateCharacter();
+					charCreationGump.CreateCharacter(_selectedProfession);
 					break;
 
 				case Buttons.PreviousCollection: SelectedMapIndex--; break;

@@ -8,7 +8,7 @@ namespace ClassicUO.IO.Resources
 {
     class ProfessionLoader : ResourceLoader
     {
-        public static Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
         public override void Load()
         {
             bool result = false;

@@ -310,7 +310,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character, CityInfo startingCity)
+        public void CreateCharacter(PlayerMobile character, CityInfo startingCity, byte profession)
         {
             int i = 0;
 
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
+            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i, profession));
         }
 
         public void DeleteCharacter(uint index)

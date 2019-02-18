@@ -123,7 +123,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(PlayerMobile character, CityInfo startingCity, uint clientIP, int serverIndex, uint slot) : base(0x00)
+        public PCreateCharacter(PlayerMobile character, CityInfo startingCity, uint clientIP, int serverIndex, uint slot, byte profession) : base(0x00)
         {
             int skillcount = 3;
 
@@ -148,7 +148,7 @@ namespace ClassicUO.Network
             WriteUInt(clientflag);
             WriteUInt(0x01);
             WriteUInt(0x0);
-            WriteByte(0x0); // Profession
+            WriteByte(profession); // Profession
             Skip(15);
             byte val;
 
