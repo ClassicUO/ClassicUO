@@ -47,6 +47,9 @@ namespace ClassicUO.Game.GameObjects
         //private float _processAlpha = 1;
         //private long _processAlphaTime = -1;
 
+        public bool Debug1 { get; set; } = false;
+        public bool Debug2 { get; set; } = false;
+        public bool Debug3 { get; set; } = false;
 
         protected bool HasShadow { get; set; }
 

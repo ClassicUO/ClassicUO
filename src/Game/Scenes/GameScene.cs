@@ -137,7 +137,14 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.UI.Add(new DebugGump());
+            if (!Engine.Profile.Current.DebugGumpIsDisabled)
+            {
+                Engine.UI.Add(new DebugGump()
+                {
+                    X = Engine.Profile.Current.DebugGumpPosition.X,
+                    Y = Engine.Profile.Current.DebugGumpPosition.Y,
+                });
+            }
 
             HeldItem = new ItemHold();
             _journalManager = new JournalManager();
