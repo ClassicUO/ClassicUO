@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in _item.Items)
+            foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
                 Add(new ItemGump(i));
         }
 
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_item.OnGround && _item.Distance > 3)
+            if (_item == null|| (_item.OnGround && _item.Distance > 3))
                 Dispose();
 
             if (IsDisposed)
@@ -146,10 +146,45 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e)
+            foreach (Item item in e.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
             {
+                CheckItemPosition(item);
                 Add(new ItemGump(item));
             }
+        }
+
+        private void CheckItemPosition(Item item)
+        {
+            int x = item.X;
+            int y = item.Y;
+
+            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+
+            if (texture != null && !texture.IsDisposed)
+            {
+                if (x < _data.Bounds.X)
+                    x = _data.Bounds.X;
+
+                if (y < _data.Bounds.Y)
+                    y = _data.Bounds.Y;
+
+                if (x + texture.Width > _data.Bounds.Right)
+                    x = _data.Bounds.Right - texture.Width;
+
+                if (y + texture.Height > _data.Bounds.Bottom)
+                    y = _data.Bounds.Bottom - texture.Height;
+            }
+            else
+            {
+                x = _data.Bounds.X;
+                y = _data.Bounds.Y;
+            }
+
+            if (x != item.X || y != item.Y)
+            {
+                item.Position = new Position((ushort)x, (ushort)y);
+            }
+
         }
 
         public override void Dispose()

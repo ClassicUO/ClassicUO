@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -18,7 +18,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
 using System;
 using System.Diagnostics;
@@ -26,7 +25,7 @@ using System.Diagnostics;
 namespace ClassicUO.Game.GameObjects
 {
     [DebuggerDisplay("Text = {Text}")]
-    internal class TextOverhead : GameObject
+    internal partial class TextOverhead : GameObject
     {
         public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f)
         {
@@ -38,19 +37,48 @@ namespace ClassicUO.Game.GameObjects
             IsUnicode = isunicode;
             Style = style;
             TimeToLive = timeToLive;
+            AlphaHue = 0xFF;
+
+            _text = new RenderedText
+            {
+                MaxWidth = maxwidth,
+                Hue = hue,
+                Font = font,
+                IsUnicode = isunicode,
+                FontStyle = style,
+                SaveHitMap = true,
+                Text = Text
+            };
+            Texture = _text.Texture;
+
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
+
+                if (delay < 10)
+                    delay = 10;
+
+                if (TimeToLive <= 0.0f)
+                    TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+            }
+            else
+            {
+                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
+
+                if (TimeToLive <= 0.0f)
+                    TimeToLive = (delay >> 31) + delay;
+            }
+
+            EdgeDetection = true;
         }
 
         public string Text { get; }
 
         public GameObject Parent { get; }
 
-        public bool IsPersistent { get; set; }
-
         public float TimeToLive { get; set; }
 
         public MessageType MessageType { get; set; }
-
-        public float Alpha { get; private set; }
 
         public bool IsUnicode { get; }
 
@@ -60,63 +88,54 @@ namespace ClassicUO.Game.GameObjects
 
         public FontStyle Style { get; }
 
-        public bool Initialized { get; set; }
-
         public bool IsOverlapped { get; set; }
 
-        protected override View CreateView()
+        public override void Dispose()
         {
-            return new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+            _text?.Dispose();
+            base.Dispose();
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
                 return;
+         
 
-            if (Initialized)
+            TimeToLive -= (float)frameMS;
+
+            if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
             {
-                if (IsPersistent)
-                {
-                    if (IsOverlapped && Alpha <= 0.0f)
-                        Alpha = 0.5f;
-                    else if (!IsOverlapped && Alpha != 0.0f)
-                        Alpha = 0;
-                }
-                else
-                {
-                    TimeToLive -= (float)frameMS;
+                // start alpha decreasing
 
-                    if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                    {
-                        // start alpha decreasing
-                        float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
-
-                        if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
-                            Alpha = alpha;
-                    }
-                    else if (TimeToLive <= 0.0f)
-                    {
-                        Dispose();
-                    }
-                    else if (IsOverlapped && Alpha <= 0.0f)
-                        Alpha = 0.5f;
-                    else if (!IsOverlapped && Alpha != 0.0f)
-                        Alpha = 0;
-                }
-               
+                //if (Engine.Ticks > _fadeOut)
+                //{
+                //    _fadeOut = Engine.Ticks + 55;
+                //    ProcessAlpha(0);
+                //}
+                //if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
+                //    Alpha = alpha;
             }
+            else if (TimeToLive <= 0.0f)
+            {
+                Dispose();
+            }
+            else if (IsOverlapped && AlphaHue != 75)
+                AlphaHue = 75;
+            //else if (!IsOverlapped && AlphaHue != 0xFF)
+            //    AlphaHue = 0xFF;                  
         }
     }
 
     internal class DamageOverhead : TextOverhead
     {
-        private const int DAMAGE_Y_MOVING_TIME = 50;
+        private const int DAMAGE_Y_MOVING_TIME = 25;
 
         private uint _movingTime;
         public DamageOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent, text, maxwidth, hue, font, isunicode, style, timeToLive)
         {
-            
+            EdgeDetection = false;
+            AlphaHue = 0xFF;
         }
 
         public int OffsetY { get; private set; }
@@ -124,20 +143,12 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-
-            if (Initialized)
+      
+            if (_movingTime < totalMS)
             {
-                if (_movingTime < totalMS)
-                {
-                    _movingTime = (uint) totalMS + DAMAGE_Y_MOVING_TIME;
-                    OffsetY -= 2;
-                }
-            }
-        }
-
-        protected override View CreateView()
-        {
-            return new DamageOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+                _movingTime = (uint) totalMS + DAMAGE_Y_MOVING_TIME;
+                OffsetY -= 1;
+            }          
         }
     }
 }

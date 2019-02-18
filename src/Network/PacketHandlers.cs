@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -97,214 +97,122 @@ namespace ClassicUO.Network
         {
             ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0x82, LoginError);
-            ToClient.Add(0x86, ResendCharacterList);
-            ToClient.Add(0x8C, RelayServer);
-            ToClient.Add(0xA8, ServerList);
-            ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
             ToClient.Add(0x03, ClientTalk);
-            /*ToServer.Add(0x00, CreateCharacter);
-            ToServer.Add(0x01, Disconnect);
-            ToServer.Add(0x02, MoveRequest);
-            ToServer.Add(0x03, TalkRequest);
-            ToServer.Add(0x04, RequestGodMode);
-            ToServer.Add(0x05, RequestAttack);
-            ToServer.Add(0x06, DoubleClick);
-            ToServer.Add(0x07, PickUpItem);
-            ToServer.Add(0x08, DropItem);
-            ToServer.Add(0x09, SingleClick);
-            ToServer.Add(0x0A, EditGodMode);*/
             ToClient.Add(0x0B, Damage);
-            ToClient.Add(0x0C, EditTileDataGodClientR); /*ToServer.Add(0x0C, EditTileDataGodClientS);*/
             ToClient.Add(0x11, CharacterStatus);
-            /* ToServer.Add(0x12, RequestSkill);
-             ToServer.Add(0x13, WearItem);
-             ToServer.Add(0x14, SendElevationGodClient);
-             ToServer.Add(0x15 FollowS);*/
             ToClient.Add(0x15, FollowR);
-            ToClient.Add(0x16, /*NewHealthBarStatusUpdateSA*/ NewHealthbarUpdate);
+            ToClient.Add(0x16, NewHealthbarUpdate);
             ToClient.Add(0x17, NewHealthbarUpdate);
             ToClient.Add(0x1A, UpdateItem);
-            // *** ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x1C, Talk);
             ToClient.Add(0x1D, DeleteObject);
-            ToClient.Add(0x1F, Explosion);
             ToClient.Add(0x20, UpdatePlayer);
             ToClient.Add(0x21, DenyWalk);
-            ToClient.Add(0x22, ConfirmWalk); /*ToServer.Add(0x22, ResyncRequest);*/
+            ToClient.Add(0x22, ConfirmWalk);
             ToClient.Add(0x23, DragAnimation);
             ToClient.Add(0x24, OpenContainer);
             ToClient.Add(0x25, UpdateContainedItem);
-            ToClient.Add(0x26, KickPlayer);
             ToClient.Add(0x27, DenyMoveItem);
             ToClient.Add(0x28, EndDraggingItem);
             ToClient.Add(0x29, DropItemAccepted);
-            ToClient.Add(0x2A, Blood);
-            ToClient.Add(0x2B, GodMode);
             ToClient.Add(0x2C, DeathScreen);
             ToClient.Add(0x2D, MobileAttributes);
             ToClient.Add(0x2E, EquipItem);
-            ToClient.Add(0x2F, FightOccuring);
-            ToClient.Add(0x30, AttackOK);
-            ToClient.Add(0x31, AttackEnded);
             ToClient.Add(0x32, p => { }); // unknown
-            ToClient.Add(0x33, PauseControl);
-            /*ToServer.Add(0x34, GetPlayerStatus);
-            ToServer.Add(0x35, AddResourceGodClient);*/
-            ToClient.Add(0x36, ResourceTileDataGodClient);
             ToClient.Add(0x38, Pathfinding);
-            /*ToServer.Add(0x37, MoveItemGodClient);
-            ToServer.Add(0x38, PathfindingInClient);
-            ToServer.Add(0x39, RemoveGroupS);*/
-            ToClient.Add(0x39, RemoveGroupR);
-            /*ToServer.Add(0x3A, SendSkills);*/
             ToClient.Add(0x3A, UpdateSkills);
-            //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
-            ToClient.Add(0x3E, VersionGodClient);
-            /*ToServer.Add(0x45, VersionOK);
-            ToServer.Add(0x46, NewArtwork);
-            ToServer.Add(0x47, NewTerrain);
-            ToServer.Add(0x48, NewAnimation);
-            ToServer.Add(0x49, NewHues);
-            ToServer.Add(0x4A, DeleteArt);
-            ToServer.Add(0x4B, CheckClientVersion);
-            ToServer.Add(0x4C, ScriptNames);
-            ToServer.Add(0x4D, EditScriptFile);*/
             ToClient.Add(0x4E, PersonalLightLevel);
-            ToClient.Add(0x4F, LightLevel);
-            /*ToServer.Add(0x50, BoardHeader);
-            ToServer.Add(0x51, BoardMessage);
-            ToServer.Add(0x52, BoardPostMessage);*/
-            ToClient.Add(0x53, ErrorCode);
+            ToClient.Add(0x4F, LightLevel);         
             ToClient.Add(0x54, PlaySoundEffect);
-            // *** ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0x56, MapData); //ToServer.Add(0x56, MapPacketTreauseCartographyS);
-            /*ToServer.Add(0x57, UpdateRegions);
-            ToServer.Add(0x58, AddRegion);
-            ToServer.Add(0x59, NewContextFX);
-            ToServer.Add(0x5A, UpdateContextFX);*/
+            ToClient.Add(0x56, MapData);
             ToClient.Add(0x5B, SetTime);
-            /*ToServer.Add(0x5C, RestartVersion);
-            ToServer.Add(0x5D, LoginCharacter);
-            ToServer.Add(0x5E, ServerListing);
-            ToServer.Add(0x5F, ServerListAddEntry);
-            ToServer.Add(0x60, ServerListRemoveEntry);
-            ToServer.Add(0x61, RemoveStaticObject);
-            ToServer.Add(0x62, MoveStaticObject);
-            ToServer.Add(0x63, LoadArea);
-            ToServer.Add(0x64, LoadAreaRequest);*/
             ToClient.Add(0x65, SetWeather);
-            ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
-            //ToServer.Add(0x69, ChangeText);
+            ToClient.Add(0x66, BookData);
             ToClient.Add(0x6C, TargetCursor);
             ToClient.Add(0x6D, PlayMusic);
             ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
-            ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
-            ToClient.Add(0x72, Warmode); // ToServer.Add(0x72, RequestWarMode);
-            ToClient.Add(0x73, Ping); //ToServer.Add(0x73, PingS);
+            ToClient.Add(0x71, BulletinBoardData);
+            ToClient.Add(0x72, Warmode);
+            ToClient.Add(0x73, Ping);
             ToClient.Add(0x74, BuyList);
-            //ToServer.Add(0x75, RenameCharacter);
-            ToClient.Add(0x76, NewSubServer);
             ToClient.Add(0x77, UpdateCharacter);
             ToClient.Add(0x78, UpdateObject);
-            ToClient.Add(0x7C, OpenMenu);
-            /*ToServer.Add(0x7D, ResponseToDialogBox);
-            ToServer.Add(0x80, LoginRequest);*/
-            // *** ToClient.Add(0x82, LoginError);
-            //ToServer.Add(0x83, DeleteCharacter);
-            // *** ToClient.Add(0x86, ResendCharacterList);
+            ToClient.Add(0x7C, OpenMenu);       
             ToClient.Add(0x88, OpenPaperdoll);
             ToClient.Add(0x89, CorpseEquipment);
-            // *** ToClient.Add(0x8C, RelayServer);
             ToClient.Add(0x90, DisplayMap);
-            //ToServer.Add(0x91, GameServerLogin);
-            ToClient.Add(0x93, OpenBook); //ToServer.Add(0x93, BookHeaderOldS);
-            ToClient.Add(0x95, DyeData); //ToServer.Add(0x95, DyeWindowS);
+            ToClient.Add(0x93, OpenBook);
+            ToClient.Add(0x95, DyeData);
             ToClient.Add(0x97, MovePlayer);
-            ToClient.Add(0x98, AllNames3DGameOnlyR); //ToServer.Add(0x98, AllNames3DGameOnlyS);
-            ToClient.Add(0x99, MultiPlacement); //ToServer.Add(0x99, RequestBoatAndHousePlacement);
-            ToClient.Add(0x9A, ASCIIPrompt); //ToServer.Add(0x9A, ConsoleEntryPromptS);
-            //ToServer.Add(0x9B, RequestHelp);
-            ToClient.Add(0x9C, RequestAssistance);
-            ToClient.Add(0x9E, SellList);
-            /*ToServer.Add(0x9F, SellListReply);
-            ToServer.Add(0xA0, SelectServer);*/
+            ToClient.Add(0x99, MultiPlacement);
+            ToClient.Add(0x9A, ASCIIPrompt);
+            ToClient.Add(0x9E, SellList);      
             ToClient.Add(0xA1, UpdateHitpoints);
             ToClient.Add(0xA2, UpdateMana);
             ToClient.Add(0xA3, UpdateStamina);
-            //ToServer.Add(0xA4, ClientSpy);
             ToClient.Add(0xA5, OpenUrl);
             ToClient.Add(0xA6, TipWindow);
-            //ToServer.Add(0xA7, RequestNoticeWindow);
-            // *** ToClient.Add(0xA8, ServerList);
-            // *** ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xAA, AttackCharacter);
             ToClient.Add(0xAB, TextEntryDialog);
-            /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
-            ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
+            ToClient.Add(0xAF, DisplayDeath);
             ToClient.Add(0xAE, UnicodeTalk);
             ToClient.Add(0xB0, OpenGump);
-            //ToServer.Add(0xB1, GumpMenuSelection);
             ToClient.Add(0xB2, ChatMessage);
-            /*ToServer.Add(0xB3, ChatText);
-            ToServer.Add(0xB5, OpenChatWindow);
-            ToServer.Add(0xB6, SendHelpRequest);*/
             ToClient.Add(0xB7, Help);
-            ToClient.Add(0xB8, CharacterProfile); //ToServer.Add(0xB8, RequestCharProfile);
+            ToClient.Add(0xB8, CharacterProfile);
             ToClient.Add(0xB9, EnableLockedFeatures);
             ToClient.Add(0xBA, DisplayQuestArrow);
-            ToClient.Add(0xBB, UltimaMessengerR); //ToServer.Add(0xBB, UltimaMessengerS);
+            ToClient.Add(0xBB, UltimaMessengerR);
             ToClient.Add(0xBC, Season);
-            // *** ToClient.Add(0xBD, ClientVersion); //ToServer.Add(0xBD, ClientVersionS);
-            ToClient.Add(0xBE, AssistVersion); // ToServer.Add(0xBE, AssistVersionS);
-            ToClient.Add(0xBF, ExtendedCommand); //ToServer.Add(0xBF, GeneralInformationPacketS);
+            ToClient.Add(0xBE, AssistVersion);
+            ToClient.Add(0xBF, ExtendedCommand);
             ToClient.Add(0xC0, GraphicEffect);
             ToClient.Add(0xC1, DisplayClilocString);
-            ToClient.Add(0xC2, UnicodePrompt); //ToServer.Add(0xC2, UnicodeTextEntryS);
+            ToClient.Add(0xC2, UnicodePrompt);
             ToClient.Add(0xC4, Semivisible);
-            //ToServer.Add(0xC5, validMapRequest);
             ToClient.Add(0xC6, InvalidMapEnable);
             ToClient.Add(0xC7, GraphicEffect);
             ToClient.Add(0xC8, ClientViewRange);
-            ToClient.Add(0xCA, GetUserServerPingGodClientR); //ToServer.Add(0xCA, GetUserServerPingGodClientS);
+            ToClient.Add(0xCA, GetUserServerPingGodClientR);
             ToClient.Add(0xCB, GlobalQueCount);
             ToClient.Add(0xCC, DisplayClilocString);
-            ToClient.Add(0xD0, ConfigurationFileR); //ToServer.Add(0xD0, ConfigurationFileS);
-            ToClient.Add(0xD1, Logout); //ToServer.Add(0xD1, LogoutStatusS);
+            ToClient.Add(0xD0, ConfigurationFileR);
+            ToClient.Add(0xD1, Logout);
             ToClient.Add(0xD2, UpdateCharacter);
             ToClient.Add(0xD3, UpdateObject);
-            ToClient.Add(0xD4, OpenBook); //ToServer.Add(0xD4, BookHeaderNewS);
-            ToClient.Add(0xD6, MegaCliloc); //ToServer.Add(0xD6, MegaClilocS);
-            ToClient.Add(0xD7, GenericAOSCommandsR); //ToServer.Add(0xD7, GenericAOSCommandsS);
+            ToClient.Add(0xD4, OpenBook); 
+            ToClient.Add(0xD6, MegaCliloc);
+            ToClient.Add(0xD7, GenericAOSCommandsR);
             ToClient.Add(0xD8, CustomHouse);
-            //ToServer.Add(0xD9, SpyOnClient);
             ToClient.Add(0xDB, CharacterTransferLog);
             ToClient.Add(0xDC, OPLInfo);
             ToClient.Add(0xDD, OpenCompressedGump);
             ToClient.Add(0xDE, UpdateMobileStatus);
             ToClient.Add(0xDF, BuffDebuff);
-            /*ToServer.Add(0xE0, BugReportKR);
-            ToServer.Add(0xE1, ClientTypeKRSA);*/
             ToClient.Add(0xE2, NewCharacterAnimation);
             ToClient.Add(0xE3, KREncryptionResponse);
-            /*ToServer.Add(0xEC, EquipMacroKR);
-            ToServer.Add(0xED, UnequipItemMacroKR);
-            ToServer.Add(0xEF, KR2DClientLoginSeed);*/
             ToClient.Add(0xF0, KrriosClientSpecial);
-            ToClient.Add(0xF1, FreeshardListR); //ToServer.Add(0xF1, FreeshardListS);
+            ToClient.Add(0xF1, FreeshardListR);
             ToClient.Add(0xF3, UpdateItemSA);
             ToClient.Add(0xF5, DisplayMap);
-            //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
+            ToClient.Add(0xF6, BoatMoving);
             ToClient.Add(0xF7, PacketList);
         }
 
         private static void TargetCursor(Packet p)
         {
-            TargetManager.SetTargeting((TargetType)p.ReadByte(), p.ReadUInt(), p.ReadByte());
+            TargetManager.SetTargeting((CursorTarget)p.ReadByte(), p.ReadUInt(), (TargetType)p.ReadByte());
+
+            if (World.Party.PartyHealTimer < Engine.Ticks && World.Party.PartyHealTarget != 0)
+            {
+                TargetManager.TargetGameObject(World.Get(World.Party.PartyHealTarget));
+                World.Party.PartyHealTimer = 0;
+                World.Party.PartyHealTarget = 0;
+            }
         }
 
         private static void SecureTrading(Packet p)
@@ -378,12 +286,6 @@ namespace ClassicUO.Network
 
                 Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
-
-            //World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
-        }
-
-        private static void EditTileDataGodClientR(Packet p)
-        {
         }
 
         private static void CharacterStatus(Packet p)
@@ -399,71 +301,100 @@ namespace ClassicUO.Network
             mobile.IsRenamable = p.ReadBool();
             byte type = p.ReadByte();
 
-            if (type > 0)
+            if (type > 0 && p.Position + 1 <= p.Length)
             {
-                World.Player.Female = p.ReadBool();
-                World.Player.Strength = p.ReadUShort();
-                World.Player.Dexterity = p.ReadUShort();
-                World.Player.Intelligence = p.ReadUShort();
-                World.Player.Stamina = p.ReadUShort();
-                World.Player.StaminaMax = p.ReadUShort();
-                World.Player.Mana = p.ReadUShort();
-                World.Player.ManaMax = p.ReadUShort();
-                World.Player.Gold = p.ReadUInt();
-                World.Player.ResistPhysical = p.ReadUShort();
-                World.Player.Weight = p.ReadUShort();
+                mobile.IsFemale = p.ReadBool();
 
-                if (type >= 5) //ML
+                if (mobile == World.Player)
                 {
-                    World.Player.WeightMax = p.ReadUShort();
-                    byte race = p.ReadByte();
-                    if (race <= 0) race = 1;
-                    World.Player.Race = (RaceType)race;
-                }
-                else
-                {
-                    if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-                        World.Player.WeightMax = (ushort)(7 * (World.Player.Strength >> 1) + 40);
+                    ushort str = p.ReadUShort();
+                    ushort dex = p.ReadUShort();
+                    ushort intell = p.ReadUShort();
+                    World.Player.Stamina = p.ReadUShort();
+                    World.Player.StaminaMax = p.ReadUShort();
+                    World.Player.Mana = p.ReadUShort();
+                    World.Player.ManaMax = p.ReadUShort();
+                    World.Player.Gold = p.ReadUInt();
+                    World.Player.ResistPhysical = p.ReadUShort();
+                    World.Player.Weight = p.ReadUShort();
+
+
+                    if (World.Player.Strength != 0)
+                    {
+                        ushort currentStr = World.Player.Strength;
+                        ushort currentDex = World.Player.Dexterity;
+                        ushort currentInt = World.Player.Intelligence;
+
+                        int deltaStr = str - currentStr;
+                        int deltaDex = dex - currentDex;
+                        int deltaInt = intell - currentInt;
+
+                        if (deltaStr != 0)
+                            Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+
+                        if (deltaDex != 0)
+                            Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+
+                        if (deltaInt != 0)
+                            Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                    }
+
+                    World.Player.Strength = str;
+                    World.Player.Dexterity = dex;
+                    World.Player.Intelligence = intell;
+
+                    if (type >= 5) //ML
+                    {
+                        World.Player.WeightMax = p.ReadUShort();
+                        byte race = p.ReadByte();
+                        if (race <= 0) race = 1;
+                        World.Player.Race = (RaceType) race;
+                    }
                     else
-                        World.Player.WeightMax = (ushort)(World.Player.Strength * 4 + 25);
-                }
+                    {
+                        if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                            World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
+                        else
+                            World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
+                    }
 
-                if (type >= 3) //Renaissance
-                {
-                    World.Player.StatsCap = p.ReadUShort();
-                    World.Player.Followers = p.ReadByte();
-                    World.Player.FollowersMax = p.ReadByte();
-                }
+                    if (type >= 3) //Renaissance
+                    {
+                        World.Player.StatsCap = p.ReadUShort();
+                        World.Player.Followers = p.ReadByte();
+                        World.Player.FollowersMax = p.ReadByte();
+                    }
 
-                if (type >= 4) //AOS
-                {
-                    World.Player.ResistFire = p.ReadUShort();
-                    World.Player.ResistCold = p.ReadUShort();
-                    World.Player.ResistPoison = p.ReadUShort();
-                    World.Player.ResistEnergy = p.ReadUShort();
-                    World.Player.Luck = p.ReadUShort();
-                    World.Player.DamageMin = p.ReadUShort();
-                    World.Player.DamageMax = p.ReadUShort();
-                    World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
-                }
+                    if (type >= 4) //AOS
+                    {
+                        World.Player.ResistFire = p.ReadUShort();
+                        World.Player.ResistCold = p.ReadUShort();
+                        World.Player.ResistPoison = p.ReadUShort();
+                        World.Player.ResistEnergy = p.ReadUShort();
+                        World.Player.Luck = p.ReadUShort();
+                        World.Player.DamageMin = p.ReadUShort();
+                        World.Player.DamageMax = p.ReadUShort();
+                        World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
+                    }
 
-                if (type >= 6)
-                {
-                    World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
-                    World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    if (type >= 6)
+                    {
+                        World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                    }
                 }
             }
 
@@ -594,6 +525,10 @@ namespace ClassicUO.Network
             if (graphic >= 0x4000)
             {
                 item.Graphic -= 0x4000;
+
+                //if (item.IsMulti)
+                //    item.IsMulti = false;
+
                 item.IsMulti = true;
             }
 
@@ -605,19 +540,19 @@ namespace ClassicUO.Network
 
             if (item.ItemData.IsAnimated)
             {
-                item.View.AllowedToDraw = false;
+                item.AllowedToDraw = false;
 
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
-            //item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
-
             if (item.OnGround)
                 item.AddToTile();
         }
 
         private static void EnterWorld(Packet p)
         {
-            Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
+            LoginScene scene = Engine.SceneManager.GetScene<LoginScene>();
+
+            Engine.Profile.Load(World.ServerName, scene.Account, Engine.GlobalSettings.LastCharacterName);
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
@@ -677,7 +612,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, font);
+            Chat.OnMessage(entity, text, name, hue, type, font);
         }
 
         private static void DeleteObject(Packet p)
@@ -708,7 +643,7 @@ namespace ClassicUO.Network
                         World.Player.UpdateAbilities();
                     }
 
-                    World.Get(item.Container).Items.Remove(item);
+                    World.Get(item.Container)?.Items.Remove(item);
                 }
 
                 if (World.RemoveItem(serial))
@@ -719,10 +654,6 @@ namespace ClassicUO.Network
                 World.Items.ProcessDelta();
                 World.Mobiles.ProcessDelta();
             }
-        }
-
-        private static void Explosion(Packet p)
-        {
         }
 
         private static void UpdatePlayer(Packet p)
@@ -868,27 +799,39 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
-                var gump = new ShopGump(serial, true, 150, 5);
+                ShopGump gump = new ShopGump(serial, true, 150, 5);
+                Engine.UI.Add(gump);
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.Equipment[(int) layer];
 
-                    Item a = item?.Items.FirstOrDefault();
+                    //Item a = item?.Items.FirstOrDefault();
 
-                    if (a == null)
-                        continue;
+                    //if (a == null)
+                    //    continue;
 
-                    var list = item.Items.OrderBy(s => s.Serial.Value).Reverse();
+                    //bool reverse = a.X > 1;
+
+                    //var list = reverse ? 
+                    //               item.Items.OrderBy(s => s.Serial.Value).Reverse() 
+                    //               :
+                    //               item.Items.OrderBy(s => s.Serial.Value);
+
+                    var list = item.Items/*.OrderByDescending(s => s.Serial.Value)*/.ToArray();
+
+                    if (list.Length == 0)
+                        return;
+
+                    if (list[0].X > 1)
+                        list = list.Reverse().ToArray();
 
                     foreach (var i in list)
                     {
-                        gump.AddItem(i);
+                        gump.AddItem(i, false);
                     }
-
                 }
 
-                Engine.UI.Add(gump);
             }
             else
             {
@@ -915,6 +858,24 @@ namespace ClassicUO.Network
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
+
+            //if (graphic != 0x0030)
+            //{
+            //    Item item = World.Items.Get(serial);
+
+            //    if (item != null)
+            //    {
+            //        if (!item.IsCorpse)
+            //        {
+            //            foreach (Item itemItem in item.Items)
+            //            {
+            //                item.Items.Remove(itemItem);
+            //                World.Items.Remove(itemItem);
+            //            }
+            //        }
+            //    }
+            //}
+
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -922,14 +883,22 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            List<Item> items = new List<Item>();
+            Serial serial = p.ReadUInt();
+            Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+            ushort amount = Math.Max((ushort) 1, p.ReadUShort());
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
 
-            if (ReadContainerContent(p, items))
-                World.Items.ProcessDelta();
-        }
+            if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+                p.Skip(1);
 
-        private static void KickPlayer(Packet p)
-        {
+            Serial containerSerial = p.ReadUInt();
+            Hue hue = p.ReadUShort();
+
+            AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+
+            World.Get(containerSerial)?.Items.ProcessDelta();
+            World.Items.ProcessDelta();
         }
 
         private static void DenyMoveItem(Packet p)
@@ -996,8 +965,7 @@ namespace ClassicUO.Network
 
                                     mob.Equipment[(int) hold.Layer] = item;
 
-                                    World.Items.Add(item);
-
+                                    mob.Items.ProcessDelta();
                                     mob.ProcessDelta();
                                 }
                                 else
@@ -1012,6 +980,10 @@ namespace ClassicUO.Network
                         }
                         else 
                             item.AddToTile();
+
+                        World.Items.Add(item);
+                        item.ProcessDelta();
+                        World.Items.ProcessDelta();
                     }
                 }
 
@@ -1026,7 +998,7 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), 0, MessageType.System, MessageFont.Normal);
+                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, MessageFont.Normal);
             }
         }
 
@@ -1050,14 +1022,6 @@ namespace ClassicUO.Network
             scene.HeldItem.Dropped = false;
         }
 
-        private static void Blood(Packet p)
-        {
-        }
-
-        private static void GodMode(Packet p)
-        {
-        }
-
         private static void DeathScreen(Packet p)
         {
             // todo
@@ -1066,6 +1030,9 @@ namespace ClassicUO.Network
             if (action != 1)
             {
                 Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
+
+                if (Engine.Profile.Current.EnableDeathScreen)
+                    World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
 
                 GameActions.SetWarMode(false);
             }
@@ -1087,7 +1054,33 @@ namespace ClassicUO.Network
 
         private static void EquipItem(Packet p)
         {
-            Item item = World.GetOrCreateItem(p.ReadUInt());
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+
+            Item item = World.GetOrCreateItem(serial);
+
+            
+            if (item.Graphic != 0 && item.Layer != Layer.Backpack)
+            {
+                item.Items.Clear();
+            }
+
+            if (item.Container != 0)
+            {
+                Entity cont = World.Get(item.Container);
+                cont.Items.Remove(item);
+                cont.Items.ProcessDelta();
+                item.Container = Serial.INVALID;
+            }
+
+            item.RemoveFromTile();
+
+            //if (item.Graphic != 0)
+            //    World.RemoveItem(item);
+            
+
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer)p.ReadByte();
             item.Container = p.ReadUInt();
@@ -1099,11 +1092,16 @@ namespace ClassicUO.Network
             {
                 mobile.Equipment[(int)item.Layer] = item;
                 mobile.Items.Add(item);
+                mobile.Items.ProcessDelta();
             }
 
-            item.ProcessDelta();
-            if (World.Items.Add(item)) World.Items.ProcessDelta();
-            mobile?.ProcessDelta();
+            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
+            {
+                item.Items.Clear();
+            }
+
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
 
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
@@ -1112,18 +1110,6 @@ namespace ClassicUO.Network
 
             if (gs.HeldItem.Serial == item.Serial)
                 gs.HeldItem.Clear();
-        }
-
-        private static void FightOccuring(Packet p)
-        {
-        }
-
-        private static void AttackOK(Packet p)
-        {
-        }
-
-        private static void AttackEnded(Packet p)
-        {
         }
 
         private static void UpdateSkills(Packet p)
@@ -1174,14 +1160,6 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
         }
 
-        private static void RemoveGroupR(Packet p)
-        {
-        }
-
-        private static void PauseControl(Packet p)
-        {
-        }
-
         private static void Pathfinding(Packet p)
         {
             if (!World.InGame)
@@ -1194,45 +1172,79 @@ namespace ClassicUO.Network
             Pathfinder.WalkTo(x, y, z, 0);
         }
 
-        private static void ResourceTileDataGodClient(Packet p)
-        {
-        }
-
         private static void UpdateContainedItems(Packet p)
         {
             if (!World.InGame)
                 return;
+
             ushort count = p.ReadUShort();
-            List<Item> items = new List<Item>(count);
+
+            Entity container = null;
 
             for (int i = 0; i < count; i++)
-                ReadContainerContent(p, items);
-
-            if (items.Count != 0)
             {
-                Item container = World.Items.Get(items[0].Container);
+                Serial serial = p.ReadUInt();
+                Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+                ushort amount = Math.Max(p.ReadUShort(), (ushort)1);
+                ushort x = p.ReadUShort();
+                ushort y = p.ReadUShort();
+                if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+                    p.Skip(1);
+                Serial containerSerial = p.ReadUInt();
+                Hue hue = p.ReadUShort();
 
-                if (container != null && container.IsSpellBook && SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
+                if (i == 0)
                 {
-                    SpellbookData.GetData(container, out ulong field, out SpellBookType type);
+                    container = World.Get(containerSerial);
 
-                    if (container.FillSpellbook(type, field))
+                    if (container != null)
                     {
-                        SpellbookGump gump = Engine.UI.GetByLocalSerial<SpellbookGump>(container);
-                        gump?.Update();
+                        if (container.Graphic == 0x2006)
+                        {                          
+                            container.Items
+                                     .Where( s=> s.Layer == Layer.Invalid)
+                                     .ToList()
+                                     .ForEach(s =>
+                            {
+                                s.Container = Serial.INVALID;
+                                container.Items.Remove(s);
+                                World.Items.Remove(s);
+                            });
+                        }
+                        else
+                        {
+                            container.Items
+                                     .ToList()
+                                     .ForEach(s =>
+                                      {
+                                          s.Container = Serial.INVALID;
+                                          container.Items.Remove(s);
+                                          World.Items.Remove(s);
+                                      });
+                        }
+
+                        container.ProcessDelta();
+                        World.Items.ProcessDelta();
                     }
+                }
+
+                AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+            }
+
+            container?.Items.ProcessDelta();
+
+            if (container is Item itemContainer && itemContainer.IsSpellBook && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
+            {
+                SpellbookData.GetData(itemContainer, out ulong field, out SpellBookType type);
+
+                if (itemContainer.FillSpellbook(type, field))
+                {
+                    Engine.UI.GetByLocalSerial<SpellbookGump>(itemContainer)?.Update();
                 }
             }
 
+
             World.Items.ProcessDelta();
-        }
-
-        private static void VersionGodClient(Packet p)
-        {
-        }
-
-        private static void UpdateStaticsGodClient(Packet p)
-        {
         }
 
         private static void PersonalLightLevel(Packet p)
@@ -1259,10 +1271,6 @@ namespace ClassicUO.Network
                 level = 0x1F;
 
             //World.Light.Overall = level;
-        }
-
-        private static void ErrorCode(Packet p)
-        {
         }
 
         private static void PlaySoundEffect(Packet p)
@@ -1297,21 +1305,17 @@ namespace ClassicUO.Network
         {
             if (World.Player != null)
             {
-                GameScene scene = new GameScene();
-                Engine.SceneManager.ChangeScene(scene);
-
+                Engine.SceneManager.ChangeScene(ScenesType.Game);
 
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());
 
-                //TODO: issue with viewrange
-                //if (FileManager.ClientVersion >= ClientVersions.CV_305D)
-                //    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+                if (FileManager.ClientVersion >= ClientVersions.CV_305D)
+                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
-                scene.Load();
 
                 Engine.Profile.Current.ReadGumps()?.ForEach(Engine.UI.Add);
             }
@@ -1363,6 +1367,9 @@ namespace ClassicUO.Network
 
         private static void BookData(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             UIManager ui = Engine.UI;
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
@@ -1447,7 +1454,7 @@ namespace ClassicUO.Network
 
         private static void BulletinBoardData(Packet p)
         {
-            if (World.Player == null)
+            if (!World.InGame)
                 return;
 
             switch (p.ReadByte())
@@ -1550,10 +1557,10 @@ namespace ClassicUO.Network
 
         private static void Warmode(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             World.Player.InWarMode = p.ReadBool();
-            p.ReadByte(); // always 0x00
-            p.ReadByte(); // always 0x32
-            p.ReadByte(); // always 0x00
             World.Player.ProcessDelta();
         }
 
@@ -1592,37 +1599,45 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                Item a = container.Items.FirstOrDefault();
+                //Item a = container.Items.FirstOrDefault();
 
-                if (a == null)
+                //if (a == null)
+                //    return;
+
+                //bool reverse = a.X > 1;
+
+                //var list = reverse ? 
+                //               container.Items.OrderBy(s => s.Serial.Value).Reverse()
+                //               :
+                //               container.Items.OrderBy(s => s.Serial.Value);
+
+
+                var list = container.Items/*.OrderBy(s => s.Serial.Value)*/.ToArray();
+
+                if (list.Length == 0)
                     return;
 
-                bool reverse = a.X > 1;
+                if (list[0].X > 1)
+                    list = list.Reverse().ToArray();
 
-                var list = reverse ? 
-                               container.Items.OrderBy(s => s.Serial.Value).Reverse()
-                               :
-                               container.Items.OrderBy(s => s.Serial.Value);
 
                 foreach (Item it in list.Take(count))
                 {
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
-
+                    bool fromcliloc = false;
                     if (int.TryParse(name, out int cliloc))
                     {
                         it.Name = FileManager.Cliloc.GetString(cliloc);
+                        fromcliloc = true;
                     }
                     else
                         it.Name = name;
 
+                    gump.SetIfNameIsFromCliloc(it, fromcliloc);
                 }
             }
-        }
-
-        private static void NewSubServer(Packet p)
-        {
         }
 
         private static void UpdateCharacter(Packet p)
@@ -1688,6 +1703,9 @@ namespace ClassicUO.Network
                 p.Skip(6);
 
             uint itemSerial;
+
+            // reset equipment
+            mobile.Equipment = null;
 
             while ((itemSerial = p.ReadUInt()) != 0)
             {
@@ -1758,38 +1776,46 @@ namespace ClassicUO.Network
 
             if (mobile != World.Player)
                 NetClient.Socket.Send(new PClickRequest(mobile));
+
+            Engine.UI.GetByLocalSerial<PaperDollGump>(mobile)?.Update();
         }
 
         private static void OpenMenu(Packet p)
         {
+            //TODO:
+            if (!World.InGame)
+                return;
+
             Serial serial = p.ReadUInt();
-            uint id = p.ReadUInt();
-            //string name = p.ReadASCII(p.ReadByte());
-            //int count = p.ReadByte();
-            // to finish
-        }
+            ushort id = p.ReadUShort();
+            string name = p.ReadASCII(p.ReadByte());
+            int count = p.ReadByte();
 
-        private static void LoginError(Packet p)
-        {
-        }
+            Graphic menuid = p.ReadUShort();
+            p.Seek(p.Position - 2);
 
-        private static void ResendCharacterList(Packet p)
-        {
-            int slots = p.ReadByte();
-
-            if (slots > 0)
+            if (menuid != 0)
             {
-                for (int i = 0; i < slots; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    string name = p.ReadASCII(30);
-                    p.Skip(30);
+                    Graphic graphic = p.ReadUShort();
+                    Hue hue = p.ReadUShort();
+                    name = p.ReadASCII(p.ReadByte());
 
-                    if (name.Length > 0)
-                    {
-                    }
                 }
             }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    p.Skip(4); 
+                    name = p.ReadASCII(p.ReadByte());
+                }
+            }
+
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
         }
+
 
         private static void OpenPaperdoll(Packet p)
         {
@@ -1812,25 +1838,26 @@ namespace ClassicUO.Network
 
         private static void CorpseEquipment(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Entity corpse = World.Get(p.ReadUInt());
-            Layer layer = (Layer)p.ReadByte();
+            Layer layer = (Layer)p.ReadByte() - 1;
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
                 Item item = World.Items.Get(p.ReadUInt());
-
+                
                 if (item != null && item.Container == corpse)
                 {
-                    // put equip
+                    item.Layer = layer;
+                    corpse.Equipment[(int) layer] = item;
                 }
 
-                layer = (Layer)p.ReadByte();
+                layer = (Layer)p.ReadByte() - 1;
             }
         }
 
-        private static void RelayServer(Packet p)
-        {
-        }
 
         private static void DisplayMap(Packet p)
         {
@@ -1938,12 +1965,9 @@ namespace ClassicUO.Network
             World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
-        private static void AllNames3DGameOnlyR(Packet p)
-        {
-        }
-
         private static void MultiPlacement(Packet p)
         {
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `MultiPlacement` not implemented yet.");
         }
 
         private static void ASCIIPrompt(Packet p)
@@ -1960,12 +1984,11 @@ namespace ClassicUO.Network
             };       
         }
 
-        private static void RequestAssistance(Packet p)
-        {
-        }
-
         private static void SellList(Packet p)
         {
+            if (!World.InGame)
+                return;
+
             Mobile vendor = World.Mobiles.Get(p.ReadUInt());
 
             if (vendor == null) return;
@@ -1973,7 +1996,9 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
-            List<Item> itemList = new List<Item>(countItems);
+            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(vendor);          
+            gump?.Dispose();
+            gump = new ShopGump(vendor, false, 100, 0);
 
             for (int i = 0; i < countItems; i++)
             {
@@ -1984,16 +2009,18 @@ namespace ClassicUO.Network
                 item.Price = p.ReadUShort();
 
                 string name = p.ReadASCII(p.ReadUShort());
+                bool fromcliloc = false;
                 if (int.TryParse(name, out int clilocnum))
+                {
                     name = FileManager.Cliloc.GetString(clilocnum);
+                    fromcliloc = true;
+                }
 
                 item.Name = name;
 
-                itemList.Add(item);
+                gump.AddItem(item, fromcliloc);
             }
-
-            UIManager ui = Engine.UI;
-            //ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
+            Engine.UI.Add(gump);
         }
 
         private static void UpdateHitpoints(Packet p)
@@ -2052,14 +2079,8 @@ namespace ClassicUO.Network
                 Serial serial = p.ReadUInt();
                 string str = p.ReadASCII(p.ReadUShort());
             }
-        }
 
-        private static void ServerList(Packet p)
-        {
-        }
-
-        private static void CharacterList(Packet p)
-        {
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `TipWindow` not implemented yet.");
         }
 
         private static void AttackCharacter(Packet p)
@@ -2073,11 +2094,6 @@ namespace ClassicUO.Network
                 if (mob != null && mob.HitsMax <= 0)
                     NetClient.Socket.Send(new PStatusRequest(World.LastAttack));
             }
-            //Mobile lastattackedmobile = World.Mobiles.Get(p.ReadUInt());
-
-            //if (lastattackedmobile != null)
-            //{
-            //}
         }
 
         private static void TextEntryDialog(Packet p)
@@ -2109,6 +2125,34 @@ namespace ClassicUO.Network
 
         private static void UnicodeTalk(Packet p)
         {
+
+            if (!World.InGame)
+            {
+                LoginScene scene = Engine.SceneManager.GetScene<LoginScene>();
+
+                if (scene != null)
+                {
+                    //Serial serial = p.ReadUInt();
+                    //ushort graphic = p.ReadUShort();
+                    //MessageType type = (MessageType)p.ReadByte();
+                    //Hue hue = p.ReadUShort();
+                    //MessageFont font = (MessageFont)p.ReadUShort();
+                    //string lang = p.ReadASCII(4);
+                    //string name = p.ReadASCII(30);
+                    Log.Message(LogTypes.Warning, "UnicodeTalk received during LoginScene");
+
+                    if (p.Length > 48)
+                    {
+                        p.Seek(48);
+                        Log.PushIndent();
+                        Log.Message(LogTypes.Warning, "Handled UnicodeTalk in LoginScene");
+                        Log.PopIndent();
+                    }
+                }
+
+                return;
+            }
+
             Serial serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
@@ -2121,12 +2165,54 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.Graphic = graphic;
+                //entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
+            Chat.OnMessage(entity, text, name, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
+        }
+
+        private static void DisplayDeath(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            Serial corpseSerial = p.ReadUInt();
+            Serial running = p.ReadUInt();
+
+            Mobile owner = World.Mobiles.Get(serial);
+
+            if (owner == null)
+                return;
+
+            serial |= 0x80000000;
+
+
+            //World.Mobiles.Remove(owner);
+            //World.Mobiles.ProcessDelta();
+
+            //Mobile newOwner = World.GetOrCreateMobile(serial);
+
+            //foreach (Item i in owner.Items)
+            //{
+            //    i.Container = serial;
+            //    newOwner.Items.Add(i); // item duping?
+            //}
+
+            //World.Mobiles.Add(newOwner);
+            //newOwner.ProcessDelta();
+            //World.Mobiles.ProcessDelta();
+
+            //if (corpseSerial.IsValid)
+            //{
+
+            //}
+
+            //byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
+
+            //owner.SetAnimation(group, 0, 5, 1);
         }
 
         private static void OpenGump(Packet p)
@@ -2176,10 +2262,14 @@ namespace ClassicUO.Network
 
         private static void CharacterProfile(Packet p)
         {
-            var serial = p.ReadUInt();
-            var header = p.ReadASCII();
-            var footer = p.ReadUnicode();
-            var body = p.ReadUnicode();
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            string header = p.ReadASCII();
+            string footer = p.ReadUnicode();
+            
+            string body = p.Position < p.Length ? p.ReadUnicode() : string.Empty;
 
             Engine.UI.GetByLocalSerial<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, (serial == World.Player.Serial)));
@@ -2367,6 +2457,12 @@ namespace ClassicUO.Network
                         count++;
                     }
 
+                    if ((count < 20 && count > 0) || (next == 0xFFFFFFFC && count == 0))
+                        strBuffer.Append(']');
+
+                    if (strBuffer.Length != 0)
+                        item.AddOverhead(MessageType.Regular, strBuffer.ToString(), 3, 0x03B2, true);
+                    NetClient.Socket.Send(new PMegaClilocRequestOld(item));
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2446,9 +2542,8 @@ namespace ClassicUO.Network
                             break;
                         case 5:
                             Mobile character = World.Mobiles.Get(serial);
-
-                            if (character == null) return;
-                            if (p.Length == 19) dead = p.ReadBool();
+                            if (character != null && p.Length == 19)
+                                character.IsDead = p.ReadBool();
 
                             break;
                     }
@@ -2614,12 +2709,12 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.Graphic = graphic;
+                //entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, hue, type, font, true);
+            Chat.OnMessage(entity, text, name, hue, type, font, true);
         }
 
         private static void UnicodePrompt(Packet p)
@@ -2673,13 +2768,44 @@ namespace ClassicUO.Network
             if (unknown > 1)
                 return;
 
-            Entity entity = World.Get(p.ReadUInt());
-
-            if (entity == null) return;
+            Serial serial = p.ReadUInt();
             p.Skip(2);
-            entity.PropertiesHash = p.ReadUInt();
-            entity.UpdateProperties(ReadProperties(p));
-            entity.ProcessDelta();
+            uint revision = p.ReadUInt();
+
+            Entity entity = World.Mobiles.Get(serial);
+
+            if (entity == null)
+            {
+                if (serial.IsMobile)
+                    Log.Message(LogTypes.Warning, "Searching a mobile into World.Items from MegaCliloc packet");
+                entity = World.Items.Get(serial);
+            }
+
+            if (entity != null)
+            {
+                entity.PropertiesHash = revision;
+                entity.UpdateProperties(ReadProperties(p));
+                entity.ProcessDelta();
+
+                if (serial.IsItem && entity.Properties.Any())
+                {
+                    Property property = entity.Properties.FirstOrDefault();
+                    entity.Name = FileManager.Cliloc.Translate((int)property.Cliloc, property.Args, true);
+                }
+
+            }
+
+            if (entity is Item it)
+            {
+                ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(it.RootContainer);
+
+                if (gump != null)
+                {
+                    Property property = it.Properties.FirstOrDefault();
+
+                    gump.SetNameTo(it, FileManager.Cliloc.Translate((int)property.Cliloc, property.Args, true));
+                }
+            }
         }
 
         private static void GenericAOSCommandsR(Packet p)
@@ -2693,6 +2819,9 @@ namespace ClassicUO.Network
             Serial serial = p.ReadUInt();
             Item foundation = World.Items.Get(serial);
             uint revision = p.ReadUInt();
+
+            if (foundation == null)
+                return;
 
             MultiInfo multi = foundation.MultiInfo;
             if (!foundation.IsMulti || multi == null)
@@ -2847,7 +2976,8 @@ namespace ClassicUO.Network
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
                 Entity entity = World.Get(serial);
-                if (entity != null && entity.PropertiesHash != revision) NetClient.Socket.Send(new PMegaClilocRequest(entity));
+                if (entity != null && entity.PropertiesHash != revision)
+                    NetClient.Socket.Send(new PMegaClilocRequest(entity));
             }
         }
 
@@ -2870,10 +3000,8 @@ namespace ClassicUO.Network
             {
                 clen = p.ReadUInt() - 4;
                 dlen = (int)p.ReadUInt();
-                data = new byte[clen];
+                data = p.ReadArray((int) clen);
 
-                for (int i = 0; i < clen; i++)
-                    data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
                 lines = new string[linesNum];
@@ -3007,6 +3135,9 @@ namespace ClassicUO.Network
 
             if (type == 2)
             {
+                //if (item.IsMulti)
+                //    item.IsMulti = false;
+
                 item.IsMulti = true;
                 item.Graphic = (ushort)(item.Graphic & 0x3FFF);
             }
@@ -3017,12 +3148,58 @@ namespace ClassicUO.Network
 
             if (item.ItemData.IsAnimated)
             {
-                item.View.AllowedToDraw = false;
+                item.AllowedToDraw = false;
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
 
             if (item.OnGround)
                 item.AddToTile();
+        }
+
+        private static void BoatMoving(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            Serial serial = p.ReadUInt();
+            byte boatSpeed = p.ReadByte();
+            Direction movingDirection = (Direction) p.ReadByte();
+            Direction facingDirection = (Direction) p.ReadByte();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            ushort z = p.ReadUShort();
+
+            Item item = World.Items.Get(serial);
+
+            if (item == null)
+                return;
+
+            item.Position = new Position(x, y , (sbyte) z);
+            item.AddToTile();
+
+            if (World.HouseManager.TryGetHouse(item, out House house))
+            {
+                house.Generate(true);
+            }
+
+
+            int count = p.ReadUShort();
+
+            for (int i = 0; i < count; i++)
+            {
+                Serial cSerial = p.ReadUInt();
+                ushort cx = p.ReadUShort();
+                ushort cy = p.ReadUShort();
+                ushort cz = p.ReadUShort();
+
+                Entity entity = World.Get(cSerial);
+
+                if (entity != null)
+                {
+                    entity.Position = new Position(cx, cy, (sbyte) cz);
+                    entity.AddToTile();
+                }
+            }
         }
 
         private static void PacketList(Packet p)
@@ -3031,66 +3208,60 @@ namespace ClassicUO.Network
                 return;
         }
 
-        private static bool ReadContainerContent(Packet p, List<Item> items)
+        private static void AddItemToContainer(Serial serial, Graphic graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
         {
-            Item item = World.GetOrCreateItem(p.ReadUInt());
-            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
-            item.Amount = Math.Max(p.ReadUShort(), (ushort)1);
-            ushort x = p.ReadUShort();
-            ushort y = p.ReadUShort();
-            if (FileManager.ClientVersion >= ClientVersions.CV_6017) 
-                p.Skip(1);
-            item.Container = p.ReadUInt();
-            item.Position = new Position(x, y);
-            item.Hue = p.ReadUShort();
-
-            items.Add(item);
-
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs != null && gs.HeldItem.Serial == item.Serial && gs.HeldItem.Dropped)
-            {
+            if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
                 gs.HeldItem.Clear();
-            }
 
-            Entity entity = World.Get(item.Container);
+            Entity container = World.Get(containerSerial);
 
-            if (entity != null)
+            if (container == null)
             {
+                Log.Message(LogTypes.Warning, $"No container ({containerSerial}) found");
+                return;
+            }
+           
 
-                entity.Items.Remove(item);
-                entity.ProcessDelta();
+            Item item = World.Items.Get(serial);
 
-                entity.Items.Add(item);
-                World.Items.Add(item);
 
-                item.ProcessDelta();
-                entity.ProcessDelta();
-                return true;
+            if (serial.IsMobile)
+            {
+                Log.Message(LogTypes.Warning, $"AddItemToContainer function adds mobile as Item");
             }
 
-            //if (entity != null)
-            //{
-            //    entity.Items.Add(item);
+            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
+            {
+                Entity initcontainer = World.Get(item.Container);
 
-            //    foreach (Item i in World.ToAdd.Where(i => i.Container == item))
-            //    {
-            //        item.Items.Add(i);
-            //        World.Items.Add(i);
-            //    }
+                if (initcontainer != null)
+                {
+                    item.Container = Serial.INVALID;
+                    initcontainer.Items.Remove(item);
+                    initcontainer.ProcessDelta();
+                }
+                else if (item.Container.IsValid)
+                {
+                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
+                }
 
-            //    World.ToAdd.ExceptWith(item.Items);
-            //    item.ProcessDelta();
-            //    entity.ProcessDelta();
+                World.Items.Remove(item);
+                World.Items.ProcessDelta();
+            }
 
-            //    return World.Items.Add(item);
-            //}
+            item = World.GetOrCreateItem(serial);
+            item.Graphic = graphic;
+            item.Amount = amount;
+            item.Hue = hue;
+            item.Position = new Position(x, y);
+            item.Container = containerSerial;
 
-            //World.ToAdd.Add(item);
-            item.ProcessDelta();
-
-            return false;
+            container.Items.Add(item);
+            World.Items.Add(item);
         }
+
 
         private static IEnumerable<Property> ReadProperties(Packet p)
         {

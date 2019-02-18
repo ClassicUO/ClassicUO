@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -64,25 +64,6 @@ namespace ClassicUO
         }
     }
 
-    //internal class Window
-    //{
-    //    private Engine _engine;
-
-    //    public Window(Engine engine)
-    //    {
-    //        _engine = engine;
-    //    }
-
-    //    public int X
-    //    {
-    //        get => _engine.Window.ClientBounds.X;
-    //        set
-    //        {
-    //            _engine.Window.
-    //        }
-    //    }
-    //}
-
     internal class Engine : Microsoft.Xna.Framework.Game
     { 
         private const int MIN_FPS = 15;
@@ -101,15 +82,30 @@ namespace ClassicUO
         private float _time;
         private int _totalFrames;
         private UIManager _uiManager;
-        private Settings _settings;
+        private readonly Settings _settings;
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private bool _isMaximized;
+        private bool _isHighDPI;
 
-        private Engine()
+        public bool IsQuitted { get; private set; }
+
+        private Engine(Settings settings)
         {
-            //IsFixedTimeStep = true;
+            _settings = settings ?? ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+
+            if (_settings == null)
+            {
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, "settings.json file not found");
+                _settings = new Settings();
+                _settings.Save();
+                IsQuitted = true;
+                return;
+            }
+
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            IsFixedTimeStep = _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
@@ -120,11 +116,27 @@ namespace ClassicUO
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
             _graphicDeviceManager.ApplyChanges();
 
+            _isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+
             Window.ClientSizeChanged += (sender, e) =>
             {
-                _graphicDeviceManager.PreferredBackBufferWidth = Window.ClientBounds.Width;
-                _graphicDeviceManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
+                int width = Window.ClientBounds.Width;
+                int height = Window.ClientBounds.Height;
+
+                if (_isHighDPI)
+                {
+                    width *= 2;
+                    height *= 2;
+                }
+
+                _graphicDeviceManager.PreferredBackBufferWidth = width;
+                _graphicDeviceManager.PreferredBackBufferHeight = height;
                 _graphicDeviceManager.ApplyChanges();
+
+                WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
+
+                if (gump != null && _profileManager.Current.GameWindowFullSize)
+                    gump.ResizeWindow(new Point(WindowWidth, WindowHeight));
             };
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
@@ -154,7 +166,7 @@ namespace ClassicUO
             }
         }
 
-        public static Version Version { get; } = new Version(0, 0, 0, 1);
+        public static Version Version { get; } = new Version(0, 0, 1, 1);
 
         public static int CurrentFPS { get; private set; }
 
@@ -235,16 +247,119 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             Configure();
+                      
+            using (_engine = new Engine(ArgsParser(args)))
+            {
+                if (!_engine.IsQuitted)
+                    _engine.Run();
+            }
+        }
 
-            using (_engine = new Engine())
-                _engine.Run();
+        private static Settings ArgsParser(string[] args)
+        {
+            Settings settings = null;
+
+            if (args.Length > 1)
+            {
+                settings = new Settings();
+
+                for (int i = 0; i < args.Length - 1; i += 2)
+                {
+                    string cmd = args[i].ToLower();
+
+                    if (cmd.Length <= 1 && cmd[0] != '-')
+                        continue;
+
+                    cmd = cmd.Remove(0, 1);
+                    string value = args[i + 1];
+
+                    Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+
+                    switch (cmd)
+                    {
+                        case "uopath":
+                            settings.UltimaOnlineDirectory = value;
+
+                            break;
+                        case "ip":
+                            settings.IP = value;
+
+                            break;
+                        case "port":
+                            settings.Port = ushort.Parse(value);
+
+                            break;
+                        case "username":
+                            settings.Username = value;
+
+                            break;
+                        case "password":
+                            settings.Password = Crypter.Encrypt(value);
+
+                            break;
+                        case "clientversion":
+                            settings.ClientVersion = value;
+
+                            break;
+                        case "lastcharname":
+                            settings.LastCharacterName = value;
+
+                            break;
+                        case "fps":
+                            settings.MaxLoginFPS = int.Parse(value);
+
+                            break;
+                        case "debug":
+                            settings.Debug = bool.Parse(value);
+
+                            break;
+                        case "profiler":
+                            settings.Profiler = bool.Parse(value);
+
+                            break;
+                        case "saveaccount":
+                            settings.SaveAccount = bool.Parse(value);
+
+                            break;
+                        case "autologin":
+                            settings.AutoLogin = bool.Parse(value);
+
+                            break;
+                        case "music":
+                            settings.LoginMusic = bool.Parse(value);
+
+                            break;
+                        case "music_volume":
+                            settings.LoginMusicVolume = int.Parse(value);
+
+                            break;
+                        case "shard":
+                            settings.ShardType = int.Parse(value);
+
+                            break;
+                        case "fixed_time_step":
+                            settings.FixedTimeStep = bool.Parse(value);
+
+                            break;
+
+                    }
+
+                }
+            }
+
+            return settings;
         }
 
         public static void Quit()
         {
-            _engine.Exit();
+            _engine?.Exit();
         }
 
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            IsQuitted = true;
+            base.OnExiting(sender, args);
+        }
 
 
         private static void Configure()
@@ -270,55 +385,51 @@ namespace ClassicUO
             if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
                 string libsPath = Path.Combine(ExePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
-
                 SetDllDirectory(libsPath);
             }
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+            Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(ExePath, "Data", "Plugins"));
         }
-
-
 
         protected override void Initialize()
         {
-            Log.NewLine();
-            Log.NewLine();
+            Log.NewLine(); Log.NewLine();
 
             Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
 
-            Log.NewLine();
-            Log.NewLine();
+            Log.NewLine(); Log.NewLine();
 
-            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
-            if (_settings == null)
-            {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
-                _settings = new Settings();
-                _settings.Save();
-                Quit();
+            _batcher = new Batcher2D(GraphicsDevice);
+            _inputManager = new InputManager();
+            _uiManager = new UIManager();
+            _profileManager = new ProfileManager();
+            _sceneManager = new SceneManager();
+            _debugInfo = new DebugInfo();
 
-                return;
-            }
+            FpsLimit = LOGIN_SCREEN_FPS;
+
+
+
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
 
             try
             {
-                FileManager.UoFolderPath = _settings.UltimaOnlineDirectory;
+                FileManager.UoFolderPath = Engine.GlobalSettings.UltimaOnlineDirectory;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
 
-                throw e;
+                throw;
             }
 
-            Log.Message(LogTypes.Trace, "Done!");          
+            Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
             Log.PopIndent();
 
@@ -327,10 +438,7 @@ namespace ClassicUO
             FileManager.LoadFiles();
             Log.PopIndent();
 
-
             uint[] hues = FileManager.Hues.CreateShaderColors();
-
-            _batcher = new Batcher2D(GraphicsDevice);
 
             int size = FileManager.Hues.HuesCount;
 
@@ -342,23 +450,22 @@ namespace ClassicUO
             GraphicsDevice.Textures[2] = texture1;
 
 
-            _inputManager = new InputManager();
-            _uiManager = new UIManager();
-            _profileManager = new ProfileManager();
-            _sceneManager = new SceneManager();
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
-            UltimaLive.Load();
+            UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
 
-            FpsLimit = LOGIN_SCREEN_FPS;
+            _uiManager.InitializeGameCursor();
 
-            _debugInfo = new DebugInfo();
-            _uiManager.Add(new DebugGump());          
+            Log.Message(LogTypes.Trace, "Loading plugins...");
+            Log.PushIndent();
+            Plugin.Create(@".\Assistant\Razor.dll");
+            Log.Message(LogTypes.Trace, "Done!");
+            Log.PopIndent();
 
             base.Initialize();
         }
@@ -366,12 +473,6 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            Log.Message(LogTypes.Trace, "Loading plugins...");
-            Log.PushIndent();
-            Plugin.Create(@".\Assistant\Razor.dll");
-            Log.Message(LogTypes.Trace, "Done!");
-            Log.PopIndent();
-
             _sceneManager.ChangeScene(ScenesType.Login);
             base.LoadContent();           
         }
@@ -444,7 +545,7 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene.IsLoaded)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.Draw(_batcher);
 
             GraphicsDevice.Clear(Color.Transparent);
@@ -511,13 +612,21 @@ namespace ClassicUO
 
         private void OnUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene.IsLoaded)
-                _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            Scene scene = _sceneManager.CurrentScene;
+
+            if (scene != null && scene.IsLoaded)
+            {
+                if (scene.IsDisposed)
+                    _sceneManager.Switch();
+                else
+                    scene.Update(totalMS, frameMS);
+            }
+
         }
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene.IsLoaded)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }

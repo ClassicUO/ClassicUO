@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,12 +21,16 @@
 
 #endregion
 
+using System;
+
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -59,16 +63,18 @@ namespace ClassicUO.Game.UI.Controls
             if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {
                 if (dict.TryGetValue(id, out EquipConvData data))
-                    id = data.Gump;
+                    id = (ushort)(data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
             }
 
-            Texture = FileManager.Gumps.GetTexture( (ushort) (id + offset));
+            Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
 
             if (owner.IsFemale && Texture == null)
                 Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
 
             if (Texture == null)
             {
+                if (item.Layer != Layer.Face)
+                    Log.Message(LogTypes.Error, $"No texture founded for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
                 return;
             }
@@ -132,7 +138,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.OnMouseClick(x, y, button);
 
-            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+            if (button != MouseButton.Left)
+                return;
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs == null || gs.IsHoldingItem)
                 return;
 
             if (!_clickedCanDrag)
@@ -147,7 +158,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
                 {
                     return;
                 }

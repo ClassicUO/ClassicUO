@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -37,8 +37,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Button _createAddButton;
         private readonly Label _createAddLabel;
-        private readonly GameBorder _gameBorder;
-        private readonly GumpPicTiled _gumpPicTiled;
         private readonly Button _leaveButton;
         private readonly Label _leaveLabel;
         private readonly Texture2D _line;
@@ -48,6 +46,10 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _messagePartyLabel;
         private readonly List<PartyListEntry> _partyListEntries;
         private readonly ScrollArea _scrollArea;
+        private readonly AlphaBlendControl _alphaBlendControl;
+
+        private const int WIDTH = 320;
+        private const int HEIGHT = 400;
 
         public PartyGumpAdvanced() : base(0, 0)
         {
@@ -61,14 +63,19 @@ namespace ClassicUO.Game.UI.Gumps
             X = 100;
             Y = 100;
             CanMove = true;
-            AcceptMouseInput = false;
-            Add(_gameBorder = new GameBorder(0, 0, 320, 400, 4));
+            AcceptMouseInput = true;
+            WantUpdateSize = false;
 
-            Add(_gumpPicTiled = new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40)
+            Width = WIDTH;
+            Height = HEIGHT;
+
+            Add(_alphaBlendControl = new AlphaBlendControl(0.05f)
             {
-                IsTransparent = true
+                X = 1,
+                Y = 1,
+                Width = WIDTH - 2,
+                Height = HEIGHT - 2
             });
-            Add(_gumpPicTiled);
 
             _scrollArea = new ScrollArea(20, 60, 295, 190, true)
             {
@@ -159,9 +166,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _partyListEntries.Clear();
-            foreach (PartyMember member in World.Party.Members) _partyListEntries.Add(new PartyListEntry(member));
-            for (int i = 0; i < _partyListEntries.Count; i++) _scrollArea.Add(_partyListEntries[i]);
+
+            foreach (PartyMember member in World.Party.Members)
+            {
+                PartyListEntry p = new PartyListEntry(member);
+                _partyListEntries.Add(p);
+                _scrollArea.Add(p);
+            }
         }
+        private Texture2D _edge;
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
@@ -171,6 +184,14 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
             batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
 
+            if (_edge == null)
+            {
+                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                _edge.SetData(new Color[] { Color.Gray });
+            }
+
+            batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+
             return true;
         }
 
@@ -179,8 +200,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (!World.Party.IsInParty)
             {
                 //Set gump size if player is NOT in party
-                _gameBorder.Height = 320;
-                _gumpPicTiled.Height = _gameBorder.Height - 12;
+                Height = 320;
+                _alphaBlendControl.Height = Height;
                 //Set contents if player is NOT in party
                 _createAddButton.Y = 270;
                 _createAddLabel.Y = _createAddButton.Y;
@@ -195,8 +216,8 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 //Set gump size if player is in party
-                _gameBorder.Height = 400;
-                _gumpPicTiled.Height = _gameBorder.Height - 12;
+                Height = HEIGHT;
+                _alphaBlendControl.Height = Height;
                 //Set contents if player is in party
                 _createAddButton.Y = 350;
                 _createAddLabel.Y = _createAddButton.Y;
@@ -226,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
                 case Buttons.Loot:
-                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot ? true : false;
+                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
 
                     break;
                 case Buttons.Message:
@@ -246,6 +267,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            _edge?.Dispose();
+
             base.Dispose();
             _line.Dispose();
         }

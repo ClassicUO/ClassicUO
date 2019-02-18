@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
                 });
                 // Virtue menu
-                Add(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
+                Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
 				int profileX = 25;
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
                 {
                     Mobile.Serial
-                });
+                }, new Tuple<ushort, string>[0]);
             }
         }
 
@@ -326,6 +326,8 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
+        public void Update() => _paperDollInteractable.Update();
+
         public override void OnButtonClick(int buttonID)
         {
 	        switch ((Buttons)buttonID)
@@ -336,11 +338,11 @@ namespace ClassicUO.Game.UI.Gumps
 			        break;
 		        case Buttons.Options:
 
-		            OptionsGump1 gump = Engine.UI.GetByLocalSerial<OptionsGump1>();
+		            OptionsGump gump = Engine.UI.GetByLocalSerial<OptionsGump>();
 
                     if (gump == null)
 			        {
-				        Engine.UI.Add(new OptionsGump1
+				        Engine.UI.Add(new OptionsGump
 				        {
 					        X = Engine.WindowWidth / 2 - 300,
 					        Y = Engine.WindowHeight / 2 - 250
@@ -352,11 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 		        case Buttons.LogOut:
-			        Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
-			        {
-				        if (s)
-					        Engine.SceneManager.ChangeScene(ScenesType.Login);
-			        }));
+			       Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
 
 			        break;
 		        case Buttons.Quests:

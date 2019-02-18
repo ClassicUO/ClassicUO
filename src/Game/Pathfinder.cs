@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -146,7 +146,7 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
+                            if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

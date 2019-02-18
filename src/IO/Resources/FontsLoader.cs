@@ -90,6 +90,9 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < 224; i++)
                     {
                         FontHeader* fh = (FontHeader*)fonts.PositionAddress;
+
+                        if (fonts.Position + fontHeaderSize >= fonts.Length)
+                            continue;
                         fonts.Skip(fontHeaderSize);
                         int bcount = fh->Width * fh->Height * 2;
 
@@ -127,6 +130,9 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = 0; j < 224; j++)
                 {
+                    if (fonts.Position + 3 >= fonts.Length)
+                        continue;
+
                     byte w = fonts.ReadByte();
                     byte h = fonts.ReadByte();
                     fonts.Skip(1);
@@ -316,7 +322,7 @@ namespace ClassicUO.IO.Resources
                     case TEXT_ALIGN_TYPE.TS_CENTER:
 
                         {
-                            w = (width - ptr.Width) >> 1;
+                            w = ((width - ptr.Width) >> 1);
 
                             if (w < 0)
                                 w = 0;
@@ -631,7 +637,7 @@ namespace ClassicUO.IO.Resources
             return GeneratePixelsUnicode(font, str, color, cell, width, align, flags, saveHitmap);
         }
 
-        private unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
+        public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return string.Empty;
@@ -642,7 +648,7 @@ namespace ClassicUO.IO.Resources
                 uint offset = table['.'];
 
                 if (offset != 0 && offset != 0xFFFFFFFF)
-                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3;
+                    width -= ((*(byte*)((IntPtr)table + (int)offset + 2) * 3) + 3);
             }
 
             int textLength = 0;
@@ -1044,7 +1050,7 @@ namespace ClassicUO.IO.Resources
                     case TEXT_ALIGN_TYPE.TS_CENTER:
 
                     {
-                        w += (width - ptr.Width) >> 1;
+                        w += ((width - ptr.Width) >> 1);
 
                         if (w < 0)
                             w = 0;

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,7 +32,7 @@ namespace ClassicUO.Network
 {
     internal sealed class NetClient
     {
-        private const int BUFF_SIZE = 0x30000;
+        private const int BUFF_SIZE = 0x80000;
         private readonly object _sendLock = new object();
         private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;
@@ -79,7 +79,8 @@ namespace ClassicUO.Network
             }
         }
 
-        public event EventHandler Connected, Disconnected;
+        public event EventHandler Connected;
+        public event EventHandler<SocketError> Disconnected;
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
@@ -154,7 +155,7 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Message(LogTypes.Error, e.SocketError.ToString());
-                    Disconnect();
+                    Disconnect(e.SocketError);
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;
@@ -162,6 +163,11 @@ namespace ClassicUO.Network
         }
 
         public void Disconnect()
+        {
+           Disconnect(SocketError.SocketError);
+        }
+
+        private void Disconnect(SocketError error)
         {
             if (IsDisposed)
                 return;
@@ -207,7 +213,7 @@ namespace ClassicUO.Network
             }
 
             _circularBuffer = null;
-            Disconnected.Raise();
+            Disconnected.Raise(error);
             Statistics.Reset();
         }
 

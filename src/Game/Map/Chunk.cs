@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -272,16 +272,19 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i, j];
+                    //Tile tile = Tiles[i, j];
+                    GameObject obj = Tiles[i, j].FirstNode;
 
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
+                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
                         if (obj != World.Player)
-                        {
                             obj.Dispose();
-                        }
                     }
 
+                    //tile.Clear();
                     Tiles[i, j] = null;
                 }
             }
@@ -297,13 +300,17 @@ namespace ClassicUO.Game.Map
                 {
                     Tile tile = Tiles[i, j];
 
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                    {
+                    GameObject obj = tile.FirstNode;
 
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
+                    for (; obj != null; obj = obj.Right)
+                    {
                         if (obj is GameEffect effect && effect.Source is Static)
                             continue;
 
-                        if (!(obj is Land) && !(obj is Static))
+                        if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
                             return false;
                     }
                 }

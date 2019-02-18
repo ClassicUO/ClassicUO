@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -25,9 +25,9 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.GameObjects
 {
-    internal class LightningEffectView : View
+    internal partial class LightningEffect
     {
         private static readonly Point[] _offsets =
         {
@@ -35,17 +35,12 @@ namespace ClassicUO.Game.Views
         };
         private Graphic _displayed = Graphic.INVALID;
 
-        public LightningEffectView(LightningEffect effect) : base(effect)
-        {
-        }
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            LightningEffect effect = (LightningEffect)GameObject;
-
-            if (effect.AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
+            if (AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
-                _displayed = effect.AnimationGraphic;
+                _displayed = AnimationGraphic;
 
                 if (_displayed > 0x4E29)
                     return false;
@@ -53,11 +48,14 @@ namespace ClassicUO.Game.Views
                 Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && GameObject.Distance > World.ViewRange)
-                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+            
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
+                HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+
             Engine.DebugInfo.EffectsRendered++;
             return base.Draw(batcher, position, list);
         }

@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -87,7 +88,7 @@ namespace ClassicUO.Network
         public PSeed(uint v, byte[] version) : base(0xEF)
         {
             WriteUInt(v);
-            for (int i = 0; i < 4; i++) WriteUInt(version[i]);
+            for (int i = 0; i < version.Length && version.Length == 4; i++) WriteUInt(version[i]);
         }
     }
 
@@ -193,7 +194,7 @@ namespace ClassicUO.Network
 
             var location = startingCity.Index; // City
 
-            if (FileManager.ClientVersion < ClientVersions.CV_70130)
+            if (FileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
                 location--;
 
             WriteByte((byte) location);
@@ -611,7 +612,7 @@ namespace ClassicUO.Network
     {
         public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            var e = World.Get(entity);
+            Entity e = World.Get(entity);
 
             WriteByte(0x00);
             WriteUInt(cursorID);
@@ -642,38 +643,38 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetCancel : PacketWriter
     {
-        public PTargetCancel(Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetCancel(CursorTarget type, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            WriteByte(0x00);
+            WriteByte((byte) type);
             WriteUInt(cursorID);
             WriteByte(cursorType);
-            WriteUInt(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
-            WriteUShort(0x00);
+            WriteUInt(0);
+            WriteUInt(0xFFFF_FFFF);
+            WriteByte(0);
+            WriteByte(0);
+            WriteUShort(0);
         }
     }
 
     internal sealed class PASCIIPromptResponse : PacketWriter
     {
-        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x9A)
+        public PASCIIPromptResponse(string text, bool cancel) : base(0x9A)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
 
-            WriteASCII(text, len);
+            WriteASCII(text);
         }
     }
 
     internal sealed class PUnicodePromptResponse : PacketWriter
     {
-        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base(0xC2)
+        public PUnicodePromptResponse(string text, string lang, bool cancel) : base(0xC2)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
             WriteUInt((uint)(cancel ? 0 : 1));
             WriteASCII(lang, 3);
-            WriteUnicode(text, len);
+            WriteUnicode(text);
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -43,7 +44,7 @@ namespace ClassicUO.Game.Managers
 
         public Serial Leader { get; private set; }
 
-        public string LeaderName => Leader != null && Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
+        public string LeaderName => Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
 
         public List<PartyMember> Members { get; } = new List<PartyMember>();
 
@@ -56,6 +57,10 @@ namespace ClassicUO.Game.Managers
                 GameActions.RequestPartyLootState(_allowPartyLoot);
             }
         }
+
+        public long PartyHealTimer { get; set; }
+
+        public Serial PartyHealTarget { get; set; }
 
         public event EventHandler PartyMemberChanged;
 
@@ -91,22 +96,11 @@ namespace ClassicUO.Game.Managers
                     break;
                 case CommandPrivateMessage:
                 case CommandPublicMessage:
-                    Serial partyMemberSerial = p.ReadUInt();
-                    PartyMember partyMember = World.Party.GetPartyMember(partyMemberSerial);
+                    PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
 
                     if (partyMember != null)
                     {
-                        //Entity partyMemberEntity = World.Get(partyMemberSerial);//party messages from players off screen == null
-                        //string partyMemberName = partyMemberEntity.Name; //party messages from players off screen == null
-
-                        string partyMemberName = partyMember.Name;
-                        string partyMessage = "[" + partyMemberName + "]: " + p.ReadUnicode();
-
-                        Hue partyMessagehue = Engine.Profile.Current.PartyMessageHue;
-                        MessageType messageType = MessageType.Party;
-                        MessageFont partyMessageFont = MessageFont.Normal;
-
-                        Chat.OnMessage(null, partyMessage, partyMessagehue, messageType, partyMessageFont);
+                        Chat.OnMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
                     }
 
                     break;
@@ -114,24 +108,22 @@ namespace ClassicUO.Game.Managers
                     //The packet that arrives in PacketHandlers.DisplayClilocString(Packet p) for party invite does not have the party leader's serial
                     //and therefor it is not handled by Chat.OnMessage because we have no entity and also the packet message type is incorrectly set to .Label
                     //we handle the party invite here because we have the partyLeader's serial and we can appropriately set the MesageType.System
-                    Serial partyLeaderSerial = p.ReadUInt();
-                    Entity partyLeaderEntity = World.Get(partyLeaderSerial);
+                    Serial serial = p.ReadUInt();
+                    Mobile partyLeaderEntity = World.Mobiles.Get(serial);
 
                     if (partyLeaderEntity != null)
                     {
-                        Hue hue = 0x03B2; //white system
-                        MessageType messageType = MessageType.System;
-                        MessageFont font = MessageFont.Normal;
-                        int cliloc = 1008089; // " : You are invited to join the party. Type /accept to join or /decline to decline the offer."
-                        string clilocString = FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(cliloc));
-                        string clilocMessage = partyLeaderEntity.Name + clilocString;
-
-                        Chat.OnMessage(partyLeaderEntity, clilocMessage, hue, messageType, font, true);
+                        Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
                     }
+
+                    World.Party.SetPartyLeader(serial);
 
                     break;
             }
         }
+
+        private void SetPartyLeader(Serial s)
+            => Leader = s;
 
         public void ReceivePartyMemberList(Serial[] mobileSerials)
         {
@@ -167,7 +159,7 @@ namespace ClassicUO.Game.Managers
 
         private void AddPartyMember(Serial mobileSerial)
         {
-            if (!Members.Any(p => p.Serial == mobileSerial))
+            if (Members.All(p => p.Serial != mobileSerial))
             {
                 Members.Add(new PartyMember(mobileSerial));
                 GameActions.RequestMobileStatus(mobileSerial);
@@ -192,7 +184,7 @@ namespace ClassicUO.Game.Managers
 
         public void AcceptPartyInvite()
         {
-            GameActions.RequestPartyAccept(World.Player.Serial);
+            GameActions.RequestPartyAccept(Leader);
         }
 
         public void DeclinePartyInvite()

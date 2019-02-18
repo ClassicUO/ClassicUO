@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -52,10 +52,11 @@ namespace ClassicUO.Game.UI.Controls
             Y = item.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-            var texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
+            LocalSerial = Item.Serial;
 
             Item.Disposed += ItemOnDisposed;
 
@@ -79,7 +80,6 @@ namespace ClassicUO.Game.UI.Controls
 
             TextOverhead overhead = (TextOverhead) sender;
 
-            overhead.Initialized = true;
             overhead.TimeToLive = 4000;
 
             FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
@@ -114,7 +114,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                GameActions.SingleClick(Item);
+                if (!World.ClientFlags.TooltipsEnabled)
+                    GameActions.SingleClick(Item);
+                GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }
 
@@ -137,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture.Contains(x, y))
                 return true;
 
-            if (Item.Amount > 1 && Item.ItemData.IsStackable)
+            if (!Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
             {
                 if (Texture.Contains(x - 5, y - 5))
                     return true;
@@ -169,8 +171,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     switch (TargetManager.TargetingState)
                     {
-                        case TargetType.Position:
-                        case TargetType.Object:
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
                             gs.SelectedObject = Item;
 
 
@@ -181,10 +183,8 @@ namespace ClassicUO.Game.UI.Controls
                             }
 
                             break;
-                        case TargetType.Nothing:
 
-                            break;
-                        case TargetType.SetTargetClientSide:
+                        case CursorTarget.SetTargetClientSide:
                             gs.SelectedObject = Item;
 
                             if (Item != null)
@@ -235,12 +235,17 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {      
-            if (button != MouseButton.Left || Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+            if (button != MouseButton.Left)
+                return;
+
+            var gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (gs == null || gs.IsHoldingItem)
                 return;
 
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
                 {
                     TargetManager.TargetGameObject(Item);
                     Mouse.LastLeftButtonClickTime = 0;

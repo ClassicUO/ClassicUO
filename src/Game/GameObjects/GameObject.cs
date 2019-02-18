@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -26,7 +26,6 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -39,10 +38,9 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract partial class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
-        private View _view;
         public Vector3 Offset;
         private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
         private Tile _tile;
@@ -100,8 +98,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual Graphic Graphic { get; set; }
        
-        public View View => _view ?? (_view = CreateView());
-
         public sbyte AnimIndex { get; set; }
 
         public int CurrentRenderIndex { get; set; }
@@ -138,8 +134,10 @@ namespace ClassicUO.Game.GameObjects
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
-            {         
-                    
+            {
+                if (World.Player == null)
+                    return ushort.MaxValue;
+
                 if (World.Player.IsMoving && this != World.Player)
                 {
                     Mobile.Step step = World.Player.Steps.Back();
@@ -158,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var overhead = _overHeads[i];
                 overhead.Update(totalMS, frameMS);
-                
+
                 if (overhead.IsDisposed)
                     _overHeads.RemoveAt(i--);
             }
@@ -189,6 +187,15 @@ namespace ClassicUO.Game.GameObjects
                 _tile?.AddGameObject(this);
             }
         }
+
+        public void RemoveFromTile()
+        {
+            if (World.Map != null && _tile != null)
+            {
+                _tile?.RemoveGameObject(this);
+                _tile = null;
+            }
+        }
       
 
         public event EventHandler Disposed, OverheadAdded;
@@ -202,11 +209,6 @@ namespace ClassicUO.Game.GameObjects
 
         public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
 
-        protected virtual View CreateView()
-        {
-            return null;
-        }
-
         public TextOverhead AddOverhead(MessageType type, string message)
         {
             return AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
@@ -219,19 +221,19 @@ namespace ClassicUO.Game.GameObjects
 
             TextOverhead overhead;
 
-            //for (int i = 0; i < _overHeads.Value.Count; i++)
-            //{
-            //    overhead = _overHeads.Value[i];
+            for (int i = 0; i < _overHeads.Count; i++)
+            {
+                overhead = _overHeads[i];
 
-            //    if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
-            //    {
-            //        overhead.Hue = hue;
-            //        _overHeads.Value.RemoveAt(i);
-            //        InsertGameText(overhead);
+                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
+                {
+                    overhead.Hue = hue;
+                    _overHeads.RemoveAt(i);
+                    InsertGameText(overhead);
 
-            //        return overhead;
-            //    }
-            //}
+                    return overhead;
+                }
+            }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
@@ -246,11 +248,11 @@ namespace ClassicUO.Game.GameObjects
 
             InsertGameText(overhead);
 
-            if (_overHeads.Count > 5)
+            while (_overHeads.Count > 5)
             {
-                TextOverhead over = _overHeads[_overHeads.Count - 1];
+                //TextOverhead over = _overHeads[_overHeads.Count - 1];
 
-                if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
+                //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
                     _overHeads.RemoveFromBack().Dispose();
                 }
@@ -265,20 +267,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
                 _overHeads.AddToFront(gameText);
-            else 
+            else
                 _overHeads.Insert(1, gameText);
+
             //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected virtual void OnPositionChanged()
         {
 
-        }
-
-        protected void DisposeView()
-        {
-            if (_view != null)
-                _view = null;
         }
 
         //~GameObject()
@@ -294,8 +291,6 @@ namespace ClassicUO.Game.GameObjects
 
             Disposed.Raise();
 
-            DisposeView();
-
             _tile?.RemoveGameObject(this);
             _tile = null;
 
@@ -305,7 +300,7 @@ namespace ClassicUO.Game.GameObjects
             }
             _overHeads.Clear();
 
-            //GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
     }
 }

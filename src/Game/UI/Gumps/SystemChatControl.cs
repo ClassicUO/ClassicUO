@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -59,14 +59,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _currentChatModeLabel;
         private int _messageHistoryIndex = -1;
         private ChatMode _mode = ChatMode.Default;
-        private readonly TextBox _textBox;
         private readonly AlphaBlendControl _trans;
 
-        //public override bool AcceptKeyboardInput
-        //{
-        //    get;
-        //    set;
-        //}
+        public readonly TextBox textBox;
 
         public SystemChatControl(int x, int y, int w, int h)
         {
@@ -82,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
 
-            _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
                 Y = Height - height - 3,
@@ -92,17 +87,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_trans = new AlphaBlendControl
             {
-                X = _textBox.X,
-                Y = _textBox.Y,
+                X = textBox.X,
+                Y = textBox.Y,
                 Width = Width,
                 Height = height + 5
             });
-            Add(_textBox);
+            Add(textBox);
 
             Add(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
             {
-                X = _textBox.X,
-                Y = _textBox.Y,
+                X = textBox.X,
+                Y = textBox.Y,
                 IsVisible = false
             });
             WantUpdateSize = false;
@@ -122,12 +117,12 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case ChatMode.Default:
                         DisposeChatModePrefix();
-                        _textBox.Hue = Engine.Profile.Current.SpeechHue;
-                        _textBox.SetText(string.Empty);
+                        textBox.Hue = Engine.Profile.Current.SpeechHue;
+                        textBox.SetText(string.Empty);
 
                         break;
                     case ChatMode.Whisper:
-                        AppendChatModePrefix("[Whisper]: ", 33);
+                        AppendChatModePrefix("[Whisper]: ", Engine.Profile.Current.WhisperHue);
 
                         break;
                     case ChatMode.Emote:
@@ -164,18 +159,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
-                    AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+                    AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
 
                     break;
                 case MessageType.Party:
-                    AddLine($"[Party][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+                    AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
 
                     break;
                 case MessageType.Guild:
-                    AddLine($"[Guild][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+                    AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+
                     break;
                 case MessageType.Alliance:
-                    AddLine($"[Alliance][{e.Parent.Name}]: {e.Text}", (byte)e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+                    AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+
                     break;
             }
         }
@@ -193,10 +190,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentChatModeLabel.Hue = hue;
                 _currentChatModeLabel.Text = labelText;
                 _currentChatModeLabel.IsVisible = true;
-                _currentChatModeLabel.Location = _textBox.Location;
-                _textBox.X = _currentChatModeLabel.Width;
-                _textBox.Hue = hue;
-                _textBox.SetText(string.Empty);
+                _currentChatModeLabel.Location = textBox.Location;
+                textBox.X = _currentChatModeLabel.Width;
+                textBox.Hue = hue;
+                textBox.SetText(string.Empty);
             }
         }
 
@@ -204,8 +201,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_currentChatModeLabel.IsVisible)
             {
-                _textBox.Hue = 33;
-                _textBox.X -= _currentChatModeLabel.Width;
+                textBox.Hue = 33;
+                textBox.X -= _currentChatModeLabel.Width;
                 _currentChatModeLabel.IsVisible = false;
             }
         }
@@ -220,13 +217,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void Resize()
         {
-            if (_textBox != null)
+            if (textBox != null)
             {
                 int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-                _textBox.Y = Height - height - 3;
-                _textBox.Width = Width;
-                _textBox.Height = height - 3;
-                _trans.Location = _textBox.Location;
+                textBox.Y = Height - height - 3;
+                textBox.Width = Width;
+                textBox.Height = height - 3;
+                _trans.Location = textBox.Location;
                 _trans.Width = Width;
                 _trans.Height = height + 5;
             }
@@ -235,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _textBox.SetKeyboardFocus();
+            textBox.SetKeyboardFocus();
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -250,9 +247,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mode == ChatMode.Default)
             {
-                if (_textBox.Text.Length == 1)
+                if (textBox.Text.Length == 1)
                 {
-                    switch (_textBox.Text[0])
+                    switch (textBox.Text[0])
                     {
                         case ';':
                             Mode = ChatMode.Whisper;
@@ -276,13 +273,13 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                     }
                 }
-                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                else if (textBox.Text.Length == 2 && textBox.Text[0] == ':' && textBox.Text[1] == ' ')
                     Mode = ChatMode.Emote;
             }
 
-            if (Engine.Profile.Current.SpeechHue != _textBox.Hue)
+            if (Engine.Profile.Current.SpeechHue != textBox.Hue)
             {
-                _textBox.Hue = Engine.Profile.Current.SpeechHue;
+                textBox.Hue = Engine.Profile.Current.SpeechHue;
             }
 
             base.Update(totalMS, frameMS);
@@ -290,7 +287,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            int y = _textBox.Y + position.Y - 20;
+            int y = textBox.Y + position.Y - 20;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
@@ -312,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
-                    _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                    textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
@@ -321,21 +318,21 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _messageHistoryIndex++;
                         Mode = _messageHistory[_messageHistoryIndex].Item1;
-                        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                        textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
                     }
                     else
-                        _textBox.SetText(string.Empty);
+                        textBox.SetText(string.Empty);
 
                     break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(_textBox.Text):
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
                     Mode = ChatMode.Default;
 
                     break;
                 case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
                     if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
-                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, 0, true));
+                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
                     else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
-                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, 0, "ENU", true));
+                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
                     Chat.PromptData = default;
                     break;
             }
@@ -346,7 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (string.IsNullOrEmpty(text))
                 return;
             ChatMode sentMode = Mode;
-            _textBox.SetText(string.Empty);
+            textBox.SetText(string.Empty);
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;
@@ -354,9 +351,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (Chat.PromptData.Prompt != ConsolePrompt.None)
             {
                 if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
-                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length, text.Length < 1));
+                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length < 1));
                 else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
-                    NetClient.Socket.Send(new PUnicodePromptResponse(text, text.Length, "ENU", text.Length < 1));
+                    NetClient.Socket.Send(new PUnicodePromptResponse(text, "ENU", text.Length < 1));
 
                 Chat.PromptData = default;
             }

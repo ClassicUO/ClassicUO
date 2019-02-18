@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -50,7 +50,11 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && HeldItem.Serial != entity)
             {
-                GameActions.DropItem(HeldItem.Serial, entity.Position, entity.Serial);
+                if (entity.Serial.IsMobile)
+                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, entity.Serial);
+                else if (entity.Serial.IsItem)
+                    GameActions.DropItem(HeldItem.Serial, entity.Position.X, entity.Position.Y, entity.Position.Z, entity.Serial);
+
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
             }
@@ -58,6 +62,9 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
+            if (World.Player.IsDead || item == null)
+                return;
+
             if (!_isShiftDown && !amount.HasValue && !item.IsCorpse && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
@@ -79,7 +86,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
+            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
             {
                 return;
             }
@@ -88,26 +95,28 @@ namespace ClassicUO.Game.Scenes
             if (!item.IsPickable)
                 return;
             HeldItem.Clear();
-            HeldItem.Set(item);
+            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
 
             if (!item.OnGround)
             {
                 Entity entity = World.Get(item.Container);
+                item.Container = Serial.INVALID;
                 entity.Items.Remove(item);
 
-                if (item.Container.IsMobile)
+                if (entity.HasEquipment)
                 {
-                    ((Mobile)entity).Equipment[item.ItemData.Layer] = null;
+                    entity.Equipment[item.ItemData.Layer] = null;
                 }
 
                 entity.Items.ProcessDelta();
             }
             else
             {
-                World.Map.GetTile(item.X, item.Y)
-                     .RemoveGameObject(item);
+                item.RemoveFromTile();
             }
+
             World.Items.Remove(item);
+            World.Items.ProcessDelta();
             CloseItemGumps(item);
            
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
@@ -179,6 +188,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
+
                 }
                 else
                 {

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -59,12 +60,21 @@ namespace ClassicUO.Game.UI.Gumps
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
             _updateTotal = false;
-          
+
 
             if (isBuyGump)
                 Add(new GumpPic(0, 0, 0x0870, 0));
             else
                 Add(new GumpPic(0, 0, 0x0872, 0));
+
+
+           
+               
+            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 180, false, 130));
+
+
+
+
 
             if (isBuyGump)
                 Add(new GumpPic(170, 214, 0x0871, 0));
@@ -81,35 +91,40 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 1
             };
 
-            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
-            boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
+            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
+            boxClear.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
             Add(boxAccept);
             Add(boxClear);
+
 
             if (isBuyGump)
             {
                 Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
-                    X = 240, Y = 385
+                    X = 240,
+                    Y = 385
                 });
 
                 Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
                 {
-                    X = 358, Y = 385
+                    X = 358,
+                    Y = 385
                 });
             }
             else
                 Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
                 {
-                    X = 358, Y = 386
+                    X = 358,
+                    Y = 386
                 });
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 5)
             {
-                X = 242, Y = 408
-            }); 
-               
-            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 130, false));
+                X = 242,
+                Y = 408
+            });
+
+
             Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
 
 
@@ -195,14 +210,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsBuyGump { get; }
 
-        public void AddItem(Item item)
+        public void SetIfNameIsFromCliloc(Item it, bool fromcliloc)
+        {
+            if (_shopItems.TryGetValue(it, out var shopItem))
+            {
+                shopItem.NameFromCliloc = fromcliloc;
+            }
+        }
+
+        public void AddItem(Item item, bool fromcliloc)
         {
             ShopItem shopItem;
 
             _shopScrollArea.Add(shopItem = new ShopItem(item)
             {
                 X = 5,
-                Y = 5
+                Y = 5,
+                NameFromCliloc = fromcliloc
             });
 
             _shopScrollArea.Add(new ResizePicLine(0x39)
@@ -214,9 +238,21 @@ namespace ClassicUO.Game.UI.Gumps
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(item, shopItem);
         }
-        
+
+        public void SetNameTo(Item item, string name)
+        {
+            if (_shopItems.TryGetValue(item, out ShopItem shopItem))
+            {
+                shopItem.SetName(name);
+            }
+        }
+
+
         public override void Update(double totalMS, double frameMS)
         {
+            if (!World.InGame || IsDisposed)
+                return;
+
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
             {
                 if (_isDownDOWN)
@@ -340,22 +376,81 @@ namespace ClassicUO.Game.UI.Gumps
             Clear
         }
 
-        private class ShopItem : Control
+        class ShopItem : Control
         {
-            private readonly Label _amountLabel;
+            private readonly Label _amountLabel, _name;
 
+           
             public ShopItem(Item item)
             {
                 Item = item;
-                var itemName = StringHelper.CapitalizeAllWords(item.Name);
+                string itemName = StringHelper.CapitalizeAllWords(item.Name);
 
-                Add(new ItemGump(item)
+                TextureControl control;
+
+                if (item.Serial.IsMobile)
                 {
-                    X = 5, Y = 5, Height = 50, AcceptMouseInput = false
-                });
+                    byte group = 0;
 
-                Label label;
-                Add(label = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                    switch (FileManager.Animations.GetGroupIndex(item.Graphic))
+                    {
+                        case ANIMATION_GROUPS.AG_LOW:
+                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+
+                            break;
+                        case ANIMATION_GROUPS.AG_HIGHT:
+                            group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+                            break;
+                        case ANIMATION_GROUPS.AG_PEOPLE:
+                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                            break;
+                    }
+
+                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[item.Graphic].Groups[group].Direction[1];
+                    FileManager.Animations.AnimID = item.Graphic;
+                    FileManager.Animations.AnimGroup = group;
+                    FileManager.Animations.Direction = 1;
+
+                    if (direction.FrameCount == 0)
+                        FileManager.Animations.LoadDirectionGroup(ref direction);
+
+                    Add(control = new TextureControl()
+                    {
+                        Texture = FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        X = 5, Y = 5,
+                        AcceptMouseInput = false,
+                    });
+
+                    control.Width = control.Texture.Width;
+                    control.Height = control.Texture.Height;
+
+                    if (control.Width > 35)
+                        control.Width = 35;
+
+                    if (control.Height > 35)
+                        control.Height = 35;
+                }
+                else if (item.Serial.IsItem)
+                {
+                    var texture = FileManager.Art.GetTexture(item.Graphic);
+                    Add(control = new TextureControl()
+                    {
+                        Texture = texture,
+                        X = 5,
+                        Y = 5,
+                        Width = texture.ImageRectangle.Width,
+                        Height = texture.ImageRectangle.Height,
+                        AcceptMouseInput = false,
+                        ScaleTexture = false,
+                    });
+                }
+                else 
+                    return;
+
+             
+
+                Add(_name = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
                 {
                     Y = 5, X = 65
                 });
@@ -366,10 +461,12 @@ namespace ClassicUO.Game.UI.Gumps
                 });
 
                 Width = 220;
-                Height = label.Height;
 
+
+                Height = Math.Max(_name.Height, control.Height) + 10;
                 WantUpdateSize = false;
             }
+
 
             public Item Item { get; }
 
@@ -388,10 +485,51 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            public bool NameFromCliloc { get; set; }
+
+            public void SetName(string s)
+            {
+                if (NameFromCliloc)
+                    _name.Text = $"{s} at {Item.Price}gp";
+            }
+
             protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
             {
                 return true;
             }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                base.Update(totalMS, frameMS);
+
+                if (Item != null)
+                {
+                    if (Item.Serial.IsMobile)
+                    {
+                        byte group = 0;
+
+                        switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
+                        {
+                            case ANIMATION_GROUPS.AG_LOW:
+                                group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
+
+                                break;
+                            case ANIMATION_GROUPS.AG_HIGHT:
+                                group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+
+                                break;
+                            case ANIMATION_GROUPS.AG_PEOPLE:
+                                group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                                break;
+                        }
+
+                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
+                        direction.LastAccessTime = Engine.Ticks;
+                    }
+                }
+            }
+
         }
 
         private class TransactionItem : Control
@@ -401,7 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
             public TransactionItem(Item item, int amount)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
+                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
 
                 Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, font: 9)
                 {
@@ -477,7 +615,7 @@ namespace ClassicUO.Game.UI.Gumps
                 buttonRemove.MouseDown += (sender, e) =>
                 {
                     status = 1;
-                    t1 = Engine.Ticks + 200;
+                    t1 = Engine.Ticks + 500;
                 };
                 buttonRemove.MouseUp += (sender, e) => { status = 0; };
 

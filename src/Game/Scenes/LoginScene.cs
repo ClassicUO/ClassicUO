@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 using ClassicUO.Configuration;
@@ -36,6 +37,8 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -57,7 +60,11 @@ namespace ClassicUO.Game.Scenes
         private byte[] _clientVersionBuffer;
         private Gump _currentGump;
         private LoginStep _lastLoginStep;
-        private static bool _isFirstLogin = true;
+
+        public bool Reconnect { get; set; } = false;
+
+        private long? _reconnectTime = null;
+        private int _reconnectTryCounter = 1;
 
         public LoginScene() : base()
         {
@@ -105,13 +112,15 @@ namespace ClassicUO.Game.Scenes
                 byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
             };
 
-            Audio.PlayMusic(0);
+            int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
 
-            if (Engine.GlobalSettings.AutoLogin && _isFirstLogin && CurrentLoginStep != LoginStep.Main)
+            Audio.PlayMusic(music);
+
+            if ((Engine.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
             {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                 {
-                    Connect(Engine.GlobalSettings.Username, Engine.GlobalSettings.Password);
+                    Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
                 }
             }
         }
@@ -128,7 +137,7 @@ namespace ClassicUO.Game.Scenes
             // NetClient.Socket.Connected -= NetClient_Connected;
             NetClient.Socket.Disconnected -= NetClient_Disconnected;
             NetClient.LoginSocket.Connected -= NetClient_Connected;
-            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
             Engine.UI.GameCursor.IsLoading = false;
@@ -150,6 +159,25 @@ namespace ClassicUO.Game.Scenes
                 _lastLoginStep = CurrentLoginStep;
             }
 
+            if (Reconnect && (CurrentLoginStep == LoginStep.PopUpMessage || CurrentLoginStep == LoginStep.Main))
+            {
+                long rt = (long)totalMS + (Engine.GlobalSettings.ReconnectTime * 1000);
+
+                if (_reconnectTime == null)
+                    _reconnectTime = rt;
+
+                if (_reconnectTime < totalMS)
+                {
+                    if (!string.IsNullOrEmpty(Account))
+                        Connect(Account, Password);
+                    else if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
+                        Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
+
+                    _reconnectTime = rt;
+                    _reconnectTryCounter++;
+                }
+            }
+
             base.Update(totalMS, frameMS);
         }
 
@@ -165,7 +193,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
                 case LoginStep.PopUpMessage:
-                    Engine.UI.GameCursor.IsLoading = true;
+                    Engine.UI.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
                     return GetLoadingScreen();
                 case LoginStep.CharacterSelection:
 
@@ -226,8 +254,18 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
+
             Account = account;
             Password = password;
+
+            // Save credentials to config file
+            if (Engine.GlobalSettings.SaveAccount)
+            {
+                Engine.GlobalSettings.Username = Account;
+                Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
+                Engine.GlobalSettings.Save();
+            }
+
             Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
             NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port);
             CurrentLoginStep = LoginStep.Connecting;
@@ -335,38 +373,51 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
-        private void NetClient_Disconnected(object sender, EventArgs e)
+        private void NetClient_Disconnected(object sender, SocketError e)
         {
             Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+
+            if (CurrentLoginStep == LoginStep.CharCreation)
+                return;
+
             Characters = null;
             Servers = null;
-            PopupMessage = "Connection lost";
+            PopupMessage = $"Connection lost:\n{e}";
             CurrentLoginStep = LoginStep.PopUpMessage;
         }
 
-        private void Login_NetClient_Disconnected(object sender, EventArgs e)
+        private void Login_NetClient_Disconnected(object sender, SocketError e)
         {
             Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
+
+            if (e > 0)
+            {
+                Characters = null;
+                Servers = null;
+                PopupMessage = $"Connection lost:\n`{e}`";
+
+                if (Engine.GlobalSettings.Reconnect)
+                {
+                    Reconnect = true;
+                    PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{e}`";
+                }
+
+                CurrentLoginStep = LoginStep.PopUpMessage;
+            }
+
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)
         {
+            e.MoveToData();
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
                     ParseServerList(e);
 
-                    // Save credentials to config file
-                    if (Engine.GlobalSettings.SaveAccount)
-                    {
-                        Engine.GlobalSettings.Username = Account;
-                        Engine.GlobalSettings.Password = Password;
-                        Engine.GlobalSettings.Save();
-                    }
-
                     CurrentLoginStep = LoginStep.ServerSelection;
 
-                    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+                    if (Engine.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
                             SelectServer( (byte) Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
@@ -397,9 +448,8 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin && _isFirstLogin)
+				    if (Engine.GlobalSettings.AutoLogin || Reconnect)
 				    {
-				        _isFirstLogin = false;
                         bool haveAnyCharacter = false;
 
                         for (byte i = 0; i < Characters.Length; i++)
@@ -427,7 +477,6 @@ namespace ClassicUO.Game.Scenes
                 case 0x82: // ReceiveLoginRejection
                 case 0x85: // character list notification
                 case 0x53: // Error Code
-                    //HandleErrorCode(e);
                     byte code = e.ReadByte();
 
                     PopupMessage = ServerErrorMessages.GetError(e.ID, code);
@@ -451,7 +500,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnect();
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
-            NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
+            byte[] ss = new byte[4]{(byte)(seed>>24), (byte)(seed>>16), (byte)(seed>>8), (byte)(seed)};
+            NetClient.Socket.Send(ss);
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 
@@ -466,7 +516,6 @@ namespace ClassicUO.Game.Scenes
 
         private void ParseCharacterList(Packet p)
         {
-            p.MoveToData();
             int count = p.ReadByte();
             Characters = new string[count];
 
@@ -488,6 +537,14 @@ namespace ClassicUO.Game.Scenes
 	        if (!isNew)
 	            descriptions = ReadCityTextFile(count);
 
+	        Position[] oldtowns =
+	        {
+	            new Position(105, 130), new Position(245, 90),
+                new Position(165, 200), new Position(395, 160),
+                new Position(200, 305), new Position(335, 250),
+                new Position(160, 395), new Position(100, 250),
+                new Position(270, 130), new Position(0xFFFF, 0xFFFF), 
+	        };
 
             for (int i = 0; i < count; i++)
 		    {
@@ -503,7 +560,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityDescription = p.ReadUInt();
 				    p.ReadUInt();
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, FileManager.Cliloc.GetString((int)cityDescription), cityPosition, cityMapIndex, isNew);
 			    }
 			    else
 			    {
@@ -511,7 +568,7 @@ namespace ClassicUO.Game.Scenes
 				    var cityName = p.ReadASCII(31);
 				    var cityBuilding = p.ReadASCII(31);
 
-				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, Position.INVALID, 0);
+				    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, oldtowns[i], 0, isNew);
 			    }
 
 			    cities[i] = cityInfo;
@@ -575,10 +632,9 @@ namespace ClassicUO.Game.Scenes
 
                             if (text.Length != 0)
                             {
-                                string t = text.ToString();
+                                string t = text + "\n\n";
                                 text.Clear();
-                                //text.AppendLine();
-                                //text.AppendLine();
+
                                 text.Append(t);
                             }
 
@@ -614,7 +670,8 @@ namespace ClassicUO.Game.Scenes
 
 	    private void ParseFlags(Packet p)
 	    {
-		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
+            if (p.Position + 4 <= p.Length)
+		        World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
 		}
     }
 
@@ -644,8 +701,9 @@ namespace ClassicUO.Game.Scenes
 		public readonly string Description;
 		public readonly Position Position;
 		public readonly uint Map;
+	    public readonly bool IsNewCity;
 
-		public CityInfo(int index, string city, string building, string description, Position position, uint map)
+		public CityInfo(int index, string city, string building, string description, Position position, uint map, bool isNew)
 		{
 			Index = index;
 			City = city;
@@ -653,6 +711,7 @@ namespace ClassicUO.Game.Scenes
 			Description = description;
 			Position = position;
 			Map = map;
+		    IsNewCity = isNew;
 		}
 	}
 }

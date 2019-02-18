@@ -47,7 +47,7 @@ namespace ClassicUO.IO.Resources
                     return default;
 
 	            var hasAction = _file.ReadBool();
-	            var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1));
+	            var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)).TrimEnd('\0');
 
 				_skills[index] = new SkillEntry(index, name, hasAction); 
             }

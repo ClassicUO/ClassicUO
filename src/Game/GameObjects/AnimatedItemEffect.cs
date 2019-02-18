@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -18,11 +18,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class AnimatedItemEffect : GameEffect
+    internal partial class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {
@@ -76,11 +75,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
                 SetSource(sourceX, sourceY, sourceZ);
-        }
-
-        protected override View CreateView()
-        {
-            return new AnimatedEffectView(this);
         }
 
         public override void Update(double totalMS, double frameMS)

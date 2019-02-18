@@ -59,19 +59,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButton.Left)
             {
-
-                ref Ability ability = ref World.Player.Abilities[_isPrimary ? 0 : 1];
-
-                if (((byte) ability & 0x80) == 0)
-                {
-                    for (int i = 0; i < 2; i++)
-                        World.Player.Abilities[i] &= (Ability) 0x7F;
-                    GameActions.UseAbility((byte)ability);
-                }
+                if (_isPrimary)
+                    GameActions.UsePrimaryAbility();
                 else 
-                    GameActions.UseAbility(0);
-
-                ability ^= (Ability) 0x80;
+                    GameActions.UseSecondaryAbility();              
             }
         }
 

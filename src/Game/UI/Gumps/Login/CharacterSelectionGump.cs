@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -40,8 +40,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public CharacterSelectionGump() : base(0, 0)
         {
-            //AddChildren(new LoginBackground(true));
-
             bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
             int posInList = 0;
             int yOffset = 150;
@@ -89,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            if (!World.ClientFlags.OnePerson)
+            if (!World.ClientFlags.OnePerson || loginScene.Characters.All(string.IsNullOrEmpty))
             {
                 Add(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {

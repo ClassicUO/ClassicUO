@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -23,8 +23,13 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal struct Hue : IComparable, IComparable<ushort>
+    internal readonly struct Hue : IComparable<ushort>
     {
+        public bool Equals(Hue other)
+        {
+            return _value == other._value;
+        }
+ 
         public const ushort INVALID = 0xFFFF;
        
         private readonly ushort _value;
@@ -64,15 +69,18 @@ namespace ClassicUO.Game
             return h1._value > h2._value;
         }
 
-        public int CompareTo(object obj)
-        {
-            return _value.CompareTo(obj);
-        }
-
         public int CompareTo(ushort other)
         {
             return _value.CompareTo(other);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+
+            return obj is Hue other && Equals(other);
+        }
+
 
         public override string ToString()
         {
@@ -82,16 +90,6 @@ namespace ClassicUO.Game
         public override int GetHashCode()
         {
             return _value.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            switch (obj)
-            {
-                case Hue hue: return _value == hue._value;
-                case ushort @ushort: return _value == @ushort;
-                default: return false;
-            }
         }
 
         public static Hue Parse(string str)

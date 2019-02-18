@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI
 {
     abstract class AbstractEntry : IDisposable
     {
-        public AbstractEntry(int maxcharlength, int width, int maxWidth)
+        protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
             MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
             Width = width;
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI
         public int MaxCharCount { get; }
 
         public int Width { get; }
-        public int Height => RenderText.Height < 20 ? 20 : RenderText.Height;
+        public int Height => RenderText.Height < 25 ? 25 : RenderText.Height;
 
         public int MaxWidth { get; }
 

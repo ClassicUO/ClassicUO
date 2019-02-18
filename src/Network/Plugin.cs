@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,7 @@ using ClassicUO.Game;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -78,6 +80,7 @@ namespace ClassicUO.Network
 
         private delegate void OnInstall(ref void* header);
 
+
         public void Load()
         {
             _recv = OnPluginRecv;
@@ -87,8 +90,6 @@ namespace ClassicUO.Network
             _castSpell = GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
-
-
 
             IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
 
@@ -124,6 +125,13 @@ namespace ClassicUO.Network
             //Marshal.WriteIntPtr(headerPtr, SDL.SDL_GL_GetCurrentWindow());
             //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getUoFilePath));
 
+            SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
+            SDL.SDL_VERSION(out info.version);
+            SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+
+            IntPtr hwnd = IntPtr.Zero;
+            if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
+                hwnd = info.info.win.window;
 
             PluginHeader header = new PluginHeader
             {
@@ -134,7 +142,7 @@ namespace ClassicUO.Network
                 GetPlayerPosition = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition),
                 CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
                 GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
-                HWND = SDL.SDL_GL_GetCurrentWindow(),
+                HWND = hwnd,
                 GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath)
             };
 

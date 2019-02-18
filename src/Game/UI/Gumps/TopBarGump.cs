@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -213,13 +213,9 @@ namespace ClassicUO.Game.UI.Gumps
                     DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
 
                     if (debugGump == null)
-                    {
-                        // dont consider this case
-                    }
+                        Engine.UI.Add(new DebugGump());
                     else
-                    {
                         debugGump.IsVisible = !debugGump.IsVisible;
-                    }
 
                     break;
             }

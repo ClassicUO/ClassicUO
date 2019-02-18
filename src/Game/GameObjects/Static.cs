@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,14 +21,14 @@
 
 using System.Runtime.CompilerServices;
 
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class Static : GameObject
+    internal partial class Static : GameObject
     {
         private StaticTiles? _itemData;
 
@@ -37,6 +37,20 @@ namespace ClassicUO.Game.GameObjects
             Graphic = OriginalGraphic = graphic;
             Hue = hue;
             Index = index;
+
+            _isFoliage = ItemData.IsFoliage;
+            _isPartialHue = ItemData.IsPartialHue;
+
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+       
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || (ItemData.IsSurface && ItemData.IsBackground) || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
         }
 
         public int Index { get; }
@@ -59,15 +73,13 @@ namespace ClassicUO.Game.GameObjects
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
-            _itemData = null;
+            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
-            _itemData = null;
+            _itemData = FileManager.TileData.StaticData[Graphic];
         }
-
-        protected override View CreateView() => new StaticView(this);
     }
 }

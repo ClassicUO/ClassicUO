@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 using ClassicUO.Utility;
@@ -45,13 +46,13 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
 
+        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = "Remember\\Double\\Backslashes\\";
+
+        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = "0.0.0.0";
+
         [JsonProperty(PropertyName = "lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "lastservernum")] public ushort LastServerNum { get; set; } = 1;
-
-        [JsonProperty(PropertyName = "ultimaonlinedirectory")] public string UltimaOnlineDirectory { get; set; } = string.Empty;
-
-        [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "login_fps")]public int MaxLoginFPS { get; set; } = 60;
 
@@ -65,14 +66,19 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; } = false;
 
+        [JsonProperty(PropertyName = "reconnect")] public bool Reconnect { get; set; } = false;
+        [JsonProperty(PropertyName = "reconnect_time")] public int ReconnectTime { get; set; } = 0;
+
         [JsonProperty(PropertyName = "login_music")]
         public bool LoginMusic { get; set; } = true;
 
         [JsonProperty(PropertyName = "login_music_volume")]
-        public int LoginMusicVolume { get; set; } = 100;
+        public int LoginMusicVolume { get; set; } = 70;
 
         [JsonProperty(PropertyName = "shard_type")]
-        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = outlands, 2 = ??
+        public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
+
+        [JsonProperty(PropertyName = "fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 
         public void Save()
         {

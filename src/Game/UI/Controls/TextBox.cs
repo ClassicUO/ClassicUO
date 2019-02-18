@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -19,8 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -30,8 +33,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class TextBox : AbstractTextBox
     {
-        public TextEntry TxEntry { get; private set; }
-
         public TextBox(TextEntry txentry, bool editable)
         {
             TxEntry = txentry;
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = true;
         }
 
-        public TextBox(string[] parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
+        public TextBox(string[] parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -56,6 +57,12 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
+
+
+        public event EventHandler TextChanged;
+
+
+        public TextEntry TxEntry { get; private set; }
 
         public bool IsChanged => TxEntry.IsChanged;
 
@@ -75,6 +82,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             get => TxEntry.NumericOnly;
             set => TxEntry.NumericOnly = value;
+        }
+
+        public bool SafeCharactersOnly
+        {
+            get => TxEntry.SafeCharactersOnly;
+            set => TxEntry.SafeCharactersOnly = value;
         }
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
@@ -99,7 +112,10 @@ namespace ClassicUO.Game.UI.Controls
                 Height = TxEntry.Height;
 
             if (TxEntry.IsChanged)
+            {
                 TxEntry.UpdateCaretPosition();
+                TextChanged.Raise(this);
+            }
             base.Update(totalMS, frameMS);
         }
 
@@ -128,8 +144,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            string s=null;
-            int oldidx = TxEntry.CaretIndex;
+            string s;
+
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
@@ -169,6 +185,9 @@ namespace ClassicUO.Game.UI.Controls
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
                     TxEntry.SetCaretPosition(Text.Length - 1);
+                    break;
+                case SDL.SDL_Keycode.SDLK_TAB:
+                    Parent.KeyboardTabToNextFocus(this);
                     break;
             }
 

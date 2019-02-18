@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,11 +21,10 @@
 using System;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class MovingEffect : GameEffect
+    internal partial class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
 
@@ -116,10 +115,6 @@ namespace ClassicUO.Game.GameObjects
 
         public byte MovingDelay { get; set; } = 20;
 
-        protected override View CreateView()
-        {
-            return new MovingEffectView(this);
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -278,7 +273,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 countY -= (int) Offset.Z + (tz - sz) * 4;
-                float angle = /*180.0f +*/ (float) (Math.Atan2(countY, countX) * 57.295780); //-((float)Math.Atan2(ty - sy, tx - sx) + (float)Math.PI * (1f / 4f));
+                float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
                 AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
 
                 if (sx != newX || sy != newY)
@@ -286,35 +281,11 @@ namespace ClassicUO.Game.GameObjects
                     sx = newX;
                     sy = newY;
 
-                    //X = (ushort) newX;
-                    //Y = (ushort) newY;
-                    //Tile = World.Map.GetTile(X, Y);
                     wantUpdateInRenderList = true;
                 }
 
                 if (wantUpdateInRenderList) SetSource(sx, sy, sz);
             }
-
-            //if (_timeUntilHit == 0f)
-            //{
-            //    _timeActive = 0f;
-            //    _timeUntilHit = (float) Math.Sqrt(Math.Pow(tx - sx, 2) + Math.Pow(ty - sy, 2) + Math.Pow(tz - sz, 2)) * 75f;
-            //}
-            //else
-            //    _timeActive += (float) frameMS;
-
-            //if (_timeActive >= _timeUntilHit)
-            //    Dispose();
-            //else
-            //{
-            //    float x = sx + _timeActive / _timeUntilHit * (tx - sx);
-            //    float y = sy + _timeActive / _timeUntilHit * (ty - sy);
-            //    float z = sz + _timeActive / _timeUntilHit * (tz - sz);
-            //    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-            //    Tile = World.Map.GetTile((int) x, (int) y);
-            //    Offset = new Vector3(x % 1, y % 1, z % 1);
-            //    AngleToTarget = -((float) Math.Atan2(ty - sy, tx - sx) + (float) Math.PI * (1f / 4f));
-            //}
         }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)

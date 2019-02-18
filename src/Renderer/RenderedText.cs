@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -47,6 +47,7 @@ namespace ClassicUO.Renderer
     internal sealed class RenderedText : IDisposable
     {
         private string _text;
+        private byte _font;
 
         public RenderedText()
         {
@@ -56,8 +57,19 @@ namespace ClassicUO.Renderer
 
         public bool IsUnicode { get; set; }
 
-        public byte Font { get; set; }
-
+        public byte Font
+        {
+            get => _font;
+            set
+            {
+                if (_font != value)
+                {
+                    if (value == 0xFF)
+                        value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    _font = value;
+                }
+            }
+        }
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }
@@ -67,6 +79,8 @@ namespace ClassicUO.Renderer
         public byte Cell { get; set; }
 
         public bool IsHTML { get; set; }
+
+        public bool RecalculateWidthByInfo { get; set; }
 
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
@@ -152,6 +166,9 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
+            if (Texture == null)
+                return false;
+
             return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
@@ -165,6 +182,9 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+
+            FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+
             bool ispartial = false;
 
             if (IsUnicode)
@@ -182,6 +202,7 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 FileManager.Fonts.SetUseHTML(false);
+            FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Dispose()

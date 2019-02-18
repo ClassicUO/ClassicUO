@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -82,7 +77,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (!IsVisible)
                 IsVisible = true;
 
-
             int per = Mobile.HitsMax;
 
             if (per > 0)
@@ -106,10 +100,24 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile == null || Engine.Profile.Current == null)
                 return false;
 
-            if (X < Engine.Profile.Current.GameWindowPosition.X || X + Width > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X)
+            Point gWinPos = Engine.Profile.Current.GameWindowPosition;
+            Point gWinSize = Engine.Profile.Current.GameWindowSize;
+            float scale = Engine.Profile.Current.ScaleZoom;
+
+            if (Mobile != null && !Mobile.IsDisposed)
+            {
+                float x = (Mobile.RealScreenPosition.X + gWinPos.X + 9) / scale;
+                float y = (Mobile.RealScreenPosition.Y + gWinPos.Y + 30) / scale;
+
+                X = (int)(x + Mobile.Offset.X);
+                Y = (int)(y + Mobile.Offset.Y - Mobile.Offset.Z);
+            }
+
+            if (X < gWinPos.X || X + Width > gWinPos.X + gWinSize.X)
                 return false;
-            if (Y < Engine.Profile.Current.GameWindowPosition.Y || Y + Height > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y)
+            if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
                 return false;
+
             return base.Draw(batcher, position, hue);
         }
     }

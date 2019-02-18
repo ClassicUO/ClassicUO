@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeWindow(_lastSize);
 
-                    OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+                    OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
                     if (options != null)
                         options.UpdateVideo();
 
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            OptionsGump1 options = Engine.UI.GetByLocalSerial<OptionsGump1>();
+            OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
             if (options != null)
                 options.UpdateVideo();
         }

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly Mobile _mobile;
         private bool _canDrag, _sendClickIfNotDClick;
         private Point _clickPoint;
-        private ItemGump _itemGump;
+        private ItemGumpFixed _itemGump;
         private float _pickupTime, _singleClickTime;
         
 
@@ -93,20 +93,48 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Item != null)
                 {
-                    Add(_itemGump = new ItemGump(Item)
+                    Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
                         HighlightOnMouseOver = false,
-                        ShowLabel = false
+                        ShowLabel = false,
                     });
+
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
-                    int offsetX = (13 - texture.ImageRectangle.Width) >> 1;
-                    int offsetY = (14 - texture.ImageRectangle.Height) >> 1;
+                    //int offsetX = (13 - texture.ImageRectangle.Width) >> 1;
+                    //int offsetY = (14 - texture.ImageRectangle.Height) >> 1;
                     int tileX = 2;
                     int tileY = 3;
-                    tileX -= texture.ImageRectangle.X - offsetX;
-                    tileY -= texture.ImageRectangle.Y - offsetY;
+                    //tileX -= texture.ImageRectangle.X - offsetX;
+                    //tileY -= texture.ImageRectangle.Y - offsetY;
+
+                    int imgW = texture.ImageRectangle.Width;
+                    int imgH = texture.ImageRectangle.Height;
+
+                    if (imgW < 14)
+                        tileX += 7 - (imgW >> 1);
+                    else
+                    {
+                        tileX -= 2;
+
+                        if (imgW > 18)
+                            imgW = 18;
+                    }
+
+                    if (imgH < 14)
+                        tileY += 7 - (imgH >> 1);
+                    else
+                    {
+                        tileY -= 2;
+
+                        if (imgH > 18)
+                            imgH = 18;
+                    }
+
+
                     _itemGump.X = tileX;
                     _itemGump.Y = tileY;
+                    _itemGump.Width = imgW;
+                    _itemGump.Height = imgH;
                 }
             }
 
@@ -179,6 +207,35 @@ namespace ClassicUO.Game.UI.Controls
         {
             Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
             GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
+        }
+
+
+        class ItemGumpFixed : ItemGump
+        {
+            private Point _originalSize, _point;
+
+            public ItemGumpFixed(Item item, int w, int h) : base(item)
+            {
+                Width = w;
+                Height = h;
+                WantUpdateSize = false;
+
+
+                ArtTexture texture = (ArtTexture) Texture;
+
+                _point.X = texture.ImageRectangle.X;
+                _point.Y = texture.ImageRectangle.Y;
+                _originalSize.X = texture.ImageRectangle.Width;
+                _originalSize.Y = texture.ImageRectangle.Height;
+            }
+
+
+            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            {
+                Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
+
+                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(_point.X, _point.Y, _originalSize.X, _originalSize.Y), huev);
+            }
         }
     }
 }

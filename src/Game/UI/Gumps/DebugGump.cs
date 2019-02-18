@@ -16,16 +16,20 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _label;
         private readonly AlphaBlendControl _trans;
 
+        private bool _fullDisplayMode = true;
+
         private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
+        private const string DEBUG_STRING_SMALL = "FPS: {0}";
+
         public DebugGump() : base(0, 0)
         {
             CanMove = true;
             CanCloseWithEsc = false;
-            CanCloseWithRightClick = false;
+            CanCloseWithRightClick = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
 
@@ -46,6 +50,16 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                _fullDisplayMode = !_fullDisplayMode;
+                return true;
+            }
+
+            return false;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -60,10 +74,15 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
-            _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-            _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
-            _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
+            if (_fullDisplayMode)
+            {
+                _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
+                _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
+            }
+            else
+                _sb.AppendFormat(DEBUG_STRING_SMALL, Engine.CurrentFPS);
 
             _label.Text = _sb.ToString();
 
@@ -72,9 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string ReadObject(GameObject obj)
         {
-            if (obj != null)
+            if (obj != null && _fullDisplayMode)
             {
-
                 switch (obj)
                 {
                     case Mobile mob:
@@ -82,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case Item item:
                         return string.Format("Item ({0})  graphic: {1}  flags: {2}  amount: {3}", item.Serial, item.Graphic, item.Flags, item.Amount);
                     case Static st:
-                        return string.Format("Static ({0})  height: {1}  flags: {2}", st.Graphic, st.ItemData.Height, st.ItemData.Flags);
+                        return string.Format("Static ({0})  height: {1}  flags: {2}  Alpha: {3}", st.Graphic, st.ItemData.Height, st.ItemData.Flags, st.AlphaHue);
                     case Multi multi:
                         return string.Format("Multi ({0})  height: {1}  flags: {2}", multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags);
                     case GameEffect effect:
@@ -96,10 +114,8 @@ namespace ClassicUO.Game.UI.Gumps
                     case Land land:
                         return string.Format("Static ({0})  flags: {1}", land.Graphic, land.TileData.Flags);
                 }
-
             }
             return string.Empty;
-
         }
     }
 }

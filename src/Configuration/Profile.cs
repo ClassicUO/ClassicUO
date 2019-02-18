@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -53,8 +54,6 @@ namespace ClassicUO.Configuration
         [JsonProperty]
         public string CharacterName { get; }
 
-
-
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
         [JsonProperty] public int SoundVolume { get; set; } = 100;
@@ -71,6 +70,7 @@ namespace ClassicUO.Configuration
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
+        [JsonProperty] public ushort WhisperHue { get; set; } = 0x0033;
         [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
@@ -95,6 +95,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MobileHPType { get; set; } = 0;
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
         [JsonProperty] public bool TreeToStumps { get; set; } = false;
+        [JsonProperty] public bool EnableCaveBorder { get; set; } = false;
         [JsonProperty] public bool HideVegetation { get; set; } = false;
         [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
@@ -103,6 +104,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
         [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
+        [JsonProperty] public bool BandageSelfOld { get; set; } = true;
+
+        [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
+        [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;
@@ -113,6 +118,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnablePathfind { get; set; } = true;
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
+        [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
@@ -125,6 +131,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
+
+        [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
 
 
         public void Save(List<Gump> gumps = null)
@@ -141,7 +149,11 @@ namespace ClassicUO.Configuration
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
             // save settings.json
-            ConfigurationResolver.Save(this, Path.Combine(path, "settings.json"));
+            ConfigurationResolver.Save(this, Path.Combine(path, "settings.json"), new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+            });
 
             // save gumps.bin
             SaveGumps(path, gumps);

@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -52,8 +52,6 @@ namespace ClassicUO.Game.Managers
 
         public UIManager()
         {
-            GameCursor = new GameCursor();
-
             Engine.Input.MouseDragging += (sender, e) =>
             {
                 if (_isDraggingControl)
@@ -64,6 +62,7 @@ namespace ClassicUO.Game.Managers
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
+
                 if (MouseOverControl != null)
                 {
                     MakeTopMostGump(MouseOverControl);
@@ -224,7 +223,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
-        public GameCursor GameCursor { get; }
+        public GameCursor GameCursor { get; private set; }
 
         public Control KeyboardFocusControl
         {
@@ -262,19 +261,11 @@ namespace ClassicUO.Game.Managers
         public bool IsDragging => _isDraggingControl && _draggingControl != null;
 
 
-        //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
-        //public void AddInputBlocker(object obj)
-        //{
-        //    if (!_inputBlockingObjects.Contains(obj))
-        //        _inputBlockingObjects.Add(obj);
-        //}
-
-        //public void RemoveInputBlocker(object obj)
-        //{
-        //    if (_inputBlockingObjects.Contains(obj))
-        //        _inputBlockingObjects.Remove(obj);
-        //}
+        public void InitializeGameCursor()
+        {
+            GameCursor = new GameCursor();
+        }
 
         private void CloseIfClickOutGumps()
         {
@@ -332,11 +323,18 @@ namespace ClassicUO.Game.Managers
 
                             break;
                         case "buttontileart":
-                            gump.Add(new Button(gparams), page);
+                            gump.Add(new Button(gparams)
+                            {
+                                //WantUpdateSize = false,
+                                ContainsByBounds = true,
+                            }, page);
 
                             gump.Add(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
                             {
-                                X = int.Parse(gparams[1]) + int.Parse(gparams[10]), Y = int.Parse(gparams[2]) + int.Parse(gparams[11])
+                                X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
+                                Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
+
+                                AcceptMouseInput = true,
                             }, page);
 
                             break;
@@ -364,7 +362,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (c is Button)
                                     {
-                                        c.IsVisible = false;
+                                        c.Alpha = 1f;
                                     }
 
 
@@ -518,8 +516,33 @@ namespace ClassicUO.Game.Managers
                             if (World.ClientFlags.TooltipsEnabled)
                             {
                                 string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
-                                Control last = gump.Children.Count > 0 ? gump.Children.Last() : null;
-                                last?.SetTooltip(cliloc);
+
+                                if (gparams.Length > 2 && gparams[2][0] == '@')
+                                {
+                                    string l = gparams[gparams.Length - 1];
+
+                                    if (l.Length > 2)
+                                    {
+                                        if (l[l.Length - 1] == '\'' && l[l.Length - 2] == '@')
+                                        {
+                                            sb = new StringBuilder();
+
+                                            for (int i = 2; i < gparams.Length - 1; i++)
+                                            {
+                                                sb.Append( i == 2 ? gparams[i].Substring(1, gparams[i].Length - 1) : gparams[i]);
+                                                sb.Append(' ');
+                                            }
+
+                                            cliloc = FileManager.Cliloc.Translate(cliloc, sb.ToString());
+                                        }
+                                        else
+                                            Log.Message(LogTypes.Error, $"Missing final ''@' into gump tooltip: {cliloc}");
+                                    }
+                                    else
+                                        Log.Message(LogTypes.Error, $"String '{l}' too short, something wrong with gump tooltip: {cliloc}");
+                                }
+
+                                gump.Children.Last()?.SetTooltip(cliloc);
                             }
 
                             break;
@@ -549,6 +572,19 @@ namespace ClassicUO.Game.Managers
             Add(gump);
 
             return gump;
+        }
+
+        public ChildType GetChildByLocalSerial<ParentType, ChildType>(Serial parentSerial, Serial childSerial) 
+            where ParentType : Control
+            where ChildType : Control
+        {
+            ParentType parent = GetByLocalSerial<ParentType>(parentSerial);
+            if(parent != null)
+            {
+                return parent.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
+            }
+
+            return null;
         }
 
         public T GetByLocalSerial<T>(Serial? serial = null) where T : Control
@@ -582,7 +618,7 @@ namespace ClassicUO.Game.Managers
                     _gumps.RemoveAt(i--);
             }
 
-            GameCursor.Update(totalMS, frameMS);
+            GameCursor?.Update(totalMS, frameMS);
             HandleKeyboardInput();
             HandleMouseInput();
         }
@@ -599,7 +635,7 @@ namespace ClassicUO.Game.Managers
                     g.Draw(batcher, g.Location);
             }
 
-            GameCursor.Draw(batcher);
+            GameCursor?.Draw(batcher);
         }
 
         public void Add(Control gump)
@@ -620,8 +656,7 @@ namespace ClassicUO.Game.Managers
         {
             _gumps.ForEach(s =>
             {
-                if (!(s is DebugGump))
-                    s.Dispose();
+                s.Dispose();
             });
         }
 

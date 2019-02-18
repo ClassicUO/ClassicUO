@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool AcceptMouseInput
         {
-            get => IsEnabled && !IsDisposed && _acceptMouseInput;
+            get => IsEnabled && !IsDisposed && _acceptMouseInput && IsVisible;
             set => _acceptMouseInput = value;
         }
 
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Controls
         public Control Parent
         {
             get => _parent;
-            private set
+            internal set
             {
                 if (value == null)
                     _parent?._children.Remove(this);
@@ -333,20 +333,20 @@ namespace ClassicUO.Game.UI.Controls
                     });
                 }
 
-                int w, h;
+                //int w, h;
 
-                if (Texture == null)
-                {
-                    w = Width;
-                    h = Height;
-                }
-                else
-                {
-                    w = Texture.Width;
-                    h = Texture.Height;
-                }
+                //if (Texture == null)
+                //{
+                //    w = Width;
+                //    h = Height;
+                //}
+                //else
+                //{
+                //    w = Texture.Width;
+                //    h = Texture.Height;
+                //}
 
-                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, w, h), Vector3.Zero);
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
         }
 
@@ -365,6 +365,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (c.IsDisposed)
                     {
+                        OnChildRemoved();
                         _children.RemoveAt(i--);
                         continue;  
                     }
@@ -435,6 +436,8 @@ namespace ClassicUO.Game.UI.Controls
                 Engine.UI.KeyboardFocusControl = this;
             }
         }
+
+        public event EventHandler Disposed;
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
@@ -825,6 +828,27 @@ namespace ClassicUO.Game.UI.Controls
                 Parent.CloseWithRightClick();
         }
 
+        public void KeyboardTabToNextFocus(Control c)
+        {
+            int startIndex = _children.IndexOf(c);
+            for (int i = startIndex + 1; i < _children.Count; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+            for (int i = 0; i < startIndex; i++)
+            {
+                if (_children[i].AcceptKeyboardInput)
+                {
+                    _children[i].SetKeyboardFocus();
+                    return;
+                }
+            }
+        }
+
         public virtual void OnButtonClick(int buttonID)
         {
             Parent?.OnButtonClick(buttonID);
@@ -852,6 +876,8 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             IsDisposed = true;
+
+            Disposed.Raise();
         }
     }
 }

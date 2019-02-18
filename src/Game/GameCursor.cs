@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -56,7 +56,6 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private SpriteTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
-        //private Hue _hue;
         private bool _needGraphicUpdate = true;
         private Point _offset;
         private Rectangle _rect;
@@ -70,7 +69,6 @@ namespace ClassicUO.Game
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
-                    //Texture2D texture = FileManager.Art.GetTexture(id);
 
                     ushort[] pixels = FileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
 
@@ -171,6 +169,12 @@ namespace ClassicUO.Game
                                     break;
                             }
 
+                            //if (offX == 0 && offY == 0)
+                            //{
+                            //    offX = -1;
+                            //    offY = -1;
+                            //}
+
                             _cursorOffset[0, j] = (int) offX;
                             _cursorOffset[1, j] = (int) offY;
                         }
@@ -208,8 +212,6 @@ namespace ClassicUO.Game
             }
         }
 
-        //public ArtTexture Texture { get; private set; }
-
         private ItemHold _itemHold;
 
         public void SetDraggedItem(ItemHold hold)
@@ -219,7 +221,6 @@ namespace ClassicUO.Game
             _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
         }
-
 
         private IntPtr  _cursor, _surface;
 
@@ -267,12 +268,9 @@ namespace ClassicUO.Game
                 }
             }
 
-            //Texture.Ticks = (long) totalMS;
-
             if (_itemHold != null && _itemHold.Enabled)
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
-
 
         public void Draw(Batcher2D sb)
         {
@@ -290,41 +288,6 @@ namespace ClassicUO.Game
                 }
             }
             DrawToolTip(sb, Mouse.Position);
-
-            //ushort id = Graphic;
-
-            //if (id < 0x206A)
-            //    id -= 0x2053;
-            //else
-            //    id -= 0x206A;
-
-            //if (id < 16)
-            //{
-            //    if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
-            //    {
-            //        Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
-            //        Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
-            //        sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-
-            //        if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
-            //        {
-            //            p.X += 5;
-            //            p.Y += 5;
-            //            sb.Draw2D(_draggedItemTexture, p, _rect, hue);
-            //        }
-            //    }
-            //    DrawToolTip(sb, Mouse.Position);
-
-            //   // Vector3 vec = World.InGame && !World.Player.InWarMode && World.MapIndex != 0 && !(Engine.UI.MouseOverControl is AbstractTextBox) ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
-
-            //    //sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), vec);
-
-            //    //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-            //    //if (gs != null)
-            //    //    _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
-
-            //    //_text.Draw(sb, new Point(Mouse.Position.X, Mouse.Position.Y - 20));
-            //}
         }
 
         private void DrawToolTip(Batcher2D batcher, Point position)
@@ -346,7 +309,6 @@ namespace ClassicUO.Game
 
                         return;
                     }
-
 
                     if (Engine.UI.IsMouseOverAControl)
                     {
@@ -378,7 +340,6 @@ namespace ClassicUO.Game
                             return;
                         }
                     }
-
                   
                     if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
                     {
@@ -432,6 +393,10 @@ namespace ClassicUO.Game
 
             if (!Engine.UI.IsMouseOverWorld)
                 return result;
+
+            if (Engine.Profile.Current == null)
+                return result;
+
             int windowCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
             int windowCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
 
@@ -465,52 +430,36 @@ namespace ClassicUO.Game
             switch (hashf)
             {
                 case 111:
-
                     return (int) Direction.West; // W
                 case 112:
-
                     return (int) Direction.Up; // NW
                 case 113:
-
                     return (int) Direction.North; // N
                 case 120:
-
                     return (int) Direction.West; // W
                 case 131:
-
                     return (int) Direction.West; // W
                 case 132:
-
                     return (int) Direction.Left; // SW
                 case 133:
-
                     return (int) Direction.South; // S
                 case 210:
-
                     return (int) Direction.North; // N
                 case 230:
-
                     return (int) Direction.South; // S
                 case 311:
-
                     return (int) Direction.East; // E
                 case 312:
-
                     return (int) Direction.Right; // NE
                 case 313:
-
                     return (int) Direction.North; // N
                 case 320:
-
                     return (int) Direction.East; // E
                 case 331:
-
                     return (int) Direction.East; // E
                 case 332:
-
                     return (int) Direction.Down; // SE
                 case 333:
-
                     return (int) Direction.South; // S
             }
 

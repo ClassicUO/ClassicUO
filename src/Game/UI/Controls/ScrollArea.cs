@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -33,14 +33,17 @@ namespace ClassicUO.Game.UI.Controls
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
         private Rectangle _rect;
+        private bool _isNormalScroll;
+        private int _scrollbarHeight;
 
-        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar)
+        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
             X = x;
             Y = y;
             Width = w;
             Height = h;
-
+            _isNormalScroll = normalScrollbar;
+            _scrollbarHeight = scrollbarHeight;
             if (normalScrollbar)
                 _scrollBar = new ScrollBar( Width - 14, 0, Height);
             else
@@ -52,10 +55,17 @@ namespace ClassicUO.Game.UI.Controls
                 Width = Width + 15;
             }
 
-            _scrollBar.MinValue = 0;
-            _scrollBar.MaxValue = Height;
+            if (scrollbarHeight < 0)
+                scrollbarHeight = Height;
 
-            Add((Control)_scrollBar);
+            _scrollBar.MinValue = 0;
+            _scrollBar.MaxValue = scrollbarHeight;
+
+            //Add((Control)_scrollBar);
+
+            Control c = (Control) _scrollBar;
+            c.Parent = this;
+
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
@@ -100,8 +110,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.EnableScissorTest(true);
                 int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
+                int maxheight = _scrollBar.Value + Height;
                 bool drawOnly1 = true;
+
+                position = _rect.Location;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -109,7 +121,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (!child.IsVisible)
                         continue;
-                    child.Y = height - _scrollBar.Value;
+
+                    child.Y = height - _scrollBar.Value /*+ (_isNormalScroll ? 20 : 0)*/;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -168,7 +181,7 @@ namespace ClassicUO.Game.UI.Controls
             else
             {
                 // Try to find the wrapped control
-                var wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
+                ScrollAreaItem wrapper = Children.OfType<ScrollAreaItem>().FirstOrDefault(o => o.Children.Contains(c));
                 base.Remove(wrapper);
             }
         }
@@ -197,15 +210,20 @@ namespace ClassicUO.Game.UI.Controls
 
         private void CalculateScrollBarMaxValue()
         {
-            _scrollBar.Height = Height;
+            _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
             int height = 0;
-            for (int i = 1; i < Children.Count; i++) height += Children[i].Height;
+            for (int i = 1; i < Children.Count; i++)
+                height += Children[i].Height;
+
             height -= _scrollBar.Height;
+
+            //if (_isNormalScroll)
+            //    height += 40;
 
             if (height > 0)
             {
-                _scrollBar.MaxValue = height;
+                _scrollBar.MaxValue =  height;
 
                 if (maxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;
@@ -220,5 +238,12 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class ScrollAreaItem : Control
     {
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Children.Count == 0)
+                Dispose();
+        }
     }
 }

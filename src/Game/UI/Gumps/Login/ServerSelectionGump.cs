@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 150, Y = 90, Width = 393 - 14, Height = 271
             });
             // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)
@@ -224,13 +224,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _labelPacketLoss.CreateTexture();
                 AcceptMouseInput = true;
                 Width = 393;
+                Height = 25;
 
-                Height = new[]
-                {
-                    _labelName.Height, _labelPing.Height, _labelPacketLoss.Height
-                }.Max() + 10;
-                X = 0;
-                Y = 0;
+                //Height = new[]
+                //{
+                //    _labelName.Height, _labelPing.Height, _labelPacketLoss.Height
+                //}.Max();
+
+
+                WantUpdateSize = false;
             }
 
             private RenderedText CreateRenderedText(string text)
@@ -250,9 +252,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 if (IsDisposed)
                     return false;
-                _labelName.Draw(batcher, position + new Point(74, 10));
-                _labelPing.Draw(batcher, position + new Point(250, 10));
-                _labelPacketLoss.Draw(batcher, position + new Point(310, 10));
+                _labelName.Draw(batcher, position + new Point(74, 0));
+                _labelPing.Draw(batcher, position + new Point(250, 0));
+                _labelPacketLoss.Draw(batcher, position + new Point(310, 0));
 
                 return base.Draw(batcher, position, hue);
             }

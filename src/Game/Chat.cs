@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -84,12 +84,12 @@ namespace ClassicUO.Game
 
         public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
 
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(entity, message, hue, type, font, true, "ENU");
+        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => Print(_system, message, hue, type, font, unicode);
+        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
 
         public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
     
-        public static void OnMessage(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
 			switch (type)
 			{
@@ -97,38 +97,28 @@ namespace ClassicUO.Game
 			    case MessageType.Whisper:
 			    case MessageType.Yell:
                 case MessageType.Spell:
-				case MessageType.Label:
 				case MessageType.Regular:
-				    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+			    case MessageType.Label:
+                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
 					break;
 				case MessageType.Emote:
 				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);
-					break;			
-				case MessageType.Command:
+					break;
 
-				    break;
+                case MessageType.Command:
+
 				case MessageType.Encoded:
-
-				    break;
-				case MessageType.System:
+                case MessageType.System:
 				case MessageType.Party:
-				    //text = $"[Party][{parent.Name}]: {text}";
-
-				    //break;
 				case MessageType.Guild:
-				    //text = $"[Guild][{parent.Name}]: {text}";
-
-				    //break;
                 case MessageType.Alliance:
-                    //text = $"[Alliance][{parent.Name}]: {text}";
-
                     break;
                 default:
                     parent?.AddOverhead(type, text, (byte)font, hue, unicode);
                     break;
 			}
 
-			Message.Raise(new UOMessageEventArgs(parent, text, hue, type, font, unicode, lang), parent ?? _system);
+			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
 		}
 
 		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
@@ -140,10 +130,11 @@ namespace ClassicUO.Game
 
 	internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
+            Name = name;
             Hue = hue;
             Type = type;
             Font = font;
@@ -168,6 +159,8 @@ namespace ClassicUO.Game
         public Entity Parent { get; }
 
         public string Text { get; }
+
+        public string Name { get; }
 
         public Hue Hue { get; }
 

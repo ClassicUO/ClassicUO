@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -61,6 +61,8 @@ namespace ClassicUO.Game.UI
 
         public bool NumericOnly { get; set; }
 
+        public bool SafeCharactersOnly { get; set; }
+
         public ushort Hue
         {
             get => RenderText.Hue;
@@ -96,12 +98,20 @@ namespace ClassicUO.Game.UI
 
             if (MaxCharCount > 0)
             {
-                if (NumericOnly)
+                if (SafeCharactersOnly)
+                {
+                    foreach (char c1 in c)
+                    {
+                        if (c1 < 32 || c1 > 126)
+                            return;
+                    }
+                }
+                else if (NumericOnly)
                 {
                     string s = Text;
                     s = s.Insert(CaretIndex, c);
 
-                    if (!int.TryParse(s, out int value) || value >= MaxCharCount)
+                    if (!int.TryParse(s, out int value) || s.Length >= MaxCharCount)
                         return;
                 }
                 else if (Text.Length >= MaxCharCount)
@@ -120,10 +130,23 @@ namespace ClassicUO.Game.UI
         {
             if (MaxCharCount > 0)
             {
-                if (NumericOnly)
+                if (SafeCharactersOnly)
+                {
+                    char[] ch = text.ToCharArray();
+                    string safeString = "";
+                    foreach (char c in ch)
+                    {
+                        if ((int)Convert.ToChar(c) >= 32 && (int)Convert.ToChar(c) <= 126)
+                            safeString += c;
+                    }
+                    if (safeString.Length > MaxCharCount)
+                        text = safeString.Substring(0, MaxCharCount);
+                    else
+                        text = safeString;
+                }
+                else if (NumericOnly)
                 {
                     string str = text;
-
                     while (true)
                     {
                         int len = str.Length;
@@ -134,7 +157,7 @@ namespace ClassicUO.Game.UI
                             break;
                     }
                 }
-                else if (text.Length >= MaxCharCount)
+                else if (text.Length > MaxCharCount)
                     text = text.Remove(MaxCharCount - 1);
             }
 

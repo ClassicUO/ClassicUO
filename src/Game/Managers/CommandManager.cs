@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -37,11 +37,11 @@ namespace ClassicUO.Game.Managers
             {
                 if (!TargetManager.IsTargeting)
                 {
-                    TargetManager.SetTargeting(TargetType.SetTargetClientSide, 6983686, 0);
+                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, 6983686, 0);
                 }
                 else
                 {
-                    TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
+                    TargetManager.CancelTarget();
                 }
             });
         }

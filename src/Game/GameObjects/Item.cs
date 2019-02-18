@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -24,7 +24,6 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -33,7 +32,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class Item : Entity
+    internal partial class Item : Entity
     {
         private ushort _amount;
         private Serial _container;
@@ -45,6 +44,53 @@ namespace ClassicUO.Game.GameObjects
 
         public Item(Serial serial) : base(serial)
         {
+        }
+
+        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
+        {
+            Item item = null;
+
+            if (hue == 0xFFFF)
+            {
+                var minColor = 0xFFFF;
+                foreach (Item i in Items)
+                {
+                    if (i.Graphic == graphic)
+                    {
+                        if (i.Hue < minColor)
+                        {
+                            item = i;
+                            minColor = i.Hue;
+                        }
+                    }
+                    if (i.Container.IsValid)
+                    {
+                        Item found = i.FindItem(graphic, hue);
+                        if (found != null && found.Hue < minColor)
+                        {
+                            item = found;
+                            minColor = found.Hue;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Item i in Items)
+                {
+                    if (i.Graphic == graphic && i.Hue == hue)
+                        item = i;
+
+                    if (i.Container.IsValid)
+                    {
+                        Item found = i.FindItem(graphic, hue);
+                        if (found != null)
+                            item = found;
+                    }
+                }
+            }
+
+            return item;
         }
 
         public uint Price
@@ -103,21 +149,22 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
-
         public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
         {
             get
             {
-                if (_displayedGraphic.HasValue) return _displayedGraphic.Value;
+                if (_displayedGraphic.HasValue)
+                    return _displayedGraphic.Value;
 
                 if (IsCoin)
                 {
                     if (Amount > 5) return (Graphic) (Graphic + 2);
                     if (Amount > 1) return (Graphic) (Graphic + 1);
                 }
+                else if (IsMulti)
+                    return MultiGraphic;
 
                 return Graphic;
             }
@@ -126,18 +173,21 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90;
 
+        public Graphic MultiGraphic { get; private set; }
+
         public bool IsMulti
         {
             get => _isMulti;
             set
             {
-                if (_isMulti != value)
+                //if (_isMulti != value)
                 {
                     _isMulti = value;
 
+
                     if (value)
                     {
-                        if (MultiDistanceBonus == 0 || MultiInfo == null)
+                        //if (MultiDistanceBonus == 0 || MultiInfo == null)
                         {
                             short minX = 0;
                             short minY = 0;
@@ -151,26 +201,36 @@ namespace ClassicUO.Game.GameObjects
                                 house = new House(Serial, 0, false);
                                 World.HouseManager.Add(Serial, house);
                             }
-                            else 
+                            else
+                            {
                                 house.ClearComponents();
+                            }
 
                             for (int i = 0; i < count; i++)
                             {
-                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags);
+                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                                 if (x < minX) minX = x;
                                 if (x > maxX) maxX = x;
                                 if (y < minY) minY = y;
                                 if (y > maxY) maxY = y;
 
-                                if (flags != 0)
+                                if (add)
                                 {
                                     house.Components.Add(new Multi(graphic)
                                     {
-                                        Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z))
+                                        Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z)),
+                                        MultiOffset = new Position((ushort)x, (ushort)y , (sbyte) z),
+                                        AlphaHue = 0xFF
                                     });
-                                }                              
+                                }
+                                else if (i == 0)
+                                {
+                                    MultiGraphic = graphic;
+                                }
                             }
+
+                            FileManager.Multi.ReleaseLastMultiDataRead();
 
                             MultiInfo = new MultiInfo((short) X, (short) Y)
                             {
@@ -193,6 +253,8 @@ namespace ClassicUO.Game.GameObjects
                         MultiInfo = null;
                     }
                 }
+
+                AllowedToDraw = MultiGraphic != 0;
             }
         }
 
@@ -213,7 +275,8 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 Item item = this;
-                while (item.Container.IsItem) item = World.Items.Get(item.Container);
+                while (item.Container.IsItem)
+                    item = World.Items.Get(item.Container);
 
                 return item.Container.IsMobile ? item.Container : item;
             }
@@ -230,9 +293,35 @@ namespace ClassicUO.Game.GameObjects
                 if (base.Graphic != value)
                 {
                     base.Graphic = value;
-                    _itemData = null;
-                    Name = ItemData.Name;
+                    _itemData = FileManager.TileData.StaticData[value];
+                    //Name = ItemData.Name;
+
+                    CheckGraphicChange();
                 }
+            }
+        }
+
+        private void CheckGraphicChange()
+        {
+            if (!IsCorpse)
+            {
+                if (IsMulti)
+                    AllowedToDraw = MultiGraphic != 0;
+                else
+                    AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+            }
+            else
+            {
+                if ((Direction & Direction.Running) != 0)
+                {
+                    UsedLayer = true;
+                    Direction &= (Direction)0x7F;
+                }
+                else
+                    UsedLayer = false;
+
+                Layer = (Layer)Direction;
+                AllowedToDraw = true;
             }
         }
 
@@ -250,8 +339,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public event EventHandler OwnerChanged;
-
-        protected override View CreateView() => new ItemView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -555,10 +642,6 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
 
         public override void ProcessAnimation()
         {

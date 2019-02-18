@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -23,6 +23,10 @@ using System;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
+
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -43,7 +47,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             _showButtons = showButtons;
             _buttonClick = buttonClick;
-
+            CanCloseWithRightClick = false;
+            CanCloseWithEsc = false;
 
             Label label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -71,12 +76,25 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     X = 264, Y = 304, ButtonAction = ButtonAction.Activate
                 });
-
                 Add(new Button((int) Buttons.Cancel, 0x047E, 0x0480, 0x047F)
                 {
                     X = 348, Y = 304, ButtonAction = ButtonAction.Activate
                 });
             }
+
+            Engine.Input.KeyDown += InputOnKeyDown;
+        }
+
+        private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
+        {
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER || e.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
+                Engine.SceneManager.ChangeScene(ScenesType.Login);
+        }
+
+        public override void Dispose()
+        {
+            Engine.Input.KeyDown -= InputOnKeyDown;
+            base.Dispose();
         }
 
         public override void OnButtonClick(int buttonID)

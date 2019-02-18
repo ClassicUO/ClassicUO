@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -34,12 +35,20 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _okButton;
         private readonly TextBox _textBox;
         private readonly Point _offsert;
+        private readonly WeakReference _itemGump;
 
         private bool _firstChange;
 
         public SplitMenuGump(Item item, Point offset) : base(item, 0)
         {
             Item = item;
+
+            ItemGump itemGump = Engine.UI.GetChildByLocalSerial<ContainerGump, ItemGump>(item.Container, item.Serial);
+            if(itemGump != null)
+            {
+                _itemGump = new WeakReference(itemGump);
+                itemGump.Disposed += ItemGumpOnDisposed;
+            }
             _offsert = offset;
 
             CanMove = true;
@@ -68,6 +77,12 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public Item Item { get; }
+
+        private void ItemGumpOnDisposed(object sender, EventArgs e)
+        {
+            Dispose();
+        }
+
 
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
@@ -130,6 +145,16 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             _okButton.MouseClick -= OkButtonOnMouseClick;
+
+            if(_itemGump != null && _itemGump.IsAlive)
+            {
+                ItemGump gump = _itemGump.Target as ItemGump;
+                if (gump != null)
+                {
+                    gump.Disposed -= ItemGumpOnDisposed;
+                }
+            }
+
             base.Dispose();
         }
 

@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,6 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -50,13 +51,32 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed, _continueRunning;
+        private bool _rightMousePressed, _continueRunning, _useObjectHandles;
 
+        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirection = new Dictionary<SDL.SDL_Keycode, Direction>()
+        {
+           { SDL.SDL_Keycode.SDLK_LEFT, Direction.Left },
+           { SDL.SDL_Keycode.SDLK_RIGHT, Direction.Right },
+           { SDL.SDL_Keycode.SDLK_UP, Direction.Up },
+           { SDL.SDL_Keycode.SDLK_DOWN, Direction.Down },
+        };
+
+        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirectionNum = new Dictionary<SDL.SDL_Keycode, Direction>()
+        {
+           { SDL.SDL_Keycode.SDLK_KP_4, Direction.Left },
+           { SDL.SDL_Keycode.SDLK_KP_6, Direction.Right },
+           { SDL.SDL_Keycode.SDLK_KP_8, Direction.Up },
+           { SDL.SDL_Keycode.SDLK_KP_2, Direction.Down },
+           { SDL.SDL_Keycode.SDLK_KP_9, Direction.North },
+           { SDL.SDL_Keycode.SDLK_KP_3, Direction.East },
+           { SDL.SDL_Keycode.SDLK_KP_7, Direction.West },
+           { SDL.SDL_Keycode.SDLK_KP_1, Direction.South },
+        };
+
+        private bool _isShiftDown;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
-
-	    private bool _isShiftDown;
-
+	    
         private void MoveCharacterByInputs()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
@@ -82,13 +102,11 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-
                     GameObject obj = _mousePicker.MouseOverObject;
                     Point point = _mousePicker.MouseOverObjectPoint;
                     _dragginObject = obj;
                     _dragOffset = point;
                 }
-
             }
             else if (e.Button == MouseButton.Right)
             {
@@ -114,10 +132,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     switch (TargetManager.TargetingState)
                     {
-                        case TargetType.Position:
-                        case TargetType.Object:
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
                             GameObject obj = SelectedObject;
-
                             if (obj != null)
                             {
                                 TargetManager.TargetGameObject(obj);
@@ -125,11 +142,8 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             break;
-                        case TargetType.Nothing:
 
-                            break;
-                        case TargetType.SetTargetClientSide:
-
+                        case CursorTarget.SetTargetClientSide:
                             obj = SelectedObject;
                             if (obj != null)
                             {
@@ -139,9 +153,9 @@ namespace ClassicUO.Game.Scenes
 
                             }
                             break;
+
                         default:
                             Log.Message(LogTypes.Warning, "Not implemented.");
-
                             break;
                     }
                 }
@@ -156,9 +170,10 @@ namespace ClassicUO.Game.Scenes
                         switch (obj)
                         {
                             case Mobile mobile:
+                                // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
                                 MergeHeldItem(mobile);
-
                                 break;
+
                             case Item item:
                                 if (item.IsCorpse)
                                     MergeHeldItem(item);
@@ -172,19 +187,21 @@ namespace ClassicUO.Game.Scenes
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                                 }
                                 break;
+
                             case Multi multi:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
                                 break;
+
                             case Static st:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
                                 break;
+
                             case Land _:
                                 DropHeldItemToWorld(obj.Position);
-
                                 break;
+
                             default:
                                 Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
-
                                 return;
                         }
                     }
@@ -198,32 +215,27 @@ namespace ClassicUO.Game.Scenes
                     switch (obj)
                     {
                         case Static st:
-
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-
                             if (obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-
                             break;
+
                         case Multi multi:
                             name = multi.Name;
-
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-
                             if (obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
-                        case Entity entity:
 
+                        case Entity entity:
                             if (!_inqueue)
                             {
                                 _inqueue = true;
                                 _queuedObject = entity;
                                 _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
                                 _queuedAction = () =>
                                 {
                                     if (!World.ClientFlags.TooltipsEnabled)
@@ -231,7 +243,6 @@ namespace ClassicUO.Game.Scenes
                                     GameActions.OpenPopupMenu(_queuedObject);
                                 };
                             }
-
                             break;
                     }
                     
@@ -255,22 +266,21 @@ namespace ClassicUO.Game.Scenes
                     case Item item:
                         e.Result = true;
                         GameActions.DoubleClick(item);
-
                         break;
+
                     case Mobile mob:
                         e.Result = true;
-
                         if (World.Player.InWarMode && World.Player != mob)
                             GameActions.Attack(mob);
                         else
                             GameActions.DoubleClick(mob);
-
                         break;
+
                     case GameEffect effect when effect.Source is Item item:
                         e.Result = true;
                         GameActions.DoubleClick(item);
-
                         break;
+
                     case TextOverhead overhead when overhead.Parent is Entity entity:
                         e.Result = true;
                         GameActions.DoubleClick(entity);
@@ -290,7 +300,6 @@ namespace ClassicUO.Game.Scenes
                         if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
-
                             e.Result = true;
                         }
                     }
@@ -323,11 +332,10 @@ namespace ClassicUO.Game.Scenes
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
 
-
                             break;
+
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-
                             break;
                     }
 
@@ -358,12 +366,10 @@ namespace ClassicUO.Game.Scenes
                             HealthBarGump currentHealthBarGump;
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-
-
                             break;
+
                         case Item item:
 							PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-
                             break;
                     }
 
@@ -372,31 +378,72 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
-                TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
+                TargetManager.CancelTarget();
 
 	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+                if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
+                    GameActions.SetWarMode(true);
+
+            if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
             {
-	            if (!World.Player.InWarMode)
-		            GameActions.SetWarMode(true);
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                SystemChatControl chat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                if (chat != null && chat.textBox.Text.Length == 0)
+                    World.Player.Walk(dWalk, false);
             }
-           
+
+            if ((e.keysym.mod & SDL2.SDL.SDL_Keymod.KMOD_NUM) != SDL2.SDL.SDL_Keymod.KMOD_NUM)
+                if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                    World.Player.Walk(dWalkN, false);
+
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+
+
+            _useObjectHandles = isshift && isctrl;
+
+            Macro macro = _macroManager.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
+            if (macro != null)
+            {
+                _macroManager.SetMacroToExecute(macro.FirstNode);
+                _macroManager.WaitForTargetTimer = 0;
+                _macroManager.Update();
+            }
+
+            //if (_hotkeysManager.TryExecuteIfBinded(e.keysym.sym, e.keysym.mod, out Action action))
+            //{
+            //    action();
+            //}
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
-		{
-			_isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+        {
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+
+            _isShiftDown = isshift;
+
+            _useObjectHandles = isctrl && isshift;
 
 			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
 			{
-				if (World.Player.InWarMode)
-					GameActions.SetWarMode(false);
+                if (Engine.Profile.Current.HoldDownKeyTab)
+                {
+                    if (World.Player.InWarMode)
+                        GameActions.SetWarMode(false);
+                }
+                else
+                    GameActions.ToggleWarMode();
 			}
 		}
+
     }
 }

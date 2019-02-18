@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,8 +32,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public enum CharCreationStep
         {
 			Appearence = 0,
-			ChooseTrade = 1,
-			ChooseCity = 2,
+			ChooseProfession = 1,
+			ChooseTrade = 2,
+			ChooseCity = 3,
 		}
 
         private PlayerMobile _character;
@@ -42,8 +43,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly LoginScene loginScene;
 
 	    private CityInfo _startingCity;
+		private ProfessionInfo _selectedProfession;
 
-        public CharCreationGump() : base(0, 0)
+		public CharCreationGump() : base(0, 0)
         {
             loginScene = Engine.SceneManager.GetScene<LoginScene>();
             Add(new CreateCharAppearanceGump(), 1);
@@ -54,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public void SetCharacter(PlayerMobile character)
         {
             _character = character;
-            SetStep(CharCreationStep.ChooseTrade);
+			SetStep(CharCreationStep.ChooseProfession);
 		}
 
 	    public void SetAttributes()
@@ -66,6 +68,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 	    {
 		    _startingCity = city;
 	    }
+
+		public void SetProfession(ProfessionInfo info)
+		{
+			_selectedProfession = info;
+
+			SetStep(CharCreationStep.ChooseTrade);
+		}
 
 		public void CreateCharacter()
         {
@@ -102,25 +111,35 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(1);
 
                     break;
-                case CharCreationStep.ChooseTrade:
+				case CharCreationStep.ChooseProfession:
 					var existing = Children.FirstOrDefault(page => page.Page == 2);
-
-	                if (existing != null)
-		                Remove(existing);
-
-					Add(new CreateCharTradeGump(_character), 2);
-
-                    ChangePage(2);
-	                break;
-				case CharCreationStep.ChooseCity:
-					existing = Children.FirstOrDefault(page => page.Page == 3);
 
 					if (existing != null)
 						Remove(existing);
 
-					Add(new CreateCharCityGump(), 3);
+					Add(new CreateCharProfessionGump(), 2);
 
-					ChangePage(3);
+					ChangePage(2);
+					break;
+				case CharCreationStep.ChooseTrade:
+					existing = Children.FirstOrDefault(page => page.Page == 3);
+
+	                if (existing != null)
+		                Remove(existing);
+
+					Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
+
+                    ChangePage(3);
+	                break;
+				case CharCreationStep.ChooseCity:
+					existing = Children.FirstOrDefault(page => page.Page == 4);
+
+					if (existing != null)
+						Remove(existing);
+
+					Add(new CreateCharCityGump(), 4);
+
+					ChangePage(4);
 					break;
             }
         }

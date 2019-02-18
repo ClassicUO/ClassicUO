@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -29,13 +29,10 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Label : Control
     {
-        private float _alpha;
         private readonly RenderedText _gText;
 
         public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
         {
-            if (font == 0xFF) font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
-
             _gText = new RenderedText
             {
                 IsUnicode = isunicode,
@@ -80,6 +77,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
+
+        public byte Font => _gText.Font;
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {

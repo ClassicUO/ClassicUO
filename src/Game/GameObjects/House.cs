@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -21,10 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
-using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -42,13 +38,18 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom { get; set; }
 
-        public void Generate()
+        public void Generate(bool recalculate = false)
         {
+            Item item = World.Items.Get(Serial);
+
             Components.ForEach(s =>
             {
+                if (recalculate && item != null)
+                    s.Position = item.Position + s.MultiOffset;
                 s.AddToTile();
             });
         }
+
 
         public bool Equals(Serial other) => Serial == other;
 

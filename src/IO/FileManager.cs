@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -31,7 +31,6 @@ namespace ClassicUO.IO
 {
     internal static class FileManager
     {
-        public static string UoStaticsMapPath => UltimaLive.IsUltimaLiveActive && !string.IsNullOrWhiteSpace(UltimaLive.ShardName) ? UltimaLive.ShardName : UoFolderPath;
         private static string _uofolderpath;
 
         public static string UoFolderPath
@@ -40,11 +39,6 @@ namespace ClassicUO.IO
             set
             {
                 _uofolderpath = value;
-                //FileInfo client = new FileInfo(Path.Combine(value, "client.exe"));
-                //if (!client.Exists)
-                //    throw new FileNotFoundException();
-
-                //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
                 if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
                 {
@@ -197,6 +191,12 @@ namespace ClassicUO.IO
 
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
+        }
+
+        internal static void MapLoaderReLoad(MapLoader newloader)
+        {
+            Map?.Dispose();
+            Map = newloader;
         }
     }
 }

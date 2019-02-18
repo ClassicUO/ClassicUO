@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -27,7 +27,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
-        private readonly SpriteTexture _texture;
+        protected readonly SpriteTexture _texture;
 
         public HitBox(int x, int y, int w, int h)
         {
@@ -65,9 +65,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             if (MouseIsOver)
-                return batcher.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
-
-            return true;
+                batcher.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+            
+            return base.Draw(batcher, position, hue);
         }
 
         public override void Dispose()

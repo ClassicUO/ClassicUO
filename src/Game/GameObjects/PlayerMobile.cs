@@ -1,5 +1,5 @@
 #region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -46,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
         private ushort _enhancePotions;
         private ushort _fasterCasting;
         private ushort _fasterCastRecovery;
-        private bool _female;
         private byte _followers;
         private byte _followersMax;
         private uint _gold;
@@ -85,9 +84,7 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-
-      
-
+        
         public PlayerMobile(Serial serial) : base(serial)
         {
             _sklls = new Skill[FileManager.Skills.SkillsCount];
@@ -328,19 +325,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Female
-        {
-            get => _female;
-            set
-            {
-                if (_female != value)
-                {
-                    _female = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
-
         public ushort StatsCap
         {
             get => _statscap;
@@ -523,7 +507,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //====================================================
         public ushort ReflectPhysicalDamage
         {
             get => _reflectPhysicalDamage;
@@ -757,6 +740,17 @@ namespace ClassicUO.Game.GameObjects
 
         protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
 
+        public Item FindBandage()
+        {
+            Item backpack = Equipment[(int)Layer.Backpack];
+            Item item = null;
+
+            if (backpack != null)
+                item = backpack.FindItem(0x0E21);
+
+            return item;
+        }
+
         public void AddBuff(Graphic graphic, uint time, string text)
         {
             _buffIcons[graphic] = new BuffIcon(graphic, time, text);
@@ -781,9 +775,7 @@ namespace ClassicUO.Game.GameObjects
 			        var direction = (delta < 0 ? "decreased" : "increased");
 			
 			        if (displayMessage)
-				        Chat.OnMessage(this,
-					        $"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.",
-					        0x57, MessageType.System, MessageFont.Normal, true);
+                        Chat.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
 			    }
 			
 			    skill.ValueFixed = realValue;

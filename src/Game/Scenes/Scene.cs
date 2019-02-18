@@ -1,5 +1,5 @@
 ﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
+//  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -64,21 +64,25 @@ namespace ClassicUO.Game.Scenes
       
         public virtual void Load()
         {
-            _audio = new AudioManager();
-            Coroutine.Start(this, CleaningResources(), "cleaning resources");
+            if (this is GameScene || this is LoginScene)
+            {
+                _audio = new AudioManager();
+                Coroutine.Start(this, CleaningResources(), "cleaning resources");
+            }
+
             IsLoaded = true;
         }
 
         public virtual void Unload()
         {
-            _audio.StopMusic();
+            _audio?.StopMusic();
             Coroutines.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            _audio.Update();
-            Coroutines.Update();
+            _audio?.Update();
+            Coroutines.Update();            
         }
 
         public virtual void FixedUpdate(double totalMS, double frameMS)
