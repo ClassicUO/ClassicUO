@@ -226,8 +226,15 @@ namespace ClassicUO.Game.UI.Gumps
                 _edge.SetData(new Color[] { Color.Gray });
             }
 
+
+            if (X < gWinPos.X || X + Width > gWinPos.X + gWinSize.X)
+                return false;
+            if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
+                return false;
+
             position.X = X;
             position.Y = Y;
+
 
             batcher.DrawRectangle(_edge, new Rectangle(position.X - 1, position.Y - 1, Width + 1, Height + 1), Vector3.Zero);
 
