@@ -46,8 +46,6 @@ namespace ClassicUO.IO.Resources
                 Graphic = 5545,
                 TopLevel = true,
                 Type = PROF_TYPE.PROFESSION,
-                StatsVal = new int[] { 40, 10, 11 },
-                SkillDefVal = new int[4, 2] { { 0, 50 }, { 1, 50 }, { 2, 0 }, { 3, 0 } },
                 DescriptionIndex = -1,
                 TrueName = "advanced"
             }] = null;

@@ -152,6 +152,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfo
     {
+        public static int InitialSkillValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 30 : 50;
+        public static int RemainStatValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }
@@ -162,13 +164,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public Graphic Graphic { get; set; }
 
         public bool TopLevel { get; set; }
-
-        private static readonly int[,] _VoidSkills = new int[4, 2] { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 } };
+    
+        internal static readonly int[,] _VoidSkills = new int[4, 2] { { 0, InitialSkillValue }, { 0, InitialSkillValue }, { 0, FileManager.ClientVersion < ClientVersions.CV_70160 ? 0 : InitialSkillValue }, { 0, 10 } };
         public int[,] SkillDefVal { get; set; } = _VoidSkills;
-        private static readonly int[] _VoidStats = new int[3] { 0, 0, 0 };
+        internal static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
         public int[] StatsVal { get; set; } = _VoidStats;
         public List<string> Childrens { get; set; }
-        public Dictionary<string, int> Skills { get; set; } = new Dictionary<string, int>();
-        public Dictionary<string, int> Stats { get; set; } = new Dictionary<string, int>();
     }
 }

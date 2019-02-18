@@ -41,12 +41,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
             var skillCount = 3;
-            var initialValue = 50;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_70160)
             {
                 skillCount = 4;
-                initialValue = 30;
             }
             _character = character;
             if(profession.TrueName != "advanced")
@@ -101,10 +99,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
-            var values = FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
-            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, 60, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, ProfessionInfo._VoidStats[0], HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
             string[] skillList = FileManager.Skills.SkillNames;
             int y = 172;
@@ -113,17 +110,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             for (var i = 0; i < skillCount; i++)
             {
-                if (FileManager.ClientVersion < ClientVersions.CV_70160 && i == 2)
-                    initialValue = 0;
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
-                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, initialValue, HSliderBarStyle.MetalWidgetRecessedBar, true));
+                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i,1], HSliderBarStyle.MetalWidgetRecessedBar, true));
                 y += 70;
             }
 
-			if (profession.Skills.Any())
+			if (profession.SkillDefVal.Length >= skillCount)
 			{
 				for (int i = 0; i < skillCount; i++)
-					_skillSliders[i].Value = 0;
+					_skillSliders[i].Value = ProfessionInfo._VoidSkills[i,1];
 
 				int GetSkillIndex(string name)
 				{
@@ -163,34 +158,25 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					return Array.IndexOf(skillList, name);
 				}
 
-				var skillIndex = 0;
-				foreach (var skillKVP in profession.Skills)
-				{
-					var skillCombo = _skills[skillIndex];
-					var skillSlider = _skillSliders[skillIndex];
-
-					var index = GetSkillIndex(skillKVP.Key);
-
-					if (index > 0)
-					{
-						skillCombo.SelectedIndex = index;
-						skillSlider.Value = skillKVP.Value;
-					}
-
-					skillIndex++;
-				}
+                var skillIndex = 0;
+                for (int i = 0; i < skillCount; i++)
+                {
+                    var index = GetSkillIndex(FileManager.Skills.SkillNames[profession.SkillDefVal[i, 0]]);
+                    var skillCombo = _skills[skillIndex];
+                    var skillSlider = _skillSliders[skillIndex];
+                    if(index>0)
+                    {
+                        skillCombo.SelectedIndex = index;
+                        skillSlider.Value = profession.SkillDefVal[i, 1];
+                    }
+                }
 			}
 
-			if (profession.Stats.Count > 0)
+			if (profession.StatsVal.Length == 3)
 			{
-				if (profession.Stats.TryGetValue("Str", out var str))
-					_attributeSliders[0].Value = str;
-
-				if (profession.Stats.TryGetValue("Dex", out var dex))
-					_attributeSliders[1].Value = dex;
-
-				if (profession.Stats.TryGetValue("Int", out var intell))
-					_attributeSliders[2].Value = intell;
+                _attributeSliders[0].Value = profession.StatsVal[0];//STR
+                _attributeSliders[1].Value = profession.StatsVal[2];//DEX
+                _attributeSliders[2].Value = profession.StatsVal[1];//INT
 			}
 
 			Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
