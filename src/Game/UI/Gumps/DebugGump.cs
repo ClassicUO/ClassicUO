@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (!FullDisplayMode)
+            if (FullDisplayMode)
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string ReadObject(GameObject obj)
         {
-            if (obj != null && !FullDisplayMode)
+            if (obj != null && FullDisplayMode)
             {
                 switch (obj)
                 {
