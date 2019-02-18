@@ -574,17 +574,40 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
+
+        private readonly Dictionary<Serial, TargetLineGump> _targetLineGumps = new Dictionary<Serial, TargetLineGump>();
+
+        public void SetTargetLineGump(Serial mob)
+        {
+            if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))
+            {
+                Mobile m = World.Mobiles.Get(mob);
+                if (m == null)
+                    return;
+
+                gump = new TargetLineGump(m);
+                _targetLineGumps[mob] = gump;
+                Engine.UI.Add(gump);
+            }
+        }
+
+        public void RemoveTargetLineGump(Serial serial)
+        {
+            if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
+            {
+                gump?.Dispose();
+                _targetLineGumps.Remove(serial);
+            }
+        }
+
+
         public ChildType GetChildByLocalSerial<ParentType, ChildType>(Serial parentSerial, Serial childSerial) 
             where ParentType : Control
             where ChildType : Control
         {
             ParentType parent = GetByLocalSerial<ParentType>(parentSerial);
-            if(parent != null)
-            {
-                return parent.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
-            }
 
-            return null;
+            return parent?.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
         }
 
         public T GetByLocalSerial<T>(Serial? serial = null) where T : Control
