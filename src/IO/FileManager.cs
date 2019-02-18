@@ -76,6 +76,7 @@ namespace ClassicUO.IO
         public static LightsLoader Lights { get; private set; }
         public static SoundsLoader Sounds { get; private set; }
         public static MultiMapLoader Multimap { get; private set; }
+        public static ProfessionLoader Profession { get; private set; }
 
         public static void LoadFiles()
         {
@@ -128,6 +129,9 @@ namespace ClassicUO.IO
 
             Multimap = new MultiMapLoader();
             Multimap.Load();
+
+            Profession = new ProfessionLoader();
+            Profession.Load();
 
             if (Verdata.File != null)
             {

@@ -2,6 +2,7 @@
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Utility;
+using ClassicUO.IO.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -549,11 +550,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		}
 
 		public string Name { get; set; }
-		public int Localization { get; set; }
+        public string TrueName { get; set; }
+        public int Localization { get; set; }
 		public int Description { get; set; }
+        public int DescriptionIndex { get; set; }
+        public ProfessionLoader.PROF_TYPE Type { get; set; }
 
-		public Graphic Graphic { get; set; }
+        public Graphic Graphic { get; set; }
 
+        public bool TopLevel { get; set; }
+
+        private static readonly int[,] _VoidSkills = new int[4, 2] { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 } };
+        public int[,] SkillDefVal { get; set; } = _VoidSkills;
+        private static readonly int[] _VoidStats = new int[3] { 0,0,0 };
+        public int[] StatsVal { get; set; } = _VoidStats;
+        public List<string> Childrens { get; set; }
 		public Dictionary<string, int> Skills { get; set; } = new Dictionary<string, int>();
 		public Dictionary<string, int> Stats { get; set; } = new Dictionary<string, int>();
 	}

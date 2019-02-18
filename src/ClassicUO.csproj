@@ -230,6 +230,7 @@
     <Compile Include="IO\Resources\MapLoader.cs" />
     <Compile Include="IO\Resources\MultiLoader.cs" />
     <Compile Include="IO\Resources\MultiMapLoader.cs" />
+    <Compile Include="IO\Resources\ProfessionLoader.cs" />
     <Compile Include="IO\Resources\SkillsLoader.cs" />
     <Compile Include="IO\Resources\SoundsLoader.cs" />
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
