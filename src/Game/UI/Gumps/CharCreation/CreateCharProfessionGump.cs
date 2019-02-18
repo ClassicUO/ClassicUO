@@ -9,9 +9,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
     internal class CreateCharProfessionGump : Gump
     {
-        public CreateCharProfessionGump() : base(0, 0)
+        private readonly ProfessionInfo _Parent;
+        public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
         {
-            List<ProfessionInfo> professions = new List<ProfessionInfo>(FileManager.Profession.Professions.Keys);
+            _Parent = parent;
+            if (parent == null || !FileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            {
+                professions = new List<ProfessionInfo>(FileManager.Profession.Professions.Keys);
+            }
 
             /* Build the gump */
             Add(new ResizePic(2600)
@@ -58,23 +63,41 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
-
-            if (charCreationGump != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && FileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
-                charCreationGump.SetProfession(info);
+                Parent.Add(new CreateCharProfessionGump(info));
+                Parent.Remove(this);
+            }
+            else
+            {
+                CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+
+                if (charCreationGump != null)
+                {
+                    charCreationGump.SetProfession(info);
+                }
             }
         }
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
-
             switch ((Buttons)buttonID)
             {
                 case Buttons.Prev:
-                    charCreationGump.StepBack();
+                {
+                    if (_Parent != null && _Parent.TopLevel)
+                    {
+                        Parent.Add(new CreateCharProfessionGump());
+                        Parent.Remove(this);
+                    }
+                    else
+                    {
+                        Parent.Remove(this);
+                        CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+                        charCreationGump?.StepBack();
+                    }
                     break;
+                }
             }
 
             base.OnButtonClick(buttonID);
