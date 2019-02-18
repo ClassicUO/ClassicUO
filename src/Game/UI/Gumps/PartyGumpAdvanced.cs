@@ -325,6 +325,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(KickButton);
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Member.Mobile != null && Member.Mobile.IsDead && Status.Hue != 0)
+                Status.Hue = 0;
+            else if (Status.Hue != 0x43)
+                Status.Hue = 0x43;
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             switch ((Buttons) buttonID)
