@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Managers
         
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static GameObject LastGameObject { get; set; }
+        public static Serial LastGameObject { get; set; }
 
         public static bool IsTargeting { get; private set; }
 
@@ -123,7 +123,10 @@ namespace ClassicUO.Game.Managers
             if (selectedEntity is Entity entity)
             {
                 if (selectedEntity != World.Player)
-                    LastGameObject = selectedEntity;
+                {
+                    Engine.UI.RemoveTargetLineGump(LastGameObject);
+                    LastGameObject = entity.Serial;
+                }
 
                 if (_enqueuedAction != null)
                 {

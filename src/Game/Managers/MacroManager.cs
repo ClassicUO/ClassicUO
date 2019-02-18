@@ -336,7 +336,7 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                            TargetManager.TargetGameObject(TargetManager.LastGameObject);
+                            TargetManager.TargetGameObject( World.Get(TargetManager.LastGameObject));
 
                         WaitForTargetTimer = 0;
                     }
@@ -413,12 +413,13 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    if (TargetManager.LastGameObject is Mobile mob)
+                    if (TargetManager.LastGameObject.IsMobile)
                     {
+                        Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
+
                         if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 
-                        TargetManager.LastGameObject = mob;
                         World.LastAttack = mob.Serial;
                     }
 
@@ -495,7 +496,7 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastGameObject);
+                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastGameObject));
                             else
                                 result = 1;
 
