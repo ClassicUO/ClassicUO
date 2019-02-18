@@ -329,8 +329,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Member.Mobile != null && Member.Mobile.IsDead && Status.Hue != 0)
-                Status.Hue = 0;
+            if (Member.Mobile != null && Member.Mobile.IsDead)
+                if (Status.Hue != 0)
+                    Status.Hue = 0;
             else if (Status.Hue != 0x43)
                 Status.Hue = 0x43;
         }

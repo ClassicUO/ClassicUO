@@ -90,8 +90,9 @@ namespace ClassicUO.Game.Scenes
                     if (obj is Mobile)
                         continue;
 
-                    if (!(obj is Static) && !(obj is Multi))
-                        continue;
+
+                    //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
+                    //    continue;
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
@@ -115,8 +116,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        if (!(obj is Static) && !(obj is Multi))
-                            continue;
+                        //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
+                        //    continue;
 
                         if (obj is Mobile)
                             continue;
