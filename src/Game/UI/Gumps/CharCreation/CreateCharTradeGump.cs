@@ -40,7 +40,27 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
+            var skillCount = 3;
+            var initialValue = 50;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
+            {
+                skillCount = 4;
+                initialValue = 30;
+            }
             _character = character;
+            if(profession.TrueName != "advanced")
+            {
+                for (int i = 0; i < skillCount; i++)
+                {
+                    _character.UpdateSkill(profession.SkillDefVal[i, 0], (ushort)profession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+                }
+                _character.Strength = (ushort)profession.StatsVal[0];
+                _character.Intelligence = (ushort)profession.StatsVal[1];
+                _character.Dexterity = (ushort)profession.StatsVal[2];
+                OnButtonClick((int)Buttons.Skip);
+                return;
+            }
 
             foreach (var skill in _character.Skills)
                 _character.UpdateSkill(skill.Index, 0, 0, Lock.Locked, 0);
@@ -85,14 +105,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, 60, HSliderBarStyle.MetalWidgetRecessedBar, true));
             Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            var skillCount = 3;
-            var initialValue = 50;
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
-            {
-                skillCount = 4;
-                initialValue = 30;
-            }
 
             string[] skillList = FileManager.Skills.SkillNames;
             int y = 172;
@@ -238,6 +250,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					}
 
                     break;
+                case Buttons.Skip:
+                {
+                    charCreationGump.SetAttributes();
+                    break;
+                }
             }
 
             base.OnButtonClick(buttonID);
@@ -269,7 +286,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private enum Buttons
         {
             Prev,
-            Next
+            Next,
+            Skip
         }
     }
 }

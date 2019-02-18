@@ -76,9 +76,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 			SetStep(CharCreationStep.ChooseTrade);
 		}
 
-		public void CreateCharacter()
+		public void CreateCharacter(byte profession)
         {
-            loginScene.CreateCharacter(_character, _startingCity);
+            loginScene.CreateCharacter(_character, _startingCity, profession);
         }
 
         public void StepBack()
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					if (existing != null)
 						Remove(existing);
 
-					Add(new CreateCharCityGump(), 4);
+					Add(new CreateCharCityGump((byte)_selectedProfession.DescriptionIndex), 4);
 
 					ChangePage(4);
 					break;
