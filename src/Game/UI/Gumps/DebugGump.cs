@@ -16,7 +16,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _label;
         private readonly AlphaBlendControl _trans;
 
-        public bool FullDisplayMode { get; private set; }
+        private bool _fullDisplayMode;
+
+        public bool FullDisplayMode
+        {
+            get => _fullDisplayMode;
+            set
+            {
+                _fullDisplayMode = value;
+                Engine.Profile.Current.DebugGumpIsMinimized = !_fullDisplayMode;
+            }
+        }
 
         private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
@@ -33,7 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
 
-            FullDisplayMode = Engine.Profile.Current.DebugGumpIsMinimized;
+            _fullDisplayMode = !Engine.Profile.Current.DebugGumpIsMinimized;
+
             Engine.Profile.Current.DebugGumpIsDisabled = false;
 
             Width = 500;
@@ -57,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                FullDisplayMode = Engine.Profile.Current.DebugGumpIsMinimized = !Engine.Profile.Current.DebugGumpIsMinimized;
+                FullDisplayMode = !FullDisplayMode;
                 return true;
             }
 
