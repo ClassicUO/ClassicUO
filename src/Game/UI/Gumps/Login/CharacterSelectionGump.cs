@@ -118,7 +118,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginCharacter(_selectedCharacter);             
+                if (_selectedCharacter == 0)
+                    OnButtonClick((int)Buttons.New);
+                else
+                    LoginCharacter(_selectedCharacter);
             }
         }
 
