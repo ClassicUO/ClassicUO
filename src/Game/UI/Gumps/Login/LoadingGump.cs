@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER || e.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
-                Engine.SceneManager.ChangeScene(ScenesType.Login);
+                OnButtonClick((int)Buttons.OK);
         }
 
         public override void Dispose()

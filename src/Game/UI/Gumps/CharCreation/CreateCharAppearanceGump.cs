@@ -31,6 +31,8 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
+using SDL2;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -57,6 +59,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Layer.Beard, 0
             }
         };
+
+        /*
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
+            {
+                var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+                _character.Name = _nameTextBox.Text;
+
+                if (ValidateCharacter(_character))
+                    charCreationGump.SetCharacter(_character);
+            }
+        }*/
 
         public CreateCharAppearanceGump() : base(0, 0)
         {
@@ -372,7 +387,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _character.Hue = e.SelectedHue;
             _paperDoll.Update();
         }
-
 
         private void Facial_OnOptionSelected(object sender, int e)
         {
