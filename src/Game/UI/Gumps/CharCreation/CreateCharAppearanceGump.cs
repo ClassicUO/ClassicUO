@@ -60,19 +60,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
         };
 
-        /*
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
-            {
-                var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
-                _character.Name = _nameTextBox.Text;
-
-                if (ValidateCharacter(_character))
-                    charCreationGump.SetCharacter(_character);
-            }
-        }*/
-
         public CreateCharAppearanceGump() : base(0, 0)
         {
             Add(new ResizePic(0x0E10)
