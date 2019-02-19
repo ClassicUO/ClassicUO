@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Scenes
             switch (CurrentLoginStep)
             {
                 case LoginStep.Main:
-
+                    PopupMessage = null;
                     return new LoginGump();
                 case LoginStep.Connecting:
                 case LoginStep.VerifyingAccount:
@@ -219,6 +219,7 @@ namespace ClassicUO.Game.Scenes
             {
                 labelText = PopupMessage;
                 showButtons = LoadingGump.Buttons.OK;
+                PopupMessage = null;
             }
             else
             {

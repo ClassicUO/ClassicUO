@@ -837,6 +837,9 @@ namespace ClassicUO.Network
             {
                 Item item = World.Items.Get(serial);
 
+                if (item == null)
+                    return;
+
                 if (graphic == 0xFFFF) // spellbook
                 {
                     if (item.IsSpellBook)
