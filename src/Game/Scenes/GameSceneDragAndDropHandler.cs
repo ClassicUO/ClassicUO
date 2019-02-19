@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 
-                if (gump != null)
+                if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
