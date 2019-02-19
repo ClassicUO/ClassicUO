@@ -12,6 +12,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -184,6 +185,40 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                if (Engine.UI.IsDragging)
+                    return;
+
+                if (TargetManager.IsTargeting)
+                {
+                    switch (TargetManager.TargetingState)
+                    {
+                        case CursorTarget.Object:
+                            TargetManager.TargetGameObject(Entity);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            break;
+
+                        case CursorTarget.SetTargetClientSide:
+                            TargetManager.TargetGameObject(Entity);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            Engine.UI.Add(new InfoGump(Entity));
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    GameActions.OpenPopupMenu(Entity);
+                }
+            }
+            base.OnMouseUp(x, y, button);
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -211,8 +246,8 @@ namespace ClassicUO.Game.UI.Gumps
                 float x = (m.RealScreenPosition.X + gWinPos.X) / scale;
                 float y = (m.RealScreenPosition.Y + gWinPos.Y) / scale;
 
-                X = (int)(x + m.Offset.X) - Width / 2 + 22;
-                Y = (int)(y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - Height / 2 + (m.IsMounted ? 0 : 22);
+                X = (int)(x + m.Offset.X) - (Width >> 1) + 22;
+                Y = (int)(y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - (Height >> 1) + (m.IsMounted ? 0 : 22);
             }
             else
             {

@@ -49,6 +49,18 @@ namespace ClassicUO.IO.Resources
                 DescriptionIndex = -1,
                 TrueName = "advanced"
             }] = null;
+
+            foreach(KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
+            {
+                kvp.Key.Childrens = null;
+                if(kvp.Value!=null)
+                {
+                    foreach(ProfessionInfo info in kvp.Value)
+                    {
+                        info.Childrens = null;
+                    }
+                }
+            }
         }
 
         internal enum PROF_TYPE
