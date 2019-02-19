@@ -19,6 +19,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game.Data;
@@ -167,7 +170,7 @@ namespace ClassicUO.Game.UI
                     hasStartColor = true;
                 }
 
-                string text = FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true);
+                string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
 
                 if (string.IsNullOrEmpty(text)) continue;
                 _sb.Append(text);
@@ -192,6 +195,25 @@ namespace ClassicUO.Game.UI
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
+		private static char[] _titleFormatChars = new[] { ' ', '-', '\n', '[' };
+
+		public unsafe string FormatTitle(string text)
+		{
+			var index = 0;
+
+			fixed (char* value = text)
+			{
+				while (index < text.Length)
+				{
+					if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
+						value[index] = Char.ToUpper(value[index]);
+
+					index++;
+				}
+
+				return new string(value);
+			}
+		}
 
         public void SetText(string text, int maxWidth = 0)
         {
