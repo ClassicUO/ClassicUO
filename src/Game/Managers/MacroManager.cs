@@ -594,7 +594,13 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuiconWindow:
-                    // TODO:
+                    BuffGump buff = Engine.UI.GetByLocalSerial<BuffGump>();
+
+                    if (buff != null)
+                        buff.Dispose();
+                    else 
+                        Engine.UI.Add(new BuffGump(100, 100));
+
                     break;
                 case MacroType.InvokeVirtue:
                     byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
@@ -617,6 +623,7 @@ namespace ClassicUO.Game.Managers
                     NetClient.Socket.Send(new PEquipLastWeapon());
                     break;
                 case MacroType.KillGumpOpen:
+                    // TODO:
 
                     break;
             }
