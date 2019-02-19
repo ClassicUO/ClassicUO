@@ -340,27 +340,26 @@ namespace ClassicUO.Game.Scenes
                     Servers = null;
                     CurrentLoginStep = LoginStep.Main;
                     NetClient.LoginSocket.Disconnect();
-
                     break;
+
                 case LoginStep.LoginInToServer:
-                case LoginStep.CharacterSelection:
                     NetClient.Socket.Disconnect();
                     Characters = null;
                     Servers = null;
                     Connect(Account, Password);
-
                     break;
+
                 case LoginStep.CharCreation:
                     CurrentLoginStep = LoginStep.CharacterSelection;
-
                     break;
+
                 case LoginStep.PopUpMessage:
+                case LoginStep.CharacterSelection:
                     NetClient.LoginSocket.Disconnect();
                     NetClient.Socket.Disconnect();
                     Characters = null;
                     Servers = null;
                     CurrentLoginStep = LoginStep.Main;
-
                     break;
             }
         }
