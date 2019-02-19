@@ -195,9 +195,10 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.PopUpMessage:
                     Engine.UI.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
                     return GetLoadingScreen();
-                case LoginStep.CharacterSelection:
 
+                case LoginStep.CharacterSelection:
                     return new CharacterSelectionGump();
+
                 case LoginStep.ServerSelection:
 
                     return new ServerSelectionGump();
@@ -447,26 +448,32 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin || Reconnect)
-				    {
-                        bool haveAnyCharacter = false;
+                    uint charToSelect = 0;
+                    bool haveAnyCharacter = false;
 
-                        for (byte i = 0; i < Characters.Length; i++)
-                        {
-                            if (Characters[i].Length > 0)
-				            {
-                                haveAnyCharacter = true;
-                                if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
-                                {
-                                    SelectCharacter(i);
-                                    return;
-                                }
-				            }
+                    for (byte i = 0; i < Characters.Length; i++)
+                    {
+                        if (Characters[i].Length > 0)
+				        {
+                            haveAnyCharacter = true;
+                            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                            {
+                                charToSelect = i;
+                                break;
+                            }
 				        }
-
-                        if (haveAnyCharacter)
-                            SelectCharacter(0);
 				    }
+
+                    if (Engine.GlobalSettings.AutoLogin || Reconnect)
+                    {
+                        if (charToSelect != 0)
+                            SelectCharacter(charToSelect);
+                        else if (haveAnyCharacter)
+                            SelectCharacter(0);
+                    }
+
+                    if (!haveAnyCharacter)
+                        StartCharCreation();
 
                     break;
                 case 0xBD: // ReceiveVersionRequest
