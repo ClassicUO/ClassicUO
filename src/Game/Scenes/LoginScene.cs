@@ -450,7 +450,9 @@ namespace ClassicUO.Game.Scenes
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
                     uint charToSelect = 0;
+
                     bool haveAnyCharacter = false;
+                    bool tryAutologin = Engine.GlobalSettings.AutoLogin || Reconnect;
 
                     for (byte i = 0; i < Characters.Length; i++)
                     {
@@ -465,17 +467,10 @@ namespace ClassicUO.Game.Scenes
 				        }
 				    }
 
-                    if (Engine.GlobalSettings.AutoLogin || Reconnect)
-                    {
-                        if (charToSelect != 0)
-                            SelectCharacter(charToSelect);
-                        else if (haveAnyCharacter)
-                            SelectCharacter(0);
-                    } 
+                    if (tryAutologin && haveAnyCharacter)
+                        SelectCharacter(charToSelect);
                     else if (!haveAnyCharacter)
-                    {
                         StartCharCreation();
-                    }                        
 
                     break;
 
