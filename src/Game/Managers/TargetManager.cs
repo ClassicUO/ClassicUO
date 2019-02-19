@@ -27,28 +27,36 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-    public enum TargetType
+    public enum CursorTarget
     {
         Invalid = -1,
         Object = 0,
         Position = 1,
         MultiPlacement = 2,
         SetTargetClientSide = 3
+    }
 
+    public enum TargetType
+    {
+        Neutral,
+        Harmful,
+        Helpful,
+        Cancel
     }
 
     internal static class TargetManager
     {
         private static Serial _targetCursorId;
-        private static byte _targetCursorType;
+        private static TargetType _targetCursorType;
         private static int _multiModel;
-
         
-        public static TargetType TargetingState { get; private set; } = TargetType.Invalid;
+        public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static GameObject LastGameObject { get; set; }
+        public static Serial LastGameObject { get; set; }
 
         public static bool IsTargeting { get; private set; }
+
+        public static TargetType TargeringType => _targetCursorType;
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
@@ -57,15 +65,15 @@ namespace ClassicUO.Game.Managers
 
         private static Action<Serial, Graphic, ushort, ushort, sbyte, bool> _enqueuedAction;
 
-        public static void SetTargeting(TargetType targeting, Serial cursorID, byte cursorType)
+        public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
         {
-            if (targeting == TargetType.Invalid)
+            if (targeting == CursorTarget.Invalid)
                 throw new Exception("Invalid target type");
 
             TargetingState = targeting;
             _targetCursorId = cursorID;
             _targetCursorType = cursorType;
-            IsTargeting = cursorType < 3;            
+            IsTargeting = cursorType < TargetType.Cancel;            
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
@@ -75,13 +83,13 @@ namespace ClassicUO.Game.Managers
 
         public static void CancelTarget()
         {
-            GameActions.TargetCancel(TargetingState, _targetCursorId, _targetCursorType);
+            GameActions.TargetCancel(TargetingState, _targetCursorId, (byte)_targetCursorType);
             IsTargeting = false;
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, int model, byte targetType)
+        public static void SetTargetingMulti(Serial deedSerial, int model, TargetType targetType)
         {
-            SetTargeting(TargetType.MultiPlacement, deedSerial, targetType);
+            SetTargeting(CursorTarget.MultiPlacement, deedSerial, targetType);
             _multiModel = model;
         }
 
@@ -96,7 +104,7 @@ namespace ClassicUO.Game.Managers
                 z += st.ItemData.Height;
             }
 
-            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
+            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
             ClearTargetingWithoutTargetCancelPacket();
         }
 
@@ -115,14 +123,17 @@ namespace ClassicUO.Game.Managers
             if (selectedEntity is Entity entity)
             {
                 if (selectedEntity != World.Player)
-                    LastGameObject = selectedEntity;
+                {
+                    Engine.UI.RemoveTargetLineGump(LastGameObject);
+                    LastGameObject = entity.Serial;
+                }
 
                 if (_enqueuedAction != null)
                 {
                     _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
                 }
                 else
-                    GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
+                    GameActions.TargetObject(entity, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
             else
@@ -145,7 +156,7 @@ namespace ClassicUO.Game.Managers
                         z += m.ItemData.Height;
                 }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
+                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
 

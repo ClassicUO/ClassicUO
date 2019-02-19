@@ -84,9 +84,7 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-
-      
-
+        
         public PlayerMobile(Serial serial) : base(serial)
         {
             _sklls = new Skill[FileManager.Skills.SkillsCount];
@@ -509,7 +507,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //====================================================
         public ushort ReflectPhysicalDamage
         {
             get => _reflectPhysicalDamage;
@@ -742,6 +739,17 @@ namespace ClassicUO.Game.GameObjects
         public Lock IntLock { get; set; }
 
         protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
+
+        public Item FindBandage()
+        {
+            Item backpack = Equipment[(int)Layer.Backpack];
+            Item item = null;
+
+            if (backpack != null)
+                item = backpack.FindItem(0x0E21);
+
+            return item;
+        }
 
         public void AddBuff(Graphic graphic, uint time, string text)
         {

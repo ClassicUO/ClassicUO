@@ -145,6 +145,7 @@
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
+    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
     <Compile Include="Game\UI\Gumps\DebugGump.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\NameOverheadGump.cs" />
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
@@ -228,6 +230,7 @@
     <Compile Include="IO\Resources\MapLoader.cs" />
     <Compile Include="IO\Resources\MultiLoader.cs" />
     <Compile Include="IO\Resources\MultiMapLoader.cs" />
+    <Compile Include="IO\Resources\ProfessionLoader.cs" />
     <Compile Include="IO\Resources\SkillsLoader.cs" />
     <Compile Include="IO\Resources\SoundsLoader.cs" />
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
@@ -271,9 +274,8 @@
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\OptionsGump1.cs" />
+    <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
-    <Compile Include="Game\UI\Gumps\PartyMemberGump.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
     <Compile Include="Game\UI\Gumps\SkillButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\SplitMenuGump.cs" />
@@ -363,7 +365,6 @@
     <Compile Include="Game\UI\Gumps\JournalGump.cs" />
     <Compile Include="Game\UI\Gumps\WorldMapGump.cs" />
     <Compile Include="Game\UI\Gumps\MiniMapGump.cs" />
-    <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PaperdollGump.cs" />
     <Compile Include="Game\UI\Gumps\SkillGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\SpellbookGump.cs" />

@@ -13,6 +13,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 
 using Newtonsoft.Json;
+using ClassicUO.Utility.Logging;
 
 using SDL2;
 
@@ -58,6 +59,7 @@ namespace ClassicUO.Game.Managers
 
         public long WaitForTargetTimer { get; set; }
 
+        public bool WaitingBandageTarget { get; set; }
 
         public void InitMacro(Macro first)
         {
@@ -161,16 +163,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-
         private int Process()
         {
             int result;
 
-            if (_lastMacro == null)
+            if (_lastMacro == null) // MRC_STOP
                 result = 2;
             else if (_nextTimer <= Engine.Ticks)
                 result = Process(_lastMacro);
-            else 
+            else // MRC_BREAK_PARSER
                 result = 1;
 
             return result;
@@ -192,24 +193,26 @@ namespace ClassicUO.Game.Managers
                     if (!string.IsNullOrEmpty(mos.Text))
                     {
                         MessageType type = MessageType.Regular;
+                        ushort hue = Engine.Profile.Current.SpeechHue;
 
                         switch (macro.Code)
                         {
                             case MacroType.Emote:
                                 type = MessageType.Emote;
-
+                                hue = Engine.Profile.Current.EmoteHue;
                                 break;
+
                             case MacroType.Whisper:
                                 type = MessageType.Whisper;
-
+                                hue = Engine.Profile.Current.WhisperHue;
                                 break;
+
                             case MacroType.Yell:
                                 type = MessageType.Yell;
-
                                 break;
                         }
 
-                        Chat.Say(mos.Text, type: type);
+                        Chat.Say(mos.Text, hue, type);
                     }
 
                     break;
@@ -234,7 +237,21 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.Paste:
-                    // TODO:
+                    if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
+                    {
+                        string s = SDL.SDL_GetClipboardText();
+                        if (!string.IsNullOrEmpty(s))
+                        {
+                            WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                            if (viewport != null)
+                            {
+                                SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                                if (chat != null)
+                                    chat.textBox.Text += s;
+                            }
+                        }
+                    }
+
                     break;
                 case MacroType.Open:
                 case MacroType.Close:
@@ -319,7 +336,7 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                            TargetManager.TargetGameObject(TargetManager.LastGameObject);
+                            TargetManager.TargetGameObject( World.Get(TargetManager.LastGameObject));
 
                         WaitForTargetTimer = 0;
                     }
@@ -396,12 +413,13 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    if (TargetManager.LastGameObject is Mobile mob)
+                    if (TargetManager.LastGameObject.IsMobile)
                     {
+                        Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
+
                         if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 
-                        TargetManager.LastGameObject = mob;
                         World.LastAttack = mob.Serial;
                     }
 
@@ -469,11 +487,48 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
-                    // TODO:
-                    if (FileManager.ClientVersion < ClientVersions.CV_5020)
+
+                    if (FileManager.ClientVersion < ClientVersions.CV_5020 || Engine.Profile.Current.BandageSelfOld)
                     {
-                        
+                        if (WaitingBandageTarget)
+                        {
+                            if (WaitForTargetTimer == 0)
+                                WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+
+                            if (TargetManager.IsTargeting)
+                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastGameObject));
+                            else
+                                result = 1;
+
+                            WaitingBandageTarget = false;
+                            WaitForTargetTimer = 0;
+                        }
+                        else
+                        {
+                            var bandage = World.Player.FindBandage();
+                            if (bandage != null)
+                            {
+                                WaitingBandageTarget = true;
+                                GameActions.DoubleClick(bandage);
+                                result = 1;
+                            }
+                        }
                     }
+                    else
+                    {
+                        var bandage = World.Player.FindBandage();
+                        if (bandage != null)
+                        {
+                            if (macro.Code == MacroType.BandageSelf)
+                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+                            else
+                            {
+                                // TODO: NewTargetSystem
+                                Log.Message(LogTypes.Warning, $"BandageTarget (NewTargetSystem) not implemented yet.");
+                            }
+                        }
+                    }
+
                     break;
 
                 case MacroType.SetUpdateRange:
@@ -539,7 +594,13 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuiconWindow:
-                    // TODO:
+                    BuffGump buff = Engine.UI.GetByLocalSerial<BuffGump>();
+
+                    if (buff != null)
+                        buff.Dispose();
+                    else 
+                        Engine.UI.Add(new BuffGump(100, 100));
+
                     break;
                 case MacroType.InvokeVirtue:
                     byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
@@ -562,6 +623,7 @@ namespace ClassicUO.Game.Managers
                     NetClient.Socket.Send(new PEquipLastWeapon());
                     break;
                 case MacroType.KillGumpOpen:
+                    // TODO:
 
                     break;
             }

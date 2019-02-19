@@ -265,11 +265,14 @@ namespace ClassicUO.IO.Resources
                     ushort realAnimID = 0;
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
-
+                   
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
                         animFile = 1;
                         realAnimID = (ushort)anim[0];
+
+                        if (index == 0x00C0)
+                            mountedHeightOffset = -9;
 
                         if (realAnimID == 68)
                             realAnimID = 122;
@@ -346,6 +349,9 @@ namespace ClassicUO.IO.Resources
                         animFile = 4;
                         realAnimID = (ushort)anim[3];
                         mountedHeightOffset = -9;
+
+                        if (index == 0x0115 || index == 0x00C0)
+                            mountedHeightOffset = 0;
 
                         if (realAnimID == 34)
                             startAnimID = (realAnimID - 200) * 65 + 22000;
@@ -799,6 +805,11 @@ namespace ClassicUO.IO.Resources
                                     if (!_animationSequenceReplacing.ContainsKey((ushort) animID))
                                         _animationSequenceReplacing.Add((ushort)animID, (byte) replaces);
                                     DataIndex[animID].Groups[oldIdx].Direction = DataIndex[animID].Groups[newIDX].Direction;
+
+                                    if (animID == 0x01B0)
+                                    {
+                                        DataIndex[animID].MountedHeightOffset = 9;
+                                    }
                                 }
                                 DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
                             }

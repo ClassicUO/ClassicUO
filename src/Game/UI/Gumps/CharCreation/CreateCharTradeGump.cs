@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,9 +38,27 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly PlayerMobile _character;
         private readonly Combobox[] _skills;
 
-        public CreateCharTradeGump(PlayerMobile character) : base(0, 0)
+        public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
+            var skillCount = 3;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
+            {
+                skillCount = 4;
+            }
             _character = character;
+            if(profession.TrueName != "advanced")
+            {
+                for (int i = 0; i < skillCount; i++)
+                {
+                    _character.UpdateSkill(profession.SkillDefVal[i, 0], (ushort)profession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+                }
+                _character.Strength = (ushort)profession.StatsVal[0];
+                _character.Intelligence = (ushort)profession.StatsVal[1];
+                _character.Dexterity = (ushort)profession.StatsVal[2];
+                OnButtonClick((int)Buttons.Skip);
+                return;
+            }
 
             foreach (var skill in _character.Skills)
                 _character.UpdateSkill(skill.Index, 0, 0, Lock.Locked, 0);
@@ -80,18 +99,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
-            var values = FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
-            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, 60, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, values, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            var skillCount = 3;
-            var initialValue = 50;
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
-            {
-                skillCount = 4;
-                initialValue = 30;
-            }
+            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, ProfessionInfo._VoidStats[0], HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
+            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
             string[] skillList = FileManager.Skills.SkillNames;
             int y = 172;
@@ -100,14 +110,76 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             for (var i = 0; i < skillCount; i++)
             {
-                if (FileManager.ClientVersion < ClientVersions.CV_70160 && i == 2)
-                    initialValue = 0;
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
-                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, initialValue, HSliderBarStyle.MetalWidgetRecessedBar, true));
+                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i,1], HSliderBarStyle.MetalWidgetRecessedBar, true));
                 y += 70;
             }
 
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+			if (profession.SkillDefVal.Length >= skillCount)
+			{
+				for (int i = 0; i < skillCount; i++)
+					_skillSliders[i].Value = ProfessionInfo._VoidSkills[i,1];
+
+				int GetSkillIndex(string name)
+				{
+					/* Not sure if other cases exist. 
+					 * 7.0.20.0 has a specific function to convert string -> index for each skill in prof.txt. */
+					if (String.Equals(name, "Blacksmith", StringComparison.CurrentCulture))
+						name = "Blacksmithy";
+					else if (String.Equals(name, "AnimalLore", StringComparison.CurrentCulture))
+						name = "Animal Lore";
+					else if (String.Equals(name, "ItemID", StringComparison.CurrentCulture))
+						name = "Item Identification";
+					else if (String.Equals(name, "ArmsLore", StringComparison.CurrentCulture))
+						name = "Arms Lore";
+					else if (String.Equals(name, "Bowcraft", StringComparison.CurrentCulture))
+						name = "Bowcraft/Fletching";
+					else if (String.Equals(name, "DetectHidden", StringComparison.CurrentCulture))
+						name = "Detecting Hidden";
+					else if (String.Equals(name, "Enticement", StringComparison.CurrentCulture))
+						name = "Discordance";
+					else if (String.Equals(name, "EvaluateIntelligence", StringComparison.CurrentCulture))
+						name = "Evaluating Intelligence";
+					else if (String.Equals(name, "ForensicEvaluation", StringComparison.CurrentCulture))
+						name = "Forensic Evaluation";
+					else if (String.Equals(name, "ResistingSpells", StringComparison.CurrentCulture))
+						name = "Resisting Spells";
+					else if (String.Equals(name, "SpiritSpeak", StringComparison.CurrentCulture))
+						name = "Spirit Speak";
+					else if (String.Equals(name, "AnimalTaming", StringComparison.CurrentCulture))
+						name = "Animal Taming";
+					else if (String.Equals(name, "TasteIdentification", StringComparison.CurrentCulture))
+						name = "Taste Identification";
+					else if (String.Equals(name, "MaceFighting", StringComparison.CurrentCulture))
+						name = "Mace Fighting";
+					else if (String.Equals(name, "Disarm", StringComparison.CurrentCulture))
+						name = "Remove Trap";
+
+					return Array.IndexOf(skillList, name);
+				}
+
+                var skillIndex = 0;
+                for (int i = 0; i < skillCount; i++)
+                {
+                    var index = GetSkillIndex(FileManager.Skills.SkillNames[profession.SkillDefVal[i, 0]]);
+                    var skillCombo = _skills[skillIndex];
+                    var skillSlider = _skillSliders[skillIndex];
+                    if(index>0)
+                    {
+                        skillCombo.SelectedIndex = index;
+                        skillSlider.Value = profession.SkillDefVal[i, 1];
+                    }
+                }
+			}
+
+			if (profession.StatsVal.Length == 3)
+			{
+                _attributeSliders[0].Value = profession.StatsVal[0];//STR
+                _attributeSliders[1].Value = profession.StatsVal[2];//DEX
+                _attributeSliders[2].Value = profession.StatsVal[1];//INT
+			}
+
+			Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
             });
@@ -164,6 +236,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					}
 
                     break;
+                case Buttons.Skip:
+                {
+                    charCreationGump.SetAttributes();
+                    break;
+                }
             }
 
             base.OnButtonClick(buttonID);
@@ -195,7 +272,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private enum Buttons
         {
             Prev,
-            Next
+            Next,
+            Skip
         }
     }
 }

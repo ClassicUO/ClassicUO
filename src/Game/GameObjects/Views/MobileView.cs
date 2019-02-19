@@ -105,24 +105,27 @@ namespace ClassicUO.Game.GameObjects
             bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
             bool needHpLine = false;
 
-            if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == this))
+            if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
             {
                 targetColor = Notoriety.GetHue(NotorietyFlag);
 
                 if (isAttack || this == TargetManager.LastGameObject)
                 {
-                    if (TargetLineGump.TTargetLineGump?.Mobile != this)
-                    {
-                        if (TargetLineGump.TTargetLineGump == null || TargetLineGump.TTargetLineGump.IsDisposed)
-                        {
-                            TargetLineGump.TTargetLineGump = new TargetLineGump();
-                            Engine.UI.Add(TargetLineGump.TTargetLineGump);
-                        }
-                        else
-                        {
-                            TargetLineGump.TTargetLineGump.SetMobile(this);
-                        }
-                    }
+
+                    Engine.UI.SetTargetLineGump(this);
+
+                    //if (TargetLineGump.TTargetLineGump?.Mobile != this)
+                    //{
+                    //    if (TargetLineGump.TTargetLineGump == null || TargetLineGump.TTargetLineGump.IsDisposed)
+                    //    {
+                    //        TargetLineGump.TTargetLineGump = new TargetLineGump();
+                    //        Engine.UI.Add(TargetLineGump.TTargetLineGump);
+                    //    }
+                    //    else
+                    //    {
+                    //        TargetLineGump.TTargetLineGump.SetMobile(this);
+                    //    }
+                    //}
 
                     needHpLine = true;
                 }
@@ -160,11 +163,14 @@ namespace ClassicUO.Game.GameObjects
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-
+                
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
                     HueVector = ShaderHuesTraslator.GetHueVector(this.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsPartial, 0, false);
+
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }
@@ -175,26 +181,25 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
 
+            //if (needHpLine)
+            //{
+            //    //position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
+            //    //position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
 
-            //MessageOverHead(batcher, position, IsMounted ? 0 : -22);
-
-            if (needHpLine)
-            {
-                //position.X += Engine.Profile.Current.GameWindowPosition.X + 9;
-                //position.Y += Engine.Profile.Current.GameWindowPosition.Y + 30;
-
-                //TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + Offset.X);
-                //TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ Offset.Y - Offset.Z - 3);
-                TargetLineGump.TTargetLineGump.BackgroudHue = targetColor;
+            //    //TargetLineGump.TTargetLineGump.X = (int)(position.X /*+ 22*/ + Offset.X);
+            //    //TargetLineGump.TTargetLineGump.Y = (int)(position.Y /*+ 22 + (mobile.IsMounted ? 22 : 0) */+ Offset.Y - Offset.Z - 3);
+            //    //TargetLineGump.TTargetLineGump.BackgroudHue = targetColor;
                 
-                if (IsPoisoned)
-                    TargetLineGump.TTargetLineGump.HpHue = 63;
-                else if (IsYellowHits)
-                    TargetLineGump.TTargetLineGump.HpHue = 53;
+            //    //if (IsPoisoned)
+            //    //    TargetLineGump.TTargetLineGump.HpHue = 63;
+            //    //else if (IsYellowHits)
+            //    //    TargetLineGump.TTargetLineGump.HpHue = 53;
 
-                else
-                    TargetLineGump.TTargetLineGump.HpHue = 90;
-            }
+            //    //else
+            //    //    TargetLineGump.TTargetLineGump.HpHue = 90;
+
+            //    Engine.UI.SetTargetLineGumpHue(targetColor);
+            //}
 
             //if (_edge == null)
             //{
@@ -207,7 +212,6 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
         //private static Texture2D _edge;
-
 
 
         private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)

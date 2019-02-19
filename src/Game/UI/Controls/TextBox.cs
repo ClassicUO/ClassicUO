@@ -144,8 +144,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            string s=null;
-            int oldidx = TxEntry.CaretIndex;
+            string s;
+
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)

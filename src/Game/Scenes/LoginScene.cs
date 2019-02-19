@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Scenes
             // NetClient.Socket.Connected -= NetClient_Connected;
             NetClient.Socket.Disconnected -= NetClient_Disconnected;
             NetClient.LoginSocket.Connected -= NetClient_Connected;
-            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
+            NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
             Engine.UI.GameCursor.IsLoading = false;
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character, CityInfo startingCity)
+        public void CreateCharacter(PlayerMobile character, CityInfo startingCity, byte profession)
         {
             int i = 0;
 
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
+            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint)i, profession));
         }
 
         public void DeleteCharacter(uint index)
@@ -340,27 +340,26 @@ namespace ClassicUO.Game.Scenes
                     Servers = null;
                     CurrentLoginStep = LoginStep.Main;
                     NetClient.LoginSocket.Disconnect();
-
                     break;
+
                 case LoginStep.LoginInToServer:
-                case LoginStep.CharacterSelection:
                     NetClient.Socket.Disconnect();
                     Characters = null;
                     Servers = null;
                     Connect(Account, Password);
-
                     break;
+
                 case LoginStep.CharCreation:
                     CurrentLoginStep = LoginStep.CharacterSelection;
-
                     break;
+
                 case LoginStep.PopUpMessage:
+                case LoginStep.CharacterSelection:
                     NetClient.LoginSocket.Disconnect();
                     NetClient.Socket.Disconnect();
                     Characters = null;
                     Servers = null;
                     CurrentLoginStep = LoginStep.Main;
-
                     break;
             }
         }
@@ -404,6 +403,7 @@ namespace ClassicUO.Game.Scenes
 
                 CurrentLoginStep = LoginStep.PopUpMessage;
             }
+
         }
 
         private void NetClient_PacketReceived(object sender, Packet e)

@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead)
+            if (World.Player.IsDead || item == null)
                 return;
 
             if (!_isShiftDown && !amount.HasValue && !item.IsCorpse && item.Amount > 1 && item.ItemData.IsStackable)
@@ -92,8 +92,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (!item.IsPickable)
-                return;
+            //if (!item.IsPickable)
+            //    return;
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
 
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 
-                if (gump != null)
+                if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);

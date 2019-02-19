@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = item.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-            var texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
@@ -171,8 +171,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     switch (TargetManager.TargetingState)
                     {
-                        case TargetType.Position:
-                        case TargetType.Object:
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
                             gs.SelectedObject = Item;
 
 
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Controls
 
                             break;
 
-                        case TargetType.SetTargetClientSide:
+                        case CursorTarget.SetTargetClientSide:
                             gs.SelectedObject = Item;
 
                             if (Item != null)
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
                 {
                     TargetManager.TargetGameObject(Item);
                     Mouse.LastLeftButtonClickTime = 0;

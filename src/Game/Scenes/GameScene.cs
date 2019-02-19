@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -38,6 +39,8 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using System.Diagnostics;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -58,6 +61,9 @@ namespace ClassicUO.Game.Scenes
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene = false;
+
+        private bool _deathScreenActive = false;
+        private Label _deathScreenLabel;
 
         public GameScene() : base()
         {
@@ -131,7 +137,14 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.UI.Add(new DebugGump());
+            if (!Engine.Profile.Current.DebugGumpIsDisabled)
+            {
+                Engine.UI.Add(new DebugGump()
+                {
+                    X = Engine.Profile.Current.DebugGumpPosition.X,
+                    Y = Engine.Profile.Current.DebugGumpPosition.Y,
+                });
+            }
 
             HeldItem = new ItemHold();
             _journalManager = new JournalManager();
@@ -376,6 +389,7 @@ namespace ClassicUO.Game.Scenes
 
             UpdateMaxDrawZ();
             _renderListCount = 0;
+            _objectHandlesCount = 0;
 
             int minX = _minTile.X;
             int minY = _minTile.Y;
@@ -413,7 +427,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile != null)
                         {
-                            AddTileToRenderList(tile.FirstNode, x, y, false, 150);
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150);
                         }
                         x++;
                         y--;
@@ -488,53 +502,77 @@ namespace ClassicUO.Game.Scenes
 
             _useItemQueue.Update(totalMS, frameMS);
         }
-
+        
         public override bool Draw(Batcher2D batcher)
         {
             if (!World.InGame)
                 return false;
+
+            if (Engine.Profile.Current.EnableDeathScreen)
+            {
+                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
+                {
+                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
+                    {
+                        Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
+                        {
+                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
+                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
+                            X = Engine.WindowWidth / 2 - 50,
+                            Y = Engine.WindowHeight / 2 - 50
+                        });
+                        _deathScreenActive = true;
+                    }
+                }
+                else if (World.Player.DeathScreenTimer < Engine.Ticks)
+                {
+                    _deathScreenActive = false;
+                    _deathScreenLabel.Dispose();
+                }
+            }
+
             DrawWorld(batcher);
+
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 
             return base.Draw(batcher);
         }
-
+        
         private void DrawWorld(Batcher2D batcher)
         {
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+
             batcher.Begin();
+
             batcher.EnableLight(true);
             batcher.SetLightIntensity(World.Light.IsometricLevel);
             batcher.SetLightDirection(World.Light.IsometricDirection);
-            RenderedObjectsCount = 0;
 
-            //int drawX = (Engine.Profile.Current.GameWindowSize.X >> 1);
-            //int drawY = (Engine.Profile.Current.GameWindowSize.Y >> 1) - 22;
-
-            //if (CircleOfTransparency.Circle == null)
-            //    CircleOfTransparency.Create(100);
-            //CircleOfTransparency.Circle.Draw(batcher, drawX, drawY);
-
-            int z = World.Player.Z + 5;
-            bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
-
-            for (int i = 0; i < _renderListCount; i++)
+            if (!_deathScreenActive)
             {
-                GameObject obj = _renderList[i];
-                if (obj.Z <= _maxGroundZ)
-                {
-                    obj.DrawTransparent = usecircle && obj.TransparentTest(z);
+                RenderedObjectsCount = 0;
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                int z = World.Player.Z + 5;
+                bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
+
+                for (int i = 0; i < _renderListCount; i++)
+                {
+                    GameObject obj = _renderList[i];
+                    if (obj.Z <= _maxGroundZ)
                     {
-                        RenderedObjectsCount++;
+                        obj.DrawTransparent = usecircle && obj.TransparentTest(z);
+
+                        if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
+                        {
+                            RenderedObjectsCount++;
+                        }
                     }
                 }
-            }
 
-            // Draw in game overhead text messages
-            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+                // Draw in game overhead text messages
+                _overheadManager.Draw(batcher, _mouseOverList, _offset);
+            }
 
             batcher.End();
             batcher.EnableLight(false);

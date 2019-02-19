@@ -65,6 +65,8 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
+        public long DeathScreenTimer { get; set; }
+
         public Mobile(Serial serial) : base(serial)
         {
             LastAnimationChangeTime = Engine.Ticks;
@@ -97,7 +99,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
       
         public RaceType Race
         {
@@ -276,12 +277,10 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StaminaChanged;
 
-
         public void SetSAPoison(bool value)
         {
             _isSA_Poisoned = value;
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -854,6 +853,7 @@ namespace ClassicUO.Game.GameObjects
         {
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
+
             base.Dispose();
         }
 

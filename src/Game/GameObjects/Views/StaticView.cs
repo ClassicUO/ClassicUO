@@ -115,7 +115,9 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(0x038E, 1, HueVector.Z);
+                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
 
@@ -135,11 +137,11 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            if (Texture.Contains(x, y))
+            if (!istransparent && Texture.Contains(x, y))
                 list.Add(this, vertex[0].Position);
         }
     }

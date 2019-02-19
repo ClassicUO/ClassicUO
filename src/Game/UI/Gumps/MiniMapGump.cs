@@ -34,6 +34,8 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System.Diagnostics;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class MiniMapGump : Gump
@@ -146,10 +148,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _useLargeMap = !_useLargeMap;
                 _forceUpdate = true;
-
                 return true;
             }
-
             return false;
         }
 

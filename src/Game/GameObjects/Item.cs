@@ -46,6 +46,53 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
+        {
+            Item item = null;
+
+            if (hue == 0xFFFF)
+            {
+                var minColor = 0xFFFF;
+                foreach (Item i in Items)
+                {
+                    if (i.Graphic == graphic)
+                    {
+                        if (i.Hue < minColor)
+                        {
+                            item = i;
+                            minColor = i.Hue;
+                        }
+                    }
+                    if (i.Container.IsValid)
+                    {
+                        Item found = i.FindItem(graphic, hue);
+                        if (found != null && found.Hue < minColor)
+                        {
+                            item = found;
+                            minColor = found.Hue;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Item i in Items)
+                {
+                    if (i.Graphic == graphic && i.Hue == hue)
+                        item = i;
+
+                    if (i.Container.IsValid)
+                    {
+                        Item found = i.FindItem(graphic, hue);
+                        if (found != null)
+                            item = found;
+                    }
+                }
+            }
+
+            return item;
+        }
+
         public uint Price
         {
             get => _price;
@@ -102,7 +149,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public bool IsPickable => ItemData.Weight < 255;
+        //public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
         {
@@ -153,14 +200,9 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 house = new House(Serial, 0, false);
                                 World.HouseManager.Add(Serial, house);
-
-                                Console.WriteLine("NEW HOUSE");
-
                             }
                             else
                             {
-                                Console.WriteLine("ALREADY EXISTRS HOUSE");
-
                                 house.ClearComponents();
                             }
 

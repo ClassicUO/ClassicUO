@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
             IsUnicode = isunicode;
             Style = style;
             TimeToLive = timeToLive;
-
+            AlphaHue = 0xFF;
 
             _text = new RenderedText
             {

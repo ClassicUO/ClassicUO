@@ -47,7 +47,6 @@ namespace ClassicUO.Game.GameObjects
         //private float _processAlpha = 1;
         //private long _processAlphaTime = -1;
 
-
         protected bool HasShadow { get; set; }
 
         protected bool IsFlipped { get; set; }
@@ -59,6 +58,12 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 HueVector;
 
         public bool AllowedToDraw { get; set; } = true;
+
+        public bool UseObjectHandles { get; set; }
+
+        public bool ClosedObjectHandles { get; set; }
+
+        public bool ObjectHandlesOpened { get; set; }
 
         public SpriteTexture Texture { get; set; }
 
@@ -213,15 +218,20 @@ namespace ClassicUO.Game.GameObjects
                 vertex[3].Position.Y += Bounds.Height;               
             }
 
+            bool isTransparent = false;
             if (DrawTransparent)
             {
                 int dist = Distance;
                 int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
 
                 if (dist <= maxDist)
+                {
+                    isTransparent = dist <= 3;
                     HueVector.Z = 1f - (dist / (float)maxDist);
+                }
                 else
                     HueVector.Z = 1f - AlphaHue / 255f;
+
             }
             else
                 HueVector.Z = 1f - AlphaHue / 255f;
@@ -282,14 +292,14 @@ namespace ClassicUO.Game.GameObjects
             //}
             if (!batcher.DrawSprite(Texture, vertex))
                 return false;
-            
 
-            MousePick(list, vertex);
+
+            MousePick(list, vertex, isTransparent);
 
             return true;
         }
 
-        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
+        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {
         }
 

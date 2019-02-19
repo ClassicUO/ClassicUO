@@ -16,7 +16,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _label;
         private readonly AlphaBlendControl _trans;
 
-        private bool _fullDisplayMode = true;
+        private bool _fullDisplayMode;
+
+        public bool FullDisplayMode
+        {
+            get => _fullDisplayMode;
+            set
+            {
+                _fullDisplayMode = value;
+                Engine.Profile.Current.DebugGumpIsMinimized = !_fullDisplayMode;
+            }
+        }
 
         private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
@@ -32,6 +42,10 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
+
+            _fullDisplayMode = !Engine.Profile.Current.DebugGumpIsMinimized;
+
+            Engine.Profile.Current.DebugGumpIsDisabled = false;
 
             Width = 500;
             Height = 275;
@@ -54,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                _fullDisplayMode = (_fullDisplayMode) ? false : true;
+                FullDisplayMode = !FullDisplayMode;
                 return true;
             }
 
@@ -74,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (_fullDisplayMode)
+            if (FullDisplayMode)
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
@@ -91,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string ReadObject(GameObject obj)
         {
-            if (obj != null && _fullDisplayMode)
+            if (obj != null && FullDisplayMode)
             {
                 switch (obj)
                 {
@@ -100,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case Item item:
                         return string.Format("Item ({0})  graphic: {1}  flags: {2}  amount: {3}", item.Serial, item.Graphic, item.Flags, item.Amount);
                     case Static st:
-                        return string.Format("Static ({0})  height: {1}  flags: {2}", st.Graphic, st.ItemData.Height, st.ItemData.Flags);
+                        return string.Format("Static ({0})  height: {1}  flags: {2}  Alpha: {3}", st.Graphic, st.ItemData.Height, st.ItemData.Flags, st.AlphaHue);
                     case Multi multi:
                         return string.Format("Multi ({0})  height: {1}  flags: {2}", multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags);
                     case GameEffect effect:
@@ -117,5 +131,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
             return string.Empty;
         }
+
+        protected override void CloseWithRightClick()
+        {
+            Engine.Profile.Current.DebugGumpIsDisabled = true;
+            base.CloseWithRightClick();
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            base.OnDragEnd(x, y);
+            Engine.Profile.Current.DebugGumpPosition = Location;
+        }
+
     }
 }

@@ -23,6 +23,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility;
 
@@ -158,6 +159,22 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
             if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
             if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (UseObjectHandles && !ObjectHandlesOpened)
+            {
+                NameOverheadGump gump = Engine.UI.GetByLocalSerial<NameOverheadGump>(Serial);
+
+                if (gump == null)
+                {
+                    Engine.UI.Add(new NameOverheadGump(this));
+                    ObjectHandlesOpened = true;
+                }
+            }
         }
 
         protected override void OnPositionChanged()

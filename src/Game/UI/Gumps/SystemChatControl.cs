@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     case ChatMode.Whisper:
-                        AppendChatModePrefix("[Whisper]: ", 33);
+                        AppendChatModePrefix("[Whisper]: ", Engine.Profile.Current.WhisperHue);
 
                         break;
                     case ChatMode.Emote:

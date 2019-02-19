@@ -60,11 +60,11 @@ namespace ClassicUO.Game.UI.Controls
 
             ushort id = Item.ItemData.AnimID;
 
-            //if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
-            //{
-            //    if (dict.TryGetValue(id, out EquipConvData data))
-            //        id = data.Gump;
-            //}
+            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
+            {
+                if (dict.TryGetValue(id, out EquipConvData data))
+                    id = (ushort)(data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
+            }
 
             Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
 

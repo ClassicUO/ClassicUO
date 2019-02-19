@@ -208,14 +208,14 @@ namespace ClassicUO.Game
             Socket.Send(new PStatusRequest(serial));
         }
 
-        public static void TargetCancel(TargetType type, Serial cursorID, byte cursorType)
+        public static void TargetCancel(CursorTarget type, Serial cursorID, byte cursorType)
         {
             Socket.Send(new PTargetCancel(type, cursorID, cursorType));
         }
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
         {
-            if (Engine.Profile.Current.EnabledCriminalActionQuery)
+            if (Engine.Profile.Current.EnabledCriminalActionQuery && TargetManager.TargeringType == TargetType.Harmful)
             {
                 Mobile m = World.Mobiles.Get(entity);
 

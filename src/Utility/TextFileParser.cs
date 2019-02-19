@@ -8,64 +8,73 @@ namespace ClassicUO.Utility
 {
     internal class TextFileParser
     {
-        private readonly char[] _Delimiters, _Comments, _Quotes;
-        private string _String;
+        private readonly char[] _delimiters, _comments, _quotes;
+        private readonly string _string;
         private readonly long _Size;
-        private bool _Trim;
-        private int _Pos = 0;
-        private int _EOL;
+        private bool _trim;
+        private int _pos = 0;
+        private int _eol;
 
         public TextFileParser(FileInfo file, char[] delimiters, char[] comments, char[] quotes)
         {
-            if (file.Length > 1M)
-                throw new InternalBufferOverflowException();
-            _Delimiters = delimiters;
-            _Comments = comments;
-            _Quotes = quotes;
+            if (file.Length > 0x100000)//1megabyte limit of string file
+                throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
+
+            _delimiters = delimiters;
+            _comments = comments;
+            _quotes = quotes;
             _Size = file.Length;
-            _String = File.ReadAllText(file.FullName);
+            _string = File.ReadAllText(file.FullName);
         }
 
         internal void Restart()
         {
-            _Pos = 0;
+            _pos = 0;
         }
 
         internal bool IsDelimiter()
         {
             bool result = false;
 
-            for (int i = 0; i < _Delimiters.Length && !result; i++)
-                result = _String[_Pos] == _Delimiters[i];
+            for (int i = 0; i < _delimiters.Length && !result; i++)
+                result = _string[_pos] == _delimiters[i];
             return result;
+        }
+
+        internal bool IsEOF()
+        {
+            return _pos >= _string.Length;
         }
 
         private void GetEOL()
         {
-            for(int i = _Pos; i < _String.Length; i++)
+            for(int i = _pos; i < _string.Length; i++)
             {
-                if (_String[i] == '\n')
-                    _EOL = i;
+                if (_string[i] == '\n' || i + 1 >= _string.Length)
+                {
+                    _eol = i;
+                    break;
+                }
             }
         }
 
         private void SkipToData()
         {
-            while (_Pos < _EOL && IsDelimiter())
-                _Pos++;
+            while (_pos < _eol && IsDelimiter())
+                _pos++;
         }
 
         private bool IsComment()
         {
-            bool result = _String[_Pos] == '\n';
+            bool result = _string[_pos] == '\n';
 
-            for (int i = 0; i < _Comments.Length && !result; i++)
+            for (int i = 0; i < _comments.Length && !result; i++)
             {
-                result = _String[_Pos] == _Comments[i];
+                result = _string[_pos] == _comments[i];
 
-                if (result && i + 1 < _Comments.Length && _Comments[i] == _Comments[i + 1] && _Pos + 1 < _EOL)
+                if (result && i + 1 < _comments.Length && _comments[i] == _comments[i + 1] && _pos + 1 < _eol)
                 {
-                    result = _String[_Pos] == _String[_Pos + 1];
+                    result = _string[_pos] == _string[_pos + 1];
                     i++;
                 }
             }
@@ -75,11 +84,11 @@ namespace ClassicUO.Utility
 
         private bool IsQuote()
         {
-            bool result = _String[_Pos] == '\n';
+            bool result = _string[_pos] == '\n';
 
-            for (int i = 0; i < _Quotes.Length && !result; i += 2)
+            for (int i = 0; i < _quotes.Length && !result; i += 2)
             {
-                if (_String[_Pos] == _Quotes[i] || (i + 1 < _Quotes.Length && _String[_Pos] == _Quotes[i + 1]))
+                if (_string[_pos] == _quotes[i] || (i + 1 < _quotes.Length && _string[_pos] == _quotes[i + 1]))
                 {
                     result = true;
                     break;
@@ -91,11 +100,11 @@ namespace ClassicUO.Utility
 
         private bool IsSecondQuote()
         {
-            bool result = _String[_Pos] == '\n';
+            bool result = _string[_pos] == '\n';
 
-            for (int i = 0; i + 1 < _Quotes.Length && !result; i += 2)
+            for (int i = 0; i + 1 < _quotes.Length && !result; i += 2)
             {
-                if (_String[_Pos] == _Quotes[i + 1])
+                if (_string[_pos] == _quotes[i + 1])
                 {
                     result = true;
                     break;
@@ -109,21 +118,21 @@ namespace ClassicUO.Utility
         {
             StringBuilder result = new StringBuilder();
 
-            while (_Pos < _String.Length && _String[_Pos] != '\n')
+            while (_pos < _string.Length && _string[_pos] != '\n')
             {
                 if (IsDelimiter())
                     break;
 
                 else if (IsComment())
                 {
-                    _Pos = _EOL;
+                    _pos = _eol;
                     break;
                 }
 
-                if (_String[_Pos] != '\r' && (!_Trim || (_String[_Pos] != ' ' && _String[_Pos] != '\t')))
-                    result.Append(_String[_Pos]);
+                if (_string[_pos] != '\r' && (!_trim || (_string[_pos] != ' ' && _string[_pos] != '\t')))
+                    result.Append(_string[_pos]);
 
-                _Pos++;
+                _pos++;
             }
 
             return result.ToString();
@@ -134,28 +143,28 @@ namespace ClassicUO.Utility
             bool exit = false;
             string result = "";
 
-            for (int i = 0; i < _Quotes.Length; i += 2)
+            for (int i = 0; i < _quotes.Length; i += 2)
             {
-                if (_String[_Pos] == _Quotes[i])
+                if (_string[_pos] == _quotes[i])
                 {
-                    char endQuote = _Quotes[i + 1];
+                    char endQuote = _quotes[i + 1];
                     exit = true;
 
-                    _Pos++;
-                    int pos = _Pos;
+                    _pos++;
+                    int pos = _pos;
 
-                    while (pos < _EOL && _String[pos] != '\n' && _String[pos] != endQuote)
+                    while (pos < _eol && _string[pos] != '\n' && _string[pos] != endQuote)
                         pos++;
 
-                    int size = pos - _Pos;
+                    int size = pos - _pos;
 
                     if (size > 0)
                     {
-                        result = _String.Substring(_Pos, size).TrimEnd('\r', '\n');
-                        _Pos = pos;
+                        result = _string.Substring(_pos, size).TrimEnd('\r', '\n');
+                        _pos = pos;
 
-                        if (_Pos < _EOL && _String[_Pos] == endQuote)
-                            _Pos++;
+                        if (_pos < _eol && _string[_pos] == endQuote)
+                            _pos++;
                     }
 
                     break;
@@ -171,26 +180,26 @@ namespace ClassicUO.Utility
         private string RawLine;
         void SaveRawLine()
         {
-            int size = _EOL - _Pos;
+            int size = _eol - _pos;
 
             if (size > 0)
-                RawLine = _String.Substring(_Pos, size).TrimEnd('\r', '\n');
+                RawLine = _string.Substring(_pos, size).TrimEnd('\r', '\n');
             else
                 RawLine = "";
         }
 
         internal List<string> ReadTokens(bool trim = true)
         {
-            _Trim = trim;
+            _trim = trim;
             List<string> result = new List<string>();
 
-            if (_Pos < _String.Length)
+            if (_pos < _string.Length)
             {
                 GetEOL();
 
                 SaveRawLine();
 
-                while (_Pos < _EOL)
+                while (_pos < _eol)
                 {
                     SkipToData();
 
@@ -202,10 +211,10 @@ namespace ClassicUO.Utility
                     if (buf.Length > 0)
                         result.Add(buf);
                     else if (IsSecondQuote())
-                        _Pos++;
+                        _pos++;
                 }
 
-                _Pos = _EOL + 1;
+                _pos = _eol + 1;
             }
 
             return result;

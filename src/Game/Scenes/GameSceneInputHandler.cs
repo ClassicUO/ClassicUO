@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed, _continueRunning;
+        private bool _rightMousePressed, _continueRunning, _useObjectHandles;
 
         private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirection = new Dictionary<SDL.SDL_Keycode, Direction>()
         {
@@ -132,8 +132,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     switch (TargetManager.TargetingState)
                     {
-                        case TargetType.Position:
-                        case TargetType.Object:
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
                             GameObject obj = SelectedObject;
                             if (obj != null)
                             {
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Scenes
 
                             break;
 
-                        case TargetType.SetTargetClientSide:
+                        case CursorTarget.SetTargetClientSide:
                             obj = SelectedObject;
                             if (obj != null)
                             {
@@ -405,6 +405,9 @@ namespace ClassicUO.Game.Scenes
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
 
+
+            _useObjectHandles = isshift && isctrl;
+
             Macro macro = _macroManager.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
             if (macro != null)
@@ -421,8 +424,14 @@ namespace ClassicUO.Game.Scenes
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
-		{
-			_isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+        {
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+
+            _isShiftDown = isshift;
+
+            _useObjectHandles = isctrl && isshift;
 
 			if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
 			{

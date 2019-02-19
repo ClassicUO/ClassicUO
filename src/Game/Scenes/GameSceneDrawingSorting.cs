@@ -90,8 +90,9 @@ namespace ClassicUO.Game.Scenes
                     if (obj is Mobile)
                         continue;
 
-                    if (!(obj is Static) && !(obj is Multi))
-                        continue;
+
+                    //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
+                    //    continue;
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
@@ -115,8 +116,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        if (!(obj is Static) && !(obj is Multi))
-                            continue;
+                        //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
+                        //    continue;
 
                         if (obj is Mobile)
                             continue;
@@ -152,6 +153,7 @@ namespace ClassicUO.Game.Scenes
 
         private int _renderIndex = 1;
         private int _renderListCount;
+        private int _objectHandlesCount;
         private GameObject[] _renderList = new GameObject[2000];
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
@@ -413,11 +415,26 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
+                if (useObjectHandles)
+                {
+                    obj.UseObjectHandles = (ismobile || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
+                    _objectHandlesCount++;
+                }
+                else if (obj.ClosedObjectHandles)
+                    obj.ClosedObjectHandles = false;
+                else if (obj.UseObjectHandles)
+                {
+                    obj.ObjectHandlesOpened = false;
+                    obj.UseObjectHandles = false;
+                }
+                
+
                 _renderList[_renderListCount] = obj;
                 //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
         }
+
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {

@@ -135,6 +135,8 @@ namespace ClassicUO.Game.GameObjects
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
+                if (World.Player == null)
+                    return ushort.MaxValue;
 
                 if (World.Player.IsMoving && this != World.Player)
                 {
@@ -219,19 +221,19 @@ namespace ClassicUO.Game.GameObjects
 
             TextOverhead overhead;
 
-            //for (int i = 0; i < _overHeads.Value.Count; i++)
-            //{
-            //    overhead = _overHeads.Value[i];
+            for (int i = 0; i < _overHeads.Count; i++)
+            {
+                overhead = _overHeads[i];
 
-            //    if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
-            //    {
-            //        overhead.Hue = hue;
-            //        _overHeads.Value.RemoveAt(i);
-            //        InsertGameText(overhead);
+                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
+                {
+                    overhead.Hue = hue;
+                    _overHeads.RemoveAt(i);
+                    InsertGameText(overhead);
 
-            //        return overhead;
-            //    }
-            //}
+                    return overhead;
+                }
+            }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
@@ -246,9 +248,9 @@ namespace ClassicUO.Game.GameObjects
 
             InsertGameText(overhead);
 
-            if (_overHeads.Count > 5)
+            while (_overHeads.Count > 5)
             {
-                TextOverhead over = _overHeads[_overHeads.Count - 1];
+                //TextOverhead over = _overHeads[_overHeads.Count - 1];
 
                 //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
@@ -265,8 +267,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
                 _overHeads.AddToFront(gameText);
-            else 
+            else
                 _overHeads.Insert(1, gameText);
+
             //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 

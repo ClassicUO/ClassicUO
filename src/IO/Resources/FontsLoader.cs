@@ -637,7 +637,7 @@ namespace ClassicUO.IO.Resources
             return GeneratePixelsUnicode(font, str, color, cell, width, align, flags, saveHitmap);
         }
 
-        private unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
+        public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return string.Empty;
@@ -648,7 +648,7 @@ namespace ClassicUO.IO.Resources
                 uint offset = table['.'];
 
                 if (offset != 0 && offset != 0xFFFFFFFF)
-                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3;
+                    width -= ((*(byte*)((IntPtr)table + (int)offset + 2) * 3) + 3);
             }
 
             int textLength = 0;

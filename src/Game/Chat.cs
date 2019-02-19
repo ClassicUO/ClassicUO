@@ -97,31 +97,21 @@ namespace ClassicUO.Game
 			    case MessageType.Whisper:
 			    case MessageType.Yell:
                 case MessageType.Spell:
-				case MessageType.Label:
 				case MessageType.Regular:
-				    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+			    case MessageType.Label:
+                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
 					break;
 				case MessageType.Emote:
 				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);
-					break;			
-				case MessageType.Command:
+					break;
 
-				    break;
+                case MessageType.Command:
+
 				case MessageType.Encoded:
-
-				    break;
-				case MessageType.System:
+                case MessageType.System:
 				case MessageType.Party:
-				    //text = $"[Party][{parent.Name}]: {text}";
-
-				    //break;
 				case MessageType.Guild:
-				    //text = $"[Guild][{parent.Name}]: {text}";
-
-				    //break;
                 case MessageType.Alliance:
-                    //text = $"[Alliance][{parent.Name}]: {text}";
-
                     break;
                 default:
                     parent?.AddOverhead(type, text, (byte)font, hue, unicode);

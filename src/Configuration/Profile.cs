@@ -70,6 +70,7 @@ namespace ClassicUO.Configuration
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
+        [JsonProperty] public ushort WhisperHue { get; set; } = 0x0033;
         [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
@@ -103,6 +104,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
         [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
+        [JsonProperty] public bool BandageSelfOld { get; set; } = true;
+
+        [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
+        [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
 
         // tooltip
         [JsonProperty] public bool EnableTooltip { get; set; } = true;
@@ -124,6 +129,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(0, 0);
+        [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = false;
+        [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
