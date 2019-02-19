@@ -471,12 +471,14 @@ namespace ClassicUO.Game.Scenes
                             SelectCharacter(charToSelect);
                         else if (haveAnyCharacter)
                             SelectCharacter(0);
-                    }
-
-                    if (!haveAnyCharacter)
+                    } 
+                    else if (!haveAnyCharacter)
+                    {
                         StartCharCreation();
+                    }                        
 
                     break;
+
                 case 0xBD: // ReceiveVersionRequest
                     NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 
