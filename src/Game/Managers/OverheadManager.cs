@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    Vector3 position = owner.RealScreenPosition; 
+                    Vector3 position = owner.RealScreenPosition;
 
                     if (owner is Mobile m)
                     {
@@ -74,8 +74,9 @@ namespace ClassicUO.Game.Managers
                             Z = position.Z
                         };
                     }
-                    //else if (owner is Static st)
-                    //    position.Y -= st.ItemData.Height /*((ArtTexture)st.View.Texture).ImageRectangle.Height / 2*/;
+                    else
+                        position.Y -= (owner.Texture.Height >> 1);
+
 
                     Rectangle current = new Rectangle((int) position.X - overhead.Bounds.X, (int) position.Y - overhead.Bounds.Y, overhead.Bounds.Width, overhead.Bounds.Height);
 
