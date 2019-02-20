@@ -111,6 +111,8 @@ namespace ClassicUO.Game.UI
 
                 foreach (char c1 in c)
                 {
+                    allowChar = false;
+
                     if ((AllowValidateRules & (uint)Constants.RULES.SAFE_CHARECTERS) != 0 && (c1 >= 32 && c1 <= 126))
                         allowChar = true;
                     if ((AllowValidateRules & (uint)Constants.RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57))
@@ -119,10 +121,10 @@ namespace ClassicUO.Game.UI
                         allowChar = true;
                     if ((AllowValidateRules & (uint)Constants.RULES.SPACE) != 0 && (c1 == 32))
                         allowChar = true;
-                }
 
-                if (!allowChar)
-                    return;
+                    if (!allowChar)
+                        return;
+                }
             }
 
             string text = Text.Insert(CaretIndex, c);
@@ -143,6 +145,8 @@ namespace ClassicUO.Game.UI
                 {
                     foreach (char c in ch)
                     {
+                        allowChar = false;
+
                         var c1 = (int)Convert.ToChar(c);
 
                         if ((AllowValidateRules & (uint)Constants.RULES.SAFE_CHARECTERS) != 0 && (c1 >= 32 && c1 <= 126))
