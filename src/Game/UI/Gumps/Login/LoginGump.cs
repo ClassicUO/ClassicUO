@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                SafeCharactersOnly = true
+                AllowValidateRules = (uint)(Constants.RULES.SAFE_CHARECTERS),
             });
 
             Add(_textboxPassword = new TextBox(5, 32, 190, 190, false)
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 25,
                 Hue = 0x034F,
                 IsPassword = true,
-                SafeCharactersOnly = true
+                AllowValidateRules = (uint)(Constants.RULES.SAFE_CHARECTERS),
             });
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
             _textboxPassword.SetText( Crypter.Decrypt(Engine.GlobalSettings.Password));
