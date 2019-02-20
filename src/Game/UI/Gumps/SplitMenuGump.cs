@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 29, Y = 42,
                 Width = 60,
-                ValidationRules = (uint)(Constants.RULES.NUMERIC),
+                NumericOnly = true,
             });
             _textBox.SetText(item.Amount.ToString());
         }
