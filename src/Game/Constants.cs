@@ -91,8 +91,8 @@ namespace ClassicUO.Game
         public enum RULES : uint
         {
             NUMERIC = 0x00000001,
-            SAFE_CHARECTERS = 0x00000002,
-            LETTERS = 0x00000004,
+            SYMBOL = 0x00000002,
+            LETTER = 0x00000004,
             SPACE = 0x00000008
         }
 
