@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_nameTextBox = new TextBox(5, 32, 0, 200, false, hue: 1, style: FontStyle.Fixed)
             {
                 X = 257, Y = 65, Width = 200, Height = 20,
-                AllowValidateRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
+                ValidationRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
             }, 1);
             _nameTextBox.SetText(string.Empty);
 
