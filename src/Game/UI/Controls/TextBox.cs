@@ -93,10 +93,10 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.SafeCharactersOnly = value;
         }
 
-        public uint AllowValidateRules
+        public uint ValidationRules
         {
-            get => TxEntry.AllowValidateRules;
-            set => TxEntry.AllowValidateRules = value;
+            get => TxEntry.ValidationRules;
+            set => TxEntry.ValidationRules = value;
         }
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
