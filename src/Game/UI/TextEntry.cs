@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI
                     }
                 }
 
-                if (safeString.Length > MaxCharCount)
+                if (safeString.Length > MaxCharCount && MaxCharCount > 0)
                     text = safeString.Substring(0, MaxCharCount);
                 else
                     text = safeString;
