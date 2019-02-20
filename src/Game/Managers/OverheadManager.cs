@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
                 {
                     GameObject owner = overhead.Parent;
 
-                    if (overhead.IsDisposed || owner.IsDisposed)
+                    if (owner == null || overhead.IsDisposed || owner.IsDisposed)
                     {
                         continue;
                     }
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Managers
                             Z = position.Z
                         };
                     }
-                    else
+                    else if (owner.Texture != null)
                         position.Y -= (owner.Texture.Height >> 1);
 
 
