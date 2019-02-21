@@ -12,7 +12,12 @@ namespace ClassicUO.Game.UI.Controls
 {
     class AlphaBlendControl : Control
     {
-        private readonly float _alpha;
+        private float _alpha;
+
+        internal void SetAlpha(float alpha)
+        {
+            _alpha = alpha;
+        }
 
         public AlphaBlendControl(float alpha = 0.5f)
         {
