@@ -420,6 +420,8 @@ namespace ClassicUO.Game.UI.Gumps
                         Texture = FileManager.Animations.GetTexture(direction.FramesHashes[0]),
                         X = 5, Y = 5,
                         AcceptMouseInput = false,
+                        Hue = item.Hue,
+                        IsPartial = item.ItemData.IsPartialHue
                     });
 
                     control.Width = control.Texture.Width;
@@ -443,6 +445,8 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = texture.ImageRectangle.Height,
                         AcceptMouseInput = false,
                         ScaleTexture = false,
+                        Hue = item.Hue,
+                        IsPartial = item.ItemData.IsPartialHue,
                     });
                 }
                 else 

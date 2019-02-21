@@ -157,6 +157,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\MenuGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverheadGump.cs" />
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />

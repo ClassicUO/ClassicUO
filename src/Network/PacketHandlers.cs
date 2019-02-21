@@ -1799,13 +1799,34 @@ namespace ClassicUO.Network
 
             if (menuid != 0)
             {
+                MenuGump gump = new MenuGump(serial, name);
+
+                int posX = 0;
+
                 for (int i = 0; i < count; i++)
                 {
                     Graphic graphic = p.ReadUShort();
                     Hue hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
+                    Rectangle rect = FileManager.Art.GetTexture(graphic).Bounds;
+
+                    if (rect.Width != 0 && rect.Height != 0)
+                    {
+                        int posY = rect.Height;
+
+                        if (posY >= 47)
+                            posY = 0;
+                        else
+                            posY = ((47 - posY) >> 1);
+
+                        gump.AddItem(graphic, hue, name, posX, posY);
+
+                        posX += rect.Width;
+                    }
                 }
+
+                Engine.UI.Add(gump);
             }
             else
             {
