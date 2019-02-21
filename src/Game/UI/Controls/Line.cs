@@ -19,11 +19,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using ClassicUO.Renderer;
 using ClassicUO.Game.UI.Gumps;
-
-using System;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -45,7 +44,9 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
             else
+            {
                 g.Add(new Line(startx, starty, width, linewidth, linecolor), topage);
+            }
             g.Add(new Line(startx, starty, linewidth, height, linecolor), topage);
             g.Add(new Line(startx + width - 1, starty, linewidth, height, linecolor), topage);
             g.Add(new Line(startx, starty + height - 1, width, linewidth, linecolor), topage);
@@ -70,7 +71,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            _texture.Ticks = (long) totalMS;
+            _texture.Ticks = (long)totalMS;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
