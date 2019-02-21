@@ -40,15 +40,15 @@ namespace ClassicUO.Game.UI.Controls
                 g.Add(l, topage);
                 if (rwidth > 0)
                 {
-                    g.Add(new Line(startx, starty, rwidth, 1, linecolor), topage);
-                    g.Add(new Line(startx + width - rwidth, starty, rwidth, 1, linecolor), topage);
+                    g.Add(new Line(startx, starty, rwidth, linewidth, linecolor), topage);
+                    g.Add(new Line(startx + width - rwidth, starty, rwidth, linewidth, linecolor), topage);
                 }
             }
             else
-                g.Add(new Line(startx, starty, width, 1, linecolor), topage);
-            g.Add(new Line(startx, starty, 1, height, linecolor), topage);
-            g.Add(new Line(startx + width - 1, starty, 1, height, linecolor), topage);
-            g.Add(new Line(startx, starty + height - 1, width, 1, linecolor), topage);
+                g.Add(new Line(startx, starty, width, linewidth, linecolor), topage);
+            g.Add(new Line(startx, starty, linewidth, height, linecolor), topage);
+            g.Add(new Line(startx + width - 1, starty, linewidth, height, linecolor), topage);
+            g.Add(new Line(startx, starty + height - 1, width, linewidth, linecolor), topage);
         }
 
         private readonly SpriteTexture _texture;
