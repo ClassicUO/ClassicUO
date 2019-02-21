@@ -334,7 +334,7 @@ namespace ClassicUO.Game.Scenes
 
                             break;
 
-                        case Item item:
+                        case Item item when !item.IsCorpse:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
                             break;
                     }

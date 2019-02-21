@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
         private UOMusic _currentMusic;
         private int _lastMusicVolume;
 
-        private const float SOUND_DELTA = 250f;
+        private const float SOUND_DELTA = 2500f;
 
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
         {

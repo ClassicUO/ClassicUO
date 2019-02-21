@@ -43,7 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
             StaticPic pic = new StaticPic(graphic, hue)
             {
                 X = x,
-                Y = y
+                Y = y,
+                AcceptMouseInput = true,
             };
             pic.SetTooltip(name);
 

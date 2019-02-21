@@ -1289,10 +1289,7 @@ namespace ClassicUO.Network
 
             float soundByRange = Engine.Profile.Current.SoundVolume / (float)World.ViewRange;
             soundByRange *= World.Player.Position.DistanceTo(position);
-            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 100f;
-
-            if (volume > 0 && volume < 0.01f)
-                volume = 0.01f;
+            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 2500f;
 
             Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(index, volume, true);
         }
