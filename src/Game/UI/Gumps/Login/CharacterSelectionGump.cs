@@ -117,12 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
-            {
-                if (_selectedCharacter == 0)
-                    OnButtonClick((int)Buttons.New);
-                else
-                    LoginCharacter(_selectedCharacter);
-            }
+                LoginCharacter(_selectedCharacter);
         }
 
         public override void OnButtonClick(int buttonID)
