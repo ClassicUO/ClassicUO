@@ -64,14 +64,9 @@ namespace ClassicUO.Game.GameObjects
 
         private void Recalculate()
         {
-            if (Personal > Overall)
-            {
-                IsometricLevel = 1;
-
-                return;
-            }
-
-            IsometricLevel = (32 - Overall + Personal) / 32.0f;
+            int reverted = 32 - Overall; //if overall is 0, we have MAXIMUM light, if 30, we have the MINIMUM light, so 30 is the max, but we must have some remainder for visibility
+            float current = Personal > reverted ? Personal : reverted;
+            IsometricLevel = current * 0.03125f;
         }
     }
 }
