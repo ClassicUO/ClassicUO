@@ -137,7 +137,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
 
-
+        internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
@@ -147,7 +147,7 @@ namespace ClassicUO.Configuration
             if (string.IsNullOrEmpty(CharacterName))
                 throw new InvalidDataException();
 
-            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
@@ -203,7 +203,7 @@ namespace ClassicUO.Configuration
 
         public List<Gump> ReadGumps()
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
             string binpath = Path.Combine(path, "gumps.bin");
             if (!File.Exists(binpath))

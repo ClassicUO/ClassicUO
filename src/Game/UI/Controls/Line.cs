@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Label l = new Label(toplabel, true, textcolor, font: textfont);
                 int rwidth = (width - l.Width) >> 1;
-                l.X = (startx + width + 6 - l.Width) >> 1;
+                l.X = startx + rwidth + 2;
                 l.Y = Math.Max(0, starty - ((l.Height + 1) >> 1));
                 g.Add(l, topage);
                 if (rwidth > 0)

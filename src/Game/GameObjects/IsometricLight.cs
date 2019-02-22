@@ -64,14 +64,8 @@ namespace ClassicUO.Game.GameObjects
 
         private void Recalculate()
         {
-            if (Personal > Overall)
-            {
-                IsometricLevel = 1;
-
-                return;
-            }
-
-            IsometricLevel = (32 - Overall + Personal) / 32.0f;
+            float current = Personal > Overall ? Personal : Overall - (Overall - Personal);
+            IsometricLevel = current * 0.03125f;
         }
     }
 }
