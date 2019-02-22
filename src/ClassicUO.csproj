@@ -137,6 +137,7 @@
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
     <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
     <Compile Include="Game\UI\Controls\MacroControl.cs" />
