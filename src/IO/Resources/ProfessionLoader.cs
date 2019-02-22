@@ -195,16 +195,26 @@ namespace ClassicUO.IO.Resources
                     }
                     case PM_CODE.SKILL:
                     {
-                        for (int i = 0; i < 4 && i < strings.Count && strings.Count > 2; i++)
+                        if(strings.Count > 2)
                         {
+                            int idx = 0;
+                            for(int i = 0, len = skillIndex.GetLength(0); i < len; i++)
+                            {
+                                if (skillIndex[i, 0] == 0xFF)
+                                {
+                                    idx = i;
+                                    break;
+                                }
+                            }
                             for (int j = 0; j < FileManager.Skills.SkillsCount; j++)
                             {
                                 SkillEntry skill = FileManager.Skills.GetSkill(j);
 
                                 if (strings[1] == skill.Name)
                                 {
-                                    skillIndex[i,0] = j;
-                                    int.TryParse(strings[2], out skillIndex[i, 1]);
+                                    skillIndex[idx, 0] = j;
+                                    int.TryParse(strings[2], out skillIndex[idx, 1]);
+                                    break;
                                 }
                             }
                         }

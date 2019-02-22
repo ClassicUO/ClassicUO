@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _character.Strength = (ushort)profession.StatsVal[0];
                 _character.Intelligence = (ushort)profession.StatsVal[1];
                 _character.Dexterity = (ushort)profession.StatsVal[2];
-                OnButtonClick((int)Buttons.Skip);
+                Dispose();
                 return;
             }
 
@@ -236,11 +236,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 					}
 
                     break;
-                case Buttons.Skip:
-                {
-                    charCreationGump.SetAttributes();
-                    break;
-                }
             }
 
             base.OnButtonClick(buttonID);
@@ -272,8 +267,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private enum Buttons
         {
             Prev,
-            Next,
-            Skip
+            Next
         }
     }
 }
