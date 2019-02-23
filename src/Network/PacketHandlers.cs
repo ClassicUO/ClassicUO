@@ -1827,11 +1827,49 @@ namespace ClassicUO.Network
             }
             else
             {
+                GrayMenuGump gump = new GrayMenuGump(serial, name)
+                {
+                    X = (Engine.WindowWidth >> 1) - 200,
+                    Y = (Engine.WindowHeight >> 1) - ((121 + (count * 21)) >> 1)
+                };
+
+                int offsetY = 35 + gump.Height;
+                int gumpHeight = 70 + offsetY;
+
                 for (int i = 0; i < count; i++)
                 {
                     p.Skip(4); 
                     name = p.ReadASCII(p.ReadByte());
+
+                    int addHeight = gump.AddItem(name, offsetY);
+
+                    if (addHeight < 21)
+                        addHeight = 21;
+
+
+                    offsetY += addHeight - 1;
+                    gumpHeight += addHeight;
                 }
+
+                offsetY += 5;
+
+                gump.Add(new Button(0, 0x1450, 0x1451, 0x1450)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 70,
+                    Y = offsetY
+                });
+
+                gump.Add(new Button(1, 0x13B2, 0x13B3, 0x13B2)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 200,
+                    Y = offsetY
+                });
+
+                gump.SetHeight(gumpHeight);
+                gump.WantUpdateSize = false;
+                Engine.UI.Add(gump);
             }
 
             Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");

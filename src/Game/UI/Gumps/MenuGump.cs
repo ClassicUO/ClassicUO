@@ -233,8 +233,62 @@ namespace ClassicUO.Game.UI.Gumps
 
     class GrayMenuGump : Gump
     {
-        public GrayMenuGump(Serial local) : base(local, 0)
+        private readonly ResizePic _resizePic;
+        public GrayMenuGump(Serial local, string name) : base(local, 0)
         {
+            CanMove = true;
+            AcceptMouseInput = true;
+
+            Add(_resizePic = new ResizePic(0x13EC)
+            {
+                Width = 400,
+                Height = 111111,
+            });
+
+            Label l;
+            Add(l = new Label(name, false, 0x0386, 370, 1)
+            {
+                X = 20,
+                Y = 16
+            });
+
+            Width = _resizePic.Width;
+            Height = l.Height;
+        }
+
+        public void SetHeight(int h)
+        {
+            _resizePic.Height = h;
+            Width = _resizePic.Width;
+            Height = _resizePic.Height;
+        }
+
+
+        public int AddItem(string name, int y)
+        {
+            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false)
+            {
+                X = 50,
+                Y = y
+            };
+
+            Add(radio);
+
+            return radio.Height;
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch (buttonID)
+            {
+                case 0: // cancel
+
+                    break;
+
+                case 1: // continue
+
+                    break;
+            }
         }
     }
 }
