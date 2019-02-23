@@ -40,25 +40,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
-            var skillCount = 3;
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
-            {
-                skillCount = 4;
-            }
             _character = character;
-            if(profession.TrueName != "advanced")
-            {
-                for (int i = 0; i < skillCount; i++)
-                {
-                    _character.UpdateSkill(profession.SkillDefVal[i, 0], (ushort)profession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
-                }
-                _character.Strength = (ushort)profession.StatsVal[0];
-                _character.Intelligence = (ushort)profession.StatsVal[1];
-                _character.Dexterity = (ushort)profession.StatsVal[2];
-                Dispose();
-                return;
-            }
 
             foreach (var skill in _character.Skills)
                 _character.UpdateSkill(skill.Index, 0, 0, Lock.Locked, 0);
@@ -105,19 +87,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             string[] skillList = FileManager.Skills.SkillNames;
             int y = 172;
-            _skillSliders = new HSliderBar[skillCount];
-            _skills = new Combobox[skillCount];
+            _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
+            _skills = new Combobox[CharCreationGump._skillsCount];
 
-            for (var i = 0; i < skillCount; i++)
+            for (var i = 0; i < CharCreationGump._skillsCount; i++)
             {
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
                 Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i,1], HSliderBarStyle.MetalWidgetRecessedBar, true));
                 y += 70;
             }
 
-			if (profession.SkillDefVal.Length >= skillCount)
+			if (profession.SkillDefVal.Length >= CharCreationGump._skillsCount)
 			{
-				for (int i = 0; i < skillCount; i++)
+				for (int i = 0; i < CharCreationGump._skillsCount; i++)
 					_skillSliders[i].Value = ProfessionInfo._VoidSkills[i,1];
 
 				int GetSkillIndex(string name)
@@ -159,7 +141,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 				}
 
                 var skillIndex = 0;
-                for (int i = 0; i < skillCount; i++)
+                for (int i = 0; i < CharCreationGump._skillsCount; i++)
                 {
                     var index = GetSkillIndex(FileManager.Skills.SkillNames[profession.SkillDefVal[i, 0]]);
                     var skillCombo = _skills[skillIndex];
