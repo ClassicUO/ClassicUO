@@ -726,6 +726,9 @@ namespace ClassicUO.Game
 
         public static bool WalkTo(int x, int y, int z, int distance)
         {
+            if (World.Player.Stamina == 0 || World.Player.IsParalyzed)
+                return false;
+
             for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
                 if (_openList[i] == null)

@@ -127,10 +127,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 	                if (existing != null)
 		                Remove(existing);
 
-					Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
-
-                    ChangePage(3);
-	                break;
+                    Gump g = new CreateCharTradeGump(_character, _selectedProfession);
+                    Add(g, 3);
+                    if (!g.IsDisposed)
+                    {
+                        ChangePage(3);
+                        break;
+                    }
+                    else
+                    {
+                        Engine.UI.GetByLocalSerial<CharCreationGump>().SetAttributes();
+                        goto case CharCreationStep.ChooseCity;
+                    }
 				case CharCreationStep.ChooseCity:
 					existing = Children.FirstOrDefault(page => page.Page == 4);
 

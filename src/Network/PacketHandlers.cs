@@ -1259,10 +1259,10 @@ namespace ClassicUO.Network
             {
                 byte level = p.ReadByte();
 
-                if (level > 0x1F)
-                    level = 0x1F;
+                if (level > 0x1E)
+                    level = 0x1E;
 
-                //World.Light.Personal = level;
+                World.Light.Personal = level;
             }
         }
 
@@ -1270,10 +1270,10 @@ namespace ClassicUO.Network
         {
             byte level = p.ReadByte();
 
-            if (level > 0x1F)
-                level = 0x1F;
+            if (level > 0x1E)
+                level = 0x1E;
 
-            //World.Light.Overall = level;
+            World.Light.Overall = level;
         }
 
         private static void PlaySoundEffect(Packet p)
