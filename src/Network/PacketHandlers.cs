@@ -1782,7 +1782,6 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
-            //TODO:
             if (!World.InGame)
                 return;
 
@@ -1796,7 +1795,11 @@ namespace ClassicUO.Network
 
             if (menuid != 0)
             {
-                MenuGump gump = new MenuGump(serial, name);
+                MenuGump gump = new MenuGump(serial, id, name)
+                {
+                    X = 100,
+                    Y = 100
+                };
 
                 int posX = 0;
 
@@ -1817,7 +1820,7 @@ namespace ClassicUO.Network
                         else
                             posY = ((47 - posY) >> 1);
 
-                        gump.AddItem(graphic, hue, name, posX, posY);
+                        gump.AddItem(graphic, hue, name, posX, posY, i + 1);
 
                         posX += rect.Width;
                     }
@@ -1827,7 +1830,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                GrayMenuGump gump = new GrayMenuGump(serial, name)
+                GrayMenuGump gump = new GrayMenuGump(serial, id, name)
                 {
                     X = (Engine.WindowWidth >> 1) - 200,
                     Y = (Engine.WindowHeight >> 1) - ((121 + (count * 21)) >> 1)

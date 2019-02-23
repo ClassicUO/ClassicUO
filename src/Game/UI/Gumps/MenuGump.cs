@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -17,10 +18,11 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ContainerHorizontal _container;
         private bool _isDown, _isLeft;
 
-        public MenuGump(Serial serial, string name) : base(serial, 0)
+        public MenuGump(Serial serial, Serial serv, string name) : base(serial, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
+            CanCloseWithRightClick = true;
 
             Add(new GumpPic(0, 0, 0x0910, 0));
             Add(new ColorBox(217, 49, 0, 0xFF000001)
@@ -53,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {
-                IsTransparent = false,
+                IsTransparent = true,
                 Alpha = 1,
             };
             left.MouseDown += (sender, e) =>
@@ -71,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox right = new HitBox(260, 60, 10, 15)
             {
-                IsTransparent = false,
+                IsTransparent = true,
                 Alpha = 1,
             };
             right.MouseDown += (sender, e) =>
@@ -98,13 +100,19 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(Graphic graphic, Hue hue, string name, int x, int y)
+        public void AddItem(Graphic graphic, Hue hue, string name, int x, int y, int index)
         {
             StaticPic pic = new StaticPic(graphic, hue)
             {
                 X = x,
                 Y = y,
+                //LocalSerial = (uint) index,
                 AcceptMouseInput = true,
+            };
+            pic.MouseDoubleClick += (sender, e) =>
+            {
+                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index, graphic, hue));
+                Dispose();
             };
             pic.SetTooltip(name);
 
@@ -234,10 +242,11 @@ namespace ClassicUO.Game.UI.Gumps
     class GrayMenuGump : Gump
     {
         private readonly ResizePic _resizePic;
-        public GrayMenuGump(Serial local, string name) : base(local, 0)
+        public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
+            CanCloseWithRightClick = false;
 
             Add(_resizePic = new ResizePic(0x13EC)
             {
@@ -266,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int AddItem(string name, int y)
         {
-            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false)
+            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false, 340)
             {
                 X = 50,
                 Y = y
@@ -282,11 +291,25 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
+                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, 0));
 
+                    Dispose();
                     break;
 
                 case 1: // continue
 
+                    ushort index = 1;
+                    foreach (RadioButton radioButton in Children.OfType<RadioButton>())
+                    {
+                        if (radioButton.IsChecked)
+                        {
+                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic)ServerSerial.Value, index));
+                            break;
+                        }
+
+                        index++;
+                    }
+                    Dispose();
                     break;
             }
         }

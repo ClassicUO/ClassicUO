@@ -536,17 +536,28 @@ namespace ClassicUO.Network
 
     internal sealed class PMenuResponse : PacketWriter
     {
-        public PMenuResponse() : base(0x7D)
+        public PMenuResponse(Serial serial, Graphic graphic, int code, Graphic itemGraphic, Hue itemHue) : base(0x7D)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUShort(graphic);
+
+            if (code != 0)
+            {
+                WriteUShort((ushort) code);
+
+                WriteUShort(itemGraphic);
+                WriteUShort(itemHue);            
+            }
         }
     }
 
     internal sealed class PGrayMenuResponse : PacketWriter
     {
-        public PGrayMenuResponse() : base(0x7D)
+        public PGrayMenuResponse(Serial serial, Graphic graphic, ushort code) : base(0x7D)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUShort(graphic);
+            WriteUShort(code);
         }
     }
 
