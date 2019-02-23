@@ -461,7 +461,7 @@ namespace ClassicUO.Network
         public PCastSpellFromBook(int idx, Serial serial) : base(0x12)
         {
             WriteByte(0x27);
-            WriteASCII(string.Format("{0} {1}", idx, serial));
+            WriteASCII($"{idx} {serial}");
         }
     }
 
@@ -470,7 +470,7 @@ namespace ClassicUO.Network
         public PUseSkill(int idx) : base(0x12)
         {
             WriteByte(0x24);
-            WriteASCII(idx + " 0");
+            WriteASCII($"{idx} 0");
         }
     }
 

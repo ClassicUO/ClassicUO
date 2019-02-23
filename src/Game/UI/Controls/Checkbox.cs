@@ -59,6 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 Font = font, Hue = color, IsUnicode = isunicode, MaxWidth = maxWidth, Text = text
             };
             Width += _text.Width;
+            Height += _text.Height;
             CanMove = false;
             AcceptMouseInput = true;
         }
