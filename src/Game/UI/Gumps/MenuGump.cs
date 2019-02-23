@@ -233,6 +233,9 @@ namespace ClassicUO.Game.UI.Gumps
             private void CalculateWidth()
             {
                 _maxWidth = Children.Sum(s => s.Width) - Width;
+
+                if (_maxWidth < 0)
+                    _maxWidth = 0;
             }
         }
 
