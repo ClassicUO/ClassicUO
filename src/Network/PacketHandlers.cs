@@ -1871,8 +1871,6 @@ namespace ClassicUO.Network
                 gump.WantUpdateSize = false;
                 Engine.UI.Add(gump);
             }
-
-            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
         }
 
 
