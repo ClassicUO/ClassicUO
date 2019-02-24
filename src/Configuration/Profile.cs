@@ -186,7 +186,7 @@ namespace ClassicUO.Configuration
 
 
                 if (gumps != null)
-                { 
+                {
                     writer.Write(gumps.Count);
 
                     foreach (Gump gump in gumps)
@@ -198,6 +198,11 @@ namespace ClassicUO.Configuration
                 {
                     writer.Write(0);
                 }
+            }
+
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
+            {
+                Engine.AnchorManager.Save(writer);
             }
         }
 
@@ -253,9 +258,16 @@ namespace ClassicUO.Configuration
                 }
             }
 
+            string anchorsPath = Path.Combine(path, "anchors.bin");
+            if (File.Exists(anchorsPath))
+            {
+                using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                {
+                    Engine.AnchorManager.Restore(reader, gumps);
+                }
+            }
+
             return gumps;
         }
-
-        
     }
 }

@@ -35,7 +35,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class HealthBarGump : Gump
+    class HealthBarGump : AnchorableGump
     {
         private const ushort BACKGROUND_NORMAL = 0x0803;
         private const ushort BACKGROUND_WAR = 0x0807;
