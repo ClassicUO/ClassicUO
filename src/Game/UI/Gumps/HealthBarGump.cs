@@ -156,7 +156,9 @@ namespace ClassicUO.Game.UI.Gumps
                         if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
                             color = 0;
 
-                        if (_canChangeName = Mobile.IsRenamable)
+                        _canChangeName = Mobile.IsRenamable;
+
+                        if (_canChangeName)
                         {
                             textColor = 0x000E;
                         }
@@ -264,11 +266,13 @@ namespace ClassicUO.Game.UI.Gumps
             Hue textColor = 0x0386;
             Hue hitsColor = 0x0386;
 
-            if (Mobile == null || Mobile.IsDisposed)
-            {
-                Mobile = World.Mobiles.Get(LocalSerial);
+            Mobile = World.Mobiles.Get(LocalSerial);
 
-                if (!_outOfRange && Mobile == null)
+
+            if (!_outOfRange && (Mobile == null || Mobile.IsDisposed))
+            {
+
+                //if ( && Mobile == null)
                 {
                     _poisoned = false;
                     _yellowHits = false;
@@ -313,10 +317,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (Mobile != null && Mobile.HitsMax > 0)
+            if (Mobile != null && !Mobile.IsDisposed)
             {
                 if (_outOfRange)
                 {
+                    if (Mobile.HitsMax == 0)
+                        GameActions.RequestMobileStatus(Mobile);
+
                     _outOfRange = false;
 
                     if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
