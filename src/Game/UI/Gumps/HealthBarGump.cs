@@ -25,7 +25,6 @@ using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -47,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private const ushort LINE_RED_PARTY = 0x0028;
         private const ushort LINE_BLUE_PARTY = 0x0029;
-
 
         private readonly GumpPicWithWidth[] _bars = new GumpPicWithWidth[3];
         private GumpPic _background, _hpLineRed, _manaLineRed, _stamLineRed;
@@ -169,7 +167,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = _background.Texture.Width;
                     Height = _background.Texture.Height;
 
-
                     Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
                     {
                         X = 16,
@@ -178,6 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
+                        ValidationRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
                         Text = _name
                     });
 
@@ -339,7 +337,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-
                             _textBox.MouseClick += TextBoxOnMouseClick;
                         }
                     }
@@ -377,8 +374,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _bars[0].IsVisible = true;
                 }
-
-               
 
                 if (Mobile.IsPoisoned && !_poisoned)
                 {
@@ -418,7 +413,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldHits = hits;
                 }
             }
-
 
             if (CanBeSaved)
             {             
@@ -471,7 +465,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile.IsSelected = false;
             }
         }
-
 
         public override void OnButtonClick(int buttonID)
         {
