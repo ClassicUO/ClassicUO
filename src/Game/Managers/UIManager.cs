@@ -223,6 +223,8 @@ namespace ClassicUO.Game.Managers
 
         public bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
+        public Control DraggingControl => _draggingControl;
+
         public GameCursor GameCursor { get; private set; }
 
         public Control KeyboardFocusControl
@@ -736,6 +738,11 @@ namespace ClassicUO.Game.Managers
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
                     _mouseDownControls[i].InvokeMouseOver(position);
             }
+        }
+
+        public Control[] GetMouseOverControls(Point position)
+        {
+            return _gumps.Where(o => o.HitTest(position)!= null).ToArray();
         }
 
         private Control GetMouseOverControl(Point position)

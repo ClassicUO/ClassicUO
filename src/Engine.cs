@@ -83,6 +83,7 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
         private readonly Settings _settings;
+        private AnchorManager _anchorManager;
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private bool _isMaximized;
@@ -220,6 +221,8 @@ namespace ClassicUO
                 _engine._graphicDeviceManager.ApplyChanges();
             }
         }
+
+        public static AnchorManager AnchorManager => _engine._anchorManager;
 
         public static UIManager UI => _engine._uiManager;
 
@@ -406,6 +409,7 @@ namespace ClassicUO
             _batcher = new Batcher2D(GraphicsDevice);
             _inputManager = new InputManager();
             _uiManager = new UIManager();
+            _anchorManager = new AnchorManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
