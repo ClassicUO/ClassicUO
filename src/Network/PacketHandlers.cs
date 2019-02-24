@@ -1663,7 +1663,10 @@ namespace ClassicUO.Network
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
-            if (World.Get(mobile) == null)
+            //Fix for 'Pets disappear offscreen' #276 on github issues
+            bool mobileHasInvalidPosition = mobile != null && mobile.X == 65535 && mobile.Y == 65535 && mobile.Z == 0;
+
+            if (World.Get(mobile) == null || mobileHasInvalidPosition)
             {
                 mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = dir;
