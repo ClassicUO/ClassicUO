@@ -144,7 +144,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.Distance > ViewRange && item.OnGround)
+                    if (item.OnGround && item.Distance > ViewRange)
                     {
                         if (item.IsMulti)
                         {
