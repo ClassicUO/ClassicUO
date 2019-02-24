@@ -21,6 +21,7 @@
 
 using System;
 
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -74,59 +75,82 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        protected override bool Contains(int x, int y)
         {
-            BlendState blend = new BlendState();
-            blend.AlphaSourceBlend = blend.ColorSourceBlend = Blend.SourceAlpha;
-            blend.AlphaDestinationBlend = blend.ColorDestinationBlend = Blend.InverseSourceAlpha;
+            for (int i = 0; i < 9; i++)
+            {
+                SpriteTexture t = _gumpTexture[i];
+                int drawWidth = t.Width;
+                int drawHeight = t.Height;
+                int drawX = X;
+                int drawY = Y;
+
+                switch (i)
+                {
+                    case 0:
+                        if (t.Contains(x, y))
+                            return true;
+
+                        break;
+                    case 1:
+                        drawX += _gumpTexture[0].Width;
+                  
+                       if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+
+                        break;
+                    case 2:
+                        drawX += Width - drawWidth;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+
+                        break;
+                    case 3:
+                        drawY += _gumpTexture[0].Height;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                    case 4:
+                        drawX += Width - drawWidth /*- offsetRight*/;
+                        drawY += _gumpTexture[2].Height;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                    case 5:
+                        drawY += Height - drawHeight;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                    case 6:
+                        drawX += _gumpTexture[5].Width;
+                        drawY += Height - drawHeight /*- offsetBottom*/;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                    case 7:
+                        drawX += Width - drawWidth;
+                        drawY += Height - drawHeight;
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                    case 8:
+                        drawX += _gumpTexture[0].Width;
+                        drawY += _gumpTexture[0].Height;
+
+                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                            return true;
+                        break;
+                }
+            }
 
 
-            return blend;
-        });
+            return false;
+        }
 
-        private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState();
-
-            state.DepthBufferEnable = true;
-            state.StencilEnable = true;
-
-            //state.StencilFunction = CompareFunction.Always;
-            //state.ReferenceStencil = 1;
-            //state.StencilMask = 1;
-
-            //state.StencilFail = StencilOperation.Keep;
-            //state.StencilDepthBufferFail = StencilOperation.Keep;
-            //state.StencilPass = StencilOperation.Replace;
-
-            //state.TwoSidedStencilMode = false;
-
-            return state;
-        });
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            //int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
-            //int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
-            //int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
-            //int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
-
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-
-            //if (IsTransparent)
-            //{
-            //    batcher.SetBlendState(_checkerBlend.Value);
-            //    DrawInternal(batcher, position, color);
-            //    batcher.SetBlendState(null);
-
-            //    batcher.SetStencil(_checkerStencil.Value);
-            //    DrawInternal(batcher, position, color);
-            //    batcher.SetStencil(null);
-            //}
-            //else
-            //{
-            //    DrawInternal(batcher, position, color);
-            //}
             DrawInternal(batcher, position, color);
             return base.Draw(batcher, position, hue);
         }
