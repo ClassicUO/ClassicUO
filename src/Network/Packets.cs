@@ -621,19 +621,17 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetObject : PacketWriter
     {
-        public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject(Serial entity, Graphic graphic, ushort x, ushort y, sbyte z, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            Entity e = World.Get(entity);
-
             WriteByte(0x00);
             WriteUInt(cursorID);
             WriteByte(cursorType);
             WriteUInt(entity);
-            WriteUShort(e.X);
-            WriteUShort(e.Y);
+            WriteUShort(x);
+            WriteUShort(y);
             WriteByte(0xFF);
-            WriteSByte(e.Z);
-            WriteUShort(e.Graphic);
+            WriteSByte(z);
+            WriteUShort(graphic);
         }
     }
 
