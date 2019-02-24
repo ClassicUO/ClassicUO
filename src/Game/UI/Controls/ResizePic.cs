@@ -94,9 +94,28 @@ namespace ClassicUO.Game.UI.Controls
                         break;
                     case 1:
                         drawX += _gumpTexture[0].Width;
-                  
-                       if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
+
+                        int startX = drawX;
+                        int maxW = drawX + (Width - _gumpTexture[0].Width - _gumpTexture[2].Width);
+                        int maxH = drawY + drawHeight;
+
+
+                        while (drawX < maxW)
+                        {
+                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                                return true;
+
+                            drawX += drawWidth;
+
+                            if (drawX > maxW)
+                            {
+                                drawX = startX;
+                                drawY += drawHeight;
+
+                                if (drawY > maxH)
+                                    break;
+                            }
+                        }
 
                         break;
                     case 2:
@@ -107,14 +126,54 @@ namespace ClassicUO.Game.UI.Controls
                         break;
                     case 3:
                         drawY += _gumpTexture[0].Height;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
+
+                        startX = drawX;
+                        maxW = drawX + drawWidth;
+                        maxH = drawY + (Height - _gumpTexture[0].Height - _gumpTexture[5].Height);
+
+
+                        while (drawX < maxW)
+                        {
+                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                                return true;
+
+                            drawX += drawWidth;
+
+                            if (drawX > maxW)
+                            {
+                                drawX = startX;
+                                drawY += drawHeight;
+
+                                if (drawY > maxH)
+                                    break;
+                            }
+                        }
                         break;
                     case 4:
                         drawX += Width - drawWidth /*- offsetRight*/;
                         drawY += _gumpTexture[2].Height;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
+
+                        startX = drawX;
+                        maxW = drawX + drawWidth;
+                        maxH = drawY + (Height - _gumpTexture[2].Height - _gumpTexture[7].Height);
+
+
+                        while (drawX < maxW)
+                        {
+                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                                return true;
+
+                            drawX += drawWidth;
+
+                            if (drawX > maxW)
+                            {
+                                drawX = startX;
+                                drawY += drawHeight;
+
+                                if (drawY > maxH)
+                                    break;
+                            }
+                        }
                         break;
                     case 5:
                         drawY += Height - drawHeight;
@@ -124,8 +183,28 @@ namespace ClassicUO.Game.UI.Controls
                     case 6:
                         drawX += _gumpTexture[5].Width;
                         drawY += Height - drawHeight /*- offsetBottom*/;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
+
+                        startX = drawX;
+                        maxW = drawX + (Width - _gumpTexture[5].Width - _gumpTexture[7].Width);
+                        maxH = drawY + drawHeight;
+
+
+                        while (drawX < maxW)
+                        {
+                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                                return true;
+
+                            drawX += drawWidth;
+
+                            if (drawX > maxW)
+                            {
+                                drawX = startX;
+                                drawY += drawHeight;
+
+                                if (drawY > maxH)
+                                    break;
+                            }
+                        }
                         break;
                     case 7:
                         drawX += Width - drawWidth;
@@ -137,8 +216,30 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += _gumpTexture[0].Width;
                         drawY += _gumpTexture[0].Height;
 
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
+                        startX = drawX;
+                        maxW = drawX + (Width - _gumpTexture[0].Width - _gumpTexture[2].Width);
+                        maxH = drawY + (Height - _gumpTexture[2].Height - _gumpTexture[7].Height);
+
+
+                        while (drawX < maxW)
+                        {                     
+                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+                                return true;
+
+                            drawX += drawWidth;
+
+                            if (drawX > maxW)
+                            {
+                                drawX = startX;
+                                drawY += drawHeight;
+
+                                if (drawY > maxH)
+                                    break;
+                            }
+
+
+                        }
+
                         break;
                 }
             }
@@ -220,10 +321,11 @@ namespace ClassicUO.Game.UI.Controls
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
 
                         //if (!OnlyCenterTransparent)
-                        var c = color;
+                        Vector3 c = color;
 
                         if (OnlyCenterTransparent)
                             c.Z = 1;
+
                         batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), c);
 
                         break;

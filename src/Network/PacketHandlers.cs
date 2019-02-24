@@ -1660,6 +1660,7 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player)
                 return;
+
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
