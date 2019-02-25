@@ -164,13 +164,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (button == MouseButton.Left)
             {
-                if (Mouse.IsDragging)
-                    return;
-
+              
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                 if (TargetManager.IsTargeting)
                 {
+                    if (Mouse.IsDragging)
+                        return;
 
                     switch (TargetManager.TargetingState)
                     {
