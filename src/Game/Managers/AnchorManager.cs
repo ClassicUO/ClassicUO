@@ -17,23 +17,23 @@ namespace ClassicUO.Game.Managers
             Left, Top, Right, Bottom
         }
 
-        static Dictionary<AnchorDirection, Vector2[]> AnchorTriangles = new Dictionary<AnchorDirection, Vector2[]>()
+        private static readonly Vector2[][] _anchorTriangles =
         {
-            { AnchorDirection.Left, new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f) } },
-            { AnchorDirection.Top, new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f) } },
-            { AnchorDirection.Right, new Vector2[] { new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) } },
-            { AnchorDirection.Bottom, new Vector2[] { new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) } }
+             new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f) },
+             new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f) },
+             new Vector2[] { new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
+             new Vector2[] { new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) }
         };
 
-        static Dictionary<AnchorDirection, Point> AnchorDirectionMatrix = new Dictionary<AnchorDirection, Point>()
+        private static readonly Point[] _anchorDirectionMatrix =
         {
-            { AnchorDirection.Left, new Point(-1, 0) },
-            { AnchorDirection.Top, new Point(0, -1) },
-            { AnchorDirection.Right, new Point(1, 0) },
-            { AnchorDirection.Bottom, new Point(0, 1) }
+             new Point(-1, 0) ,
+             new Point(0, -1) ,
+             new Point(1, 0) ,
+             new Point(0, 1)
         };
 
-        private Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
+        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
         {
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
 
                 if (this[host] == null || this[host].IsEmptyDirection(host, direction))
                 {
-                    var offset = AnchorDirectionMatrix[direction] * new Point(draggedControl.Width, draggedControl.Height);
+                    var offset = _anchorDirectionMatrix[(int) direction] * new Point(draggedControl.Width, draggedControl.Height);
                     return new Point(host.X + offset.X, host.Y + offset.Y);
                 }
             }
@@ -92,8 +92,7 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                AnchorGroup group = null;
-                reverseMap.TryGetValue(control, out group);
+                reverseMap.TryGetValue(control, out AnchorGroup @group);
 
                 return group;
             }
@@ -139,7 +138,7 @@ namespace ClassicUO.Game.Managers
 
             for (AnchorDirection anchorDirection = AnchorDirection.Left; anchorDirection <= AnchorDirection.Bottom; anchorDirection++)
             {
-                if (IsPointInPolygon(AnchorTriangles[anchorDirection], anchorPoint))
+                if (IsPointInPolygon(_anchorTriangles[ (int) anchorDirection], anchorPoint))
                 {
                     return anchorDirection;
                 }
@@ -253,8 +252,8 @@ namespace ClassicUO.Game.Managers
                 Point? hostDirection = GetControlCoordinates(host);
                 if (hostDirection.HasValue)
                 {
-                    var targetX = hostDirection.Value.X + AnchorDirectionMatrix[direction].X;
-                    var targetY = hostDirection.Value.Y + AnchorDirectionMatrix[direction].Y;
+                    var targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int)direction].X;
+                    var targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int)direction].Y;
 
                     if (IsEmptyDirection(targetX, targetY))
                     {
@@ -270,9 +269,13 @@ namespace ClassicUO.Game.Managers
 
 
                         hostDirection = GetControlCoordinates(host);
-                        targetX = hostDirection.Value.X + AnchorDirectionMatrix[direction].X;
-                        targetY = hostDirection.Value.Y + AnchorDirectionMatrix[direction].Y;
-                        controlMatrix[targetX, targetY] = control;
+
+                        if (hostDirection.HasValue)
+                        {
+                            targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int) direction].X;
+                            targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int) direction].Y;
+                            controlMatrix[targetX, targetY] = control;
+                        }
                     }
                 }
             }
@@ -282,8 +285,8 @@ namespace ClassicUO.Game.Managers
                 Point? hostDirection = GetControlCoordinates(host);
                 if (hostDirection.HasValue)
                 {
-                    var targetX = hostDirection.Value.X + AnchorDirectionMatrix[direction].X;
-                    var targetY = hostDirection.Value.Y + AnchorDirectionMatrix[direction].Y;
+                    var targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int) direction].X;
+                    var targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int) direction].Y;
 
                     return IsEmptyDirection(targetX, targetY);
                 }
