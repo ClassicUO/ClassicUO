@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (FullDisplayMode)
             {
-                _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : Engine.Profile.Current.ScaleZoom);
+                _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, !World.InGame ? 1f : scene.Scale);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                 _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
                 _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));

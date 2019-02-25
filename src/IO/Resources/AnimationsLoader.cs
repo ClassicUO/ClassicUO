@@ -1561,8 +1561,9 @@ namespace ClassicUO.IO.Resources
 
             _reader.SetData(decbuffer, decLen);
             _reader.Skip(8);
-            int dcsize = _reader.ReadInt();
-            int animID = _reader.ReadInt();
+            _reader.Skip(8);
+            //int dcsize = _reader.ReadInt();
+            //int animID = _reader.ReadInt();
             _reader.Skip(16);
             int frameCount = _reader.ReadInt();
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
