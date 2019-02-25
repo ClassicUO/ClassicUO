@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Managers
         {
             var anchorPoint = new Vector2((float)x / host.Width, (float)y / host.Height);
 
-            foreach (AnchorDirection anchorDirection in Enum.GetValues(typeof(AnchorDirection)))
+            for (AnchorDirection anchorDirection = AnchorDirection.Left; anchorDirection <= AnchorDirection.Bottom; anchorDirection++)
             {
                 if (IsPointInPolygon(AnchorTriangles[anchorDirection], anchorPoint))
                 {
