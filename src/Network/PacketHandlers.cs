@@ -1261,8 +1261,8 @@ namespace ClassicUO.Network
 
                 if (level > 0x1E)
                     level = 0x1E;
-
-                World.Light.Personal = level;
+                //TODO: need an option to on/off
+                //World.Light.Personal = level;
             }
         }
 
@@ -1272,8 +1272,8 @@ namespace ClassicUO.Network
 
             if (level > 0x1E)
                 level = 0x1E;
-
-            World.Light.Overall = level;
+            //TODO: need an option to on/off
+            //World.Light.Overall = level;
         }
 
         private static void PlaySoundEffect(Packet p)
