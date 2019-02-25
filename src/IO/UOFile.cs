@@ -56,7 +56,7 @@ namespace ClassicUO.IO
 
             if (size > 0)
             {
-                _file = MemoryMappedFile.CreateFromFile(File.OpenRead(fileInfo.FullName), null, 0, MemoryMappedFileAccess.Read, null, HandleInheritability.None, false);
+                _file = MemoryMappedFile.CreateFromFile(File.OpenRead(fileInfo.FullName), null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
                 //_file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
                 byte* ptr = null;
