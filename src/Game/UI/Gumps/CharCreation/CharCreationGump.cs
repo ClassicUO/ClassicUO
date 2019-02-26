@@ -76,7 +76,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			_selectedProfession = info;
 
-			SetStep(CharCreationStep.ChooseTrade);
+			for (int i = 0; i < _skillsCount; i++)
+			{
+				_character.UpdateSkill(_selectedProfession.SkillDefVal[i, 0], (ushort)_selectedProfession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+			}
+
+			_character.Strength = (ushort)_selectedProfession.StatsVal[0];
+			_character.Intelligence = (ushort)_selectedProfession.StatsVal[1];
+			_character.Dexterity = (ushort)_selectedProfession.StatsVal[2];
+
+			SetAttributes();
+
+			if (_selectedProfession.DescriptionIndex > 0)
+				SetStep(CharCreationStep.ChooseCity);
+			else
+				SetStep(CharCreationStep.ChooseTrade);
 		}
 
 		public void CreateCharacter(byte profession)
@@ -84,14 +98,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             loginScene.CreateCharacter(_character, _startingCity, profession);
         }
 
-        public void StepBack()
+        public void StepBack(int steps = 1)
         {
-            if (_currentStep == CharCreationStep.Appearence)
-            {
-                loginScene.StepBack();
-            }
-            else
-                SetStep(_currentStep - 1);
+			if (_currentStep == CharCreationStep.Appearence)
+			{
+				loginScene.StepBack();
+			}
+			else
+			{
+				SetStep(_currentStep - steps);
+			}
         }
 
         public void ShowMessage(string message)
@@ -110,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             switch (step)
             {
+				default:
                 case CharCreationStep.Appearence:
                     ChangePage(1);
 
@@ -130,24 +147,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 	                if (existing != null)
 		                Remove(existing);
 
-                    if (_selectedProfession.TrueName == "advanced")
-                    {
-                        Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
-                        ChangePage(3);
-                        break;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < _skillsCount; i++)
-                        {
-                            _character.UpdateSkill(_selectedProfession.SkillDefVal[i, 0], (ushort)_selectedProfession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
-                        }
-                        _character.Strength = (ushort)_selectedProfession.StatsVal[0];
-                        _character.Intelligence = (ushort)_selectedProfession.StatsVal[1];
-                        _character.Dexterity = (ushort)_selectedProfession.StatsVal[2];
-                        SetAttributes();
-                        goto case CharCreationStep.ChooseCity;
-                    }
+                    Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
+                    ChangePage(3);
+                    break;
 				case CharCreationStep.ChooseCity:
 					existing = Children.FirstOrDefault(page => page.Page == 4);
 
