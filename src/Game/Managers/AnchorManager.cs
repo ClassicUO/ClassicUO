@@ -76,6 +76,15 @@ namespace ClassicUO.Game.Managers
                                 .FirstOrDefault();
         }
 
+        public void DetachControl(AnchorableGump control)
+        {
+            if (this[control] != null)
+            {
+                this[control].DetachControl(control);
+                this[control] = null;
+            }
+        }
+
         public void DisposeAllControls(AnchorableGump control)
         {
             if (this[control] != null)
@@ -192,6 +201,26 @@ namespace ClassicUO.Game.Managers
                             writer.Write(Serial.INVALID);
                     }
                 }
+            }
+
+            public void MakeTopMost()
+            {
+                for (int x = 0; x < controlMatrix.GetLength(0); x++)
+                {
+                    for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    {
+                        if (controlMatrix[x, y] != null)
+                        {
+                            Engine.UI.MakeTopMostGump(controlMatrix[x, y]);
+                        }
+                    }
+                }
+            }
+
+            public void DetachControl(AnchorableGump control)
+            {
+                var coords = GetControlCoordinates(control);
+                controlMatrix[coords.Value.X, coords.Value.Y] = null;
             }
 
             public List<AnchorableGump> Restore(BinaryReader reader, List<Gump> gumps)
@@ -327,26 +356,6 @@ namespace ClassicUO.Game.Managers
                         newMatrix[x + xInitial, y + yInitial] = controlMatrix[x, y];
 
                 controlMatrix = newMatrix;
-            }
-
-            private void PrintMatrix()
-            {
-                Console.Write(Environment.NewLine + Environment.NewLine);
-                Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++");
-                Console.Write(Environment.NewLine + Environment.NewLine);
-
-                for (int y = 0; y < controlMatrix.GetLength(1); y++)
-                {
-                    for (int x = 0; x < controlMatrix.GetLength(0); x++)
-                    {
-                        if (controlMatrix[x, y] != null)
-                            Console.Write("   " + controlMatrix[x, y].LocalSerial);
-                        else
-                            Console.Write("   " + "----------");
-                    }
-
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-                }
             }
         }
     }
