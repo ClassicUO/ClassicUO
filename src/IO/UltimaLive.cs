@@ -508,7 +508,7 @@ namespace ClassicUO.IO
                         }
                     }
                     else
-                        _file = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, null, HandleInheritability.None, false);
+                        _file = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
 
                     _accessor = _file.CreateViewAccessor(0, isstaticmul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
                     byte* ptr = null;

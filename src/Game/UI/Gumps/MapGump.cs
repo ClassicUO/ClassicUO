@@ -20,8 +20,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public MapGump(Serial serial, ushort gumpid, int width, int height) : base(serial, 0)
         {
+            AcceptMouseInput = false;
             CanMove = true;
-            CanCloseWithRightClick = true;
 
             Width = width;
             Height = height;
@@ -44,13 +44,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 24, Y = 31,
                 Width = width,
-                Height = height
+                Height = height,
             });
 
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
 
 
-            WantUpdateSize = false;
+            //WantUpdateSize = false;
         }
 
         public int PlotState { get; private set; }
@@ -58,7 +58,10 @@ namespace ClassicUO.Game.UI.Gumps
         public void SetMapTexture(SpriteTexture texture)
         {
             _textureControl.Texture?.Dispose();
+            _textureControl.WantUpdateSize = true;
             _textureControl.Texture = texture;
+
+            WantUpdateSize = true;
         }
 
         public void AddToContainer(Control c)

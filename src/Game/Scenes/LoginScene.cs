@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Scenes
             switch (CurrentLoginStep)
             {
                 case LoginStep.Main:
-
+                    PopupMessage = null;
                     return new LoginGump();
                 case LoginStep.Connecting:
                 case LoginStep.VerifyingAccount:
@@ -195,9 +195,10 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.PopUpMessage:
                     Engine.UI.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
                     return GetLoadingScreen();
-                case LoginStep.CharacterSelection:
 
+                case LoginStep.CharacterSelection:
                     return new CharacterSelectionGump();
+
                 case LoginStep.ServerSelection:
 
                     return new ServerSelectionGump();
@@ -218,6 +219,7 @@ namespace ClassicUO.Game.Scenes
             {
                 labelText = PopupMessage;
                 showButtons = LoadingGump.Buttons.OK;
+                PopupMessage = null;
             }
             else
             {
@@ -447,28 +449,31 @@ namespace ClassicUO.Game.Scenes
 					ParseFlags(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
 
-				    if (Engine.GlobalSettings.AutoLogin || Reconnect)
-				    {
-                        bool haveAnyCharacter = false;
+                    uint charToSelect = 0;
 
-                        for (byte i = 0; i < Characters.Length; i++)
-                        {
-                            if (Characters[i].Length > 0)
-				            {
-                                haveAnyCharacter = true;
-                                if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
-                                {
-                                    SelectCharacter(i);
-                                    return;
-                                }
-				            }
+                    bool haveAnyCharacter = false;
+                    bool tryAutologin = Engine.GlobalSettings.AutoLogin || Reconnect;
+
+                    for (byte i = 0; i < Characters.Length; i++)
+                    {
+                        if (Characters[i].Length > 0)
+				        {
+                            haveAnyCharacter = true;
+                            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                            {
+                                charToSelect = i;
+                                break;
+                            }
 				        }
-
-                        if (haveAnyCharacter)
-                            SelectCharacter(0);
 				    }
 
+                    if (tryAutologin && haveAnyCharacter)
+                        SelectCharacter(charToSelect);
+                    else if (!haveAnyCharacter)
+                        StartCharCreation();
+
                     break;
+
                 case 0xBD: // ReceiveVersionRequest
                     NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 

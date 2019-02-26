@@ -142,6 +142,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 0;
                 Y = 0;
+
+                Engine.Profile.Current.TopbarGumpPosition = Location;
             }
         }
 

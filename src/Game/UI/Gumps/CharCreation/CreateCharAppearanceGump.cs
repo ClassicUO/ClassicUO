@@ -31,6 +31,8 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
+using SDL2;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -98,10 +100,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 X = 445, Y = 455, ButtonAction = ButtonAction.Activate
             }, 1);
 
-            Add(_nameTextBox = new TextBox(5, 32, 0, 200, false, hue: 1, style: FontStyle.Fixed )
+            Add(_nameTextBox = new TextBox(5, 32, 0, 200, false, hue: 1, style: FontStyle.Fixed)
             {
                 X = 257, Y = 65, Width = 200, Height = 20,
-                SafeCharactersOnly = true
+                ValidationRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
             }, 1);
             _nameTextBox.SetText(string.Empty);
 
@@ -372,7 +374,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _character.Hue = e.SelectedHue;
             _paperDoll.Update();
         }
-
 
         private void Facial_OnOptionSelected(object sender, int e)
         {

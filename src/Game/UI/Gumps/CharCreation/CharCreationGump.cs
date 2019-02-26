@@ -23,7 +23,9 @@ using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Gumps.Login;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -41,8 +43,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private CharCreationStep _currentStep;
         private LoadingGump _loadingGump;
         private readonly LoginScene loginScene;
+        internal static int _skillsCount => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 4 : 3;
 
-	    private CityInfo _startingCity;
+        private CityInfo _startingCity;
 		private ProfessionInfo _selectedProfession;
 
 		public CharCreationGump() : base(0, 0)
@@ -127,10 +130,24 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 	                if (existing != null)
 		                Remove(existing);
 
-					Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
-
-                    ChangePage(3);
-	                break;
+                    if (_selectedProfession.TrueName == "advanced")
+                    {
+                        Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
+                        ChangePage(3);
+                        break;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < _skillsCount; i++)
+                        {
+                            _character.UpdateSkill(_selectedProfession.SkillDefVal[i, 0], (ushort)_selectedProfession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+                        }
+                        _character.Strength = (ushort)_selectedProfession.StatsVal[0];
+                        _character.Intelligence = (ushort)_selectedProfession.StatsVal[1];
+                        _character.Dexterity = (ushort)_selectedProfession.StatsVal[2];
+                        SetAttributes();
+                        goto case CharCreationStep.ChooseCity;
+                    }
 				case CharCreationStep.ChooseCity:
 					existing = Children.FirstOrDefault(page => page.Page == 4);
 

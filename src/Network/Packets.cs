@@ -461,7 +461,7 @@ namespace ClassicUO.Network
         public PCastSpellFromBook(int idx, Serial serial) : base(0x12)
         {
             WriteByte(0x27);
-            WriteASCII(string.Format("{0} {1}", idx, serial));
+            WriteASCII($"{idx} {serial}");
         }
     }
 
@@ -470,7 +470,7 @@ namespace ClassicUO.Network
         public PUseSkill(int idx) : base(0x12)
         {
             WriteByte(0x24);
-            WriteASCII(idx + " 0");
+            WriteASCII($"{idx} 0");
         }
     }
 
@@ -536,17 +536,28 @@ namespace ClassicUO.Network
 
     internal sealed class PMenuResponse : PacketWriter
     {
-        public PMenuResponse() : base(0x7D)
+        public PMenuResponse(Serial serial, Graphic graphic, int code, Graphic itemGraphic, Hue itemHue) : base(0x7D)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUShort(graphic);
+
+            if (code != 0)
+            {
+                WriteUShort((ushort) code);
+
+                WriteUShort(itemGraphic);
+                WriteUShort(itemHue);            
+            }
         }
     }
 
     internal sealed class PGrayMenuResponse : PacketWriter
     {
-        public PGrayMenuResponse() : base(0x7D)
+        public PGrayMenuResponse(Serial serial, Graphic graphic, ushort code) : base(0x7D)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUShort(graphic);
+            WriteUShort(code);
         }
     }
 
@@ -610,19 +621,17 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetObject : PacketWriter
     {
-        public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject(Serial entity, Graphic graphic, ushort x, ushort y, sbyte z, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            Entity e = World.Get(entity);
-
             WriteByte(0x00);
             WriteUInt(cursorID);
             WriteByte(cursorType);
             WriteUInt(entity);
-            WriteUShort(e.X);
-            WriteUShort(e.Y);
+            WriteUShort(x);
+            WriteUShort(y);
             WriteByte(0xFF);
-            WriteSByte(e.Z);
-            WriteUShort(e.Graphic);
+            WriteSByte(z);
+            WriteUShort(graphic);
         }
     }
 

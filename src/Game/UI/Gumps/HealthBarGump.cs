@@ -25,7 +25,6 @@ using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -36,7 +35,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class HealthBarGump : Gump
+    class HealthBarGump : AnchorableGump
     {
         private const ushort BACKGROUND_NORMAL = 0x0803;
         private const ushort BACKGROUND_WAR = 0x0807;
@@ -47,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private const ushort LINE_RED_PARTY = 0x0028;
         private const ushort LINE_BLUE_PARTY = 0x0029;
-
 
         private readonly GumpPicWithWidth[] _bars = new GumpPicWithWidth[3];
         private GumpPic _background, _hpLineRed, _manaLineRed, _stamLineRed;
@@ -156,7 +154,9 @@ namespace ClassicUO.Game.UI.Gumps
                         if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
                             color = 0;
 
-                        if (_canChangeName = Mobile.IsRenamable)
+                        _canChangeName = Mobile.IsRenamable;
+
+                        if (_canChangeName)
                         {
                             textColor = 0x000E;
                         }
@@ -169,7 +169,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = _background.Texture.Width;
                     Height = _background.Texture.Height;
 
-
                     Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor)
                     {
                         X = 16,
@@ -178,6 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
+                        ValidationRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
                         Text = _name
                     });
 
@@ -264,11 +264,13 @@ namespace ClassicUO.Game.UI.Gumps
             Hue textColor = 0x0386;
             Hue hitsColor = 0x0386;
 
-            if (Mobile == null || Mobile.IsDisposed)
-            {
-                Mobile = World.Mobiles.Get(LocalSerial);
+            Mobile = World.Mobiles.Get(LocalSerial);
 
-                if (!_outOfRange && Mobile == null)
+
+            if (!_outOfRange && (Mobile == null || Mobile.IsDisposed))
+            {
+
+                //if ( && Mobile == null)
                 {
                     _poisoned = false;
                     _yellowHits = false;
@@ -313,10 +315,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (Mobile != null && Mobile.HitsMax > 0)
+            if (Mobile != null && !Mobile.IsDisposed)
             {
                 if (_outOfRange)
                 {
+                    if (Mobile.HitsMax == 0)
+                        GameActions.RequestMobileStatus(Mobile);
+
                     _outOfRange = false;
 
                     if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
@@ -339,7 +344,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-
                             _textBox.MouseClick += TextBoxOnMouseClick;
                         }
                     }
@@ -377,8 +381,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _bars[0].IsVisible = true;
                 }
-
-               
 
                 if (Mobile.IsPoisoned && !_poisoned)
                 {
@@ -418,7 +420,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldHits = hits;
                 }
             }
-
 
             if (CanBeSaved)
             {             
@@ -471,7 +472,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile.IsSelected = false;
             }
         }
-
 
         public override void OnButtonClick(int buttonID)
         {

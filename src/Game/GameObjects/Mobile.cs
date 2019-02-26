@@ -491,7 +491,7 @@ namespace ClassicUO.Game.GameObjects
 
                     float soundByRange = Engine.Profile.Current.SoundVolume / (float) World.ViewRange;
                     soundByRange *= Distance;
-                    float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 250f;
+                    float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 2500f;
 
                     //if (volume > 0 && volume < 0.01f)
                     //    volume = 0.01f;

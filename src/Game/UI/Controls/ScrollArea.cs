@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
         private bool _needUpdate = true;
         private Rectangle _rect;
         private bool _isNormalScroll;
-        private int _scrollbarHeight;
+        private readonly int _scrollbarHeight;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {

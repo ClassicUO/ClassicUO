@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Media;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Scenes;
+﻿using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -18,7 +9,7 @@ namespace ClassicUO.Game.Managers
         private UOMusic _currentMusic;
         private int _lastMusicVolume;
 
-        private const float SOUND_DELTA = 250f;
+        private const float SOUND_DELTA = 2500f;
 
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
         {

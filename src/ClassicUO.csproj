@@ -128,6 +128,7 @@
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\ItemHold.cs" />
+    <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
     <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
     <Compile Include="Game\UI\Controls\MacroControl.cs" />
@@ -147,6 +149,7 @@
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
+    <Compile Include="Game\UI\Gumps\AnchorableGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
     <Compile Include="Game\UI\Gumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
@@ -157,6 +160,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\UI\Gumps\MapGump.cs" />
+    <Compile Include="Game\UI\Gumps\MenuGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverheadGump.cs" />
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />

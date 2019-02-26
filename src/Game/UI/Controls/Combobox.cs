@@ -29,9 +29,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Combobox : Control
     {
-        private readonly string[] _items;
         private readonly Label _label;
         private readonly int _maxHeight;
+        private string[] _items;
         private int _selectedIndex;
 
         public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "")
@@ -77,10 +77,21 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        internal string GetSelectedItem()
+        {
+            return _label.Text;
+        }
+        internal void SetItemsValue(string[] items)
+        {
+            _items = items;
+        }
+
         public event EventHandler<int> OnOptionSelected;
+        public event EventHandler OnBeforeContextMenu;
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            OnBeforeContextMenu?.Invoke(this, null);
             var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY

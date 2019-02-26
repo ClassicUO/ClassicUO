@@ -417,11 +417,14 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles)
                 {
-                    obj.UseObjectHandles = (ismobile || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
+                    obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
                     _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)
+                {
                     obj.ClosedObjectHandles = false;
+                    obj.ObjectHandlesOpened = false;
+                }
                 else if (obj.UseObjectHandles)
                 {
                     obj.ObjectHandlesOpened = false;

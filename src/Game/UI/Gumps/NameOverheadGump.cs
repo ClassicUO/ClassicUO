@@ -251,8 +251,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                X = (int)(Entity.RealScreenPosition.X / scale);
-                Y = (int)(Entity.RealScreenPosition.Y / scale);
+                X = (int)(Entity.RealScreenPosition.X / scale) - (Width >> 1) + 22;
+                Y = (int)(Entity.RealScreenPosition.Y / scale) - (Height >> 1);
             }
 
             if (_edge == null)
