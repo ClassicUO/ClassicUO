@@ -28,12 +28,12 @@ namespace ClassicUO.Game.UI.Gumps
         
         private void Input_KeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            _isAltPressed = e.keysym.sym == SDL.SDL_Keycode.SDLK_LALT;
+            _isAltPressed = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
         }
 
         private void Input_KeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-            _isAltPressed = !(e.keysym.sym == SDL.SDL_Keycode.SDLK_LALT);
+            _isAltPressed = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
         }
 
         protected override void OnMove()
