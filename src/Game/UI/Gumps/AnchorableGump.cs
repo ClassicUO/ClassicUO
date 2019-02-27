@@ -18,22 +18,10 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
-        private bool _isAltPressed = false;
 
         public AnchorableGump(Serial local, Serial server) : base(local, server)
         {
-            Engine.Input.KeyDown += Input_KeyDown;
-            Engine.Input.KeyUp += Input_KeyUp;
-        }
-        
-        private void Input_KeyDown(object sender, SDL.SDL_KeyboardEvent e)
-        {
-            _isAltPressed = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-        }
 
-        private void Input_KeyUp(object sender, SDL.SDL_KeyboardEvent e)
-        {
-            _isAltPressed = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
         }
 
         protected override void OnMove()
@@ -94,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_isAltPressed && Engine.AnchorManager[this] != null && _lockGumpPic == null)
+            if (Input.Keyboard.Alt && Engine.AnchorManager[this] != null && _lockGumpPic == null)
             {
                 _lockGumpPic = new GumpPic(0, 0, 0x082C, 0);
                 _lockGumpPic.Update(totalMS, frameMS);
@@ -104,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockGumpPic.MouseClick += _lockGumpPic_MouseClick;
 
                 Add(_lockGumpPic);
-            } else if ((!_isAltPressed || Engine.AnchorManager[this] == null) && _lockGumpPic != null)
+            } else if ((!Input.Keyboard.Alt || Engine.AnchorManager[this] == null) && _lockGumpPic != null)
             {
                 Remove(_lockGumpPic);
                 _lockGumpPic.Dispose();
