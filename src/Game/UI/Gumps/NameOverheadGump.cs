@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Entity == null || Entity.IsDisposed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles)
+            if (Entity == null || Entity.IsDisposed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
             {
                 Dispose();
             }
