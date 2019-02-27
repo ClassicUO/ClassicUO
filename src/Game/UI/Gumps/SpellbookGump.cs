@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Add(text, page);
                     }
 
-                    int topage = (dictionaryPagesCount >> 1) + (spellDone >> 1);
+                    int topage = (dictionaryPagesCount >> 1) + ((spellDone + 1) >> 1);
 
                     for (int k = 0; k < spellsOnPage; k++)
                     {
