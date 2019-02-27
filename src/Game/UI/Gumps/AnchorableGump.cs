@@ -115,8 +115,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Engine.Input.KeyDown -= Input_KeyDown;
-            Engine.Input.KeyUp -= Input_KeyUp;
             Engine.AnchorManager.DetachControl(this);
             
             base.Dispose();
