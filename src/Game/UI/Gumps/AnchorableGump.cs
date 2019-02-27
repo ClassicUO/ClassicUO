@@ -112,6 +112,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void CloseWithRightClick()
+        {
+            Engine.AnchorManager.DisposeAllControls(this);
+
+            base.CloseWithRightClick();
+        }
+
         private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left)
@@ -122,8 +129,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Engine.Input.KeyDown -= Input_KeyDown;
             Engine.Input.KeyUp -= Input_KeyUp;
-            Engine.AnchorManager.DisposeAllControls(this);
-
+            Engine.AnchorManager.DetachControl(this);
+            
             base.Dispose();
         }
     }
