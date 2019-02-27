@@ -25,8 +25,8 @@ namespace ClassicUO.Game.GameObjects
     internal sealed class IsometricLight
     {
         private float _height = -0.75f;
-        private int _overall = 9;
-        private int _personal = 9;
+        private int _overall = 9, _realOveall = 9;
+        private int _personal = 9, _realPersonal = 9;
 
         public int Personal
         {
@@ -58,6 +58,25 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public int RealPersonal
+        {
+            get => _realPersonal;
+            set
+            {
+                _realPersonal = value;
+                Recalculate();
+            }
+        }
+
+        public int RealOverall
+        {
+            get => _realOveall;
+            set
+            {
+                _realOveall = value;
+                Recalculate();
+            }
+        }
         public float IsometricLevel { get; private set; }
 
         public Vector3 IsometricDirection { get; } = new Vector3(-1.0f, -1.0f, .5f);

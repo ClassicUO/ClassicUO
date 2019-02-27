@@ -108,7 +108,7 @@ namespace ClassicUO.Game
 
         public static IsometricLight Light { get; } = new IsometricLight
         {
-            Overall = 0, Personal = 0
+            Overall = 0, Personal = 0, RealOverall = 0, RealPersonal = 0,
         };
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();

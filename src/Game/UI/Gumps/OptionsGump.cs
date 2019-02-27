@@ -57,8 +57,9 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect;
+        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
         private Combobox _shardType;
+        private HSliderBar _lightBar;
 
         private Checkbox _gameWindowLock;
         private Checkbox _gameWindowFullsize;
@@ -376,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                 X = 10,
-                Y = 105,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -386,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                 X = 80,
-                Y = 105,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -395,17 +396,20 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
             {
                 X = 140,
-                Y = 100,
+                Y = 57,
                 IsChecked = Engine.Profile.Current.GameWindowLock
             };
 
             item.Add(_gameWindowLock);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
 
             _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
                 X = 10,
-                Y = 160,
+                Y = 35,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -415,12 +419,23 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
                 X = 80,
-                Y = 160,
+                Y = 35,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
             });
 
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
+            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
+            {
+                Y = 20,
+                IsChecked = Engine.Profile.Current.UseCustomLightLevel
+            };
+            item.Add(_enableLight);
+            _lightBar = new HSliderBar(_enableLight.Width + 2, 20, 150, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            item.Add(_lightBar);
             rightArea.Add(item);
 
             Add(rightArea, PAGE);
@@ -720,6 +735,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    _lightBar.Value = 0;
+                    _enableLight.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -836,30 +853,24 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            int GameWindowSizeWidth = 640;
-            int GameWindowSizeHeight = 480;
+            int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
+            int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            int.TryParse(_gameWindowWidth.Text, out GameWindowSizeWidth);
-            int.TryParse(_gameWindowHeight.Text, out GameWindowSizeHeight);
-
-            if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
+            if (gameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || gameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                Point n = e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
+                Point n = e.ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
                 _gameWindowWidth.Text = n.X.ToString();
                 _gameWindowHeight.Text = n.Y.ToString();
             }
 
-            int GameWindowPositionX = 20;
-            int GameWindowPositionY = 20;
+            int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
+            int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
-            int.TryParse(_gameWindowPositionX.Text, out GameWindowPositionX);
-            int.TryParse(_gameWindowPositionY.Text, out GameWindowPositionY);
-
-            if (GameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || GameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
+            if (gameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || gameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
             {
-                Point n = new Point(GameWindowPositionX, GameWindowPositionY);
+                Point n = new Point(gameWindowPositionX, gameWindowPositionY);
 
                 WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                 e.Location = n;
@@ -907,6 +918,18 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.ScaleZoom = 1f;
 
                 Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
+            }
+
+            Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
+
+            if (_enableLight.IsChecked)
+            {
+                World.Light.Overall = Engine.Profile.Current.LightLevel = (byte)(_lightBar.MaxValue - _lightBar.Value);
+            }
+            else
+            {
+                World.Light.Overall = World.Light.RealOverall;
+                World.Light.Personal = World.Light.RealPersonal;
             }
 
             UpdateVideo();

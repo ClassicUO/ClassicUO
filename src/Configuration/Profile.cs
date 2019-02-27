@@ -132,6 +132,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = false;
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public bool UseCustomLightLevel { get; set; } = false;
+        [JsonProperty] public byte LightLevel { get; set; } = 0;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

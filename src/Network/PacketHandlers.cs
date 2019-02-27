@@ -571,7 +571,8 @@ namespace ClassicUO.Network
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
-
+            if (Engine.Profile.Current.UseCustomLightLevel)
+                World.Light.Overall = Engine.Profile.Current.LightLevel;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
             {
@@ -1261,8 +1262,11 @@ namespace ClassicUO.Network
 
                 if (level > 0x1E)
                     level = 0x1E;
-                //TODO: need an option to on/off
-                //World.Light.Personal = level;
+             
+                World.Light.RealPersonal = level;
+
+                if (!Engine.Profile.Current.UseCustomLightLevel)
+                    World.Light.Personal = level;
             }
         }
 
@@ -1272,8 +1276,11 @@ namespace ClassicUO.Network
 
             if (level > 0x1E)
                 level = 0x1E;
-            //TODO: need an option to on/off
-            //World.Light.Overall = level;
+
+            World.Light.RealOverall = level;
+
+            if (!Engine.Profile.Current.UseCustomLightLevel)
+                World.Light.Overall = level;
         }
 
         private static void PlaySoundEffect(Packet p)
