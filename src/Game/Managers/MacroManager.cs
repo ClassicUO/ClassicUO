@@ -626,6 +626,11 @@ namespace ClassicUO.Game.Managers
                     // TODO:
 
                     break;
+
+                case MacroType.DefaultScale:
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    break;
+
             }
 
 
@@ -903,7 +908,8 @@ namespace ClassicUO.Game.Managers
         ToggleBuiconWindow,
         BandageSelf,
         BandageTarget,
-        ToggleGargoyleFly
+        ToggleGargoyleFly,
+        DefaultScale
     }
 
     internal enum MacroSubType
