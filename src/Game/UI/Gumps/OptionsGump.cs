@@ -722,7 +722,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _zoom.IsChecked = false;
                     _savezoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
-                    _gameWindowWidth.Text = "640";
+                    _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
                     _gameWindowPositionX.Text = "10";
                     _gameWindowPositionY.Text = "10";
@@ -886,7 +886,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    n = e.ResizeWindow(new Point(640, 480));
+                    n = e.ResizeWindow(new Point(600, 480));
                     loc = e.Location = new Point(20, 20);
                 }
 
