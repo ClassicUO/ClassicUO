@@ -71,13 +71,17 @@ namespace ClassicUO.IO.Resources
         {
             if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = GetGumpPixels(g, out int w, out int h);
+                if (!ResourceDictionary.ContainsKey(g))
+                {
+                    ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
-                if (pixels == null || pixels.Length <= 0)
-                    return null;
-                texture = new SpriteTexture(w, h, false);
-                texture.SetDataHitMap16(pixels);
-                ResourceDictionary.Add(g, texture);
+                    if (pixels == null || pixels.Length <= 0)
+                        return null;
+
+                    texture = new SpriteTexture(w, h, false);
+                    texture.SetDataHitMap16(pixels);
+                    ResourceDictionary.Add(g, texture);
+                }
             }
             return texture;
         }
