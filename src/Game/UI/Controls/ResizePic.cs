@@ -131,7 +131,6 @@ namespace ClassicUO.Game.UI.Controls
                         maxW = drawX + drawWidth;
                         maxH = drawY + (Height - _gumpTexture[0].Height - _gumpTexture[5].Height);
 
-
                         while (drawX < maxW)
                         {
                             if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))

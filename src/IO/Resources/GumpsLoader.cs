@@ -73,7 +73,7 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
-                if (pixels == null || pixels.Length <= 0)
+                if (pixels == null || pixels.Length == 0)
                     return null;
                 texture = new SpriteTexture(w, h, false);
                 texture.SetDataHitMap16(pixels);
