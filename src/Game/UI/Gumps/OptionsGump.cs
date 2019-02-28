@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder, _closeHealthbarsIfMobNotExists;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -223,6 +223,16 @@ namespace ClassicUO.Game.UI.Gumps
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
+
+
+            _closeHealthbarsIfMobNotExists = new Checkbox(0x00D2, 0x00D3, "Close HealthBar gump if mobile not exists", FONT, HUE_FONT, true)
+            {
+                X = 0,
+                Y = _showHpMobile.Bounds.Bottom + 15,
+                IsChecked = Engine.Profile.Current.CloseHealthBarIfMobileNotExists
+            };
+            hpAreaItem.Add(_closeHealthbarsIfMobNotExists);
+
             rightArea.Add(hpAreaItem);
 
             // highlight character by flags
@@ -705,6 +715,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
                     _preloadMaps.IsChecked = false;
+                    _closeHealthbarsIfMobNotExists.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -779,6 +790,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
+            Engine.Profile.Current.CloseHealthBarIfMobileNotExists = _closeHealthbarsIfMobNotExists.IsChecked;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {

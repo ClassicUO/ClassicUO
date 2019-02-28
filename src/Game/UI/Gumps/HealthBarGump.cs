@@ -31,6 +31,8 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -93,7 +95,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (World.Party.GetPartyMember(_partyMemeberSerial) != null)
             {
-                Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0) { IsVisible = false });
+                Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0)
+                {
+                    IsTransparent = true,
+                    Alpha = 1,
+                });
                 Width = 115;
                 Height = 55;
 
@@ -266,11 +272,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Mobile = World.Mobiles.Get(LocalSerial);
 
-
-            if (!_outOfRange && (Mobile == null || Mobile.IsDisposed))
+            if (Mobile == null || Mobile.IsDisposed)
             {
+                if (Engine.Profile.Current.CloseHealthBarIfMobileNotExists)
+                {
+                    Dispose();
+                    return;
+                }
 
-                //if ( && Mobile == null)
+                if (!_outOfRange)
                 {
                     _poisoned = false;
                     _yellowHits = false;
@@ -492,6 +502,11 @@ namespace ClassicUO.Game.UI.Gumps
             Mouse.CancelDoubleClick = true;
             Mouse.LastLeftButtonClickTime = 0;
         }
+
+        //protected override bool Contains(int x, int y)
+        //{
+        //    return World.Party.GetPartyMember(_partyMemeberSerial) != null ?  x >= 0 && x <= Width && y >= 0 && y <= Height : base.Contains(x, y);
+        //}
 
         public override void Save(BinaryWriter writer)
         {
