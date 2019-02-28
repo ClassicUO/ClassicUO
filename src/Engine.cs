@@ -72,8 +72,6 @@ namespace ClassicUO
 
         private static int _fpsLimit = 30;
         private static Engine _engine;
-        private static GameWindow _window;
-
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private Batcher2D _batcher;
         private double _currentFpsTime;
@@ -120,7 +118,6 @@ namespace ClassicUO
             _graphicDeviceManager.ApplyChanges();
 
             _isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-            _window = Window;
 
             Window.ClientSizeChanged += (sender, e) =>
             {
@@ -173,15 +170,6 @@ namespace ClassicUO
         public static Version Version { get; } = new Version(0, 0, 1, 1);
 
         public static int CurrentFPS { get; private set; }
-
-        public static bool AllowWindowResizing
-        {
-            get => _window.AllowUserResizing;
-            set
-            {
-                _window.AllowUserResizing = value;
-            }
-        }
 
         /// <summary>
         ///     Total game time in milliseconds
