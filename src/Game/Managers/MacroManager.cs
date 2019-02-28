@@ -214,7 +214,6 @@ namespace ClassicUO.Game.Managers
 
                         Chat.Say(mos.Text, hue, type);
                     }
-
                     break;
 
                 case MacroType.Walk:
@@ -230,12 +229,12 @@ namespace ClassicUO.Game.Managers
 
                     if (!Pathfinder.AutoWalking)
                         World.Player.Walk((Direction) dt, false);
-
                     break;
+
                 case MacroType.WarPeace:
                     GameActions.ToggleWarMode();
-
                     break;
+
                 case MacroType.Paste:
                     if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
                     {
@@ -251,8 +250,8 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                     }
-
                     break;
+
                 case MacroType.Open:
                 case MacroType.Close:
                 case MacroType.Minimize:
@@ -262,8 +261,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.OpenDoor:
                     GameActions.OpenDoor();
-
                     break;
+
                 case MacroType.UseSkill:
                     int skill = macro.SubCode - MacroSubType.Anatomy;
 
@@ -275,9 +274,11 @@ namespace ClassicUO.Game.Managers
                             GameActions.UseSkill(skill);
                     }
                     break;
+
                 case MacroType.LastSkill:
                     GameActions.UseSkill(GameActions.LastSkillIndex);
                     break;
+
                 case MacroType.CastSpell:
                     int spell = macro.SubCode - MacroSubType.Clumsy + 1;
 
@@ -305,9 +306,11 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     break;
+
                 case MacroType.LastSpell:
                     GameActions.CastSpell(GameActions.LastSpellIndex);
                     break;
+
                 case MacroType.Bow:
                 case MacroType.Salute:
                     int index = macro.Code - MacroType.Bow;
@@ -317,13 +320,15 @@ namespace ClassicUO.Game.Managers
 
                     GameActions.EmoteAction(index == 0 ? BOW : SALUTE);
                     break;
+
                 case MacroType.QuitGame:
                     Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
                     break;
+
                 case MacroType.AllNames:
                     GameActions.AllNames();
-
                     break;
+
                 case MacroType.LastTarget:
 
                     if (WaitForTargetTimer == 0)
@@ -345,6 +350,7 @@ namespace ClassicUO.Game.Managers
                     else result = 1;
 
                     break;
+
                 case MacroType.TargetSelf:
                     if (WaitForTargetTimer == 0)
                         WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
@@ -360,6 +366,7 @@ namespace ClassicUO.Game.Managers
                         result = 1;
 
                     break;
+
                 case MacroType.ArmDisarm:
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Engine.SceneManager.GetScene<GameScene>();
@@ -400,7 +407,6 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.WaitForTarget:
-
                     if (WaitForTargetTimer == 0)
                         WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
@@ -408,11 +414,9 @@ namespace ClassicUO.Game.Managers
                         WaitForTargetTimer = 0;
                     else
                         result = 1;
-
                     break;
 
                 case MacroType.TargetNext:
-
                     if (TargetManager.LastGameObject.IsMobile)
                     {
                         Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
@@ -422,8 +426,8 @@ namespace ClassicUO.Game.Managers
 
                         World.LastAttack = mob.Serial;
                     }
-
                     break;
+
                 case MacroType.AttackLast:
                     GameActions.Attack(World.LastAttack);
                     break;
@@ -439,7 +443,6 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CircleTrans:
                     Engine.Profile.Current.UseCircleOfTransparency = !Engine.Profile.Current.UseCircleOfTransparency;
-
                     break;
 
                 case MacroType.CloseGump:
@@ -448,13 +451,12 @@ namespace ClassicUO.Game.Managers
                           .Where( s=> !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
                           .ToList()
                           .ForEach(s => s.Dispose());
-
                     break;
 
                 case MacroType.AlwaysRun:
                     Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
-
                     break;
+
                 case MacroType.SaveDesktop:
                     Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
                     break;
@@ -473,6 +475,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.AttackSelectedTarget:
                     // TODO:
                     break;
+
                 case MacroType.UseSelectedTarget:
                     // TODO:
                     break;
@@ -528,7 +531,6 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                     }
-
                     break;
 
                 case MacroType.SetUpdateRange:
@@ -544,38 +546,37 @@ namespace ClassicUO.Game.Managers
                         World.ViewRange = res;
                     }
                     break;
+
                 case MacroType.IncreaseUpdateRange:
                     World.ViewRange++;
                     if (World.ViewRange > Constants.MAX_VIEW_RANGE)
                         World.ViewRange = Constants.MAX_VIEW_RANGE;
                     break;
+
                 case MacroType.DecreaseUpdateRange:
                     World.ViewRange--;
                     if (World.ViewRange < Constants.MIN_VIEW_RANGE)
                         World.ViewRange = Constants.MIN_VIEW_RANGE;
-
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-
                     break;
+
                 case MacroType.MinUpdateRange:
                     World.ViewRange = Constants.MIN_VIEW_RANGE;
-
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-
                     break;
+
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                     // TODO:
                     int scantype = macro.SubCode - MacroSubType.Hostile;
                     int scanRange = macro.Code - MacroType.SelectNext;
-
 
                     switch (scanRange)
                     {
@@ -589,7 +590,6 @@ namespace ClassicUO.Game.Managers
 
                             break;
                     }
-                    
 
                     break;
 
@@ -602,32 +602,37 @@ namespace ClassicUO.Game.Managers
                         Engine.UI.Add(new BuffGump(100, 100));
 
                     break;
+
                 case MacroType.InvokeVirtue:
                     byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
                     NetClient.Socket.Send(new PInvokeVirtueRequest(id));
                     break;
+
                 case MacroType.PrimaryAbility:
                     GameActions.UsePrimaryAbility();
-
                     break;
+
                 case MacroType.SecondaryAbility:
                     GameActions.UseSecondaryAbility();
-
                     break;
+
                 case MacroType.ToggleGargoyleFly:
                     if (World.Player.Race == RaceType.GARGOYLE)
                         NetClient.Socket.Send(new PToggleGargoyleFlying());
-
                     break;
+
                 case MacroType.EquipLastWeapon:
                     NetClient.Socket.Send(new PEquipLastWeapon());
                     break;
+
                 case MacroType.KillGumpOpen:
                     // TODO:
+                    break;
 
+                case MacroType.DefaultScale:
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
             }
-
 
             return result;
         }
@@ -903,7 +908,8 @@ namespace ClassicUO.Game.Managers
         ToggleBuiconWindow,
         BandageSelf,
         BandageTarget,
-        ToggleGargoyleFly
+        ToggleGargoyleFly,
+        DefaultScale
     }
 
     internal enum MacroSubType
