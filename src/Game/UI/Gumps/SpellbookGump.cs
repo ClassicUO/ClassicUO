@@ -619,6 +619,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetActivePage(int page)
         {
+            if (page == ActivePage)
+                return;
+
             if (page < 1)
                 page = 1;
             else if (page > _maxPage)

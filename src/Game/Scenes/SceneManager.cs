@@ -62,8 +62,8 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case ScenesType.Game:
-                    Engine.IsFullScreen = true;
                     Engine.AllowWindowResizing = true;
+                    Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
                     break;
             }

@@ -1272,6 +1272,8 @@ namespace ClassicUO.Network
 
         private static void LightLevel(Packet p)
         {
+            if (!World.InGame)
+                return;
             byte level = p.ReadByte();
 
             if (level > 0x1E)

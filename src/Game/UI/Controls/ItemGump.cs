@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (TargetManager.IsTargeting)
                 {
-                    if (Mouse.IsDragging)
+                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
                         return;
 
                     switch (TargetManager.TargetingState)
