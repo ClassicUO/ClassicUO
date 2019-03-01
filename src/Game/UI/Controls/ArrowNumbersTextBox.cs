@@ -45,25 +45,26 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = true;
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
-            X = x;
-            Y = y;
-            Width = width;
+            X = x + 3;
+            Y = y + 3;
+            Width = width - 15;
             Height = height;
             _Min = minvalue;
             _Max = maxvalue;
             
             c.Add(new ResizePic(0x0BB8)
             {
-                X = x - 5,
-                Y = y - 3,
-                Width = width + 15,
+                X = x,
+                Y = y,
+                Width = width,
                 Height = height - 2
             }, page);
 
             _up = new Button(raiseamount, 0x983, 0x984)
             {
-                X = x + width,
-                Y = y - 4
+                X = x + width - 12,
+                Y = y - 1,
+                ButtonAction = ButtonAction.Activate
             };
             _up.MouseDown += (sender, e) =>
             {
@@ -76,8 +77,9 @@ namespace ClassicUO.Game.UI.Controls
             c.Add(_up, page);
             _down = new Button(-raiseamount, 0x985, 0x986)
             {
-                X = x + width,
-                Y = y + 9
+                X = x + width - 12,
+                Y = y + 12,
+                ButtonAction = ButtonAction.Activate
             };
             _down.MouseDown += (sender, e) =>
             {
@@ -118,6 +120,8 @@ namespace ClassicUO.Game.UI.Controls
 
         internal override void OnFocusLeft()
         {
+            if (IsDisposed)
+                return;
             int.TryParse(Text, out int i);
             ValidateValue(i);
         }
