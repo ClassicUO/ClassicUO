@@ -33,8 +33,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ArrowNumbersTextBox : AbstractTextBox
     {
-        private static readonly long _nextValueUpdate = TimeSpan.FromMilliseconds(250).Ticks;
-        private long _nextUpdateOn;
+        private float _timeUntilNextClick;
+        private const int TIME_BETWEEN_CLICKS = 250;
         private readonly Button _up, _down;
         private readonly int _Min, _Max;
 
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_up.IsClicked)
                 {
                     UpdateValue();
-                    _nextUpdateOn = DateTime.UtcNow.Ticks + _nextValueUpdate * 2;
+                    _timeUntilNextClick = TIME_BETWEEN_CLICKS * 2;
                 }
             };
             c.Add(_up, page);
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_down.IsClicked)
                 {
                     UpdateValue();
-                    _nextUpdateOn = DateTime.UtcNow.Ticks + _nextValueUpdate * 2;
+                    _timeUntilNextClick = TIME_BETWEEN_CLICKS * 2;
                 }
             };
             c.Add(_down, page);
@@ -116,9 +116,10 @@ namespace ClassicUO.Game.UI.Controls
             ValidateValue(i);
         }
 
-        protected override void OnFocusLeft()
+        internal override void OnFocusLeft()
         {
-            base.OnFocusLeft();
+            int.TryParse(Text, out int i);
+            ValidateValue(i);
         }
 
         private void ValidateValue(int val)
@@ -140,13 +141,12 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_up.IsClicked || _down.IsClicked)
             {
-                long nowtick = DateTime.UtcNow.Ticks;
-                if (_nextUpdateOn <= nowtick)
+                if(_timeUntilNextClick <= 0f)
                 {
-                    _nextUpdateOn = nowtick + _nextValueUpdate;
-
+                    _timeUntilNextClick += TIME_BETWEEN_CLICKS;
                     UpdateValue();
                 }
+                _timeUntilNextClick -= (float)frameMS;
             }
 
             if (Height != TxEntry.Height)

@@ -254,7 +254,12 @@ namespace ClassicUO.Game.Managers
             set
             {
                 if (value != null && value.AcceptKeyboardInput)
+                {
+                    if (_keyboardFocusControl != null)
+                        _keyboardFocusControl.OnFocusLeft();
                     _keyboardFocusControl = value;
+                    value.OnFocusEnter();
+                }
             } 
         }
 

@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollBar : Control, IScrollBar
     {
-        private const int TIME_BETWEEN_CLICKS = 500;
+        private const int TIME_BETWEEN_CLICKS = 100;
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;
         private Point _clickPosition;
         private int _max;
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
                         Value += ScrollStep;
                 }
 
-                _timeUntilNextClick -= (float) totalMS;
+                _timeUntilNextClick -= (float)frameMS;
             }
 
             for (int i = 0; i < 3; i++)
