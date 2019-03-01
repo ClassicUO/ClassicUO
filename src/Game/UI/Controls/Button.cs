@@ -115,6 +115,8 @@ namespace ClassicUO.Game.UI.Controls
             ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
         }
 
+        public bool IsClicked => _clicked;
+
         public int ButtonID { get; }
 
         public ButtonAction ButtonAction { get; set; }
