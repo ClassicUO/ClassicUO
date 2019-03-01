@@ -78,15 +78,16 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private void SpellBookOnDisposed(object sender, EventArgs e)
-        {
-            _spellBook.Items.Added -= ItemsOnAdded;
-            _spellBook.Items.Removed -= ItemsOnRemoved;
-            _spellBook.Disposed -= SpellBookOnDisposed;
+        {          
             Dispose();
         }
 
         public override void Dispose()
         {
+            _spellBook.Items.Added -= ItemsOnAdded;
+            _spellBook.Items.Removed -= ItemsOnRemoved;
+            _spellBook.Disposed -= SpellBookOnDisposed;
+
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
             Engine.UI.SavePosition(LocalSerial, Location);
             base.Dispose();
