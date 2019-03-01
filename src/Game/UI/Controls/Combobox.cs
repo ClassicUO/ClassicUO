@@ -77,10 +77,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal string GetSelectedItem()
-        {
-            return _label.Text;
-        }
+        internal string GetSelectedItem => _label.Text;
+
+        internal uint GetItemsLength => (uint)_items.Length;
+
         internal void SetItemsValue(string[] items)
         {
             _items = items;

@@ -96,6 +96,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Profile.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
+    <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />

@@ -76,5 +76,26 @@ namespace ClassicUO.Utility
         {
             return (c >= 0x20 && c < 0xFFFE);
         }
+
+        public static string AddSpaceBeforeCapital(string str, bool checkAcronyms = true)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return "";
+            StringBuilder sb = new StringBuilder(str.Length * 2);
+            sb.Append(str[0]);
+            for (int i = 1, len = str.Length - 1; i <= len; i++)
+            {
+                if (char.IsUpper(str[i]))
+                {
+                    if ((str[i - 1] != ' ' && !char.IsUpper(str[i - 1])) ||
+                        (checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1])))
+                    {
+                        sb.Append(' ');
+                    }
+                }
+                sb.Append(str[i]);
+            }
+            return sb.ToString();
+        }
     } 
 }

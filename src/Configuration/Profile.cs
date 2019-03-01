@@ -141,6 +141,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
+        internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
         public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
