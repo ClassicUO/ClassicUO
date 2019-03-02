@@ -320,7 +320,7 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            startAnimID = (69300 + ((realAnimID - 630) * 175));
+                            startAnimID = (35000 + ((realAnimID - 400) * 175));
                             groupType = ANIMATION_GROUPS_TYPE.HUMAN;
                         }
 
