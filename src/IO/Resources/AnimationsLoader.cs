@@ -304,13 +304,9 @@ namespace ClassicUO.IO.Resources
                                 ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
                                 ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
 
-                                if (index == 46)
-                                {
 
-                                }
-
-                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
-                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
+                                //dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
+                                //dataIndex.BaseSize = dataCheckIndex.BaseSize;
 
                                 dataIndex.Address = dataCheckIndex.BaseAddress;
                                 dataIndex.Size = dataCheckIndex.BaseSize;
@@ -333,7 +329,7 @@ namespace ClassicUO.IO.Resources
                                 if (dataIndex.FileIndex != dataCheckIndex.FileIndex)
                                     dataIndex.FileIndexPatched = dataCheckIndex.FileIndex;
 
-                             //   dataIndex.IsBodyDef = true;
+                                dataIndex.IsBodyDef = true;
                             }
                         }
 
@@ -642,8 +638,6 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-
-                                //DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
 
                                 if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress == 0)
                                 {
@@ -1213,8 +1207,8 @@ namespace ClassicUO.IO.Resources
                             replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
 
 
-                        if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
-                            continue;
+                        //if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
+                        //    continue;
 
                         if (replace)
                         {
