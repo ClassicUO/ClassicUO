@@ -46,13 +46,15 @@ namespace ClassicUO.IO
         {
             base.Load(loadentries);
 
-            if (loadentries && _idxFile != null)
+            if (loadentries)
             {
-                int count = (int) _idxFile.Length / 12;
+                UOFile file = _idxFile ?? (UOFile) this;
+
+                int count = (int)file.Length / 12;
                 Entries = new UOFileIndex3D[count];
 
                 for (int i = 0; i < count; i++)
-                    Entries[i] = new UOFileIndex3D(_idxFile.ReadInt(), _idxFile.ReadInt(), 0, _idxFile.ReadInt());
+                    Entries[i] = new UOFileIndex3D(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
 
                 UOFileIndex5D[] patches = Verdata.Patches;
 
