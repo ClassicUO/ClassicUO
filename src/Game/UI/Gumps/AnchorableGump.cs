@@ -16,6 +16,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class AnchorableGump : Gump
     {
+        public string AnchorGroupName { get; protected set; }
+
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 
