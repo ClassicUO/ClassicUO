@@ -91,7 +91,7 @@ namespace ClassicUO.IO.Resources
             long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
 
-            Dictionary<int, ANIMATION_GROUPS_TYPE> mobTypes = new Dictionary<int, ANIMATION_GROUPS_TYPE>();
+            Dictionary<int, Tuple<ANIMATION_GROUPS_TYPE, uint>> mobTypes = new Dictionary<int, Tuple<ANIMATION_GROUPS_TYPE, uint>>();
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
@@ -135,7 +135,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 //ref IndexAnimation index = ref DataIndex[id];
 
-                                mobTypes[id] = (ANIMATION_GROUPS_TYPE)i;
+                                mobTypes[id] = Tuple.Create((ANIMATION_GROUPS_TYPE)i, 0x80000000 | number);
 
                                 //index.Type = (ANIMATION_GROUPS_TYPE)i;
                                 //index.Flags = 0x80000000 | number;
@@ -173,9 +173,13 @@ namespace ClassicUO.IO.Resources
 
                 findID *= animIdxBlockSize;
 
+                if (mobTypes.TryGetValue(i, out var t))
+                    DataIndex[i].Flags = t.Item2;
+
                 if (findID >= idxfile0.Length)
                 {
-
+                    if (t != null)
+                        DataIndex[i].Type = t.Item1;
                     //if (mobTypes.TryGetValue(i, out var t))
                     //    DataIndex[i].Type = t;
 
@@ -397,7 +401,8 @@ namespace ClassicUO.IO.Resources
 
                                 if (dataCheckIndex.FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
                                 {
-                                    DataIndex[checkIndex].Type = t;
+                                    DataIndex[checkIndex].Type = t.Item1;
+                                    DataIndex[checkIndex].Flags = t.Item2;
                                 }
 
                             }
@@ -447,6 +452,7 @@ namespace ClassicUO.IO.Resources
                     ushort realAnimID = 0;
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+
                    
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
@@ -553,7 +559,7 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            realAnimID = 0x2BCA;
+                            startAnimID = 0x2BCA;
                             groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
                         }
 
@@ -719,12 +725,14 @@ namespace ClassicUO.IO.Resources
 
                                 if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
                                 {
-                                    DataIndex[checkIndex].Type = t;
+                                    DataIndex[checkIndex].Type = t.Item1;
+                                    DataIndex[checkIndex].Flags = t.Item2;
                                 }
 
                                 if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(index, out t))
                                 {
-                                    DataIndex[index].Type = t;
+                                    DataIndex[index].Type = t.Item1;
+                                    DataIndex[index].Flags = t.Item2;
                                 }
                             }
                         }
