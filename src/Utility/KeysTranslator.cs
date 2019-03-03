@@ -269,9 +269,9 @@ namespace ClassicUO.Utility
             {
                 StringBuilder sb = new StringBuilder();
 
-                bool isshift = (mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-                bool isctrl = (mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
-                bool isalt = (mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
+                bool isshift = (mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+                bool isctrl = (mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+                bool isalt = (mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
 
 
                 if (isshift)
