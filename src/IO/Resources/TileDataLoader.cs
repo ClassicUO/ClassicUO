@@ -22,7 +22,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-            UOFileMul tiledata = new UOFileMul(path, false);
+            UOFileMul tiledata = new UOFileMul(path, true);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
             int staticscount = !isold ? (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
@@ -55,7 +55,7 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < staticscount; i++)
             {
                 if (tiledata.Position >= tiledata.Length)
-                    goto END_2;
+                    break;
                 tiledata.Skip(4);
 
                 for (int j = 0; j < 32; j++)
@@ -79,9 +79,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-        END_2:
-            tiledata.Dispose();
-
+      
 
 
             //path = Path.Combine(FileManager.UoFolderPath, "tileart.uop");
@@ -206,72 +204,66 @@ namespace ClassicUO.IO.Resources
             //        {
             //            //StaticData[tileID] = new StaticTiles(flags, 0, 0, 0, );
             //        }
-                   
-                  
+
+
             //    }
 
             //    uop.Dispose();
             //    reader.ReleaseData();
             //}
 
-            //string pathdef = Path.Combine(FileManager.UoFolderPath, "FileManager.Art.def");
-            //if (!File.Exists(pathdef))
-            //    return;
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
+            if (!File.Exists(pathdef))
+                return;
 
-            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-            //{
-            //    string line;
-            //    while ((line = reader.ReadLine()) != null)
-            //    {
-            //        line = line.Trim();
-            //        if (line.Length <= 0 || line[0] == '#')
-            //            continue;
-            //        string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
-            //        if (defs.Length < 2)
-            //            continue;
+            using (DefReader reader = new DefReader(pathdef, 1))
+            {
+                while (reader.Next())
+                {
+                    int index = reader.ReadInt();
 
-            //        int index = int.Parse(defs[0]);
+                    if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                        continue;
 
-            //        if (index < 0 || index >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-            //            continue;
+                    int[] group = reader.ReadGroup();
 
-            //        int first = defs[1].IndexOf("{");
-            //        int last = defs[1].IndexOf("}");
+                    for (int i = 0; i < group.Length; i++)
+                    {
+                        int checkIndex = group[i];
 
-            //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                            continue;
 
-            //        foreach (string s in newdef)
-            //        {
-            //            int checkindex = int.Parse(s);
+                        if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && tiledata.Entries[checkIndex].Length != 0 && tiledata.Entries[index].Length == 0)
+                        {
+                            LandData[index] = LandData[checkIndex];
+                            break;
+                        }
 
-            //            if (checkindex < 0 || checkindex >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-            //                continue;
+                        if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                        {
+                            checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
+                            checkIndex &= 0x3FFF;
+                            index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
 
-            //            //_file.Entries[index] = _file.Entries[checkindex];
+                            if (index == 9922)
+                            {
 
-            //            if (index < MAX_LAND_DATA_INDEX_COUNT && checkindex < MAX_LAND_DATA_INDEX_COUNT && LandData.Length > checkindex && !LandData[checkindex].Equals(default) && (LandData.Length <= index  || LandData[index].Equals(default)))
-            //            {
-            //                LandData[index] = LandData[checkindex];
-            //            }
-            //            else if (index >= MAX_LAND_DATA_INDEX_COUNT && checkindex >= MAX_LAND_DATA_INDEX_COUNT)
-            //            {
-            //                checkindex -= MAX_LAND_DATA_INDEX_COUNT;
-            //                checkindex &= 0x3FFF;
-            //                index -= MAX_LAND_DATA_INDEX_COUNT;
+                            }
 
-            //                if ( (StaticData.Length <= index || StaticData[index].Equals(default)) &&
-            //                    StaticData.Length > checkindex && !StaticData[checkindex].Equals(default))
-            //                {
+                            if (tiledata.Entries[index].Length == 0 && tiledata.Entries[checkIndex].Length != 0)
+                            {
+                                StaticData[index] = StaticData[checkIndex];
+                            }
+                        }
+                    }
+                }
+            }
 
-            //                    StaticData[index] = StaticData[checkindex];
 
-            //                    break;
-            //                }
+        END_2:
+            tiledata.Dispose();
 
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         protected override void CleanResources()
@@ -588,4 +580,5 @@ namespace ClassicUO.IO.Resources
         /// Movable multi? Cool ships and vehicles etc?
         MultiMovable = 0x10000000000
     }
+
 }

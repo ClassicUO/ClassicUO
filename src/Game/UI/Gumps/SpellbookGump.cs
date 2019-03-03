@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                 icon.MouseDoubleClick += (sender, e) => {
                     if (e.Button == MouseButton.Left)
                     {
-                        SpellDefinition? def = _getSpellDefinition(sender);
+                        SpellDefinition? def = GetSpellDefinition(sender);
                         if (def != null)
                             GameActions.CastSpell(def.Value.ID);
                     }
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    SpellDefinition? def = _getSpellDefinition(sender);
+                    SpellDefinition? def = GetSpellDefinition(sender);
 
                     UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
@@ -399,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
-        private SpellDefinition? _getSpellDefinition(Object sender)
+        private SpellDefinition? GetSpellDefinition(object sender)
         {
             Control ctrl = (Control)sender;
             int idx = (int)(ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;

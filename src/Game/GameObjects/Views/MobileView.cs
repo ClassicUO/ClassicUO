@@ -312,7 +312,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.Direction = dir;
 
             ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
-
+            
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
             direction.LastAccessTime = Engine.Ticks;

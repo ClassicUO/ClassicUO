@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
