@@ -25,7 +25,9 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -152,21 +154,58 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        //protected override void OnMouseUp(int x, int y, MouseButton button)
-        //{
-        //    if (button == MouseButton.Left)
-        //    {
-        //        //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            base.OnMouseUp(x, y, MouseButton.None); // workaround to avoid clickeddrag
 
-        //        //if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
-        //        //{
-        //        //    return;
-        //        //}
+            if (button == MouseButton.Left)
+            {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+                if (TargetManager.IsTargeting)
+                {
+                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                        return;
+
+                    switch (TargetManager.TargetingState)
+                    {
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
+                            gs.SelectedObject = Item;
 
 
-        //        //gs.WearHeldItem(Mobile);                   
-                   
-        //    }
-        //}
+                            if (Item != null)
+                            {
+                                TargetManager.TargetGameObject(Item);
+                                Mouse.LastLeftButtonClickTime = 0;
+                            }
+
+                            break;
+
+                        case CursorTarget.SetTargetClientSide:
+                            gs.SelectedObject = Item;
+
+                            if (Item != null)
+                            {
+                                TargetManager.TargetGameObject(Item);
+                                Mouse.LastLeftButtonClickTime = 0;
+                                Engine.UI.Add(new InfoGump(Item));
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    {
+                        return;
+                    }
+
+                    gs.WearHeldItem(Mobile);
+
+                }
+            }
+
+        }
     }
 }
