@@ -792,7 +792,7 @@ namespace ClassicUO.Network
             Serial serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
 
-            Engine.UI.GetByLocalSerial(serial)?.Dispose();
+            
 
             if (graphic == 0x30) // vendor
             {
@@ -800,6 +800,7 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
+                Engine.UI.GetByLocalSerial<ShopGump>(serial)?.Dispose();
                 ShopGump gump = new ShopGump(serial, true, 150, 5);
                 Engine.UI.Add(gump);
 
@@ -832,7 +833,6 @@ namespace ClassicUO.Network
                         gump.AddItem(i, false);
                     }
                 }
-
             }
             else
             {
@@ -845,6 +845,7 @@ namespace ClassicUO.Network
                 {
                     if (item.IsSpellBook)
                     {
+                        Engine.UI.GetByLocalSerial<SpellbookGump>(serial)?.Dispose();
                         SpellbookGump spellbookGump = new SpellbookGump(item);
                         if (!Engine.UI.GetGumpCachePosition(item, out Point location))
                         {
@@ -859,6 +860,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
+                    Engine.UI.GetByLocalSerial<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
