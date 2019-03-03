@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0}, Scale: {1:F1}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
