@@ -90,32 +90,95 @@ namespace ClassicUO.IO.Resources
             UOFile idxfile5 = _files[4]?.IdxFile;
             long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
+
+            Dictionary<int, ANIMATION_GROUPS_TYPE> mobTypes = new Dictionary<int, ANIMATION_GROUPS_TYPE>();
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            {
+                string[] typeNames = new string[5]
+                {
+                    "monster", "sea_monster", "animal", "human", "equipment"
+                };
+
+                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
+                {
+                    string line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        line = line.Trim();
+
+                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
+                            continue;
+
+                        string[] parts = line.Split(new[]
+                        {
+                            '\t', ' '
+                        }, StringSplitOptions.RemoveEmptyEntries);
+                        int id = int.Parse(parts[0]);
+
+                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            continue;
+                        string testType = parts[1].ToLower();
+                        int commentIdx = parts[2].IndexOf('#');
+
+                        if (commentIdx > 0)
+                            parts[2] = parts[2].Substring(0, commentIdx - 1);
+                        else if (commentIdx == 0)
+                            continue;
+
+                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (testType == typeNames[i])
+                            {
+                                //ref IndexAnimation index = ref DataIndex[id];
+
+                                mobTypes[id] = (ANIMATION_GROUPS_TYPE)i;
+
+                                //index.Type = (ANIMATION_GROUPS_TYPE)i;
+                                //index.Flags = 0x80000000 | number;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+
             for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
                 int findID = 0;
 
-                if (i >= 200)
+                if (i < 200)
                 {
-                    if (i >= 400)
-                    {
-                        findID = (35000 + ((i - 400) * 175)) * animIdxBlockSize;
-                        groupTye = ANIMATION_GROUPS_TYPE.HUMAN;
-                    }
-                    else
-                    {
-                        findID = (22000 + ((i - 200) * 65)) * animIdxBlockSize;
-                        groupTye = ANIMATION_GROUPS_TYPE.ANIMAL;
-                    }
+                    findID = i * 110;
+                    groupTye = ANIMATION_GROUPS_TYPE.MONSTER;
                 }
                 else
                 {
-                    findID = i * 110 * animIdxBlockSize;
-                    groupTye = ANIMATION_GROUPS_TYPE.MONSTER;
+                    if (i < 400)
+                    {
+                        findID = 22000 + ((i - 200) * 65);
+                        groupTye = ANIMATION_GROUPS_TYPE.ANIMAL;
+                    }
+                    else
+                    {
+                        findID = 35000 + ((i - 400) * 175);
+                        groupTye = ANIMATION_GROUPS_TYPE.HUMAN;
+                    }
                 }
+
+                findID *= animIdxBlockSize;
 
                 if (findID >= idxfile0.Length)
                 {
+
+                    //if (mobTypes.TryGetValue(i, out var t))
+                    //    DataIndex[i].Type = t;
+
                     DataIndex[i].Groups = new AnimationGroup[100];
 
                     for (int j = 0; j < 100; j++)
@@ -330,6 +393,12 @@ namespace ClassicUO.IO.Resources
                                     dataIndex.FileIndexPatched = dataCheckIndex.FileIndex;
 
                                 dataIndex.IsBodyDef = true;
+
+                                if (dataCheckIndex.FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
+                                {
+                                    DataIndex[checkIndex].Type = t;
+                                }
+
                             }
                         }
 
@@ -377,7 +446,6 @@ namespace ClassicUO.IO.Resources
                     ushort realAnimID = 0;
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
-
                    
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
@@ -559,17 +627,10 @@ namespace ClassicUO.IO.Resources
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
 
-                                            //if (index == 46)
-                                            //{
-
-                                            //}
-
                                             if (dataindex.IsBodyDef)
                                             {
                                                 dataindex.Address = dataindex.BaseAddress;
                                                 dataindex.Size = dataindex.BaseSize;
-                                                //dataindex.BaseAddress = dataindex.Address = dataindex.PatchedAddress;
-                                                //dataindex.BaseSize = dataindex.Size = dataindex.PatchedSize;
                                             }
 
                                         }
@@ -653,10 +714,23 @@ namespace ClassicUO.IO.Resources
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
                                     DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
                                 }
+
+
+                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
+                                {
+                                    DataIndex[checkIndex].Type = t;
+                                }
+
+                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(index, out t))
+                                {
+                                    DataIndex[index].Type = t;
+                                }
                             }
                         }
 
-                        DataIndex[index].Type = DataIndex[checkIndex].Type;
+
+
+                        //DataIndex[index].Type = DataIndex[checkIndex].Type;
                         DataIndex[index].Flags = DataIndex[checkIndex].Flags;
                         DataIndex[index].Graphic = (ushort) checkIndex;
                         DataIndex[index].Color = color;
@@ -664,55 +738,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-            {
-                string[] typeNames = new string[5]
-                {
-                    "monster", "sea_monster", "animal", "human", "equipment"
-                };
-
-                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
-                {
-                    string line;
-
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        line = line.Trim();
-
-                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
-                            continue;
-
-                        string[] parts = line.Split(new[]
-                        {
-                            '\t', ' '
-                        }, StringSplitOptions.RemoveEmptyEntries);
-                        int id = int.Parse(parts[0]);
-
-                        if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            continue;
-                        string testType = parts[1].ToLower();
-                        int commentIdx = parts[2].IndexOf('#');
-
-                        if (commentIdx > 0)
-                            parts[2] = parts[2].Substring(0, commentIdx - 1);
-                        else if (commentIdx == 0)
-                            continue;
-
-                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
-                        for (int i = 0; i < 5; i++)
-                        {
-                            if (testType == typeNames[i])
-                            {
-                                ref IndexAnimation index = ref DataIndex[id];
-                                index.Type = (ANIMATION_GROUPS_TYPE)i;
-                                index.Flags = 0x80000000 | number;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
 
 
 
