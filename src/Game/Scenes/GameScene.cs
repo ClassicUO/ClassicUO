@@ -74,10 +74,10 @@ namespace ClassicUO.Game.Scenes
             get => _scale;
             set
             {
-                if (value < 0.7f)
-                    value = 0.7f;
-                else if (value > 2.3f)
-                    value = 2.3f;
+                if (value < 0.5f)
+                    value = 0.5f;
+                else if (value > 2.5f)
+                    value = 2.5f;
                 _scale = value;              
             }
         }
@@ -179,10 +179,10 @@ namespace ClassicUO.Game.Scenes
                 else
                     Scale -= 0.1f;
 
-                if (Scale < 0.7f)
-                    Scale = 0.7f;
-                else if (Scale > 2.3f)
-                    Scale = 2.3f;
+                if (Scale < 0.5f)
+                    Scale = 0.5f;
+                else if (Scale > 2.5f)
+                    Scale = 2.5f;
 
                 if (Engine.Profile.Current.SaveScaleAfterClose)
                     Engine.Profile.Current.ScaleZoom = Scale;
