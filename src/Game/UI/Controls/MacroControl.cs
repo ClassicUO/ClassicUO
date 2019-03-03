@@ -45,13 +45,13 @@ namespace ClassicUO.Game.UI.Controls
                 SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
 
                 if (_collection.Macro.Alt)
-                    mod |= SDL.SDL_Keymod.KMOD_LALT;
+                    mod |= SDL.SDL_Keymod.KMOD_ALT;
 
                 if (_collection.Macro.Shift)
-                    mod |= SDL.SDL_Keymod.KMOD_LSHIFT;
+                    mod |= SDL.SDL_Keymod.KMOD_SHIFT;
 
                 if (_collection.Macro.Ctrl)
-                    mod |= SDL.SDL_Keymod.KMOD_LCTRL;
+                    mod |= SDL.SDL_Keymod.KMOD_CTRL;
 
                 box.SetKey(_collection.Macro.Key, mod);
             }
@@ -62,9 +62,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             HotkeyBox b = (HotkeyBox) sender;
 
-            bool shift = (b.Mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-            bool alt = (b.Mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-            bool ctrl = (b.Mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+            bool shift = (b.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool alt = (b.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool ctrl = (b.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             if (Engine.SceneManager.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
             {

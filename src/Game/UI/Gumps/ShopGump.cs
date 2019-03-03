@@ -190,13 +190,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_LSHIFT)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_LSHIFT || e.keysym.sym == SDL.SDL_Keycode.SDLK_RSHIFT)
                 _shiftPressed = false;
         }
 
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (e.keysym.mod == SDL.SDL_Keymod.KMOD_LSHIFT)
+            if (Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
                 _shiftPressed = true;
         }
 

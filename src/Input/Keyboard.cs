@@ -35,16 +35,16 @@ namespace ClassicUO.Input
 
         private static void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
         }
 
         private static void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
         }
 
     }
