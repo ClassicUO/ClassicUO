@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = dataX, Y = 52 + y, LocalSerial = (uint)topage, AcceptMouseInput = true, Tag = offs + 1
                             };
 
-                            text.MouseDown += OnClicked;
+                            text.MouseClick += OnClicked;
                             text.MouseDoubleClick += OnDoubleClicked;
                             Add(text, page);
                             y += 15;
