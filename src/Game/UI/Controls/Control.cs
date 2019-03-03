@@ -791,11 +791,11 @@ namespace ClassicUO.Game.UI.Controls
         {
         }
 
-        protected virtual void OnFocusEnter()
+        internal virtual void OnFocusEnter()
         {
         }
 
-        protected virtual void OnFocusLeft()
+        internal virtual void OnFocusLeft()
         {
         }
 

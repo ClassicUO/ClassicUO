@@ -20,9 +20,13 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Game;
+
+using System.Diagnostics;
 
 using Microsoft.Xna.Framework;
 
@@ -59,9 +63,40 @@ namespace ClassicUO.Game.UI
 
         public bool IsPassword { get; set; }
 
-        public bool NumericOnly { get; set; }
+        public uint ValidationRules { get; set; } = 0;
 
-        public bool SafeCharactersOnly { get; set; }
+        public bool SafeCharactersOnly
+        {
+            set
+            {
+                if (value)
+                    ValidationRules = (uint)(Constants.RULES.NUMERIC | Constants.RULES.SYMBOL | Constants.RULES.SPACE | Constants.RULES.LETTER);
+                else
+                    ValidationRules = (ValidationRules - (uint)(Constants.RULES.NUMERIC | Constants.RULES.SYMBOL | Constants.RULES.SPACE | Constants.RULES.LETTER));
+            }
+        }
+
+        public bool NumericOnly
+        {
+            set
+            {
+                if (value)
+                    ValidationRules = (uint)Constants.RULES.NUMERIC;
+                else
+                    ValidationRules = ValidationRules - (uint)Constants.RULES.NUMERIC;
+            }
+        }
+
+        public bool LettersOnly
+        {
+            set
+            {
+                if (value)
+                    ValidationRules = (uint)Constants.RULES.LETTER;
+                else
+                    ValidationRules = ValidationRules - (uint)Constants.RULES.LETTER;
+            }
+        }
 
         public ushort Hue
         {
@@ -96,27 +131,29 @@ namespace ClassicUO.Game.UI
             if (CaretIndex > Text.Length)
                 CaretIndex = Text.Length;
 
-            if (MaxCharCount > 0)
-            {
-                if (SafeCharactersOnly)
-                {
-                    foreach (char c1 in c)
-                    {
-                        if (c1 < 32 || c1 > 126)
-                            return;
-                    }
-                }
-                else if (NumericOnly)
-                {
-                    string s = Text;
-                    s = s.Insert(CaretIndex, c);
+            if (MaxCharCount > 0 && Text.Length >= MaxCharCount)
+                return;
 
-                    if (!int.TryParse(s, out int value) || s.Length >= MaxCharCount)
-                        return;
-                }
-                else if (Text.Length >= MaxCharCount)
+            if (ValidationRules != 0)
+            {
+                bool allowChar = false;
+
+                foreach (char c1 in c)
                 {
-                    return;
+                    allowChar = false;
+
+                    // https://www.dotnetperls.com/ascii-table
+                    if ((ValidationRules & (uint)Constants.RULES.SYMBOL) != 0 && ((c1 >= 33 && c1 <= 47) || (c1 >= 58 && c1 <= 64) || (c1 >= 91 && c1 <= 96) || (c1 >= 123 && c1 <= 126)) )
+                        allowChar = true;
+                    if ((ValidationRules & (uint)Constants.RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57))
+                        allowChar = true;
+                    if ((ValidationRules & (uint)Constants.RULES.LETTER) != 0 && ((c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122)))
+                        allowChar = true;
+                    if ((ValidationRules & (uint)Constants.RULES.SPACE) != 0 && (c1 == 32))
+                        allowChar = true;
+
+                    if (!allowChar)
+                        return;
                 }
             }
 
@@ -128,38 +165,42 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text)
         {
-            if (MaxCharCount > 0)
+            if (ValidationRules != 0)
             {
-                if (SafeCharactersOnly)
+                char[] ch = text.ToCharArray();
+                string safeString = "";
+                bool allowChar = false;
+
+                if (ch.Length > 0)
                 {
-                    char[] ch = text.ToCharArray();
-                    string safeString = "";
                     foreach (char c in ch)
                     {
-                        if ((int)Convert.ToChar(c) >= 32 && (int)Convert.ToChar(c) <= 126)
+                        allowChar = false;
+
+                        var c1 = (int)Convert.ToChar(c);
+
+                        if ((ValidationRules & (uint)Constants.RULES.SYMBOL) != 0 && ((c1 >= 33 && c1 <= 47) || (c1 >= 58 && c1 <= 64) || (c1 >= 91 && c1 <= 96) || (c1 >= 123 && c1 <= 126)) )
+                            allowChar = true;
+                        if ((ValidationRules & (uint)Constants.RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57))
+                            allowChar = true;
+                        if ((ValidationRules & (uint)Constants.RULES.LETTER) != 0 && ((c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122)))
+                            allowChar = true;
+                        if ((ValidationRules & (uint)Constants.RULES.SPACE) != 0 && (c1 == 32))
+                            allowChar = true;
+
+                        if (allowChar)
                             safeString += c;
                     }
-                    if (safeString.Length > MaxCharCount)
-                        text = safeString.Substring(0, MaxCharCount);
-                    else
-                        text = safeString;
                 }
-                else if (NumericOnly)
-                {
-                    string str = text;
-                    while (true)
-                    {
-                        int len = str.Length;
 
-                        if (int.TryParse(str, out int result) && result >= MaxCharCount && len > 0)
-                            str = str.Substring(len - 1);
-                        else 
-                            break;
-                    }
-                }
-                else if (text.Length > MaxCharCount)
-                    text = text.Remove(MaxCharCount - 1);
+                if (safeString.Length > MaxCharCount && MaxCharCount > 0)
+                    text = safeString.Substring(0, MaxCharCount);
+                else
+                    text = safeString;
             }
+
+            if (MaxCharCount > 0 && text.Length > MaxCharCount)
+                text = text.Remove(MaxCharCount - 1);
 
             if (MaxWidth > 0)
             {

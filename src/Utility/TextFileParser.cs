@@ -50,8 +50,11 @@ namespace ClassicUO.Utility
         {
             for(int i = _pos; i < _string.Length; i++)
             {
-                if (_string[i] == '\n')
+                if (_string[i] == '\n' || i + 1 >= _string.Length)
+                {
                     _eol = i;
+                    break;
+                }
             }
         }
 

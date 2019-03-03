@@ -152,21 +152,21 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+        //protected override void OnMouseUp(int x, int y, MouseButton button)
+        //{
+        //    if (button == MouseButton.Left)
+        //    {
+        //        //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
-                {
-                    return;
-                }
+        //        //if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
+        //        //{
+        //        //    return;
+        //        //}
 
 
-                gs.WearHeldItem(Mobile);                   
+        //        //gs.WearHeldItem(Mobile);                   
                    
-            }
-        }
+        //    }
+        //}
     }
 }

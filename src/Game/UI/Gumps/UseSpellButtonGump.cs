@@ -28,9 +28,8 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class UseSpellButtonGump : Gump
+    internal class UseSpellButtonGump : AnchorableGump
     {
-        private GumpPic _button;
         private SpellDefinition _spell;
 
         public UseSpellButtonGump() : base(0 ,0)
@@ -51,27 +50,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             LocalSerial = (uint)_spell.ID;
 
-            _button = new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0)
-            {
-                AcceptMouseInput = true
-            };
-            _button.MouseDoubleClick += ButtonOnMouseDoubleClick;
-            Add(_button);
+            Add(new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
 
             WantUpdateSize = true;
+            AcceptMouseInput = true;
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
+            if (button == MouseButton.Left)
+                GameActions.CastSpell(_spell.ID);
+
             return true;
         }
-
-        private void ButtonOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
-        {
-            if (e.Button == MouseButton.Left)
-                GameActions.CastSpell(_spell.ID);
-        }
-
+        
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -121,7 +113,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _button.MouseDoubleClick -= ButtonOnMouseDoubleClick;
             base.Dispose();
         }
     }

@@ -167,9 +167,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (UseObjectHandles && !ObjectHandlesOpened)
             {
-                NameOverheadGump gump = Engine.UI.GetByLocalSerial<NameOverheadGump>(Serial);
+                //NameOverheadGump gump = Engine.UI.GetByLocalSerial<NameOverheadGump>(Serial);
 
-                if (gump == null)
+                //if (gump == null)
                 {
                     Engine.UI.Add(new NameOverheadGump(this));
                     ObjectHandlesOpened = true;

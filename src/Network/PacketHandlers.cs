@@ -571,7 +571,8 @@ namespace ClassicUO.Network
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
-
+            if (Engine.Profile.Current.UseCustomLightLevel)
+                World.Light.Overall = Engine.Profile.Current.LightLevel;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
             {
@@ -836,6 +837,9 @@ namespace ClassicUO.Network
             else
             {
                 Item item = World.Items.Get(serial);
+
+                if (item == null)
+                    return;
 
                 if (graphic == 0xFFFF) // spellbook
                 {
@@ -1256,21 +1260,29 @@ namespace ClassicUO.Network
             {
                 byte level = p.ReadByte();
 
-                if (level > 0x1F)
-                    level = 0x1F;
+                if (level > 0x1E)
+                    level = 0x1E;
+             
+                World.Light.RealPersonal = level;
 
-                //World.Light.Personal = level;
+                if (!Engine.Profile.Current.UseCustomLightLevel)
+                    World.Light.Personal = level;
             }
         }
 
         private static void LightLevel(Packet p)
         {
+            if (!World.InGame)
+                return;
             byte level = p.ReadByte();
 
-            if (level > 0x1F)
-                level = 0x1F;
+            if (level > 0x1E)
+                level = 0x1E;
 
-            //World.Light.Overall = level;
+            World.Light.RealOverall = level;
+
+            if (!Engine.Profile.Current.UseCustomLightLevel)
+                World.Light.Overall = level;
         }
 
         private static void PlaySoundEffect(Packet p)
@@ -1286,10 +1298,7 @@ namespace ClassicUO.Network
 
             float soundByRange = Engine.Profile.Current.SoundVolume / (float)World.ViewRange;
             soundByRange *= World.Player.Position.DistanceTo(position);
-            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 100f;
-
-            if (volume > 0 && volume < 0.01f)
-                volume = 0.01f;
+            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / 2500f;
 
             Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(index, volume, true);
         }
@@ -1660,10 +1669,11 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player)
                 return;
+
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
-            if (World.Get(mobile) == null)
+            if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
             {
                 mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = dir;
@@ -1782,7 +1792,6 @@ namespace ClassicUO.Network
 
         private static void OpenMenu(Packet p)
         {
-            //TODO:
             if (!World.InGame)
                 return;
 
@@ -1796,24 +1805,85 @@ namespace ClassicUO.Network
 
             if (menuid != 0)
             {
+                MenuGump gump = new MenuGump(serial, id, name)
+                {
+                    X = 100,
+                    Y = 100
+                };
+
+                int posX = 0;
+
                 for (int i = 0; i < count; i++)
                 {
                     Graphic graphic = p.ReadUShort();
                     Hue hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
+                    Rectangle rect = FileManager.Art.GetTexture(graphic).Bounds;
+
+                    if (rect.Width != 0 && rect.Height != 0)
+                    {
+                        int posY = rect.Height;
+
+                        if (posY >= 47)
+                            posY = 0;
+                        else
+                            posY = ((47 - posY) >> 1);
+
+                        gump.AddItem(graphic, hue, name, posX, posY, i + 1);
+
+                        posX += rect.Width;
+                    }
                 }
+
+                Engine.UI.Add(gump);
             }
             else
             {
+                GrayMenuGump gump = new GrayMenuGump(serial, id, name)
+                {
+                    X = (Engine.WindowWidth >> 1) - 200,
+                    Y = (Engine.WindowHeight >> 1) - ((121 + (count * 21)) >> 1)
+                };
+
+                int offsetY = 35 + gump.Height;
+                int gumpHeight = 70 + offsetY;
+
                 for (int i = 0; i < count; i++)
                 {
                     p.Skip(4); 
                     name = p.ReadASCII(p.ReadByte());
-                }
-            }
 
-            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `OpenMenu` not implemented yet.");
+                    int addHeight = gump.AddItem(name, offsetY);
+
+                    if (addHeight < 21)
+                        addHeight = 21;
+
+
+                    offsetY += addHeight - 1;
+                    gumpHeight += addHeight;
+                }
+
+                offsetY += 5;
+
+                gump.Add(new Button(0, 0x1450, 0x1451, 0x1450)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 70,
+                    Y = offsetY
+                });
+
+                gump.Add(new Button(1, 0x13B2, 0x13B3, 0x13B2)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 200,
+                    Y = offsetY
+                });
+
+                gump.SetHeight(gumpHeight);
+                gump.WantUpdateSize = false;
+                Engine.UI.Add(gump);
+            }
         }
 
 

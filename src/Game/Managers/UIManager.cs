@@ -223,6 +223,8 @@ namespace ClassicUO.Game.Managers
 
         public bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
+        public Control DraggingControl => _draggingControl;
+
         public GameCursor GameCursor { get; private set; }
 
         public Control KeyboardFocusControl
@@ -252,7 +254,12 @@ namespace ClassicUO.Game.Managers
             set
             {
                 if (value != null && value.AcceptKeyboardInput)
+                {
+                    if (_keyboardFocusControl != null)
+                        _keyboardFocusControl.OnFocusLeft();
                     _keyboardFocusControl = value;
+                    value.OnFocusEnter();
+                }
             } 
         }
 
@@ -574,17 +581,40 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
+
+        private readonly Dictionary<Serial, TargetLineGump> _targetLineGumps = new Dictionary<Serial, TargetLineGump>();
+
+        public void SetTargetLineGump(Serial mob)
+        {
+            if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))
+            {
+                Mobile m = World.Mobiles.Get(mob);
+                if (m == null)
+                    return;
+
+                gump = new TargetLineGump(m);
+                _targetLineGumps[mob] = gump;
+                Engine.UI.Add(gump);
+            }
+        }
+
+        public void RemoveTargetLineGump(Serial serial)
+        {
+            if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
+            {
+                gump?.Dispose();
+                _targetLineGumps.Remove(serial);
+            }
+        }
+
+
         public ChildType GetChildByLocalSerial<ParentType, ChildType>(Serial parentSerial, Serial childSerial) 
             where ParentType : Control
             where ChildType : Control
         {
             ParentType parent = GetByLocalSerial<ParentType>(parentSerial);
-            if(parent != null)
-            {
-                return parent.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
-            }
 
-            return null;
+            return parent?.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
         }
 
         public T GetByLocalSerial<T>(Serial? serial = null) where T : Control
@@ -713,6 +743,11 @@ namespace ClassicUO.Game.Managers
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
                     _mouseDownControls[i].InvokeMouseOver(position);
             }
+        }
+
+        public Control[] GetMouseOverControls(Point position)
+        {
+            return _gumps.Where(o => o.HitTest(position)!= null).ToArray();
         }
 
         private Control GetMouseOverControl(Point position)

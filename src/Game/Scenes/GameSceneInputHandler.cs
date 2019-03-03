@@ -334,7 +334,7 @@ namespace ClassicUO.Game.Scenes
 
                             break;
 
-                        case Item item:
+                        case Item item when !item.IsCorpse:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
                             break;
                     }
@@ -401,9 +401,9 @@ namespace ClassicUO.Game.Scenes
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                     World.Player.Walk(dWalkN, false);
 
-            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
 
             _useObjectHandles = isshift && isctrl;
@@ -425,9 +425,9 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LSHIFT) != 0;
-            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LALT) != 0;
-            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_LCTRL) != 0;
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             _isShiftDown = isshift;
 

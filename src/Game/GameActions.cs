@@ -215,6 +215,10 @@ namespace ClassicUO.Game
 
         public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
         {
+            Entity e = World.Get(entity);
+            if (e == null)
+                return;
+
             if (Engine.Profile.Current.EnabledCriminalActionQuery && TargetManager.TargeringType == TargetType.Harmful)
             {
                 Mobile m = World.Mobiles.Get(entity);
@@ -226,7 +230,7 @@ namespace ClassicUO.Game
                                                                s =>
                                                                {
                                                                    if (s)
-                                                                       Socket.Send(new PTargetObject(entity, cursorID, cursorType));
+                                                                       Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
                                                                });
 
                     Engine.UI.Add(messageBox);
@@ -234,7 +238,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            Socket.Send(new PTargetObject(entity, cursorID, cursorType));
+            Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
         }
 
         public static void TargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType)

@@ -57,10 +57,12 @@ namespace ClassicUO.Game.Scenes
                     Engine.IsFullScreen = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
+                    Engine.AllowWindowResizing = false;
                     CurrentScene = new LoginScene();
                     break;
 
                 case ScenesType.Game:
+                    Engine.AllowWindowResizing = true;
                     Engine.IsFullScreen = true;
                     CurrentScene = new GameScene();
                     break;

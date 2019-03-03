@@ -29,12 +29,13 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Combobox : Control
     {
-        private readonly string[] _items;
         private readonly Label _label;
         private readonly int _maxHeight;
+        private string[] _items;
         private int _selectedIndex;
+        private readonly byte _font;
 
-        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "")
+        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 9)
         {
             X = x;
             Y = y;
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.UI.Controls
             SelectedIndex = selected;
             _items = items;
             _maxHeight = maxHeight;
+            _font = font;
 
             Add(new ResizePic(0x0BB8)
             {
@@ -50,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             });
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            Add(_label = new Label(initialText, false, 0x0453, font: 9, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            Add(_label = new Label(initialText, false, 0x0453, font: _font, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 2, Y = 5
             });
@@ -77,10 +79,21 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        internal string GetSelectedItem => _label.Text;
+
+        internal uint GetItemsLength => (uint)_items.Length;
+
+        internal void SetItemsValue(string[] items)
+        {
+            _items = items;
+        }
+
         public event EventHandler<int> OnOptionSelected;
+        public event EventHandler OnBeforeContextMenu;
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            OnBeforeContextMenu?.Invoke(this, null);
             var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
@@ -104,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 foreach (var item in items)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: 9, align: TEXT_ALIGN_TYPE.TS_LEFT)
+                    var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: _box._font, align: TEXT_ALIGN_TYPE.TS_LEFT)
                     {
                         X = 2, Y = index * 15, Tag = index
                     };

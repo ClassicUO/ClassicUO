@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder, _closeHealthbarsIfMobNotExists;
         private Combobox _hpComboBox;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -57,8 +57,9 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect;
+        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
         private Combobox _shardType;
+        private HSliderBar _lightBar;
 
         private Checkbox _gameWindowLock;
         private Checkbox _gameWindowFullsize;
@@ -222,6 +223,16 @@ namespace ClassicUO.Game.UI.Gumps
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
+
+
+            _closeHealthbarsIfMobNotExists = new Checkbox(0x00D2, 0x00D3, "Close HealthBar gump if mobile not exists", FONT, HUE_FONT, true)
+            {
+                X = 0,
+                Y = _showHpMobile.Bounds.Bottom + 15,
+                IsChecked = Engine.Profile.Current.CloseHealthBarIfMobileNotExists
+            };
+            hpAreaItem.Add(_closeHealthbarsIfMobNotExists);
+
             rightArea.Add(hpAreaItem);
 
             // highlight character by flags
@@ -376,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                 X = 10,
-                Y = 105,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -386,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                 X = 80,
-                Y = 105,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -395,17 +406,20 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
             {
                 X = 140,
-                Y = 100,
+                Y = 57,
                 IsChecked = Engine.Profile.Current.GameWindowLock
             };
 
             item.Add(_gameWindowLock);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
 
             _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
                 X = 10,
-                Y = 160,
+                Y = 35,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
@@ -415,12 +429,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
                 X = 80,
-                Y = 160,
+                Y = 35,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
             });
 
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
+            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
+            {
+                Y = 20,
+                IsChecked = Engine.Profile.Current.UseCustomLightLevel
+            };
+            _lightBar = new HSliderBar(_enableLight.Width + 10, 20, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+
+            item.Add(_enableLight);
+            item.Add(_lightBar);
             rightArea.Add(item);
 
             Add(rightArea, PAGE);
@@ -615,11 +641,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-        public void UpdateVideo()
-        {
-            BuildVideo();
-        }
-
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -694,6 +715,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
                     _preloadMaps.IsChecked = false;
+                    _closeHealthbarsIfMobNotExists.IsChecked = false;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -711,7 +733,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _zoom.IsChecked = false;
                     _savezoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
-                    _gameWindowWidth.Text = "640";
+                    _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
                     _gameWindowPositionX.Text = "10";
                     _gameWindowPositionY.Text = "10";
@@ -720,6 +742,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    _lightBar.Value = 0;
+                    _enableLight.IsChecked = false;
                     break;
                 case 4: // commands
 
@@ -766,6 +790,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
+            Engine.Profile.Current.CloseHealthBarIfMobileNotExists = _closeHealthbarsIfMobNotExists.IsChecked;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
@@ -836,68 +861,51 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            int GameWindowSizeWidth = 640;
-            int GameWindowSizeHeight = 480;
+            int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
+            int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            int.TryParse(_gameWindowWidth.Text, out GameWindowSizeWidth);
-            int.TryParse(_gameWindowHeight.Text, out GameWindowSizeHeight);
-
-            if (GameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || GameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
+            if (gameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || gameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                Point n = e.ResizeWindow(new Point(GameWindowSizeWidth, GameWindowSizeHeight));
+                Point n = Engine.UI.GetByLocalSerial<WorldViewportGump>().ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
                 _gameWindowWidth.Text = n.X.ToString();
                 _gameWindowHeight.Text = n.Y.ToString();
             }
 
-            int GameWindowPositionX = 20;
-            int GameWindowPositionY = 20;
+            int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
+            int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
-            int.TryParse(_gameWindowPositionX.Text, out GameWindowPositionX);
-            int.TryParse(_gameWindowPositionY.Text, out GameWindowPositionY);
-
-            if (GameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || GameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
+            if (gameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || gameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
             {
-                Point n = new Point(GameWindowPositionX, GameWindowPositionY);
-
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                e.Location = n;
-
-                Engine.Profile.Current.GameWindowPosition = n;
+                Engine.UI.GetByLocalSerial<WorldViewportGump>().Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
             }
 
             if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
             {
-                if (_gameWindowLock.IsChecked)
-                {
-                    // lock
-                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    e.CanMove = false;
-                }
-                else
-                {
-                    // unlock
-                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    e.CanMove = true;
-                }
+                Engine.UI.GetByLocalSerial<WorldViewportGump>().CanMove = !_gameWindowLock.IsChecked;
                 Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
             }
             
             if (_gameWindowFullsize.IsChecked != Engine.Profile.Current.GameWindowFullSize)
             {
+                Point n, loc;
+                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+
                 if (_gameWindowFullsize.IsChecked)
                 {
-                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                    e.Location = new Point(-5, -5);
+                    n = e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                    loc = e.Location = new Point(-5, -5);
                 }
                 else
                 {
-                    WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    e.ResizeWindow(new Point(640, 480));
-                    e.Location = new Point(20, 20);
+                    n = e.ResizeWindow(new Point(600, 480));
+                    loc = e.Location = new Point(20, 20);
                 }
+
+                _gameWindowPositionX.Text = loc.X.ToString();
+                _gameWindowPositionY.Text = loc.Y.ToString();
+                _gameWindowWidth.Text = n.X.ToString();
+                _gameWindowHeight.Text = n.Y.ToString();
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
@@ -909,8 +917,20 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
             }
 
-            UpdateVideo();
+            Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
+            Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 
+            if (_enableLight.IsChecked)
+            {
+                World.Light.Overall = Engine.Profile.Current.LightLevel;
+            }
+            else
+            {
+                World.Light.Overall = World.Light.RealOverall;
+                World.Light.Personal = World.Light.RealPersonal;
+            }
+
+            
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
 
@@ -926,6 +946,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+        }
+
+        internal void UpdateVideo()
+        {
+            WorldViewportGump gump = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+            _gameWindowWidth.Text = gump.Width.ToString();
+            _gameWindowHeight.Text = gump.Height.ToString();
+            _gameWindowPositionX.Text = gump.X.ToString();
+            _gameWindowPositionY.Text = gump.Y.ToString();
         }
 
         private Texture2D _edge;

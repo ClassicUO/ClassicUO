@@ -23,7 +23,9 @@ using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Gumps.Login;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -41,8 +43,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private CharCreationStep _currentStep;
         private LoadingGump _loadingGump;
         private readonly LoginScene loginScene;
+        internal static int _skillsCount => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 4 : 3;
 
-	    private CityInfo _startingCity;
+        private CityInfo _startingCity;
 		private ProfessionInfo _selectedProfession;
 
 		public CharCreationGump() : base(0, 0)
@@ -73,22 +76,38 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 		{
 			_selectedProfession = info;
 
-			SetStep(CharCreationStep.ChooseTrade);
+			for (int i = 0; i < _skillsCount; i++)
+			{
+				_character.UpdateSkill(_selectedProfession.SkillDefVal[i, 0], (ushort)_selectedProfession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+			}
+
+			_character.Strength = (ushort)_selectedProfession.StatsVal[0];
+			_character.Intelligence = (ushort)_selectedProfession.StatsVal[1];
+			_character.Dexterity = (ushort)_selectedProfession.StatsVal[2];
+
+			SetAttributes();
+
+			if (_selectedProfession.DescriptionIndex > 0)
+				SetStep(CharCreationStep.ChooseCity);
+			else
+				SetStep(CharCreationStep.ChooseTrade);
 		}
 
-		public void CreateCharacter()
+		public void CreateCharacter(byte profession)
         {
-            loginScene.CreateCharacter(_character, _startingCity);
+            loginScene.CreateCharacter(_character, _startingCity, profession);
         }
 
-        public void StepBack()
+        public void StepBack(int steps = 1)
         {
-            if (_currentStep == CharCreationStep.Appearence)
-            {
-                loginScene.StepBack();
-            }
-            else
-                SetStep(_currentStep - 1);
+			if (_currentStep == CharCreationStep.Appearence)
+			{
+				loginScene.StepBack();
+			}
+			else
+			{
+				SetStep(_currentStep - steps);
+			}
         }
 
         public void ShowMessage(string message)
@@ -107,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             switch (step)
             {
+				default:
                 case CharCreationStep.Appearence:
                     ChangePage(1);
 
@@ -127,17 +147,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 	                if (existing != null)
 		                Remove(existing);
 
-					Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
-
+                    Add(new CreateCharTradeGump(_character, _selectedProfession), 3);
                     ChangePage(3);
-	                break;
+                    break;
 				case CharCreationStep.ChooseCity:
 					existing = Children.FirstOrDefault(page => page.Page == 4);
 
 					if (existing != null)
 						Remove(existing);
 
-					Add(new CreateCharCityGump(), 4);
+					Add(new CreateCharCityGump((byte)_selectedProfession.DescriptionIndex), 4);
 
 					ChangePage(4);
 					break;

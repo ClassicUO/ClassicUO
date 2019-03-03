@@ -56,7 +56,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "login_fps")]public int MaxLoginFPS { get; set; } = 60;
 
-        [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; } = true;
+        [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; } = false;
 
         [JsonProperty(PropertyName = "profiler")] public bool Profiler { get; set; } = true;
 
@@ -66,7 +66,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; } = false;
 
-        [JsonProperty(PropertyName = "reconnect")] public bool Reconnect { get; set; } = false;
+        [JsonProperty(PropertyName = "reconnect")] public bool Reconnect { get; set; } = true;
         [JsonProperty(PropertyName = "reconnect_time")] public int ReconnectTime { get; set; } = 0;
 
         [JsonProperty(PropertyName = "login_music")]

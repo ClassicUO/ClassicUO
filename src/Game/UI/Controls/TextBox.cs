@@ -80,14 +80,23 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool NumericOnly
         {
-            get => TxEntry.NumericOnly;
             set => TxEntry.NumericOnly = value;
+        }
+
+        public bool LettersOnly
+        {
+            set => TxEntry.LettersOnly = value;
         }
 
         public bool SafeCharactersOnly
         {
-            get => TxEntry.SafeCharactersOnly;
             set => TxEntry.SafeCharactersOnly = value;
+        }
+
+        public uint ValidationRules
+        {
+            get => TxEntry.ValidationRules;
+            set => TxEntry.ValidationRules = value;
         }
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }

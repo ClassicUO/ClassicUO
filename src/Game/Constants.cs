@@ -26,14 +26,12 @@ namespace ClassicUO.Game
 
         public const int USED_LAYER_COUNT = 25;
 
-
         public const int CLEAR_TEXTURES_DELAY = 3000;
         public const int MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_SOUND_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
         public const int MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 50;
-
 
         public const int MAX_FAST_WALK_STACK_SIZE = 5;
 
@@ -58,7 +56,6 @@ namespace ClassicUO.Game
         public const int CONTAINER_RECT_STEP = 20;
         public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
         public const int CONTAINER_RECT_LINESTEP = 800;
-
 
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
@@ -89,5 +86,15 @@ namespace ClassicUO.Game
         public const int DEAD_RANGE_COLOR = 0x038E;
 
         public const int DEATH_SCREEN_TIMER = 1500;
+
+        [Flags]
+        public enum RULES : uint
+        {
+            NUMERIC = 0x00000001,
+            SYMBOL = 0x00000002,
+            LETTER = 0x00000004,
+            SPACE = 0x00000008
+        }
+
     }
 }

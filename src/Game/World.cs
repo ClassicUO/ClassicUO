@@ -36,11 +36,10 @@ namespace ClassicUO.Game
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<Entity> _toRemove = new List<Entity>();
 
+
         public static PartyManager Party { get; } = new PartyManager();
 
         public static HouseManager HouseManager { get; } = new HouseManager();
-
-        //public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
 
@@ -109,7 +108,7 @@ namespace ClassicUO.Game
 
         public static IsometricLight Light { get; } = new IsometricLight
         {
-            Overall = 0, Personal = 0
+            Overall = 0, Personal = 0, RealOverall = 0, RealPersonal = 0,
         };
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
@@ -136,15 +135,18 @@ namespace ClassicUO.Game
 
                 if (_toRemove.Count != 0)
                 {
-                    _toRemove.ForEach(s => Mobiles.Remove(s));
-                    _toRemove.Clear();
+                    for (int i = 0; i < _toRemove.Count; i++)
+                    {
+                        Mobiles.Remove(_toRemove[i]);
+                        _toRemove.RemoveAt(i--);
+                    }
                 }
 
                 foreach (Item item in Items)
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.Distance > ViewRange && item.OnGround)
+                    if (item.OnGround && item.Distance > ViewRange)
                     {
                         if (item.IsMulti)
                         {
@@ -161,8 +163,11 @@ namespace ClassicUO.Game
 
                 if (_toRemove.Count != 0)
                 {
-                    _toRemove.ForEach(s => Items.Remove(s));
-                    _toRemove.Clear();
+                    for (int i = 0; i < _toRemove.Count; i++)
+                    {
+                        Items.Remove(_toRemove[i]);
+                        _toRemove.RemoveAt(i--);
+                    }
                 }
 
                 _effectManager.Update(totalMS, frameMS);

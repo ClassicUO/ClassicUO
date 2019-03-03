@@ -38,10 +38,10 @@ namespace ClassicUO.Input
 
         public bool IsHandled { get; set; }
 
-        public bool Alt => (Mod & SDL_Keymod.KMOD_LALT) == SDL_Keymod.KMOD_LALT;
+        public bool Alt => (Mod & SDL_Keymod.KMOD_ALT) != SDL_Keymod.KMOD_NONE;
 
-        public bool Control => (Mod & SDL_Keymod.KMOD_LCTRL) == SDL_Keymod.KMOD_LCTRL;
+        public bool Control => (Mod & SDL_Keymod.KMOD_CTRL) != SDL_Keymod.KMOD_NONE;
 
-        public bool Shift => (Mod & SDL_Keymod.KMOD_LSHIFT) == SDL_Keymod.KMOD_LSHIFT;
+        public bool Shift => (Mod & SDL_Keymod.KMOD_SHIFT) != SDL_Keymod.KMOD_NONE;
     }
 }

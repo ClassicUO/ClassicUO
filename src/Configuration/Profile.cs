@@ -129,12 +129,19 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(0, 0);
+        [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = false;
+        [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public bool UseCustomLightLevel { get; set; } = false;
+        [JsonProperty] public byte LightLevel { get; set; } = 0;
+        [JsonProperty] public bool CloseHealthBarIfMobileNotExists { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
         [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
 
-
+        internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
+        internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
         public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
@@ -144,7 +151,7 @@ namespace ClassicUO.Configuration
             if (string.IsNullOrEmpty(CharacterName))
                 throw new InvalidDataException();
 
-            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
@@ -183,7 +190,7 @@ namespace ClassicUO.Configuration
 
 
                 if (gumps != null)
-                { 
+                {
                     writer.Write(gumps.Count);
 
                     foreach (Gump gump in gumps)
@@ -196,11 +203,16 @@ namespace ClassicUO.Configuration
                     writer.Write(0);
                 }
             }
+
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
+            {
+                Engine.AnchorManager.Save(writer);
+            }
         }
 
         public List<Gump> ReadGumps()
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
             string binpath = Path.Combine(path, "gumps.bin");
             if (!File.Exists(binpath))
@@ -250,9 +262,16 @@ namespace ClassicUO.Configuration
                 }
             }
 
+            string anchorsPath = Path.Combine(path, "anchors.bin");
+            if (File.Exists(anchorsPath))
+            {
+                using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                {
+                    Engine.AnchorManager.Restore(reader, gumps);
+                }
+            }
+
             return gumps;
         }
-
-        
     }
 }

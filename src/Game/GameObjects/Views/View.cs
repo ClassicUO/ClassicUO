@@ -47,7 +47,6 @@ namespace ClassicUO.Game.GameObjects
         //private float _processAlpha = 1;
         //private long _processAlphaTime = -1;
 
-
         protected bool HasShadow { get; set; }
 
         protected bool IsFlipped { get; set; }
