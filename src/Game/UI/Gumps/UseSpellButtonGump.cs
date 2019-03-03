@@ -54,6 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
+            AnchorGroupName = "spell";
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)

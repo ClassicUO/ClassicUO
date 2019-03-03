@@ -81,6 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
         public HealthBarGump() : base(0, 0)
         {
             CanMove = true;
+            AnchorGroupName = "healthbar";
         }
 
         public Mobile Mobile { get; private set; }
