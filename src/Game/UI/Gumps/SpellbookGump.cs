@@ -38,6 +38,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _maxPage;
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private SpellBookType _spellBookType;
+        private Control _lastPressed;
+        private float _clickTiming = 0;
 
         public SpellbookGump(Item item) : this()
         {
@@ -216,7 +218,6 @@ namespace ClassicUO.Game.UI.Gumps
                         X = indexX, Y = 10
                     };
                     Add(text, page);
-
                     if (isMageSpellbook)
                     {
                         text = new Label(SpellsMagery.CircleNames[(i - 1) * 2 + j % 2], false, 0x0288, font: 6)
@@ -242,14 +243,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                             text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
                             {
-                                X = dataX, Y = 52 + y, LocalSerial = (uint)topage, AcceptMouseInput = true
+                                X = dataX, Y = 52 + y, LocalSerial = (uint)topage, AcceptMouseInput = true, Tag = offs + 1
                             };
 
-                            text.MouseClick += (sender, e) =>
-                            {
-                                HoveredLabel l = (HoveredLabel)sender;
-                                SetActivePage((int)l.LocalSerial.Value);
-                            };
+                            text.MouseDown += OnClicked;
+                            text.MouseDoubleClick += OnDoubleClicked;
                             Add(text, page);
                             y += 15;
                         }
@@ -733,6 +731,41 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             CreateBook();
+        }
+
+        private void OnClicked(object sender, MouseEventArgs e)
+        {
+            if(sender is HoveredLabel l && e.Button == MouseButton.Left)
+            {
+                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                if (_clickTiming > 0)
+                    _lastPressed = l;
+            }
+        }
+
+        private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
+        {
+            if(_lastPressed != null && e.Button == MouseButton.Left)
+            {
+                _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                GameActions.CastSpell((int)_lastPressed.Tag);
+                _lastPressed = null;
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+            if(_lastPressed!=null)
+            {
+                _clickTiming -= (float)frameMS;
+                if(_clickTiming <= 0)
+                {
+                    _clickTiming = 0;
+                    SetActivePage((int)_lastPressed.LocalSerial.Value);
+                    _lastPressed = null;
+                }
+            }
         }
 
         public void Update()
