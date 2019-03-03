@@ -35,9 +35,9 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                File = new UOFileMul(path);
+                File = new UOFileMul(path, false);
                 Patches = new UOFileIndex5D[File.ReadInt()];
-                Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
+                //Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
                 /* for (int i = 0; i < Patches.Length; i++)
                  {
                      Patches[i].File = File.ReadInt();
