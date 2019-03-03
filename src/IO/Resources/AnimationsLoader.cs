@@ -367,9 +367,10 @@ namespace ClassicUO.IO.Resources
                                 ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
                                 ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
 
-
-                                //dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
-                                //dataIndex.BaseSize = dataCheckIndex.BaseSize;
+                                //TODO: comm
+                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
+                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
+                                //
 
                                 dataIndex.Address = dataCheckIndex.BaseAddress;
                                 dataIndex.Size = dataCheckIndex.BaseSize;
