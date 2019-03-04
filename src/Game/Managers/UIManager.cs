@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int i = 10; i < gparams.Length; i++)
                                 {
-                                    sb.Append('\t');
+                                    sb.Append(' ');
                                     sb.Append(gparams[i]);
                                 }
                             }
