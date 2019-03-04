@@ -321,7 +321,7 @@ namespace ClassicUO.Game.Managers
                 {
                     string sub = layout.Substring(begin + 1, end - begin - 1).Trim();
                     index = end;
-                    string[] gparams = sub.Split(' ');//Regex.Split(sub, @"\s+");
+                    string[] gparams = Regex.Split(sub, @"\s+");
 
                     switch (gparams[0].ToLower())
                     {
