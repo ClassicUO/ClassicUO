@@ -16,8 +16,9 @@ namespace ClassicUO.Game.UI.Controls
     {
         private bool _isSelected;
         private readonly ButtonAction _action;
+        private readonly int _groupnumber;
 
-        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text) : base(x, y, w, h)
+        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0) : base(x, y, w, h)
         {
             _action = action;
             Label label;
@@ -26,6 +27,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = -2,
             });
             label.Y = (h - label.Height) / 2;
+            _groupnumber = groupnumber;
         }
 
         public int ButtonParameter { get; set; }
@@ -62,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     foreach (var b in list)
                     {
-                        if (b != this)
+                        if (b != this && b._groupnumber == _groupnumber)
                         {
                             b.IsSelected = false;
                         }
