@@ -40,6 +40,7 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class UIManager
     {
+        private static readonly char[] _splitchar = { ' ' };
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<Control> _gumps = new List<Control>();
         //private readonly List<object> _inputBlockingObjects = new List<object>();
@@ -321,7 +322,11 @@ namespace ClassicUO.Game.Managers
                 {
                     string sub = layout.Substring(begin + 1, end - begin - 1).Trim();
                     index = end;
-                    string[] gparams = Regex.Split(sub, @"\s+");
+                    string[] gparams = sub.Split(_splitchar, StringSplitOptions.RemoveEmptyEntries);//Regex.Split(sub, @"\s+");
+                    if(gparams.Length == 0)
+                    {
+                        continue;
+                    }
 
                     switch (gparams[0].ToLower())
                     {
