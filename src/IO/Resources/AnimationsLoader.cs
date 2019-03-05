@@ -172,15 +172,16 @@ namespace ClassicUO.IO.Resources
                 {
                     if (i < 400)
                     {
-                        findID = 22000 + ((i - 200) * 65);
+                        findID = i * 65 + 9000;
                         groupTye = ANIMATION_GROUPS_TYPE.ANIMAL;
                     }
                     else
                     {
-                        findID = 35000 + ((i - 400) * 175);
+                        findID = (i - 200) * 175;
                         groupTye = ANIMATION_GROUPS_TYPE.HUMAN;
                     }
                 }
+
 
                 findID *= animIdxBlockSize;
 
@@ -366,7 +367,7 @@ namespace ClassicUO.IO.Resources
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
 
-                    if (index == 302)
+                    if (index == 1)
                     {
 
                     }
@@ -594,18 +595,6 @@ namespace ClassicUO.IO.Resources
                                             }
 
                                         }
-                                        else
-                                        {
-                                            ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
-                                            if (index == 46)
-                                            {
-                                                if (j == (int)HIGHT_ANIMATION_GROUP.HAG_FLY)
-                                                {
-
-                                                }
-                                            }
-
-                                        }
                                     }
                                 }
                             }
@@ -642,6 +631,10 @@ namespace ClassicUO.IO.Resources
                             -1, -1
                         };
 
+                        if (index == 1)
+                        {
+
+                        }
                        
 
                         switch (DataIndex[checkIndex].Type)
@@ -944,7 +937,7 @@ namespace ClassicUO.IO.Resources
                             //    }
                             //}
 
-                            if (animID == 735)
+                            if (animID == 1)
                             {
 
                             }
@@ -1719,7 +1712,7 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
-                return d.Address != 0 || d.IsUOP;
+                return (d.Address != 0 && d.Size == 0) || d.IsUOP;
             }
 
             return false;
@@ -1730,7 +1723,7 @@ namespace ClassicUO.IO.Resources
             if (animDir.IsUOP)
                 return TryReadUOPAnimDimension(ref animDir);
 
-            if (animDir.Address == 0)
+            if (animDir.Address == 0 && animDir.Size == 0)
                 return false;
 
             UOFileMul file = _files[animDir.FileIndex];
@@ -2022,7 +2015,7 @@ namespace ClassicUO.IO.Resources
 
                 ref AnimationDirection direction1 = ref DataIndex[id].Groups[animGroup].Direction[0];
 
-                if (direction1.Address != 0)
+                if (direction1.Address != 0 && direction1.Size != 0)
                 {
                     if (!direction1.IsVerdata)
                     {
