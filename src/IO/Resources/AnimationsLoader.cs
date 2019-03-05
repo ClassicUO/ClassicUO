@@ -174,14 +174,15 @@ namespace ClassicUO.IO.Resources
                 findID *= animIdxBlockSize;
 
                 if (mobTypes.TryGetValue(i, out var t))
+                {
                     DataIndex[i].Flags = t.Item2;
+                }
+
 
                 if (findID >= idxfile0.Length)
                 {
                     if (t != null)
                         DataIndex[i].Type = t.Item1;
-                    //if (mobTypes.TryGetValue(i, out var t))
-                    //    DataIndex[i].Type = t;
 
                     DataIndex[i].Groups = new AnimationGroup[100];
 
@@ -376,6 +377,12 @@ namespace ClassicUO.IO.Resources
                                 dataIndex.BaseSize = dataCheckIndex.BaseSize;
                                 //
 
+                                if (index == 796)
+                                {
+
+                                }
+                                
+
                                 dataIndex.Address = dataCheckIndex.BaseAddress;
                                 dataIndex.Size = dataCheckIndex.BaseSize;
 
@@ -413,10 +420,11 @@ namespace ClassicUO.IO.Resources
                         DataIndex[index].Graphic = (ushort)checkIndex;
                         DataIndex[index].Color = (ushort)color;
 
-                        break;
+                        //break;
                     }
                 }
             }
+
 
 
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Bodyconv.def")))
@@ -453,7 +461,7 @@ namespace ClassicUO.IO.Resources
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-                   
+
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
                         animFile = 1;
@@ -629,15 +637,19 @@ namespace ClassicUO.IO.Resources
                                         if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
                                             ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
-                                           
+
+    
                                             dataindex.PatchedAddress = aidx->Position;
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
 
+
                                             if (dataindex.IsBodyDef)
                                             {
-                                                dataindex.Address = dataindex.BaseAddress;
-                                                dataindex.Size = dataindex.BaseSize;
+                                                dataindex.Address = dataindex.BaseAddress = 0;
+                                                dataindex.Size = dataindex.BaseSize = 0;
+                                                //dataindex.Address = dataindex.PatchedAddress;
+                                                //dataindex.Size = dataindex.PatchedSize;
                                             }
 
                                         }
@@ -650,18 +662,17 @@ namespace ClassicUO.IO.Resources
             }
 
 
-
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
             {
                 while (defReader.Next())
                 {
-                    ushort index = (ushort) defReader.ReadInt();
+                    ushort index = (ushort)defReader.ReadInt();
                     if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     int[] group = defReader.ReadGroup();
 
-                    ushort color = (ushort) defReader.ReadInt();
+                    ushort color = (ushort)defReader.ReadInt();
 
                     for (int i = 0; i < group.Length; i++)
                     {
@@ -702,6 +713,7 @@ namespace ClassicUO.IO.Resources
                         {
                             for (byte d = 0; d < 5; d++)
                             {
+
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
@@ -741,12 +753,11 @@ namespace ClassicUO.IO.Resources
 
                         DataIndex[index].Type = DataIndex[checkIndex].Type;
                         DataIndex[index].Flags = DataIndex[checkIndex].Flags;
-                        DataIndex[index].Graphic = (ushort) checkIndex;
+                        DataIndex[index].Graphic = (ushort)checkIndex;
                         DataIndex[index].Color = color;
                     }
                 }
             }
-
 
 
 
@@ -1240,10 +1251,6 @@ namespace ClassicUO.IO.Resources
                         else if (DataIndex[i].Groups[g].Direction[d].FileIndex == 2)
                             replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
 
-
-                        //if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
-                        //    continue;
-
                         if (replace)
                         {
                             DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].PatchedAddress;
@@ -1251,8 +1258,16 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
-                            DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
+                            if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
+                            {
+                                DataIndex[i].Groups[g].Direction[d].Address = 0;
+                                DataIndex[i].Groups[g].Direction[d].Size = 0;
+                            }
+                            else
+                            {
+                                DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
+                                DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
+                            }
                         }
                     }
                 }
