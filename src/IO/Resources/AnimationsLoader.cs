@@ -1721,8 +1721,7 @@ namespace ClassicUO.IO.Resources
             if (animDir.Address + startAddress >= startAddress + file.Length)
             {
                 animDir = DataIndex[DataIndex[AnimID].Graphic].Groups[AnimGroup].Direction[Direction];
-                file = _files[animDir.FileIndex];
-                startAddress = (long)file.StartAddress;
+                startAddress = (long) _files[animDir.FileIndex].StartAddress;
             }
 
             _reader.SetData((IntPtr)(startAddress + animDir.Address), animDir.Size);
