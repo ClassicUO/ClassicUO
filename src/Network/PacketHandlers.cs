@@ -3064,7 +3064,7 @@ namespace ClassicUO.Network
             byte[] data = p.ReadArray((int)clen);
             byte[] decData = new byte[dlen];
             ZLib.Decompress(data, 0, decData, dlen);
-            string layout = Encoding.UTF8.GetString(decData);
+            string layout = Encoding.UTF8.GetString(decData).Trim('\0');
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
 

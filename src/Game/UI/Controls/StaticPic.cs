@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Collections.Generic;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -43,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
+        public StaticPic(List<string> parts) : this(Graphic.Parse(parts[3]), parts.Count > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
