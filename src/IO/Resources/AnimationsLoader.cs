@@ -389,9 +389,28 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            startAnimID = realAnimID * 65 + 9000;
-                            groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            if (realAnimID < 400)
+                            {
+                                startAnimID = realAnimID * 65 + 9000;
+                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                            }
+                            else
+                            {
+                                startAnimID = (realAnimID - 200) * 175;
+                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
+                            }
                         }
+
+                        //if (realAnimID < 200)
+                        //{
+                        //    startAnimID = realAnimID * 110;
+                        //    groupType = ANIMATION_GROUPS_TYPE.MONSTER;
+                        //}
+                        //else
+                        //{
+                        //    startAnimID = realAnimID * 65 + 9000;
+                        //    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                        //}
                        
                     }
                     else if (anim[1] != -1 && maxAddress3.HasValue && maxAddress3 != 0)
