@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -143,7 +144,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 ref IndexAnimation index = ref DataIndex[id];
 
-                                mobTypes[id] = Tuple.Create((ANIMATION_GROUPS_TYPE)i, 0x80000000 | number);
+                                //mobTypes[id] = Tuple.Create((ANIMATION_GROUPS_TYPE)i, 0x80000000 | number);
 
                                 index.Type = (ANIMATION_GROUPS_TYPE)i;
                                 index.Flags = 0x80000000 | number;
@@ -191,8 +192,8 @@ namespace ClassicUO.IO.Resources
 
                 if (findID >= idxfile0.Length)
                 {
-                    if (t != null)
-                        DataIndex[i].Type = t.Item1;
+                    //if (t != null)
+                    //    DataIndex[i].Type = t.Item1;
 
                     DataIndex[i].Groups = new AnimationGroup[100];
 
@@ -364,6 +365,11 @@ namespace ClassicUO.IO.Resources
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
+
+                    if (index == 46)
+                    {
+
+                    }
 
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
@@ -565,6 +571,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+            List<int> ind = new List<int>();
 
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
             {
@@ -635,22 +642,32 @@ namespace ClassicUO.IO.Resources
                                 //    }
                                 //}
 
-                                if (dataIndex.BaseAddress == 0)
-                                    continue;
-
-                                ////TODO: comm
-                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
-                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
-                                ////
-
                                 if (index == 46)
                                 {
 
                                 }
 
 
-                                //dataIndex.Address = dataCheckIndex.BaseAddress;
-                                //dataIndex.Size = dataCheckIndex.BaseSize;
+                                //if (dataIndex.BaseAddress == 0)
+                                //if (dataIndex.PatchedAddress != 0)
+                                //{
+                                //    dataIndex.BaseAddress = dataIndex.PatchedAddress;
+                                //    dataIndex.BaseSize = dataIndex.PatchedSize;
+
+                                //    if (!ind.Contains(index))
+                                //        ind.Add(index);
+                                //    continue;
+                                //}
+
+                                ////TODO: comm
+                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
+                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
+                                ////
+
+
+
+                                dataIndex.Address = dataIndex.BaseAddress;
+                                dataIndex.Size = dataIndex.BaseSize;
 
                                 if (dataIndex.PatchedAddress == 0)
                                 {
@@ -689,6 +706,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+            //ind.ForEach(s => Console.WriteLine(s));
 
             //using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
             //{
@@ -787,7 +805,7 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-
+            ind.ForEach(s => Console.WriteLine(s));
 
             byte maxGroup = 0;
 
@@ -1668,9 +1686,9 @@ namespace ClassicUO.IO.Resources
 
             if (animDir.Address + startAddress >= startAddress + file.Length)
             {
-                animDir.FileIndex = animDir.FileIndexPatched;
-                file = _files[animDir.FileIndex];
-                startAddress = (long) file.StartAddress;
+                //animDir.FileIndex = animDir.FileIndexPatched;
+                //file = _files[animDir.FileIndex];
+                //startAddress = (long) file.StartAddress;
             }
 
             _reader.SetData((IntPtr)(startAddress + animDir.Address), animDir.Size);
