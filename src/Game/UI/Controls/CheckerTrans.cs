@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Renderer;
 
@@ -38,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
         //    AcceptMouseInput = false;
         //}
 
-        public CheckerTrans(string[] parts)
+        public CheckerTrans(List<string> parts)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Collections.Generic;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -46,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = heigth;
         }
 
-        public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
+        public GumpPicTiled(List<string> parts) : this(Graphic.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

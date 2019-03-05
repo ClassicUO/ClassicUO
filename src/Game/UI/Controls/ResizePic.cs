@@ -19,7 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic(List<string> parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

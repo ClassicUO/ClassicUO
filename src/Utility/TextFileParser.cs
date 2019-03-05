@@ -9,22 +9,19 @@ namespace ClassicUO.Utility
     internal class TextFileParser
     {
         private readonly char[] _delimiters, _comments, _quotes;
-        private readonly string _string;
-        private readonly long _Size;
+        private string _string;
+        private int _Size;
         private bool _trim;
         private int _pos = 0;
         private int _eol;
 
-        public TextFileParser(FileInfo file, char[] delimiters, char[] comments, char[] quotes)
+        public TextFileParser(string str, char[] delimiters, char[] comments, char[] quotes)
         {
-            if (file.Length > 0x100000)//1megabyte limit of string file
-                throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
-
             _delimiters = delimiters;
             _comments = comments;
             _quotes = quotes;
-            _Size = file.Length;
-            _string = File.ReadAllText(file.FullName);
+            _Size = str.Length;
+            _string = str;
         }
 
         internal void Restart()
@@ -43,14 +40,14 @@ namespace ClassicUO.Utility
 
         internal bool IsEOF()
         {
-            return _pos >= _string.Length;
+            return _pos >= _Size;
         }
 
         private void GetEOL()
         {
-            for(int i = _pos; i < _string.Length; i++)
+            for(int i = _pos; i < _Size; i++)
             {
-                if (_string[i] == '\n' || i + 1 >= _string.Length)
+                if (_string[i] == '\n' || i + 1 >= _Size)
                 {
                     _eol = i;
                     break;
@@ -118,7 +115,7 @@ namespace ClassicUO.Utility
         {
             StringBuilder result = new StringBuilder();
 
-            while (_pos < _string.Length && _string[_pos] != '\n')
+            while (_pos < _Size && _string[_pos] != '\n')
             {
                 if (IsDelimiter())
                     break;
@@ -193,7 +190,7 @@ namespace ClassicUO.Utility
             _trim = trim;
             List<string> result = new List<string>();
 
-            if (_pos < _string.Length)
+            if (_pos < _Size)
             {
                 GetEOL();
 
@@ -215,6 +212,34 @@ namespace ClassicUO.Utility
                 }
 
                 _pos = _eol + 1;
+            }
+
+            return result;
+        }
+
+        internal List<string> GetTokens(string str, bool trim = true)
+        {
+            _trim = trim;
+            List<string> result = new List<string>();
+
+            _pos = 0;
+            _string = str;
+            _Size = str.Length;
+            _eol = _Size - 1;
+
+            SaveRawLine();
+
+            while (_pos < _eol)
+            {
+                SkipToData();
+
+                if (IsComment())
+                    break;
+
+                string buf = ObtainQuotedData();
+
+                if (buf.Length > 0)
+                    result.Add(buf);
             }
 
             return result;

@@ -16,8 +16,10 @@ namespace ClassicUO.IO.Resources
             FileInfo file = new FileInfo(Path.Combine(FileManager.UoFolderPath, "Prof.txt"));
             if (file.Exists)
             {
+                if (file.Length > 0x100000)//1megabyte limit of string file
+                    throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
                 //what if file doesn't exist? we skip section completely...directly into advanced selection
-                TextFileParser read = new TextFileParser(file, new char[] { ' ', '\t', ',' }, new char[] { '#', ';' }, new char[] { '"', '"' });
+                TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new char[] { ' ', '\t', ',' }, new char[] { '#', ';' }, new char[] { '"', '"' });
 
                 while (!read.IsEOF())
                 {
