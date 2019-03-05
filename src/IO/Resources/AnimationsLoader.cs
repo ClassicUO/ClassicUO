@@ -540,8 +540,11 @@ namespace ClassicUO.IO.Resources
                                     {
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset + d) * animIdxBlockSize);
 
-                                        if ((long)aidx >= (long)maxaddress)
+
+                                        if ((long) aidx >= (long) maxaddress)
+                                        {
                                             break;
+                                        }
                                        
                                         if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
@@ -551,7 +554,8 @@ namespace ClassicUO.IO.Resources
                                             {
 
                                             }
-    
+
+                                          
                                             dataindex.PatchedAddress = aidx->Position;
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
@@ -560,6 +564,19 @@ namespace ClassicUO.IO.Resources
                                             {
                                                 //dataindex.Address = dataindex.BaseAddress = 0;
                                                 //dataindex.Size = dataindex.BaseSize = 0;
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
+
+                                            if (index == 46)
+                                            {
+                                                if (j == (int)HIGHT_ANIMATION_GROUP.HAG_FLY)
+                                                {
+
+                                                }
                                             }
 
                                         }
@@ -641,12 +658,18 @@ namespace ClassicUO.IO.Resources
 
                                 //    }
                                 //}
-
                                 if (index == 46)
                                 {
+                                    if (j == (int)HIGHT_ANIMATION_GROUP.HAG_FLY)
+                                    {
 
+                                    }
                                 }
 
+                                if (dataIndex.BaseAddress == 0 && dataIndex.PatchedAddress == 0)
+                                {
+                                    continue;
+                                }
 
                                 //if (dataIndex.BaseAddress == 0)
                                 //if (dataIndex.PatchedAddress != 0)
