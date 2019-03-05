@@ -366,7 +366,7 @@ namespace ClassicUO.IO.Resources
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
 
-                    if (index == 46)
+                    if (index == 302)
                     {
 
                     }
@@ -399,21 +399,29 @@ namespace ClassicUO.IO.Resources
                         animFile = 2;
                         realAnimID = (ushort)anim[1];
 
-                        if (realAnimID < 200)
+                        if (realAnimID < 300)
                         {
-                            startAnimID = realAnimID * 110;
+                            if (FileManager.ClientVersion < ClientVersions.CV_70130)
+                                startAnimID = realAnimID * 110;
+                            else
+                                startAnimID = realAnimID * 65 + 9000;
+
                             groupType = ANIMATION_GROUPS_TYPE.MONSTER;
                         }
                         else
                         {
                             if (realAnimID < 400)
                             {
-                                startAnimID = realAnimID * 65 + 9000;
+                                if (FileManager.ClientVersion < ClientVersions.CV_70130)
+                                    startAnimID = realAnimID * 65;
+                                else
+                                    startAnimID = 33000 + ((realAnimID - 300) * 110);
+
                                 groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
                             }
                             else
                             {
-                                startAnimID = (realAnimID - 200) * 175;
+                                startAnimID = 35000 + ((realAnimID - 400) * 175);
                                 groupType = ANIMATION_GROUPS_TYPE.HUMAN;
                             }
                         }
@@ -550,7 +558,7 @@ namespace ClassicUO.IO.Resources
                                         {
                                             ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
-                                            if (index == 11)
+                                            if (index == 302)
                                             {
 
                                             }
@@ -570,7 +578,6 @@ namespace ClassicUO.IO.Resources
                                         else
                                         {
                                             ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
-
                                             if (index == 46)
                                             {
                                                 if (j == (int)HIGHT_ANIMATION_GROUP.HAG_FLY)
@@ -664,6 +671,10 @@ namespace ClassicUO.IO.Resources
                                     {
 
                                     }
+                                }
+
+                                if (index == 0x12E)
+                                {
                                 }
 
                                 if (dataIndex.BaseAddress == 0 && dataIndex.PatchedAddress == 0)
@@ -1709,9 +1720,9 @@ namespace ClassicUO.IO.Resources
 
             if (animDir.Address + startAddress >= startAddress + file.Length)
             {
-                //animDir.FileIndex = animDir.FileIndexPatched;
-                //file = _files[animDir.FileIndex];
-                //startAddress = (long) file.StartAddress;
+                animDir = DataIndex[DataIndex[AnimID].Graphic].Groups[AnimGroup].Direction[Direction];
+                file = _files[animDir.FileIndex];
+                startAddress = (long)file.StartAddress;
             }
 
             _reader.SetData((IntPtr)(startAddress + animDir.Address), animDir.Size);
