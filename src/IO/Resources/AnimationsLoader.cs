@@ -53,6 +53,14 @@ namespace ClassicUO.IO.Resources
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
 
 
+        struct BodyDefEntry
+        {
+            public int OriginalGraphic;
+            public int NewGraphic;
+            public int NewHue;
+        }
+
+
 
         public override void Load()
         {
@@ -145,6 +153,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
+            
 
 
             for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
@@ -317,113 +327,6 @@ namespace ClassicUO.IO.Resources
             }
 
 
-            using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
-            {
-                while (defReader.Next())
-                {
-                    int index = defReader.ReadInt();
-                    if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                        continue;
-
-                    int[] group = defReader.ReadGroup();
-                    int color = defReader.ReadInt();
-
-                    for (int i = 0; i < group.Length; i++)
-                    {
-                        int checkIndex = group[i];
-                        if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            continue;
-
-                        int count = 0;
-
-                        int[] ignoreGroups =
-                        {
-                            -1, -1
-                        };
-
-                        switch (DataIndex[checkIndex].Type)
-                        {
-                            case ANIMATION_GROUPS_TYPE.MONSTER:
-                            case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                                count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
-                                ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
-                                break;
-                            case ANIMATION_GROUPS_TYPE.HUMAN:
-                            case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                                count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
-                                ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
-                                break;
-                            case ANIMATION_GROUPS_TYPE.ANIMAL:
-                                count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
-                                ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
-                                break;
-                        }
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            if (j == ignoreGroups[0] || j == ignoreGroups[1])
-                                continue;
-
-                            for (byte d = 0; d < 5; d++)
-                            {
-                                ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
-                                ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
-
-                                //TODO: comm
-                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
-                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
-                                //
-
-                                if (index == 796)
-                                {
-
-                                }
-                                
-
-                                dataIndex.Address = dataCheckIndex.BaseAddress;
-                                dataIndex.Size = dataCheckIndex.BaseSize;
-
-                                if (dataIndex.PatchedAddress == 0)
-                                {
-                                    dataIndex.PatchedAddress = dataCheckIndex.PatchedAddress;
-                                    dataIndex.PatchedSize = dataCheckIndex.PatchedSize;
-                                    dataIndex.FileIndex = dataCheckIndex.FileIndex;
-                                }
-
-                                if (dataIndex.BaseAddress == 0)
-                                {
-                                    dataIndex.BaseAddress = dataIndex.PatchedAddress;
-                                    dataIndex.BaseSize = dataIndex.PatchedSize;
-                                    dataIndex.Address = dataIndex.BaseAddress;
-                                    dataIndex.Size = dataIndex.BaseSize;
-                                }
-
-                                if (dataIndex.FileIndex != dataCheckIndex.FileIndex)
-                                    dataIndex.FileIndexPatched = dataCheckIndex.FileIndex;
-
-                                dataIndex.IsBodyDef = true;
-
-                                if (dataCheckIndex.FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
-                                {
-                                    DataIndex[checkIndex].Type = t.Item1;
-                                    DataIndex[checkIndex].Flags = t.Item2;
-                                }
-
-                            }
-                        }
-
-                        DataIndex[index].Type = DataIndex[checkIndex].Type;
-                        DataIndex[index].Flags = DataIndex[checkIndex].Flags;
-                        DataIndex[index].Graphic = (ushort)checkIndex;
-                        DataIndex[index].Color = (ushort)color;
-
-                        //break;
-                    }
-                }
-            }
 
 
 
@@ -638,18 +541,19 @@ namespace ClassicUO.IO.Resources
                                         {
                                             ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
+                                            if (index == 11)
+                                            {
+
+                                            }
     
                                             dataindex.PatchedAddress = aidx->Position;
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
 
-
                                             if (dataindex.IsBodyDef)
                                             {
-                                                dataindex.Address = dataindex.BaseAddress = 0;
-                                                dataindex.Size = dataindex.BaseSize = 0;
-                                                //dataindex.Address = dataindex.PatchedAddress;
-                                                //dataindex.Size = dataindex.PatchedSize;
+                                                //dataindex.Address = dataindex.BaseAddress = 0;
+                                                //dataindex.Size = dataindex.BaseSize = 0;
                                             }
 
                                         }
@@ -657,6 +561,117 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+
+            using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
+            {
+                while (defReader.Next())
+                {
+                    int index = defReader.ReadInt();
+                    if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                        continue;
+
+                    int[] group = defReader.ReadGroup();
+                    int color = defReader.ReadInt();
+
+                    for (int i = 0; i < group.Length; i++)
+                    {
+                        int checkIndex = group[i];
+                        if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            continue;
+
+
+
+                        int count = 0;
+
+                        int[] ignoreGroups =
+                        {
+                            -1, -1
+                        };
+
+                        switch (DataIndex[checkIndex].Type)
+                        {
+                            case ANIMATION_GROUPS_TYPE.MONSTER:
+                            case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                                count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
+                                ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
+                                ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
+                                break;
+                            case ANIMATION_GROUPS_TYPE.HUMAN:
+                            case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+                                count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+                                ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
+                                ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
+                                break;
+                            case ANIMATION_GROUPS_TYPE.ANIMAL:
+                                count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                                ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
+                                ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
+                                break;
+                        }
+
+                        for (int j = 0; j < count; j++)
+                        {
+                            if (j == ignoreGroups[0] || j == ignoreGroups[1])
+                                continue;
+
+                            for (byte d = 0; d < 5; d++)
+                            {
+                                ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
+                                ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
+
+
+
+                                ////TODO: comm
+                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
+                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
+                                ////
+
+                                if (index == 46)
+                                {
+
+                                }
+
+
+                                //dataIndex.Address = dataCheckIndex.BaseAddress;
+                                //dataIndex.Size = dataCheckIndex.BaseSize;
+
+                                if (dataIndex.PatchedAddress == 0)
+                                {
+                                    dataIndex.PatchedAddress = dataCheckIndex.PatchedAddress;
+                                    dataIndex.PatchedSize = dataCheckIndex.PatchedSize;
+                                    dataIndex.FileIndex = dataCheckIndex.FileIndex;
+                                }
+
+                                if (dataIndex.BaseAddress == 0)
+                                {
+                                    dataIndex.BaseAddress = dataIndex.PatchedAddress;
+                                    dataIndex.BaseSize = dataIndex.PatchedSize;
+                                    dataIndex.Address = dataIndex.BaseAddress;
+                                    dataIndex.Size = dataIndex.BaseSize;
+                                }
+
+                                //if (dataIndex.FileIndex != dataCheckIndex.FileIndex)
+                                //    dataIndex.FileIndexPatched = dataCheckIndex.FileIndex;
+
+                                //dataIndex.IsBodyDef = true;
+
+                                if (dataCheckIndex.FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
+                                {
+                                    DataIndex[checkIndex].Type = t.Item1;
+                                    DataIndex[checkIndex].Flags = t.Item2;
+                                }
+
+                            }
+                        }
+
+                        DataIndex[index].Type = DataIndex[checkIndex].Type;
+                        DataIndex[index].Flags = DataIndex[checkIndex].Flags;
+                        DataIndex[index].Graphic = (ushort)checkIndex;
+                        DataIndex[index].Color = (ushort)color;
                     }
                 }
             }
@@ -1258,12 +1273,12 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
-                            {
-                                DataIndex[i].Groups[g].Direction[d].Address = 0;
-                                DataIndex[i].Groups[g].Direction[d].Size = 0;
-                            }
-                            else
+                            //if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
+                            //{
+                            //    DataIndex[i].Groups[g].Direction[d].Address = 0;
+                            //    DataIndex[i].Groups[g].Direction[d].Size = 0;
+                            //}
+                            //else
                             {
                                 DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
                                 DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
