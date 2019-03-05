@@ -562,6 +562,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }); // Plus
 
                 int status = 0;
+                const int increm = 100;
 
                 float t0 = Engine.Ticks;
 
@@ -571,8 +572,11 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t0)
                         {
-                            t0 = Engine.Ticks + 50;
+                            t0 = Engine.Ticks + (increm >> _StepChanger);
                             OnButtonClick(0);
+                            _StepsDone++;
+                            if (_StepsDone % 5 == 0)
+                                _StepChanger++;
                         }
                     }
                     else if (Engine.Ticks > t0)
@@ -585,9 +589,13 @@ namespace ClassicUO.Game.UI.Gumps
                 buttonAdd.MouseDown += (sender, e) =>
                 {
                     status = 1;
-                    t0 = Engine.Ticks + 200;
+                    t0 = Engine.Ticks + (increm * 2);
                 };
-                buttonAdd.MouseUp += (sender, e) => { status = 0; };
+                buttonAdd.MouseUp += (sender, e) =>
+                {
+                    status = 0;
+                    _StepsDone = _StepChanger = 1;
+                };
 
 
                 Button buttonRemove;
@@ -605,8 +613,11 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t1)
                         {
-                            t1 = Engine.Ticks + 50;
+                            t1 = Engine.Ticks + (increm >> _StepChanger);
                             OnButtonClick(1);
+                            _StepsDone++;
+                            if (_StepsDone % 5 == 0)
+                                _StepChanger++;
                         }
                     }
                     else if (Engine.Ticks > t1)
@@ -619,9 +630,13 @@ namespace ClassicUO.Game.UI.Gumps
                 buttonRemove.MouseDown += (sender, e) =>
                 {
                     status = 1;
-                    t1 = Engine.Ticks + 500;
+                    t1 = Engine.Ticks + (increm * 2);
                 };
-                buttonRemove.MouseUp += (sender, e) => { status = 0; };
+                buttonRemove.MouseUp += (sender, e) =>
+                {
+                    status = 0;
+                    _StepsDone = _StepChanger = 1;
+                };
 
 
                 Width = 220;
