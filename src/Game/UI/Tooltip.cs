@@ -199,20 +199,25 @@ namespace ClassicUO.Game.UI
 
 		public unsafe string FormatTitle(string text)
 		{
-			var index = 0;
-
-			fixed (char* value = text)
+			if (text != default(String))
 			{
-				while (index < text.Length)
+				var index = 0;
+
+				fixed (char* value = text)
 				{
-					if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-						value[index] = Char.ToUpper(value[index]);
+					while (index < text.Length)
+					{
+						if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
+							value[index] = Char.ToUpper(value[index]);
 
-					index++;
+						index++;
+					}
+
+					return new string(value);
 				}
-
-				return new string(value);
 			}
+
+			return text;
 		}
 
         public void SetText(string text, int maxWidth = 0)
