@@ -54,22 +54,25 @@ namespace ClassicUO.Game.UI.Gumps
 		{
 			base.Update(totalMS, frameMS);
 
+			var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+			var viewport = var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+
 			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
 			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;
 			int screenRight = screenLeft + Engine.Profile.Current.GameWindowSize.X;
 			int screenBottom = screenTop + Engine.Profile.Current.GameWindowSize.Y;
 
-			var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+			
 
-			int screenCenterX = (int)((screenRight - screenLeft) / 2);
-			int screenCenterY = (int)((screenBottom - screenTop) / 2);
+			var screenCenterX = ((screenRight - screenLeft) / 2);
+			var screenCenterY = ((screenBottom - screenTop) / 2);
 
-			int offsetX = _mx - World.Player.X;
-			int offsetY = _my - World.Player.Y;
+			var offsetX = ((_mx - World.Player.X) / scale);
+			var offsetY = ((_my - World.Player.Y) / scale);
 			var offsetZ = World.Map.GetTileZ(_mx, _my);
 
-			int drawX = screenLeft + (int)(screenCenterX + (offsetX - offsetY) * 22) + 3;
-			int drawY = screenTop + (int)(screenCenterY + (offsetX + offsetY) * 22) + 3;
+			int drawX = screenLeft + (int)((screenCenterX + (offsetX - offsetY) * 22));
+			int drawY = screenTop + (int)((screenCenterY + (offsetX + offsetY) * 22));
 
 			var direction = DirectionHelper.DirectionFromPoints(
 				new Point(screenCenterX, screenCenterY),
@@ -83,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 			drawX += (int)((_offsetTableX[(int)direction] * (arrowWidth + 22)) - (arrowWidth / 2));
 			drawY += (int)((_offsetTableY[(int)direction] * (arrowHeight + 22)) - (arrowHeight / 2));
-			drawY -= (int)(offsetZ * 3 / scale);
+			drawY -= (int)(offsetZ * 3);
 
 			if (drawX < screenLeft) drawX = screenLeft;
 			if (drawY < screenTop) drawY = screenTop;
