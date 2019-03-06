@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 			base.Update(totalMS, frameMS);
 
 			var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
-			var viewport = var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+			var viewport = Engine.SceneManager.GetScene<GameScene>().Scale;
 
 			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
 			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;
@@ -69,14 +69,17 @@ namespace ClassicUO.Game.UI.Gumps
 
 			var offsetX = ((_mx - World.Player.X) / scale);
 			var offsetY = ((_my - World.Player.Y) / scale);
-			var offsetZ = World.Map.GetTileZ(_mx, _my);
+			var offsetZ = World.Map.GetTileZ(_mx, _my) / scale;
 
-			int drawX = screenLeft + (int)((screenCenterX + (offsetX - offsetY) * 22));
-			int drawY = screenTop + (int)((screenCenterY + (offsetX + offsetY) * 22));
+			int relativeX = (int)((screenCenterX + (offsetX - offsetY) * 22));
+			int relativeY = (int)((screenCenterY + (offsetX + offsetY) * 22));
 
 			var direction = DirectionHelper.DirectionFromPoints(
 				new Point(screenCenterX, screenCenterY),
-				new Point(drawX, drawY));
+				new Point(relativeX, relativeY));
+
+			int drawX = screenLeft + relativeX;
+			int drawY = screenTop + relativeY;
 
 			if (_direction != direction || _arrow == null)
 				UpdateArrow(direction);
