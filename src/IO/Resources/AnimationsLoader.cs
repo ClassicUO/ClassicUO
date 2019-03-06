@@ -33,16 +33,8 @@ namespace ClassicUO.IO.Resources
         private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
         private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>(); 
 
-       
-        public AnimationsLoader(string path) : base(path)
-        {
-        }
+      
 
-        public AnimationsLoader(string[] paths) : base(paths)
-        {
-        }
-
-        public AnimationsLoader() { }
 
         public ushort Color { get; set; }
         public byte AnimGroup { get; set; }
@@ -91,8 +83,6 @@ namespace ClassicUO.IO.Resources
             long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
 
-            Dictionary<int, Tuple<ANIMATION_GROUPS_TYPE, uint>> mobTypes = new Dictionary<int, Tuple<ANIMATION_GROUPS_TYPE, uint>>();
-
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
                 string[] typeNames = new string[5]
@@ -135,9 +125,6 @@ namespace ClassicUO.IO.Resources
                             {
                                 ref IndexAnimation index = ref DataIndex[id];
 
-
-                                //mobTypes[id] = Tuple.Create((ANIMATION_GROUPS_TYPE)i, 0x80000000 | number);
-
                                 index.Type = (ANIMATION_GROUPS_TYPE)i;
                                 index.Flags = 0x80000000 | number;
                                 break;
@@ -147,18 +134,12 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            
 
 
             for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
                 int findID = 0;
-
-                if (i == 479)
-                {
-
-                }
 
                 if (i < 200)
                 {
@@ -179,20 +160,11 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-
                 findID *= animIdxBlockSize;
-
-                if (mobTypes.TryGetValue(i, out var t))
-                {
-                    DataIndex[i].Flags = t.Item2;
-                }
 
 
                 if (findID >= idxfile0.Length)
                 {
-                    if (t != null)
-                        DataIndex[i].Type = t.Item1;
-
                     DataIndex[i].Groups = new AnimationGroup[100];
 
                     for (int j = 0; j < 100; j++)
@@ -289,18 +261,11 @@ namespace ClassicUO.IO.Resources
             {
                 while (defReader.Next())
                 {
-                    ushort body = (ushort) defReader.ReadInt();
-                    
+                    ushort body = (ushort) defReader.ReadInt();               
                     if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     ushort graphic = (ushort) defReader.ReadInt();
-
-                    if (graphic == 863)
-                    {
-
-                    }
-
                     if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
@@ -369,11 +334,6 @@ namespace ClassicUO.IO.Resources
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-
-                    if (index == 1)
-                    {
-
-                    }
 
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
@@ -571,8 +531,6 @@ namespace ClassicUO.IO.Resources
                                     {
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset + d) * animIdxBlockSize);
 
-
-
                                         if ((long) aidx >= (long) maxaddress)
                                         {
                                             break;
@@ -580,18 +538,11 @@ namespace ClassicUO.IO.Resources
                                        
                                         if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
-                                            ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
+                                            ref AnimationDirection dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
                                             dataindex.PatchedAddress = aidx->Position;
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
-
-                                            if (dataindex.IsBodyDef)
-                                            {
-                                                //dataindex.Address = dataindex.BaseAddress = 0;
-                                                //dataindex.Size = dataindex.BaseSize = 0;
-                                            }
-
                                         }
                                     }
                                 }
@@ -618,23 +569,12 @@ namespace ClassicUO.IO.Resources
                         if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
 
-
-
                         int count = 0;
 
                         int[] ignoreGroups =
                         {
                             -1, -1
                         };
-
-                        if (index == 1067)
-                        {
-
-                        }
-                        if (index == 863)
-                        {
-
-                        }
 
                         switch (DataIndex[checkIndex].Type)
                         {
@@ -662,55 +602,14 @@ namespace ClassicUO.IO.Resources
                             if (j == ignoreGroups[0] || j == ignoreGroups[1])
                                 continue;
 
-                            
-
                             for (byte d = 0; d < 5; d++)
                             {
                                 ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
                                 ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
 
-                                //if (index == 0x2E && j <= (int) HIGHT_ANIMATION_GROUP.HAG_FLY)
-                                //{
-                                //    if (j == (int) HIGHT_ANIMATION_GROUP.HAG_FLY)
-                                //    {
 
-                                //    }
-                                //}
-                                if (index == 46)
-                                {
-                                    if (j == (int)HIGHT_ANIMATION_GROUP.HAG_FLY)
-                                    {
-
-                                    }
-                                }
-
-                                if (index == 1067)
-                                {
-                                }
-
-                                //if (dataIndex.BaseAddress == 0 && dataIndex.PatchedAddress == 0)
-                                //{
-                                //    continue;
-                                //}
-
-                                //if (dataIndex.BaseAddress == 0)
-                                //if (dataIndex.PatchedAddress != 0)
-                                //{
-                                //    dataIndex.BaseAddress = dataIndex.PatchedAddress;
-                                //    dataIndex.BaseSize = dataIndex.PatchedSize;
-
-                                //    if (!ind.Contains(index))
-                                //        ind.Add(index);
-                                //    continue;
-                                //}
-
-                                ////TODO: comm
                                 dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
                                 dataIndex.BaseSize = dataCheckIndex.BaseSize;
-                                ////
-
-
-
                                 dataIndex.Address = dataIndex.BaseAddress;
                                 dataIndex.Size = dataIndex.BaseSize;
 
@@ -728,18 +627,6 @@ namespace ClassicUO.IO.Resources
                                     dataIndex.Address = dataIndex.BaseAddress;
                                     dataIndex.Size = dataIndex.BaseSize;
                                 }
-
-                                //if (dataIndex.FileIndex != dataCheckIndex.FileIndex)
-                                //    dataIndex.FileIndexPatched = dataCheckIndex.FileIndex;
-
-                                //dataIndex.IsBodyDef = true;
-
-                                if (dataCheckIndex.FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
-                                {
-                                    DataIndex[checkIndex].Type = t.Item1;
-                                    DataIndex[checkIndex].Flags = t.Item2;
-                                }
-
                             }
                         }
 
@@ -752,8 +639,6 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
-            //ind.ForEach(s => Console.WriteLine(s));
 
             //using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
             //{
@@ -1349,16 +1234,8 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            //if (DataIndex[i].Groups[g].Direction[d].IsBodyDef)
-                            //{
-                            //    DataIndex[i].Groups[g].Direction[d].Address = 0;
-                            //    DataIndex[i].Groups[g].Direction[d].Size = 0;
-                            //}
-                            //else
-                            {
-                                DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
-                                DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
-                            }
+                            DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
+                            DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
                         }
                     }
                 }
@@ -2333,10 +2210,6 @@ namespace ClassicUO.IO.Resources
         public bool IsVerdata;
         public long LastAccessTime;
         public uint[] FramesHashes;
-
-        public int FileIndexPatched;
-
-        public bool IsBodyDef;
     }
 
     internal readonly struct EquipConvData
