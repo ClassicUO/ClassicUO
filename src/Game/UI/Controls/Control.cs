@@ -47,6 +47,8 @@ namespace ClassicUO.Game.UI.Controls
 
     internal abstract class Control : IDrawableUI, IUpdateable, IColorable
     {
+        internal static int _StepsDone = 1;
+        internal static int _StepChanger = 1;
         private static SpriteTexture _debugTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;

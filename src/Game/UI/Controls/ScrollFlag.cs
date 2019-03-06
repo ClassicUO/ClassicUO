@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollFlag : Control, IScrollBar
     {
-        private const int TIME_BETWEEN_CLICKS = 500;
+        private const int TIME_BETWEEN_CLICKS = 150;
 
         private Point _clickPosition;
         private int _max, _min;
@@ -140,12 +140,15 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _timeUntilNextClick += TIME_BETWEEN_CLICKS;
                     if (_btUpClicked)
-                        Value -= ScrollStep;
+                        Value -= ScrollStep + _StepChanger;
 
                     if (_btDownClicked)
-                        Value += ScrollStep;
+                        Value += ScrollStep + _StepChanger;
+                    _StepsDone++;
+                    if (_StepsDone % 4 == 0)
+                        _StepChanger++;
                 }
-                _timeUntilNextClick -= (float)totalMS;
+                _timeUntilNextClick -= (float)frameMS;
             }
 
 
@@ -210,6 +213,7 @@ namespace ClassicUO.Game.UI.Controls
             _btDownClicked = false;
             _btUpClicked = false;
             _btnSliderClicked = false;
+            _StepChanger = _StepsDone = 1;
         }
 
         protected override void OnMouseOver(int x, int y)

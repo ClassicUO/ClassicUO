@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (entity.HasEquipment)
                 {
-                    entity.Equipment[item.ItemData.Layer] = null;
+                    entity.Equipment[ (int) item.Layer] = null;
                 }
 
                 entity.Items.ProcessDelta();

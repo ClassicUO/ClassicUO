@@ -40,6 +40,7 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class UIManager
     {
+        private static readonly char[] _splitchar = { ' ' };
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<Control> _gumps = new List<Control>();
         //private readonly List<object> _inputBlockingObjects = new List<object>();
@@ -70,7 +71,7 @@ namespace ClassicUO.Game.Managers
 
                     if (MouseOverControl.AcceptKeyboardInput)
                         _keyboardFocusControl = MouseOverControl;
-                    _mouseDownControls[(int) MouseButton.Left] = MouseOverControl;
+                    _mouseDownControls[(int)MouseButton.Left] = MouseOverControl;
                 }
                 else
                 {
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.Managers
                 //if (MouseOverControl == null)
                 //    return;
 
-                const int btn = (int) MouseButton.Left;
+                const int btn = (int)MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -122,7 +123,7 @@ namespace ClassicUO.Game.Managers
                 {
                     e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
                 }
-                
+
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
@@ -137,7 +138,7 @@ namespace ClassicUO.Game.Managers
 
                     if (MouseOverControl.AcceptKeyboardInput)
                         _keyboardFocusControl = MouseOverControl;
-                    _mouseDownControls[(int) MouseButton.Right] = MouseOverControl;
+                    _mouseDownControls[(int)MouseButton.Right] = MouseOverControl;
                 }
                 else
                 {
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.Managers
 
                 //if (MouseOverControl == null)
                 //    return;
-                const int btn = (int) MouseButton.Right;
+                const int btn = (int)MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -260,7 +261,7 @@ namespace ClassicUO.Game.Managers
                     _keyboardFocusControl = value;
                     value.OnFocusEnter();
                 }
-            } 
+            }
         }
 
         public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);
@@ -289,6 +290,8 @@ namespace ClassicUO.Game.Managers
             return _gumpPositionCache.TryGetValue(id, out pos);
         }
 
+        private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new char[] { ' ' }, new char[] { }, new char[] { '{', '}' });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new char[] { ' ' }, new char[] { }, new char[] { });
         public Control Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
             if (GetGumpCachePosition(gumpID, out Point pos))
@@ -309,271 +312,266 @@ namespace ClassicUO.Game.Managers
             };
             int group = 0;
             int page = 0;
-            int index = 0;
-
-            while (index < layout.Length)
+            
+            List<string> cmdlist = _parser.GetTokens(layout);
+            int cmdlen = cmdlist.Count;
+            
+            for (int cnt = 0; cnt<cmdlen; cnt++)
             {
-                if (layout.Substring(index) == "\0") break;
-                int begin = layout.IndexOf("{", index, StringComparison.Ordinal);
-                int end = layout.IndexOf("}", index + 1, StringComparison.Ordinal);
-
-                if (begin != -1 && end != -1)
+                List<string> gparams = _cmdparser.GetTokens(cmdlist[cnt], false);
+                if(gparams.Count == 0)
                 {
-                    string sub = layout.Substring(begin + 1, end - begin - 1).Trim();
-                    index = end;
-                    string[] gparams = Regex.Split(sub, @"\s+");
+                    continue;
+                }
 
-                    switch (gparams[0].ToLower())
-                    {
-                        case "button":
-                            gump.Add(new Button(gparams), page);
+                switch (gparams[0].ToLower())
+                {
+                    case "button":
+                        gump.Add(new Button(gparams), page);
 
-                            break;
-                        case "buttontileart":
-                            gump.Add(new Button(gparams)
+                        break;
+                    case "buttontileart":
+                        gump.Add(new Button(gparams)
+                        {
+                            //WantUpdateSize = false,
+                            ContainsByBounds = true,
+                        }, page);
+
+                        gump.Add(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
+                        {
+                            X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
+                            Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
+
+                            AcceptMouseInput = true,
+                        }, page);
+
+                        break;
+                    case "checkertrans":
+                        CheckerTrans t = new CheckerTrans(gparams);
+
+
+                        //for (int i = 0; i < gump.Children.Count; i++)
+                        for (int i = gump.Children.Count - 1; i >= 0; i--)
+                        {
+                            Control c = gump.Children[i];
+                            c.Initialize();
+                            if (c is CheckerTrans)
+                                break;
+
+                            c.IsTransparent = true;
+                            c.Alpha = 0.5f;
+
+                            if (t.Bounds.Intersects(c.Bounds))
                             {
-                                //WantUpdateSize = false,
-                                ContainsByBounds = true,
-                            }, page);
+                                //if (t.Bounds.Contains(c.Bounds))
+                                //{
+                                //    c.IsEnabled = false;
+                                //}
 
-                            gump.Add(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
-                            {
-                                X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
-                                Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
-
-                                AcceptMouseInput = true,
-                            }, page);
-
-                            break;
-                        case "checkertrans":
-                            CheckerTrans t = new CheckerTrans(gparams);
-
-
-                            //for (int i = 0; i < gump.Children.Count; i++)
-                            for (int i = gump.Children.Count - 1; i >= 0; i--)
-                            {
-                                Control c = gump.Children[i];
-                                c.Initialize();
-                                if (c is CheckerTrans)
-                                    break;
-
-                                c.IsTransparent = true;
-                                c.Alpha = 0.5f;
-
-                                if (t.Bounds.Intersects(c.Bounds))
+                                if (c is Button)
                                 {
-                                    //if (t.Bounds.Contains(c.Bounds))
-                                    //{
-                                    //    c.IsEnabled = false;
-                                    //}
-
-                                    if (c is Button)
-                                    {
-                                        c.Alpha = 1f;
-                                    }
-
-
-                                    //else
-                                    //    c.IsEnabled = false;
+                                    c.Alpha = 1f;
                                 }
+
+
+                                //else
+                                //    c.IsEnabled = false;
                             }
+                        }
 
-                            //float[] alpha = { 0, 0.5f };
+                        //float[] alpha = { 0, 0.5f };
 
-                            //bool checkTransparent(Control c, int start)
-                            //{
-                            //    bool transparent = false;
-                            //    for (int i = start; i < c.Children.Count; i++)
-                            //    {
-                            //        var control = c.Children[i];
+                        //bool checkTransparent(Control c, int start)
+                        //{
+                        //    bool transparent = false;
+                        //    for (int i = start; i < c.Children.Count; i++)
+                        //    {
+                        //        var control = c.Children[i];
 
-                            //        bool canDraw = c.Page == 0 || control.Page == 0 || c.Page == control.Page;
+                        //        bool canDraw = c.Page == 0 || control.Page == 0 || c.Page == control.Page;
 
-                            //        if (canDraw && control is CheckerTrans)
-                            //        {
-                            //            transparent = true;
-                            //        }
-                            //    }
+                        //        if (canDraw && control is CheckerTrans)
+                        //        {
+                        //            transparent = true;
+                        //        }
+                        //    }
 
-                            //    return transparent;
-                            //}
-
-
-                            //bool trans = checkTransparent(gump, 0);
-
-                            //for (int i = gump.Children.Count - 1; i >= 0; i--)
-                            //{
-                            //    Control g = gump.Children[i];
-                            //    g.IsTransparent = true;
-
-                            //    if (g is CheckerTrans)
-                            //    {
-                            //        trans = checkTransparent(gump, i + 1);
-
-                            //        continue;
-                            //    }
-
-                            //    g.Alpha = alpha[trans ? 1 : 0];
-                            //}
+                        //    return transparent;
+                        //}
 
 
-                            gump.Add(t, page);
+                        //bool trans = checkTransparent(gump, 0);
+
+                        //for (int i = gump.Children.Count - 1; i >= 0; i--)
+                        //{
+                        //    Control g = gump.Children[i];
+                        //    g.IsTransparent = true;
+
+                        //    if (g is CheckerTrans)
+                        //    {
+                        //        trans = checkTransparent(gump, i + 1);
+
+                        //        continue;
+                        //    }
+
+                        //    g.Alpha = alpha[trans ? 1 : 0];
+                        //}
 
 
-                            break;
-                        case "croppedtext":
-                            gump.Add(new CroppedText(gparams, lines), page);
+                        gump.Add(t, page);
 
-                            break;
-                        case "gumppic":
-                            gump.Add(new GumpPic(gparams), page);
 
-                            break;
-                        case "gumppictiled":
-                            gump.Add(new GumpPicTiled(gparams), page);
+                        break;
+                    case "croppedtext":
+                        gump.Add(new CroppedText(gparams, lines), page);
 
-                            break;
-                        case "htmlgump":
-                            gump.Add(new HtmlControl(gparams, lines), page);
+                        break;
+                    case "gumppic":
+                        gump.Add(new GumpPic(gparams), page);
 
-                            break;
-                        case "xmfhtmlgump":
-                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
+                        break;
+                    case "gumppictiled":
+                        gump.Add(new GumpPicTiled(gparams), page);
 
-                            break;
-                        case "xmfhtmlgumpcolor":
-                            int color = int.Parse(gparams[8]);
+                        break;
+                    case "htmlgump":
+                        gump.Add(new HtmlControl(gparams, lines), page);
 
-                            if (color == 0x7FFF)
-                                color = 0x00FFFFFF;
-                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), color, true), page);
+                        break;
+                    case "xmfhtmlgump":
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
 
-                            break;
-                        case "xmfhtmltok":
-                            color = int.Parse(gparams[7]);
+                        break;
+                    case "xmfhtmlgumpcolor":
+                        int color = int.Parse(gparams[8]);
 
-                            if (color == 0x7FFF)
-                                color = 0x00FFFFFF;
-                            StringBuilder sb = null;
+                        if (color == 0x7FFF)
+                            color = 0x00FFFFFF;
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", FileManager.Cliloc.GetString(int.Parse(gparams[5])), color, true), page);
 
-                            if (gparams.Length > 9)
+                        break;
+                    case "xmfhtmltok":
+                        color = int.Parse(gparams[7]);
+
+                        if (color == 0x7FFF)
+                            color = 0x00FFFFFF;
+                        StringBuilder sb = null;
+
+                        if (gparams.Count > 9)
+                        {
+                            sb = new StringBuilder();
+                            sb.Append(gparams[9]);
+
+                            for (int i = 10; i < gparams.Count; i++)
                             {
-                                sb = new StringBuilder();
-                                sb.Append(gparams[9]);
-
-                                for (int i = 10; i < gparams.Length; i++)
-                                {
-                                    sb.Append('\t');
-                                    sb.Append(gparams[i]);
-                                }
+                                sb.Append(' ');
+                                sb.Append(gparams[i]);
                             }
+                        }
 
-                            gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? FileManager.Cliloc.GetString(int.Parse(gparams[8])) : FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? FileManager.Cliloc.GetString(int.Parse(gparams[8])) : FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
 
-                            break;
-                        case "page":
-                            page = int.Parse(gparams[1]);
+                        break;
+                    case "page":
+                        page = int.Parse(gparams[1]);
 
-                            break;
-                        case "resizepic":
-                            gump.Add(new ResizePic(gparams), page);
+                        break;
+                    case "resizepic":
+                        gump.Add(new ResizePic(gparams), page);
 
-                            break;
-                        case "text":
-                            gump.Add(new Label(gparams, lines), page);
+                        break;
+                    case "text":
+                        gump.Add(new Label(gparams, lines), page);
 
-                            break;
-                        case "textentrylimited":
-                        case "textentry":
-                            gump.Add(new TextBox(gparams, lines), page);
+                        break;
+                    case "textentrylimited":
+                    case "textentry":
+                        gump.Add(new TextBox(gparams, lines), page);
 
-                            break;
-                        case "tilepichue":
-                        case "tilepic":
-                            gump.Add(new StaticPic(gparams), page);
+                        break;
+                    case "tilepichue":
+                    case "tilepic":
+                        gump.Add(new StaticPic(gparams), page);
 
-                            break;
-                        case "noclose":
-                            gump.CanCloseWithRightClick = false;
+                        break;
+                    case "noclose":
+                        gump.CanCloseWithRightClick = false;
 
-                            break;
-                        case "nodispose":
-                            gump.CanCloseWithEsc = false;
+                        break;
+                    case "nodispose":
+                        gump.CanCloseWithEsc = false;
 
-                            break;
-                        case "nomove":
-                            gump.BlockMovement = true;
+                        break;
+                    case "nomove":
+                        gump.BlockMovement = true;
 
-                            break;
-                        case "group":
-                        case "endgroup":
-                            group++;
+                        break;
+                    case "group":
+                    case "endgroup":
+                        group++;
 
-                            break;
-                        case "radio":
-                            gump.Add(new RadioButton(group, gparams, lines), page);
+                        break;
+                    case "radio":
+                        gump.Add(new RadioButton(group, gparams, lines), page);
 
-                            break;
-                        case "checkbox":
-                            gump.Add(new Checkbox(gparams, lines), page);
+                        break;
+                    case "checkbox":
+                        gump.Add(new Checkbox(gparams, lines), page);
 
-                            break;
-                        case "tooltip":
+                        break;
+                    case "tooltip":
 
-                            if (World.ClientFlags.TooltipsEnabled)
+                        if (World.ClientFlags.TooltipsEnabled)
+                        {
+                            string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
+
+                            if (gparams.Count > 2 && gparams[2][0] == '@')
                             {
-                                string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
+                                string l = gparams[gparams.Count - 1];
 
-                                if (gparams.Length > 2 && gparams[2][0] == '@')
+                                if (l.Length > 2)
                                 {
-                                    string l = gparams[gparams.Length - 1];
-
-                                    if (l.Length > 2)
+                                    if (l[l.Length - 1] == '\'' && l[l.Length - 2] == '@')
                                     {
-                                        if (l[l.Length - 1] == '\'' && l[l.Length - 2] == '@')
+                                        sb = new StringBuilder();
+
+                                        for (int i = 2; i < gparams.Count - 1; i++)
                                         {
-                                            sb = new StringBuilder();
-
-                                            for (int i = 2; i < gparams.Length - 1; i++)
-                                            {
-                                                sb.Append( i == 2 ? gparams[i].Substring(1, gparams[i].Length - 1) : gparams[i]);
-                                                sb.Append(' ');
-                                            }
-
-                                            cliloc = FileManager.Cliloc.Translate(cliloc, sb.ToString());
+                                            sb.Append( i == 2 ? gparams[i].Substring(1, gparams[i].Length - 1) : gparams[i]);
+                                            sb.Append(' ');
                                         }
-                                        else
-                                            Log.Message(LogTypes.Error, $"Missing final ''@' into gump tooltip: {cliloc}");
+
+                                        cliloc = FileManager.Cliloc.Translate(cliloc, sb.ToString());
                                     }
                                     else
-                                        Log.Message(LogTypes.Error, $"String '{l}' too short, something wrong with gump tooltip: {cliloc}");
+                                        Log.Message(LogTypes.Error, $"Missing final ''@' into gump tooltip: {cliloc}");
                                 }
-
-                                gump.Children.Last()?.SetTooltip(cliloc);
+                                else
+                                    Log.Message(LogTypes.Error, $"String '{l}' too short, something wrong with gump tooltip: {cliloc}");
                             }
 
-                            break;
-	                    case "itemproperty":
-		                    if (World.ClientFlags.TooltipsEnabled)
-		                    {
-			                    var entity = World.Get(Serial.Parse(gparams[1]));
-			                    var lastControl = gump.Children.LastOrDefault();
+                            gump.Children.Last()?.SetTooltip(cliloc);
+                        }
 
-			                    if (lastControl != default(Control) && entity != default(Entity))
-				                    lastControl.SetTooltip(entity);
-		                    }
+                        break;
+	                case "itemproperty":
+		                if (World.ClientFlags.TooltipsEnabled)
+		                {
+			                var entity = World.Get(Serial.Parse(gparams[1]));
+			                var lastControl = gump.Children.LastOrDefault();
 
-		                    break;
-						case "noresize":
+			                if (lastControl != default(Control) && entity != default(Entity))
+				                lastControl.SetTooltip(entity);
+		                }
 
-                            break;
-                        case "mastergump":
-                            Log.Message(LogTypes.Warning, "Gump part 'mastergump' not handled.");
-                            break;
-                    }
+		                break;
+					case "noresize":
+
+                        break;
+                    case "mastergump":
+                        Log.Message(LogTypes.Warning, "Gump part 'mastergump' not handled.");
+                        break;
                 }
-                else
-                    break;
             }
 
             Add(gump);

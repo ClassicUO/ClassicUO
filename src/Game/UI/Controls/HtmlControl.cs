@@ -20,7 +20,7 @@
 #endregion
 
 using System.Diagnostics;
-using System.Linq;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlControl(string[] parts, string[] lines) : this()
+        public HtmlControl(List<string> parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

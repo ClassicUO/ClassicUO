@@ -19,7 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using ClassicUO.IO;
+using System.Collections.Generic;
+
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = _gText.Height;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
+        public Label(List<string> parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

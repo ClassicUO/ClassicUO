@@ -19,7 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -97,12 +97,12 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(string[] parts) : this(parts.Length >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
 
-            if (parts.Length >= 6)
+            if (parts.Count >= 6)
             {
                 int action = int.Parse(parts[5]);
 
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Controls
                     ButtonAction = ButtonAction.Activate;
             }
             
-            ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
+            ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
         }
 
         public bool IsClicked => _clicked;

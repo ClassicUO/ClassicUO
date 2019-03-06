@@ -739,7 +739,7 @@ namespace ClassicUO.IO.Resources
 
 
 
-                        //DataIndex[index].Type = DataIndex[checkIndex].Type;
+                        DataIndex[index].Type = DataIndex[checkIndex].Type;
                         DataIndex[index].Flags = DataIndex[checkIndex].Flags;
                         DataIndex[index].Graphic = (ushort) checkIndex;
                         DataIndex[index].Color = color;

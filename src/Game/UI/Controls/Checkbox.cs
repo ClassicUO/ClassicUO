@@ -20,7 +20,7 @@
 #endregion
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public Checkbox(string[] parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Checkbox(List<string> parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

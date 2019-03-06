@@ -153,9 +153,14 @@ namespace ClassicUO.Game.UI.Controls
             if (button != MouseButton.Left)
                 return;
 
+            if (TargetManager.IsTargeting)
+            {
+                if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    return;
+            }
+
             _clickedCanDrag = true;
-            float totalMS = Engine.Ticks;
-            _picUpTime = totalMS + 500f;
+            _picUpTime = Engine.Ticks + 500f;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -163,8 +168,7 @@ namespace ClassicUO.Game.UI.Controls
             _clickedCanDrag = false;
 
             if (button == MouseButton.Left)
-            {
-              
+            {              
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                 if (TargetManager.IsTargeting)
