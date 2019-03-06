@@ -270,7 +270,7 @@ namespace ClassicUO.Game.GameObjects
                                     Graphic graphic = item.ItemData.AnimID;
                                     Hue hue = item.Hue;
 
-                                    if (FileManager.Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                                    if (FileManager.Animations.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
                                     {
                                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                         {
