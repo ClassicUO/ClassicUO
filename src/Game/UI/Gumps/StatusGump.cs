@@ -1006,13 +1006,24 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                Point p = new Point(x, y);
-                Rectangle rect = new Rectangle(Bounds.Width - 42, Bounds.Height - 25, Bounds.Width, Bounds.Height);
-
-                if (rect.Contains(p))
+                if (TargetManager.IsTargeting)
                 {
-                    Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                    Dispose();
+                    if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
+                    {
+                        TargetManager.TargetGameObject(World.Player);
+                        Mouse.LastLeftButtonClickTime = 0;
+                    }
+                }
+                else
+                {
+                    Point p = new Point(x, y);
+                    Rectangle rect = new Rectangle(Bounds.Width - 42, Bounds.Height - 25, Bounds.Width, Bounds.Height);
+
+                    if (rect.Contains(p))
+                    {
+                        Engine.UI.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
+                        Dispose();
+                    }
                 }
             }
         }

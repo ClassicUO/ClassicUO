@@ -246,11 +246,6 @@ namespace ClassicUO.IO.Resources
                             checkIndex &= 0x3FFF;
                             index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
 
-                            if (index == 9922)
-                            {
-
-                            }
-
                             if (tiledata.Entries[index].Length == 0 && tiledata.Entries[checkIndex].Length != 0)
                             {
                                 StaticData[index] = StaticData[checkIndex];
