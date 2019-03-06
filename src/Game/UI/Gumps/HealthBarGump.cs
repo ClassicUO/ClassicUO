@@ -201,7 +201,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (_canChangeName)
+            if (TargetManager.IsTargeting)
+            {
+                TargetManager.TargetGameObject(Mobile);
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+            else if (_canChangeName)
                 _textBox.IsEditable = true;
         }
 
@@ -209,11 +214,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
-                {
-                    TargetManager.TargetGameObject(Mobile);
-                    Mouse.LastLeftButtonClickTime = 0;
-                }
+                TargetManager.TargetGameObject(Mobile);
+                Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)
                 _textBox.IsEditable = false;
