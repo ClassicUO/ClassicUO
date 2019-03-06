@@ -54,15 +54,6 @@ namespace ClassicUO.IO.Resources
         public IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
 
 
-        struct BodyDefEntry
-        {
-            public int OriginalGraphic;
-            public int NewGraphic;
-            public int NewHue;
-        }
-
-
-
         public override void Load()
         {
             Dictionary<ulong, UopFileData> hashes = new Dictionary<ulong, UopFileData>();
@@ -631,7 +622,7 @@ namespace ClassicUO.IO.Resources
                             -1, -1
                         };
 
-                        if (index == 1)
+                        if (index == 1160)
                         {
 
                         }
@@ -689,10 +680,10 @@ namespace ClassicUO.IO.Resources
                                 {
                                 }
 
-                                if (dataIndex.BaseAddress == 0 && dataIndex.PatchedAddress == 0)
-                                {
-                                    continue;
-                                }
+                                //if (dataIndex.BaseAddress == 0 && dataIndex.PatchedAddress == 0)
+                                //{
+                                //    continue;
+                                //}
 
                                 //if (dataIndex.BaseAddress == 0)
                                 //if (dataIndex.PatchedAddress != 0)
