@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Controls
 
             CanMove = false;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = false;
+            //CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
         }
 
