@@ -1724,7 +1724,7 @@ namespace ClassicUO.Network
                 Item item = World.GetOrCreateItem(itemSerial);
                 Graphic itemGraphic = p.ReadUShort();
                 item.Layer = (Layer)p.ReadByte();
-           
+
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                     item.Hue = p.ReadUShort();
                 else if ((itemGraphic & 0x8000) != 0)
@@ -1732,8 +1732,8 @@ namespace ClassicUO.Network
                     itemGraphic &= 0x7FFF;
                     item.Hue = p.ReadUShort();
                 }
-                else
-                    itemGraphic &= 0x3FFF;
+                //else
+                //    itemGraphic &= 0x3FFF;
 
                 item.Graphic = itemGraphic;
                 item.Amount = 1;

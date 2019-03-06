@@ -135,6 +135,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 ref IndexAnimation index = ref DataIndex[id];
 
+
                                 //mobTypes[id] = Tuple.Create((ANIMATION_GROUPS_TYPE)i, 0x80000000 | number);
 
                                 index.Type = (ANIMATION_GROUPS_TYPE)i;
@@ -153,6 +154,11 @@ namespace ClassicUO.IO.Resources
             {
                 ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
                 int findID = 0;
+
+                if (i == 479)
+                {
+
+                }
 
                 if (i < 200)
                 {
@@ -284,11 +290,17 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     ushort body = (ushort) defReader.ReadInt();
-
+                    
                     if (body >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
                     ushort graphic = (ushort) defReader.ReadInt();
+
+                    if (graphic == 863)
+                    {
+
+                    }
+
                     if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
@@ -560,6 +572,7 @@ namespace ClassicUO.IO.Resources
                                         AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset + d) * animIdxBlockSize);
 
 
+
                                         if ((long) aidx >= (long) maxaddress)
                                         {
                                             break;
@@ -588,8 +601,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            List<int> ind = new List<int>();
-
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
             {
                 while (defReader.Next())
@@ -616,11 +627,14 @@ namespace ClassicUO.IO.Resources
                             -1, -1
                         };
 
-                        if (index == 1160)
+                        if (index == 1067)
                         {
 
                         }
-                       
+                        if (index == 863)
+                        {
+
+                        }
 
                         switch (DataIndex[checkIndex].Type)
                         {
@@ -670,7 +684,7 @@ namespace ClassicUO.IO.Resources
                                     }
                                 }
 
-                                if (index == 0x12E)
+                                if (index == 1067)
                                 {
                                 }
 
@@ -837,8 +851,6 @@ namespace ClassicUO.IO.Resources
             //        }
             //    }
             //}
-
-            ind.ForEach(s => Console.WriteLine(s));
 
             byte maxGroup = 0;
 
