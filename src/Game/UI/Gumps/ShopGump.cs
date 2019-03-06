@@ -67,14 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             else
                 Add(new GumpPic(0, 0, 0x0872, 0));
 
-
-           
-               
             Add(_shopScrollArea = new ScrollArea(30, 60, 225, 180, false, 130));
-
-
-
-
 
             if (isBuyGump)
                 Add(new GumpPic(170, 214, 0x0871, 0));
@@ -99,23 +92,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (isBuyGump)
             {
-                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", true, 0x0386, 0, 1)
                 {
-                    X = 240,
-                    Y = 385
+                    X = 238,
+                    Y = 381
                 });
 
-                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
+                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), true, 0x0386, 0, 1)
                 {
-                    X = 358,
-                    Y = 385
+                    X = 356,
+                    Y = 381
                 });
             }
             else
-                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", true, 0x0386, 0, 1)
                 {
-                    X = 358,
-                    Y = 386
+                    X = 356,
+                    Y = 381
                 });
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 5)
@@ -125,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
 
-            Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+            Add(_transactionScrollArea = new ScrollArea(180, 280, 245, 78, false));
 
 
             HitBox upButton = new HitBox(233, 50, 18, 16)
@@ -150,10 +143,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
             downButton.MouseUp += (sender, e) => { _isDownDOWN = false; };
             Add(downButton);
-
-
-
-
 
 
             HitBox upButtonT = new HitBox(403, 265, 18, 16)
@@ -241,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetNameTo(Item item, string name)
         {
-            if (_shopItems.TryGetValue(item, out ShopItem shopItem))
+            if (!string.IsNullOrEmpty(name) && _shopItems.TryGetValue(item, out ShopItem shopItem))
             {
                 shopItem.SetName(name);
             }
@@ -291,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 transactionItem.Amount += total;
             else
             {
-                transactionItem = new TransactionItem(shopItem.Item, total);
+                transactionItem = new TransactionItem(shopItem.Item, total, shopItem.ShopItemName);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
                 _transactionScrollArea.Add(transactionItem);
@@ -380,7 +369,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly Label _amountLabel, _name;
 
-           
+            internal string ShopItemName => _name.Text;
+
             public ShopItem(Item item)
             {
                 Item = item;
@@ -439,8 +429,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(control = new TextureControl()
                     {
                         Texture = texture,
-                        X = 5,
-                        Y = 5,
+                        X = 10 - texture.ImageRectangle.X,
+                        Y = 10 + texture.ImageRectangle.Y,
                         Width = texture.ImageRectangle.Width,
                         Height = texture.ImageRectangle.Height,
                         AcceptMouseInput = false,
@@ -451,23 +441,26 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else 
                     return;
-
-             
-
-                Add(_name = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                string subname = $"{itemName} at {item.Price}gp";
+                //FileManager.Fonts.SetUseHTML(true);
+                int height = FileManager.Fonts.GetHeightUnicode(1, subname, 110, TEXT_ALIGN_TYPE.TS_LEFT, 0);
+                Add(_name = new Label($"{itemName} at {item.Price}gp", true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
                 {
-                    Y = 5, X = 65
+                    Y = 0, X = 60
                 });
+                //FileManager.Fonts.SetUseHTML(false);
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
+                height = Math.Max(height, control.Height) + 10;
+
+                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
-                    X = 180, Y = 20
+                    X = 165, Y = height >> 2
                 });
 
                 Width = 220;
 
 
-                Height = Math.Max(_name.Height, control.Height) + 10;
+                Height = height;
                 WantUpdateSize = false;
             }
 
@@ -493,8 +486,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetName(string s)
             {
-                if (NameFromCliloc)
-                    _name.Text = $"{s} at {Item.Price}gp";
+                _name.Text = $"{s} at {Item.Price}gp";
+                WantUpdateSize = true;
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -540,29 +533,29 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly Label _amountLabel;
 
-            public TransactionItem(Item item, int amount)
+            public TransactionItem(Item item, int amount, string realname)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
-
-                Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, font: 9)
+                Label l;
+                Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
-                    X = 5, Y = 5
+                    X = 50, Y = 0
                 });
 
-                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
+                Add(_amountLabel = new Label(amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
-                    X = 30, Y = 5
+                    X = 10,
+                    Y = 0
                 });
 
                 Button buttonAdd;
                 Add(buttonAdd = new Button(0, 0x37, 0x37)
                 {
-                    X = 170, Y = 5, ButtonAction = ButtonAction.Activate, ContainsByBounds = true
+                    X = 190, Y = 5, ButtonAction = ButtonAction.Activate, ContainsByBounds = true
                 }); // Plus
 
                 int status = 0;
-                const int increm = 100;
+                const int increm = 50;
 
                 float t0 = Engine.Ticks;
 
@@ -572,10 +565,10 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t0)
                         {
-                            t0 = Engine.Ticks + (increm >> _StepChanger);
+                            t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(0);
                             _StepsDone++;
-                            if (_StepsDone % 5 == 0)
+                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
                                 _StepChanger++;
                         }
                     }
@@ -588,8 +581,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonAdd.MouseDown += (sender, e) =>
                 {
+                    _StepChanger = 0;
                     status = 1;
-                    t0 = Engine.Ticks + (increm * 2);
+                    t0 = Engine.Ticks + 200;
                 };
                 buttonAdd.MouseUp += (sender, e) =>
                 {
@@ -601,7 +595,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Button buttonRemove;
                 Add(buttonRemove = new Button(1, 0x38, 0x38)
                 {
-                    X = 190, Y = 5, ButtonAction = ButtonAction.Activate,
+                    X = 210, Y = 5, ButtonAction = ButtonAction.Activate,
                     ContainsByBounds = true
                 }); // Minus
 
@@ -613,10 +607,10 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t1)
                         {
-                            t1 = Engine.Ticks + (increm >> _StepChanger);
+                            t1 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
                             _StepsDone++;
-                            if (_StepsDone % 5 == 0)
+                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
                                 _StepChanger++;
                         }
                     }
@@ -629,8 +623,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonRemove.MouseDown += (sender, e) =>
                 {
+                    _StepChanger = 0;
                     status = 1;
-                    t1 = Engine.Ticks + (increm * 2);
+                    t1 = Engine.Ticks + 200;
                 };
                 buttonRemove.MouseUp += (sender, e) =>
                 {
@@ -639,8 +634,8 @@ namespace ClassicUO.Game.UI.Gumps
                 };
 
 
-                Width = 220;
-                Height = 30;
+                Width = 245;
+                Height = l.Height;
                 WantUpdateSize = false;
             }
 

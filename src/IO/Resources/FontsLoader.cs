@@ -1652,7 +1652,7 @@ namespace ClassicUO.IO.Resources
                     }
                     else if (stack.Count > 1)
                     {
-                        int index = -1;
+                        //int index = -1;
 
                         for (int j = stack.Count - 1; j >= 1; j--)
                         {
