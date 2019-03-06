@@ -27,6 +27,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly AlphaBlendControl _background;
 
         private readonly RenderedText _renderedText;
+        private bool _isPressed = false;
+        private float _clickTiming = 0;
 
         public NameOverheadGump(Entity entity) : base(entity.Serial, 0)
         {
@@ -179,6 +181,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
+                _isPressed = false;
+                _clickTiming = 0;
                 GameActions.DoubleClick(Entity);
             }
 
@@ -213,7 +217,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    GameActions.OpenPopupMenu(Entity);
+                    _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                    if (_clickTiming > 0)
+                        _isPressed = true;
                 }
             }
             base.OnMouseUp(x, y, button);
@@ -226,6 +232,23 @@ namespace ClassicUO.Game.UI.Gumps
             if (Entity == null || Entity.IsDisposed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
             {
                 Dispose();
+            }
+            if (_isPressed)
+            {
+                if (Engine.UI.IsDragging)
+                {
+                    _clickTiming = 0;
+                    _isPressed = false;
+                    return;
+                }
+
+                _clickTiming -= (float)frameMS;
+                if (_clickTiming <= 0)
+                {
+                    _clickTiming = 0;
+                    _isPressed = false;
+                    GameActions.OpenPopupMenu(Entity);
+                }
             }
         }
 
