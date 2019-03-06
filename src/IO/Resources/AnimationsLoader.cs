@@ -184,8 +184,8 @@ namespace ClassicUO.IO.Resources
 
                 if (findID >= idxfile0.Length)
                 {
-                    //if (t != null)
-                    //    DataIndex[i].Type = t.Item1;
+                    if (t != null)
+                        DataIndex[i].Type = t.Item1;
 
                     DataIndex[i].Groups = new AnimationGroup[100];
 
@@ -569,12 +569,6 @@ namespace ClassicUO.IO.Resources
                                         {
                                             ref var dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
-                                            if (index == 302)
-                                            {
-
-                                            }
-
-                                          
                                             dataindex.PatchedAddress = aidx->Position;
                                             dataindex.PatchedSize = aidx->Size;
                                             dataindex.FileIndex = animFile;
@@ -739,6 +733,8 @@ namespace ClassicUO.IO.Resources
                         DataIndex[index].Flags = DataIndex[checkIndex].Flags;
                         DataIndex[index].Graphic = (ushort)checkIndex;
                         DataIndex[index].Color = (ushort)color;
+
+                        break;
                     }
                 }
             }
@@ -1703,7 +1699,7 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
-                return (d.Address != 0 && d.Size == 0) || d.IsUOP;
+                return (d.Address != 0 && d.Size != 0) || d.IsUOP;
             }
 
             return false;
