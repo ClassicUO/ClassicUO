@@ -103,12 +103,24 @@ namespace ClassicUO.Game.UI.Gumps
                     HighlightOnMouseOver = true,
                 };
 
+                int x = g.X;
+                int y = g.Y;
 
-                //if (g.X >= 155)
-                //    g.X = 125;
+                if (x + g.Texture.Width > 110)
+                    x = 110 - g.Texture.Width;
 
-                //if (g.Y >= 150)
-                //    g.Y = 120;
+                if (y + g.Texture.Height > 80)
+                    y = 80 - g.Texture.Height;
+
+                if (x < 0)
+                    x = 0;
+
+                if (y < 0)
+                    y = 0;
+
+
+                g.X = x;
+                g.Y = y;
 
                 _myBox.Add(g);
             }
@@ -123,12 +135,24 @@ namespace ClassicUO.Game.UI.Gumps
                     HighlightOnMouseOver = true,
                 };
 
+                int x = g.X;
+                int y = g.Y;
 
-                //if (g.X >= 155)
-                //    g.X = 125;
+                if (x + g.Texture.Width > 110)
+                    x = 110 - g.Texture.Width;
 
-                //if (g.Y >= 150)
-                //    g.Y = 120;
+                if (y + g.Texture.Height > 80)
+                    y = 80 - g.Texture.Height;
+
+                if (x < 0)
+                    x = 0;
+
+                if (y < 0)
+                    y = 0;
+
+
+                g.X = x;
+                g.Y = y;
 
                 _hisBox.Add(g);
             }
@@ -182,8 +206,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(_hisPic);
-
-
         }
 
 
@@ -206,8 +228,14 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Label(_name, false, 0x0386, font: 1)
                             { X = fontWidth, Y = 170 });
 
-            Add(_myBox = new DataBox(45, 70, 110, 80));
-            Add(_hisBox = new DataBox(192, 70, 110, 80));
+            Add(_myBox = new DataBox(45, 70, 110, 80)
+            {
+                WantUpdateSize = false,
+            });
+            Add(_hisBox = new DataBox(192, 70, 110, 80)
+            {
+                WantUpdateSize = false,
+            });
 
             SetCheckboxes();
 
