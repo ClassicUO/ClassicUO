@@ -91,8 +91,7 @@ namespace ClassicUO.Game.GameObjects
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
                     Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-                    AddToTile();
-                  
+                    AddToTile();                  
                 }
             }
         }

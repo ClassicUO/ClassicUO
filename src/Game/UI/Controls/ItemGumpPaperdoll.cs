@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture == null)
             {
                 if (item.Layer != Layer.Face)
-                    Log.Message(LogTypes.Error, $"No texture founded for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
+                    Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
                 return;
             }
