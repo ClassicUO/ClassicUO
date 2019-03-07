@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Point offset = Mouse.LDroppedOffset;
 
-                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE)
+                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     _clickedCanDrag = false;
                     AttempPickUp();
