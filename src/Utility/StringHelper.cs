@@ -77,6 +77,14 @@ namespace ClassicUO.Utility
             return (c >= 0x20 && c < 0xFFFE);
         }
 
+        public static void AddSpaceBeforeCapital(string[] str, bool checkAcronyms = true)
+        {
+            for(int i = 0; i < str.Length; i++)
+            {
+                str[i] = AddSpaceBeforeCapital(str[i], checkAcronyms);
+            }
+        }
+
         public static string AddSpaceBeforeCapital(string str, bool checkAcronyms = true)
         {
             if (string.IsNullOrWhiteSpace(str))
