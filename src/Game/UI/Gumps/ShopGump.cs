@@ -442,19 +442,17 @@ namespace ClassicUO.Game.UI.Gumps
                 else 
                     return;
                 string subname = $"{itemName} at {item.Price}gp";
-                //FileManager.Fonts.SetUseHTML(true);
                 int height = FileManager.Fonts.GetHeightUnicode(1, subname, 110, TEXT_ALIGN_TYPE.TS_LEFT, 0);
-                Add(_name = new Label($"{itemName} at {item.Price}gp", true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
+                Add(_name = new Label($"{itemName} at {item.Price}gp", true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
-                    Y = 0, X = 60
+                    Y = 0, X = 55
                 });
-                //FileManager.Fonts.SetUseHTML(false);
 
                 height = Math.Max(height, control.Height) + 10;
 
                 Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
-                    X = 165, Y = height >> 2
+                    X = 168, Y = height >> 2
                 });
 
                 Width = 220;

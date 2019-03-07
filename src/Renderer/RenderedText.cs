@@ -55,6 +55,11 @@ namespace ClassicUO.Renderer
             Cell = 30;
         }
 
+        public RenderedText(bool ishtml) : this()
+        {
+            IsHTML = ishtml;
+        }
+
         public bool IsUnicode { get; set; }
 
         public byte Font
