@@ -378,7 +378,7 @@ namespace ClassicUO
         private static void Configure()
         {
             Log.Start(LogTypes.All);
-            ExePath = Directory.GetCurrentDirectory();
+            ExePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
