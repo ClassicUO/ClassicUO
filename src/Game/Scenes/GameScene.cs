@@ -60,8 +60,8 @@ namespace ClassicUO.Game.Scenes
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene = false;
-        private int _scale = 5;
         private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
+        private int _scale = 5; // 1.0
 
         private bool _deathScreenActive = false;
         private Label _deathScreenLabel;
