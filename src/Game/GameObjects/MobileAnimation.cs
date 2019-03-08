@@ -203,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
                 animation = _animAssociateTable[animation][(sbyte) group - 1];
         }
 
-        public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
+        public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0, bool isequip = false)
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0) graphic = mobile.GetGraphicForAnimation();
@@ -369,7 +369,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
+            if (!isequip)
+                CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
 
             return result;
         }

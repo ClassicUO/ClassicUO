@@ -108,7 +108,7 @@ namespace ClassicUO.IO.Resources
                 if (a.Length > 1 && a[0] == '#')
                 {
                     int id1 = int.Parse(a.Substring(1));
-                    arguments[i] = GetString(id1);
+                    arguments[i] = GetString(id1) ?? string.Empty;
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);
