@@ -64,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
             if (Graphic == 0)
                 return false;
 
-            AnimationFrameTexture bodyFrame = FileManager.Animations.GetTexture(_frames[0].Hash);
+            AnimationFrameTexture bodyFrame = _frames[0].Hash; // FileManager.Animations.GetTexture(_frames[0].Hash);
 
             if (bodyFrame == null)
                 return false;
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
-                AnimationFrameTexture frame = FileManager.Animations.GetTexture(vl.Hash);
+                AnimationFrameTexture frame = vl.Hash; //FileManager.Animations.GetTexture(vl.Hash);
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
@@ -330,9 +330,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                uint hash = direction.FramesHashes[animIndex];
+                var hash = direction.FramesHashes[animIndex];
 
-                if (hash == 0)
+                if (hash == null)
                     return;
 
                 if (hue == 0)
@@ -482,7 +482,7 @@ namespace ClassicUO.Game.GameObjects
         private struct ViewLayer
         {
             public Hue Hue;
-            public uint Hash;
+            public AnimationFrameTexture Hash;
             public bool IsPartial;
             public int OffsetY;
         }

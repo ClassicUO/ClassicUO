@@ -136,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrameTexture frame = FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
+                    AnimationFrameTexture frame = direction.FramesHashes[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
 
                     if (frame == null || frame.IsDisposed) return false;
 

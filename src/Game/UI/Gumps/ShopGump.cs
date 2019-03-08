@@ -407,7 +407,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(control = new TextureControl()
                     {
-                        Texture = FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        Texture = direction.FramesHashes[0], //FileManager.Animations.GetTexture(direction.FramesHashes[0]),
                         X = 5, Y = 5,
                         AcceptMouseInput = false,
                         Hue = item.Hue,
