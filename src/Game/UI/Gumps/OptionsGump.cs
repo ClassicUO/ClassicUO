@@ -846,7 +846,14 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
-            Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
+
+            if (Engine.Profile.Current.EnableScaleZoom != _zoom.IsChecked)
+            {
+                if (!_zoom.IsChecked)
+                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+
+                Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
+            }
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
