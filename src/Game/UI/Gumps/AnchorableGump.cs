@@ -104,9 +104,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            Engine.AnchorManager.DisposeAllControls(this);
+            if (Engine.AnchorManager[this] == null || _isAltPressed)
+            {
+                Engine.AnchorManager.DisposeAllControls(this);
 
-            base.CloseWithRightClick();
+                base.CloseWithRightClick();
+            }
         }
 
         private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)
