@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (Engine.AnchorManager[this] == null || _isAltPressed)
+            if (Engine.AnchorManager[this] == null || Input.Keyboard.Alt)
             {
                 Engine.AnchorManager.DisposeAllControls(this);
 
