@@ -16,6 +16,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class AnchorableGump : Gump
     {
+        public string AnchorGroupName { get; protected set; }
+
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 
@@ -102,9 +104,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            Engine.AnchorManager.DisposeAllControls(this);
+            if (Engine.AnchorManager[this] == null || Input.Keyboard.Alt)
+            {
+                Engine.AnchorManager.DisposeAllControls(this);
 
-            base.CloseWithRightClick();
+                base.CloseWithRightClick();
+            }
         }
 
         private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)

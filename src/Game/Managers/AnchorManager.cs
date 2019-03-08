@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Managers
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
         {
-            if (host.GetType().IsInstanceOfType(draggedControl) && this[draggedControl] == null)
+            if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
                 AnchorDirection direction = GetAnchorDirection(host, x, y);
 
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Managers
 
         public Point GetCandidateDropLocation(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
         {
-            if (host.GetType().IsInstanceOfType(draggedControl) && this[draggedControl] == null)
+            if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
                 AnchorDirection direction = GetAnchorDirection(host, x, y);
 

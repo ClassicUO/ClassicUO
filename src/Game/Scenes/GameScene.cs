@@ -57,10 +57,11 @@ namespace ClassicUO.Game.Scenes
         private MacroManager _macroManager;
         private GameObject _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
-        private float _scale = 1;
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene = false;
+        private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
+        private int _scale = 5; // 1.0
 
         private bool _deathScreenActive = false;
         private Label _deathScreenLabel;
@@ -69,17 +70,24 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public float Scale
+        public int ScalePos
         {
             get => _scale;
             set
             {
-                if (value < 0.5f)
-                    value = 0.5f;
-                else if (value > 2.5f)
-                    value = 2.5f;
-                _scale = value;              
+                if (value < 0)
+                    value = 0;
+                else if (value >= (_scaleArray.Length - 1))
+                    value = _scaleArray.Length - 1;
+
+                _scale = value;
             }
+        }
+
+        public float Scale
+        {
+            get => _scaleArray[_scale];
+            set => ScalePos = (int)(value * 10) - 5;
         }
 
         public HotkeysManager Hotkeys => _hotkeysManager;
@@ -175,14 +183,9 @@ namespace ClassicUO.Game.Scenes
                     return;
 
                 if (e.Direction == MouseEvent.WheelScrollDown)
-                    Scale += 0.1f;
+                    ScalePos++;
                 else
-                    Scale -= 0.1f;
-
-                if (Scale < 0.5f)
-                    Scale = 0.5f;
-                else if (Scale > 2.5f)
-                    Scale = 2.5f;
+                    ScalePos--;
 
                 if (Engine.Profile.Current.SaveScaleAfterClose)
                     Engine.Profile.Current.ScaleZoom = Scale;
@@ -196,10 +199,7 @@ namespace ClassicUO.Game.Scenes
 
             Chat.Message += ChatOnMessage;
 
-            if (Engine.Profile.Current.SaveScaleAfterClose)
-                Scale = Engine.Profile.Current.ScaleZoom;
-            else
-                Scale = 1f; // hard return to 1.0f
+            Scale = (Engine.Profile.Current.SaveScaleAfterClose) ? Engine.Profile.Current.ScaleZoom : 1f;
 
             Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());
