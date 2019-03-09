@@ -271,16 +271,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            while (_overHeads.Count > 5)
-            {
-                //TextOverhead over = _overHeads[_overHeads.Count - 1];
-
-                //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
-                {
-                    _overHeads.RemoveFromBack().Dispose();
-                }
-            }
-
             OverheadAdded?.Raise(overhead);
 
             return overhead;
