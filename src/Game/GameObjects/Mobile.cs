@@ -78,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void CalculateRandomIdleTime()
         {
-            const int TIME = 300;
+            const int TIME = 30000;
             _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 

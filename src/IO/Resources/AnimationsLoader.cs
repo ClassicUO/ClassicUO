@@ -304,9 +304,6 @@ namespace ClassicUO.IO.Resources
             }
 
 
-
-
-
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Bodyconv.def")))
             {
                 while (defReader.Next())
@@ -389,6 +386,22 @@ namespace ClassicUO.IO.Resources
                         animFile = 2;
                         realAnimID = (ushort)anim[1];
 
+                        //if (realAnimID < 700)
+                        //{
+                        //    startAnimID = realAnimID * 110;
+                        //    groupType = ANIMATION_GROUPS_TYPE.MONSTER;
+                        //}
+                        //else if (realAnimID < 1400)
+                        //{
+                        //    startAnimID = (realAnimID - 700) * 65 + 77000;
+                        //    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
+                        //}
+                        //else
+                        //{
+                        //    startAnimID = (realAnimID - 1400) * 175 + 122500;
+                        //    groupType = ANIMATION_GROUPS_TYPE.HUMAN;
+                        //}
+
                         if (realAnimID < 300)
                         {
                             if (FileManager.ClientVersion < ClientVersions.CV_70130)
@@ -400,7 +413,6 @@ namespace ClassicUO.IO.Resources
                             {
                                 startAnimID = realAnimID * 65 + 9000;
                                 groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-
                             }
                         }
                         else
@@ -417,7 +429,7 @@ namespace ClassicUO.IO.Resources
                                     startAnimID = 33000 + ((realAnimID - 300) * 110);
                                     groupType = ANIMATION_GROUPS_TYPE.MONSTER;
                                 }
-                               
+
                             }
                             else
                             {
@@ -425,7 +437,6 @@ namespace ClassicUO.IO.Resources
                                 groupType = ANIMATION_GROUPS_TYPE.HUMAN;
                             }
                         }
-                      
                     }
                     else if (anim[2] != -1 && maxAddress4.HasValue && maxAddress4 != 0)
                     {
@@ -569,7 +580,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
             {
                 while (defReader.Next())
@@ -657,8 +667,6 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
-
 
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
             {
