@@ -124,9 +124,14 @@ namespace ClassicUO.IO.Resources
                             if (testType == typeNames[i])
                             {
                                 ref IndexAnimation index = ref DataIndex[id];
+                                ref IndexAnimation index2 = ref UOPAnim[id];
 
                                 index.Type = (ANIMATION_GROUPS_TYPE)i;
                                 index.Flags = 0x80000000 | number;
+
+                                index2.Type = (ANIMATION_GROUPS_TYPE) i;
+                                index2.Flags = 0x80000000 | number;
+
                                 break;
                             }
                         }
@@ -555,104 +560,6 @@ namespace ClassicUO.IO.Resources
             }
 
 
-            //using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
-            //{
-            //    while (defReader.Next())
-            //    {
-            //        ushort index = (ushort)defReader.ReadInt();
-            //        if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-            //            continue;
-
-            //        int[] group = defReader.ReadGroup();
-
-            //        ushort color = (ushort)defReader.ReadInt();
-
-            //        for (int i = 0; i < group.Length; i++)
-            //        {
-            //            int checkIndex = group[i];
-            //            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-            //                continue;
-
-            //            int[] ignoreGroups =
-            //            {
-            //                -1, -1
-            //            };
-
-            //            switch (DataIndex[checkIndex].Type)
-            //            {
-            //                case ANIMATION_GROUPS_TYPE.MONSTER:
-            //                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-            //                    ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
-            //                    ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
-
-            //                    break;
-            //                case ANIMATION_GROUPS_TYPE.HUMAN:
-            //                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-            //                    ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
-            //                    ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
-
-            //                    break;
-            //                case ANIMATION_GROUPS_TYPE.ANIMAL:
-            //                    ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
-            //                    ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
-
-            //                    break;
-            //            }
-
-            //            if (ignoreGroups[0] == -1)
-            //                continue;
-
-            //            for (byte j = 0; j < 2; j++)
-            //            {
-            //                for (byte d = 0; d < 5; d++)
-            //                {
-
-            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-
-            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress == 0)
-            //                    {
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
-            //                    }
-
-            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress == 0)
-            //                    {
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-            //                    }
-
-
-            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
-            //                    {
-            //                        DataIndex[checkIndex].Type = t.Item1;
-            //                        DataIndex[checkIndex].Flags = t.Item2;
-            //                    }
-
-            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(index, out t))
-            //                    {
-            //                        DataIndex[index].Type = t.Item1;
-            //                        DataIndex[index].Flags = t.Item2;
-            //                    }
-            //                }
-            //            }
-
-
-
-            //            DataIndex[index].Type = DataIndex[checkIndex].Type;
-            //            DataIndex[index].Flags = DataIndex[checkIndex].Flags;
-            //            DataIndex[index].Graphic = (ushort)checkIndex;
-            //            DataIndex[index].Color = color;
-            //        }
-            //    }
-            //}
-
-
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Body.def"), 1))
             {
                 while (defReader.Next())
@@ -744,10 +651,113 @@ namespace ClassicUO.IO.Resources
             }
 
 
+
+            //using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Corpse.def"), 1))
+            //{
+            //    while (defReader.Next())
+            //    {
+            //        ushort index = (ushort)defReader.ReadInt();
+            //        if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            //            continue;
+
+            //        int[] group = defReader.ReadGroup();
+
+            //        ushort color = (ushort)defReader.ReadInt();
+
+            //        for (int i = 0; i < group.Length; i++)
+            //        {
+            //            int checkIndex = group[i];
+            //            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            //                continue;
+
+            //            int[] ignoreGroups =
+            //            {
+            //                -1, -1
+            //            };
+
+            //            switch (DataIndex[checkIndex].Type)
+            //            {
+            //                case ANIMATION_GROUPS_TYPE.MONSTER:
+            //                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+            //                    ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
+            //                    ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
+
+            //                    break;
+            //                case ANIMATION_GROUPS_TYPE.HUMAN:
+            //                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+            //                    ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
+            //                    ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
+
+            //                    break;
+            //                case ANIMATION_GROUPS_TYPE.ANIMAL:
+            //                    ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
+            //                    ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
+
+            //                    break;
+            //            }
+
+            //            if (ignoreGroups[0] == -1)
+            //                continue;
+
+            //            for (byte j = 0; j < 2; j++)
+            //            {
+            //                for (byte d = 0; d < 5; d++)
+            //                {
+
+            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+            //                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+
+            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress == 0)
+            //                    {
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
+            //                    }
+
+            //                    if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress == 0)
+            //                    {
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+            //                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+            //                    }
+
+
+            //                    //if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(checkIndex, out var t))
+            //                    //{
+            //                    //    DataIndex[checkIndex].Type = t.Item1;
+            //                    //    DataIndex[checkIndex].Flags = t.Item2;
+            //                    //}
+
+            //                    //if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex > 0 && mobTypes.TryGetValue(index, out t))
+            //                    //{
+            //                    //    DataIndex[index].Type = t.Item1;
+            //                    //    DataIndex[index].Flags = t.Item2;
+            //                    //}
+            //                }
+            //            }
+
+
+
+            //            DataIndex[index].Type = DataIndex[checkIndex].Type;
+            //            DataIndex[index].Flags = DataIndex[checkIndex].Flags;
+            //            DataIndex[index].Graphic = (ushort)checkIndex;
+            //            DataIndex[index].Color = color;
+
+            //            break;
+            //        }
+            //    }
+            //}
+
+
             byte maxGroup = 0;
 
             for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             {
+                UOPAnim[animID].Type = DataIndex[animID].Type;
+
                 for (byte grpID = 0; grpID < 100; grpID++)
                 {
                     string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
@@ -762,12 +772,13 @@ namespace ClassicUO.IO.Resources
                         DataIndex[animID].Groups[grpID].UOPAnimData = data;
                         UOPAnim[animID].IsUOP = true;
                         UOPAnim[animID].Groups[grpID].UOPAnimData = data;
+                        UOPAnim[animID].Type = DataIndex[animID].Type;
 
                         for (byte dirID = 0; dirID < 5; dirID++)
                         {
-                            ref AnimationDirection dataIndex = ref DataIndex[animID].Groups[grpID].Direction[dirID];
+                            DataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
                             UOPAnim[animID].Groups[grpID].Direction[dirID].IsUOP = true;
-                            dataIndex.IsUOP = true;
+
                             //dataIndex.BaseAddress = 0;
                             //dataIndex.Address = 0;
 
@@ -806,7 +817,6 @@ namespace ClassicUO.IO.Resources
 
                             _reader.SetData(decbuffer, decbuffer.Length);
                             uint animID = _reader.ReadUInt();
-                            IndexAnimation index = DataIndex[animID];
 
                             //if (animID != 729 && animID != 735)
                             //    continue;
@@ -818,35 +828,35 @@ namespace ClassicUO.IO.Resources
                             StringBuilder sb = new StringBuilder();
                             //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
 
-                            //if (index.IsUOP)
-                            //{
-                            //    switch (replaces)
-                            //    {
-                            //        case 29:
-                            //            index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                            //            break;
-                            //        case 31: // what is this?
-                            //            break;
-                            //        case 32:
-                            //            index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
-                            //            break;
-                            //        case 48:
-                            //        case 68:
-                            //            index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                            //            break;
-                            //    }
-                            //}
 
-                         
-                            if (animID == 1069)
+
+                            UOPAnim[animID].Graphic = DataIndex[animID].Graphic;
+                            UOPAnim[animID].Flags = DataIndex[animID].Flags;
+                            UOPAnim[animID].IsUOP = true;
+                            UOPAnim[animID].Color = DataIndex[animID].Color;
+                            UOPAnim[animID].MountedHeightOffset = DataIndex[animID].MountedHeightOffset;
+                            UOPAnim[animID].Type = DataIndex[animID].Type;
+
+                            //DataIndex[animID].IsUOP = true;
+
+                            if (UOPAnim[animID].IsUOP)
                             {
-
+                                switch (replaces)
+                                {
+                                    case 29:
+                                        UOPAnim[animID].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                                        break;
+                                    case 31:
+                                    case 32:
+                                        UOPAnim[animID].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
+                                        break;
+                                    case 48:
+                                    case 68:
+                                        UOPAnim[animID].Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                                        break;
+                                }
                             }
 
-                            if (animID == 0x1b0)
-                            {
-
-                            }
 
 
                             for (int k = 0; k < replaces; k++)
@@ -858,122 +868,78 @@ namespace ClassicUO.IO.Resources
 
                                 //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
 
-                                var hashstring = string.Empty;
+                                string hashstring = string.Empty;
 
                                 if (newIDX >= 0)
                                     hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
-                                //else
-                                //    hashstring = $"build/animationlegacyframe/{animID:D6}/{oldIdx:D2}.bin";
 
                                 ulong hash = UOFileUop.CreateHash(hashstring);
 
-                                if (hashes.TryGetValue(hash, out UopFileData data) && DataIndex[animID].IsUOP)
+                                if (animID == 1069 && oldIdx == 6)
+                                {
+
+                                }
+
+                                if (hashes.TryGetValue(hash, out UopFileData data))
                                 {
                                     if (frameCount == 0)
                                     {
-                                        //IndexAnimation anim = new IndexAnimation()
-                                        //{
-                                        //    Groups = new AnimationGroup[100],
-                                        //    Graphic = index.Graphic,
-                                        //    Flags = index.Flags,
-                                        //    IsUOP = true,
-                                        //    Color = index.Color,
-                                        //    MountedHeightOffset = index.MountedHeightOffset,
-                                        //    Type = index.Type
-                                        //};
 
-                                        ref IndexAnimation anim = ref UOPAnim[animID];
-                                        anim.Graphic = index.Graphic;
-                                        anim.Flags = index.Flags;
-                                        anim.IsUOP = true;
-                                        anim.Color = index.Color;
-                                        anim.MountedHeightOffset = index.MountedHeightOffset;
-                                        anim.Type = index.Type;
+                                        //DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
+                                        //DataIndex[animID].Groups[oldIdx].Direction = DataIndex[animID].Groups[newIDX].Direction;
 
-                                        for (int g = 0; g < 100; g++)
+                                        UOPAnim[animID].Groups[oldIdx].UOPAnimData = data;
+                                        DataIndex[animID].Groups[oldIdx].UOPAnimData = default;
+
+
+                                        for (int d = 0; d < 5; d++)
                                         {
-                                            //anim.Groups[g].Direction = new AnimationDirection[5];
+                                            DataIndex[animID].Groups[oldIdx].Direction[d].IsUOP = true;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].BaseAddress = 0;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].BaseSize = 0;
+
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].BaseAddress = DataIndex[animID].Groups[newIDX].Direction[d].BaseAddress;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].BaseSize = DataIndex[animID].Groups[newIDX].Direction[d].BaseSize;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].PatchedAddress =  DataIndex[animID].Groups[newIDX].Direction[d].PatchedAddress;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].PatchedSize =  DataIndex[animID].Groups[newIDX].Direction[d].PatchedSize;
+                                            //DataIndex[animID].Groups[oldIdx].Direction[d].FileIndex = DataIndex[animID].Groups[newIDX].Direction[d].FileIndex;
+
+                                            //UOPAnim[animID].Groups[oldIdx].Direction[d] = new AnimationDirection()
+                                            //{
+                                            //    Address = DataIndex[animID].Groups[newIDX].Direction[d].Address,
+                                            //    Size = DataIndex[animID].Groups[newIDX].Direction[d].Size,
+                                            //    BaseAddress = DataIndex[animID].Groups[newIDX].Direction[d].BaseAddress,
+                                            //    BaseSize = DataIndex[animID].Groups[newIDX].Direction[d].BaseSize,
+                                            //    PatchedAddress = DataIndex[animID].Groups[newIDX].Direction[d].PatchedAddress,
+                                            //    PatchedSize = DataIndex[animID].Groups[newIDX].Direction[d].PatchedSize,
+                                            //    FileIndex = DataIndex[animID].Groups[newIDX].Direction[d].FileIndex,
+                                            //    IsUOP = true
+                                            //};
 
 
-                                            for (int d = 0; d < 5; d++)
-                                            {
-                                                DataIndex[animID].Groups[oldIdx].Direction[d].IsUOP = true;
+                                            UOPAnim[animID].Groups[oldIdx].Direction[d].IsUOP = true;
+                                            UOPAnim[animID].Groups[newIDX].Direction[d].IsUOP = true;
 
-                                                anim.Groups[oldIdx].Direction[d].IsUOP = true;
-                                                anim.Groups[newIDX].Direction[d].IsUOP = true;
+                                            //UOPAnim[animID].Groups[oldIdx].Direction[d].BaseAddress = 0;
+                                            //UOPAnim[animID].Groups[newIDX].Direction[d].BaseAddress = 0;
 
-
-                                                anim.Groups[oldIdx].Direction[d].BaseAddress = 0;
-                                                anim.Groups[newIDX].Direction[d].BaseAddress = 0;
-                                            }
+                                            //UOPAnim[animID].Groups[oldIdx].Direction[d].BaseSize = 0;
+                                            //UOPAnim[animID].Groups[newIDX].Direction[d].BaseSize = 0;
                                         }
 
-
-                                        anim.Groups[oldIdx].Direction = index.Groups[newIDX].Direction;
-                                        anim.IsUOP = true;
-                                        anim.Groups[oldIdx].UOPAnimData = data;
-
-                                        UOPAnim[(ushort)animID] = anim;
 
                                         if (!_animationSequenceReplacing.ContainsKey((ushort) animID))
                                         {
-                                            _animationSequenceReplacing.Add((ushort) animID, (byte) replaces);
-
-
-                                            //var indexAnim = new IndexAnimation
-                                            //{
-                                            //    Graphic = (ushort) animID,
-                                            //    Flags = index.
-                                            //    Groups = new AnimationGroup[100]
-                                            //};
-
-                                            //for (int g = 0; g < 100; g++)
-                                            //{
-                                            //    if (g == newIDX)
-                                            //    {
-
-                                            //    }
-                                            //    else
-                                            //    {
-                                            //        indexAnim.
-                                            //    }
-                                            //}
-
-                                            
-
-                                           
+                                            _animationSequenceReplacing.Add((ushort) animID, (byte) replaces);                                           
                                         }
-                                        //DataIndex[animID].Groups[oldIdx].Direction = DataIndex[animID].Groups[newIDX].Direction;
 
                                         if (animID == 0x01B0)
                                         {
-                                            index.MountedHeightOffset = 9;
+                                            DataIndex[animID].MountedHeightOffset = 9;
                                         }
                                     }
-                                    //DataIndex[animID].Groups[oldIdx].UOPAnimData = data;
                                 }
 
-                                /*
-                                if (animID == 735)
-                                {
-
-
-                                    if (oldIdx == 4)
-                                    {
-                                        //newIDX = 25;
-                                    }
-
-                                    if (newIDX == 4)
-                                    {
-
-                                    }
-                                }
-
-                                if (frameCount == 0 && index.IsUOP)
-                                {
-                                    index.Groups[oldIdx] = index.Groups[newIDX];
-                                }
-                                */
 
                                 _reader.Skip(48);
 
@@ -1309,11 +1275,17 @@ namespace ClassicUO.IO.Resources
                         {
                             DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].PatchedAddress;
                             DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].PatchedSize;
+
+                            //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].PatchedAddress;
+                            //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].PatchedSize;
                         }
                         else
                         {
                             DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
                             DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
+
+                            //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].BaseAddress;
+                            //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].BaseSize;
                         }
                     }
                 }
@@ -1618,12 +1590,12 @@ namespace ClassicUO.IO.Resources
         
        */
 
-        public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
+        public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
 
-            switch (DataIndex[graphic].Type)
+            switch (DataIndex[graphic].IsUOP && !isequip ? UOPAnim[graphic].Type : DataIndex[graphic].Type)
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
@@ -1661,12 +1633,24 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public bool AnimationExists(ushort graphic, byte group)
+        public bool AnimationExists(ushort graphic, byte group, bool isequip = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
+
+                if (DataIndex[graphic].IsUOP && !isequip)
+                    return UOPAnim[graphic].Groups[group].UOPAnimData.Offset != 0;
+
                 ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
-                return (d.Address != 0 && d.Size != 0) || d.IsUOP;
+
+                //ref AnimationDirection d = ref  (DataIndex[graphic].IsUOP && !isequip ? 
+                //                                     ref UOPAnim[graphic].Groups[group].Direction[0] : 
+                //                                     ref DataIndex[graphic].Groups[group].Direction[0]);
+
+                if (d.IsUOP && !isequip)
+                    return DataIndex[graphic].Groups[group].UOPAnimData.Offset != 0;
+
+                return d.Address != 0 && d.Size != 0;
             }
 
             return false;
@@ -1699,7 +1683,7 @@ namespace ClassicUO.IO.Resources
 
         private unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
-            ref AnimationGroup dataindex = ref UOPAnim[AnimID].Groups[AnimGroup];  //DataIndex[AnimID].Groups[AnimGroup];
+            AnimationGroup dataindex = UOPAnim[AnimID].Groups[AnimGroup];  //DataIndex[AnimID].Groups[AnimGroup];
 
             UopFileData animData = dataindex.UOPAnimData;
 
@@ -1968,7 +1952,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                ref AnimationDirection direction1 = ref DataIndex[id].Groups[animGroup].Direction[0];
+                AnimationDirection direction1 = DataIndex[id].Groups[animGroup].Direction[0];
 
                 if (direction1.Address != 0 && direction1.Size != 0)
                 {

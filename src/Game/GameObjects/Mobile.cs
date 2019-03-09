@@ -78,7 +78,8 @@ namespace ClassicUO.Game.GameObjects
 
         private void CalculateRandomIdleTime()
         {
-            _lastAnimationIdleDelay = Engine.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
+            const int TIME = 300;
+            _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
@@ -628,11 +629,14 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    bool istotallyUOP = FileManager.Animations.DataIndex[id].IsUOP && FileManager.Animations.UOPAnim[id].Groups[animGroup].UOPAnimData.Offset != 0;
+
+                    ref AnimationDirection direction = ref istotallyUOP ? ref FileManager.Animations.UOPAnim[id].Groups[animGroup].Direction[dir] : ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                     FileManager.Animations.AnimID = id;
                     FileManager.Animations.AnimGroup = (byte) animGroup;
                     FileManager.Animations.Direction = dir;
-                    if ((direction.FrameCount == 0 || direction.FramesHashes == null)) FileManager.Animations.LoadDirectionGroup(ref direction);
+                    if ((direction.FrameCount == 0 || direction.FramesHashes == null))
+                        FileManager.Animations.LoadDirectionGroup(ref direction);
 
                     if ((direction.Address != 0 && direction.Size != 0) || direction.IsUOP)
                     {

@@ -309,16 +309,16 @@ namespace ClassicUO.Game.GameObjects
                 }
             } */
 
+          
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
 
-            ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+            bool callUop = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction].IsUOP && !isequip;
 
-            if (direction.IsUOP && !isequip)
-            {
-                direction = ref FileManager.Animations.UOPAnim[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
-            }
+            ref AnimationDirection direction = ref (callUop?
+                ref FileManager.Animations.UOPAnim[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction] :
+                ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction]);
 
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction, isequip))
                 return;
