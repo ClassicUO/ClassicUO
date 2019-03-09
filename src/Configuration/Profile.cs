@@ -242,14 +242,10 @@ namespace ClassicUO.Configuration
                             Gump gump = (Gump)Activator.CreateInstance(type);
                             gump.Initialize();
                             gump.Restore(reader);
-
-                            if (x >= Engine.Instance.Window.ClientBounds.X || x < 0)
-                                x = 0;
-                            if (y >= Engine.Instance.Window.ClientBounds.Y || y < 0)
-                                y = 0;
-
                             gump.X = x;
                             gump.Y = y;
+
+                            gump.SetInScreen();
 
                             if (gump.LocalSerial != 0)
                                 Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));

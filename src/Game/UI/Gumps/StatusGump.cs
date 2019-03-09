@@ -65,7 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (gump == null)
                         Engine.UI.Add(new BuffGump(100, 100));
                     else
+                    {
+                        gump.SetInScreen();
                         gump.BringOnTop();
+                    }
 
                     break;
                 default:
@@ -96,22 +99,33 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static StatusGumpBase GetStatusGump()
         {
+            StatusGumpBase gump;
+
+          
+
             switch (Engine.GlobalSettings.ShardType)
             {
                 case 0: // modern
 
-                    return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpModern>();
+                    gump = ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpModern>();
+                    break;
                 case 1: // old
 
-                    return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOld>();
+                    gump = ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOld>();
+                    break;
                 case 2: // outlands
 
-                    return ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
-
+                    gump = ClassicUO.Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
+                    break;
                 default:
 
-                    return Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
+                    gump = Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
+                    break;
             }
+
+            gump?.SetInScreen();
+
+            return gump;
         }
 
         public static void AddStatusGump(int x, int y)

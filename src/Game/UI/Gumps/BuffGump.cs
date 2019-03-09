@@ -49,10 +49,12 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public BuffGump(int x, int y) : this()
-        {
+        {          
             X = x;
             Y = y;
-          
+
+            SetInScreen();
+
             _graphic = 0x7580;
             BuildGump();
         }

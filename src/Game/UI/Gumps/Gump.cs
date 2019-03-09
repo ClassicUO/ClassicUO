@@ -71,6 +71,15 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(Y);
         }
 
+        public void SetInScreen()
+        {
+            if (X >= Engine.Instance.Window.ClientBounds.X || X < 0)
+                X = 0;
+
+            if (Y >= Engine.Instance.Window.ClientBounds.Y || Y < 0)
+                Y = 0;
+        }
+
         public virtual void Restore(BinaryReader reader)
         {
 

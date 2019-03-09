@@ -169,7 +169,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (miniMapGump == null)
                         Engine.UI.Add(new MiniMapGump());
                     else
+                    {
+                        miniMapGump.SetInScreen();
                         miniMapGump.BringOnTop();
+                    }
 
                     break;
                 case Buttons.Paperdoll:
@@ -177,7 +180,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (paperdollGump == null)
                         GameActions.OpenPaperdoll(World.Player);
                     else
+                    {
+                        paperdollGump.SetInScreen();
                         paperdollGump.BringOnTop();
+                    }
 
                     break;
                 case Buttons.Inventory:
@@ -190,7 +196,10 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.DoubleClick(backpack);
                     }
                     else
+                    {
+                        backpackGump.SetInScreen();
                         backpackGump.BringOnTop();
+                    }
 
                     break;
                 case Buttons.Journal:
@@ -199,7 +208,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (journalGump == null)
                         Engine.UI.Add(new JournalGump() { X = 64, Y = 64});
                     else
+                    {
+                        journalGump.SetInScreen();
                         journalGump.BringOnTop();
+                    }
 
                     break;
                 case Buttons.Chat:
@@ -215,15 +227,20 @@ namespace ClassicUO.Game.UI.Gumps
                     DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
 
                     if (debugGump == null)
-                        Engine.UI.Add(new DebugGump()
+                    {
+                        debugGump = new DebugGump()
                         {
                             X = Engine.Profile.Current.DebugGumpPosition.X,
                             Y = Engine.Profile.Current.DebugGumpPosition.Y,
-                        });
+                        };
+
+                        Engine.UI.Add(debugGump);
+                    }
                     else
                     {
                         Engine.Profile.Current.DebugGumpIsDisabled = debugGump.IsVisible;
                         debugGump.IsVisible = !debugGump.IsVisible;
+                        debugGump.SetInScreen();
                     }
 
                     break;

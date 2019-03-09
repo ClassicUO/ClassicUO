@@ -348,8 +348,11 @@ namespace ClassicUO.Game.UI.Gumps
 					        Y = Engine.WindowHeight / 2 - 250
 				        });
 			        }
-			        else
+                    else
+                    {
+                        gump.SetInScreen();
                         gump.BringOnTop();
+                    }
 
 
                     break;
