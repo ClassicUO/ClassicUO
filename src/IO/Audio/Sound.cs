@@ -113,14 +113,18 @@ namespace ClassicUO.IO.Audio
             AfterStop();
         }
 
-        public void SetVolume(float v)
+        public float Volume
         {
-            if (v < 0.0f)
-                v = 0f;
-            else if (v > 1f)
-                v = 1f;
+            get => m_ThisInstance.Volume;
+            set
+            {
+                if (value < 0.0f)
+                    value = 0f;
+                else if (value > 1f)
+                    value = 1f;
 
-            m_ThisInstance.Volume = v;
+                m_ThisInstance.Volume = value;
+            }
         }
 
         private void CullExpiredEffects(double now)

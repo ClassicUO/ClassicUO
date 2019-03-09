@@ -17,6 +17,19 @@ namespace ClassicUO.Game.Managers
                 return;
 
             float volume = (Engine.Profile.Current.SoundVolume / SOUND_DELTA);
+            
+            if (Engine.Instance.IsActive)
+            {
+                if (!Engine.Profile.Current.ReproduceSoundsInBackground)
+                {
+                    volume = Engine.Profile.Current.SoundVolume / SOUND_DELTA;
+                }
+            }
+            else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
+            {
+                volume = 0;
+            }
+            
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -26,8 +39,20 @@ namespace ClassicUO.Game.Managers
 
         public void PlaySoundWithDistance(int index, float volume, bool spamCheck = false)
         {
-            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
+            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || (!Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground))
                 return;
+
+            if (Engine.Instance.IsActive)
+            {
+                if (!Engine.Profile.Current.ReproduceSoundsInBackground)
+                {
+                    volume = Engine.Profile.Current.SoundVolume / SOUND_DELTA;
+                }
+            }
+            else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
+            {
+                volume = 0;
+            }
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -83,7 +108,7 @@ namespace ClassicUO.Game.Managers
                 if (volume < -1 || volume > 1f)
                     return;
 
-                _currentMusic.SetVolume(volume);
+                _currentMusic.Volume = volume;
             }
         }
 
@@ -99,6 +124,21 @@ namespace ClassicUO.Game.Managers
 
         public void Update()
         {
+            if (_currentMusic != null && Engine.Profile.Current != null)
+            {
+                if (Engine.Instance.IsActive)
+                {
+                    if (!Engine.Profile.Current.ReproduceSoundsInBackground)
+                    {
+                        _currentMusic.Volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
+                    }
+                }
+                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0)
+                {
+                    _currentMusic.Volume = 0;
+                }
+            }
+
             _currentMusic?.Update();
         }
     }
