@@ -94,11 +94,11 @@ namespace ClassicUO.Game.GameObjects
                 if (layer == Layer.Mount) continue;
                 Graphic graphic;
                 Hue color;
+                bool isequip = false;
 
                 if (layer == Layer.Invalid)
                 {
                     graphic = GetGraphicForAnimation();
-                    //graphic = item.DisplayedGraphic;
                     FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(GetGraphicForAnimation(), UsedLayer);
                     color = Hue;
                 }
@@ -109,22 +109,31 @@ namespace ClassicUO.Game.GameObjects
                     if (itemEquip == null) continue;
                     graphic = itemEquip.ItemData.AnimID;
 
-                    if (FileManager.Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    if (graphic == 1069)
                     {
-                        if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
+
+                    }
+
+                    if (FileManager.Animations.EquipConversions.TryGetValue(Amount, out Dictionary<ushort, EquipConvData> map))
+                    {
+                        if (map.TryGetValue(graphic, out EquipConvData data))
                             graphic = data.Graphic;
                     }
 
+                    isequip = true;
                     color = itemEquip.Hue;
                 }
                 else 
                     continue;
 
                 FileManager.Animations.AnimID = graphic;
-                ref var index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
-                ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+                ref IndexAnimation index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
 
-                if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+                ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction].IsUOP && !isequip ?
+                                                           ref FileManager.Animations.UOPAnim[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction]:
+                                                           ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+
+                if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction, isequip))
                     return false;
                 direction.LastAccessTime = Engine.Ticks;
                 int fc = direction.FrameCount;
