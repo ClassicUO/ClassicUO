@@ -769,7 +769,6 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateStatusFillBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
 
             // Name
-            
             Label text = new Label(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 100,

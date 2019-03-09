@@ -245,7 +245,7 @@ namespace ClassicUO.Configuration
                             gump.X = x;
                             gump.Y = y;
 
-                            gump.SetInScreen();
+                            //gump.SetInScreen();
 
                             if (gump.LocalSerial != 0)
                                 Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));

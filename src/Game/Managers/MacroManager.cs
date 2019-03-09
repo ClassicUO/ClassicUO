@@ -257,7 +257,196 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
-                    // TODO:
+
+                    switch (macro.Code)
+                    {
+                        case MacroType.Open:
+
+                            switch (macro.SubCode)
+                            {
+                                case MacroSubType.Configuration:
+                                    OptionsGump opt = Engine.UI.GetByLocalSerial<OptionsGump>();
+
+                                    if (opt == null)
+                                    {
+                                        Engine.UI.Add(opt = new OptionsGump());
+                                        opt.SetInScreen();
+                                    }
+                                    else
+                                    {
+                                        opt.SetInScreen();
+                                        opt.BringOnTop();
+                                    }
+
+                                    break;
+                                case MacroSubType.Paperdoll:
+                                    GameActions.OpenPaperdoll(World.Player);
+
+                                    break;
+                                case MacroSubType.Status:
+                                    if (StatusGumpBase.GetStatusGump() == null)
+                                        StatusGumpBase.AddStatusGump(100 , 100);
+                                    break;
+                                case MacroSubType.Journal:
+                                    JournalGump journalGump = Engine.UI.GetByLocalSerial<JournalGump>();
+
+                                    if (journalGump == null)
+                                        Engine.UI.Add(new JournalGump() { X = 64, Y = 64 });
+                                    else
+                                    {
+                                        journalGump.SetInScreen();
+                                        journalGump.BringOnTop();
+                                    }
+                                    break;
+                                case MacroSubType.Skills:
+                                    World.SkillsRequested = true;
+                                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                                    break;
+                                case MacroSubType.MageSpellbook:
+                                case MacroSubType.NecroSpellbook:
+                                case MacroSubType.PaladinSpellbook:
+                                case MacroSubType.BushidoSpellbook:
+                                case MacroSubType.NinjitsuSpellbook:
+                                case MacroSubType.SpellWeavingSpellbook:
+                                case MacroSubType.MysticismSpellbook:
+
+                                    SpellBookType type = SpellBookType.Magery;
+
+                                    switch (macro.SubCode)
+                                    {
+                                        case MacroSubType.NecroSpellbook:
+                                            type = SpellBookType.Necromancy;
+                                            break;
+                                        case MacroSubType.PaladinSpellbook:
+                                            type = SpellBookType.Chivalry;
+                                            break;
+                                        case MacroSubType.BushidoSpellbook:
+                                            type = SpellBookType.Bushido;
+                                            break;
+                                        case MacroSubType.NinjitsuSpellbook:
+                                            type = SpellBookType.Ninjitsu;
+                                            break;
+                                        case MacroSubType.SpellWeavingSpellbook:
+                                            type = SpellBookType.Spellweaving;
+                                            break;
+                                        case MacroSubType.MysticismSpellbook:
+                                            type = SpellBookType.Mysticism;
+                                            break;
+                                    }
+
+                                    NetClient.Socket.Send(new POpenSpellBook((byte)type));
+
+                                    break;
+                                case MacroSubType.Chat:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    break;
+                                case MacroSubType.Backpack:
+                                    Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                                    if (backpack != null)
+                                        GameActions.DoubleClick(backpack);
+                                    break;
+                                case MacroSubType.Owerview:
+                                    MiniMapGump miniMapGump = Engine.UI.GetByLocalSerial<MiniMapGump>();
+                                    if (miniMapGump == null)
+                                        Engine.UI.Add(new MiniMapGump());
+                                    else
+                                    {
+                                        miniMapGump.SetInScreen();
+                                        miniMapGump.BringOnTop();
+                                    }
+                                    break;
+                                case MacroSubType.WorldMap:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                                case MacroSubType.Mail:
+                                case MacroSubType.PartyManifest:
+                                    var party = Engine.UI.GetByLocalSerial<PartyGumpAdvanced>();
+                                    if (party == null)
+                                        Engine.UI.Add(new PartyGumpAdvanced());
+                                    else
+                                        party.BringOnTop();
+                                    break;
+
+                                case MacroSubType.Guild:
+                                    GameActions.OpenGuildGump();
+                                    break;
+                                case MacroSubType.QuestLog:
+                                    GameActions.RequestQuestMenu();
+                                    break;
+                                case MacroSubType.PartyChat:
+                                case MacroSubType.CombatBook:
+                                case MacroSubType.RacialAbilitiesBook:
+                                case MacroSubType.BardSpellbook:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                            }
+
+                            break;
+                        case MacroType.Close:
+                        case MacroType.Minimize: // TODO: miniminze/maximize
+                        case MacroType.Maximize:
+
+                            switch (macro.SubCode)
+                            {
+                                case MacroSubType.Configuration:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<OptionsGump>()?.Dispose();
+                                    break;
+                                case MacroSubType.Paperdoll:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<PaperDollGump>()?.Dispose();
+                                    break;
+                                case MacroSubType.Status:
+                                    if (macro.Code == MacroType.Close)
+                                        StatusGumpBase.GetStatusGump()?.Dispose();
+                                    break;
+                                case MacroSubType.Journal:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<JournalGump>()?.Dispose();
+                                    break;
+                                case MacroSubType.Skills:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<SkillGumpAdvanced>()?.Dispose();
+                                    break;
+                                case MacroSubType.MageSpellbook:
+                                case MacroSubType.NecroSpellbook:
+                                case MacroSubType.PaladinSpellbook:
+                                case MacroSubType.BushidoSpellbook:
+                                case MacroSubType.NinjitsuSpellbook:
+                                case MacroSubType.SpellWeavingSpellbook:
+                                case MacroSubType.MysticismSpellbook:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<SpellbookGump>()?.Dispose();
+                                    break;
+                                case MacroSubType.Chat:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                                case MacroSubType.Owerview:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<MiniMapGump>()?.Dispose();
+                                    break;
+                                case MacroSubType.Mail:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                                case MacroSubType.PartyManifest:
+                                    if (macro.Code == MacroType.Close)
+                                        Engine.UI.GetByLocalSerial<PartyGumpAdvanced>()?.Dispose();
+                                    break;
+                                case MacroSubType.PartyChat:
+                                case MacroSubType.CombatBook:
+                                case MacroSubType.RacialAbilitiesBook:
+                                case MacroSubType.BardSpellbook:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                            }
+                            break;
+                    }
+                    
                     break;
 
                 case MacroType.OpenDoor:

@@ -73,10 +73,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (X >= Engine.Instance.Window.ClientBounds.X || X < 0)
+            if (X >= Engine.Instance.Window.ClientBounds.Width || X < 0)
                 X = 0;
 
-            if (Y >= Engine.Instance.Window.ClientBounds.Y || Y < 0)
+            if (Y >= Engine.Instance.Window.ClientBounds.Height || Y < 0)
                 Y = 0;
         }
 
