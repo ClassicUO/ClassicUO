@@ -35,11 +35,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly Layer _layer;
         private readonly Mobile _mobile;
-        private bool _canDrag, _sendClickIfNotDClick;
-        private Point _clickPoint;
         private ItemGumpFixed _itemGump;
-        private float _pickupTime, _singleClickTime;
-        
+
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -66,11 +63,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public Item Item { get; private set; }
 
-        public Mobile Mobile
-        {
-            get => _mobile;
-            set { }
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -96,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
                     Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
                         HighlightOnMouseOver = false,
-                        ShowLabel = false,
+                        ShowLabel = true,
                     });
 
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
@@ -140,11 +132,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Item != null)
             {
-                if (_canDrag && totalMS >= _pickupTime)
-                {
-                    _canDrag = false;
-                    AttempPickUp();
-                }
+            //    if (_canDrag && totalMS >= _pickupTime)
+            //    {
+            //        _canDrag = false;
+            //        AttempPickUp();
+            //    }
+
+            //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+            //    {
+            //        if (!World.ClientFlags.TooltipsEnabled)
+            //            GameActions.SingleClick(Item);
+            //        GameActions.OpenPopupMenu(Item);
+            //        _sendClickIfNotDClick = false;
+            //    }
 
                 //if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
                 //{
@@ -156,60 +156,9 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
-        {
-            if (Item == null)
-                return;
-            _canDrag = true;
-            float totalMS = Engine.Ticks;
-            _pickupTime = totalMS + 800;
-            _clickPoint.X = x;
-            _clickPoint.Y = y;
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (Item == null)
-                return;
-
-            if (_canDrag && Math.Abs(_clickPoint.X - x) + Math.Abs(_clickPoint.Y - y) > 3)
-            {
-                _canDrag = false;
-                AttempPickUp();
-            }
-        }
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (Item == null)
-                return;
-
-            if (_canDrag)
-            {
-                _canDrag = false;
-                _sendClickIfNotDClick = true;
-                float totalMS = Engine.Ticks;
-                _singleClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-            }
-        }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
-        {
-            if (Item == null)
-                return false;
-            GameActions.DoubleClick(Item);
-            _sendClickIfNotDClick = false;
-
-            return true;
-        }
-
-        private void AttempPickUp()
-        {
-            Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
-            GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
-        }
 
 
+      
         class ItemGumpFixed : ItemGump
         {
             private Point _originalSize, _point;
@@ -219,7 +168,6 @@ namespace ClassicUO.Game.UI.Controls
                 Width = w;
                 Height = h;
                 WantUpdateSize = false;
-
 
                 ArtTexture texture = (ArtTexture) Texture;
 
@@ -236,6 +184,35 @@ namespace ClassicUO.Game.UI.Controls
 
                 return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(_point.X, _point.Y, _originalSize.X, _originalSize.Y), huev);
             }
+
+            protected override bool Contains(int x, int y)
+            {
+                return true;
+            }
+
+
+            protected override void UpdateLabel()
+            {
+                if (World.ClientFlags.TooltipsEnabled)
+                    return;
+
+                if (!Item.IsDisposed && Item.Overheads.Count > 0)
+                {
+                    LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+                    if (container == null)
+                    {
+                        container = new LabelContainer(Item);
+                        Engine.UI.Add(container);
+                    }
+
+                    container.X = ScreenCoordinateX;
+                    container.Y = ScreenCoordinateY;
+
+                    Engine.UI.MakeTopMostGumpOverAnother(container, this);
+                }
+            }
+
         }
     }
 }

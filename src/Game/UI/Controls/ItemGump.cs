@@ -58,37 +58,35 @@ namespace ClassicUO.Game.UI.Controls
             Height = texture.Height;
             LocalSerial = Item.Serial;
 
-            Item.Disposed += ItemOnDisposed;
-
             WantUpdateSize = false;
             ShowLabel = true;
 
             if (!World.ClientFlags.TooltipsEnabled)
+            {
+                Item.OverheadAdded -= ItemOnOverheadAdded;
                 Item.OverheadAdded += ItemOnOverheadAdded;
+            }
         }
 
 
-        private void ItemOnOverheadAdded(object sender, EventArgs e)
+
+        private static void ItemOnOverheadAdded(object sender, EventArgs e)
         {
-            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+            TextOverhead overhead = (TextOverhead)sender;
+            Item parent = overhead.Parent as Item;
+
+            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(parent);
 
             if (container == null)
             {
-                container = new LabelContainer(Item);
+                container = new LabelContainer(parent);
                 Engine.UI.Add(container);
             }
-
-            TextOverhead overhead = (TextOverhead) sender;
 
             overhead.TimeToLive = 4000;
 
             FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
             container.Add(label);
-        }
-
-        private void ItemOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
         }
 
         public Item Item { get; }
@@ -101,6 +99,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (Item == null || Item.IsDisposed)
+                Dispose();
+
             if (IsDisposed)
                 return;
 
@@ -283,7 +284,6 @@ namespace ClassicUO.Game.UI.Controls
             Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
             if (!World.ClientFlags.TooltipsEnabled)
                 Item.OverheadAdded -= ItemOnOverheadAdded;
-            Item.Disposed -= ItemOnDisposed;
             base.Dispose();
         }
 
@@ -302,6 +302,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
        
+
         protected virtual void UpdateLabel()
         {
             if (World.ClientFlags.TooltipsEnabled)
@@ -316,7 +317,8 @@ namespace ClassicUO.Game.UI.Controls
                     container = new LabelContainer(Item);
                     Engine.UI.Add(container);
                 }
-                container.X = ScreenCoordinateX + (Width >> 1) /*- (container.Width >> 1)*/;
+
+                container.X = ScreenCoordinateX + (Width >> 1) - (container.Width >> 1);
                 container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
                 
                 Engine.UI.MakeTopMostGumpOverAnother(container, this);
@@ -343,16 +345,18 @@ namespace ClassicUO.Game.UI.Controls
 
             public override void Add(Control c, int page = 0)
             {
-                c.X = Width - (c.Width >> 1);
+                Width = Children.Count == 0 ? c.Width : Math.Max(c.Width, Children.Max(s => s.Width));
 
                 if (Children.Count > 0)
                 {
+                    for (int i = 0; i < Children.Count; i++)
+                    {
+                        Children[i].X = Width / 2 - (Children[i].Width >> 1);
+                    }
+
                     var a = Children[Children.Count - 1];
                     c.Y = a.Y + a.Height;
                 }
-
-                if (Width > c.Width)
-                    Width = c.Width;
 
                 Height += c.Height;
 

@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
                     Engine.UI.Add(container);
                 }
 
-                container.X = ScreenCoordinateX + _clickedPoint.X /*- (container.Width >> 1)*/;
+                container.X = ScreenCoordinateX + _clickedPoint.X - (container.Width >> 1);
                 container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
 
                 Engine.UI.MakeTopMostGumpOverAnother(container, this);
