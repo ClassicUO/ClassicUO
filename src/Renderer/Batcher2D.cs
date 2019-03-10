@@ -141,20 +141,20 @@ namespace ClassicUO.Renderer
         {
             if (texture == null || texture.IsDisposed)
                 return false;
-            //bool draw = false;
 
-            //for (byte i = 0; i < 4; i++)
-            //{
-            //    if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
-            //    {
-            //        draw = true;
+            bool draw = false;
 
-            //        break;
-            //    }
-            //}
+            for (byte i = 0; i < 4; i++)
+            {
+                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+                {
+                    draw = true;
+                    break;
+                }
+            }
 
-            //if (!draw)
-            //    return false;
+            if (!draw)
+                return false;
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
