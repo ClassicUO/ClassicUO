@@ -165,7 +165,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (TargetManager.IsTargeting)
                 {
                     if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    {
+                        if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
+                        {
+                            return;
+                        }
+
+                        gs.WearHeldItem(Mobile);
                         return;
+                    }
 
                     switch (TargetManager.TargetingState)
                     {

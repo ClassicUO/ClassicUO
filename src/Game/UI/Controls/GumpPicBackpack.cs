@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -47,7 +49,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (TargetManager.IsTargeting)
                 {
-                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    Point offset = Mouse.LDroppedOffset;
+
+                    if (Mouse.IsDragging && !(Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS))
                         return;
 
                     switch (TargetManager.TargetingState)

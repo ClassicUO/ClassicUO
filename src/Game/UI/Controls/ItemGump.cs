@@ -175,7 +175,25 @@ namespace ClassicUO.Game.UI.Controls
                 if (TargetManager.IsTargeting)
                 {
                     if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    {
+                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                        {
+                            return;
+                        }
+
+                        gs.SelectedObject = Item;
+
+                        if (Item.ItemData.IsContainer)
+                            gs.DropHeldItemToContainer(Item);
+                        else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
+                            gs.MergeHeldItem(Item);
+                        else
+                        {
+                            if (Item.Container.IsItem)
+                                gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+                        }
                         return;
+                    }
 
                     switch (TargetManager.TargetingState)
                     {

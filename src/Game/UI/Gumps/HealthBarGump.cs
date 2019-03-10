@@ -222,6 +222,17 @@ namespace ClassicUO.Game.UI.Gumps
                 _textBox.IsEditable = false;
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            Point offset = Mouse.LDroppedOffset;
+
+            if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            {
+                TargetManager.TargetGameObject(Mobile);
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+        }
+
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (Mobile != null)

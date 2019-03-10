@@ -377,8 +377,14 @@ namespace ClassicUO.Game
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+
             if (TargetManager.IsTargeting)
-                return _cursorData[war, 12];
+            {
+                if (gs != null && !gs.IsHoldingItem)
+                    return _cursorData[war, 12];
+            }
 
             if (Engine.UI.IsDragging)
                 return _cursorData[war, 8];
