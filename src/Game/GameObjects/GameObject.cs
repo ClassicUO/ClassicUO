@@ -247,14 +247,27 @@ namespace ClassicUO.Game.GameObjects
             };
 
             InsertGameText(overhead);
-
-            while (_overHeads.Count > 5)
+            int limit3text = 0;
+            for (int i = 0; i < _overHeads.Count; i++)
             {
-                //TextOverhead over = _overHeads[_overHeads.Count - 1];
-
-                //if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
+                if (i <= 5)
                 {
-                    _overHeads.RemoveFromBack().Dispose();
+                    if (_overHeads[i].MessageType == MessageType.Limit3Spell)
+                    {
+                        limit3text++;
+                        if (limit3text > 3)
+                        {
+                            _overHeads[i].Dispose();
+                            _overHeads.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
+                else
+                {
+                    _overHeads[i].Dispose();
+                    _overHeads.RemoveAt(i);
+                    i--;
                 }
             }
 
