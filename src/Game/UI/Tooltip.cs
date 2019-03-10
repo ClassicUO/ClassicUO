@@ -195,20 +195,20 @@ namespace ClassicUO.Game.UI
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-		private static char[] _titleFormatChars = new[] { ' ', '-', '\n', '[' };
+		private static readonly char[] _titleFormatChars = new[] { ' ', '-', '\n', '[' };
 
 		public unsafe string FormatTitle(string text)
 		{
-			if (text != default(String))
+			if (text != null)
 			{
-				var index = 0;
+				int index = 0;
 
 				fixed (char* value = text)
 				{
 					while (index < text.Length)
 					{
 						if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-							value[index] = Char.ToUpper(value[index]);
+							value[index] = char.ToUpper(value[index]);
 
 						index++;
 					}

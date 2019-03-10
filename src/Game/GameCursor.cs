@@ -354,7 +354,7 @@ namespace ClassicUO.Game
 
             if (Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-	            if (Engine.UI.MouseOverControl.Tooltip is String text)
+	            if (Engine.UI.MouseOverControl.Tooltip is string text)
 	            {
 		            if (_tooltip.Text != text)
 			            _tooltip.Clear();

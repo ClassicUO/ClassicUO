@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public object Tooltip { get; private set; }
 
-        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && Tooltip != null;
+        public bool HasTooltip => /*World.ClientFlags.TooltipsEnabled &&*/ Tooltip != null;
 
         public virtual bool AcceptKeyboardInput
         {
