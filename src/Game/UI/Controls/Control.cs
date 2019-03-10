@@ -572,12 +572,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public T[] GetControls<T>() where T : Control
         {
-            return Children.OfType<T>().ToArray();
+            return Children.OfType<T>().Where(s => !s.IsDisposed).ToArray();
         }
 
         public IEnumerable<T> FindControls<T>() where T : Control
         {
-            return Children.OfType<T>();
+            return Children.OfType<T>().Where(s => !s.IsDisposed);
         }
 
         public void InvokeMouseDown(Point position, MouseButton button)
