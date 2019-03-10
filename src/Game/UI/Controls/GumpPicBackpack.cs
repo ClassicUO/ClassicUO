@@ -20,8 +20,12 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -40,8 +44,45 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-                if (gs.IsHoldingItem && gs.IsMouseOverUI)
-                    gs.DropHeldItemToContainer(Backpack);
+
+                if (TargetManager.IsTargeting)
+                {
+                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                        return;
+
+                    switch (TargetManager.TargetingState)
+                    {
+                        case CursorTarget.Position:
+                        case CursorTarget.Object:
+                            gs.SelectedObject = Backpack;
+
+
+                            if (Backpack != null)
+                            {
+                                TargetManager.TargetGameObject(Backpack);
+                                Mouse.LastLeftButtonClickTime = 0;
+                            }
+
+                            break;
+
+                        case CursorTarget.SetTargetClientSide:
+                            gs.SelectedObject = Backpack;
+
+                            if (Backpack != null)
+                            {
+                                TargetManager.TargetGameObject(Backpack);
+                                Mouse.LastLeftButtonClickTime = 0;
+                                Engine.UI.Add(new InfoGump(Backpack));
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+
+                    if (gs.IsHoldingItem && gs.IsMouseOverUI)
+                        gs.DropHeldItemToContainer(Backpack);
+                }
             }
         }
 
