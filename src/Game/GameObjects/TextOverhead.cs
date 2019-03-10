@@ -76,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
 
         public GameObject Parent { get; }
 
-        public float TimeToLive { get; set; }
+        public double TimeToLive { get; set; }
 
         public MessageType MessageType { get; set; }
 
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
          
 
-            TimeToLive -= (float)frameMS;
+            TimeToLive -= frameMS;
 
             if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
             {
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
                 //if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
                 //    Alpha = alpha;
             }
-            else if (TimeToLive <= 0.0f)
+            else if (TimeToLive <= 0.0)
             {
                 Dispose();
             }

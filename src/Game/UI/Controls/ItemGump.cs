@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
             overhead.TimeToLive = 4000;
 
-            FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
+            FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, (float) overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
             container.Add(label);
         }
 
