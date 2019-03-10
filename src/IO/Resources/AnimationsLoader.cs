@@ -2072,6 +2072,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+            count = 0;
 
             for (int i = 0; i < _usedUopTextures.Count; i++)
             {
