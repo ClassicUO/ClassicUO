@@ -867,9 +867,13 @@ namespace ClassicUO.Game.GameObjects
             public sbyte Z;
             public byte Direction;
             public bool Run;
+
+#if JAEDAN_MOVEMENT_PATCH || MOVEMENT2
+
             public byte Rej;
             public bool Anim;
             public byte Seq;
+#endif
         }
     }
 }
