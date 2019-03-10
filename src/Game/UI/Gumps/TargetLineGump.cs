@@ -1,6 +1,7 @@
 ﻿
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -18,6 +19,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = false;
             AcceptMouseInput = false;
+            CanCloseWithEsc = false;
+            CanCloseWithRightClick = false;
 
             Add(_background = new GumpPic(0,0, 0x1068, 0));
             Add(_hp = new GumpPicWithWidth(0, 0, 0x1069, 0, 1));
@@ -36,6 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == null || Mobile.IsDisposed)
             {
+                Dispose();
                 Engine.UI.RemoveTargetLineGump(Mobile);
                 return;
             }

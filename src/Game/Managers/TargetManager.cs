@@ -73,7 +73,12 @@ namespace ClassicUO.Game.Managers
             TargetingState = targeting;
             _targetCursorId = cursorID;
             _targetCursorType = cursorType;
-            IsTargeting = cursorType < TargetType.Cancel;            
+            IsTargeting = cursorType < TargetType.Cancel;
+
+            if (IsTargeting)
+            {
+                Engine.UI.RemoveTargetLineGump(LastGameObject);
+            }
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
@@ -124,6 +129,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (selectedEntity != World.Player)
                 {
+                    Engine.UI.RemoveTargetLineGump(World.LastAttack);
                     Engine.UI.RemoveTargetLineGump(LastGameObject);
                     LastGameObject = entity.Serial;
                 }

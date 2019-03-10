@@ -582,27 +582,42 @@ namespace ClassicUO.Game.Managers
 
         private readonly Dictionary<Serial, TargetLineGump> _targetLineGumps = new Dictionary<Serial, TargetLineGump>();
 
+        public TargetLineGump TargetLine { get; set; }
+
         public void SetTargetLineGump(Serial mob)
         {
-            if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))
-            {
-                Mobile m = World.Mobiles.Get(mob);
-                if (m == null)
-                    return;
+            if (TargetLine != null && !TargetLine.IsDisposed && TargetLine.Mobile == mob)
+                return;
 
-                gump = new TargetLineGump(m);
-                _targetLineGumps[mob] = gump;
-                Engine.UI.Add(gump);
+            TargetLine?.Dispose();
+            Remove<TargetLineGump>();
+            TargetLine = null;
+
+            if (TargetLine == null || TargetLine.IsDisposed)
+            {
+                TargetLine = new TargetLineGump(World.Mobiles.Get(mob));
+                Engine.UI.Add(TargetLine);
             }
+
+            //if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))
+            //{
+            //    Mobile m = World.Mobiles.Get(mob);
+            //    if (m == null)
+            //        return;
+
+            //    gump = new TargetLineGump(m);
+            //    _targetLineGumps[mob] = gump;
+            //    Engine.UI.Add(gump);
+            //}
         }
 
         public void RemoveTargetLineGump(Serial serial)
         {
-            if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
-            {
-                gump?.Dispose();
-                _targetLineGumps.Remove(serial);
-            }
+            //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
+            //{
+            //    gump?.Dispose();
+            //    _targetLineGumps.Remove(serial);
+            //}
         }
 
 
