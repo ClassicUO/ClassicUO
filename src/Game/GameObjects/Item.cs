@@ -275,8 +275,14 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 Item item = this;
+
                 while (item.Container.IsItem)
+                {
                     item = World.Items.Get(item.Container);
+
+                    if (item == null)
+                        return Serial.INVALID;
+                }
 
                 return item.Container.IsMobile ? item.Container : item;
             }

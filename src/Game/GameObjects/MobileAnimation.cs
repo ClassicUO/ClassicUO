@@ -53,19 +53,19 @@ namespace ClassicUO.Game.GameObjects
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
+                (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
+                (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_2, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
             },
             new[]
             {
@@ -137,11 +137,11 @@ namespace ClassicUO.Game.GameObjects
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_3, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
+                (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_3, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
             },
             new[]
             {
