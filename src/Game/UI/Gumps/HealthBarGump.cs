@@ -75,6 +75,9 @@ namespace ClassicUO.Game.UI.Gumps
             Mobile = mob;
             _name = Mobile.Name;
             _partyMemeberSerial = Mobile.Serial;
+
+            _isDead = mob.IsDead;
+
             BuildGump();
         }
 
@@ -271,6 +274,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private bool _isDead;
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -288,11 +293,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == null || Mobile.IsDisposed)
             {
-                if (Engine.Profile.Current.CloseHealthBarIfMobileNotExists)
+                if (Engine.Profile.Current.CloseHealthBarType == 1)
                 {
                     Dispose();
                     return;
                 }
+
+                if (_isDead)
+                    _isDead = false;
 
                 if (!_outOfRange)
                 {
@@ -341,6 +349,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile != null && !Mobile.IsDisposed)
             {
+                if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
+                {
+                    Dispose();
+                    return;
+                }
+
+                if (!Mobile.IsDead && _isDead)
+                {
+                    _isDead = false;
+                }
+
                 if (_outOfRange)
                 {
                     if (Mobile.HitsMax == 0)

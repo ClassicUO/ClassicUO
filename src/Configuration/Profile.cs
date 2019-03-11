@@ -134,7 +134,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
         [JsonProperty] public bool UseCustomLightLevel { get; set; } = false;
         [JsonProperty] public byte LightLevel { get; set; } = 0;
-        [JsonProperty] public bool CloseHealthBarIfMobileNotExists { get; set; } = false;
+        [JsonProperty] public int CloseHealthBarType { get; set; } = 0; // 0 = none, 1 == not exists, 2 == is dead
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

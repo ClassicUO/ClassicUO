@@ -43,8 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder, _closeHealthbarsIfMobNotExists;
-        private Combobox _hpComboBox;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
+        private Combobox _hpComboBox, _healtbarType;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
         // sounds
@@ -202,15 +202,15 @@ namespace ClassicUO.Game.UI.Gumps
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
 
-            text = new Label("- Mobiles HP", true, HUE_FONT, font: FONT)
-            {
-                Y = 10
-            };
-            hpAreaItem.Add(text);
+            //text = new Label("- Mobiles HP", true, HUE_FONT, font: FONT)
+            //{
+            //    Y = 10
+            //};
+            //hpAreaItem.Add(text);
 
             _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT, true)
             {
-                X = 25, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
+                X = 0, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
             hpAreaItem.Add(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
@@ -218,20 +218,28 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            _hpComboBox = new Combobox(200, 30, 150, new[]
+            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 30, 150, new[]
             {
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
 
 
-            _closeHealthbarsIfMobNotExists = new Checkbox(0x00D2, 0x00D3, "Close HealthBar gump if mobile not exists", FONT, HUE_FONT, true)
+            mode = Engine.Profile.Current.CloseHealthBarType;
+            if (mode < 0 || mode > 2)
+                mode = 0;
+
+            text = new Label("Close healtbar gump when:", true, HUE_FONT, font: FONT)
             {
-                X = 0,
-                Y = _showHpMobile.Bounds.Bottom + 15,
-                IsChecked = Engine.Profile.Current.CloseHealthBarIfMobileNotExists
+                Y = _hpComboBox.Bounds.Bottom + 20,
             };
-            hpAreaItem.Add(_closeHealthbarsIfMobNotExists);
+            hpAreaItem.Add(text);
+            _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 20, 150, new[]
+            {
+                "None", "Mobile not exists", "Mobile is dead"
+            }, mode);
+            hpAreaItem.Add(_healtbarType);
+
 
             rightArea.Add(hpAreaItem);
 
@@ -715,7 +723,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
                     _preloadMaps.IsChecked = false;
-                    _closeHealthbarsIfMobNotExists.IsChecked = false;
+                    _healtbarType.SelectedIndex = 0;
                     break;
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
@@ -790,7 +798,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
-            Engine.Profile.Current.CloseHealthBarIfMobileNotExists = _closeHealthbarsIfMobNotExists.IsChecked;
+            Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
