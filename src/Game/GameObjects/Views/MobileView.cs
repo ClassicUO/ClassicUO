@@ -220,10 +220,8 @@ namespace ClassicUO.Game.GameObjects
                         hue = 0x038E;
                     else if (!IsHuman && IsDead)
                         hue = 0x0386;
-                    else if (hue == 0)
-                        hue = Hue;
-
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue, IsHuman, 0, false);
+ 
+                    HueVector = ShaderHuesTraslator.GetHueVector(hue == 0 ? Hue : hue, hue != 0 && IsHuman, 0, false);
                 }
 
                 base.Draw(batcher, position, objecList);

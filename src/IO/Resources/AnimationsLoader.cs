@@ -722,24 +722,27 @@ namespace ClassicUO.IO.Resources
                         {
                             for (byte d = 0; d < 5; d++)
                             {
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+                                ref AnimationDirection dataIndex = ref DataIndex[index].Groups[ignoreGroups[j]].Direction[d];
+                                ref AnimationDirection dataCheck = ref DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d];
 
-                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress == 0)
+                                dataIndex.BaseAddress = dataCheck.BaseAddress;
+                                dataIndex.BaseSize = dataCheck.BaseSize;
+                                dataIndex.Address = dataIndex.BaseAddress;
+                                dataIndex.Size = dataIndex.BaseSize;
+
+                                if (dataIndex.PatchedAddress == 0)
                                 {
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
+                                    dataIndex.PatchedAddress = dataCheck.PatchedAddress;
+                                    dataIndex.PatchedSize = dataCheck.PatchedSize;
+                                    dataIndex.FileIndex = dataCheck.FileIndex;
                                 }
 
-                                if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress == 0)
+                                if (dataIndex.BaseAddress == 0)
                                 {
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                                    DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+                                    dataIndex.BaseAddress = dataIndex.PatchedAddress;
+                                    dataIndex.BaseSize = dataIndex.PatchedSize;
+                                    dataIndex.Address = dataIndex.BaseAddress;
+                                    dataIndex.Size = dataIndex.BaseSize;
                                 }
                             }
                         }
@@ -833,15 +836,12 @@ namespace ClassicUO.IO.Resources
                             //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
 
 
-
                             UOPDataIndex[animID].Graphic = DataIndex[animID].Graphic;
                             UOPDataIndex[animID].Flags = DataIndex[animID].Flags;
                             UOPDataIndex[animID].IsUOP = true;
                             UOPDataIndex[animID].Color = DataIndex[animID].Color;
                             UOPDataIndex[animID].MountedHeightOffset = DataIndex[animID].MountedHeightOffset;
                             UOPDataIndex[animID].Type = DataIndex[animID].Type;
-
-                            //DataIndex[animID].IsUOP = true;
 
                             if (UOPDataIndex[animID].IsUOP)
                             {
@@ -1613,7 +1613,7 @@ namespace ClassicUO.IO.Resources
 
         public byte GetDieGroupIndex(ushort id, bool second)
         {
-            switch (DataIndex[id].IsUOP ? UOPDataIndex[id].Type : DataIndex[id].Type)
+            switch (DataIndex[id].IsUOP && DataIndex[id].Groups[(int)DataIndex[id].Type].UOPAnimData.Offset == 0 ? UOPDataIndex[id].Type : DataIndex[id].Type)
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 

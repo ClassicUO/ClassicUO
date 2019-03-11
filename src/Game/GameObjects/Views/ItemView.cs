@@ -103,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
-                FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(GetGraphicForAnimation(), UsedLayer);
+                FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
                 color = Hue;
             }
             else if (HasEquipment)

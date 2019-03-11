@@ -660,17 +660,22 @@ namespace ClassicUO.Game.GameObjects
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
                         int animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
-                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+
+                        bool istotallyUOP = FileManager.Animations.DataIndex[id].IsUOP && FileManager.Animations.UOPDataIndex[id].Groups[animGroup].UOPAnimData.Offset != 0;
+
+                        ref AnimationDirection direction = ref istotallyUOP ? ref FileManager.Animations.UOPDataIndex[id].Groups[animGroup].Direction[dir] : ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                         FileManager.Animations.AnimID = id;
-                        FileManager.Animations.AnimGroup = (byte) animGroup;
+                        FileManager.Animations.AnimGroup = (byte)animGroup;
                         FileManager.Animations.Direction = dir;
-                        if ((direction.FrameCount == 0 || direction.FramesHashes == null)) FileManager.Animations.LoadDirectionGroup(ref direction);
+                        if ((direction.FrameCount == 0 || direction.FramesHashes == null))
+                            FileManager.Animations.LoadDirectionGroup(ref direction);
 
                         if ((direction.Address != 0 && direction.Size != 0) || direction.IsUOP)
                         {
                             direction.LastAccessTime = Engine.Ticks;
                             int fc = direction.FrameCount;
-                            if (frameIndex >= fc) frameIndex = (sbyte) (fc - 1);
+                            if (frameIndex >= fc)
+                                frameIndex = (sbyte) (fc - 1);
                             AnimIndex = frameIndex;
                         }
                     }
