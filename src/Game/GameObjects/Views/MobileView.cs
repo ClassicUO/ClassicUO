@@ -221,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
                     else if (!IsHuman && IsDead)
                         hue = 0x0386;
  
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue == 0 ? Hue : hue, hue != 0 && IsHuman, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(hue == 0 ? Hue : hue, hue == 0 && IsHuman, 0, false);
                 }
 
                 base.Draw(batcher, position, objecList);
@@ -234,7 +234,7 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
-              
+
                 DrawLayer(batcher, position, objectList, dir, drawX, drawY, drawCenterY, layer, ref rect, ref mirror, hue, ref mountHeight);
             }
         }

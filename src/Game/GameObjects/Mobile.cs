@@ -65,26 +65,22 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
-        public long DeathScreenTimer { get; set; }
 
         public Mobile(Serial serial) : base(serial)
         {
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
 
-            //_frames = new ViewLayer[(int)Layer.Legs];
             HasShadow = true;
         }
 
-        private void CalculateRandomIdleTime()
-        {
-            const int TIME = 30000;
-            _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
-        }
+     
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
         public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
+
+        public long DeathScreenTimer { get; set; }
 
         private bool _isFemale;
 
@@ -281,6 +277,12 @@ namespace ClassicUO.Game.GameObjects
         public void SetSAPoison(bool value)
         {
             _isSA_Poisoned = value;
+        }
+
+        private void CalculateRandomIdleTime()
+        {
+            const int TIME = 300;
+            _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
         public override void Update(double totalMS, double frameMS)
