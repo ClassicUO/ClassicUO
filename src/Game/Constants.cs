@@ -24,7 +24,7 @@ namespace ClassicUO.Game
         public const float TIME_FADEOUT_TEXT = 1000;
         public const float TIME_DISPLAY_SYSTEM_MESSAGE_TEXT = 10000;
 
-        public const int USED_LAYER_COUNT = 25;
+        public const int USED_LAYER_COUNT = 23;
 
         public const int CLEAR_TEXTURES_DELAY = 3000;
         public const int MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;

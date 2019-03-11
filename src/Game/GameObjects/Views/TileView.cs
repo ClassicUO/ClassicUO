@@ -61,26 +61,14 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (IsStretched)
-            {
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
-                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
-                else
-                    HueVector = GetHueVector(Hue, true);
-
-                return Draw3DStretched(batcher, position, objectList);
-            }
-
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                 HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
-                HueVector = GetHueVector(Hue, false);
+                HueVector = GetHueVector(Hue, IsStretched);
 
-            return base.Draw(batcher, position, objectList);
+            return IsStretched ? Draw3DStretched(batcher, position, objectList) : base.Draw(batcher, position, objectList);
         }
 
         private static Vector3 GetHueVector(int hue, bool stretched)
@@ -88,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
             return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
         }
 
-        private unsafe bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        private bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             Texture.Ticks = Engine.Ticks;
 

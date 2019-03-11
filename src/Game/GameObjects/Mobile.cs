@@ -72,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
 
-            _frames = new ViewLayer[(int)Layer.Legs];
+            //_frames = new ViewLayer[(int)Layer.Legs];
             HasShadow = true;
         }
 
