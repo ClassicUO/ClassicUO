@@ -211,6 +211,14 @@ namespace ClassicUO.Game.Data
                 Y += Constants.CONTAINER_RECT_STEP;
             }
         }
+
+        public static void DoStepBack()
+        {
+            if (X == DefaultX || Y == DefaultY)
+
+            X = ContainerManager.X;
+            Y = ContainerManager.Y;
+        }
     }
 
     internal struct ContainerData

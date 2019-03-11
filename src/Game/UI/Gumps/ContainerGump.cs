@@ -81,9 +81,20 @@ namespace ClassicUO.Game.UI.Gumps
             if (_isCorspeContainer)
                 Add(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
 
-            ContainerManager.CalculateContainerPosition(g);
-            X = ContainerManager.X;
-            Y = ContainerManager.Y;
+            ContainerGump gg = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
+
+            if (gg == null)
+            {
+                ContainerManager.CalculateContainerPosition(g);
+                X = ContainerManager.X;
+                Y = ContainerManager.Y;
+            }
+            else
+            {
+                X = gg.X;
+                Y = gg.Y;
+            }
+       
 
             if (_data.OpenSound != 0)
                 Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.OpenSound);
