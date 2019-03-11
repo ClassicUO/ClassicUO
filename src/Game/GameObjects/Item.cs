@@ -312,6 +312,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
+                AnimIndex = 0;
                 if ((Direction & Direction.Running) != 0)
                 {
                     UsedLayer = true;

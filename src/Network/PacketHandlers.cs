@@ -2285,9 +2285,9 @@ namespace ClassicUO.Network
 
             //}
 
-            //byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
+            byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
 
-            //owner.SetAnimation(group, 0, 5, 1);
+            owner.SetAnimation(group, 0, 5, 1);
         }
 
         private static void OpenGump(Packet p)
@@ -3192,7 +3192,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             byte type = p.ReadByte();
             Item item = World.GetOrCreateItem(p.ReadUInt());
-            item.Graphic = p.ReadUShort();
+            Graphic graphic = p.ReadUShort();
             ushort graphicInc = p.ReadByte();
             //item.Direction = (Direction)p.ReadByte();
             item.Amount = p.ReadUShort();
@@ -3204,6 +3204,8 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 p.ReadUShort(); //unknown
             item.Container = Serial.INVALID;
+
+            item.Graphic = graphic;
 
             if (item.Graphic != 0x2006)
                 item.Graphic += graphicInc;

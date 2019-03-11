@@ -67,11 +67,8 @@ namespace ClassicUO.Game.GameObjects
                 Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                 base.Draw(batcher, offsetDrawPosition, objectList);
             }
-
-            bool ok = base.Draw(batcher, position, objectList);
-            //MessageOverHead(batcher, position, Bounds.Y);
             
-            return ok;
+            return base.Draw(batcher, position, objectList);
         }
 
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
@@ -86,92 +83,91 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.Direction = dir;
             byte animIndex = (byte) AnimIndex;
 
+            DrawLayer(batcher, position, objectList, Layer.Invalid, animIndex);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
-
-                if (layer == Layer.Mount) continue;
-                Graphic graphic;
-                Hue color;
-                bool isequip = false;
-
-                if (layer == Layer.Invalid)
-                {
-                    graphic = GetGraphicForAnimation();
-                    FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(GetGraphicForAnimation(), UsedLayer);
-                    color = Hue;
-                }
-                else if (HasEquipment)
-                {
-                    Item itemEquip = Equipment[(int) layer];
-
-                    if (itemEquip == null) continue;
-                    graphic = itemEquip.ItemData.AnimID;
-
-                    if (graphic == 1069)
-                    {
-
-                    }
-
-                    if (FileManager.Animations.EquipConversions.TryGetValue(Amount, out Dictionary<ushort, EquipConvData> map))
-                    {
-                        if (map.TryGetValue(graphic, out EquipConvData data))
-                            graphic = data.Graphic;
-                    }
-
-                    isequip = true;
-                    color = itemEquip.Hue;
-                }
-                else 
-                    continue;
-
-                FileManager.Animations.AnimID = graphic;
-                ref IndexAnimation index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
-
-                ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction].IsUOP && !isequip ?
-                                                           ref FileManager.Animations.UOPDataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction]:
-                                                           ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
-
-                if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction, isequip))
-                    return false;
-                direction.LastAccessTime = Engine.Ticks;
-                int fc = direction.FrameCount;
-                if (fc > 0 && animIndex >= fc)
-                    animIndex = (byte) (fc - 1);
-
-                if (color == 0)
-                    color = index.Color;
-
-                if (animIndex < direction.FrameCount)
-                {
-                    AnimationFrameTexture frame = direction.FramesHashes[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
-
-                    if (frame == null || frame.IsDisposed) return false;
-
-                    int drawCenterY = frame.CenterY;
-                    const int drawX = -22;
-                    int drawY = drawCenterY - 22 - 3;
-                    int x = drawX + frame.CenterX;
-                    int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
-                    Texture = frame;
-                    Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                    
-                    if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                        HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
-                    else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                        HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
-                    else
-                        HueVector = ShaderHuesTraslator.GetHueVector(color);
-
-                    base.Draw(batcher, position, objectList);
-                    Pick(frame, Bounds, position, objectList);
-                }
+                DrawLayer(batcher, position, objectList, layer, animIndex);
             }
 
-            //MessageOverHead(batcher, position, Bounds.Y);
-
             return true;
+        }
+
+        private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, Layer layer, byte animIndex)
+        {
+            Graphic graphic;
+            Hue color;
+            bool isequip = false;
+
+            if (layer == Layer.Invalid)
+            {
+                graphic = GetGraphicForAnimation();
+                FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(GetGraphicForAnimation(), UsedLayer);
+                color = Hue;
+            }
+            else if (HasEquipment)
+            {
+                Item itemEquip = Equipment[(int)layer];
+
+                if (itemEquip == null) return;
+                graphic = itemEquip.ItemData.AnimID;
+
+                if (FileManager.Animations.EquipConversions.TryGetValue(Amount, out Dictionary<ushort, EquipConvData> map))
+                {
+                    if (map.TryGetValue(graphic, out EquipConvData data))
+                        graphic = data.Graphic;
+                }
+
+                isequip = true;
+                color = itemEquip.Hue;
+            }
+            else
+                return;
+
+            FileManager.Animations.AnimID = graphic;
+            ref IndexAnimation index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
+
+            ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction].IsUOP && !isequip ?
+                                                       ref FileManager.Animations.UOPDataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction] :
+                                                       ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+
+            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction, isequip))
+                return;
+            direction.LastAccessTime = Engine.Ticks;
+            int fc = direction.FrameCount;
+            if (fc > 0 && animIndex >= fc)
+                animIndex = (byte)(fc - 1);
+
+            if (color == 0)
+                color = index.Color;
+
+            if (animIndex < direction.FrameCount)
+            {
+                AnimationFrameTexture frame = direction.FramesHashes[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
+
+                if (frame == null || frame.IsDisposed)
+                    return;
+
+                int drawCenterY = frame.CenterY;
+                const int drawX = -22;
+                int drawY = drawCenterY - 22;
+                drawY -= 3;
+                int x = drawX + frame.CenterX;
+                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
+                Texture = frame;
+                Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+                else
+                    HueVector = ShaderHuesTraslator.GetHueVector(color);
+
+                base.Draw(batcher, position, objectList);
+                Pick(frame, Bounds, position, objectList);
+            }
         }
 
         private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
