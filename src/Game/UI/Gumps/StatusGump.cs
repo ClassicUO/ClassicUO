@@ -82,18 +82,24 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButton.Left)
             {
                 if (TargetManager.IsTargeting)
-                {
-                    if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
-                    {
-                        TargetManager.TargetGameObject(World.Player);
-                        Mouse.LastLeftButtonClickTime = 0;
-                    }
+                {                 
+                    TargetManager.TargetGameObject(World.Player);
+                    Mouse.LastLeftButtonClickTime = 0;              
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
                     Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                     Dispose();
                 }
+            }
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            if (TargetManager.IsTargeting)
+            {
+                TargetManager.TargetGameObject(World.Player);
+                Mouse.LastLeftButtonClickTime = 0;
             }
         }
 
@@ -1021,11 +1027,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (TargetManager.IsTargeting)
                 {
-                    if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
-                    {
-                        TargetManager.TargetGameObject(World.Player);
-                        Mouse.LastLeftButtonClickTime = 0;
-                    }
+                    TargetManager.TargetGameObject(World.Player);
+                    Mouse.LastLeftButtonClickTime = 0;
                 }
                 else
                 {
