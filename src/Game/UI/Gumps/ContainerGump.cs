@@ -179,11 +179,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (y < _data.Bounds.Y)
                     y = _data.Bounds.Y;
 
-                if (x + texture.Width > _data.Bounds.Right)
-                    x = _data.Bounds.Right - texture.Width;
+                if (x + texture.Width > _data.Bounds.Width)
+                    x = _data.Bounds.Width - texture.Width;
 
-                if (y + texture.Height > _data.Bounds.Bottom)
-                    y = _data.Bounds.Bottom - texture.Height;
+                if (y + texture.Height > _data.Bounds.Height)
+                    y = _data.Bounds.Height - texture.Height;
             }
             else
             {
