@@ -179,11 +179,12 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = _background.Texture.Width;
                     Height = _background.Texture.Height;
 
-                    Add(_textBox = new TextBox(1, width: 150, isunicode: false, hue: textColor, style: FontStyle.Fixed)
+                    Add(_textBox = new TextBox(1, width: 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
                     {
                         X = 16,
                         Y = 14,
-                        Width = 150,
+                        Width = 120,
+                        Height = 30,
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
