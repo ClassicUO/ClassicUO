@@ -634,6 +634,9 @@ namespace ClassicUO.Network
             if (scene.HeldItem.Serial == serial)
                 scene.HeldItem.Enabled = false;
 
+            if (World.CorpseManager.Exists(0, serial))
+                return;
+
             if (serial.IsItem)
             {
                 Item item = World.Items.Get(serial);
@@ -2272,26 +2275,10 @@ namespace ClassicUO.Network
 
             serial |= 0x80000000;
 
+            World.Mobiles.Replace(owner, serial);
 
-            //World.Mobiles.Remove(owner);
-            //World.Mobiles.ProcessDelta();
-
-            //Mobile newOwner = World.GetOrCreateMobile(serial);
-
-            //foreach (Item i in owner.Items)
-            //{
-            //    i.Container = serial;
-            //    newOwner.Items.Add(i); // item duping?
-            //}
-
-            //World.Mobiles.Add(newOwner);
-            //newOwner.ProcessDelta();
-            //World.Mobiles.ProcessDelta();
-
-            //if (corpseSerial.IsValid)
-            //{
-
-            //}
+            if (corpseSerial.IsValid)
+                World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
             byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
 

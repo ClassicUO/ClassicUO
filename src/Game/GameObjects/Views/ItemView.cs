@@ -73,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
 
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (IsDisposed)
+            if (IsDisposed || World.CorpseManager.Exists(Serial, 0))
                 return false;
 
             byte dir = (byte) ((byte) Layer & 0x7F & 7);

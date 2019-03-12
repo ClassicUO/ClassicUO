@@ -396,7 +396,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    AnimIndex = 0;
+                    AnimIndex = 99;
 
                     if ((Direction & Direction.Running) != 0)
                     {

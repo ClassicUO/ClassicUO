@@ -97,6 +97,20 @@ namespace ClassicUO.Game.GameObjects
             return entity;
         }
 
+        public void Replace(T entity, Serial newSerial)
+        {
+            if (_entities.ContainsKey(entity))
+            {
+                _entities.Remove(entity.Serial);
+
+                foreach (Item i in entity.Items)
+                    i.Container = newSerial;
+
+                _entities[newSerial] = entity;
+                entity.Serial = newSerial;
+            }
+        }
+
         public void Clear()
         {
             _removed.AddRange(this);

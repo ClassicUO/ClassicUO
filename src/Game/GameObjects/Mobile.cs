@@ -702,16 +702,36 @@ namespace ClassicUO.Game.GameObjects
                         }
                         else
                         {
-                            if (frameIndex >= fc) frameIndex = 0;
+                            if (frameIndex >= fc)
+                            {
+                                frameIndex = 0;
+
+                                if ((Serial & 0x80000000) != 0)
+                                {
+                                    World.CorpseManager.Remove(0, Serial);
+                                    World.RemoveMobile(this);
+                                }
+                            }
                         }
 
                         AnimIndex = frameIndex;
                     }
+                    else if ((Serial & 0x80000000) != 0)
+                    {
+                        World.CorpseManager.Remove(0, Serial);
+                        World.RemoveMobile(this);
+                    }
+                }
+                else if ((Serial & 0x80000000) != 0)
+                {
+                    World.CorpseManager.Remove(0, Serial);
+                    World.RemoveMobile(this);
                 }
 
                 LastAnimationChangeTime = Engine.Ticks + currentDelay;
             }
         }
+
 
         /* public int IsSitting
         {

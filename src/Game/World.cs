@@ -37,6 +37,8 @@ namespace ClassicUO.Game
         private static readonly List<Entity> _toRemove = new List<Entity>();
 
 
+        public static CorpseManager CorpseManager { get; } = new CorpseManager();
+
         public static PartyManager Party { get; } = new PartyManager();
 
         public static HouseManager HouseManager { get; } = new HouseManager();
@@ -281,6 +283,7 @@ namespace ClassicUO.Game
             Chat.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
+            CorpseManager.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)
