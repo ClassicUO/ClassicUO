@@ -1898,15 +1898,21 @@ namespace ClassicUO.Network
             if (mobile == null) return;
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
-            UIManager ui = Engine.UI;
 
-            if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
+            var paperdoll = Engine.UI.GetByLocalSerial<PaperDollGump>(mobile);
+
+            if (paperdoll == null)
             {
-                if (!ui.GetGumpCachePosition(mobile, out Point location))
+                if (!Engine.UI.GetGumpCachePosition(mobile, out Point location))
                 {
                     location = new Point(100, 100);
                 }
-                ui.Add(new PaperDollGump(mobile, text) { Location = location });
+                Engine.UI.Add(new PaperDollGump(mobile, text) { Location = location });
+            }
+            else
+            {
+                paperdoll.SetInScreen();
+                paperdoll.BringOnTop();
             }
         }
 

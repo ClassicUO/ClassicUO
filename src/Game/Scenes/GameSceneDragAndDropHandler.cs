@@ -91,9 +91,6 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-
-            //if (!item.IsPickable)
-            //    return;
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
 

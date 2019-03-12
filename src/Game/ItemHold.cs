@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,6 +54,8 @@ namespace ClassicUO.Game
 
         public void Clear()
         {
+            StackTrace trace = new StackTrace();
+            Console.WriteLine(trace.GetFrame(1).GetMethod().Name);
             Serial = Serial.INVALID;
             Position = Position.INVALID;
             Container = Serial.INVALID;

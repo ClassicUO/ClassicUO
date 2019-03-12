@@ -292,49 +292,48 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+
+            HeldItem?.Clear();
+
             try
             {
-                HeldItem?.Clear();
-
                 Plugin.OnDisconnected();
-
-                _renderList = null;
-
-                TargetManager.ClearTargetingWithoutTargetCancelPacket();
-
-                Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
-                Engine.Profile.UnLoadProfile();
-
-                NetClient.Socket.Disconnected -= SocketOnDisconnected;
-                NetClient.Socket.Disconnect();
-                _renderTarget?.Dispose();
-                CommandManager.UnRegisterAll();
-
-                Engine.UI?.Clear();
-                World.Clear();
-
-                _viewPortGump.MouseDown -= OnMouseDown;
-                _viewPortGump.MouseUp -= OnMouseUp;
-                _viewPortGump.MouseDoubleClick -= OnMouseDoubleClick;
-                _viewPortGump.DragBegin -= OnMouseDragBegin;
-
-                Engine.Input.KeyDown -= OnKeyDown;
-                Engine.Input.KeyUp -= OnKeyUp;
-
-                _overheadManager?.Dispose();
-                _overheadManager = null;
-                _journalManager?.Clear();
-                _journalManager = null;
-                _overheadManager = null;
-                _useItemQueue?.Clear();
-                _useItemQueue = null;
-                _hotkeysManager = null;
-                _macroManager = null;
-                Chat.Message -= ChatOnMessage;
-
-            } catch
-            {
             }
+            catch { }
+
+            _renderList = null;
+
+            TargetManager.ClearTargetingWithoutTargetCancelPacket();
+
+            Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            Engine.Profile.UnLoadProfile();
+
+            NetClient.Socket.Disconnected -= SocketOnDisconnected;
+            NetClient.Socket.Disconnect();
+            _renderTarget?.Dispose();
+            CommandManager.UnRegisterAll();
+
+            Engine.UI?.Clear();
+            World.Clear();
+
+            _viewPortGump.MouseDown -= OnMouseDown;
+            _viewPortGump.MouseUp -= OnMouseUp;
+            _viewPortGump.MouseDoubleClick -= OnMouseDoubleClick;
+            _viewPortGump.DragBegin -= OnMouseDragBegin;
+
+            Engine.Input.KeyDown -= OnKeyDown;
+            Engine.Input.KeyUp -= OnKeyUp;
+
+            _overheadManager?.Dispose();
+            _overheadManager = null;
+            _journalManager?.Clear();
+            _journalManager = null;
+            _overheadManager = null;
+            _useItemQueue?.Clear();
+            _useItemQueue = null;
+            _hotkeysManager = null;
+            _macroManager = null;
+            Chat.Message -= ChatOnMessage;
 
             base.Unload();
         }
