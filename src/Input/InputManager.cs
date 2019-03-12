@@ -72,6 +72,15 @@ namespace ClassicUO.Input
 
             switch (e->type)
             {
+                case SDL_EventType.SDL_AUDIODEVICEADDED:
+                    Console.WriteLine("AUDIO ADDED: {0}", e->adevice.which);
+                    break;
+                case SDL_EventType.SDL_AUDIODEVICEREMOVED:
+                    Console.WriteLine("AUDIO REMOVED: {0}", e->adevice.which);
+
+                    break;
+
+
                 case SDL_EventType.SDL_WINDOWEVENT:
 
                     switch (e->window.windowEvent)
