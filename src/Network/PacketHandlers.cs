@@ -1925,7 +1925,7 @@ namespace ClassicUO.Network
                 return;
 
             Entity corpse = World.Get(p.ReadUInt());
-            Layer layer = (Layer)p.ReadByte() - 1;
+            Layer layer = (Layer)p.ReadByte();
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
@@ -1937,7 +1937,7 @@ namespace ClassicUO.Network
                     corpse.Equipment[(int) layer] = item;
                 }
 
-                layer = (Layer)p.ReadByte() - 1;
+                layer = (Layer)p.ReadByte();
             }
         }
 
