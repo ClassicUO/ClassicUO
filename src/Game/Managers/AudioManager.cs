@@ -9,20 +9,18 @@ namespace ClassicUO.Game.Managers
         private UOMusic _currentMusic;
         private int _lastMusicVolume;
 
-        private const float SOUND_DELTA = 2500f;
-
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
         {
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
                 return;
 
-            float volume = (Engine.Profile.Current.SoundVolume / SOUND_DELTA);
+            float volume = (Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA);
             
             if (Engine.Instance.IsActive)
             {
                 if (!Engine.Profile.Current.ReproduceSoundsInBackground)
                 {
-                    volume = Engine.Profile.Current.SoundVolume / SOUND_DELTA;
+                    volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
                 }
             }
             else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
@@ -46,7 +44,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (!Engine.Profile.Current.ReproduceSoundsInBackground)
                 {
-                    volume = Engine.Profile.Current.SoundVolume / SOUND_DELTA;
+                    volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
                 }
             }
             else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
@@ -69,14 +67,14 @@ namespace ClassicUO.Game.Managers
                 if (!Engine.GlobalSettings.LoginMusic)
                     return;
 
-                volume = Engine.GlobalSettings.LoginMusicVolume / SOUND_DELTA;
+                volume = Engine.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA;
             }
             else
             {
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
                     return;
 
-                volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
+                volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
             }
 
 
@@ -104,7 +102,7 @@ namespace ClassicUO.Game.Managers
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
                     return;
 
-                float volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
+                float volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
                 if (volume < -1 || volume > 1f)
                     return;
 
@@ -130,7 +128,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (!Engine.Profile.Current.ReproduceSoundsInBackground)
                     {
-                        _currentMusic.Volume = Engine.Profile.Current.MusicVolume / SOUND_DELTA;
+                        _currentMusic.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
                     }
                 }
                 else if (!Engine.Profile.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0)

@@ -87,6 +87,9 @@ namespace ClassicUO.Game
 
         public const int DEATH_SCREEN_TIMER = 1500;
 
+        public const float SOUND_DELTA = 1000f;
+
+
         [Flags]
         public enum RULES : uint
         {
@@ -95,6 +98,5 @@ namespace ClassicUO.Game
             LETTER = 0x00000004,
             SPACE = 0x00000008
         }
-
     }
 }
