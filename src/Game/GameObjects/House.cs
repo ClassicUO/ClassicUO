@@ -55,6 +55,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void ClearComponents()
         {
+            Item item = World.Items.Get(Serial);
+            if (item != null && !item.IsDisposed)
+                item.WantUpdateMulti = true;
+
             Components.ForEach(s => s.Dispose());
             Components.Clear();
         }

@@ -533,6 +533,7 @@ namespace ClassicUO.Network
             }
 
             item.Container = Serial.INVALID;
+            item.CheckGraphicChange();
             item.ProcessDelta();
 
 
@@ -1743,6 +1744,7 @@ namespace ClassicUO.Network
 
                 if (item.PropertiesHash == 0)
                     NetClient.Socket.Send(new PMegaClilocRequest(item));
+                item.CheckGraphicChange();
                 item.ProcessDelta();
                 World.Items.Add(item);
             }
@@ -3197,7 +3199,7 @@ namespace ClassicUO.Network
             //item.Direction = (Direction)p.ReadByte();
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
-            item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             item.Direction = (Direction)p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags)p.ReadByte();
@@ -3205,10 +3207,8 @@ namespace ClassicUO.Network
                 p.ReadUShort(); //unknown
             item.Container = Serial.INVALID;
 
-            item.Graphic = graphic;
-
-            if (item.Graphic != 0x2006)
-                item.Graphic += graphicInc;
+            if (graphic != 0x2006)
+                graphic += graphicInc;
 
             if (type == 2)
             {
@@ -3216,9 +3216,17 @@ namespace ClassicUO.Network
                 //    item.IsMulti = false;
 
                 item.IsMulti = true;
-                item.Graphic = (ushort)(item.Graphic & 0x3FFF);
+                item.WantUpdateMulti = ((graphic & 0x3FFF) != item.Graphic) || (item.Position != position);
+                item.Graphic = (ushort)(graphic & 0x3FFF);
+            }
+            else
+            {
+                item.IsMulti = false;
+                item.Graphic = graphic;
             }
 
+            item.Position = position;
+            item.CheckGraphicChange();
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
