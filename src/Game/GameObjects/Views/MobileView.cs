@@ -149,13 +149,6 @@ namespace ClassicUO.Game.GameObjects
                 if (hash == null)
                     return;
 
-
-                if (hue == 0)
-                {
-                    if (direction.Address != direction.PatchedAddress)
-                        hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
-                }
-
                 AnimationFrameTexture frame = direction.FramesHashes[animIndex];
 
                 if (frame.IsDisposed)
@@ -216,12 +209,32 @@ namespace ClassicUO.Game.GameObjects
                     HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
                 {
+                    bool isPartial = IsHuman && hue == 0;
+
                     if (IsHuman && IsHidden)
+                    {
                         hue = 0x038E;
+                        isPartial = false;
+                    }
                     else if (!IsHuman && IsDead)
+                    {
                         hue = 0x0386;
- 
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue == 0 ? Hue : hue, hue == 0 && IsHuman, 0, false);
+                        isPartial = false;
+                    }
+
+
+                    if (hue == 0)
+                    {
+                        hue = Hue;
+                     
+                        if (hue == 0)
+                        {
+                            if (direction.Address != direction.PatchedAddress)
+                                hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
+                        }
+                    }
+
+                    HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, 0, false);
                 }
 
                 base.Draw(batcher, position, objecList);
@@ -314,7 +327,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (direction.Address != direction.PatchedAddress)
                         hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
-                    if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
+                    if (hue == 0 && convertedItem.HasValue)
+                        hue = convertedItem.Value.Color;
                 }
 
                 AnimationFrameTexture frame = direction.FramesHashes[animIndex];
