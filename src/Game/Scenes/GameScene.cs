@@ -273,8 +273,8 @@ namespace ClassicUO.Game.Scenes
                     Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
                     break;
             }
-
-            _journalManager.Add(text, e.Font, hue, name);
+            
+            _journalManager.Add(text, hue, name, e.IsUnicode);
         }
 
         private IEnumerable<IWaitCondition> CastSpell()
