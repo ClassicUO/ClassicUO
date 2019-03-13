@@ -227,11 +227,11 @@ namespace ClassicUO.Game.GameObjects
                 if (dist <= maxDist)
                 {
                     isTransparent = dist <= 3;
-                    HueVector.Z = 1f - (dist / (float)maxDist);
+                    HueVector.Z = MathHelper.Lerp(1f, 1f - (dist / (float) maxDist), 0.5f);
+                    //HueVector.Z = 1f - (dist / (float)maxDist);
                 }
                 else
                     HueVector.Z = 1f - AlphaHue / 255f;
-
             }
             else
                 HueVector.Z = 1f - AlphaHue / 255f;
