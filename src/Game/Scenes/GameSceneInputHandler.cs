@@ -100,13 +100,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     _continueRunning = true;
                 }
-                else
-                {
-                    GameObject obj = _mousePicker.MouseOverObject;
-                    Point point = _mousePicker.MouseOverObjectPoint;
-                    _dragginObject = obj;
-                    _dragOffset = point;
-                }
+                
+                _dragginObject = _mousePicker.MouseOverObject;
+                _dragOffset = _mousePicker.MouseOverObjectPoint;
+                
             }
             else if (e.Button == MouseButton.Right)
             {
