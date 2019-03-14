@@ -86,29 +86,27 @@ namespace ClassicUO.Game.UI.Gumps
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
-            byte font = (byte) entry.Font;
-            bool asUnicode = entry.IsUnicode;
-            TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, font, entry.Hue);
+            //TransformFont(ref font, ref asUnicode);
+            _journalEntries.AddEntry(text, (byte)entry.Font, entry.Hue, entry.IsUnicode);
         }
 
-        private void TransformFont(ref byte font, ref bool asUnicode)
-        {
-            if (asUnicode)
-                return;
+        //private void TransformFont(ref byte font, ref bool asUnicode)
+        //{
+        //    if (asUnicode)
+        //        return;
 
-            switch (font)
-            {
-                case 3:
+        //    switch (font)
+        //    {
+        //        case 3:
 
-                {
-                    font = 1;
-                    asUnicode = true;
+        //        {
+        //            font = 1;
+        //            asUnicode = true;
 
-                    break;
-                }
-            }
-        }
+        //            break;
+        //        }
+        //    }
+        //}
 
         private void InitializeJournalEntries()
         {

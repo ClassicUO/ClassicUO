@@ -122,20 +122,19 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void AddEntry(string text, int font, Hue hue)
+        public void AddEntry(string text, int font, Hue hue, bool isUnicode)
         {
             bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
             while (_entries.Count > 99)
             {
-                _entries[0].Dispose();
-                _entries.RemoveFromFront();
+                _entries.RemoveFromFront().Dispose();
             }
 
             _entries.AddToBack(new RenderedText
             {
                 MaxWidth = Width - 18,
-                IsUnicode = true,
+                IsUnicode = isUnicode,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
                 Hue = hue,

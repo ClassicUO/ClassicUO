@@ -104,7 +104,7 @@ namespace ClassicUO
                 _settings.Save();
                 IsQuitted = true;
                 return;
-            }
+            }         
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
