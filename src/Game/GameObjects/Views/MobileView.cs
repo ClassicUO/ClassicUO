@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     bool isPartial = IsHuman && hue == 0;
 
-                    if (IsHuman && IsHidden)
+                    if (IsHidden)
                     {
                         hue = 0x038E;
                         isPartial = false;
