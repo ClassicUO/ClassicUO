@@ -23,7 +23,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class NameOverheadGump : Gump
     {
-       // private readonly Label _label;
         private readonly AlphaBlendControl _background;
 
         private readonly RenderedText _renderedText;
@@ -37,14 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Entity = entity;
 
-            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)999;
-
-            //_label = new Label(string.IsNullOrEmpty(entity.Name) ? "" : entity.Name, true, hue, style: FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            //{
-            //    X = 2,
-            //    Y = 2,
-            //};
-
+            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)0x387;
 
             _renderedText = new RenderedText()
             {
@@ -60,13 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_background = new AlphaBlendControl(.3f)
             {
                 WantUpdateSize = false,
-                //Width = _label.Width + 4,
-                //Height = _label.Height + 4
             });
-           // Add(_label);
-
-            //X = (int) entity.RealScreenPosition.X;
-            //Y = (int) entity.RealScreenPosition.Y; 
         }
 
         public Entity Entity { get; }
@@ -281,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_edge == null)
             {
                 _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new Color[] { Color.Gray });
+                _edge.SetData(new [] { Color.Gray });
             }
 
 

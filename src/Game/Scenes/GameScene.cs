@@ -202,7 +202,6 @@ namespace ClassicUO.Game.Scenes
             Scale = (Engine.Profile.Current.SaveScaleAfterClose) ? Engine.Profile.Current.ScaleZoom : 1f;
 
             Plugin.OnConnected();
-            //Coroutine.Start(this, CastSpell());
         }
 
         private void ChatOnMessage(object sender, UOMessageEventArgs e)
@@ -275,19 +274,6 @@ namespace ClassicUO.Game.Scenes
             }
             
             _journalManager.Add(text, hue, name, e.IsUnicode);
-        }
-
-        private IEnumerable<IWaitCondition> CastSpell()
-        {
-            while (true)
-            {
-                yield return new WaitTime(TimeSpan.FromMilliseconds(1));
-
-                foreach (Mobile mobile in World.Mobiles)
-                {
-                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
-                }
-            }
         }
 
         public override void Unload()
