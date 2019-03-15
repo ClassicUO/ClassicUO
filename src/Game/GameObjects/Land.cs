@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
         {
             int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
 
-            if ((direction & 1) > 0)
+            if ((direction & 1) != 0)
                 return result;
 
             return (result + GetDirectionZ(direction >> 1)) >> 1;
