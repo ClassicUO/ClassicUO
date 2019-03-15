@@ -44,8 +44,6 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
-        //private float _processAlpha = 1;
-        //private long _processAlphaTime = -1;
 
         protected bool HasShadow { get; set; }
 
@@ -116,46 +114,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool DrawTransparent { get; set; }
-
-
-
-        private readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState();
-
-            state.DepthBufferEnable = true;
-            state.StencilEnable = true;
-            //state.StencilFunction = CompareFunction.Always;
-            //state.ReferenceStencil = 1;
-            //state.StencilMask = 1;
-
-            //state.StencilFail = StencilOperation.Keep;
-            //state.StencilDepthBufferFail = StencilOperation.Keep;
-            //state.StencilPass = StencilOperation.Replace;
-            //state.TwoSidedStencilMode = false;
-
-            return state;
-        });
-
-        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState();
-
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceAlpha;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
-
-            return state;
-        });
-
-        //private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        //{
-        //    BlendState state = new BlendState();
-
-        //    state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceAlpha;
-        //    state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
-
-        //    return state;
-        //});
 
 
         public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
@@ -302,22 +260,5 @@ namespace ClassicUO.Game.GameObjects
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {
         }
-
-        //protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
-        //{
-        //    //if (Overheads != null)
-        //    //{
-        //    //    for (int i = 0; i < Overheads.Count; i++)
-        //    //    {
-        //    //        TextOverhead v = Overheads[i];
-        //    //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-        //    //        v.Bounds.Y = offY + v.Texture.Height;
-        //    //        v.Bounds.Width = v.Texture.Width;
-        //    //        v.Bounds.Height = v.Texture.Height;
-        //    //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(Overheads[i], position);
-        //    //        offY += v.Texture.Height;
-        //    //    }
-        //    //}
-        //} 
     }
 }

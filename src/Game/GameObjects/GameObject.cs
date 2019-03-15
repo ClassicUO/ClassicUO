@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private Position _position = Position.INVALID;
         public Vector3 Offset;
-        private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
+        private Deque<TextOverhead> _overHeads;
         private Tile _tile;
 
         protected GameObject()
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Left { get; set; }
         public GameObject Right { get; set; }
 
-
+        protected virtual bool CanCreateOverheads => true;
 
         public Vector3 ScreenPosition { get; private set; }
         
@@ -106,7 +106,9 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        public IReadOnlyList<TextOverhead> Overheads => _overHeads;
+        public bool HasOverheads => _overHeads != null;
+
+        public IReadOnlyList<TextOverhead> Overheads => CanCreateOverheads ? _overHeads ?? (_overHeads = new Deque<TextOverhead>()) : null;
 
         //public Tile Tile
         //{
@@ -152,13 +154,16 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _overHeads.Count; i++)
+            if (_overHeads != null)
             {
-                var overhead = _overHeads[i];
-                overhead.Update(totalMS, frameMS);
+                for (int i = 0; i < _overHeads.Count; i++)
+                {
+                    var overhead = _overHeads[i];
+                    overhead.Update(totalMS, frameMS);
 
-                if (overhead.IsDisposed)
-                    _overHeads.RemoveAt(i--);
+                    if (overhead.IsDisposed)
+                        _overHeads.RemoveAt(i--);
+                }
             }
         }
 
@@ -221,7 +226,7 @@ namespace ClassicUO.Game.GameObjects
 
             TextOverhead overhead;
 
-            for (int i = 0; i < _overHeads.Count; i++)
+            for (int i = 0; i < Overheads.Count; i++)
             {
                 overhead = _overHeads[i];
 
@@ -307,11 +312,15 @@ namespace ClassicUO.Game.GameObjects
             _tile?.RemoveGameObject(this);
             _tile = null;
 
-            foreach (TextOverhead textOverhead in _overHeads)
+            if (_overHeads != null)
             {
-                textOverhead.Dispose();
+                foreach (TextOverhead textOverhead in _overHeads)
+                {
+                    textOverhead.Dispose();
+                }
+                _overHeads.Clear();
             }
-            _overHeads.Clear();
+
 
             GC.SuppressFinalize(this);
         }

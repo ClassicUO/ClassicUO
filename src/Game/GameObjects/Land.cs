@@ -39,8 +39,10 @@ namespace ClassicUO.Game.GameObjects
 
             AllowedToDraw = Graphic > 2;
 
-            AlphaHue = 255;
+            AlphaHue = 255;    
         }
+
+        protected override bool CanCreateOverheads => false;
 
         private LandTiles? _tileData;
 

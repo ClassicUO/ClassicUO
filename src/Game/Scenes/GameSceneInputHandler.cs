@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Scenes
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            if (obj.Overheads.Count == 0)
+                            if (!obj.HasOverheads || obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
 
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.Scenes
                             name = multi.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            if (obj.Overheads.Count == 0)
+                            if (!obj.HasOverheads || obj.Overheads.Count == 0)
                                 obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
 
