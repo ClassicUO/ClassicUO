@@ -213,50 +213,53 @@ namespace ClassicUO.IO.Resources
             //}
 
             string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
-            if (!File.Exists(pathdef))
-                return;
 
-            using (DefReader reader = new DefReader(pathdef, 1))
+            if (File.Exists(pathdef))
             {
-                while (reader.Next())
+                using (DefReader reader = new DefReader(pathdef, 1))
                 {
-                    int index = reader.ReadInt();
-
-                    if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-                        continue;
-
-                    int[] group = reader.ReadGroup();
-
-                    for (int i = 0; i < group.Length; i++)
+                    while (reader.Next())
                     {
-                        int checkIndex = group[i];
+                        int index = reader.ReadInt();
 
-                        if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                        if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
                             continue;
 
-                        if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && tiledata.Entries[checkIndex].Length != 0 && tiledata.Entries[index].Length == 0)
-                        {
-                            LandData[index] = LandData[checkIndex];
-                            break;
-                        }
+                        int[] group = reader.ReadGroup();
 
-                        if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                        for (int i = 0; i < group.Length; i++)
                         {
-                            checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
-                            checkIndex &= 0x3FFF;
-                            index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
+                            int checkIndex = group[i];
 
-                            if (tiledata.Entries[index].Length == 0 && tiledata.Entries[checkIndex].Length != 0)
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                                continue;
+
+                            if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < LandData.Length && index < LandData.Length && !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
                             {
-                                StaticData[index] = StaticData[checkIndex];
+                                LandData[index] = LandData[checkIndex];
+
+                                break;
+                            }
+
+                            if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                            {
+                                checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
+                                checkIndex &= 0x3FFF;
+                                index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
+
+                                if (StaticData[index].Equals(default) && !StaticData[checkIndex].Equals(default))
+                                {
+                                    StaticData[index] = StaticData[checkIndex];
+
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
 
-
-        END_2:
+            END_2:
             tiledata.Dispose();
 
         }
