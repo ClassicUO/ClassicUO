@@ -555,9 +555,11 @@ namespace ClassicUO.Game.Scenes
                 int z = World.Player.Z + 5;
                 bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
 
-                for (int i = 0; i < _renderListCount; i++)
+
+                while (_renderList.Count != 0)
                 {
-                    GameObject obj = _renderList[i];
+                    GameObject obj = _renderList.Dequeue();
+
                     if (obj.Z <= _maxGroundZ)
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
@@ -567,6 +569,7 @@ namespace ClassicUO.Game.Scenes
                             RenderedObjectsCount++;
                         }
                     }
+
                 }
 
                 // Draw in game overhead text messages

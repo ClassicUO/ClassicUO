@@ -154,7 +154,9 @@ namespace ClassicUO.Game.Scenes
         private int _renderIndex = 1;
         private int _renderListCount;
         private int _objectHandlesCount;
-        private GameObject[] _renderList = new GameObject[2000];
+        //private GameObject[] _renderList = new GameObject[2000];
+        private Queue<GameObject> _renderList = new Queue<GameObject>();
+
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
@@ -412,11 +414,11 @@ namespace ClassicUO.Game.Scenes
                         obj.ProcessAlpha(0xFF);
                 }
 
-                if (_renderListCount >= _renderList.Length)
-                {
-                    int newsize = _renderList.Length + 1000;
-                    Array.Resize(ref _renderList, newsize);
-                }
+                //if (_renderListCount >= _renderList.Length)
+                //{
+                //    int newsize = _renderList.Length + 1000;
+                //    Array.Resize(ref _renderList, newsize);
+                //}
 
                 if (useObjectHandles)
                 {
@@ -435,7 +437,8 @@ namespace ClassicUO.Game.Scenes
                 }
                 
 
-                _renderList[_renderListCount] = obj;
+                 //_renderList[_renderListCount] = obj;
+                 _renderList.Enqueue(obj);
                 //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
