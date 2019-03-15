@@ -620,7 +620,7 @@ namespace ClassicUO.Game.UI.Gumps
             item = new ScrollAreaItem();
             Label text = new Label("- Speech delay:", true, HUE_FONT, font: FONT);
             item.Add(text);
-            _sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderSpeechDelay = new HSliderBar(100, 5, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 

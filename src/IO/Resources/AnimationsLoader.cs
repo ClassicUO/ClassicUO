@@ -341,13 +341,12 @@ namespace ClassicUO.IO.Resources
                     sbyte mountedHeightOffset = 0;
                     ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
                         animFile = 1;
                         realAnimID = (ushort)anim[0];
 
-                        if (index == 0x00C0)
+                        if (index == 0x00C0 || index == 793)
                             mountedHeightOffset = -9;
 
                         if (realAnimID == 68)
@@ -471,7 +470,7 @@ namespace ClassicUO.IO.Resources
                         animFile = 4;
                         realAnimID = (ushort)anim[3];
                         mountedHeightOffset = -9;
-
+                    
                         if (index == 0x0115 || index == 0x00C0)
                             mountedHeightOffset = 0;
 

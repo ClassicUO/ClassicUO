@@ -93,10 +93,10 @@ namespace ClassicUO.Game.GameObjects
                     hue = targetColor;
             }
 
-            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, out int mountHeight);
+            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue);
 
             if (IsHuman)
-                DrawEquipment(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue, ref mountHeight);
+                DrawEquipment(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
@@ -116,12 +116,11 @@ namespace ClassicUO.Game.GameObjects
         }
         //private static Texture2D _edge;
 
-        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, out int mountHeight)
+        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
         {
             Graphic graphic = GetGraphicForAnimation();
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;
-            mountHeight = 0;
             drawX = drawY = drawCenterY = 0;
 
 
@@ -154,20 +153,8 @@ namespace ClassicUO.Game.GameObjects
                 if (frame.IsDisposed)
                     return;
 
-                bool hasmount = false;
-                if (HasEquipment && IsHuman)
-                {
-                    Item mount = Equipment[(int)Layer.Mount];
-
-                    if (mount != null)
-                    {
-                        mountHeight = FileManager.Animations.DataIndex[mount.GetGraphicForAnimation()].MountedHeightOffset;
-                        hasmount = true;
-                    }
-                }
-
                 drawCenterY = frame.CenterY;
-                drawY = mountHeight + drawCenterY + (int)(Offset.Z / 4) - 22 - (int)(Offset.Y - Offset.Z - 3);
+                drawY = drawCenterY + (int)(Offset.Z / 4) - 22 - (int)(Offset.Y - Offset.Z - 3);
 
                 if (IsFlipped)
                     drawX = -22 + (int)Offset.X;
@@ -175,12 +162,11 @@ namespace ClassicUO.Game.GameObjects
                     drawX = -22 - (int)Offset.X;
 
 
-                if (hasmount)
-                    DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, ref mountHeight);
+                DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
 
 
                 int x = drawX + frame.CenterX;
-                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - mountHeight;
+                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                 int yy = -(frame.Height + frame.CenterY + 3);
                 int xx = -frame.CenterX;
@@ -242,17 +228,17 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private void DrawEquipment(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, ref int mountHeight)
+        private void DrawEquipment(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
         {
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                DrawLayer(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue, ref mountHeight);
+                DrawLayer(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue);
             }
         }
 
-        private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, Hue hue, ref int mountHeight)
+        private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, Hue hue)
         {
             if (IsCovered(this, layer))
                 return;
@@ -271,11 +257,12 @@ namespace ClassicUO.Game.GameObjects
                 hue = item.Hue;
 
             Graphic graphic;
+            int mountHeight = 0;
 
-            if (layer == Layer.Mount)
+            if (layer == Layer.Mount && IsHuman)
             {
                 graphic = item.GetGraphicForAnimation();
-                //mountHeight = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
+                mountHeight = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
             }
             else if (item.ItemData.AnimID != 0)
             {
