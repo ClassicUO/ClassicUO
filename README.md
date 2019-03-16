@@ -10,7 +10,7 @@ An open source implementation of the Ultima Online Classic Client.
 #### Discord  
  <a href="https://discord.gg/VdyCpjQ">
         <img src="https://img.shields.io/discord/308323056592486420.svg?logo=discord"
-            alt="chat on Discord"></a>
+            alt="chat on Discord"></a>     
             
 #### Current release
 
@@ -45,42 +45,12 @@ is installed:
 - Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
 # Running
-
-First, double click ClassicUO.exe and the game will create a settings.json next to it which you must fill out a proper ip and Ultima Online directory
-
-~~~
-{
-"username": "",
-"password": "",
-"ip": "SERVER IP HERE",
-"port": SERVER PORT HERE,
-"ultimaonlinedirectory": "C:\\ULTIMA ONLINE\\FILE PATH\\HERE",
-"clientversion": "CLIENT VERSION FOR UO",
-"lastcharactername": "",
-"lastservernum": 1,
-"login_fps": 60,
-"debug": false,
-"profiler": true,
-"preload_maps": false,
-"saveaccount": false,
-"autologin": false,
-"reconnect": false,
-"reconnect_time": 0,
-"login_music": false,
-"login_music_volume": 2,
-"shard_type": 2,
-"fixed_time_step": true
-}
-~~~
-
-Then, double click ClassicUO.exe and the game will launch!
+Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
 
 # Contribute
-
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.
 
 # Legal
-
 This work is released under the GPLv3 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of version 7.0.59.8 or earlier of the Ultima Online Classic Client.
 
 Ultima Online(R) © 2018 Electronic Arts Inc. All Rights Reserved.
