@@ -527,32 +527,23 @@ namespace ClassicUO.Game.Managers
 
                             if (gparams.Count > 2 && gparams[2][0] == '@')
                             {
-                                string l = gparams[gparams.Count - 1];
+                                
+                                string args = gparams[2];
+				//Convert tooltip args format to standard cliloc format
+                                args = args.Trim('@').Replace('@','\t');
 
-                                if (l.Length > 2)
+                                if (args.Length > 1)
                                 {
-                                    if (l[l.Length - 1] == '\'' && l[l.Length - 2] == '@')
-                                    {
-                                        sb = new StringBuilder();
-
-                                        for (int i = 2; i < gparams.Count - 1; i++)
-                                        {
-                                            sb.Append( i == 2 ? gparams[i].Substring(1, gparams[i].Length - 1) : gparams[i]);
-                                            sb.Append(' ');
-                                        }
-
-                                        cliloc = FileManager.Cliloc.Translate(cliloc, sb.ToString());
-                                    }
-                                    else
-                                        Log.Message(LogTypes.Error, $"Missing final ''@' into gump tooltip: {cliloc}");
+                                    cliloc = FileManager.Cliloc.Translate(cliloc, args);
                                 }
                                 else
-                                    Log.Message(LogTypes.Error, $"String '{l}' too short, something wrong with gump tooltip: {cliloc}");
+                                    Log.Message(LogTypes.Error, $"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
                             }
 
                             gump.Children.Last()?.SetTooltip(cliloc);
                         }
 
+                        break;
                         break;
 	                case "itemproperty":
 		                if (World.ClientFlags.TooltipsEnabled)
