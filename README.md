@@ -47,16 +47,26 @@ First, double click ClassicUO.exe and the game will create a settings.json next 
 
 ~~~
 {
-  "username": "",
-  "password": "",
-  "ip": "YOUR.SERVER.IP.ADDRESS",
-  "port": 2593,
-  "lastcharactername": "",
-  "ultimaonlinedirectory": "YOUR\\PATH\\TO\\ULTIMAONLINE",
-  "clientversion": "YOUR.CLIENT.VERSION",
-  "maxfps": 144,
-  "debug": false,
-  "profiler": true,
+"username": "",
+"password": "",
+"ip": "SERVER IP HERE",
+"port": SERVER PORT HERE,
+"ultimaonlinedirectory": "C:\\ULTIMA ONLINE\\FILE PATH\\HERE",
+"clientversion": "CLIENT VERSION FOR UO",
+"lastcharactername": "",
+"lastservernum": 1,
+"login_fps": 60,
+"debug": false,
+"profiler": true,
+"preload_maps": false,
+"saveaccount": false,
+"autologin": false,
+"reconnect": false,
+"reconnect_time": 0,
+"login_music": false,
+"login_music_volume": 2,
+"shard_type": 2,
+"fixed_time_step": true
 }
 ~~~
 
