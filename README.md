@@ -11,6 +11,11 @@ An open source implementation of the Ultima Online Classic Client.
  <a href="https://discord.gg/VdyCpjQ">
         <img src="https://img.shields.io/discord/308323056592486420.svg?logo=discord"
             alt="chat on Discord"></a>
+            
+#### Current release
+
+[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/Pack4Duck/classicuo)
+
 
 # Introduction
 ClassicUO is an open source implementation of the Ultima Online Classic Client. This client is intended to emulate client versions 7.0.59.8 and older and is primarily tested against Ultima Online free shards based on RunUO and [ServUO](https://github.com/servuo/servuo). This client will not work on the official game shards.
@@ -30,8 +35,6 @@ The code itself has been written using the following projects as a reference:
 * [ServUO](https://github.com/servuo/servuo)
 
 # Building  
-[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/Pack4Duck/classicuo)
-
 Currently, only Windows is supported for building. The binary produced will work on all supported platforms.
 
 You'll need [Visual Studio 2017](https://www.visualstudio.com/downloads/). The free community edition should be fine. Once that
