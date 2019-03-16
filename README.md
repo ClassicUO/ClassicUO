@@ -4,8 +4,13 @@
 
 An open source implementation of the Ultima Online Classic Client.
 
-# Contacts
-Join [Discord channel](https://discord.gg/VdyCpjQ)
+
+#### Paypal  
+[![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara)  
+#### Discord  
+ <a href="https://discord.gg/VdyCpjQ">
+        <img src="https://img.shields.io/discord/308323056592486420.svg?logo=discord"
+            alt="chat on Discord"></a>
 
 # Introduction
 ClassicUO is an open source implementation of the Ultima Online Classic Client. This client is intended to emulate client versions 7.0.59.8 and older and is primarily tested against Ultima Online free shards based on RunUO and [ServUO](https://github.com/servuo/servuo). This client will not work on the official game shards.
