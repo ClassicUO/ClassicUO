@@ -84,6 +84,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 X = value.X;
                 Y = value.Y;
+                _bounds.Location = value;
             }
         }
 
