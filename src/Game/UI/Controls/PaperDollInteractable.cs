@@ -250,9 +250,12 @@ namespace ClassicUO.Game.UI.Controls
                                     if (robe.Graphic <= 0x2687)
                                     {
                                         if (robe.Graphic < 0x2683)
-                                            if (robe.Graphic >= 0x204E && robe.Graphic <= 0x204F)
-                                                continue;
-
+                                        {
+                                            if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
+                                            {
+                                                break;
+                                            }   
+                                        }
                                         continue;
                                     }
 
