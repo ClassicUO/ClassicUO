@@ -234,6 +234,34 @@ namespace ClassicUO.Game.UI.Controls
                             canPickUp = false;
 
                             break;
+
+                        case Layer.Helmet:
+                            var robe = _mobile.Equipment[(int) Layer.Robe];
+
+                            if (robe != null)
+                            {
+                                if (robe.Graphic > 0x3173)
+                                {
+                                    if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
+                                        continue;
+                                }
+                                else
+                                {
+                                    if (robe.Graphic <= 0x2687)
+                                    {
+                                        if (robe.Graphic < 0x2683)
+                                            if (robe.Graphic >= 0x204E && robe.Graphic <= 0x204F)
+                                                continue;
+
+                                        continue;
+                                    }
+
+                                    if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
+                                        continue;
+                                }
+                            }
+
+                            break;
                     }
 
                     Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)

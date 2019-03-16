@@ -88,7 +88,7 @@ namespace ClassicUO.IO.Audio
             switch (effect)
             {
                 case AudioEffects.PitchVariation:
-                    float pitch =RandomHelper.GetValue(-5, 5) * .025f;
+                    float pitch = RandomHelper.GetValue(-5, 5) * .025f;
                     m_ThisInstance.Pitch = pitch;
                     break;
             }
