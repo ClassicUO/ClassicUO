@@ -363,6 +363,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private ScrollAreaItem _item2;
+
         private void BuildVideo()
         {
             const int PAGE = 3;
@@ -390,10 +392,6 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_shardType);
             rightArea.Add(item);
 
-
-
-            //_gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
-
             item = new ScrollAreaItem();
             _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
             {
@@ -401,10 +399,15 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChecked = Engine.Profile.Current.GameWindowFullSize
             };
 
+            _gameWindowFullsize.MouseClick += (sender, e) => 
+            {
+                _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
+            };
+
             item.Add(_gameWindowFullsize);
             rightArea.Add(item);
 
-            item = new ScrollAreaItem();
+            _item2 = new ScrollAreaItem();
 
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
             {
@@ -412,9 +415,9 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChecked = Engine.Profile.Current.GameWindowLock
             };
 
-            item.Add(_gameWindowLock);
+            _item2.Add(_gameWindowLock);
 
-            _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowWidth = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                 X = 10,
@@ -424,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             }, "Game Play Window Size: ");
 
-            _gameWindowHeight = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowHeight = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                 X = 80,
@@ -439,9 +442,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 190,
                 Y = 30,
             };
-            item.Add(text);
+            _item2.Add(text);
 
-            _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowPositionX = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
                 X = 200,
@@ -451,7 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-            _gameWindowPositionY = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
+            _gameWindowPositionY = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
                 X = 270,
@@ -461,7 +464,9 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-            rightArea.Add(item);
+            rightArea.Add(_item2);
+
+
 
             item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
@@ -474,6 +479,8 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_enableLight);
             item.Add(_lightBar);
             rightArea.Add(item);
+
+            _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
 
             Add(rightArea, PAGE);
         }
