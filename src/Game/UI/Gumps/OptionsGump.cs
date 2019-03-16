@@ -918,12 +918,12 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_gameWindowFullsize.IsChecked)
                 {
                     n = vp.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                    loc = vp.Location = new Point(-5, -5);
+                    loc = Engine.Profile.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
                 }
                 else
                 {
                     n = vp.ResizeWindow(new Point(600, 480));
-                    loc = vp.Location = new Point(20, 20);
+                    loc = vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(20, 20);
                 }
 
                 _gameWindowPositionX.Text = loc.X.ToString();
@@ -954,7 +954,6 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
-
             
             // fonts
             Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
