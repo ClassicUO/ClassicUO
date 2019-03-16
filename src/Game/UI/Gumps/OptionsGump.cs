@@ -34,6 +34,8 @@ using ClassicUO.Network;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
+using System.Diagnostics;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -901,6 +903,27 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 vp.CanMove = !_gameWindowLock.IsChecked;
                 Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
+            }
+
+            // || vp.Width != Engine.WindowWidth || vp.Height != Engine.WindowHeight
+
+            Debug.WriteLine("vp = {0}", vp.Location);
+            Debug.WriteLine("vp2 = {0},{1}", gameWindowPositionX, gameWindowPositionY);
+
+            if (_gameWindowFullsize.IsChecked && (gameWindowPositionX != -5 || gameWindowPositionY != -5))
+            {
+                if (Engine.Profile.Current.GameWindowFullSize == _gameWindowFullsize.IsChecked)
+                {
+                    // флаг нажат и до этого был нажат т.е. поменяли размер
+                    // оставив при этом флаг
+                    _gameWindowFullsize.IsChecked = false;
+                    Debug.WriteLine("+++++++++++++++++++++");
+                }
+                else
+                {
+                    // флаг нажат НЕБЫЛ, числа не верные для фулсрина
+                    Debug.WriteLine("----------------------");
+                }
             }
             
             if (Engine.Profile.Current.GameWindowFullSize != _gameWindowFullsize.IsChecked)
