@@ -371,8 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
             _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
             _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
-            _gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
-
+           
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
@@ -391,7 +390,29 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_shardType);
             rightArea.Add(item);
 
+
+
+            //_gameWindowFullsize = CreateCheckBox(rightArea, "Always use fullsize game window", Engine.Profile.Current.GameWindowFullSize, 0, 0);
+
             item = new ScrollAreaItem();
+            _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
+            {
+                Y = 20,
+                IsChecked = Engine.Profile.Current.GameWindowFullSize
+            };
+
+            item.Add(_gameWindowFullsize);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
+
+            _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
+            {
+                Y = 0,
+                IsChecked = Engine.Profile.Current.GameWindowLock
+            };
+
+            item.Add(_gameWindowLock);
 
             _gameWindowWidth = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
@@ -413,33 +434,28 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-            _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
+            text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
             {
-                X = 140,
-                Y = 57,
-                IsChecked = Engine.Profile.Current.GameWindowLock
+                X = 190,
+                Y = 30,
             };
-
-            item.Add(_gameWindowLock);
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
+            item.Add(text);
 
             _gameWindowPositionX = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
-                X = 10,
-                Y = 35,
+                X = 200,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
-            }, "Game Play Window Position: ");
+            });
 
             _gameWindowPositionY = CreateInputField(item, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
-                X = 80,
-                Y = 35,
+                X = 270,
+                Y = 60,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true
