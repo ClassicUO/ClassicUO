@@ -266,7 +266,7 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            // nothing
         }
     }
 

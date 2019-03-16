@@ -425,6 +425,12 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             _updateDrawPosition = false;
+
+            if (_renderList.Length - _renderListCount != 0)
+            {
+                if (_renderList[_renderListCount] != null)
+                    Array.Clear(_renderList, _renderListCount, _renderList.Length - _renderListCount);
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -542,9 +548,10 @@ namespace ClassicUO.Game.Scenes
                 bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
 
 
-                while (_renderList.Count != 0)
+                //while (_renderList.Count != 0)
+                for (int i = 0; i < _renderListCount; i++)
                 {
-                    GameObject obj = _renderList.Dequeue();
+                    GameObject obj = _renderList[i]; //_renderList.Dequeue();
 
                     if (obj.Z <= _maxGroundZ)
                     {
@@ -555,7 +562,6 @@ namespace ClassicUO.Game.Scenes
                             RenderedObjectsCount++;
                         }
                     }
-
                 }
 
                 // Draw in game overhead text messages

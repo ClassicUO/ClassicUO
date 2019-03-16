@@ -1201,7 +1201,7 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_6017)
                     p.Skip(1);
                 Serial containerSerial = p.ReadUInt();
-                Hue hue = p.ReadUShort();
+                Hue hue = p.Position + 2 < p.Length ? p.ReadUShort() : p.ReadByte();
 
                 if (i == 0)
                 {

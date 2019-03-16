@@ -16,8 +16,6 @@ namespace ClassicUO.IO.Resources
     class ArtLoader : ResourceLoader<ArtTexture>
     {
         private UOFile _file;
-        //private readonly List<uint> _usedIndex = new List<uint>();
-        //private readonly List<uint> _usedIndexLand = new List<uint>();
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
 
         public override void Load()
