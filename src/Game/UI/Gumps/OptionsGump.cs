@@ -745,8 +745,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _shardType.SelectedIndex = 0;
                     _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
-                    _gameWindowPositionX.Text = "10";
-                    _gameWindowPositionY.Text = "10";
+                    _gameWindowPositionX.Text = "20";
+                    _gameWindowPositionY.Text = "20";
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
