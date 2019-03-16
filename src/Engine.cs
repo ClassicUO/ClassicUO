@@ -114,6 +114,7 @@ namespace ClassicUO
 
             if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
+
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false;
             _graphicDeviceManager.PreferMultiSampling = true;
@@ -140,7 +141,10 @@ namespace ClassicUO
                 WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
 
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
+                {
                     gump.ResizeWindow(new Point(WindowWidth, WindowHeight));
+                    gump.Location = new Point(-5, -5);
+                }
             };
             Window.AllowUserResizing = true;
             IsMouseVisible = true;

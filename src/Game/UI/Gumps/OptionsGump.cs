@@ -786,6 +786,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
+            WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+
             // general
             Engine.GlobalSettings.PreloadMaps = _preloadMaps.IsChecked;
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
@@ -881,7 +883,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || gameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                Point n = Engine.UI.GetByLocalSerial<WorldViewportGump>().ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
+                Point n = vp.ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
                 _gameWindowWidth.Text = n.X.ToString();
                 _gameWindowHeight.Text = n.Y.ToString();
@@ -892,35 +894,35 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || gameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
             {
-                Engine.UI.GetByLocalSerial<WorldViewportGump>().Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
             }
 
             if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
             {
-                Engine.UI.GetByLocalSerial<WorldViewportGump>().CanMove = !_gameWindowLock.IsChecked;
+                vp.CanMove = !_gameWindowLock.IsChecked;
                 Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
             }
             
-            if (_gameWindowFullsize.IsChecked != Engine.Profile.Current.GameWindowFullSize)
+            if (Engine.Profile.Current.GameWindowFullSize != _gameWindowFullsize.IsChecked)
             {
                 Point n, loc;
-                WorldViewportGump e = Engine.UI.GetByLocalSerial<WorldViewportGump>();
 
                 if (_gameWindowFullsize.IsChecked)
                 {
-                    n = e.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                    loc = e.Location = new Point(-5, -5);
+                    n = vp.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                    loc = vp.Location = new Point(-5, -5);
                 }
                 else
                 {
-                    n = e.ResizeWindow(new Point(600, 480));
-                    loc = e.Location = new Point(20, 20);
+                    n = vp.ResizeWindow(new Point(600, 480));
+                    loc = vp.Location = new Point(20, 20);
                 }
 
                 _gameWindowPositionX.Text = loc.X.ToString();
                 _gameWindowPositionY.Text = loc.Y.ToString();
                 _gameWindowWidth.Text = n.X.ToString();
                 _gameWindowHeight.Text = n.Y.ToString();
+
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
