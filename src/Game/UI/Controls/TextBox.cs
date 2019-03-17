@@ -84,6 +84,11 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.NumericOnly = value;
         }
 
+        public bool UNumericOnly
+        {
+            set => TxEntry.UNumericOnly = value;
+        }
+
         public bool LettersOnly
         {
             set => TxEntry.LettersOnly = value;
