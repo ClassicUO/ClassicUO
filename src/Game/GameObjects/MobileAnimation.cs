@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS groupIndex = FileManager.Animations.GetGroupIndex(graphic, isequip);
             byte result = mobile.AnimationGroup;
 
-            if (result != 0xFF && (mobile.Serial & 0x80000000) == 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (mobile.Serial & 0x80000000) == 0 && (!mobile.AnimationFromServer || checkGraphic != 0))
             {
                 GetGroupForAnimation(groupIndex, ref result);
 
