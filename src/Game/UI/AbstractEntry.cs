@@ -21,6 +21,8 @@
 
 using System;
 
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -32,7 +34,7 @@ namespace ClassicUO.Game.UI
     {
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
-            MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
+            MaxCharCount = maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
         }
@@ -52,9 +54,40 @@ namespace ClassicUO.Game.UI
         public Point CaretPosition { get; set; }
         public int CaretIndex { get; protected set; }
 
-        public abstract string Text { get; set; }
+        public ushort Hue
+        {
+            get => RenderText.Hue;
+            set
+            {
+                if (RenderText.Hue != value)
+                {
+                    RenderCaret.Hue = RenderText.Hue = value;
+                    RenderText.CreateTexture();
+                    RenderCaret.CreateTexture();
+                }
+            }
+        }
 
-        public bool IsChanged { get; protected set; }
+        public virtual string Text
+        {
+            get => RenderText.Text;
+            set
+            {
+                RenderText.Text = value;
+                IsChanged = true;
+            }
+        }
+
+        private bool _isChanged;
+        public bool IsChanged
+        {
+            get => _isChanged;
+            protected set
+            {
+                _selectionArea = (0, 0);
+                _isChanged = value;
+            }
+        }
 
         public int MaxCharCount { get; }
 
@@ -135,6 +168,14 @@ namespace ClassicUO.Game.UI
                 IsChanged = false;
         }
 
+        public void OnDraw(Batcher2D batcher, int x, int y)
+        {
+            if (_isSelection)
+            {
+                batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(_selectionArea.Item1, _selectionArea.Item2, Mouse.Position.X - _selectionArea.Item1, Mouse.Position.Y - _selectionArea.Item2), ShaderHuesTraslator.GetHueVector(222, false, 0.5f, false));
+            }
+        }
+
         public void OnMouseClick(int x, int y)
         {
             int oldPos = CaretIndex;
@@ -146,6 +187,27 @@ namespace ClassicUO.Game.UI
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
+            _selectionArea = (Mouse.Position.X, Mouse.Position.Y);
+            _isSelection = true;
+        }
+
+        private (int, int) _selectionArea;
+        private bool _isSelection = false;
+        internal void OnSelectionEnd(int x, int y)
+        {
+            int endindex;
+            if (RenderText.IsUnicode)
+                endindex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            else
+                endindex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            _isSelection = false;
+            if (endindex == CaretIndex)
+            {
+                _selectionArea = (0, 0);
+                return;
+            }
+            CaretIndex = endindex;
+            UpdateCaretPosition();
         }
 
         public void Clear()

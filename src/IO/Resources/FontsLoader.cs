@@ -538,7 +538,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         i = lastSpace + 1;
-                        si = str[i];
+                        si = i < len ? str[i] : '\0';
 
                         if (ptr.Width == 0)
                             ptr.Width = 1;
@@ -2531,7 +2531,7 @@ namespace ClassicUO.IO.Resources
             return pos;
         }
 
-        public (int, int) GetCaretPosASCII(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags, int oldx = 0)
+        public (int, int) GetCaretPosASCII(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= FontCount || pos < 1 || string.IsNullOrEmpty(str))
                 return (0, 0);
@@ -2543,28 +2543,28 @@ namespace ClassicUO.IO.Resources
 
             if (info == null)
                 return (0, 0);
-            int height = 0;
+            //int height = 0;
             //MultilinesFontInfo ptr = info;
-            //int x = 0;
+            int x = 0;
             int y = 0;
 
             while (info != null)
             {
+                x = 0;
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)
-                    return (oldx, y);
+                    return (x, y);
 
                 if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
-                    oldx = 0;
                     for (int i = 0; i < len; i++)
                     {
                         byte index = _fontIndex[info.Data[i].Item];
-                        oldx += fd.Chars[index].Width;
+                        x += fd.Chars[index].Width;
 
                         if (info.CharStart + i + 1 == pos)
-                            return (oldx, y);
+                            return (x, y);
                     }
                 }
 
@@ -2576,7 +2576,7 @@ namespace ClassicUO.IO.Resources
                 ptr1 = null;
             }
 
-            return (oldx, y);
+            return (x, y);
         }
 
         public int[] GetLinesCharsCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)

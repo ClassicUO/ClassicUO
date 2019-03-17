@@ -19,16 +19,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
-
 using SDL2;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -59,9 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             SetText(lines[int.Parse(parts[7])]);
         }
 
-
         public event EventHandler TextChanged;
-
 
         public TextEntry TxEntry { get; private set; }
 
@@ -121,10 +116,14 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
-            if(Height != TxEntry.Height)
+            if (Height != TxEntry.Height)
+            {
                 Height = TxEntry.Height;
+            }
 
             if (TxEntry.IsChanged)
             {
@@ -141,7 +140,9 @@ namespace ClassicUO.Game.UI.Controls
             if (IsEditable)
             {
                 if (HasKeyboardFocus)
+                {
                     TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                }
             }
 
             return base.Draw(batcher, position, hue);
@@ -149,10 +150,10 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-			if (ReplaceDefaultTextOnFirstKeyPress)
+            if (ReplaceDefaultTextOnFirstKeyPress)
             {
                 TxEntry.Clear();
-				ReplaceDefaultTextOnFirstKeyPress = false;
+                ReplaceDefaultTextOnFirstKeyPress = false;
             }
             TxEntry.InsertString(c);
         }
@@ -164,58 +165,59 @@ namespace ClassicUO.Game.UI.Controls
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                {
                     return;
+                }
 
                 s = SDL.SDL_GetClipboardText();
-                if(!string.IsNullOrEmpty(s))
+                if (!string.IsNullOrEmpty(s))
                 {
                     TxEntry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
                     return;
                 }
             }
-            else switch (key)
+            else
             {
-                case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                case SDL.SDL_Keycode.SDLK_RETURN:
+                switch (key)
+                {
+                    case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                    case SDL.SDL_Keycode.SDLK_RETURN:
                         s = TxEntry.Text;
-                       Parent?.OnKeyboardReturn(0, s);
-                    break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                    if (!ReplaceDefaultTextOnFirstKeyPress)
-                        TxEntry.RemoveChar(true);
-                    else
-                        ReplaceDefaultTextOnFirstKeyPress = false;
-                     break;
-                case SDL.SDL_Keycode.SDLK_LEFT:
-                    TxEntry.SeekCaretPosition(-1);
-                    break;
-                case SDL.SDL_Keycode.SDLK_RIGHT:
-                    TxEntry.SeekCaretPosition(1);
-                    break;
-                case SDL.SDL_Keycode.SDLK_DELETE:
-                    TxEntry.RemoveChar(false);
-                    break;
-                case SDL.SDL_Keycode.SDLK_HOME:
-                    TxEntry.SetCaretPosition(0);
-                    break;
-                case SDL.SDL_Keycode.SDLK_END:
-                    TxEntry.SetCaretPosition(Text.Length - 1);
-                    break;
-                case SDL.SDL_Keycode.SDLK_TAB:
-                    Parent.KeyboardTabToNextFocus(this);
-                    break;
+                        Parent?.OnKeyboardReturn(0, s);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                        if (!ReplaceDefaultTextOnFirstKeyPress)
+                        {
+                            TxEntry.RemoveChar(true);
+                        }
+                        else
+                        {
+                            ReplaceDefaultTextOnFirstKeyPress = false;
+                        }
+
+                        break;
+                    case SDL.SDL_Keycode.SDLK_LEFT:
+                        TxEntry.SeekCaretPosition(-1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_RIGHT:
+                        TxEntry.SeekCaretPosition(1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_DELETE:
+                        TxEntry.RemoveChar(false);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_HOME:
+                        TxEntry.SetCaretPosition(0);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_END:
+                        TxEntry.SetCaretPosition(Text.Length - 1);
+                        break;
+                    case SDL.SDL_Keycode.SDLK_TAB:
+                        Parent.KeyboardTabToNextFocus(this);
+                        break;
+                }
             }
 
-
             base.OnKeyDown(key, mod);
-        }
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                TxEntry.OnMouseClick(x, y);
-            } 
         }
 
         public override void Dispose()
@@ -224,5 +226,7 @@ namespace ClassicUO.Game.UI.Controls
             TxEntry = null;
             base.Dispose();
         }
+
+        public override AbstractEntry EntryValue => TxEntry;
     }
 }

@@ -19,17 +19,20 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-using SDL2;
-
 namespace ClassicUO.Game.UI.Controls
 {
-    abstract class AbstractTextBox : Control
+    internal abstract class AbstractTextBox : Control
     {
+        public abstract AbstractEntry EntryValue { get; }
+
         public AbstractTextBox()
         {
         }
@@ -41,7 +44,25 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 SetKeyboardFocus();
+                EntryValue.OnMouseClick(x, y);
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                EntryValue.OnSelectionEnd(x, y);
+            }
+        }
+
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        {
+            EntryValue.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
+
+            return base.Draw(batcher, position, hue);
         }
     }
 }

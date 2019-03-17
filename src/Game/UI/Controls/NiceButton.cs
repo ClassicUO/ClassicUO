@@ -74,6 +74,29 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        internal static NiceButton GetSelected(Control p, int group)
+        {
+            IEnumerable<NiceButton> list;
+
+            if (p is ScrollArea)
+            {
+                list = p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>());
+            }
+            else
+            {
+                list = p.FindControls<NiceButton>();
+            }
+
+            foreach (var b in list)
+            {
+                if (b._groupnumber == group && b.IsSelected)
+                {
+                    return b;
+                }
+            }
+            return null;
+        }
+
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)

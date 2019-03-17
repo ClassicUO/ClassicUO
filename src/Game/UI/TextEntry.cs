@@ -109,28 +109,13 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        public ushort Hue
-        {
-            get => RenderText.Hue;
-            set
-            {
-                if (RenderText.Hue != value)
-                {
-                    RenderCaret.Hue = RenderText.Hue = value;
-                    RenderText.CreateTexture();
-                    RenderCaret.CreateTexture();
-                }
-            } 
-        }
-
         public override string Text
         {
-            get => IsPassword ? _plainText : RenderText.Text;
+            get => IsPassword ? _plainText : base.Text;
             set
             {
                 _plainText = value;
-                RenderText.Text = IsPassword ? new string('*', value.Length) : value;
-                IsChanged = true;
+                base.Text = IsPassword ? new string('*', value.Length) : value;
             }
         }
 

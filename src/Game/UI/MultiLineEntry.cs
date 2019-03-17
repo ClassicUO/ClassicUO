@@ -52,30 +52,6 @@ namespace ClassicUO.Game.UI
             MaxLines = 0;
         }
 
-        public ushort Hue
-        {
-            get => RenderText.Hue;
-            set
-            {
-                if (RenderText.Hue != value)
-                {
-                    RenderCaret.Hue = RenderText.Hue = value;
-                    RenderText.CreateTexture();
-                    RenderCaret.CreateTexture();
-                }
-            }
-        }
-
-        public override string Text
-        {
-            get => RenderText.Text;
-            set
-            {
-                RenderText.Text = value;
-                IsChanged = true;
-            }
-        }
-
         public int MaxLines { get; internal set; }
 
         protected virtual void OnTextChanged()

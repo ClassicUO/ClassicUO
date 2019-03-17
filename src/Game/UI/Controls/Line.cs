@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Line : Control
     {
-        internal static void CreateRectangleArea(Gump g, int startx, int starty, int width, int height, int topage = 0, uint linecolor = 0xAFAFAF, int linewidth = 1, string toplabel = null, ushort textcolor = 999, byte textfont = 0xFF)
+        internal static int CreateRectangleArea(Gump g, int startx, int starty, int width, int height, int topage = 0, uint linecolor = 0xAFAFAF, int linewidth = 1, string toplabel = null, ushort textcolor = 999, byte textfont = 0xFF)
         {
             if (!string.IsNullOrEmpty(toplabel))
             {
@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             g.Add(new Line(startx, starty, linewidth, height, linecolor), topage);
             g.Add(new Line(startx + width - 1, starty, linewidth, height, linecolor), topage);
             g.Add(new Line(startx, starty + height - 1, width, linewidth, linecolor), topage);
+            return starty + height;
         }
 
         private readonly SpriteTexture _texture;

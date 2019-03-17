@@ -199,19 +199,13 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                TxEntry.OnMouseClick(x, y);
-            }
-        }
-
         public override void Dispose()
         {
             TxEntry?.Dispose();
             TxEntry = null;
             base.Dispose();
         }
+
+        public override AbstractEntry EntryValue => TxEntry;
     }
 }
