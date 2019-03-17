@@ -86,6 +86,8 @@ namespace ClassicUO.Game.UI.Gumps
         const int WIDTH = 700;
         const int HEIGHT = 500;
 
+        private ScrollAreaItem _windowSizeArea;
+
         public OptionsGump() : base(0, 0)
         {
             Add(new AlphaBlendControl(0.05f)
@@ -363,8 +365,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-        private ScrollAreaItem _item2;
-
         private void BuildVideo()
         {
             const int PAGE = 3;
@@ -401,13 +401,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gameWindowFullsize.MouseClick += (sender, e) => 
             {
-                _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
+                _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
             };
 
             item.Add(_gameWindowFullsize);
             rightArea.Add(item);
 
-            _item2 = new ScrollAreaItem();
+            _windowSizeArea = new ScrollAreaItem();
 
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
             {
@@ -415,9 +415,9 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChecked = Engine.Profile.Current.GameWindowLock
             };
 
-            _item2.Add(_gameWindowLock);
+            _windowSizeArea.Add(_gameWindowLock);
 
-            _gameWindowWidth = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
+            _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                 X = 10,
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UNumericOnly = true
             }, "Game Play Window Size: ");
 
-            _gameWindowHeight = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
+            _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                 X = 80,
@@ -442,9 +442,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 190,
                 Y = 30,
             };
-            _item2.Add(text);
+            _windowSizeArea.Add(text);
 
-            _gameWindowPositionX = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
+            _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
                 X = 200,
@@ -454,7 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-            _gameWindowPositionY = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
+            _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
             {
                 Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
                 X = 270,
@@ -464,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
 
-            rightArea.Add(_item2);
+            rightArea.Add(_windowSizeArea);
 
             item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
@@ -478,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_lightBar);
             rightArea.Add(item);
 
-            _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
+            _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
 
             Add(rightArea, PAGE);
         }
@@ -775,7 +775,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
-                    _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
+                    _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
                     break;
                 case 4: // commands
 
