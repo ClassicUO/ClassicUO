@@ -86,7 +86,9 @@ namespace ClassicUO.Game.UI.Gumps
         const int WIDTH = 700;
         const int HEIGHT = 500;
 
-        private ScrollAreaItem _windowSizeArea;
+        private ScrollAreaItem _windowSizeArea = new ScrollAreaItem();
+        private ScrollAreaItem _soundsArea = new ScrollAreaItem();
+        private ScrollAreaItem _volumeArea = new ScrollAreaItem();
 
         public OptionsGump() : base(0, 0)
         {
@@ -327,27 +329,31 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildSounds()
         {
             const int PAGE = 2;
+
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             _enableSounds = CreateCheckBox(rightArea, "Sounds", Engine.Profile.Current.EnableSound, 0, 0);
+            _enableSounds.MouseClick += (sender, e) =>
+            {
+                _soundsArea.IsVisible = (_enableSounds.IsChecked);
+            };
 
-            ScrollAreaItem item = new ScrollAreaItem();
-            Label text = new Label("- Sounds volume:", true, HUE_FONT, 0, FONT);
+            _soundsVolume = new HSliderBar(90, -15, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
 
-            _soundsVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-            item.Add(text);
-            item.Add(_soundsVolume);
-            rightArea.Add(item);
+            _soundsArea.Add(_soundsVolume);
+            rightArea.Add(_soundsArea);
 
             _enableMusic = CreateCheckBox(rightArea, "Music", Engine.Profile.Current.EnableMusic, 0, 0);
-           
-            item = new ScrollAreaItem();
-            text = new Label("- Music volume:", true, HUE_FONT, 0, FONT);
+            _enableMusic.MouseClick += (sender, e) =>
+            {
+                _volumeArea.IsVisible = (_enableMusic.IsChecked);
+            };
 
-            _musicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _musicVolume = new HSliderBar(90, -15, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
 
-            item.Add(text);
-            item.Add(_musicVolume);
-            rightArea.Add(item);
+            _volumeArea.Add(_musicVolume);
+            rightArea.Add(_volumeArea);
+
+            ScrollAreaItem item = new ScrollAreaItem();
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
@@ -356,11 +362,14 @@ namespace ClassicUO.Game.UI.Gumps
             _loginMusic = CreateCheckBox(rightArea, "Login music", Engine.GlobalSettings.LoginMusic, 0, 40);
 
             item = new ScrollAreaItem();
-            text = new Label("- Login music volume:", true, HUE_FONT, 0, FONT);
+            Label text = new Label("- Login music volume:", true, HUE_FONT, 0, FONT);
             _loginMusicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(text);
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
+
+            _soundsArea.IsVisible = (_enableSounds.IsChecked);
+            _volumeArea.IsVisible = (_enableMusic.IsChecked);
 
             Add(rightArea, PAGE);
         }
@@ -370,44 +379,20 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 3;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
-            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
-            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
-           
-            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
-            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
-            Label text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
-            {
-                Y = 30
-            };
-
-            item.Add(text);
-
-            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
-            {
-                SelectedIndex = Engine.GlobalSettings.ShardType
-            };
-            item.Add(_shardType);
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
             _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
             {
                 Y = 20,
                 IsChecked = Engine.Profile.Current.GameWindowFullSize
             };
-
-            _gameWindowFullsize.MouseClick += (sender, e) => 
+            _gameWindowFullsize.MouseClick += (sender, e) =>
             {
                 _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
             };
 
             item.Add(_gameWindowFullsize);
             rightArea.Add(item);
-
-            _windowSizeArea = new ScrollAreaItem();
 
             _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
             {
@@ -437,7 +422,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UNumericOnly = true
             });
 
-            text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
+            Label text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
             {
                 X = 190,
                 Y = 30,
@@ -465,6 +450,28 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
             rightArea.Add(_windowSizeArea);
+
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
+            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
+           
+            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
+            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
+
+            item = new ScrollAreaItem();
+            text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
+            {
+                Y = 30
+            };
+
+            item.Add(text);
+
+            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { "Modern", "Old", "Outlands" })
+            {
+                SelectedIndex = Engine.GlobalSettings.ShardType
+            };
+            item.Add(_shardType);
+            rightArea.Add(item);
 
             item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
@@ -758,6 +765,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _footStepsSound.IsChecked = true;
                     _loginMusicVolume.Value = 100;
                     _loginMusic.IsChecked = true;
+                    _soundsArea.IsVisible = (_enableSounds.IsChecked);
+                    _volumeArea.IsVisible = (_enableMusic.IsChecked);
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
