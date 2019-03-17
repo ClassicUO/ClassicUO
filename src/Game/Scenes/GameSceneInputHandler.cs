@@ -131,6 +131,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
+                        case CursorTarget.MultiPlacement:
                             GameObject obj = SelectedObject;
                             if (obj != null)
                             {
