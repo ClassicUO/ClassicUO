@@ -72,6 +72,8 @@ namespace ClassicUO.Game.GameObjects
             EdgeDetection = true;
         }
 
+        protected override bool CanCreateOverheads => false;
+
         public string Text { get; }
 
         public GameObject Parent { get; }

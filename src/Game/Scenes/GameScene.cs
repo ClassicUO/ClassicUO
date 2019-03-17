@@ -426,11 +426,11 @@ namespace ClassicUO.Game.Scenes
                 _renderIndex = 1;
             _updateDrawPosition = false;
 
-            if (_renderList.Length - _renderListCount != 0)
-            {
-                if (_renderList[_renderListCount] != null)
-                    Array.Clear(_renderList, _renderListCount, _renderList.Length - _renderListCount);
-            }
+            //if (_renderList.Length - _renderListCount != 0)
+            //{
+            //    if (_renderList[_renderListCount] != null)
+            //        Array.Clear(_renderList, _renderListCount, _renderList.Length - _renderListCount);
+            //}
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -551,7 +551,10 @@ namespace ClassicUO.Game.Scenes
                 //while (_renderList.Count != 0)
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    GameObject obj = _renderList[i]; //_renderList.Dequeue();
+                    //if (!_renderList[i].TryGetTarget(out var obj))
+                    //    continue;
+
+                    ref var obj = ref _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {

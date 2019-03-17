@@ -27,6 +27,7 @@ namespace ClassicUO.Utility
 {
     internal static class MathHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool InRange(int input, int low, int high)
         {
             return input >= low && input <= high;

@@ -187,7 +187,10 @@ namespace ClassicUO.Game.GameObjects
                     rect.Height = yy + frame.Height;
 
                 Texture = frame;
-                Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+                Bounds.X = x;
+                Bounds.Y = -y;
+                Bounds.Width = frame.Width;
+                Bounds.Height = frame.Height;
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
@@ -240,15 +243,16 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, Hue hue)
         {
-            if (IsCovered(this, layer))
-                return;
-
             Item item = Equipment[(int)layer];
 
             if (item == null)
                 return;
 
             if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
+                return;
+
+
+            if (IsCovered(this, layer))
                 return;
 
             EquipConvData? convertedItem = null;
@@ -357,7 +361,10 @@ namespace ClassicUO.Game.GameObjects
                     rect.Height = yy + frame.Height;
 
                 Texture = frame;
-                Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+                Bounds.X = x;
+                Bounds.Y = -y;
+                Bounds.Width = frame.Width;
+                Bounds.Height = frame.Height;
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);

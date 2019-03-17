@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -156,6 +157,10 @@ namespace ClassicUO.Game.Scenes
         private int _objectHandlesCount;
         private GameObject[] _renderList = new GameObject[2000];
         //private Queue<GameObject> _renderList = new Queue<GameObject>();
+
+        //private WeakReference<GameObject>[] _renderList = new WeakReference<GameObject>[2000];
+
+       // private ArrayWeak<GameObject> _renderList = new ArrayWeak<GameObject>(2000);
 
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
@@ -316,33 +321,31 @@ namespace ClassicUO.Game.Scenes
 
                             break;
                     }
-
-                    if (obj.HasOverheads)
+                
+                    for (int i = 0; i < obj.Overheads.Count; i++)
                     {
-                        for (int i = 0; i < obj.Overheads.Count; i++)
-                        {
-                            TextOverhead v = obj.Overheads[i];
-                            v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                            v.Bounds.Y = offY + v.Texture.Height;
-                            v.Bounds.Width = v.Texture.Width;
-                            v.Bounds.Height = v.Texture.Height;
-                            Overheads.AddOverhead(v);
-                            offY += v.Texture.Height;
+                        TextOverhead v = obj.Overheads[i];
+                        ref var bounds = ref v.Bounds;
+                        bounds.X = (v.Texture.Width >> 1) - 22;
+                        bounds.Y = offY + v.Texture.Height;
+                        bounds.Width = v.Texture.Width;
+                        bounds.Height = v.Texture.Height;
+                        Overheads.AddOverhead(v);
+                        offY += v.Texture.Height;
 
-                            if (_alphaChanged)
+                        if (_alphaChanged)
+                        {
+                            if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
                             {
-                                if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                                {
-                                    if (!v.IsOverlapped)
-                                        v.ProcessAlpha(0);
-                                }
-                                else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
-                                {
-                                    v.ProcessAlpha(0xFF);
-                                }
+                                if (!v.IsOverlapped)
+                                    v.ProcessAlpha(0);
+                            }
+                            else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
+                            {
+                                v.ProcessAlpha(0xFF);
                             }
                         }
-                    }
+                    }               
                 }
                 
 
@@ -417,6 +420,7 @@ namespace ClassicUO.Game.Scenes
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
+                    //_renderList.Resize(newsize);
                     Array.Resize(ref _renderList, newsize);
                 }
 
@@ -435,10 +439,17 @@ namespace ClassicUO.Game.Scenes
                     obj.ObjectHandlesOpened = false;
                     obj.UseObjectHandles = false;
                 }
-                
 
-                 _renderList[_renderListCount] = obj;
-                 //_renderList.Enqueue(obj);
+               
+                //ref var weak = ref _renderList[_renderListCount];
+
+                //if (weak == null)
+                //    weak = new WeakReference<GameObject>(obj);
+                //else
+                //    weak.SetTarget(obj);
+
+                _renderList[_renderListCount] = obj;
+                //_renderList.Enqueue(obj);
                 //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
@@ -590,6 +601,27 @@ namespace ClassicUO.Game.Scenes
 
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
+        }
+    }
+
+
+    class ArrayWeak<T> where T : class
+    {
+        private T[] _array;
+
+        public ArrayWeak(int size)
+        {
+            _array = new T[size];
+        }
+
+        public ref T this[int index] => ref _array[index];
+
+        public int Length => _array.Length;
+
+
+        public void Resize(int newSize)
+        {
+            Array.Resize(ref _array, newSize);
         }
     }
 }

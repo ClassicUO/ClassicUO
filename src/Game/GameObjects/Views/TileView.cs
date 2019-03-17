@@ -96,11 +96,11 @@ namespace ClassicUO.Game.GameObjects
                     _storedHue = Vector3.Zero;
                 }
             }
-           
-            _vertex[0].Position = position + _vertex0_yOffset;
-            _vertex[1].Position = position + _vertex1_yOffset;
-            _vertex[2].Position = position + _vertex2_yOffset;
-            _vertex[3].Position = position + _vertex3_yOffset;
+
+            Vector3.Add(ref position, ref _vertex0_yOffset, out _vertex[0].Position);
+            Vector3.Add(ref position, ref _vertex1_yOffset, out _vertex[1].Position);
+            Vector3.Add(ref position, ref _vertex2_yOffset, out _vertex[2].Position);
+            Vector3.Add(ref position, ref _vertex3_yOffset, out _vertex[3].Position);
 
             _vertex[0].Position.Y += z;
             _vertex[1].Position.Y += z;
@@ -204,6 +204,7 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[1].Normal = _normals[1];
                 _vertex[3].Normal = _normals[2];
                 _vertex[2].Normal = _normals[3];
+
                 _vertex0_yOffset = new Vector3(22, -Rectangle.Left, 0);
                 _vertex1_yOffset = new Vector3(44, 22 - Rectangle.Bottom, 0);
                 _vertex2_yOffset = new Vector3(0, 22 - Rectangle.Top, 0);
