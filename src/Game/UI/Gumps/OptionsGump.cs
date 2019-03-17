@@ -466,8 +466,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_item2);
 
-
-
             item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
             {
@@ -777,6 +775,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
+                    _item2.IsVisible = (!_gameWindowFullsize.IsChecked);
                     break;
                 case 4: // commands
 
@@ -990,9 +989,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
             Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
 
-
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+
         }
 
         internal void UpdateVideo()
