@@ -424,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 60,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true
+                UNumericOnly = true
             }, "Game Play Window Size: ");
 
             _gameWindowHeight = CreateInputField(_item2, new TextBox(1, 5, 80, 80, false)
@@ -434,7 +434,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 60,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true
+                UNumericOnly = true
             });
 
             text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)

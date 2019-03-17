@@ -87,6 +87,17 @@ namespace ClassicUO.Game.UI
             }
         }
 
+        public bool UNumericOnly
+        {
+            set
+            {
+                if (value)
+                    ValidationRules = (uint)Constants.RULES.NUMERIC + (uint)Constants.RULES.UNUMERIC;
+                else
+                    ValidationRules = ValidationRules - (uint)Constants.RULES.UNUMERIC;
+            }
+        }
+
         public bool LettersOnly
         {
             set
@@ -142,10 +153,9 @@ namespace ClassicUO.Game.UI
                 {
                     allowChar = false;
 
-                    // https://www.dotnetperls.com/ascii-table
                     if ((ValidationRules & (uint)Constants.RULES.SYMBOL) != 0 && ((c1 >= 33 && c1 <= 47) || (c1 >= 58 && c1 <= 64) || (c1 >= 91 && c1 <= 96) || (c1 >= 123 && c1 <= 126)) )
                         allowChar = true;
-                    if ((ValidationRules & (uint)Constants.RULES.NUMERIC) != 0 && ((c1 >= 48 && c1 <= 57) || (Text.Length == 0 && c1 == 45)))
+                    if ((ValidationRules & (uint)Constants.RULES.NUMERIC) != 0 && ((c1 >= 48 && c1 <= 57) || ((ValidationRules & (uint)Constants.RULES.UNUMERIC) == 0 && Text.Length == 0 && c1 == 45)))
                         allowChar = true;
                     if ((ValidationRules & (uint)Constants.RULES.LETTER) != 0 && ((c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122)))
                         allowChar = true;
