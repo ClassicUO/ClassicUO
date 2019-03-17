@@ -544,7 +544,6 @@ namespace ClassicUO.Game.Managers
                         }
 
                         break;
-                        break;
 	                case "itemproperty":
 		                if (World.ClientFlags.TooltipsEnabled)
 		                {
