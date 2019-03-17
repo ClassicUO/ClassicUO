@@ -2051,6 +2051,16 @@ namespace ClassicUO.Network
         private static void MultiPlacement(Packet p)
         {
             Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `MultiPlacement` not implemented yet.");
+            var allowGround = p.ReadBool();
+            var targID = p.ReadUInt();
+            var flags = p.ReadByte();
+            p.Skip((12));
+            var multiID = p.ReadUShort();
+            var xOff = p.ReadUShort();
+            var yOff = p.ReadUShort();
+            var zOff = p.ReadUShort();
+            TargetManager.SetTargetingMulti(targID,multiID,TargetType.Neutral);
+
         }
 
         private static void ASCIIPrompt(Packet p)
