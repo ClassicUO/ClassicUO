@@ -547,14 +547,12 @@ namespace ClassicUO.Game.Scenes
                 int z = World.Player.Z + 5;
                 bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
 
-
-                //while (_renderList.Count != 0)
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    //if (!_renderList[i].TryGetTarget(out var obj))
-                    //    continue;
+                    if (!_renderList[i].TryGetTarget(out var obj))
+                        continue;
 
-                    ref var obj = ref _renderList[i];
+                    //ref var obj = ref _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {

@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using Microsoft.Xna.Framework;
@@ -57,11 +59,13 @@ namespace ClassicUO.Renderer
             new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))
         };
 
-        public static int SizeInBytes => sizeof(float) * 12;
+        public static int SizeInBytes { get; } = sizeof(float) * 12;
 
+#if DEBUG
         public override string ToString()
         {
             return string.Format("VPNTH: <{0}> <{1}>", Position.ToString(), TextureCoordinate.ToString());
         }
+#endif
     }
 }

@@ -155,12 +155,10 @@ namespace ClassicUO.Game.Scenes
         private int _renderIndex = 1;
         private int _renderListCount;
         private int _objectHandlesCount;
-        private GameObject[] _renderList = new GameObject[2000];
-        //private Queue<GameObject> _renderList = new Queue<GameObject>();
 
-        //private WeakReference<GameObject>[] _renderList = new WeakReference<GameObject>[2000];
+        //private GameObject[] _renderList = new GameObject[2000];
+        private WeakReference<GameObject>[] _renderList = new WeakReference<GameObject>[2000];
 
-       // private ArrayWeak<GameObject> _renderList = new ArrayWeak<GameObject>(2000);
 
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
@@ -440,15 +438,15 @@ namespace ClassicUO.Game.Scenes
                     obj.UseObjectHandles = false;
                 }
 
-               
-                //ref var weak = ref _renderList[_renderListCount];
 
-                //if (weak == null)
-                //    weak = new WeakReference<GameObject>(obj);
-                //else
-                //    weak.SetTarget(obj);
+                ref var weak = ref _renderList[_renderListCount];
 
-                _renderList[_renderListCount] = obj;
+                if (weak == null)
+                    weak = new WeakReference<GameObject>(obj);
+                else
+                    weak.SetTarget(obj);
+
+                //_renderList[_renderListCount] = obj;
                 //_renderList.Enqueue(obj);
                 //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
