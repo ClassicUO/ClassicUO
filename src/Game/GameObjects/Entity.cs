@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item[] Equipment
         {
-            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 1]);
+            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 0x11]);
             set => _equipment = value;
         }
 
