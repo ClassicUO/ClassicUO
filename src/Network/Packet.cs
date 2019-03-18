@@ -28,6 +28,7 @@ namespace ClassicUO.Network
 {
     internal sealed class Packet : PacketBase
     {
+        public bool IsAssistPacket = false;
         private readonly byte[] _data;
 
         public Packet(byte[] data, int length)

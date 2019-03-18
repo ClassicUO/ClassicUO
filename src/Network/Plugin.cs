@@ -207,15 +207,16 @@ namespace ClassicUO.Network
         }
 
 
-        internal static bool ProcessRecvPacket(byte[] data, int length)
+        internal static bool ProcessRecvPacket(Packet p)
         {
             bool result = true;
-
+            if (p.IsAssistPacket)
+                return result;
             for (int i = 0; i < _plugins.Count; i++)
             {
                 Plugin plugin = _plugins[i];
 
-                if (plugin._onRecv != null && !plugin._onRecv(data, length))
+                if (plugin._onRecv != null && !plugin._onRecv(p.ToArray(), p.Length))
                     result = false;
             }
 
@@ -317,7 +318,7 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(byte[] data, int length)
         {
-            Packet p = new Packet(data, length);
+            Packet p = new Packet(data, length){IsAssistPacket = true};
             NetClient.EnqueuePacketFromPlugin(p);
             return true;
         }
