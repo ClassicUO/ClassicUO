@@ -59,7 +59,7 @@ namespace ClassicUO.Renderer
             new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))
         };
 
-        public static int SizeInBytes { get; } = sizeof(float) * 12;
+        public const int SizeInBytes = sizeof(float) * 12 * 4;
 
 #if DEBUG
         public override string ToString()
