@@ -33,12 +33,14 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.UI;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -46,6 +48,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
+
+using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 namespace ClassicUO
 {
@@ -434,6 +438,10 @@ namespace ClassicUO
             FpsLimit = LOGIN_SCREEN_FPS;
 
 
+            Log.Message(LogTypes.Trace, "Loading UI Fonts...");
+            Log.PushIndent();
+            Fonts.Load();
+            Log.PopIndent();
 
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
@@ -569,10 +577,10 @@ namespace ClassicUO
             if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
                 _sceneManager.CurrentScene.Draw(_batcher);
 
-            GraphicsDevice.Clear(Color.Transparent);
-            _batcher.Begin();
-            UI.Draw(_batcher);
-            _batcher.End();
+
+            _uiManager.Draw(_batcher);
+           
+            //_batcher.DrawString(_font, gameTime.TotalGameTime.Milliseconds.ToString(), new Point(200, 200), new Vector3(22, 0, 0));
 
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
@@ -642,7 +650,6 @@ namespace ClassicUO
                 else
                     scene.Update(totalMS, frameMS);
             }
-
         }
 
         private void OnFixedUpdate(double totalMS, double frameMS)

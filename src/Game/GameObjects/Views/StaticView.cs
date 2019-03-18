@@ -45,17 +45,11 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _oldGraphic;
 
         private bool _border = false;
-        private Texture2D _borderTexture;
+        private static Texture2D _borderTexture;
         private Color _borderColor = Color.Black;
 
         public void SetBorder(bool status, byte width = 3, Color color = default)
         {
-            if (!status)
-            {
-                _borderTexture?.Dispose();
-                _borderTexture = null;
-            }
-
             _borderColor = color == default ? Color.Black : color;
 
             _border = status;

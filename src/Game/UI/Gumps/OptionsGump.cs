@@ -103,18 +103,18 @@ namespace ClassicUO.Game.UI.Gumps
             Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
             Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
 
-            TextureControl tc = new TextureControl()
+            TextureControl tc = new TextureControl
             {
                 X = 150 + (WIDTH - 150 - 350) / 2,
                 Y = (HEIGHT - 365) / 2,
                 Width = w,
                 Height = h,
                 Alpha = 0.95f,
-                IsTransparent =  true,
-                ScaleTexture = false
+                IsTransparent = true,
+                ScaleTexture = false,
+                Texture = new SpriteTexture(w, h)
             };
-            
-            tc.Texture = new SpriteTexture(w, h);
+
             tc.Texture.SetData(pixels);
             Add(tc);
          

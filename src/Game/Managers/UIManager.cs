@@ -660,6 +660,9 @@ namespace ClassicUO.Game.Managers
         {
             SortControlsByInfo();
 
+            batcher.GraphicsDevice.Clear(Color.Transparent);
+            batcher.Begin();
+
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
                 Control g = _gumps[i];
@@ -667,6 +670,8 @@ namespace ClassicUO.Game.Managers
                 if (g.IsInitialized)
                     g.Draw(batcher, g.Location);
             }
+
+            batcher.End();
 
             GameCursor?.Draw(batcher);
         }
@@ -758,7 +763,7 @@ namespace ClassicUO.Game.Managers
             if (_isDraggingControl)
                 return _draggingControl;
 
-            List<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
+            var controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal) : _gumps;
 
             Control[] mouseOverControls = null;
             foreach (Control c in controls)

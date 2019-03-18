@@ -98,7 +98,7 @@ namespace ClassicUO.Renderer
                 ScissorTestEnable = true
             };
 
-            _stencil =  DepthStencilState.None;
+            _stencil = DepthStencilState.None;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -412,7 +412,7 @@ namespace ClassicUO.Renderer
         public bool DrawRectangle(Texture2D texture, Rectangle rectangle, Vector3 hue)
         {
             Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, rectangle.Width, 1), hue);
-            Draw2D(texture, new Rectangle(rectangle.Right, rectangle.Y, 1, rectangle.Height), hue);
+            Draw2D(texture, new Rectangle(rectangle.Right, rectangle.Y, 1, rectangle.Height + 1), hue);
             Draw2D(texture, new Rectangle(rectangle.X, rectangle.Bottom, rectangle.Width, 1), hue);
             Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, 1, rectangle.Height), hue);
             return true;
@@ -445,6 +445,98 @@ namespace ClassicUO.Renderer
             DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
 
             return true;
+        }
+
+        public void DrawString(Renderer.SpriteFont spriteFont, string text, int x, int y, Vector3 color)
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException("text");
+            }
+            if (text.Length == 0)
+            {
+                return;
+            }
+
+            Texture2D textureValue = spriteFont.Texture;
+            List<Rectangle> glyphData = spriteFont.GlyphData;
+            List<Rectangle> croppingData = spriteFont.CroppingData;
+            List<Vector3> kerning = spriteFont.Kerning;
+            List<char> characterMap = spriteFont.CharacterMap;
+
+            Vector2 curOffset = Vector2.Zero;
+            bool firstInLine = true;
+
+            Vector2 baseOffset = Vector2.Zero;
+            float axisDirX = 1;
+            float axisDirY = 1;
+
+            foreach (char c in text)
+            {
+                // Special characters
+                if (c == '\r')
+                {
+                    continue;
+                }
+                if (c == '\n')
+                {
+                    curOffset.X = 0.0f;
+                    curOffset.Y += spriteFont.LineSpacing;
+                    firstInLine = true;
+                    continue;
+                }
+
+                /* Get the List index from the character map, defaulting to the
+				 * DefaultCharacter if it's set.
+				 */
+                int index = characterMap.IndexOf(c);
+                if (index == -1)
+                {
+                    if (!spriteFont.DefaultCharacter.HasValue)
+                    {
+                        throw new ArgumentException(
+                            "Text contains characters that cannot be" +
+                            " resolved by this SpriteFont.",
+                            "text"
+                        );
+                    }
+                    index = characterMap.IndexOf(
+                        spriteFont.DefaultCharacter.Value
+                    );
+                }
+
+                /* For the first character in a line, always push the width
+				 * rightward, even if the kerning pushes the character to the
+				 * left.
+				 */
+                Vector3 cKern = kerning[index];
+                if (firstInLine)
+                {
+                    curOffset.X += Math.Abs(cKern.X);
+                    firstInLine = false;
+                }
+                else
+                {
+                    curOffset.X += spriteFont.Spacing + cKern.X;
+                }
+
+                // Calculate the character origin
+                Rectangle cCrop = croppingData[index];
+                Rectangle cGlyph = glyphData[index];
+                float offsetX = baseOffset.X + (
+                    curOffset.X + cCrop.X
+                ) * axisDirX;
+                float offsetY = baseOffset.Y + (
+                    curOffset.Y + cCrop.Y
+                ) * axisDirY;
+
+                Draw2D(textureValue, 
+                       new Point(x + (int)offsetX, y + (int)offsetY), 
+                       cGlyph, 
+                       color);
+
+                curOffset.X += cKern.Y + cKern.Z;
+            }
         }
 
         [Conditional("DEBUG")]
@@ -494,7 +586,7 @@ namespace ClassicUO.Renderer
                 return;
 
             fixed (SpriteVertex* p = &_vertexInfo[0])
-                _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
+                _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * SpriteVertex.SizeInBytes, SetDataOptions.Discard);
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -512,7 +604,7 @@ namespace ClassicUO.Renderer
             }
 
             InternalDraw(current, offset, _numSprites - offset);
-            //Array.Clear(_textureInfo, 0, _numSprites);
+
             _numSprites = 0;
         }
 
@@ -588,9 +680,11 @@ namespace ClassicUO.Renderer
         }
 
 
-        private static byte[] _isometricEffect;
+        private static byte[] _isometricEffect, _spriteEffect;
 
 
         public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
+        public static byte[] SpriteEffect => _spriteEffect ?? (_spriteEffect = GetResource("ClassicUO.SpriteEffect.fx"));
+
     }
 }

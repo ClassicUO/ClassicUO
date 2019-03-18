@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Entity = entity;
 
-            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)0x387;
+            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)0x0481;
 
             _renderedText = new RenderedText()
             {
