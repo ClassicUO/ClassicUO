@@ -250,7 +250,7 @@ namespace ClassicUO.Network
             {
                 Packet p = _queue.Dequeue();
 
-                if (Plugin.ProcessRecvPacket(p.ToArray(), p.Length))
+                if (Plugin.ProcessRecvPacket(p))
                     PacketReceived.Raise(p);
             }
 
