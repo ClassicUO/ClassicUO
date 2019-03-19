@@ -9,7 +9,7 @@ An open source implementation of the Ultima Online Classic Client.
 [![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara)  
 #### Discord  
  <a href="https://discord.gg/VdyCpjQ">
-        <img src="https://img.shields.io/discord/308323056592486420.svg?logo=discord"
+        <img src="https://img.shields.io/discord/458277173208547350.svg?logo=discord"
             alt="chat on Discord"></a>     
             
 #### Current release
