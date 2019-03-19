@@ -319,6 +319,16 @@ namespace ClassicUO.Game.GameObjects
                 _overHeads = null;
             }
 
+            if (Left != null)
+            {
+                Left = null;
+            }
+
+            if (Right != null)
+            {
+                Right = null;
+            }
+
             Texture = null;
 
             GC.SuppressFinalize(this);

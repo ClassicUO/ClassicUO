@@ -36,8 +36,6 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
-        private GameObject _firstNode;
-
         public Tile(ushort x, ushort y)
         {
             X = x;
@@ -47,135 +45,7 @@ namespace ClassicUO.Game.Map
         public ushort X { get; }
         public ushort Y { get; }
 
-        public GameObject FirstNode => _firstNode;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Add(GameObject obj)
-        {
-
-            obj.Right = null;
-
-            if (_firstNode == null)
-            {
-                obj.Left = null;
-                _firstNode = obj;
-            }
-            else
-            {
-                GameObject last = _firstNode;
-
-                while (last.Right != null)
-                    last = last.Right;
-
-                last.Right = obj;
-                obj.Left = last;
-            }
-
-
-            //if (_firstNode == null)
-            //{
-            //    _firstNode = obj;
-            //    _firstNode.Left = null;
-            //    _firstNode.Right = null;
-
-            //}
-            //else
-            //{
-            //    GameObject last = _firstNode;
-
-            //    while (last.Right != null)
-            //        last = last.Right;
-
-            //    last.Right = obj;
-            //    obj.Left = last;
-
-            //    if (obj.Right != null)
-            //    {
-
-            //    }
-
-            //    obj.Right = null;
-
-            //}
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Remove(GameObject obj)
-        {
-
-            if (_firstNode == null || obj == null)
-                return;
-
-            if (_firstNode == obj)
-                _firstNode = obj.Right;
-
-            if (obj.Right != null)
-                obj.Right.Left = obj.Left;
-
-            if (obj.Left != null)
-                obj.Left.Right = obj.Right;
-
-            obj.Left = null;
-            obj.Right = null;
-
-            //if (obj != null)
-            //{
-
-            //    if (obj.Left != null)
-            //        obj.Left.Right = obj.Right;
-
-            //    if (obj.Right != null)
-            //        obj.Right.Left = obj.Left;
-
-            //    obj.Right = null;
-            //    obj.Left = null;
-
-            //    //if (obj != _firstNode)
-            //    //    obj.Left.Right = obj.Right;
-
-            //    //if (obj.Right != null)
-            //    //    obj.Right.Left = obj.Left;
-
-            //    //GameObject left = obj.Left;
-            //    //GameObject right = obj.Right;
-
-            //    //if (left != null)
-            //    //    left.Right = right;
-
-            //    //if (right != null)
-            //    //    right.Left = left;
-
-            //    //obj.Left = null;
-            //    //obj.Right = null;
-            //}
-
-
-
-
-            //GameObject founded = FirstNode;
-            //if (founded == null)
-            //    return;
-
-            //while (founded != obj && founded != null)
-            //{
-            //    founded = founded.Right;
-            //}
-
-            //if (founded != null)
-            //{
-            //    GameObject left = founded.Left;
-            //    GameObject right = founded.Right;
-
-            //    if (left != null)
-            //        left.Right = right;
-
-            //    if (right != null)
-            //        right.Left = left;
-
-            //    founded.Left = null;
-            //    founded.Right = null;
-            //}
-        }
+        public GameObject FirstNode { get; private set; }
 
         public void AddGameObject(GameObject obj)
         {
@@ -223,13 +93,13 @@ namespace ClassicUO.Game.Map
 
 
 
-            if (_firstNode == null)
+            if (FirstNode == null)
             {
-                _firstNode = obj;
+                FirstNode = obj;
                 return;
             }
 
-            GameObject o = _firstNode;
+            GameObject o = FirstNode;
 
             while (o?.Left != null)
                 o = o.Left;
@@ -263,32 +133,26 @@ namespace ClassicUO.Game.Map
                 obj.Right = start;
                 start.Left = obj;
                 obj.Left = null;
-                _firstNode = obj;
+                FirstNode = obj;
             }
-
-            //Add(obj);
-            //_firstNode = TileSorter.Sort(_firstNode);
         }
 
         public void RemoveGameObject(GameObject obj)
         {
-            Remove(obj);
+            if (FirstNode == null || obj == null)
+                return;
+
+            if (FirstNode == obj)
+                FirstNode = obj.Right;
+
+            if (obj.Right != null)
+                obj.Right.Left = obj.Left;
+
+            if (obj.Left != null)
+                obj.Left.Right = obj.Right;
+
+            obj.Left = null;
+            obj.Right = null;
         }
-
-
-        //public void Clear()
-        //{
-        //    if (_firstNode == null)return;
-
-        //    GameObject f = _firstNode;
-
-        //    while (f.Right != null)
-        //    {
-        //        f.Left = null;
-        //        var t = f.Right;
-        //        f.Right = null;
-        //        f = t;
-        //    }
-        //}
     }
 }
