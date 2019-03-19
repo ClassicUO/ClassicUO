@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
 		{
 			base.Update(totalMS, frameMS);
 
-		    if (World.InGame || World.Map == null)
+		    if (!World.InGame || World.Map == null)
 		    {
                 Dispose();
 		    }
