@@ -54,8 +54,15 @@ namespace ClassicUO.Game.UI.Gumps
 		{
 			base.Update(totalMS, frameMS);
 
+		    if (World.InGame || World.Map == null)
+		    {
+                Dispose();
+		    }
+
+            if (IsDisposed)
+                return;
+
 			var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
-			var viewport = Engine.SceneManager.GetScene<GameScene>().Scale;
 
 			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
 			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;

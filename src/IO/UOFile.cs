@@ -57,8 +57,8 @@ namespace ClassicUO.IO
             if (size > 0)
             {
                 _file = MemoryMappedFile.CreateFromFile(File.OpenRead(fileInfo.FullName), null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
-                //_file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
+
                 byte* ptr = null;
 
                 try
@@ -131,7 +131,8 @@ namespace ClassicUO.IO
         {
             if (entryidx < 0 || entryidx >= Entries.Length)
                 return (0, 0, false);
-            UOFileIndex3D e = Entries[entryidx];
+
+            ref readonly UOFileIndex3D e = ref Entries[entryidx];
 
             if (e.Offset < 0) return (0, 0, false);
             int length = e.Length & 0x7FFFFFFF;
