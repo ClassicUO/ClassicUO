@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDisposed)
                 return;
-         
+
 
             TimeToLive -= frameMS;
 
@@ -118,14 +118,14 @@ namespace ClassicUO.Game.GameObjects
                 //if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
                 //    Alpha = alpha;
             }
-            else if (TimeToLive <= 0.0)
+            else if (TimeToLive <= 0 || AlphaHue == 0)
             {
                 Dispose();
             }
-            else if (IsOverlapped && AlphaHue != 75)
-                AlphaHue = 75;
-            //else if (!IsOverlapped && AlphaHue != 0xFF)
-            //    AlphaHue = 0xFF;                  
+            else if (IsOverlapped && AlphaHue != 120)
+                ProcessAlpha(120);
+            else if (!IsOverlapped && AlphaHue != 0xFF)
+                ProcessAlpha(0xFF);
         }
     }
 

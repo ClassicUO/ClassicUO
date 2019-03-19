@@ -33,6 +33,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
@@ -50,6 +51,12 @@ namespace ClassicUO.Game.Managers
         {
             if (_firstNode != null)
             {
+                //if (_edge == null)
+                //{
+                //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                //    _edge.SetData(new Color[] { Color.LightBlue });
+                //}
+
                 int skip = 0;
 
                 for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
@@ -75,14 +82,14 @@ namespace ClassicUO.Game.Managers
                         };
                     }
                     else if (owner.Texture != null)
-                        position.Y -= (owner.Texture.Height >> 1);
+                        position.Y -= owner.Texture.Height / 2;
 
 
                     Rectangle current = new Rectangle((int) position.X - overhead.Bounds.X, (int) position.Y - overhead.Bounds.Y, overhead.Bounds.Width, overhead.Bounds.Height);
 
                     if (skip == 0)
                     {
-                        for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead) ov.Right)
+                        for (TextOverhead ov = (TextOverhead)overhead.Right; ov != null; ov = (TextOverhead)ov.Right)
                         {
                             Vector3 pos2 = ov.Parent.RealScreenPosition;
 
@@ -97,8 +104,10 @@ namespace ClassicUO.Game.Managers
                                     Z = pos2.Z
                                 };
                             }
+                            else if (ov.Parent.Texture != null)
+                                pos2.Y -= ov.Parent.Texture.Height / 2;
 
-                            Rectangle next = new Rectangle((int) pos2.X - ov.Bounds.X, (int) pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
+                            Rectangle next = new Rectangle((int)pos2.X - ov.Bounds.X, (int)pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
 
                             overhead.IsOverlapped = current.Intersects(next);
 
@@ -125,6 +134,11 @@ namespace ClassicUO.Game.Managers
                         skip--;
 
                     overhead.Draw(batcher, position, list);
+
+                 
+
+                    //batcher.DrawRectangle(_edge, current, Vector3.Zero);
+
                 }
 
 
@@ -145,6 +159,9 @@ namespace ClassicUO.Game.Managers
 
             }
         }
+
+        //private Texture2D _edge;
+
 
         public void AddOverhead(TextOverhead overhead)
         {
