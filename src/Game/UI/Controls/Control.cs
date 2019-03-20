@@ -872,10 +872,12 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            for (int i = 0; i < Children.Count; i++)
+            for (int i = 0; i < _children.Count; i++)
             {
-                Control c = Children[i];
+                Control c = _children[i];
                 c.Dispose();
+
+                _children.RemoveAt(i--);
             }
 
             IsDisposed = true;
