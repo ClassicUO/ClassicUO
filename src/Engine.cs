@@ -177,7 +177,7 @@ namespace ClassicUO
             }
         }
 
-        public static Version Version { get; } = new Version(0, 0, 1, 3);
+        public static Version Version { get; } = new Version(0, 0, 1, 4);
 
         public static int CurrentFPS { get; private set; }
 
