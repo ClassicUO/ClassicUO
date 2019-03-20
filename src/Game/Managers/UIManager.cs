@@ -671,9 +671,10 @@ namespace ClassicUO.Game.Managers
                     g.Draw(batcher, g.Location);
             }
 
-            batcher.End();
 
             GameCursor?.Draw(batcher);
+
+            batcher.End();
         }
 
         public void Add(Control gump)
