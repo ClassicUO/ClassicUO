@@ -30,10 +30,8 @@ namespace ClassicUO.IO
     /// <summary>
     /// A fast Little Endian data reader.
     /// </summary>
-    [SecurityCritical]
     internal unsafe class DataReader
     {
-        [SecurityCritical]
         private byte* _data;
 
         internal long Position { get; set; }
@@ -45,6 +43,7 @@ namespace ClassicUO.IO
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
         private GCHandle _handle;
+
 
         public void ReleaseData()
         {
