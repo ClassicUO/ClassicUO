@@ -392,7 +392,7 @@ namespace ClassicUO
             ExePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if !DEBUG
-            AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 string msg = e.ExceptionObject.ToString();
                 Log.Message(LogTypes.Panic, msg);
@@ -402,7 +402,7 @@ namespace ClassicUO
                     Directory.CreateDirectory(path);
 
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
-                    await crashfile.WriteAsync(msg);
+                    crashfile.WriteAsync(msg).RunSynchronously();
             };
 #endif
             // We can use the mono's dllmap feature, but 99% of people use VS to compile.
