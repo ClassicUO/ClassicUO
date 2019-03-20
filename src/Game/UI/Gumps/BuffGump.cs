@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -323,12 +324,22 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
             }
 
+            private float _updateTooltipTime;
+
             public override void Update(double totalMS, double frameMS)
             {
                 base.Update(totalMS, frameMS);
 
                 Texture.Ticks = (long) totalMS;
                 int delta = (int) (_timer - totalMS);
+
+
+                if (_updateTooltipTime < totalMS && delta > 0)
+                {
+                    TimeSpan span = TimeSpan.FromMilliseconds(delta);
+                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}");
+                    _updateTooltipTime = (float) totalMS + 1000;
+                }
 
                 if (_timer != 0xFFFF_FFFF && delta < 10000)
                 {
