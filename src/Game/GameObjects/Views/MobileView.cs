@@ -162,7 +162,8 @@ namespace ClassicUO.Game.GameObjects
                     drawX = -22 - (int)Offset.X;
 
 
-                DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                if (IsHuman)
+                    DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
 
 
                 int x = drawX + frame.CenterX;

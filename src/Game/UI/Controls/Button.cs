@@ -165,13 +165,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
+            if (IsDisposed)
+                return;
+
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
                     _textures[i].Ticks = Engine.Ticks;
             }
-
-            base.Update(totalMS, frameMS);
         }
 
         private bool _entered;
