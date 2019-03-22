@@ -77,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = (AnimDataFrame.FrameInterval > 0 ?  AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+            Speed = (AnimDataFrame.FrameInterval != 0 ?  AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
                     Dispose();
                 else if (LastChangeFrameTime < totalMS)
                 {
-                    if (AnimDataFrame.FrameCount > 0)
+                    if (AnimDataFrame.FrameCount != 0)
                     { 
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;

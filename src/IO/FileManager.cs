@@ -135,66 +135,6 @@ namespace ClassicUO.IO
             Profession = new ProfessionLoader();
             Profession.Load();
 
-            if (Verdata.File != null)
-            {
-                Log.Message(LogTypes.Trace, "Patching...");
-
-                unsafe
-                {
-                    //int dataCount = Verdata.File.StartAddress;
-
-                    //long address = (long) Verdata.File.StartAddress;
-
-                    //for (int i = 0; i < dataCount; i++)
-                    //{
-                    //    var vh = Verdata.Patches[i];
-
-                    //    if (vh.FileID == 0)
-                    //    {
-                    //        Map.PatchMapBlock((ulong)vh.BlockID, (ulong) (address + vh.Position));
-                    //    }
-                    //    else if (vh.FileID == 4)
-                    //    {
-                    //        if (vh.BlockID >= Constants.MAX_LAND_DATA_INDEX_COUNT)
-                    //        {
-                    //            ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
-                                
-                    //        }
-                    //        else
-                    //        {
-                                
-                    //        }
-                    //    }
-                    //    else if (vh.FileID == 12)
-                    //    {
-
-                    //    }
-                    //    else if (vh.FileID == 14 && vh.BlockID < Multi.Count)
-                    //    {
-
-                    //    }
-                    //    else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
-                    //    {
-
-                    //    }
-                    //    else if (vh.FileID == 30)
-                    //    {
-
-                    //    }
-                    //    else if (vh.FileID == 32)
-                    //    {
-
-                    //    }
-                    //    else if (vh.FileID != 5 && vh.FileID != 6)
-                    //    {
-
-                    //    }
-                    //}
-                }
-
-                Log.Message(LogTypes.Trace, "Patched!");
-            }
-
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
         }

@@ -28,7 +28,7 @@ namespace ClassicUO.Game.GameObjects
             Graphic = 0x4E20;
             Hue = hue;
             IsEnabled = true;
-            Speed = 50;
+            Speed = Constants.ITEM_EFFECT_ANIMATION_DELAY;
             AnimIndex = 0;
         }
 
