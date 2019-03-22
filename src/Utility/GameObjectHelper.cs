@@ -34,9 +34,9 @@ namespace ClassicUO.Utility
                 case Multi multi:
                     itemdata = multi.ItemData;
                     return true;
-                //case AnimatedItemEffect ef when ef.Source is Static s:
-                //    itemdata = s.ItemData;
-                //    return true;
+                case AnimatedItemEffect ef when ef.Source is Static s:
+                    itemdata = s.ItemData;
+                    return true;
                 default:
                     itemdata = default;
                     return false;
