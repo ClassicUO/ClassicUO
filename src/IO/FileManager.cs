@@ -82,6 +82,8 @@ namespace ClassicUO.IO
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            //new AnimationsLoader2().Load();
+
             Animations = new AnimationsLoader();
             Animations.Load();
 

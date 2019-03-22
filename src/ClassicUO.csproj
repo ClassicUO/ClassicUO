@@ -226,6 +226,7 @@
     <Compile Include="IO\DefReader.cs" />
     <Compile Include="IO\ResourceLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
+    <Compile Include="IO\Resources\AnimationsLoader2.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />
     <Compile Include="IO\Resources\ArtLoader.cs" />
     <Compile Include="IO\Resources\ClilocLoader.cs" />
