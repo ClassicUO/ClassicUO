@@ -756,6 +756,10 @@ namespace ClassicUO.Game.GameObjects
             _buffIcons[graphic] = new BuffIcon(graphic, time, text);
         }
 
+
+        public bool IsBuffIconExists(Graphic graphic)
+            => _buffIcons.ContainsKey(graphic);
+
         public void RemoveBuff(Graphic graphic)
         {
             _buffIcons.Remove(graphic);

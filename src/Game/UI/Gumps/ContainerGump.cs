@@ -205,6 +205,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
 
+                if (_item != null && World.Player != null && _item.Serial == World.Player.Equipment[(int) Layer.Backpack])
+                {
+                    Engine.UI.SavePosition(_item, Location);
+                }
+
                 foreach (Item child in _item.Items)
                 {
                     if (child.Container == _item)
