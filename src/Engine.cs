@@ -22,12 +22,15 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -45,8 +48,12 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
+using Ionic.Zip;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using Octokit;
 
 using SDL2;
 
@@ -152,6 +159,8 @@ namespace ClassicUO
             };
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
+
+            Window.Title = $"ClassicUO - {Version}";
         }
 
         public static Batcher2D Batcher => _engine._batcher;
@@ -178,7 +187,7 @@ namespace ClassicUO
             }
         }
 
-        public static Version Version { get; } = new Version(0, 0, 1, 4);
+        public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
 
@@ -272,12 +281,104 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             Configure();
-                      
+
+            /* if (CheckUpdate(args))
+                return; */
+
             using (_engine = new Engine(ArgsParser(args)))
             {
                 if (!_engine.IsQuitted)
+                {
                     _engine.Run();
+                }
             }
+        }
+
+
+        private static bool CheckUpdate(string[] args)
+        {
+            string path = string.Empty;
+            string action = string.Empty;
+            int pid = -1;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "--source" && i < args.Length - 1)
+                {
+                    path = args[i + 1];
+                }
+                else if (args[i] == "--action" && i < args.Length - 1)
+                {
+                    action = args[i + 1];
+                }
+                else if (args[i] == "--pid" && i < args.Length - 1)
+                {
+                    pid = int.Parse(args[i + 1]);
+                }
+            }
+
+            if (action == "update")
+            {
+                Log.Message(LogTypes.Trace, "ClassicUO Updating...", ConsoleColor.Yellow);
+
+                try
+                {
+                    Process proc = Process.GetProcessById(pid);
+                    proc.Kill();
+                    proc.WaitForExit(5000);
+                }
+                catch
+                {
+
+                }
+              
+                File.SetAttributes(Path.GetDirectoryName(path), FileAttributes.Normal);
+              
+                foreach (string file in Directory.EnumerateFiles(ExePath, "*", SearchOption.AllDirectories))
+                {
+                    string sub = Path.Combine(file, file.Replace(ExePath, path));
+                    File.Copy(file, sub, true);
+                    Console.WriteLine("COPIED {0} over {1}", file, sub);
+                }
+
+                new Process
+                {
+                    StartInfo =
+                    {
+                        WorkingDirectory = path,
+                        FileName = Path.Combine(path, "ClassicUO.exe"),
+                        UseShellExecute = false,
+                        Arguments =
+                            $"--source \"{ExePath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup"
+                    }
+                }.Start();
+                return true;
+            }
+
+            if (action == "cleanup")
+            {
+                try
+                {
+                    Process.GetProcessById(pid);
+                    Thread.Sleep(1000);
+                    Process.GetProcessById(pid).Kill();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    Directory.Delete(path, true);
+                }
+                catch (Exception e)
+                {
+                }
+
+                Log.Message(LogTypes.Trace, "ClassicUO updated successful!", ConsoleColor.Green);
+            }
+
+            return false;
         }
 
         private static Settings ArgsParser(string[] args)
@@ -287,6 +388,7 @@ namespace ClassicUO
             if (args.Length > 1)
             {
                 settings = new Settings();
+                bool isValid = false;
 
                 for (int i = 0; i < args.Length - 1; i += 2)
                 {
@@ -304,11 +406,10 @@ namespace ClassicUO
                     {
                         case "uopath":
                             settings.UltimaOnlineDirectory = value;
-
+                            isValid = true;
                             break;
                         case "ip":
                             settings.IP = value;
-
                             break;
                         case "port":
                             settings.Port = ushort.Parse(value);
@@ -324,7 +425,7 @@ namespace ClassicUO
                             break;
                         case "clientversion":
                             settings.ClientVersion = value;
-
+                            isValid = true;
                             break;
                         case "lastcharname":
                             settings.LastCharacterName = value;
@@ -368,8 +469,10 @@ namespace ClassicUO
                             break;
 
                     }
-
                 }
+
+                if (!isValid)
+                    settings = null;
             }
 
             return settings;
@@ -605,7 +708,7 @@ namespace ClassicUO
             double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate + timeFixedUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
-            Window.Title = string.Format("ClassicUO - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS);
+            Window.Title = string.Format("ClassicUO {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
         }
 
         private void OnInputUpdate(double totalMS, double frameMS)

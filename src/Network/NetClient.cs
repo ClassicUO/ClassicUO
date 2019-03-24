@@ -105,7 +105,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                throw new AccessViolationException("Attempt to write into a dead socket");
+                Log.Message(LogTypes.Error, "Attempt to write into a dead socket");
             }
             
         }
