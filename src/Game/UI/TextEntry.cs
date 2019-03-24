@@ -160,6 +160,9 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text)
         {
+            if (text == null)
+                text = string.Empty;
+
             if (ValidationRules != 0)
             {
                 char[] ch = text.ToCharArray();
