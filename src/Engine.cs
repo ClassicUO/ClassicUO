@@ -43,6 +43,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Renderer.UI;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -495,6 +496,9 @@ namespace ClassicUO
             Plugin.Create(@".\Assistant\Razor.dll");
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
+
+
+            UoAssist.Start();
 
             base.Initialize();
         }

@@ -29,12 +29,12 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action> _commands = new Dictionary<string, Action>();
+        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
 
         public static void Initialize()
         {
-            Register("info", () =>
+            Register("info", (s) =>
             {
                 if (!TargetManager.IsTargeting)
                 {
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void Register(string name, Action callback)
+        public static void Register(string name, Action<string[]> callback)
         {
             name = name.ToLower();
 
@@ -68,13 +68,13 @@ namespace ClassicUO.Game.Managers
 
         public static void UnRegisterAll() => _commands.Clear();        
 
-        public static void Execute(string name)
+        public static void Execute(string name, params string[] args)
         {
             name = name.ToLower();
 
             if (_commands.TryGetValue(name, out var action))
             {
-                action.Invoke();
+                action.Invoke(args);
             }
             else
             {

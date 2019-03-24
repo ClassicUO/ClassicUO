@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
 
@@ -102,6 +103,8 @@ namespace ClassicUO.Game
                             Map.Center = new Point(Player.X, Player.Y);
                         Map.Initialize();
                     }
+
+                    UoAssist.SignalMapChanged(value);
                 }
             }
         }

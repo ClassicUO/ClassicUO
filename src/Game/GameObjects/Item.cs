@@ -29,6 +29,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -412,6 +413,8 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (WantUpdateMulti)
             {
+                UoAssist.SignalAddMulti( (ushort) (Graphic | 0x4000), Position);
+
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
                 {
                     LoadMulti();

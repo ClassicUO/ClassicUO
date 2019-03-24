@@ -36,6 +36,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+
+using ClassicUO.Utility.Platforms;
+
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
@@ -399,6 +402,14 @@ namespace ClassicUO.Network
             }
 
             mobile.ProcessDelta();
+
+
+            if (mobile == World.Player)
+            {
+                UoAssist.SignalHits();
+                UoAssist.SignalStamina();
+                UoAssist.SignalMana();
+            }
         }
 
         private static void FollowR(Packet p)
@@ -1069,6 +1080,13 @@ namespace ClassicUO.Network
             mobile.StaminaMax = p.ReadUShort();
             mobile.Stamina = p.ReadUShort();
             mobile.ProcessDelta();
+
+            if (mobile == World.Player)
+            {
+                UoAssist.SignalHits();
+                UoAssist.SignalStamina();
+                UoAssist.SignalMana();
+            }
         }
 
         private static void EquipItem(Packet p)
@@ -2133,6 +2151,11 @@ namespace ClassicUO.Network
             mobile.HitsMax = p.ReadUShort();
             mobile.Hits = p.ReadUShort();
             mobile.ProcessDelta();
+
+            if (mobile == World.Player)
+            {
+                UoAssist.SignalHits();
+            }
         }
 
         private static void UpdateMana(Packet p)
@@ -2143,6 +2166,11 @@ namespace ClassicUO.Network
             mobile.ManaMax = p.ReadUShort();
             mobile.Mana = p.ReadUShort();
             mobile.ProcessDelta();
+
+            if (mobile == World.Player)
+            {
+                UoAssist.SignalMana();
+            }
         }
 
         private static void UpdateStamina(Packet p)
@@ -2153,6 +2181,11 @@ namespace ClassicUO.Network
             mobile.StaminaMax = p.ReadUShort();
             mobile.Stamina = p.ReadUShort();
             mobile.ProcessDelta();
+
+            if (mobile == World.Player)
+            {
+                UoAssist.SignalStamina();
+            }
         }
 
         private static void OpenUrl(Packet p)

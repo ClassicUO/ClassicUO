@@ -38,6 +38,11 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
+    internal class TextOverheadContainer
+    {
+
+    }
+
     internal abstract partial class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.INVALID;

@@ -246,6 +246,7 @@
     <Compile Include="IO\UOFileUopNoFormat.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
+    <Compile Include="Utility\Platforms\UoAssist.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
     <Compile Include="Renderer\SpriteFont.cs" />

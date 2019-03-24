@@ -29,6 +29,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
 
@@ -48,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         Guild,
         Alliance,
         ClientCommand,
+        UOAMChat,
         Prompt
     }
 
@@ -147,6 +149,11 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     case ChatMode.ClientCommand:
                         AppendChatModePrefix("[Command]: ", 1161);
+
+                        break;
+                    case ChatMode.UOAMChat:
+                        DisposeChatModePrefix();
+                        AppendChatModePrefix("[UOAM]: ", 83);
 
                         break;
                 }
@@ -273,9 +280,14 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                     }
                 }
-                else if (textBox.Text.Length == 2 && textBox.Text[0] == ':' && textBox.Text[1] == ' ')
-                    Mode = ChatMode.Emote;
+                else if (textBox.Text.Length == 2)
+                {
+                    if (textBox.Text[0] == ':' && textBox.Text[1] == ' ')
+                        Mode = ChatMode.Emote;
+                }
             }
+            else if (Mode == ChatMode.ClientCommand && textBox.Text.Length == 1 && textBox.Text[0] == '-')
+                Mode = ChatMode.UOAMChat;
 
             if (Engine.Profile.Current.SpeechHue != textBox.Hue)
             {
@@ -433,6 +445,10 @@ namespace ClassicUO.Game.UI.Gumps
                     case ChatMode.ClientCommand:
                         CommandManager.Execute(text);
 
+                        break;
+
+                    case ChatMode.UOAMChat:
+                        UoAssist.SignalMessage(text);
                         break;
                 }
             }

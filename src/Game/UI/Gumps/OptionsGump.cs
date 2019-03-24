@@ -87,8 +87,6 @@ namespace ClassicUO.Game.UI.Gumps
         const int HEIGHT = 500;
 
         private ScrollAreaItem _windowSizeArea = new ScrollAreaItem();
-        private ScrollAreaItem _soundsArea = new ScrollAreaItem();
-        private ScrollAreaItem _volumeArea = new ScrollAreaItem();
 
         public OptionsGump() : base(0, 0)
         {
@@ -331,29 +329,39 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 2;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            _enableSounds = CreateCheckBox(rightArea, "Sounds", Engine.Profile.Current.EnableSound, 0, 0);
-            _enableSounds.MouseClick += (sender, e) =>
-            {
-                _soundsArea.IsVisible = (_enableSounds.IsChecked);
-            };
-
-            _soundsVolume = new HSliderBar(90, -15, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-
-            _soundsArea.Add(_soundsVolume);
-            rightArea.Add(_soundsArea);
-
-            _enableMusic = CreateCheckBox(rightArea, "Music", Engine.Profile.Current.EnableMusic, 0, 0);
-            _enableMusic.MouseClick += (sender, e) =>
-            {
-                _volumeArea.IsVisible = (_enableMusic.IsChecked);
-            };
-
-            _musicVolume = new HSliderBar(90, -15, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-
-            _volumeArea.Add(_musicVolume);
-            rightArea.Add(_volumeArea);
 
             ScrollAreaItem item = new ScrollAreaItem();
+
+            _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.EnableSound,
+            };
+            _enableSounds.ValueChanged += (sender, e) =>
+            {
+                _soundsVolume.IsVisible = _enableSounds.IsChecked;
+            };
+            item.Add(_enableSounds);
+            _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+
+            item.Add(_soundsVolume);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
+            _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.EnableMusic,
+            };
+            _enableMusic.ValueChanged += (sender, e) =>
+            {
+                _musicVolume.IsVisible = (_enableMusic.IsChecked);
+            };
+            item.Add(_enableMusic);
+
+            _musicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+
+            item.Add(_musicVolume);
+            rightArea.Add(item);
+
 
             _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
@@ -368,8 +376,8 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
 
-            _soundsArea.IsVisible = (_enableSounds.IsChecked);
-            _volumeArea.IsVisible = (_enableMusic.IsChecked);
+            _soundsVolume.IsVisible = _enableSounds.IsChecked;
+            _musicVolume.IsVisible = _enableMusic.IsChecked;
 
             Add(rightArea, PAGE);
         }
@@ -765,8 +773,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _footStepsSound.IsChecked = true;
                     _loginMusicVolume.Value = 100;
                     _loginMusic.IsChecked = true;
-                    _soundsArea.IsVisible = (_enableSounds.IsChecked);
-                    _volumeArea.IsVisible = (_enableMusic.IsChecked);
+                    _soundsVolume.IsVisible = _enableSounds.IsChecked;
+                    _musicVolume.IsVisible = _enableMusic.IsChecked;
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
