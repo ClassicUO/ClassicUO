@@ -109,6 +109,10 @@ namespace ClassicUO.Game.UI.Controls
         public void SetText(string text, bool append = false)
         {
             int oldidx = TxEntry.CaretIndex;
+
+            if (text == null)
+                text = string.Empty;
+
             TxEntry.SetText(text);
             TxEntry.SetCaretPosition(oldidx + text.Length);
         }
