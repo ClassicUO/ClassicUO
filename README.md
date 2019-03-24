@@ -9,7 +9,7 @@ An open source implementation of the Ultima Online Classic Client.
 [![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara)  
 #### Discord  
  <a href="https://discord.gg/VdyCpjQ">
-        <img src="https://img.shields.io/discord/308323056592486420.svg?logo=discord"
+        <img src="https://img.shields.io/discord/458277173208547350.svg?logo=discord"
             alt="chat on Discord"></a>     
             
 #### Current release
@@ -53,4 +53,4 @@ Everyone is welcome to contribute! The GitHub issues and project tracker are kep
 # Legal
 This work is released under the GPLv3 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of version 7.0.59.8 or earlier of the Ultima Online Classic Client.
 
-Ultima Online(R) © 2018 Electronic Arts Inc. All Rights Reserved.
+Ultima Online(R) © 2019 Electronic Arts Inc. All Rights Reserved.
