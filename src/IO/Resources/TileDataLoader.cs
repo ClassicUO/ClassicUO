@@ -13,8 +13,11 @@ namespace ClassicUO.IO.Resources
 {
     class TileDataLoader : ResourceLoader
     {
-        public LandTiles[] LandData { get; private set; }
-        public StaticTiles[] StaticData { get; private set; }
+        private static StaticTiles[] _staticData;
+        private static LandTiles[] _landData;
+
+        public ref readonly LandTiles[] LandData => ref _landData;
+        public ref readonly StaticTiles[] StaticData => ref _staticData;
 
         public override void Load()
         {
@@ -29,8 +32,8 @@ namespace ClassicUO.IO.Resources
             if (staticscount > 2048)
                 staticscount = 2048;
             tiledata.Seek(0);
-            LandData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            StaticData = new StaticTiles[staticscount * 32];
+            _landData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _staticData = new StaticTiles[staticscount * 32];
             byte[] bufferString = new byte[20];
 
             for (int i = 0; i < 512; i++)
@@ -299,8 +302,6 @@ namespace ClassicUO.IO.Resources
 
     internal readonly struct StaticTiles
     {
-        public static readonly StaticTiles Empty = default;
-
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
             Flags = (TileFlag)flags;

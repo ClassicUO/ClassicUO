@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Map
 
                 {
 
-                    ref StaticTiles data = ref FileManager.TileData.StaticData[obj.Graphic];
+                    ref readonly StaticTiles data = ref FileManager.TileData.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
                         priorityZ--;

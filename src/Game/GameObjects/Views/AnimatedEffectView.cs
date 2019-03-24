@@ -145,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
             Bounds.X = (Texture.Width >> 1) - 22 - (int)Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(Offset.Z - Offset.Y);
 
-            StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
+            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
