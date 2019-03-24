@@ -80,10 +80,10 @@ namespace ClassicUO.Game.Data
                 0x4D, new ContainerData(0x004D, 0x002F, 0x002E, 76, 12, 140, 68)
             },
             {
-                0x4E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 96, 140, 152)
+                0x4E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 18, 100, 152)
             },
             {
-                0x4F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 96, 140, 152)
+                0x4F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 18, 100, 152)
             },
             {
                 0x51, new ContainerData(0x0051, 0x002F, 0x002E, 16, 10, 154, 94)
