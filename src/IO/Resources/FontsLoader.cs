@@ -945,15 +945,15 @@ namespace ClassicUO.IO.Resources
                 return null;
             int len = str.Length;
 
-            if (len <= 0)
+            if (len == 0)
                 return null;
             int oldWidth = width;
 
-            if (width <= 0)
+            if (width == 0)
             {
                 width = GetWidthUnicode(font, str);
 
-                if (width <= 0)
+                if (width == 0)
                     return null;
             }
 
@@ -998,7 +998,7 @@ namespace ClassicUO.IO.Resources
             width += 4;
             int height = GetHeightUnicode(info);
 
-            if (height <= 0)
+            if (height == 0)
             {
                 while (info != null)
                 {
@@ -1050,7 +1050,7 @@ namespace ClassicUO.IO.Resources
                     case TEXT_ALIGN_TYPE.TS_CENTER:
 
                     {
-                        w += ((width - ptr.Width) >> 1);
+                        w += ((width - ptr.Width) / 2);
 
                         if (w < 0)
                             w = 0;
