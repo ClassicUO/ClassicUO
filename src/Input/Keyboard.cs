@@ -30,7 +30,6 @@ namespace ClassicUO.Input
         public static bool Ctrl { get; private set; }
 
 
-        public static bool IgnoreNextTextInput { get; set; }
 
 
         private static void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
