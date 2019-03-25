@@ -1668,7 +1668,7 @@ namespace ClassicUO.IO.Resources
             if (animDir.Address + startAddress >= startAddress + file.Length)
             {
                 animDir = DataIndex[DataIndex[AnimID].Graphic].Groups[AnimGroup].Direction[Direction];
-                startAddress = (long) _files[animDir.FileIndex].StartAddress;
+                file = _files[animDir.FileIndex];
             }
 
             file.Seek(animDir.Address);
