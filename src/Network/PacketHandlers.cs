@@ -875,17 +875,8 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-
-                    if (!Engine.UI.GetGumpCachePosition(item, out Point location))
-                    {
-                        location = new Point(64, 64);
-                    }
-
                     Engine.UI.GetByLocalSerial<ContainerGump>(serial)?.Dispose();
-                    Engine.UI.Add(new ContainerGump(item, graphic)
-                    {
-                        Location = location
-                    });
+                    Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
 

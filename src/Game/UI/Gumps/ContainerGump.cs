@@ -85,9 +85,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gg == null)
             {
-                ContainerManager.CalculateContainerPosition(g);
-                X = ContainerManager.X;
-                Y = ContainerManager.Y;
+                if (Engine.UI.GetGumpCachePosition(LocalSerial, out Point location) && _item.Serial == World.Player.Equipment[(int) Layer.Backpack])
+                {
+                    Location = location;
+                }
+                else
+                {
+                    ContainerManager.CalculateContainerPosition(g);
+                    X = ContainerManager.X;
+                    Y = ContainerManager.Y;
+                }
             }
             else
             {
