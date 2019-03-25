@@ -100,7 +100,11 @@ namespace ClassicUO.Game
 
         public static Serial Parse(string str)
         {
-            if (str.StartsWith("0x")) return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            if (str.StartsWith("0x"))
+                return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+
+            if (str.Length > 1 && str[0] == '-')
+                return (uint) int.Parse(str);
 
             return uint.Parse(str);
         }
