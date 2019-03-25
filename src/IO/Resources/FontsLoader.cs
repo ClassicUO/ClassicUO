@@ -1404,8 +1404,9 @@ namespace ClassicUO.IO.Resources
 
                     for (int x = 0; x < width; x++)
                     {
-                        if (pData[yPos + x] <= 0)
-                            pData[yPos + x] = HuesHelper.RgbaToArgb(_backgroundColor);
+                        ref uint p = ref pData[yPos + x];
+                        if (p == 0)
+                            p = HuesHelper.RgbaToArgb(_backgroundColor);
                     }
                 }
             }
@@ -1423,7 +1424,7 @@ namespace ClassicUO.IO.Resources
         {
             HTMLChar[] htmlData = GetHTMLData(font, str, ref len, align, flags);
 
-            if (htmlData.Length <= 0)
+            if (htmlData.Length == 0)
                 return null;
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
@@ -1684,6 +1685,7 @@ namespace ClassicUO.IO.Resources
                                 si = (char)0;
 
                             break;
+                        case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
                         case HTML_TAG_TYPE.HTT_BR:
                         case HTML_TAG_TYPE.HTT_BQ:
                             si = '\n';
@@ -1823,8 +1825,7 @@ namespace ClassicUO.IO.Resources
             if (j != i && i < len)
             {
                 int cmdLen = i - j;
-                string cmd = str.Substring(j, cmdLen);
-                cmd = cmd.ToLower();
+                string cmd = str.Substring(j, cmdLen).ToLower();
                 j = i;
 
                 while (str[i] != '>' && i < len)
@@ -1920,7 +1921,7 @@ namespace ClassicUO.IO.Resources
 
                         if (str.Contains("bodybgcolor"))
                         {
-                            tag = HTML_TAG_TYPE.HTT_BODY;
+                            tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
                             j = str.IndexOf("bgcolor", StringComparison.Ordinal);
                         }
                         else
@@ -1937,6 +1938,8 @@ namespace ClassicUO.IO.Resources
                     {
                         switch (tag)
                         {
+                            case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
+
                             case HTML_TAG_TYPE.HTT_BODY:
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
@@ -1946,6 +1949,9 @@ namespace ClassicUO.IO.Resources
 
                                 if (content.Length != 0)
                                     GetHTMLInfoFromContent(ref info, content);
+
+                                //if (tag == HTML_TAG_TYPE.HTT_BODYBGCOLOR)
+                                //    i = 1;
 
                                 break;
                         }
@@ -1977,6 +1983,7 @@ namespace ClassicUO.IO.Resources
 
                 switch (info.Tag)
                 {
+                    case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
                     case HTML_TAG_TYPE.HTT_BODY:
 
                         switch (str)
@@ -2662,7 +2669,9 @@ namespace ClassicUO.IO.Resources
         HTT_LEFT,
         HTT_CENTER,
         HTT_RIGHT,
-        HTT_DIV
+        HTT_DIV,
+
+        HTT_BODYBGCOLOR,
     }
 
     [StructLayout(LayoutKind.Sequential)]
