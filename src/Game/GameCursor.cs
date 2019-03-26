@@ -409,7 +409,7 @@ namespace ClassicUO.Game
             return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }
 
-        private static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)
+        public static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)
         {
             int shiftX = to_x - x1;
             int shiftY = to_y - y1;

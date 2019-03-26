@@ -5,22 +5,20 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
 	internal class QuestArrowGump : Gump
 	{
-		private static double[] _offsetTableX = new[] { -0.5, -0.75, -0.5, 0.0, 0.5, 0.75, 0.5, 0.0 };
-		private static double[] _offsetTableY = new[] { 0.5, 0.0, -0.5, -0.75, -0.5, 0.0, 0.5, 0.75 };
-
 		private int _mx;
 		private int _my;
-
 		private Direction _direction;
-
 		private GumpPic _arrow;
-		private Rectangle _arrowBounds;
+	    private float _timer;
+	    private bool _needHue;
 
 		public QuestArrowGump(Serial serial, int mx, int my) : base(serial, serial)
 		{
@@ -29,26 +27,14 @@ namespace ClassicUO.Game.UI.Gumps
 			
 			AcceptMouseInput = true;
 
-			_mx = mx;
-			_my = my;
+			SetRelativePosition(mx, my);
 		}
 
-		private void UpdateArrow(Direction direction)
-		{
-			_direction = direction;
-
-			if (_arrow != null)
-				Remove(_arrow);
-
-			var graphic = (uint)0x1194;
-
-			if (_direction >= Direction.North && _direction <= Direction.West)
-				graphic = 0x1195 + (uint)_direction;
-
-			_arrowBounds = FileManager.Gumps.GetTexture(graphic).Bounds;
-
-			Add(_arrow = new GumpPic(0, 0, (Graphic)graphic, 0));
-		}
+	    public void SetRelativePosition(int x, int y)
+	    {
+	        _mx = x;
+	        _my = y;
+	    }
 
 		public override void Update(double totalMS, double frameMS)
 		{
@@ -62,53 +48,51 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-			var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+		    Direction dir = (Direction)GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
+		    ushort gumpID = (ushort)(0x1194 + (((int)dir + 1) % 8));
 
-			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
-			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;
-			int screenRight = screenLeft + Engine.Profile.Current.GameWindowSize.X;
-			int screenBottom = screenTop + Engine.Profile.Current.GameWindowSize.Y;
+		    if (_direction != dir || _arrow == null)
+		    {
+		        _direction = dir;
 
-			
+		        if (_arrow == null)
+		        {
+		            Add(_arrow = new GumpPic(0, 0, gumpID, 0));
+		        }
+		        else
+		            _arrow.Graphic = gumpID;
+		    }
 
-			var screenCenterX = ((screenRight - screenLeft) / 2);
-			var screenCenterY = ((screenBottom - screenTop) / 2);
+		    int gox = _mx - World.Player.X;
+		    int goy = _my - World.Player.Y;
 
-			var offsetX = ((_mx - World.Player.X) / scale);
-			var offsetY = ((_my - World.Player.Y) / scale);
-			var offsetZ = World.Map.GetTileZ(_mx, _my) / scale;
+		    int x = (Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X / 2) + (((gox - goy) * 22) - (_arrow.Width / 1));
+		    int y = (Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y / 2) + (((gox + goy) * 22) + (_arrow.Height * 2));
 
-			int relativeX = (int)((screenCenterX + (offsetX - offsetY) * 22));
-			int relativeY = (int)((screenCenterY + (offsetX + offsetY) * 22));
+		    if (x < Engine.Profile.Current.GameWindowPosition.X)
+		        x = Engine.Profile.Current.GameWindowPosition.X;
+		    else if (x > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width)
+		        x = Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width;
 
-			var direction = DirectionHelper.DirectionFromPoints(
-				new Point(screenCenterX, screenCenterY),
-				new Point(relativeX, relativeY));
 
-			int drawX = screenLeft + relativeX;
-			int drawY = screenTop + relativeY;
+		    if (y < Engine.Profile.Current.GameWindowPosition.Y)
+		        y = Engine.Profile.Current.GameWindowPosition.Y;
+		    else if (y > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height)
+		        y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height;
+		    var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+            X = (int) (x / scale);
+		    Y = (int) (y / scale);
 
-			if (_direction != direction || _arrow == null)
-				UpdateArrow(direction);
+		    if (_timer < Engine.Ticks)
+		    {
+		        _timer = Engine.Ticks + 1000;
+		        _needHue = !_needHue;
+		    }
 
-			var arrowWidth = _arrowBounds.Width;
-			var arrowHeight = _arrowBounds.Height;
-
-			drawX += (int)((_offsetTableX[(int)direction] * (arrowWidth + 22)) - (arrowWidth / 2));
-			drawY += (int)((_offsetTableY[(int)direction] * (arrowHeight + 22)) - (arrowHeight / 2));
-			drawY -= (int)(offsetZ * 3);
-
-			if (drawX < screenLeft) drawX = screenLeft;
-			if (drawY < screenTop) drawY = screenTop;
-
-			if (drawX + arrowWidth > screenRight) drawX = (screenRight - arrowWidth);
-			if (drawY + arrowHeight > screenBottom) drawY = (screenBottom - arrowHeight);
-
-			X = drawX;
-			Y = drawY;
+		    _arrow.Hue = (Hue) (_needHue ? 0 : 0x21);
 		}
 
-		protected override void OnMouseClick(int x, int y, MouseButton button)
+	    protected override void OnMouseClick(int x, int y, MouseButton button)
 		{
 			var leftClick = button == MouseButton.Left;
 			var rightClick = button == MouseButton.Right;

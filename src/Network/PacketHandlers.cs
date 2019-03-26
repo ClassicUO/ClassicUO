@@ -2414,10 +2414,19 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 serial = p.ReadUInt();
 
-            ui.GetByLocalSerial<QuestArrowGump>(serial)?.Dispose();
+            var arrow = ui.GetByLocalSerial<QuestArrowGump>(serial);
 
             if (display)
-                ui.Add(new QuestArrowGump(serial, mx, my));
+            {
+                if (arrow == null)
+                    ui.Add(new QuestArrowGump(serial, mx, my));
+                else
+                {
+                   arrow.SetRelativePosition(mx, my);
+                }
+            }
+            else
+                arrow.Dispose();
         }
 
         private static void UltimaMessengerR(Packet p)
