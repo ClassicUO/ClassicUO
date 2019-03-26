@@ -460,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(_windowSizeArea);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
-            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling (Alt + Scroll)", Engine.Profile.Current.EnableScaleZoom, 0, 0);
+            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling (Ctrl + Scroll)", Engine.Profile.Current.EnableScaleZoom, 0, 0);
             _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
            
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
