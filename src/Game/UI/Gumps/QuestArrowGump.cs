@@ -100,5 +100,12 @@ namespace ClassicUO.Game.UI.Gumps
 			if (leftClick || rightClick)
 				GameActions.QuestArrow(rightClick);
 		}
+
+	    protected override bool Contains(int x, int y)
+	    {
+	        if (_arrow == null)
+	            return true;
+	        return _arrow.Texture.Contains(x, y);
+	    }
 	}
 }
