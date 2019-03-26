@@ -179,7 +179,7 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump.MouseOver += OnMouseMove;
             _viewPortGump.MouseWheel += (sender, e) =>
             {
-                if (!Engine.Profile.Current.EnableScaleZoom)
+                if (!Engine.Profile.Current.EnableScaleZoom || !Input.Keyboard.Alt)
                     return;
 
                 if (e.Direction == MouseEvent.WheelScrollDown)
