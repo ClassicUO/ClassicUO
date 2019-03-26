@@ -269,7 +269,13 @@ namespace ClassicUO.Game.Scenes
             }
 
             Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
-            NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port);
+
+            if (! NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port))
+            {
+                PopupMessage = "Check your internet connection and try again";
+                Log.Message(LogTypes.Error, "No Internet Access");
+            }
+
             CurrentLoginStep = LoginStep.Connecting;
         }
 
