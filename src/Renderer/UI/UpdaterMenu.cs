@@ -11,11 +11,9 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
-using Ionic.Zip;
 
 using Microsoft.Xna.Framework;
 
-using Octokit;
 
 namespace ClassicUO.Renderer.UI
 {
@@ -55,57 +53,61 @@ namespace ClassicUO.Renderer.UI
 
         private static async void DoUpdate()
         {
-            try
-            {
-                Interlocked.Increment(ref _isUpdating);
+            //try
+            //{
+            //    Interlocked.Increment(ref _isUpdating);
 
-                Log.Message(LogTypes.Trace, "Checking update...");
+            //    Log.Message(LogTypes.Trace, "Checking update...");
 
-                GitHubClient client = new GitHubClient(new ProductHeaderValue("ClassicUO"), new Uri("https://github.com/andreakarasho/ClassicUO"));
-                var releases = await client.Repository.Release.GetAll("andreakarasho", "ClassicUO");
+            //    GitHubClient client = new GitHubClient(new ProductHeaderValue("ClassicUO"), new Uri("https://github.com/andreakarasho/ClassicUO"));
+            //    var releases = await client.Repository.Release.GetAll("andreakarasho", "ClassicUO");
 
-                foreach (Release release in releases)
-                {
-                    if (Version.TryParse(release.TagName, out Version version) && version > Engine.Version)
-                    {
-                        Log.Message(LogTypes.Trace, "Found new version available: " + version);
+            //    foreach (Release release in releases)
+            //    {
+            //        if (Version.TryParse(release.TagName, out Version version) && version > Engine.Version)
+            //        {
+            //            Log.Message(LogTypes.Trace, "Found new version available: " + version);
 
-                        ReleaseAsset zip = release.Assets.FirstOrDefault();
-                        if (zip == null)
-                            continue;
+            //            ReleaseAsset zip = release.Assets.FirstOrDefault();
 
-                        Log.Message(LogTypes.Trace, "Downloading: " + zip.Url);
+            //            if (zip == null)
+            //            {
+            //                Log.Message(LogTypes.Error, "No zip found for: " + release.Name);
+            //                continue;
+            //            }
 
-                        var response = await client.Connection.Get<object>(new Uri(zip.Url), new Dictionary<string, string>(), "application/octet-stream");
+            //            Log.Message(LogTypes.Trace, "Downloading: " + zip.Url);
 
-                        string tempPath = Path.Combine(Engine.ExePath, "update-temp");
+            //            var response = await client.Connection.Get<object>(new Uri(zip.Url), new Dictionary<string, string>(), "application/octet-stream");
 
-                        if (!Directory.Exists(tempPath))
-                            Directory.CreateDirectory(tempPath);
+            //            string tempPath = Path.Combine(Engine.ExePath, "update-temp");
 
-                        Log.Message(LogTypes.Trace, "Exctracting zip...");
+            //            if (!Directory.Exists(tempPath))
+            //                Directory.CreateDirectory(tempPath);
 
-                        using (ZipFile file = ZipFile.Read(new MemoryStream((byte[])response.Body)))
-                            file.ExtractAll(tempPath, ExtractExistingFileAction.OverwriteSilently);
+            //            Log.Message(LogTypes.Trace, "Exctracting zip...");
 
-                        Log.Message(LogTypes.Trace, "Start replacing...");
+            //            using (ZipFile file = ZipFile.Read(new MemoryStream((byte[])response.Body)))
+            //                file.ExtractAll(tempPath, ExtractExistingFileAction.OverwriteSilently);
 
-                        Process currentProcess = Process.GetCurrentProcess();
-                        Process.Start(Path.Combine(tempPath, "ClassicUO.exe"), $"--source {Engine.ExePath} --pid {currentProcess.Id} --action update");
-                        currentProcess.Kill();
+            //            Log.Message(LogTypes.Trace, "Start replacing...");
 
-                        break;
-                    }
-                }
+            //            Process currentProcess = Process.GetCurrentProcess();
+            //            Process.Start(Path.Combine(tempPath, "ClassicUO.exe"), $"--source {Engine.ExePath} --pid {currentProcess.Id} --action update");
+            //            currentProcess.Kill();
 
-                Log.Message(LogTypes.Trace, "No update available.");
+            //            break;
+            //        }
+            //    }
 
-                Interlocked.Decrement(ref _isUpdating);
-            }
-            catch
-            {
+            //    Log.Message(LogTypes.Trace, "No update available.");
 
-            }
+            //    Interlocked.Decrement(ref _isUpdating);
+            //}
+            //catch (Exception e)
+            //{
+            //    Log.Message(LogTypes.Panic, "UPDATE EXCEPTION: " + e);
+            //}
         }
     }
 }

@@ -79,6 +79,9 @@ namespace ClassicUO.Configuration
         public int ShardType { get; set; } = 0; // 0 = normal (no customization), 1 = old, 2 = outlands??
 
         [JsonProperty(PropertyName = "fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
+        
+        [JsonProperty(PropertyName = "plugins")]
+        public string[] Plugins { get; set; } = {@".\Assistant\Razor.dll"};
 
         public void Save()
         {

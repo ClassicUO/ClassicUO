@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.IO;
+
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -107,6 +109,19 @@ namespace ClassicUO.Game.UI.Gumps
         //        }
         //    }
         //}
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_background.SpecialHeight);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+            _background.Height = _background.SpecialHeight = reader.ReadInt32();
+        }
 
         private void InitializeJournalEntries()
         {

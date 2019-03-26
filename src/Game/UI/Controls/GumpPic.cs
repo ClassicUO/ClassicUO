@@ -87,6 +87,11 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Texture == null)
                 Dispose();
+            else
+            {
+                Width = Texture.Width;
+                Height = Texture.Height;
+            }
         }
 
         private static ushort TransformHue(ushort hue)

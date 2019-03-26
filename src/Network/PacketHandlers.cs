@@ -875,17 +875,8 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-
-                    if (!Engine.UI.GetGumpCachePosition(item, out Point location))
-                    {
-                        location = new Point(64, 64);
-                    }
-
                     Engine.UI.GetByLocalSerial<ContainerGump>(serial)?.Dispose();
-                    Engine.UI.Add(new ContainerGump(item, graphic)
-                    {
-                        Location = location
-                    });
+                    Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
 
@@ -2423,10 +2414,19 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 serial = p.ReadUInt();
 
-            ui.GetByLocalSerial<QuestArrowGump>(serial)?.Dispose();
+            var arrow = ui.GetByLocalSerial<QuestArrowGump>(serial);
 
             if (display)
-                ui.Add(new QuestArrowGump(serial, mx, my));
+            {
+                if (arrow == null)
+                    ui.Add(new QuestArrowGump(serial, mx, my));
+                else
+                {
+                   arrow.SetRelativePosition(mx, my);
+                }
+            }
+            else
+                arrow.Dispose();
         }
 
         private static void UltimaMessengerR(Packet p)
@@ -3184,15 +3184,8 @@ namespace ClassicUO.Network
                         wtf = "\n" + FileManager.Cliloc.GetString((int)wtfCliloc);
                     string text = $"<left>{title}{description}{wtf}</left>";
 
-                    if (World.Player.IsBuffIconExists(BuffTable.Table[iconID]))
-                    {
-                        World.Player.RemoveBuff(BuffTable.Table[iconID]);
-                        gump?.RemoveBuff(BuffTable.Table[iconID]);
-                    }
-
                     World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
-                    gump?.AddBuff(BuffTable.Table[iconID]);
-                    
+                    gump?.AddBuff(BuffTable.Table[iconID]);                   
                 }
                 else
                 {

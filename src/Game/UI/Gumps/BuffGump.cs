@@ -111,9 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void RemoveBuff(Graphic graphic)
         {
-            BuffControlEntry entry = Children.OfType<BuffControlEntry>().FirstOrDefault(s => s.Icon.Graphic == graphic);
-
-            if (entry != null)
+            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Graphic == graphic))  
             {
                 if (Height > _background.Texture.Height)
                 {
@@ -154,6 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             UpdateElements();
         }
+
 
         private void UpdateElements()
         {

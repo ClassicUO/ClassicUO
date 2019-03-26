@@ -110,12 +110,18 @@ namespace ClassicUO.Network
             
         }
 
-        public void Connect(string ip, ushort port)
+        public bool Connect(string ip, ushort port)
         {
             IsDisposed = _sending = false;
             IPAddress address = ResolveIP(ip);
+
+            if (address == null)
+                return false;
+
             IPEndPoint endpoint = new IPEndPoint(address, port);
             Connect(endpoint);
+
+            return true;
         }
 
         public void Connect(IPAddress address, ushort port)

@@ -66,6 +66,8 @@ namespace ClassicUO.Input
 
         public event EventHandler<string> TextInput;
 
+        private bool _ignoreNextTextInput;
+
         private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
         {
             SDL_Event* e = (SDL_Event*) ev;
@@ -123,11 +125,11 @@ namespace ClassicUO.Input
 
                     if (Plugin.ProcessHotkeys((int) e->key.keysym.sym, (int) e->key.keysym.mod, true))
                     {
-                        Keyboard.IgnoreNextTextInput = false;
+                        _ignoreNextTextInput = false;
                         KeyDown?.Raise(e->key);
                     }
                     else
-                        Keyboard.IgnoreNextTextInput = true;
+                        _ignoreNextTextInput = true;
 
                     break;
                 case SDL_EventType.SDL_KEYUP:
@@ -137,7 +139,7 @@ namespace ClassicUO.Input
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
 
-                    if (Keyboard.IgnoreNextTextInput)
+                    if (_ignoreNextTextInput)
                         break;
 
                     string s = StringHelper.ReadUTF8(e->text.text);

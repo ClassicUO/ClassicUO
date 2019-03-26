@@ -72,6 +72,12 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public int SpecialHeight
+        {
+            get => _expandableScrollHeight;
+            set => _expandableScrollHeight = value;
+        }
+
         protected override void OnInitialize()
         {
             Add(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
