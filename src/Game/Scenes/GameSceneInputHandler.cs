@@ -37,8 +37,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using System.Diagnostics;
-
 using Microsoft.Xna.Framework;
 
 using SDL2;

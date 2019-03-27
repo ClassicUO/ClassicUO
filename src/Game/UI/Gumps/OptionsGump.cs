@@ -59,12 +59,12 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom, _savezoom, _restorezoom, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
         private Combobox _shardType;
         private HSliderBar _lightBar;
 
-        private Checkbox _gameWindowLock;
-        private Checkbox _gameWindowFullsize;
+        private Checkbox _gameWindowLock, _gameWindowFullsize;
+        private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
 
         // GameWindowSize
         private TextBox _gameWindowWidth;
@@ -87,6 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
         const int HEIGHT = 500;
 
         private ScrollAreaItem _windowSizeArea = new ScrollAreaItem();
+        private ScrollAreaItem _zoomSizeArea = new ScrollAreaItem();
 
         public OptionsGump() : base(0, 0)
         {
@@ -388,6 +389,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
+
+
             ScrollAreaItem item = new ScrollAreaItem();
             _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
             {
@@ -459,12 +462,48 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_windowSizeArea);
 
+
+
+
+            item = new ScrollAreaItem();
+            _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT, true)
+            {
+                Y = 0,
+                IsChecked = Engine.Profile.Current.EnableScaleZoom
+            };
+            _zoomCheckbox.MouseClick += (sender, e) =>
+            {
+                _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
+            };
+
+            item.Add(_zoomCheckbox);
+            rightArea.Add(item);
+
+
+
+            _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after close game", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.SaveScaleAfterClose
+            };
+
+            _zoomSizeArea.Add(_savezoomCheckbox);
+
+            _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Restore scale after unpress Ctrl", FONT, HUE_FONT, true)
+            {
+                Y = 20,
+                IsChecked = Engine.Profile.Current.RestoreScaleAfterUnpressCtrl
+            };
+
+            _zoomSizeArea.Add(_restorezoomCheckbox);
+
+            rightArea.Add(_zoomSizeArea);
+
+
+
+
+
+
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
-
-            _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling (Ctrl + Scroll)", Engine.Profile.Current.EnableScaleZoom, 0, 0);
-            _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
-            _restorezoom = CreateCheckBox(rightArea, "Restore scale after unpress Ctrl", Engine.Profile.Current.RestoreScaleAfterUnpressCtrl, 0, 0);
-
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
@@ -496,6 +535,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
+            _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
 
             Add(rightArea, PAGE);
         }
@@ -780,9 +820,9 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case 3: // video
                     _debugControls.IsChecked = false;
-                    _zoom.IsChecked = false;
-                    _savezoom.IsChecked = false;
-                    _restorezoom.IsChecked = false;
+                    _zoomCheckbox.IsChecked = false;
+                    _savezoomCheckbox.IsChecked = false;
+                    _restorezoomCheckbox.IsChecked = false;
                     _shardType.SelectedIndex = 0;
                     _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
@@ -902,12 +942,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.GlobalSettings.Debug = _debugControls.IsChecked;
 
-            if (Engine.Profile.Current.EnableScaleZoom != _zoom.IsChecked)
+            if (Engine.Profile.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
             {
-                if (!_zoom.IsChecked)
+                if (!_zoomCheckbox.IsChecked)
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
 
-                Engine.Profile.Current.EnableScaleZoom = _zoom.IsChecked;
+                Engine.Profile.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
             }
 
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
@@ -977,22 +1017,22 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
-            if (_savezoom.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
+            if (_savezoomCheckbox.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
             {
-                if (!_savezoom.IsChecked)
+                if (!_savezoomCheckbox.IsChecked)
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
 
-                Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
+                Engine.Profile.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
             }
 
-            if (_restorezoom.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
+            if (_restorezoomCheckbox.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
             {
-                if (!_restorezoom.IsChecked)
+                if (!_restorezoomCheckbox.IsChecked)
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                 else
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom;
 
-                Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoom.IsChecked;
+                Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
             }
 
             Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
