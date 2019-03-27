@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _zoom, _savezoom, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
+        private Checkbox _debugControls, _zoom, _savezoom, _restorezoom, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
         private Combobox _shardType;
         private HSliderBar _lightBar;
 
@@ -460,9 +460,11 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(_windowSizeArea);
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
+
             _zoom = CreateCheckBox(rightArea, "Enable in game zoom scaling (Ctrl + Scroll)", Engine.Profile.Current.EnableScaleZoom, 0, 0);
             _savezoom = CreateCheckBox(rightArea, "Save scale after close game", Engine.Profile.Current.SaveScaleAfterClose, 0, 0);
-           
+            _restorezoom = CreateCheckBox(rightArea, "Restore scale after unpress Ctrl", Engine.Profile.Current.RestoreScaleAfterUnpressCtrl, 0, 0);
+
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
@@ -780,6 +782,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _debugControls.IsChecked = false;
                     _zoom.IsChecked = false;
                     _savezoom.IsChecked = false;
+                    _restorezoom.IsChecked = false;
                     _shardType.SelectedIndex = 0;
                     _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
@@ -979,6 +982,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.ScaleZoom = 1f;
 
                 Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
+            }
+
+            if (_restorezoom.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
+            {
+                if (!_restorezoom.IsChecked)
+                    Engine.Profile.Current.ScaleZoom = 1f;
+
+                Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoom.IsChecked;
             }
 
             Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
