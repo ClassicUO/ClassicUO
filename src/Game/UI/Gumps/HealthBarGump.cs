@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Attack(Mobile);
                     }
-                    else
+                    else if (button == MouseButton.Left)
                     {
                         GameActions.DoubleClick(Mobile);
                     }
