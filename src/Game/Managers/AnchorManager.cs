@@ -80,8 +80,20 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                this[control].DetachControl(control);
-                this[control] = null;
+                var group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
+                if (group.Count == 2) // if detach 1+1 - need destroy all group
+                {
+                    foreach (var ctrl in group)
+                    {
+                        this[ctrl].DetachControl(ctrl);
+                        this[ctrl] = null;
+                    }
+                }
+                else
+                {
+                    this[control].DetachControl(control);
+                    this[control] = null;
+                }
             }
         }
 
