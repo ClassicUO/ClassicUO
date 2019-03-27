@@ -515,7 +515,6 @@ namespace ClassicUO
             };
 #endif
 
-            throw  new Exception();
             // We can use the mono's dllmap feature, but 99% of people use VS to compile.
             if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
