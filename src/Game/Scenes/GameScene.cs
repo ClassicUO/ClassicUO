@@ -40,8 +40,6 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using System.Diagnostics;
-
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
@@ -202,7 +200,9 @@ namespace ClassicUO.Game.Scenes
             if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
                 Scale = 1f;
             else
-                Scale = (Engine.Profile.Current.RestoreScaleAfterUnpressCtrl) ? Engine.Profile.Current.RestoreScaleValue : Engine.Profile.Current.ScaleZoom;
+                Scale = Engine.Profile.Current.ScaleZoom;
+
+            Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = Scale;
 
             Plugin.OnConnected();
         }

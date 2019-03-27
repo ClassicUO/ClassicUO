@@ -34,8 +34,6 @@ using ClassicUO.Network;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
-using System.Diagnostics;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -388,120 +386,115 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 3;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollAreaItem item;
+            Label text;
 
-
-
-            ScrollAreaItem item = new ScrollAreaItem();
-            _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
+            // [BLOCK] game size
             {
-                Y = 20,
-                IsChecked = Engine.Profile.Current.GameWindowFullSize
-            };
-            _gameWindowFullsize.MouseClick += (sender, e) =>
+                item = new ScrollAreaItem();
+
+                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
+                {
+                    Y = 20,
+                    IsChecked = Engine.Profile.Current.GameWindowFullSize
+                };
+                _gameWindowFullsize.MouseClick += (sender, e) =>
+                {
+                    _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
+                };
+
+                item.Add(_gameWindowFullsize);
+                rightArea.Add(item);
+
+                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
+                {
+                    Y = 0,
+                    IsChecked = Engine.Profile.Current.GameWindowLock
+                };
+                _windowSizeArea.Add(_gameWindowLock);
+
+                _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                {
+                    Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
+                    X = 10,
+                    Y = 60,
+                    Width = 50,
+                    Height = 30,
+                    UNumericOnly = true
+                }, "Game Play Window Size: ");
+
+                _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                {
+                    Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
+                    X = 80,
+                    Y = 60,
+                    Width = 50,
+                    Height = 30,
+                    UNumericOnly = true
+                });
+
+                text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
+                {
+                    X = 190,
+                    Y = 30,
+                };
+                _windowSizeArea.Add(text);
+
+                _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                {
+                    Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
+                    X = 200,
+                    Y = 60,
+                    Width = 50,
+                    Height = 30,
+                    NumericOnly = true
+                });
+
+                _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                {
+                    Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
+                    X = 270,
+                    Y = 60,
+                    Width = 50,
+                    Height = 30,
+                    NumericOnly = true
+                });
+
+                rightArea.Add(_windowSizeArea);
+
+                item = new ScrollAreaItem();
+
+                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT, true)
+                {
+                    Y = 0,
+                    IsChecked = Engine.Profile.Current.EnableScaleZoom
+                };
+                _zoomCheckbox.MouseClick += (sender, e) =>
+                {
+                    _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
+                };
+
+                item.Add(_zoomCheckbox);
+                rightArea.Add(item);
+            }
+
+            // [BLOCK] scale
             {
-                _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
-            };
+                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after close game", FONT, HUE_FONT, true)
+                {
+                    IsChecked = Engine.Profile.Current.SaveScaleAfterClose
+                };
+                _zoomSizeArea.Add(_savezoomCheckbox);
 
-            item.Add(_gameWindowFullsize);
-            rightArea.Add(item);
+                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Restore scale after unpress Ctrl", FONT, HUE_FONT, true)
+                {
+                    Y = 20,
+                    IsChecked = Engine.Profile.Current.RestoreScaleAfterUnpressCtrl
+                };
+                _zoomSizeArea.Add(_restorezoomCheckbox);
 
-            _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
-            {
-                Y = 0,
-                IsChecked = Engine.Profile.Current.GameWindowLock
-            };
-
-            _windowSizeArea.Add(_gameWindowLock);
-
-            _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
-            {
-                Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
-                X = 10,
-                Y = 60,
-                Width = 50,
-                Height = 30,
-                UNumericOnly = true
-            }, "Game Play Window Size: ");
-
-            _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
-            {
-                Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
-                X = 80,
-                Y = 60,
-                Width = 50,
-                Height = 30,
-                UNumericOnly = true
-            });
-
-            Label text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
-            {
-                X = 190,
-                Y = 30,
-            };
-            _windowSizeArea.Add(text);
-
-            _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
-            {
-                Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
-                X = 200,
-                Y = 60,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true
-            });
-
-            _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
-            {
-                Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
-                X = 270,
-                Y = 60,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true
-            });
-
-            rightArea.Add(_windowSizeArea);
-
-
-
-
-            item = new ScrollAreaItem();
-            _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT, true)
-            {
-                Y = 0,
-                IsChecked = Engine.Profile.Current.EnableScaleZoom
-            };
-            _zoomCheckbox.MouseClick += (sender, e) =>
-            {
-                _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
-            };
-
-            item.Add(_zoomCheckbox);
-            rightArea.Add(item);
-
-
-
-            _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after close game", FONT, HUE_FONT, true)
-            {
-                IsChecked = Engine.Profile.Current.SaveScaleAfterClose
-            };
-
-            _zoomSizeArea.Add(_savezoomCheckbox);
-
-            _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Restore scale after unpress Ctrl", FONT, HUE_FONT, true)
-            {
-                Y = 20,
-                IsChecked = Engine.Profile.Current.RestoreScaleAfterUnpressCtrl
-            };
-
-            _zoomSizeArea.Add(_restorezoomCheckbox);
-
-            rightArea.Add(_zoomSizeArea);
-
-
-
-
-
+                rightArea.Add(_zoomSizeArea);
+            }
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
@@ -950,6 +943,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
             }
 
+            Engine.Profile.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
+
+            if (_restorezoomCheckbox.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
+            {
+                if (_restorezoomCheckbox.IsChecked)
+                    Engine.Profile.Current.RestoreScaleValue = Engine.SceneManager.GetScene<GameScene>().Scale;
+
+                Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
+            }
+
             if (Engine.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
                 var status = StatusGumpBase.GetStatusGump();
@@ -1015,24 +1018,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _gameWindowHeight.Text = n.Y.ToString();
 
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
-            }
-
-            if (_savezoomCheckbox.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
-            {
-                if (!_savezoomCheckbox.IsChecked)
-                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
-
-                Engine.Profile.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
-            }
-
-            if (_restorezoomCheckbox.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
-            {
-                if (!_restorezoomCheckbox.IsChecked)
-                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
-                else
-                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom;
-
-                Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
             }
 
             Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
