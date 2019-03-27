@@ -793,6 +793,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
@@ -979,7 +980,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_savezoom.IsChecked != Engine.Profile.Current.SaveScaleAfterClose)
             {
                 if (!_savezoom.IsChecked)
-                    Engine.Profile.Current.ScaleZoom = 1f;
+                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
 
                 Engine.Profile.Current.SaveScaleAfterClose = _savezoom.IsChecked;
             }
@@ -987,7 +988,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_restorezoom.IsChecked != Engine.Profile.Current.RestoreScaleAfterUnpressCtrl)
             {
                 if (!_restorezoom.IsChecked)
-                    Engine.Profile.Current.ScaleZoom = 1f;
+                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
+                else
+                    Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom;
 
                 Engine.Profile.Current.RestoreScaleAfterUnpressCtrl = _restorezoom.IsChecked;
             }

@@ -433,7 +433,7 @@ namespace ClassicUO.Game.Scenes
                 Engine.Profile.Current.RestoreScaleAfterUnpressCtrl 
                 && !isctrl)
             {
-                Engine.SceneManager.GetScene<GameScene>().Scale = 1f;
+                Engine.SceneManager.GetScene<GameScene>().Scale = Engine.Profile.Current.RestoreScaleValue;
             }
 
             _isShiftDown = isshift;
