@@ -199,7 +199,10 @@ namespace ClassicUO.Game.Scenes
 
             Chat.Message += ChatOnMessage;
 
-            Scale = (Engine.Profile.Current.SaveScaleAfterClose) ? Engine.Profile.Current.ScaleZoom : 1f;
+            if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
+                Scale = 1f;
+            else
+                Scale = (Engine.Profile.Current.RestoreScaleAfterUnpressCtrl) ? Engine.Profile.Current.RestoreScaleValue : Engine.Profile.Current.ScaleZoom;
 
             Plugin.OnConnected();
         }
