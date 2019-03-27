@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile.NotorietyFlag), 150, 3, FontStyle.Fixed)
+                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 150, 3, FontStyle.Fixed)
                     {
                         X = 0, Y = -2
                     });
@@ -202,6 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void Update()
         {
             Clear();
+            Mobile = World.Mobiles.Get(LocalSerial);
             BuildGump();
         }
 
