@@ -155,6 +155,7 @@
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
     <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
     <Compile Include="Game\UI\Gumps\AnchorableGump.cs" />
+    <Compile Include="Game\UI\Gumps\CounterBarGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
     <Compile Include="Game\UI\Gumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />

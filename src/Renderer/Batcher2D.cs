@@ -191,19 +191,14 @@ namespace ClassicUO.Renderer
             vertices[3].Position.Y -= skewHorizBottom;
             _textureInfo[_numSprites] = texture;
 
-            fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
-            {
-                fixed (SpriteVertex* t = &vertices[0])
-                {
-                    SpriteVertex* ptr0 = p;
-                    ptr0[0] = t[0];
-                    ptr0[1] = t[1];
-                    ptr0[2] = t[2];
-                    ptr0[3] = t[3];
-                }
-            }
+            int idx = _numSprites * 4;
+            for (int i = 0; i < 4; i++)
+                _vertexInfo[idx + i] = vertices[i];
 
             _numSprites++;
+
+
+            DrawSprite(texture, vertices);
         }
 
         public bool Draw2D(Texture2D texture, Point position, Vector3 hue)

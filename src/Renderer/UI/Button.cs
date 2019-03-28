@@ -24,6 +24,7 @@ namespace ClassicUO.Renderer.UI
         private StateType _state;
         private Vector2 _textSize;
         private string _text;
+        private bool _adaptSizeToText;
 
         public Button(int x, int y, int w, int h, string text) : this(text)
         {
@@ -41,6 +42,21 @@ namespace ClassicUO.Renderer.UI
             CanCloseWithRightClick = false;
         }
 
+        public bool AdaptSizeToText
+        {
+            get => _adaptSizeToText;
+            set
+            {
+                _adaptSizeToText = value;
+
+                if (_textSize != Vector2.Zero)
+                {
+                    Width = (int) (_textSize.X + 4);
+                    Height = (int) (_textSize.Y + 4);
+                }
+            }
+        }
+
         public string Text
         {
             get => _text;
@@ -48,6 +64,12 @@ namespace ClassicUO.Renderer.UI
             {
                 _text = value;
                 _textSize = Fonts.Regular.MeasureString(_text);
+
+                if (AdaptSizeToText)
+                {
+                    Width = (int)(_textSize.X + 4);
+                    Height = (int)(_textSize.Y + 4);
+                }
             }
         }
 

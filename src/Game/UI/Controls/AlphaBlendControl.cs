@@ -12,22 +12,15 @@ namespace ClassicUO.Game.UI.Controls
 {
     class AlphaBlendControl : Control
     {
-        private float _alpha;
-
-        internal void SetAlpha(float alpha)
-        {
-            _alpha = alpha;
-        }
-
         public AlphaBlendControl(float alpha = 0.5f)
         {
-            _alpha = alpha;
+            Alpha = alpha;
             AcceptMouseInput = false;
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, _alpha, false));
+            return batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, Alpha, false));
         }
     }
 }

@@ -13,6 +13,8 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
+    // may be useful: https://github.com/jeffboulanger/OpenUO/blob/master/OpenUO.Ultima.Paradox3d/Adapters/AnimationTextureStorageAdapter.cs
+
     internal readonly struct BodyConvInfo
     {
         public BodyConvInfo(ushort oldGraphic, ushort newGraphic, byte fileIndex, bool isUOP, ANIMATION_GROUPS_TYPE type, int offset)

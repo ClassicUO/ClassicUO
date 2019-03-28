@@ -109,6 +109,11 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		alpha = 1 - (color.r * 1.5f);
 		color.rgb = float3(0, 0, 0);
 	}
+	else if (mode == SHADOW)
+	{
+		//alpha = 0.5f;
+		color.rgba = float4(0.6f, 0.6f, 0.6f, 0.5f);
+	}
 
 	if (DrawLighting)
 		color.rgb *= lightIntensity;

@@ -37,7 +37,20 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 vec = ShaderHuesTraslator.GetHueVector(Hue, IsPartial, Alpha, false);
 
             if (ScaleTexture)
+            {
+                if (Texture is ArtTexture artTexture)
+                {
+                    var rect = new Rectangle(position.X, position.Y, Width, Height);
+
+                    if (artTexture.ImageRectangle.Width < Width)
+                        rect.Width = artTexture.ImageRectangle.Width;
+                    if (artTexture.ImageRectangle.Height < Height)
+                        rect.Height = artTexture.ImageRectangle.Height;
+
+                    return batcher.Draw2D(Texture, rect, artTexture.ImageRectangle, vec);
+                }
                 return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), vec);
+            }
             return batcher.Draw2D(Texture, position, vec);
         }
     }
