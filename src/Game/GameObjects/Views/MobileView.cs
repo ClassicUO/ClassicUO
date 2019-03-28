@@ -166,31 +166,30 @@ namespace ClassicUO.Game.GameObjects
                 else
                     drawX = -22 - (int)Offset.X;
 
+                const int DELTA_SHADOW = 1000;
+
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
                 {
                     if (shadow)
                     {
-                        position.Z += 1000;
+                        position.Z += DELTA_SHADOW;
 
                         DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
 
                         DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
 
-                        position.Z -= 1000;
-
-                        //DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        position.Z -= DELTA_SHADOW;
                     }
-                    else
-
+                    else if (position.Z < DELTA_SHADOW)
                         DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
                 }
                 else if (shadow)
                 {
-                    position.Z += 1000;
+                    position.Z += DELTA_SHADOW;
 
                     DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
 
-                    position.Z -= 1000;
+                    position.Z -= DELTA_SHADOW;
                 }
 
 
