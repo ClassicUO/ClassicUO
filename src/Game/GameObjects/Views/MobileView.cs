@@ -205,9 +205,21 @@ namespace ClassicUO.Game.GameObjects
                         DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
 
                         position.Z -= DELTA_SHADOW;
+                        Texture = frame;
+                        Bounds.X = x;
+                        Bounds.Y = -y;
+                        Bounds.Width = frame.Width;
+                        Bounds.Height = frame.Height;
                     }
-                    else /*if (position.Z < DELTA_SHADOW)*/
+                    else
+                    {
                         DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        Texture = frame;
+                        Bounds.X = x;
+                        Bounds.Y = -y;
+                        Bounds.Width = frame.Width;
+                        Bounds.Height = frame.Height;
+                    }
                 }
                 else if (shadow)
                 {
