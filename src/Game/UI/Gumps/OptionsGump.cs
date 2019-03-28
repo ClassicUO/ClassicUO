@@ -34,6 +34,8 @@ using ClassicUO.Network;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
+using System.Diagnostics;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -84,8 +86,8 @@ namespace ClassicUO.Game.UI.Gumps
         const int WIDTH = 700;
         const int HEIGHT = 500;
 
-        private ScrollAreaItem _windowSizeArea = new ScrollAreaItem();
-        private ScrollAreaItem _zoomSizeArea = new ScrollAreaItem();
+        private ScrollAreaItem _windowSizeArea;
+        private ScrollAreaItem _zoomSizeArea;
 
         public OptionsGump() : base(0, 0)
         {
@@ -391,11 +393,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] game size
             {
-                item = new ScrollAreaItem();
-
                 _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
                 {
-                    Y = 20,
                     IsChecked = Engine.Profile.Current.GameWindowFullSize
                 };
                 _gameWindowFullsize.MouseClick += (sender, e) =>
@@ -403,31 +402,40 @@ namespace ClassicUO.Game.UI.Gumps
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
                 };
 
-                item.Add(_gameWindowFullsize);
-                rightArea.Add(item);
+                rightArea.Add(_gameWindowFullsize);
+
+                _windowSizeArea = new ScrollAreaItem();
 
                 _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
                 {
-                    Y = 0,
+                    X = 20,
+                    Y = 15,
                     IsChecked = Engine.Profile.Current.GameWindowLock
                 };
+
                 _windowSizeArea.Add(_gameWindowLock);
+
+                text = new Label("Game Play Window Size: ", true, HUE_FONT, 0, FONT)
+                {
+                    X = 20,
+                    Y = 40,
+                };
+                _windowSizeArea.Add(text);
 
                 _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
                 {
                     Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
-                    X = 10,
-                    Y = 60,
+                    X = 30,
+                    Y = 70,
                     Width = 50,
                     Height = 30,
                     UNumericOnly = true
-                }, "Game Play Window Size: ");
-
+                }, "");
                 _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
                 {
                     Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
-                    X = 80,
-                    Y = 60,
+                    X = 100,
+                    Y = 70,
                     Width = 50,
                     Height = 30,
                     UNumericOnly = true
@@ -435,38 +443,38 @@ namespace ClassicUO.Game.UI.Gumps
 
                 text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
                 {
-                    X = 190,
-                    Y = 30,
+                    X = 205,
+                    Y = 40,
                 };
                 _windowSizeArea.Add(text);
 
                 _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
                 {
                     Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
-                    X = 200,
-                    Y = 60,
+                    X = 215,
+                    Y = 70,
                     Width = 50,
                     Height = 30,
                     NumericOnly = true
                 });
-
                 _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
                 {
                     Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
-                    X = 270,
-                    Y = 60,
+                    X = 285,
+                    Y = 70,
                     Width = 50,
                     Height = 30,
                     NumericOnly = true
                 });
 
                 rightArea.Add(_windowSizeArea);
+                _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
+            }
 
-                item = new ScrollAreaItem();
-
+            // [BLOCK] scale
+            {
                 _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT, true)
                 {
-                    Y = 0,
                     IsChecked = Engine.Profile.Current.EnableScaleZoom
                 };
                 _zoomCheckbox.MouseClick += (sender, e) =>
@@ -474,29 +482,32 @@ namespace ClassicUO.Game.UI.Gumps
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
                 };
 
-                item.Add(_zoomCheckbox);
-                rightArea.Add(item);
-            }
+                rightArea.Add(_zoomCheckbox);
 
-            // [BLOCK] scale
-            {
+                _zoomSizeArea = new ScrollAreaItem();
+
                 _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after close game", FONT, HUE_FONT, true)
                 {
+                    X = 20,
+                    Y = 15,
                     IsChecked = Engine.Profile.Current.SaveScaleAfterClose
                 };
                 _zoomSizeArea.Add(_savezoomCheckbox);
 
                 _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Restore scale after unpress Ctrl", FONT, HUE_FONT, true)
                 {
-                    Y = 20,
+                    X = 20,
+                    Y = 35,
                     IsChecked = Engine.Profile.Current.RestoreScaleAfterUnpressCtrl
                 };
                 _zoomSizeArea.Add(_restorezoomCheckbox);
 
                 rightArea.Add(_zoomSizeArea);
+                _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
+
             }
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 20);
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 10);
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
@@ -526,9 +537,6 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_enableLight);
             item.Add(_lightBar);
             rightArea.Add(item);
-
-            _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
-            _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
 
             Add(rightArea, PAGE);
         }
