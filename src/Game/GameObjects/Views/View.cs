@@ -121,6 +121,11 @@ namespace ClassicUO.Game.GameObjects
             Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
+            bool hasShadow = position.Z >= 1000;
+
+            if (hasShadow)
+                position.Z -= 1000;
+
             if (Rotation != 0.0f)
             {
                 float w = Bounds.Width / 2f;
@@ -212,10 +217,10 @@ namespace ClassicUO.Game.GameObjects
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-            if (HasShadow)
-            {
 
-                SpriteVertex[] vertexS = new SpriteVertex[4]
+            if (hasShadow)
+            {
+                SpriteVertex[] vertexS =
                 {
                     vertex[0],
                     vertex[1],
@@ -225,9 +230,7 @@ namespace ClassicUO.Game.GameObjects
 
                 vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = ShaderHuesTraslator.GetHueVector(0, ShadersEffectType.Shadow);
 
-                batcher.SetBlendState(_blend.Value);
                 batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + Offset.Y - Offset.Z + 22), IsFlipped, 0);
-                batcher.SetBlendState(null);
             }
 
             //if (HasShadow)
@@ -275,14 +278,8 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState();
-            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.DestinationColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.Zero;
+       
 
-            return state;
-        });
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {

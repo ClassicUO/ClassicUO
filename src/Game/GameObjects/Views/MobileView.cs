@@ -53,6 +53,7 @@ namespace ClassicUO.Game.GameObjects
             if (Graphic == 0)
                 return false;
 
+
             /*if (_frames[0].IsSitting)
             {
                 int x1 = 0, y1 = 0;
@@ -93,10 +94,14 @@ namespace ClassicUO.Game.GameObjects
                     hue = targetColor;
             }
 
-            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue);
+            bool drawShadow = !IsDead && !IsHidden;
+
+            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
             if (IsHuman)
+            {
                 DrawEquipment(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
+            }
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
@@ -116,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
         }
         //private static Texture2D _edge;
 
-        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
+        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool shadow)
         {
             Graphic graphic = GetGraphicForAnimation();
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
@@ -161,9 +166,32 @@ namespace ClassicUO.Game.GameObjects
                 else
                     drawX = -22 - (int)Offset.X;
 
+                if (IsHuman && Equipment[(int) Layer.Mount] != null)
+                {
+                    if (shadow)
+                    {
+                        position.Z += 1000;
 
-                if (IsHuman)
-                    DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
+
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+
+                        position.Z -= 1000;
+
+                        //DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                    }
+                    else
+
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                }
+                else if (shadow)
+                {
+                    position.Z += 1000;
+
+                    DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
+
+                    position.Z -= 1000;
+                }
 
 
                 int x = drawX + frame.CenterX;
