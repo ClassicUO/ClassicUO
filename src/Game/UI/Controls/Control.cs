@@ -778,8 +778,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected virtual bool Contains(int x, int y)
-        {
-            return true;
+        {           
+            return !IsDisposed;
         }
 
         protected virtual void OnMove()

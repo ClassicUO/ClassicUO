@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
+            return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
         public override void Dispose()
