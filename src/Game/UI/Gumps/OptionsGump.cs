@@ -593,6 +593,7 @@ namespace ClassicUO.Game.UI.Gumps
                     };
                 });
 
+                dialog.CanCloseWithRightClick = true;
                 Engine.UI.Add(dialog);
             };
 
