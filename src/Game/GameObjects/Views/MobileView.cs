@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                var hash = direction.FramesHashes[animIndex];
+                AnimationFrameTexture hash = direction.FramesHashes[animIndex];
 
                 if (hash == null)
                     return;
@@ -167,31 +167,6 @@ namespace ClassicUO.Game.GameObjects
                     drawX = -22 - (int)Offset.X;
 
                 const int DELTA_SHADOW = 1000;
-
-                if (IsHuman && Equipment[(int) Layer.Mount] != null)
-                {
-                    if (shadow)
-                    {
-                        position.Z += DELTA_SHADOW;
-
-                        DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
-
-                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
-
-                        position.Z -= DELTA_SHADOW;
-                    }
-                    else if (position.Z < DELTA_SHADOW)
-                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
-                }
-                else if (shadow)
-                {
-                    position.Z += DELTA_SHADOW;
-
-                    DrawBody(batcher, position, objecList, dir, out _, out _, out _, ref rect, ref mirror, hue, false);
-
-                    position.Z -= DELTA_SHADOW;
-                }
-
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
@@ -219,6 +194,28 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Y = -y;
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
+
+                if (IsHuman && Equipment[(int) Layer.Mount] != null)
+                {
+                    if (shadow)
+                    {
+                        position.Z += DELTA_SHADOW;
+                        base.Draw(batcher, position, objecList);
+
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+
+                        position.Z -= DELTA_SHADOW;
+                    }
+                    else /*if (position.Z < DELTA_SHADOW)*/
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                }
+                else if (shadow)
+                {
+                    position.Z += DELTA_SHADOW;
+                    base.Draw(batcher, position, objecList);
+                    position.Z -= DELTA_SHADOW;
+                }
+
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
