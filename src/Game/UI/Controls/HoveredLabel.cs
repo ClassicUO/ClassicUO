@@ -36,7 +36,6 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-
         public override void Update(double totalMS, double frameMS)
         {
             if (MouseIsOver)

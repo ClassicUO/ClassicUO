@@ -55,7 +55,7 @@ namespace ClassicUO.Utility
            { SDL.SDL_Keycode.SDLK_RIGHTBRACKET, "]"},
            { SDL.SDL_Keycode.SDLK_CARET, "-" },
            { SDL.SDL_Keycode.SDLK_UNDERSCORE, "_" },
-           //{ SDL.SDL_Keycode.SDLK_BACKQUOTE = 96, // 0x00000060
+           { SDL.SDL_Keycode.SDLK_BACKQUOTE, "BACKQUOTE" }, //  = 96, // 0x00000060
            { SDL.SDL_Keycode.SDLK_a, "A" },
            { SDL.SDL_Keycode.SDLK_b, "B" },
            { SDL.SDL_Keycode.SDLK_c, "C" },
