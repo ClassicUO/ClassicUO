@@ -26,15 +26,15 @@ namespace ClassicUO.Renderer
         private const int MAX_INDICES = MAX_SPRITES * 6;
 
         private Matrix _projectionMatrix;
-        private Matrix _matrixTransformMatrix;
         private Matrix _transformMatrix = Matrix.Identity;
+        private Matrix _matrixTransformMatrix;
         private BoundingBox _drawingArea;
-        private readonly EffectParameter _viewportEffect;
-        private readonly EffectParameter _worldMatrixEffect;
-        private readonly EffectParameter _drawLightingEffect;
-        private readonly EffectParameter _projectionMatrixEffect;
-        private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
-        private readonly Effect _effect;
+        //private readonly EffectParameter _viewportEffect;
+        //private readonly EffectParameter _worldMatrixEffect;
+        //private readonly EffectParameter _drawLightingEffect;
+        //private readonly EffectParameter _projectionMatrixEffect;
+        //private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
+        //private readonly Effect _effect;
 
         //private readonly DepthStencilState _dss = new DepthStencilState
         //{
@@ -57,7 +57,8 @@ namespace ClassicUO.Renderer
         private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
         private DepthStencilState _stencil;
-
+        private Effect _customEffect;
+        private readonly IsometricEffect _isometricEffect;
 
         private int _numSprites;
         private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
@@ -65,16 +66,9 @@ namespace ClassicUO.Renderer
         public Batcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
-            _effect = new Effect(GraphicsDevice, Resources.IsometricEffect);
-            //float f = (float) FileManager.Hues.HuesCount;
-            _effect.Parameters["HuesPerTexture"].SetValue(3000.0f);
-            _drawLightingEffect = _effect.Parameters["DrawLighting"];
-            _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
-            _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
-            _viewportEffect = _effect.Parameters["Viewport"];
-            _huesTechnique = _effect.Techniques["HueTechnique"];
-            _shadowTechnique = _effect.Techniques["ShadowSetTechnique"];
-            _landTechnique = _effect.Techniques["LandTechnique"];
+
+            _isometricEffect = new IsometricEffect(device);
+
             _textureInfo = new Texture2D[MAX_SPRITES];
             _vertexInfo = new SpriteVertex[MAX_VERTICES];
             _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, MAX_VERTICES, BufferUsage.WriteOnly);
@@ -84,9 +78,7 @@ namespace ClassicUO.Renderer
             _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-            _effect.CurrentTechnique = _huesTechnique;
             _blendState = BlendState.AlphaBlend;
-
             _rasterizerState = RasterizerState.CullNone;
             _rasterizerState = new RasterizerState()
             {
@@ -107,26 +99,34 @@ namespace ClassicUO.Renderer
 
         public void SetLightDirection(Vector3 dir)
         {
-            _effect.Parameters["lightDirection"].SetValue(dir);
+            _isometricEffect.Parameters["lightDirection"].SetValue(dir);
         }
 
         public void SetLightIntensity(float inte)
         {
-            _effect.Parameters["lightIntensity"].SetValue(inte);
+            _isometricEffect.Parameters["lightIntensity"].SetValue(inte);
         }
 
         public void EnableLight(bool value)
         {
-            _drawLightingEffect.SetValue(value);
+            _isometricEffect.CanDrawLight.SetValue(value);
         }
 
         public void Begin()
+            => Begin(null, Matrix.Identity);
+
+        public void Begin(Effect effect)
+            => Begin(effect, Matrix.Identity);
+
+        public void Begin(Effect customEffect, Matrix projection)
         {
             EnsureNotStarted();
             _started = true;
 
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
+
+            _customEffect = customEffect;
         }
 
         public void End()
@@ -134,6 +134,7 @@ namespace ClassicUO.Renderer
             EnsureStarted();
             Flush();
             _started = false;
+            _customEffect = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,7 +172,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
+        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
         {
             if (texture == null || texture.IsDisposed)
                 return;
@@ -561,16 +562,20 @@ namespace ClassicUO.Renderer
             Viewport viewport = GraphicsDevice.Viewport;
             _projectionMatrix.M11 = (float)(2.0 / viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / viewport.Height);
-            //_projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
-            //_projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
 
-            _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
-            _worldMatrixEffect.SetValue(_transformMatrix);
+            _isometricEffect.ProjectionMatrix.SetValue(_matrixTransformMatrix);
+            _isometricEffect.WorldMatrix.SetValue(_transformMatrix);
+            _isometricEffect.Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            //_projectionMatrixEffect.SetValue(matrixTransformMatrix);
+            //_worldMatrixEffect.SetValue(_transformMatrix);
 
-            _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            //_viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
+
+            _isometricEffect.Pass.Apply();
         }
 
         private unsafe void Flush()
@@ -586,7 +591,12 @@ namespace ClassicUO.Renderer
             Texture2D current = _textureInfo[0];
             int offset = 0;
 
-            _effect.CurrentTechnique.Passes[0].Apply();
+
+            if (_customEffect != null)
+            {
+                _customEffect.CurrentTechnique.Passes[0].Apply();
+            }
+           
 
             for (int i = 1; i < _numSprites; i++)
             {
@@ -679,7 +689,7 @@ namespace ClassicUO.Renderer
 
 
         public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
-        public static byte[] SpriteEffect => _spriteEffect ?? (_spriteEffect = GetResource("ClassicUO.SpriteEffect.fx"));
+        public static byte[] LightEffect => _spriteEffect ?? (_spriteEffect = GetResource("ClassicUO.shaders.LightEffect.fxc"));
 
     }
 }

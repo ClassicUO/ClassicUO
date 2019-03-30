@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -31,6 +32,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -61,6 +63,7 @@ namespace ClassicUO.Game.Scenes
         private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
         private int _scale = 5; // 1.0
 
+
         private bool _deathScreenActive = false;
         private Label _deathScreenLabel;
 
@@ -68,7 +71,7 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public int ScalePos
+        private int ScalePos
         {
             get => _scale;
             set
@@ -93,6 +96,9 @@ namespace ClassicUO.Game.Scenes
         public MacroManager Macros => _macroManager;
 
         public Texture2D ViewportTexture => _renderTarget;
+
+        //private RenderTarget2D _lighTarget2D;
+        //public Texture2D LightTarget => _lighTarget2D;
 
         public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
@@ -352,6 +358,79 @@ namespace ClassicUO.Game.Scenes
             }));
         }
 
+
+        private int _lightCount;
+
+        public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
+        {
+            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
+                return;
+
+            bool canBeAdded = true;
+
+            int testX = obj.X + 1;
+            int testY = obj.Y + 1;
+
+            Tile tile = World.Map.GetTile(testX, testY);
+
+            if (tile != null)
+            {
+                sbyte z5 = (sbyte)(obj.Z + 5);
+
+                for (GameObject o = tile.FirstNode; o != null; o = o.Right)
+                {
+                    if (!(o is Static s) || !o.AllowedToDraw || (s.ItemData.IsTransparent))
+                    {
+                        continue;
+                    }
+
+                    if (o.Z < _maxZ && o.Z >= z5)
+                    {
+                        canBeAdded = false;
+
+                        break;
+                    }
+                }
+            }
+
+
+            if (canBeAdded)
+            {
+                ref var light = ref _lights[_lightCount];
+                ushort graphic = lightObject.Graphic;
+
+                if ((graphic >= 0x3E02 && graphic <= 0x3E0B) ||
+                    (graphic >= 0x3914 && graphic <= 0x3929))
+                {
+                    light.ID = 2;
+                }
+                else if (obj == lightObject && obj is Item item)
+                {
+                    light.ID = item.LightID;
+                }
+                else if (obj is Static st)
+                    light.ID = (byte) st.ItemData.Layer;
+
+                if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
+                    return;
+
+                light.Color = 0;
+
+                light.DrawX = x;
+                light.DrawY = y;
+                _lightCount++;
+            }
+        }
+
+        private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
+
+        private struct LightData
+        {
+            public byte ID;
+            public ushort Color;
+            public int DrawX, DrawY;
+        }
+
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             base.FixedUpdate(totalMS, frameMS);
@@ -451,7 +530,11 @@ namespace ClassicUO.Game.Scenes
             if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
             {
                 _renderTarget?.Dispose();
+
+                //_lighTarget2D?.Dispose();
+
                 _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                //_lighTarget2D = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();
@@ -533,6 +616,8 @@ namespace ClassicUO.Game.Scenes
 
             return base.Draw(batcher);
         }
+
+
         
         private void DrawWorld(Batcher2D batcher)
         {
@@ -540,11 +625,9 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
             batcher.Begin();
-
             batcher.EnableLight(true);
             batcher.SetLightIntensity(World.Light.IsometricLevel);
             batcher.SetLightDirection(World.Light.IsometricDirection);
-
             if (!_deathScreenActive)
             {
                 RenderedObjectsCount = 0;
@@ -573,10 +656,58 @@ namespace ClassicUO.Game.Scenes
                 // Draw in game overhead text messages
                 _overheadManager.Draw(batcher, _mouseOverList, _offset);
             }
-
             batcher.End();
             batcher.EnableLight(false);
             batcher.GraphicsDevice.SetRenderTarget(null);
+
+
+
+            //if (_lightEffect == null)
+            //{
+            //    _lightEffect = new LightEffect(batcher.GraphicsDevice);
+            //}
+
+            //batcher.SetLightIntensity(0.3f);
+
+            //batcher.GraphicsDevice.SetRenderTarget(_lighTarget2D);
+            //float newLightColor = ((32 - World.Light.Overall + World.Light.Personal) / 32.0f);
+
+            ////batcher.GraphicsDevice.Clear(new Color(newLightColor, newLightColor, newLightColor, 1));
+            //batcher.GraphicsDevice.Clear(new Color(0, 0, 0, 1));
+
+            //batcher.Begin();
+            //batcher.SetBlendState(BlendState.Additive);
+            //for (int i = 0; i < _lightCount; i++)
+            //{
+            //    ref var l = ref _lights[i];
+
+            //    var texture = FileManager.Lights.GetTexture(l.ID);
+
+            //    Vector3 pos = new Vector3(l.DrawX, l.DrawY, 0);
+
+            //    var vertex = SpriteVertex.PolyBuffer;
+            //    vertex[0].Position = pos;
+            //    vertex[0].Position.X -= texture.Width / 2;
+            //    vertex[0].Position.Y -= texture.Height / 2;
+            //    vertex[0].TextureCoordinate.Y = 0;
+            //    vertex[1].Position = vertex[0].Position;
+            //    vertex[1].Position.X += texture.Width;
+            //    vertex[1].TextureCoordinate.Y = 0;
+            //    vertex[2].Position = vertex[0].Position;
+            //    vertex[2].Position.Y += texture.Height;
+            //    vertex[3].Position = vertex[1].Position;
+            //    vertex[3].Position.Y += texture.Height;
+
+            //    vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = new Vector3(l.Color,13 /*l.Color != 0 ? 1 : 0*/, 0);
+            //    batcher.DrawSprite(texture, vertex);
+            //}
+            //batcher.End();
+            //batcher.SetBlendState(null);
+            //_lightCount = 0;
+
+            //batcher.GraphicsDevice.SetRenderTarget(null);
         }
+
+        private LightEffect _lightEffect;
     }
 }

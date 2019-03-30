@@ -251,6 +251,7 @@
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
+    <Compile Include="Renderer\Effects.cs" />
     <Compile Include="Renderer\UI\Label.cs" />
     <Compile Include="Renderer\UI\UpdaterMenu.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
@@ -528,6 +529,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="README.md" />
+    <EmbeddedResource Include="shaders\LightEffect.fxc" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -543,6 +545,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cuoicon.ico" />
+    <Content Include="shaders\LightEffect.fx" />
     <EmbeddedResource Include="cuologo.png" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

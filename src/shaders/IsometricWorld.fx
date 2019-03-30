@@ -37,17 +37,12 @@ struct PS_INPUT
 	float3 Hue		: TEXCOORD2;
 };
 
-
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
 	
 	OUT.Position = mul(mul(IN.Position, WorldMatrix), ProjectionMatrix);
 	
-	// Half pixel offset for correct texel centering.
-	//OUT.Position.x -= 0.5 / Viewport.x;
-	//OUT.Position.y += 0.5 / Viewport.y;
-
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
@@ -59,12 +54,11 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	// Get the initial pixel and discard it if the alpha == 0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
+
 	if (color.a <= 0)
 		discard;
 
 	float alpha = 1 - IN.Hue.z;
-
-	int mode = int(IN.Hue.y);
 
 	if (mode == COLOR)
 	{

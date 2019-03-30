@@ -27,6 +27,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -51,6 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
+
             batcher.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
             return base.Draw(batcher, position, hue);

@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -117,6 +118,12 @@ namespace ClassicUO.Game.GameObjects
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);
+
+            //if (ItemData.IsLight)
+            //{
+            //    Engine.SceneManager.GetScene<GameScene>()
+            //          .AddLight(this, this, (int)position.X + Texture.Width / 2, (int)position.Y + Texture.Height / 2);
+            //}
 
             if (_border)
             {
