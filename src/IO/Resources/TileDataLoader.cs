@@ -343,6 +343,7 @@ namespace ClassicUO.IO.Resources
         public bool IsContainer => (Flags & TileFlag.Container) != 0;
         public bool IsDoor => (Flags & TileFlag.Door) != 0;
         public bool IsWall => (Flags & TileFlag.Wall) != 0;
+        public bool IsLight => (Flags & TileFlag.LightSource) != 0;
     }
 
     // old

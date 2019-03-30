@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class LightsLoader : ResourceLoader
+    class LightsLoader : ResourceLoader<SpriteTexture>
     {
         private  UOFileMul _file;
 
@@ -23,14 +24,29 @@ namespace ClassicUO.IO.Resources
             _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
         }
 
-        protected override void CleanResources()
+       
+        public override void CleanResources()
         {
-            throw new NotImplementedException();
         }
 
-        public ushort[] GetLight(int idx, out int width, out int height)
+        public override SpriteTexture GetTexture(uint id)
         {
-            (int length, int extra, bool patched) = _file.SeekByEntryIndex(idx);
+            if (!ResourceDictionary.TryGetValue(id, out var texture))
+            {
+                ushort[] pixels = GetLight(id, out int w, out int h);
+
+                texture = new SpriteTexture(w, h, false);
+                texture.SetData(pixels);
+                ResourceDictionary.Add(id, texture);
+            }
+
+            return texture;
+        }
+
+
+        private ushort[] GetLight(uint idx, out int width, out int height)
+        {
+            (int length, int extra, bool patched) = _file.SeekByEntryIndex((int) idx);
             width = extra & 0xFFFF;
             height = (extra >> 16) & 0xFFFF;
             ushort[] pixels = new ushort[width * height];
@@ -41,9 +57,9 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = 0; j < width; j++)
                 {
-                    ushort val = _file.ReadUShort();
+                    ushort val = _file.ReadByte();
                     val = (ushort)((val << 10) | (val << 5) | val);
-                    pixels[pos + j] = (ushort)((val > 0 ? 0x8000 : 0) | val);
+                    pixels[pos + j] = (ushort)((val != 0 ? 0x8000 : 0) | val);
                 }
             }
 
