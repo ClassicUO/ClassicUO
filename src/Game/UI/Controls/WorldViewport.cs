@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             _rect.X = position.X;
             _rect.Y = position.Y;
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
             // draw overheads
             _scene.DrawOverheads(batcher);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
 

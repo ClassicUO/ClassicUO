@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Controls
             _entered = false;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             SpriteTexture texture = GetTextureByState();
             batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Controls
                     textTexture.Draw(batcher, position);
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)

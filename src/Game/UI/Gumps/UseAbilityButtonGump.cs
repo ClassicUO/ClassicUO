@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (IsDisposed)
                 return false;
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _button.Hue = 0;
             
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         public override void Save(BinaryWriter writer)

@@ -248,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 };
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position)
             {
                 if (IsDisposed)
                     return false;
@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _labelPing.Draw(batcher, position + new Point(250, 0));
                 _labelPacketLoss.Draw(batcher, position + new Point(310, 0));
 
-                return base.Draw(batcher, position, hue);
+                return base.Draw(batcher, position);
             }
 
             protected override void OnMouseOver(int x, int y)

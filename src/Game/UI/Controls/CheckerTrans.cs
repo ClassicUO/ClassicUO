@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Controls
             return blend;
         });
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);

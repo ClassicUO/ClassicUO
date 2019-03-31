@@ -692,7 +692,7 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position)
             {
                 Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
@@ -700,7 +700,7 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.Draw2DTiled(_gumpTexture[1], new Rectangle(position.X + _gumpTexture[0].Width, position.Y, middleWidth, _gumpTexture[1].Height), color);
                 batcher.Draw2D(_gumpTexture[2], new Point(position.X + Width - _gumpTexture[2].Width, position.Y), color);
 
-                return base.Draw(batcher, position, hue);
+                return base.Draw(batcher, position);
             }
         }
     }

@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (_gumpSpliderBackground != null)
             {
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Controls
             batcher.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
             _text?.Draw(batcher, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         private void InternalSetValue(int value)

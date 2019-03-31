@@ -59,11 +59,11 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, _isPartial, 0, true));
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
     }
 }

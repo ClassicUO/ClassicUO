@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.Value += _scrollBar.ScrollStep;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;

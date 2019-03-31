@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
             _texture.Ticks = (long)totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             return batcher.Draw2D(_texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
         }

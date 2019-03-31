@@ -33,12 +33,5 @@ namespace ClassicUO.Game.UI.Controls
             if (_timeToLive <= 0.0f)
                 Dispose();
         }
-
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
-        {
-            hue = ShaderHuesTraslator.GetHueVector(hue.HasValue ? (int)hue.Value.X : 0, false, Alpha, false);
-
-            return base.Draw(batcher, position, hue);
-        }
     }
 }

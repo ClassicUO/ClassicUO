@@ -155,7 +155,7 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
             if (MaxValue != MinValue)
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw2D(_downButton, new Point(position.X, position.Y + Height), Vector3.Zero);
             }
 
-            return base.Draw(batcher, p, hue);
+            return base.Draw(batcher, p);
         }
 
         private float GetSliderYPosition()

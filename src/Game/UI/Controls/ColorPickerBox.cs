@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (_pointer == null)
             {
@@ -162,14 +162,14 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int x = 0; x < _columns; x++)
                 {
-                    _colorBoxes[y, x].Draw(batcher, new Point(position.X + (x * _cellWidth), position.Y + (y * _cellHeight)), hue);
+                    _colorBoxes[y, x].Draw(batcher, new Point(position.X + (x * _cellWidth), position.Y + (y * _cellHeight)));
                 }
             }
 
             if (_hues.Length > 1)
                 batcher.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)

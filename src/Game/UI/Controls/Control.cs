@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(Batcher2D batcher, Point position, in Vector3? hue = null)
+        public virtual bool Draw(Batcher2D batcher, Point position)
         {
             if (IsDisposed) return false;
 
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (c.IsVisible && c.IsInitialized)
                     {
                         Point offset = new Point(c.X + position.X, c.Y + position.Y);
-                        c.Draw(batcher, offset, hue);
+                        c.Draw(batcher, offset);
 
                         //DrawDebug(batcher, position);
                     }

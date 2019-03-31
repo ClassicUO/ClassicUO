@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             int y = textBox.Y + position.Y - 20;
 
@@ -309,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textEntries[i].Draw(batcher, new Point(position.X + 2, y));
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

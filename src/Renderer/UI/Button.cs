@@ -100,7 +100,7 @@ namespace ClassicUO.Renderer.UI
             base.OnMouseExit(x, y);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {          
             Texture2D texture;
             switch (_state)

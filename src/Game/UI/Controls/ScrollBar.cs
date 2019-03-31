@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (Height <= 0 || !IsVisible)
                 return false;
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
             if (MaxValue > MinValue && middleHeight > 0)
                 batcher.Draw2D(_textureSlider, new Point(position.X + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), (int) (position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         private float GetSliderYPosition()

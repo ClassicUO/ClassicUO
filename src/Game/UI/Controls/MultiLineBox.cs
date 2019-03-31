@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private Rectangle _rect;
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (ScissorsEnabled)
             {
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override void OnTextInput(string c)

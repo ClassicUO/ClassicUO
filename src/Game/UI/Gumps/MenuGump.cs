@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position)
             {
                 _rect.X = position.X;
                 _rect.Y = position.Y;

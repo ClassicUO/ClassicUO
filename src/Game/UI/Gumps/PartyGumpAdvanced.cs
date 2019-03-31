@@ -176,9 +176,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
         private Texture2D _edge;
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
-            base.Draw(batcher, position, hue);
+            base.Draw(batcher, position);
             batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
             batcher.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
             batcher.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));

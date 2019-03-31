@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             //batcher.Draw2D(_mapTexture, Bounds, position);
 
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)

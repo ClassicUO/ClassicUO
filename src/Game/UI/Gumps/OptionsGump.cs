@@ -1071,7 +1071,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Texture2D _edge;
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (_edge == null)
             {
@@ -1080,7 +1080,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         public override void Dispose()
@@ -1202,10 +1202,10 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position)
             {
                 batcher.Draw2D(_background, new Point(position.X - 3, position.Y - 3), Vector3.Zero);
-                return base.Draw(batcher, position, hue);
+                return base.Draw(batcher, position);
             }
 
             protected override void OnMouseClick(int x, int y, MouseButton button)

@@ -248,11 +248,11 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
             DrawInternal(batcher, position, color);
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         private void DrawInternal(Batcher2D batcher, Point position, Vector3 color)

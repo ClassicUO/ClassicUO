@@ -25,10 +25,10 @@ namespace ClassicUO.Renderer.UI
             _color = color;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             batcher.Draw2D(Textures.GetTexture(_color), new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
     }
 

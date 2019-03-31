@@ -46,9 +46,9 @@ namespace ClassicUO.Game.UI.Controls
             _entries = new Deque<RenderedText>();
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
-            base.Draw(batcher, position, hue);
+            base.Draw(batcher, position);
             Point p = new Point(position.X, position.Y);
             int height = 0;
             int maxheight = _scrollBar.Value + _scrollBar.Height;

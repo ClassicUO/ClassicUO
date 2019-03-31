@@ -40,6 +40,6 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(Batcher2D batcher, Point position, in Vector3? hue = null);
+        bool Draw(Batcher2D batcher, Point position);
     }
 }

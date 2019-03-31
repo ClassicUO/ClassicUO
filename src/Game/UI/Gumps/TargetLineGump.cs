@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Hue = Notoriety.GetHue(Mobile.NotorietyFlag);;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (Engine.Profile == null || Engine.Profile.Current == null)
                 return false;
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             position.X = X;
             position.Y = Y;
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
     }
 }

@@ -169,7 +169,7 @@ namespace ClassicUO.Renderer
             if (Texture == null)
                 return false;
 
-            return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
+            return batcher.Draw2D(Texture, dst, src, Vector3.Zero);
         }
 
         public void CreateTexture()

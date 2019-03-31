@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
         public Hue Hue { get; set; }
         public bool IsPartial { get; set; }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             Vector3 vec = ShaderHuesTraslator.GetHueVector(Hue, IsPartial, Alpha, false);
 

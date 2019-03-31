@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             int centerWidth = Width - _frame[0].Width - _frame[2].Width;
             int centerHeight = Height - _frame[0].Height - _frame[6].Height;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
             batcher.Draw2DTiled(_frame[7], new Rectangle(position.X + _frame[6].Width, line3Y, centerWidth, _frame[6].Height), Vector3.Zero);
             batcher.Draw2D(_frame[8], new Point(position.X + Width - _frame[8].Width, line3Y), Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         public override void Dispose()

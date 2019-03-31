@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (IsDisposed || !SetName())
                 return false;
@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.DrawRectangle(_edge, new Rectangle(position.X - 1, position.Y - 1, Width + 1, Height + 1), Vector3.Zero);
 
-            base.Draw(batcher, position, hue);
+            base.Draw(batcher, position);
             return _renderedText.Draw(batcher, new Rectangle(position.X + 2, position.Y + 2, Width, Height), 0, 0);
         }
 

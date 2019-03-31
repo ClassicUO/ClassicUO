@@ -137,7 +137,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
 
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override void OnTextInput(string c)

@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
                 return false;
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.Draw2D(_playerIndicator, new Rectangle(position.X + w, position.Y + h, 2, 2), Vector3.Zero);
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, position);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
