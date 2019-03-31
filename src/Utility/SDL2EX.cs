@@ -9,22 +9,13 @@ using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Utility
 {
-    unsafe static class SDL2EX
+    static class SDL2EX
     {
         public delegate IntPtr OnSDLLoadObject(StringBuilder sb);
         public delegate IntPtr OnLoadFunction(IntPtr module, StringBuilder sb);
-
-        public delegate void glClearColor(float r, float g, float b, float a);
-        public delegate void glClear(uint bit);
-
-        public delegate IntPtr OnGetProcAddr(byte* s);
-
-        private static readonly OnGetProcAddr _getProcAddr;
-     
+  
         private static readonly OnSDLLoadObject _loadObject;
         private static readonly OnLoadFunction _loadFunction;
-        private static readonly glClearColor _clearColor;
-        private static readonly glClear _clear;
 
         static SDL2EX()
         {
@@ -48,19 +39,6 @@ namespace ClassicUO.Utility
 
             IntPtr loadFunc = Native.GetProcessAddress(sdl, "SDL_LoadFunction");
             _loadFunction = Marshal.GetDelegateForFunctionPointer<OnLoadFunction>(loadFunc);
-
-
-            IntPtr func = Native.GetProcessAddress(sdl, "SDL_GL_GetProcAddress");
-            _getProcAddr = Marshal.GetDelegateForFunctionPointer<OnGetProcAddr>(func);
-
-
-
-            fixed (byte* ptr = System.Text.Encoding.UTF8.GetBytes("glClearColor" + '\0'))
-                _clearColor = Marshal.GetDelegateForFunctionPointer<glClearColor>(_getProcAddr(ptr));
-
-            fixed (byte* ptr = System.Text.Encoding.UTF8.GetBytes("glClear" + '\0'))
-                _clear = Marshal.GetDelegateForFunctionPointer<glClear>(_getProcAddr(ptr));
-
         }
 
         public static IntPtr SDL_LoadObject(string name)
@@ -71,17 +49,6 @@ namespace ClassicUO.Utility
         public static IntPtr SDL_LoadFunction(IntPtr module, string name)
         {
             return _loadFunction(module, new StringBuilder(name));
-        }
-
-
-        public static void ClearColor(float r, float g, float b, float a)
-        {
-            _clearColor(r, g, b, a);
-        }
-
-        public static void Clearr(uint bit)
-        {
-            _clear(bit);
         }
     }
 }
