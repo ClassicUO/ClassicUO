@@ -260,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(hue, !IsHidden && isPartial, 0, false);
                 }
 
                 base.Draw(batcher, position, objecList);
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                     HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, item.ItemData.IsPartialHue, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, !IsHidden && item.ItemData.IsPartialHue, 0, false);
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
