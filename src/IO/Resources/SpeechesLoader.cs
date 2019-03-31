@@ -41,7 +41,7 @@ namespace ClassicUO.IO.Resources
             throw new NotImplementedException();
         }
 
-        public bool IsMatch(string input, SpeechEntry entry)
+        public bool IsMatch(string input, in SpeechEntry entry)
         {
             string[] split = entry.Keywords;
 
