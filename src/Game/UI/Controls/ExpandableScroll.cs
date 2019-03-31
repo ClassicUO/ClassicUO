@@ -189,10 +189,6 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
-        {
-            return base.Draw(batcher, position, hue);
-        }
 
         //new MouseEventArgs(x, y, button, ButtonState.Pressed)
         private void expander_OnMouseDown(object sender, MouseEventArgs args)

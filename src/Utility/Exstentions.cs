@@ -99,7 +99,7 @@ namespace ClassicUO.Utility
             foreach (T c in array) func(c);
         }
 
-        public static bool InRect(this Rectangle rect, Rectangle r)
+        public static bool InRect(ref Rectangle rect, ref Rectangle r)
         {
             bool inrect = false;
 

@@ -668,7 +668,7 @@ namespace ClassicUO.Game.Managers
                 Control g = _gumps[i];
 
                 if (g.IsInitialized)
-                    g.Draw(batcher, g.Location);
+                    g.Draw(batcher, g.X, g.Y);
             }
 
 

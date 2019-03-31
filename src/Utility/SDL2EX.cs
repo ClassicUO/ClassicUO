@@ -13,7 +13,7 @@ namespace ClassicUO.Utility
     {
         public delegate IntPtr OnSDLLoadObject(StringBuilder sb);
         public delegate IntPtr OnLoadFunction(IntPtr module, StringBuilder sb);
-
+  
         private static readonly OnSDLLoadObject _loadObject;
         private static readonly OnLoadFunction _loadFunction;
 
@@ -39,7 +39,6 @@ namespace ClassicUO.Utility
 
             IntPtr loadFunc = Native.GetProcessAddress(sdl, "SDL_LoadFunction");
             _loadFunction = Marshal.GetDelegateForFunctionPointer<OnLoadFunction>(loadFunc);
-
         }
 
         public static IntPtr SDL_LoadObject(string name)
@@ -51,7 +50,5 @@ namespace ClassicUO.Utility
         {
             return _loadFunction(module, new StringBuilder(name));
         }
-
-    
     }
 }

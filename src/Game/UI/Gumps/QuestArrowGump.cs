@@ -40,12 +40,14 @@ namespace ClassicUO.Game.UI.Gumps
 		{
 			base.Update(totalMS, frameMS);
 
-		    if (!World.InGame || World.Map == null)
+		    if (!World.InGame)
 		    {
                 Dispose();
 		    }
 
-            if (IsDisposed)
+		    var scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (IsDisposed || Engine.Profile.Current == null || scene == null)
                 return;
 
 		    Direction dir = (Direction)GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
@@ -79,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 		        y = Engine.Profile.Current.GameWindowPosition.Y;
 		    else if (y > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height)
 		        y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height;
-		    var scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+		    var scale = scene.Scale;
             X = (int) (x / scale);
 		    Y = (int) (y / scale);
 

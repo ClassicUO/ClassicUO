@@ -102,13 +102,13 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
-            bool ok = base.Draw(batcher, position);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
-            _text.Draw(batcher, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));
+            bool ok = base.Draw(batcher, x, y);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, HueVector);
+            _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
             return ok;
         }

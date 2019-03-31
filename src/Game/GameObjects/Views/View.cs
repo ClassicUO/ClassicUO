@@ -121,6 +121,11 @@ namespace ClassicUO.Game.GameObjects
             Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
+            bool hasShadow = HasShadow && position.Z >= 1000;
+
+            if (hasShadow)
+                position.Z -= 1000;
+
             if (Rotation != 0.0f)
             {
                 float w = Bounds.Width / 2f;
@@ -212,50 +217,32 @@ namespace ClassicUO.Game.GameObjects
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-            //if (HasShadow)
-            //{
-            //    SpriteVertex[] vertexS = new SpriteVertex[4]
-            //    {
-            //        vertex[0],
-            //        vertex[1],
-            //        vertex[2],
-            //        vertex[3]
-            //    };
 
-            //    batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + GameObject.Offset.Y - GameObject.Offset.Z + 22), IsFlipped, ShadowZDepth);
-            //}
+            if (hasShadow)
+            {
+                SpriteVertex[] vertexS =
+                {
+                    vertex[0],
+                    vertex[1],
+                    vertex[2],
+                    vertex[3]
+                };
 
-            //if (DrawTransparent)
-            //{
-            //    batcher.SetBlendState(_checkerBlend.Value);
-            //    batcher.DrawSprite(Texture, vertex);
-            //    batcher.SetBlendState(null, true);
+                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = ShaderHuesTraslator.GetHueVector(0, ShadersEffectType.Shadow);
 
-            //    batcher.SetStencil(_stencil.Value);
-            //    batcher.DrawSprite(Texture, vertex);
-            //    batcher.SetStencil(null);
-            //}
-            //else
-            //{
-            //    batcher.DrawSprite(Texture, vertex);
-            //}
+                batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + Offset.Y - Offset.Z + 22), IsFlipped, 0);
+            }
 
-            //if (DrawTransparent)
-            //{
-            //    vertex[0].Hue.Z = vertex[1].Hue.Z = vertex[2].Hue.Z = vertex[3].Hue.Z = 0.5f;
-
-            //    batcher.SetStencil(_stencil.Value);
-            //    batcher.DrawSprite(Texture, vertex);
-            //    batcher.SetStencil(null);
-            //}
             if (!batcher.DrawSprite(Texture, vertex))
                 return false;
-
 
             MousePick(list, vertex, isTransparent);
 
             return true;
         }
+
+       
+
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {

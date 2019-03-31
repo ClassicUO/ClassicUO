@@ -32,13 +32,31 @@ namespace ClassicUO.Game.UI.Controls
         public Hue Hue { get; set; }
         public bool IsPartial { get; set; }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             Vector3 vec = ShaderHuesTraslator.GetHueVector(Hue, IsPartial, Alpha, false);
 
             if (ScaleTexture)
-                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), vec);
-            return batcher.Draw2D(Texture, position, vec);
+            {
+                if (Texture is ArtTexture artTexture)
+                {
+                    //var rect = new Rectangle(position.X, position.Y, Width, Height);
+
+                    int w = Width;
+                    int h = Height;
+
+                    if (artTexture.ImageRectangle.Width < Width)
+                        w = artTexture.ImageRectangle.Width;
+                    if (artTexture.ImageRectangle.Height < Height)
+                        h = artTexture.ImageRectangle.Height;
+
+                    var r = artTexture.ImageRectangle;
+
+                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, vec);
+                }
+                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, vec);
+            }
+            return batcher.Draw2D(Texture, x, y, vec);
         }
     }
 }

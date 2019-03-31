@@ -32,7 +32,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
-        private Rectangle _rect;
         private bool _isNormalScroll;
         private readonly int _scrollbarHeight;
 
@@ -97,14 +96,12 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.Value += _scrollBar.ScrollStep;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
-            _rect.X = position.X;
-            _rect.Y = position.Y;
-            _rect.Width = Width - 14;
-            _rect.Height = Height;
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+            var scrollbar = Children[0];
+            scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
+
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width - 14, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
@@ -113,7 +110,6 @@ namespace ClassicUO.Game.UI.Controls
                 int maxheight = _scrollBar.Value + Height;
                 bool drawOnly1 = true;
 
-                position = _rect.Location;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -129,12 +125,12 @@ namespace ClassicUO.Game.UI.Controls
                         // do nothing
                     }
                     else if (height + child.Height <= maxheight)
-                        child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                        child.Draw(batcher, x + child.X, y + child.Y);
                     else
                     {
                         if (drawOnly1)
                         {
-                            child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                            child.Draw(batcher, x + child.X, y + child.Y);
                             drawOnly1 = false;
                         }
                     }

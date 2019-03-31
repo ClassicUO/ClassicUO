@@ -206,17 +206,17 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x ,y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
-                base.Draw(batcher, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
-                _gameText.Draw(batcher, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+                base.Draw(batcher, x, y); // TODO: set a scrollarea
+                _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }

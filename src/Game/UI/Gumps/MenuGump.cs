@@ -122,7 +122,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         class ContainerHorizontal : Control
         {
-            private Rectangle _rect;
             private int _maxWidth;
             private bool _update = true;
             private int _value;
@@ -163,15 +162,10 @@ namespace ClassicUO.Game.UI.Gumps
                     CalculateWidth();
                 }
             }
-
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            
+            public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                _rect.X = position.X;
-                _rect.Y = position.Y;
-                _rect.Width = Width;
-                _rect.Height = Height;
-
-                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
 
                 if (ScissorStack.PushScissors(scissor))
                 {
@@ -180,8 +174,6 @@ namespace ClassicUO.Game.UI.Gumps
                     int width = 0;
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
-
-                    position = _rect.Location;
 
                     for (int i = 0; i < Children.Count; i++)
                     {
@@ -198,13 +190,13 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else if (width + child.Width <= maxWidth)
                         {
-                            child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                            child.Draw(batcher, x, y);
                         }
                         else
                         {
                             if (drawOnly1)
                             {
-                                child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                                child.Draw(batcher, x, y);
                                 drawOnly1 = false;
                             }
                         }

@@ -210,17 +210,17 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             // sopra
-            batcher.Draw2DTiled(_borders[0], new Rectangle(position.X, position.Y, Width, _borderSize), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, Vector3.Zero);
             // sotto
-            batcher.Draw2DTiled(_borders[0], new Rectangle(position.X, position.Y + Height - _borderSize, Width, _borderSize), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, Vector3.Zero);
             //sx
-            batcher.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, Vector3.Zero);
             //dx
-            batcher.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
-            return base.Draw(batcher, position, hue);
+            batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, Vector3.Zero);
+            return base.Draw(batcher, x, y);
         }
     }
 }

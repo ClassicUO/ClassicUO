@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed || !SetName())
                 return false;
@@ -252,22 +252,16 @@ namespace ClassicUO.Game.UI.Gumps
             {                    
                GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
 
-                float x = (m.RealScreenPosition.X + gWinPos.X) / scale;
-                float y = (m.RealScreenPosition.Y + gWinPos.Y) / scale;
+                float xx = (m.RealScreenPosition.X + gWinPos.X) / scale;
+                float yy = (m.RealScreenPosition.Y + gWinPos.Y) / scale;
 
-                X = (int)(x + m.Offset.X) - (Width >> 1) + 22;
-                Y = (int)(y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - (Height >> 1) + (m.IsMounted ? 0 : 22);
+                X = (int)(xx + m.Offset.X) - (Width >> 1) + 22;
+                Y = (int)(yy + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - (Height >> 1) + (m.IsMounted ? 0 : 22);
             }
             else
             {
                 X = (int)(Entity.RealScreenPosition.X / scale) - (Width >> 1) + 22;
                 Y = (int)(Entity.RealScreenPosition.Y / scale) - (Height >> 1);
-            }
-
-            if (_edge == null)
-            {
-                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new [] { Color.Gray });
             }
 
 
@@ -276,22 +270,19 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
                 return false;
 
-            position.X = X;
-            position.Y = Y;
+            x = X;
+            y = Y;
 
-
-            batcher.DrawRectangle(_edge, new Rectangle(position.X - 1, position.Y - 1, Width + 1, Height + 1), Vector3.Zero);
-
-            base.Draw(batcher, position, hue);
-            return _renderedText.Draw(batcher, new Rectangle(position.X + 2, position.Y + 2, Width, Height), 0, 0);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, Vector3.Zero);
+            
+            base.Draw(batcher, x, y);
+            return _renderedText.Draw(batcher, x + 2, y + 2, Width, Height, 0, 0);
         }
 
-        private Texture2D _edge;
 
         public override void Dispose()
         {
             _renderedText?.Dispose();
-            _edge?.Dispose();
             base.Dispose();
         }
     }

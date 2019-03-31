@@ -14,9 +14,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public int Percent { get; set; }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            return batcher.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Percent, Height), ShaderHuesTraslator.GetHueVector(Hue));
+            return batcher.Draw2DTiled(Texture, x, y, Percent, Height, ShaderHuesTraslator.GetHueVector(Hue));
         }
     }
 }

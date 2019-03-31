@@ -24,6 +24,7 @@ namespace ClassicUO.Renderer.UI
         private StateType _state;
         private Vector2 _textSize;
         private string _text;
+        private bool _adaptSizeToText;
 
         public Button(int x, int y, int w, int h, string text) : this(text)
         {
@@ -41,6 +42,21 @@ namespace ClassicUO.Renderer.UI
             CanCloseWithRightClick = false;
         }
 
+        public bool AdaptSizeToText
+        {
+            get => _adaptSizeToText;
+            set
+            {
+                _adaptSizeToText = value;
+
+                if (_textSize != Vector2.Zero)
+                {
+                    Width = (int) (_textSize.X + 4);
+                    Height = (int) (_textSize.Y + 4);
+                }
+            }
+        }
+
         public string Text
         {
             get => _text;
@@ -48,6 +64,12 @@ namespace ClassicUO.Renderer.UI
             {
                 _text = value;
                 _textSize = Fonts.Regular.MeasureString(_text);
+
+                if (AdaptSizeToText)
+                {
+                    Width = (int)(_textSize.X + 4);
+                    Height = (int)(_textSize.Y + 4);
+                }
             }
         }
 
@@ -78,7 +100,7 @@ namespace ClassicUO.Renderer.UI
             base.OnMouseExit(x, y);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {          
             Texture2D texture;
             switch (_state)
@@ -98,10 +120,9 @@ namespace ClassicUO.Renderer.UI
                     break;
             }
 
-            Rectangle rect = new Rectangle(position.X, position.Y, Width, Height);
-            batcher.Draw2D(texture, rect, Vector3.Zero);
+            batcher.Draw2D(texture, x, y, Width, Height, Vector3.Zero);
 
-            batcher.DrawString(Fonts.Regular, Text, position.X - ((int)_textSize.X - Width) / 2, position.Y - ((int)_textSize.Y - Height) / 2, Vector3.Zero);
+            batcher.DrawString(Fonts.Regular, Text, x - ((int)_textSize.X - Width) / 2, y - ((int)_textSize.Y - Height) / 2, Vector3.Zero);
 
             return true; // base.Draw(batcher, position, hue);
         }

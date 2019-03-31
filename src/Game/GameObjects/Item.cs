@@ -332,6 +332,8 @@ namespace ClassicUO.Game.GameObjects
             //}
         }
 
+        public byte LightID { get; set; }
+
         public bool WantUpdateMulti { get; set; } = true;
 
         public MultiInfo MultiInfo { get; private set; }

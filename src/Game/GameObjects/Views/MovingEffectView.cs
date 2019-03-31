@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -57,7 +58,17 @@ namespace ClassicUO.Game.GameObjects
                 HueVector = ShaderHuesTraslator.GetHueVector(Hue);
 
             Engine.DebugInfo.EffectsRendered++;
-            return base.Draw(batcher, position, list);
+            base.Draw(batcher, position, list);
+
+            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
+
+            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            {
+                Engine.SceneManager.GetScene<GameScene>()
+                      .AddLight(Source, Source, (int)position.X + 22, (int)position.Y + 22);
+            }
+
+            return true;
         }
     }
 }

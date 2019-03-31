@@ -53,6 +53,7 @@ namespace ClassicUO.Game.GameObjects
             if (Graphic == 0)
                 return false;
 
+
             /*if (_frames[0].IsSitting)
             {
                 int x1 = 0, y1 = 0;
@@ -93,10 +94,14 @@ namespace ClassicUO.Game.GameObjects
                     hue = targetColor;
             }
 
-            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue);
+            bool drawShadow = !IsDead && !IsHidden;
+
+            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
             if (IsHuman)
+            {
                 DrawEquipment(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
+            }
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
@@ -116,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
         }
         //private static Texture2D _edge;
 
-        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
+        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool shadow)
         {
             Graphic graphic = GetGraphicForAnimation();
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
@@ -143,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                var hash = direction.FramesHashes[animIndex];
+                AnimationFrameTexture hash = direction.FramesHashes[animIndex];
 
                 if (hash == null)
                     return;
@@ -161,10 +166,7 @@ namespace ClassicUO.Game.GameObjects
                 else
                     drawX = -22 - (int)Offset.X;
 
-
-                if (IsHuman)
-                    DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
-
+                const int DELTA_SHADOW = 1000;
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
@@ -192,6 +194,40 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Y = -y;
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
+
+                if (IsHuman && Equipment[(int) Layer.Mount] != null)
+                {
+                    if (shadow)
+                    {
+                        position.Z += DELTA_SHADOW;
+                        base.Draw(batcher, position, objecList);
+
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+
+                        position.Z -= DELTA_SHADOW;
+                        Texture = frame;
+                        Bounds.X = x;
+                        Bounds.Y = -y;
+                        Bounds.Width = frame.Width;
+                        Bounds.Height = frame.Height;
+                    }
+                    else
+                    {
+                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        Texture = frame;
+                        Bounds.X = x;
+                        Bounds.Y = -y;
+                        Bounds.Width = frame.Width;
+                        Bounds.Height = frame.Height;
+                    }
+                }
+                else if (shadow)
+                {
+                    position.Z += DELTA_SHADOW;
+                    base.Draw(batcher, position, objecList);
+                    position.Z -= DELTA_SHADOW;
+                }
+
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                     HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
@@ -224,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue, isPartial, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(hue, !IsHidden && isPartial, 0, false);
                 }
 
                 base.Draw(batcher, position, objecList);
@@ -372,10 +408,17 @@ namespace ClassicUO.Game.GameObjects
                 else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                     HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, item.ItemData.IsPartialHue, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, !IsHidden && item.ItemData.IsPartialHue, 0, false);
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
+
+
+                if (item.ItemData.IsLight)
+                {
+                    Engine.SceneManager.GetScene<GameScene>()
+                          .AddLight(this, item, (IsFlipped ? (int)position.X + Bounds.X + 44 : (int)position.X - Bounds.X ), (int)position.Y + y + 22);
+                }
             }
 
         }

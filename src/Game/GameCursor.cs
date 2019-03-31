@@ -236,9 +236,8 @@ namespace ClassicUO.Game
         {
             Graphic = AssignGraphicByState();
 
-            if (/*Texture == null || Texture.IsDisposed ||*/ _needGraphicUpdate)
+            if (_needGraphicUpdate)
             {
-                //Texture = FileManager.Art.GetTexture(Graphic);
                 _needGraphicUpdate = false;
 
                 if (_cursor != IntPtr.Zero)
@@ -252,7 +251,7 @@ namespace ClassicUO.Game
                     id -= 0x206A;
                 int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-                ref CursorInfo info = ref _cursorPixels[war, id];
+                ref readonly CursorInfo info = ref _cursorPixels[war, id];
 
                 fixed (ushort* ptr = info.Pixels)
                     _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
@@ -276,15 +275,17 @@ namespace ClassicUO.Game
         {
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
-                Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
+                int x = Mouse.Position.X - _offset.X;
+                int y = Mouse.Position.Y - _offset.Y;
+
                 Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
-                sb.Draw2D(_draggedItemTexture, p, _rect, hue);
+                sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
                 {
-                    p.X += 5;
-                    p.Y += 5;
-                    sb.Draw2D(_draggedItemTexture, p, _rect, hue);
+                    x += 5;
+                    y += 5;
+                    sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
                 }
             }
             DrawToolTip(sb, Mouse.Position);
@@ -305,7 +306,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
-                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, position.X, position.Y + 24);
 
                         return;
                     }
@@ -335,7 +336,7 @@ namespace ClassicUO.Game
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
-                            _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+                            _tooltip.Draw(batcher, position.X, position.Y + 24);
 
                             return;
                         }
@@ -345,7 +346,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
                             _tooltip.SetGameObject(dynItem);
-                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, position.X, position.Y + 24);
 
                         return;
                     }
@@ -362,7 +363,7 @@ namespace ClassicUO.Game
 		            if (_tooltip.IsEmpty)
 			            _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
 
-		            _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
+		            _tooltip.Draw(batcher, position.X, position.Y + 24);
 	            }
             }
             else if (!_tooltip.IsEmpty)

@@ -684,7 +684,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             int idx = Position;
                             Seek(7);
-                            gump.m_Pages[changed[i]].Text.Insert(0, string.Format("{0}\n", splits[j]));
+                            gump.m_Pages[changed[i]].Text = gump.m_Pages[changed[i]].Text.Insert(0, string.Format("{0}\n", splits[j]));
                             changed.Insert(0, changed[i]);
                             WriteUShort((ushort)changed.Count);
                             Seek(idx);

@@ -188,10 +188,10 @@ namespace ClassicUO.Game.UI.Controls
             _entered = false;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             SpriteTexture texture = GetTextureByState();
-            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
+            batcher.Draw2D(texture, x, y, Width, Height, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
 
             //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
@@ -202,13 +202,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-                    textTexture.Draw(batcher, new Point(position.X + ((Width - textTexture.Width) >> 1), position.Y + yoffset + ((Height - textTexture.Height) >> 1)));
+                    textTexture.Draw(batcher, x + ((Width - textTexture.Width) >> 1), y + yoffset + ((Height - textTexture.Height) >> 1));
                 }
                 else
-                    textTexture.Draw(batcher, position);
+                    textTexture.Draw(batcher, x, y);
             }
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, x, y);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
+            return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
         public override void Dispose()

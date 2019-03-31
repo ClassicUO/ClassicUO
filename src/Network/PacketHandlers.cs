@@ -543,6 +543,7 @@ namespace ClassicUO.Network
                 item.IsMulti = true;
             }
 
+            item.LightID = direction;
             item.Container = Serial.INVALID;
             item.CheckGraphicChange();
             item.ProcessDelta();
@@ -3247,6 +3248,7 @@ namespace ClassicUO.Network
             p.Skip(2); //amount again? wtf???
             Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             item.Direction = (Direction)p.ReadByte();
+            item.LightID = (byte) item.Direction;
             item.Hue = p.ReadUShort();
             item.Flags = (Flags)p.ReadByte();
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
@@ -3343,7 +3345,7 @@ namespace ClassicUO.Network
         {
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
+            if (gs != null && gs.HeldItem.Serial == serial && (gs.HeldItem.Dropped || gs.HeldItem.Enabled))
                 gs.HeldItem.Clear();
 
             Entity container = World.Get(containerSerial);

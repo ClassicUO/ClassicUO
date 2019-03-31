@@ -500,17 +500,21 @@ namespace ClassicUO
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                string msg = e.ExceptionObject.ToString();
-                Log.Message(LogTypes.Panic, msg);
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86");
+                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
+
+                Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
                 string path = Path.Combine(ExePath, "Logs");
 
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
-                    crashfile.WriteAsync(msg).RunSynchronously();
+                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
             };
 #endif
+
             // We can use the mono's dllmap feature, but 99% of people use VS to compile.
             if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {

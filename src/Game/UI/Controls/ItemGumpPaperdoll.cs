@@ -106,12 +106,12 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
+            return batcher.Draw2D(Texture, x, y, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
         }
 
         protected override void UpdateLabel()

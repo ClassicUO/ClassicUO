@@ -37,10 +37,10 @@ namespace ClassicUO.Renderer.UI
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            batcher.DrawString(Fonts.Regular, Text, position.X, position.Y, Vector3.Zero);
-            return base.Draw(batcher, position, hue);
+            batcher.DrawString(Fonts.Regular, Text, x, y, Vector3.Zero);
+            return base.Draw(batcher, x, y);
         }
     }
 }

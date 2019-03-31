@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (Height <= 0 || !IsVisible)
                 return false;
@@ -177,27 +177,27 @@ namespace ClassicUO.Game.UI.Controls
 
             if (middleHeight > 0)
             {
-                batcher.Draw2D(_textureBackground[0], new Point(position.X, position.Y + _textureUpButton[0].Height), Vector3.Zero);
-                batcher.Draw2DTiled(_textureBackground[1], new Rectangle(position.X, position.Y + _textureUpButton[0].Height + _textureBackground[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
-                batcher.Draw2D(_textureBackground[2], new Point(position.X, position.Y + Height - _textureDownButton[0].Height - _textureBackground[2].Height), Vector3.Zero);
+                batcher.Draw2D(_textureBackground[0], x, y + _textureUpButton[0].Height, Vector3.Zero);
+                batcher.Draw2DTiled(_textureBackground[1], x, y + _textureUpButton[0].Height + _textureBackground[0].Height, _textureBackground[0].Width, middleHeight, Vector3.Zero);
+                batcher.Draw2D(_textureBackground[2], x, y + Height - _textureDownButton[0].Height - _textureBackground[2].Height, Vector3.Zero);
             }
             else
             {
                 middleHeight = Height - _textureUpButton[0].Height - _textureDownButton[0].Height;
-                batcher.Draw2DTiled(_textureBackground[1], new Rectangle(position.X, position.Y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
+                batcher.Draw2DTiled(_textureBackground[1], x, y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight, Vector3.Zero);
             }
 
             // draw up button
-            batcher.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], position, Vector3.Zero);
+            batcher.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], x, y, Vector3.Zero);
 
             // draw down button
-            batcher.Draw2D(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], new Point(position.X, position.Y + Height - _textureDownButton[0].Height), Vector3.Zero);
+            batcher.Draw2D(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x, y + Height - _textureDownButton[0].Height, Vector3.Zero);
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
-                batcher.Draw2D(_textureSlider, new Point(position.X + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), (int) (position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
+                batcher.Draw2D(_textureSlider, x + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), (int) (y + _textureUpButton[0].Height + _sliderPosition), Vector3.Zero);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, x, y);
         }
 
         private float GetSliderYPosition()

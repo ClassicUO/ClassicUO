@@ -54,11 +54,11 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            _gameText.Draw(batcher, position);
+            _gameText.Draw(batcher, x, y);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()

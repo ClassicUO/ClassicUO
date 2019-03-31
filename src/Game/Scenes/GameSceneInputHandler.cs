@@ -74,6 +74,7 @@ namespace ClassicUO.Game.Scenes
         };
 
         private bool _isShiftDown;
+        private bool _isCtrlDown;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
 	    
@@ -381,7 +382,8 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-	        _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+            _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+            _isCtrlDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
@@ -403,7 +405,6 @@ namespace ClassicUO.Game.Scenes
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
-
             _useObjectHandles = isshift && isctrl;
 
             Macro macro = _macroManager.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
@@ -414,11 +415,6 @@ namespace ClassicUO.Game.Scenes
                 _macroManager.WaitForTargetTimer = 0;
                 _macroManager.Update();
             }
-
-            //if (_hotkeysManager.TryExecuteIfBinded(e.keysym.sym, e.keysym.mod, out Action action))
-            //{
-            //    action();
-            //}
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
@@ -427,7 +423,11 @@ namespace ClassicUO.Game.Scenes
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
+            if (Engine.Profile.Current.EnableScaleZoom && Engine.Profile.Current.RestoreScaleAfterUnpressCtrl && _isCtrlDown && !isctrl)
+                Engine.SceneManager.GetScene<GameScene>().Scale = Engine.Profile.Current.RestoreScaleValue;
+
             _isShiftDown = isshift;
+            _isCtrlDown = isctrl;
 
             _useObjectHandles = isctrl && isshift;
 

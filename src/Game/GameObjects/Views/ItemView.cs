@@ -22,6 +22,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -67,7 +68,13 @@ namespace ClassicUO.Game.GameObjects
                 Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                 base.Draw(batcher, offsetDrawPosition, objectList);
             }
-            
+
+            if (ItemData.IsLight)
+            {
+                Engine.SceneManager.GetScene<GameScene>()
+                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
+            }
+
             return base.Draw(batcher, position, objectList);
         }
 

@@ -35,6 +35,8 @@ using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
 
+using SDL2;
+
 namespace ClassicUO.Configuration
 {
     internal sealed class Profile
@@ -101,9 +103,13 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
         [JsonProperty] public bool UseCircleOfTransparency { get; set; } = false;
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
+
+        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
+        [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
         [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
         [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
-        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
+        [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; } = false;
+
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
 
         [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
@@ -138,7 +144,65 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
-        [JsonProperty] public Macro[] Macros { get; set; } = new Macro[0];
+        [JsonProperty]
+        public Macro[] Macros { get; set; } =
+        {
+            new Macro("Paperdoll", (SDL.SDL_Keycode)112, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType)8, (MacroSubType)10)
+                {
+                    HasSubMenu = 1
+                },         
+            },
+
+            new Macro("Options", (SDL.SDL_Keycode)111, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType)8, (MacroSubType)9)
+                {
+                    HasSubMenu = 1
+                },
+            },
+
+            new Macro("Journal", (SDL.SDL_Keycode)106, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType)8, (MacroSubType)12)
+                {
+                    HasSubMenu = 1
+                },
+            },
+
+            new Macro("Backpack", (SDL.SDL_Keycode)105, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType)8, (MacroSubType)16)
+                {
+                    HasSubMenu = 1
+                },
+            },
+
+            new Macro("Radar", (SDL.SDL_Keycode)114, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType)8, (MacroSubType)17)
+                {
+                    HasSubMenu = 1
+                },
+            },
+
+            new Macro("Bow", (SDL.SDL_Keycode)98, false, true, false)
+            {
+                FirstNode = new MacroObject((MacroType)18, (MacroSubType)0)
+                {
+                    HasSubMenu = 0
+                },
+            },
+
+            new Macro("Salute", (SDL.SDL_Keycode)115, false, true, false)
+            {
+                FirstNode = new MacroObject((MacroType)19, (MacroSubType)0)
+                {
+                    HasSubMenu = 0
+                },
+            },
+        };
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
@@ -257,7 +321,7 @@ namespace ClassicUO.Configuration
                         }
                         catch (Exception e)
                         {
-                            Log.Message(LogTypes.Error, e.Message);
+                            Log.Message(LogTypes.Error, e.StackTrace);
                         }
                       
                     }
@@ -267,10 +331,17 @@ namespace ClassicUO.Configuration
             string anchorsPath = Path.Combine(path, "anchors.bin");
             if (File.Exists(anchorsPath))
             {
-                using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                try
                 {
-                    Engine.AnchorManager.Restore(reader, gumps);
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                    {
+                        Engine.AnchorManager.Restore(reader, gumps);
+                    }
                 }
+                catch (Exception e)
+                {
+                    Log.Message(LogTypes.Error, e.StackTrace);
+                }             
             }
 
             return gumps;

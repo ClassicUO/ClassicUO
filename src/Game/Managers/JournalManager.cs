@@ -11,7 +11,7 @@ namespace ClassicUO.Game.Managers
 
         public IReadOnlyList<JournalEntry> Entries => _entries;
 
-        public event EventHandler<JournalEntry> EntryAdded; 
+        public event EventHandler<JournalEntry> EntryAdded;
 
         public void Add(string text, Hue hue, string name, bool isunicode = true)
         {

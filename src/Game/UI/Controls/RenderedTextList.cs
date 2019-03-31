@@ -46,10 +46,13 @@ namespace ClassicUO.Game.UI.Controls
             _entries = new Deque<RenderedText>();
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            base.Draw(batcher, position, hue);
-            Point p = new Point(position.X, position.Y);
+            base.Draw(batcher, x, y);
+
+            int mx = x;
+            int my = y;
+
             int height = 0;
             int maxheight = _scrollBar.Value + _scrollBar.Height;
 
@@ -62,27 +65,27 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (height + _entries[i].Height <= maxheight)
                 {
-                    int y = height - _scrollBar.Value;
+                    int yy = height - _scrollBar.Value;
 
-                    if (y < 0)
+                    if (yy < 0)
                     {
                         // this entry starts above the renderable area, but exists partially within it.
-                        _entries[i].Draw(batcher, new Rectangle(p.X, position.Y, _entries[i].Width, _entries[i].Height + y), 0, -y);
-                        p.Y += _entries[i].Height + y;
+                        _entries[i].Draw(batcher, mx, y, _entries[i].Width, _entries[i].Height + yy, 0, -yy);
+                        my += _entries[i].Height + yy;
                     }
                     else
                     {
                         // this entry is completely within the renderable area.
-                        _entries[i].Draw(batcher, p);
-                        p.Y += _entries[i].Height;
+                        _entries[i].Draw(batcher, mx, my);
+                        my += _entries[i].Height;
                     }
 
                     height += _entries[i].Height;
                 }
                 else
                 {
-                    int y = maxheight - height;
-                    _entries[i].Draw(batcher, new Rectangle(p.X, position.Y + _scrollBar.Height - y, _entries[i].Width, y), 0, 0);
+                    int yyy = maxheight - height;
+                    _entries[i].Draw(batcher, mx, y + _scrollBar.Height - yyy, _entries[i].Width, yyy, 0, 0);
 
                     // can't fit any more entries - so we break!
                     break;

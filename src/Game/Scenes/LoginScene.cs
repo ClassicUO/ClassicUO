@@ -667,8 +667,12 @@ namespace ClassicUO.Game.Scenes
                                 break;
                         }
 
-                        descr[cityIndex++] = text.ToString();
+                        if (descr.Length <= cityIndex)
+                        {
+                            break;
+                        }
 
+                        descr[cityIndex++] = text.ToString();
                     }
                     else
                         stream.Position -= 3;

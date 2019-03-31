@@ -131,12 +131,12 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, int x, int y)
         {
-            return Draw(batcher, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
+            return Draw(batcher, x, y, Width, Height, 0, 0);
         }
 
-        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
@@ -146,30 +146,30 @@ namespace ClassicUO.Renderer
                 return false;
             src.X = offsetX;
             src.Y = offsetY;
-            int maxX = src.X + dst.Width;
+            int maxX = src.X + dwidth;
 
             if (maxX <= Width)
-                src.Width = dst.Width;
+                src.Width = dwidth;
             else
             {
                 src.Width = Width - src.X;
-                dst.Width = src.Width;
+                dwidth = src.Width;
             }
 
-            int maxY = src.Y + dst.Height;
+            int maxY = src.Y + dheight;
 
             if (maxY <= Height)
-                src.Height = dst.Height;
+                src.Height = dheight;
             else
             {
                 src.Height = Height - src.Y;
-                dst.Height = src.Height;
+                dheight = src.Height;
             }
 
             if (Texture == null)
                 return false;
 
-            return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, Vector3.Zero);
         }
 
         public void CreateTexture()
