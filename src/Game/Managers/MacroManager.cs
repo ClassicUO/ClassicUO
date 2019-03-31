@@ -513,6 +513,9 @@ namespace ClassicUO.Game.Managers
                     GameActions.AllNames();
 
                     break;
+                case MacroType.LastObject:
+                    GameActions.DoubleClick(GameActions.LastObject);
+                    break;
                 case MacroType.LastTarget:
 
                     if (WaitForTargetTimer == 0)
