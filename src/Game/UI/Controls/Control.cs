@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(Batcher2D batcher, Point position)
+        public virtual bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
 
@@ -309,20 +309,19 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (c.IsVisible && c.IsInitialized)
                     {
-                        Point offset = new Point(c.X + position.X, c.Y + position.Y);
-                        c.Draw(batcher, offset);
+                        c.Draw(batcher, c.X + x, c.Y + y);
 
                         //DrawDebug(batcher, position);
                     }
                 }
             }
 
-            DrawDebug(batcher, position);
+            DrawDebug(batcher, x, y);
 
             return true;
         }
 
-        private void DrawDebug(Batcher2D batcher, Point position)
+        private void DrawDebug(Batcher2D batcher, int x, int y)
         {
             if (IsVisible && Engine.GlobalSettings.Debug)
             {
@@ -349,7 +348,7 @@ namespace ClassicUO.Game.UI.Controls
                 //    h = Texture.Height;
                 //}
 
-                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+                batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
             }
         }
 

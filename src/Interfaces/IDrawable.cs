@@ -36,10 +36,8 @@ namespace ClassicUO.Interfaces
 
     internal interface IDrawableUI
     {
-        bool AllowedToDraw { get; set; }
-
         SpriteTexture Texture { get; set; }
 
-        bool Draw(Batcher2D batcher, Point position);
+        bool Draw(Batcher2D batcher, int x, int y);
     }
 }

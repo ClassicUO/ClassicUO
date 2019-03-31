@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             //batcher.Draw2D(_mapTexture, Bounds, position);
 
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
@@ -263,30 +263,28 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY)
         {
-            Rectangle src = new Rectangle();
+            int sx = offsetX;
+            int sy = offsetY;
+            int sw = 0, sh = 0;
 
-            //if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
-            //    return false;
-            src.X = offsetX;
-            src.Y = offsetY;
-            int maxX = src.X + dst.Width;
+            int maxX = sx + dst.Width;
 
             if (maxX <= Width)
-                src.Width = dst.Width;
+                sw = dst.Width;
             else
             {
-                src.Width = Width - src.X;
-                dst.Width = src.Width;
+                sw = Width - sx;
+                dst.Width = sw;
             }
 
-            int maxY = src.Y + dst.Height;
+            int maxY = sy + dst.Height;
 
             if (maxY <= Height)
-                src.Height = dst.Height;
+                sh = dst.Height;
             else
             {
-                src.Height = Height - src.Y;
-                dst.Height = src.Height;
+                sh = Height - sy;
+                dst.Height = sh;
             }
 
             //src.X = World.Player.Position.X - src.Width / 2;
@@ -297,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
             //dst.X = (int)rotDest.X;
             //dst.Y = (int)rotDest.Y;
 
-            return batcher.Draw2D(_mapTexture, dst, src, Vector3.Zero);
+            return batcher.Draw2D(_mapTexture, dst.X, dst.Y, dst.Width, dst.Height, sx, sy, sw, sh, Vector3.Zero);
         }
     }
 }

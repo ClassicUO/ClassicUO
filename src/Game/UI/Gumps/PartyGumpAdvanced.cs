@@ -176,13 +176,13 @@ namespace ClassicUO.Game.UI.Gumps
         }
         private Texture2D _edge;
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            base.Draw(batcher, position);
-            batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            base.Draw(batcher, x, y);
+            batcher.Draw2D(_line, x + 30, y + 50, 260, 1, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, x + 95, y+ 50, 1, 200, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, x + 245, y + 50, 1, 200, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, x + 30, y + 250, 260, 1, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
 
             if (_edge == null)
             {
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _edge.SetData(new Color[] { Color.Gray });
             }
 
-            batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+            batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
 
             return true;
         }

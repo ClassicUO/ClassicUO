@@ -56,9 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
 
@@ -122,14 +122,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public override bool Draw(Batcher2D batcher, Point position)
+            public override bool Draw(Batcher2D batcher, int x, int y)
             {
                 if (MouseIsOver)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Gray), new Rectangle(position.X, position.Y, Width, Width), Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Width, Vector3.Zero);
 
                 //batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X, position.Y, Width, Width), ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false));
 
-                base.Draw(batcher, position);
+                base.Draw(batcher, x, y);
 
                 string text = _amount.ToString();
 

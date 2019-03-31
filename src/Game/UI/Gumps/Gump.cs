@@ -105,9 +105,9 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            return IsVisible && base.Draw(batcher, position);
+            return IsVisible && base.Draw(batcher, x, y);
         }
 
         public override void OnButtonClick(int buttonID)

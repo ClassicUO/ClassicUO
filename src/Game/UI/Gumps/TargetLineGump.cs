@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Hue = Notoriety.GetHue(Mobile.NotorietyFlag);;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (Engine.Profile == null || Engine.Profile.Current == null)
                 return false;
@@ -89,11 +89,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile != null && !Mobile.IsDisposed)
             {
-                float x = (Mobile.RealScreenPosition.X + gWinPos.X) / scale;
-                float y = (Mobile.RealScreenPosition.Y + gWinPos.Y) / scale;
+                float xx = (Mobile.RealScreenPosition.X + gWinPos.X) / scale;
+                float yy = (Mobile.RealScreenPosition.Y + gWinPos.Y) / scale;
 
-                X = (int)(x + Mobile.Offset.X) - Width / 2 + 22;
-                Y = (int)(y + Mobile.Offset.Y - Mobile.Offset.Z) + 22;
+                X = (int)(xx + Mobile.Offset.X) - Width / 2 + 22;
+                Y = (int)(yy + Mobile.Offset.Y - Mobile.Offset.Z) + 22;
             }
 
             if (X < gWinPos.X || X + Width > gWinPos.X + gWinSize.X)
@@ -101,10 +101,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
                 return false;
 
-            position.X = X;
-            position.Y = Y;
+            x = X;
+            y = Y;
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
     }
 }

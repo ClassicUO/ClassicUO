@@ -1069,25 +1069,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionY.Text = gump.Y.ToString();
         }
 
-        private Texture2D _edge;
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            if (_edge == null)
-            {
-                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false , SurfaceFormat.Color);
-                _edge.SetData(new Color[] { Color.Gray });
-            }
-
-            batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-            return base.Draw(batcher, position);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
+            return base.Draw(batcher, x, y);
         }
 
-        public override void Dispose()
-        {
-            _edge?.Dispose();
-            base.Dispose();
-        }
+
 
         private enum Buttons
         {
@@ -1202,10 +1191,10 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(Batcher2D batcher, Point position)
+            public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                batcher.Draw2D(_background, new Point(position.X - 3, position.Y - 3), Vector3.Zero);
-                return base.Draw(batcher, position);
+                batcher.Draw2D(_background, x - 3, y - 3, Vector3.Zero);
+                return base.Draw(batcher, x, y);
             }
 
             protected override void OnMouseClick(int x, int y, MouseButton button)

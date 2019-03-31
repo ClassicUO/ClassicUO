@@ -100,7 +100,7 @@ namespace ClassicUO.Renderer.UI
             base.OnMouseExit(x, y);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {          
             Texture2D texture;
             switch (_state)
@@ -120,10 +120,9 @@ namespace ClassicUO.Renderer.UI
                     break;
             }
 
-            Rectangle rect = new Rectangle(position.X, position.Y, Width, Height);
-            batcher.Draw2D(texture, rect, Vector3.Zero);
+            batcher.Draw2D(texture, x, y, Width, Height, Vector3.Zero);
 
-            batcher.DrawString(Fonts.Regular, Text, position.X - ((int)_textSize.X - Width) / 2, position.Y - ((int)_textSize.Y - Height) / 2, Vector3.Zero);
+            batcher.DrawString(Fonts.Regular, Text, x - ((int)_textSize.X - Width) / 2, y - ((int)_textSize.Y - Height) / 2, Vector3.Zero);
 
             return true; // base.Draw(batcher, position, hue);
         }

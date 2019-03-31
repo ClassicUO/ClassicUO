@@ -248,15 +248,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 };
             }
 
-            public override bool Draw(Batcher2D batcher, Point position)
+            public override bool Draw(Batcher2D batcher, int x, int y)
             {
                 if (IsDisposed)
                     return false;
-                _labelName.Draw(batcher, position + new Point(74, 0));
-                _labelPing.Draw(batcher, position + new Point(250, 0));
-                _labelPacketLoss.Draw(batcher, position + new Point(310, 0));
+                _labelName.Draw(batcher, x + 74, y);
+                _labelPing.Draw(batcher, x + 250, y);
+                _labelPacketLoss.Draw(batcher, x + 310 , y);
 
-                return base.Draw(batcher, position);
+                return base.Draw(batcher, x, y);
             }
 
             protected override void OnMouseOver(int x, int y)

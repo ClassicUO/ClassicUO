@@ -248,69 +248,69 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-            DrawInternal(batcher, position, color);
-            return base.Draw(batcher, position);
+            DrawInternal(batcher, x, y, color);
+            return base.Draw(batcher, x, y);
         }
 
-        private void DrawInternal(Batcher2D batcher, Point position, Vector3 color)
+        private void DrawInternal(Batcher2D batcher, int x, int y, Vector3 color)
         {
             for (int i = 0; i < 9; i++)
             {
                 SpriteTexture t = _gumpTexture[i];
                 int drawWidth = t.Width;
                 int drawHeight = t.Height;
-                int drawX = position.X;
-                int drawY = position.Y;
+                int drawX = x;
+                int drawY = y;
 
                 switch (i)
                 {
                     case 0:
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 1:
                         drawX += _gumpTexture[0].Width;
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 2:
                         drawX += Width - drawWidth;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 3:
                         drawY += _gumpTexture[0].Height;
                         drawHeight = Height - _gumpTexture[0].Height - _gumpTexture[5].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 4:
                         drawX += Width - drawWidth /*- offsetRight*/;
                         drawY += _gumpTexture[2].Height;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 5:
                         drawY += Height - drawHeight;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 6:
                         drawX += _gumpTexture[5].Width;
                         drawY += Height - drawHeight /*- offsetBottom*/;
                         drawWidth = Width - _gumpTexture[5].Width - _gumpTexture[7].Width;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 7:
                         drawX += Width - drawWidth;
                         drawY += Height - drawHeight;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, color);
 
                         break;
                     case 8:
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (OnlyCenterTransparent)
                             c.Z = 1;
 
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), c);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, c);
 
                         break;
                 }

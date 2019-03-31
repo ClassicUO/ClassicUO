@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI
 
         public GameObject Object => _gameObject;
 
-        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, int x, int y)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -107,18 +107,18 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            if (position.X < 0)
-                position.X = 0;
-            else if (position.X > Engine.WindowWidth - (_renderedText.Width + 8))
-                position.X = Engine.WindowWidth - (_renderedText.Width + 8);
+            if (x < 0)
+                x = 0;
+            else if (x > Engine.WindowWidth - (_renderedText.Width + 8))
+                x = Engine.WindowWidth - (_renderedText.Width + 8);
 
-            if (position.Y < 0)
-                position.Y = 0;
-            else if (position.Y > Engine.WindowHeight - (_renderedText.Height + 8))
-                position.Y = Engine.WindowHeight - (_renderedText.Height + 8);
-            batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+            if (y < 0)
+                y = 0;
+            else if (y > Engine.WindowHeight - (_renderedText.Height + 8))
+                y = Engine.WindowHeight - (_renderedText.Height + 8);
+            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
-            return _renderedText.Draw(batcher, position);
+            return _renderedText.Draw(batcher, x, y);
         }
 
         public void Clear()

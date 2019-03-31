@@ -178,11 +178,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override bool Draw(Batcher2D batcher, Point position)
+            public override bool Draw(Batcher2D batcher, int x, int y)
             {
                 Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
 
-                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(_point.X, _point.Y, _originalSize.X, _originalSize.Y), huev);
+                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, huev);
             }
 
             protected override bool Contains(int x, int y)

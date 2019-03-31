@@ -297,19 +297,19 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            int y = textBox.Y + position.Y - 20;
+            int yy = textBox.Y + y - 20;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
-                y -= _textEntries[i].TextHeight;
+                yy -= _textEntries[i].TextHeight;
 
-                if (y >= position.Y)
-                    _textEntries[i].Draw(batcher, new Point(position.X + 2, y));
+                if (yy >= y)
+                    _textEntries[i].Draw(batcher, x + 2, yy);
             }
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -483,9 +483,9 @@ namespace ClassicUO.Game.UI.Gumps
             public int TextHeight => _renderedText.Height;
 
            
-            public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public bool Draw(Batcher2D batcher, int x, int y)
             {
-                return _renderedText.Draw(batcher, position, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true));
+                return _renderedText.Draw(batcher, x, y/*, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true)*/);
             }
 
             public void Update(double totalMS, double frameMS)

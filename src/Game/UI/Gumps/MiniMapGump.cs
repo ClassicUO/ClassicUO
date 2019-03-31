@@ -97,14 +97,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
                 return false;
 
-            batcher.Draw2D(_gumpTexture, position, Vector3.Zero);
+            batcher.Draw2D(_gumpTexture, x, y, Vector3.Zero);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, position, Vector3.Zero);      
+            batcher.Draw2D(_mapTexture, x, y, Vector3.Zero);      
 
             if (_draw)
             {
@@ -126,20 +126,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (Mobile mob in World.Mobiles.Where(s => s != World.Player))
                 {
-                    int x = mob.X - World.Player.X;
-                    int y = mob.Y - World.Player.Y;
+                    int xx = mob.X - World.Player.X;
+                    int yy = mob.Y - World.Player.Y;
 
-                    int gx = x - y;
-                    int gy = x + y;
+                    int gx = xx - yy;
+                    int gy = xx + yy;
 
-                    batcher.Draw2D(_mobilesIndicator, new Rectangle(position.X + w + gx, position.Y + h + gy, 2, 2), ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
+                    batcher.Draw2D(_mobilesIndicator,x + w + gx, y + h + gy, 2, 2, ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
                 }
 
                 //DRAW DOT OF PLAYER
-                batcher.Draw2D(_playerIndicator, new Rectangle(position.X + w, position.Y + h, 2, 2), Vector3.Zero);
+                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, Vector3.Zero);
             }
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)

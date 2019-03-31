@@ -164,17 +164,17 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
+            TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
             if (IsEditable)
             {
                 if (HasKeyboardFocus)
-                    TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                    TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
             }
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         protected override void OnTextInput(string c)

@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Controls
             return blend;
         });
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Controls
 
             //return true;
 
-            return batcher.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            return batcher.Draw2D(TransparentTexture, x, y, Width, Height, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
         }
     }
 }

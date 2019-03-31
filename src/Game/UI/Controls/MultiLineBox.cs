@@ -84,29 +84,22 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        private Rectangle _rect;
-
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (ScissorsEnabled)
             {
-                _rect.X = position.X;
-                _rect.Y = position.Y;
-                _rect.Width = Width;
-                _rect.Height = Height;
-
-                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
 
                 if (ScissorStack.PushScissors(scissor))
                 {
                     batcher.EnableScissorTest(true);
 
-                    TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
+                    TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
                     if (IsEditable)
                     {
                         if (HasKeyboardFocus)
-                            TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                            TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
                     }
 
                     batcher.EnableScissorTest(false);
@@ -115,16 +108,16 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                TxEntry.RenderText.Draw(batcher, new Point(position.X + TxEntry.Offset, position.Y));
+                TxEntry.RenderText.Draw(batcher, x+ TxEntry.Offset, y);
 
                 if (IsEditable)
                 {
                     if (HasKeyboardFocus)
-                        TxEntry.RenderCaret.Draw(batcher, new Point(position.X + TxEntry.Offset + TxEntry.CaretPosition.X, position.Y + TxEntry.CaretPosition.Y));
+                        TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
                 }
             }
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         protected override void OnTextInput(string c)

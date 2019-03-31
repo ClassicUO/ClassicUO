@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (_edge == null)
             {
@@ -198,8 +198,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _edge.SetData(new Color[] { Color.Gray });
             }
 
-            batcher.DrawRectangle(_edge, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
-            return base.Draw(batcher, position);
+            batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
+            return base.Draw(batcher, x, y);
         }
 
         private Texture2D _edge;

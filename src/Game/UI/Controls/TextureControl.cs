@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
         public Hue Hue { get; set; }
         public bool IsPartial { get; set; }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             Vector3 vec = ShaderHuesTraslator.GetHueVector(Hue, IsPartial, Alpha, false);
 
@@ -40,18 +40,23 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Texture is ArtTexture artTexture)
                 {
-                    var rect = new Rectangle(position.X, position.Y, Width, Height);
+                    //var rect = new Rectangle(position.X, position.Y, Width, Height);
+
+                    int w = Width;
+                    int h = Height;
 
                     if (artTexture.ImageRectangle.Width < Width)
-                        rect.Width = artTexture.ImageRectangle.Width;
+                        w = artTexture.ImageRectangle.Width;
                     if (artTexture.ImageRectangle.Height < Height)
-                        rect.Height = artTexture.ImageRectangle.Height;
+                        h = artTexture.ImageRectangle.Height;
 
-                    return batcher.Draw2D(Texture, rect, artTexture.ImageRectangle, vec);
+                    var r = artTexture.ImageRectangle;
+
+                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, vec);
                 }
-                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(0, 0, Texture.Width, Texture.Height), vec);
+                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, vec);
             }
-            return batcher.Draw2D(Texture, position, vec);
+            return batcher.Draw2D(Texture, x, y, vec);
         }
     }
 }

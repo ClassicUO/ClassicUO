@@ -155,19 +155,18 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
             if (MaxValue != MinValue)
-                batcher.Draw2D(Texture, p, Vector3.Zero);
+                batcher.Draw2D(Texture, x, (int)(y + _sliderPosition), Vector3.Zero);
 
             if (_showButtons)
             {
-                batcher.Draw2D(_upButton, position, Vector3.Zero);
-                batcher.Draw2D(_downButton, new Point(position.X, position.Y + Height), Vector3.Zero);
+                batcher.Draw2D(_upButton, x, y, Vector3.Zero);
+                batcher.Draw2D(_downButton, x, y + Height, Vector3.Zero);
             }
 
-            return base.Draw(batcher, p);
+            return base.Draw(batcher, x, y);
         }
 
         private float GetSliderYPosition()

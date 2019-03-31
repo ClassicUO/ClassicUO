@@ -58,11 +58,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             EntryValue.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
     }
 }

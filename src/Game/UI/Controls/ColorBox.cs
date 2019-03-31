@@ -48,9 +48,9 @@ namespace ClassicUO.Game.UI.Controls
                 Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+            return batcher.Draw2D(Texture, x, y, Width, Height, Vector3.Zero);
         }
 
         public override void Dispose()

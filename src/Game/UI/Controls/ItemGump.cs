@@ -126,13 +126,13 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
-            batcher.Draw2D(Texture, position, huev);
+            batcher.Draw2D(Texture, x, y, huev);
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
-            return base.Draw(batcher, position);
+                batcher.Draw2D(Texture, x + 5, y + 5, huev);
+            return base.Draw(batcher, x, y);
         }
 
         protected override bool Contains(int x, int y)

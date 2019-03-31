@@ -59,15 +59,15 @@ namespace ClassicUO.Game.UI.Controls
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
             if (MouseIsOver)
-                batcher.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
             
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()

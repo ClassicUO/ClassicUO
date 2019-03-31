@@ -154,19 +154,19 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
-                batcher.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle(position.X + _gumpSpliderBackground[0].Width, position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
-                batcher.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x , y, Vector3.Zero);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, Vector3.Zero);
             }
 
-            batcher.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
-            _text?.Draw(batcher, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
+            batcher.Draw2D(_gumpWidget, x+ _sliderX, y, Vector3.Zero);
+            _text?.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         private void InternalSetValue(int value)

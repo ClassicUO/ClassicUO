@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _label.Text = _sb.ToString();
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         private string ReadObject(GameObject obj)

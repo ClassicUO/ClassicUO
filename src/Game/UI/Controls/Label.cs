@@ -82,13 +82,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public byte Font => _gText.Font;
 
-        public override bool Draw(Batcher2D batcher, Point position)
+        public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
 
-            _gText.Draw(batcher, position);
+            _gText.Draw(batcher, x , y);
 
-            return base.Draw(batcher, position);
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()

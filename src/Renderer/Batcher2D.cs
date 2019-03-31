@@ -202,17 +202,17 @@ namespace ClassicUO.Renderer
             DrawSprite(texture, vertices);
         }
 
-        public bool Draw2D(Texture2D texture, Point position, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, Vector3 hue)
         {
-            _vertexBufferUI[0].Position.X = position.X;
-            _vertexBufferUI[0].Position.Y = position.Y;
+            _vertexBufferUI[0].Position.X = x;
+            _vertexBufferUI[0].Position.Y = y;
             _vertexBufferUI[0].Position.Z = 0;
             _vertexBufferUI[0].Normal.X = 0;
             _vertexBufferUI[0].Normal.Y = 0;
             _vertexBufferUI[0].Normal.Z = 1;
             _vertexBufferUI[0].TextureCoordinate = Vector3.Zero;
-            _vertexBufferUI[1].Position.X = position.X + texture.Width;
-            _vertexBufferUI[1].Position.Y = position.Y;
+            _vertexBufferUI[1].Position.X = x + texture.Width;
+            _vertexBufferUI[1].Position.Y = y;
             _vertexBufferUI[1].Position.Z = 0;
             _vertexBufferUI[1].Normal.X = 0;
             _vertexBufferUI[1].Normal.Y = 0;
@@ -220,8 +220,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[1].TextureCoordinate.X = 1;
             _vertexBufferUI[1].TextureCoordinate.Y = 0;
             _vertexBufferUI[1].TextureCoordinate.Z = 0;
-            _vertexBufferUI[2].Position.X = position.X;
-            _vertexBufferUI[2].Position.Y = position.Y + texture.Height;
+            _vertexBufferUI[2].Position.X = x;
+            _vertexBufferUI[2].Position.Y = y + texture.Height;
             _vertexBufferUI[2].Position.Z = 0;
             _vertexBufferUI[2].Normal.X = 0;
             _vertexBufferUI[2].Normal.Y = 0;
@@ -229,8 +229,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[2].TextureCoordinate.X = 0;
             _vertexBufferUI[2].TextureCoordinate.Y = 1;
             _vertexBufferUI[2].TextureCoordinate.Z = 0;
-            _vertexBufferUI[3].Position.X = position.X + texture.Width;
-            _vertexBufferUI[3].Position.Y = position.Y + texture.Height;
+            _vertexBufferUI[3].Position.X = x + texture.Width;
+            _vertexBufferUI[3].Position.Y = y + texture.Height;
             _vertexBufferUI[3].Position.Z = 0;
             _vertexBufferUI[3].Normal.X = 0;
             _vertexBufferUI[3].Normal.Y = 0;
@@ -243,15 +243,15 @@ namespace ClassicUO.Renderer
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
 
-        public bool Draw2D(Texture2D texture, Point position, Rectangle sourceRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width;
-            float maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height;
-            float maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            float minX = sx / (float)texture.Width;
+            float maxX = (sx + swidth) / (float)texture.Width;
+            float minY = sy / (float)texture.Height;
+            float maxY = (sy + sheight) / (float)texture.Height;
             
-            _vertexBufferUI[0].Position.X = position.X;
-            _vertexBufferUI[0].Position.Y = position.Y;
+            _vertexBufferUI[0].Position.X = x;
+            _vertexBufferUI[0].Position.Y = y;
             _vertexBufferUI[0].Position.Z = 0;
             _vertexBufferUI[0].Normal.X = 0;
             _vertexBufferUI[0].Normal.Y = 0;
@@ -259,8 +259,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[0].TextureCoordinate.X = minX;
             _vertexBufferUI[0].TextureCoordinate.Y = minY;
             _vertexBufferUI[0].TextureCoordinate.Z = 0;
-            _vertexBufferUI[1].Position.X = position.X + sourceRect.Width;
-            _vertexBufferUI[1].Position.Y = position.Y;
+            _vertexBufferUI[1].Position.X = x + swidth;
+            _vertexBufferUI[1].Position.Y = y;
             _vertexBufferUI[1].Position.Z = 0;
             _vertexBufferUI[1].Normal.X = 0;
             _vertexBufferUI[1].Normal.Y = 0;
@@ -268,8 +268,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[1].TextureCoordinate.X = maxX;
             _vertexBufferUI[1].TextureCoordinate.Y = minY;
             _vertexBufferUI[1].TextureCoordinate.Z = 0;
-            _vertexBufferUI[2].Position.X = position.X;
-            _vertexBufferUI[2].Position.Y = position.Y + sourceRect.Height;
+            _vertexBufferUI[2].Position.X = x;
+            _vertexBufferUI[2].Position.Y = y + sheight;
             _vertexBufferUI[2].Position.Z = 0;
             _vertexBufferUI[2].Normal.X = 0;
             _vertexBufferUI[2].Normal.Y = 0;
@@ -277,8 +277,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[2].TextureCoordinate.X = minX;
             _vertexBufferUI[2].TextureCoordinate.Y = maxY;
             _vertexBufferUI[2].TextureCoordinate.Z = 0;
-            _vertexBufferUI[3].Position.X = position.X + sourceRect.Width;
-            _vertexBufferUI[3].Position.Y = position.Y + sourceRect.Height;
+            _vertexBufferUI[3].Position.X = x + swidth;
+            _vertexBufferUI[3].Position.Y = y + sheight;
             _vertexBufferUI[3].Position.Z = 0;
             _vertexBufferUI[3].Normal.X = 0;
             _vertexBufferUI[3].Normal.Y = 0;
@@ -291,13 +291,13 @@ namespace ClassicUO.Renderer
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
 
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Rectangle sourceRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            float minX = sx / (float)texture.Width, maxX = (sx + swidth) / (float)texture.Width;
+            float minY = sy / (float)texture.Height, maxY = (sy + sheight) / (float)texture.Height;
 
-            _vertexBufferUI[0].Position.X = destRect.X;
-            _vertexBufferUI[0].Position.Y = destRect.Y;
+            _vertexBufferUI[0].Position.X = dx;
+            _vertexBufferUI[0].Position.Y = dy;
             _vertexBufferUI[0].Position.Z = 0;
             _vertexBufferUI[0].Normal.X = 0;
             _vertexBufferUI[0].Normal.Y = 0;
@@ -305,8 +305,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[0].TextureCoordinate.X = minX;
             _vertexBufferUI[0].TextureCoordinate.Y = minY;
             _vertexBufferUI[0].TextureCoordinate.Z = 0;
-            _vertexBufferUI[1].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[1].Position.Y = destRect.Y;
+            _vertexBufferUI[1].Position.X = dx + dwidth;
+            _vertexBufferUI[1].Position.Y = dy;
             _vertexBufferUI[1].Position.Z = 0;
             _vertexBufferUI[1].Normal.X = 0;
             _vertexBufferUI[1].Normal.Y = 0;
@@ -314,8 +314,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[1].TextureCoordinate.X = maxX;
             _vertexBufferUI[1].TextureCoordinate.Y = minY;
             _vertexBufferUI[1].TextureCoordinate.Z = 0;
-            _vertexBufferUI[2].Position.X = destRect.X;
-            _vertexBufferUI[2].Position.Y = destRect.Y + destRect.Height;
+            _vertexBufferUI[2].Position.X = dx;
+            _vertexBufferUI[2].Position.Y = dy + dheight;
             _vertexBufferUI[2].Position.Z = 0;
             _vertexBufferUI[2].Normal.X = 0;
             _vertexBufferUI[2].Normal.Y = 0;
@@ -323,8 +323,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[2].TextureCoordinate.X = minX;
             _vertexBufferUI[2].TextureCoordinate.Y = maxY;
             _vertexBufferUI[2].TextureCoordinate.Z = 0;
-            _vertexBufferUI[3].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[3].Position.Y = destRect.Y + destRect.Height;
+            _vertexBufferUI[3].Position.X = dx + dwidth;
+            _vertexBufferUI[3].Position.Y = dy+ dheight;
             _vertexBufferUI[3].Position.Z = 0;
             _vertexBufferUI[3].Normal.X = 0;
             _vertexBufferUI[3].Normal.Y = 0;
@@ -337,17 +337,17 @@ namespace ClassicUO.Renderer
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
 
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
         {
-            _vertexBufferUI[0].Position.X = destRect.X;
-            _vertexBufferUI[0].Position.Y = destRect.Y;
+            _vertexBufferUI[0].Position.X = x;
+            _vertexBufferUI[0].Position.Y = y;
             _vertexBufferUI[0].Position.Z = 0;
             _vertexBufferUI[0].Normal.X = 0;
             _vertexBufferUI[0].Normal.Y = 0;
             _vertexBufferUI[0].Normal.Z = 1;
             _vertexBufferUI[0].TextureCoordinate = Vector3.Zero;
-            _vertexBufferUI[1].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[1].Position.Y = destRect.Y;
+            _vertexBufferUI[1].Position.X = x + width;
+            _vertexBufferUI[1].Position.Y = y;
             _vertexBufferUI[1].Position.Z = 0;
             _vertexBufferUI[1].Normal.X = 0;
             _vertexBufferUI[1].Normal.Y = 0;
@@ -355,8 +355,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[1].TextureCoordinate.X = 1;
             _vertexBufferUI[1].TextureCoordinate.Y = 0;
             _vertexBufferUI[1].TextureCoordinate.Z = 0;
-            _vertexBufferUI[2].Position.X = destRect.X;
-            _vertexBufferUI[2].Position.Y = destRect.Y + destRect.Height;
+            _vertexBufferUI[2].Position.X = x;
+            _vertexBufferUI[2].Position.Y = y + height;
             _vertexBufferUI[2].Position.Z = 0;
             _vertexBufferUI[2].Normal.X = 0;
             _vertexBufferUI[2].Normal.Y = 0;
@@ -364,8 +364,8 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[2].TextureCoordinate.X = 0;
             _vertexBufferUI[2].TextureCoordinate.Y = 1;
             _vertexBufferUI[2].TextureCoordinate.Z = 0;
-            _vertexBufferUI[3].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[3].Position.Y = destRect.Y + destRect.Height;
+            _vertexBufferUI[3].Position.X = x + width;
+            _vertexBufferUI[3].Position.Y = y + height;
             _vertexBufferUI[3].Position.Z = 0;
             _vertexBufferUI[3].Normal.X = 0;
             _vertexBufferUI[3].Normal.Y = 0;
@@ -378,22 +378,24 @@ namespace ClassicUO.Renderer
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
 
-        public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
+        public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, Vector3 hue)
         {
-            int y = destRect.Y;
-            int h = destRect.Height;
+            int y = dy;
+            int h = dheight;
 
             while (h > 0)
             {
-                int x = destRect.X;
-                int w = destRect.Width;
-                Rectangle sRect = new Rectangle(0, 0, texture.Width, h < texture.Height ? h : texture.Height);
+                int x = dx;
+                int w = dwidth;
+
+                int rw = texture.Width;
+                int rh = h < texture.Height ? h : texture.Height;
 
                 while (w > 0)
                 {
                     if (w < texture.Width)
-                        sRect.Width = w;
-                    Draw2D(texture, new Point(x, y), sRect, hue);
+                        rw = w;
+                    Draw2D(texture, x, y, 0, 0, rw, rh, hue);
                     w -= texture.Width;
                     x += texture.Width;
                 }
@@ -405,12 +407,12 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool DrawRectangle(Texture2D texture, Rectangle rectangle, Vector3 hue)
+        public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
         {
-            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, rectangle.Width, 1), hue);
-            Draw2D(texture, new Rectangle(rectangle.Right, rectangle.Y, 1, rectangle.Height + 1), hue);
-            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Bottom, rectangle.Width, 1), hue);
-            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, 1, rectangle.Height), hue);
+            Draw2D(texture, x, y, width, 1, hue);
+            Draw2D(texture, x + width, y, 1, height + 1, hue);
+            Draw2D(texture, x, y + height, width, 1, hue);
+            Draw2D(texture, x, y, 1, height, hue);
             return true;
         }
 
@@ -527,8 +529,8 @@ namespace ClassicUO.Renderer
                 ) * axisDirY;
 
                 Draw2D(textureValue, 
-                       new Point(x + (int)offsetX, y + (int)offsetY), 
-                       cGlyph, 
+                       x + (int)offsetX, y + (int)offsetY, 
+                       cGlyph.X, cGlyph.Y, cGlyph.Width, cGlyph.Height, 
                        color);
 
                 curOffset.X += cKern.Y + cKern.Z;

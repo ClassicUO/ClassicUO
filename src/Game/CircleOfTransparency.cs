@@ -94,7 +94,7 @@ namespace ClassicUO.Game
                 batcher.SetBlendState(_checkerBlend.Value);
                 batcher.SetStencil(_stencil.Value);
 
-                batcher.Draw2D(_texture, new Point(X, Y), new Vector3(20, 1, 0));
+                batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0));
 
                 batcher.SetBlendState(null);
                 batcher.SetStencil(null);
