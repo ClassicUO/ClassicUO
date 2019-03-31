@@ -198,7 +198,7 @@ namespace ClassicUO.Utility
             }
         }
 
-        private struct ContextAndTick
+        private readonly struct ContextAndTick
         {
             public readonly string Name;
             public readonly long Tick;

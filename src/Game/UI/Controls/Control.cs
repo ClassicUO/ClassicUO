@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public virtual bool Draw(Batcher2D batcher, Point position, in Vector3? hue = null)
         {
             if (IsDisposed) return false;
 

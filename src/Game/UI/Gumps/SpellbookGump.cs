@@ -204,13 +204,11 @@ namespace ClassicUO.Game.UI.Gumps
                     int indexX = 106;
                     int dataX = 62;
                     int y = 0;
-                    uint spellSerial = 100;
 
                     if (j % 2 != 0)
                     {
                         indexX = 269;
                         dataX = 225;
-                        spellSerial = 1000;
                     }
 
                     Label text = new Label("INDEX", false, 0x0288, font: 6)
@@ -633,7 +631,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
+        private void CreateSpellDetailsPage(int page, bool isright, int circle, in SpellDefinition spell)
         {
             if (_spellBookType == SpellBookType.Magery)
             {

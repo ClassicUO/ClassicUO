@@ -43,8 +43,6 @@ namespace ClassicUO.IO.Resources
 
         public bool IsMatch(string input, SpeechEntry entry)
         {
-            int start = 0;
-
             string[] split = entry.Keywords;
 
             for (int i = 0; i < split.Length; i++)
@@ -95,7 +93,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    internal struct SpeechEntry : IComparable<SpeechEntry>
+    internal readonly struct SpeechEntry : IComparable<SpeechEntry>
     {
         public SpeechEntry(int id, string keyword)
         {

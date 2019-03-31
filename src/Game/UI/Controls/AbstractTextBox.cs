@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, in Vector3? hue = null)
         {
             EntryValue.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
 

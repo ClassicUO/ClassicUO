@@ -41,7 +41,7 @@ namespace ClassicUO.Utility
 
         public int Count { get; private set; }
 
-        public T this[in int index]
+        public T this[int index]
         {
             get => _items[index];
             set

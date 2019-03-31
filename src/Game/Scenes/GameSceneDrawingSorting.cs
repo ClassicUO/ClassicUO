@@ -372,8 +372,8 @@ namespace ClassicUO.Game.Scenes
                                                            st.FrameInfo.Width,
                                                            st.FrameInfo.Height);
 
-
-                            check = rect.InRect(World.Player.GetOnScreenRectangle());
+                            Rectangle r = World.Player.GetOnScreenRectangle();
+                            check = Exstentions.InRect(ref rect, ref r);
                         }
 
                         st.CharacterIsBehindFoliage = check;
@@ -398,8 +398,8 @@ namespace ClassicUO.Game.Scenes
                                                            m.FrameInfo.Width,
                                                            m.FrameInfo.Height);
 
-
-                            check = rect.InRect(World.Player.GetOnScreenRectangle());
+                            var r = World.Player.GetOnScreenRectangle();
+                            check = Exstentions.InRect(ref rect, ref r);
                         }
 
                         m.CharacterIsBehindFoliage = check;

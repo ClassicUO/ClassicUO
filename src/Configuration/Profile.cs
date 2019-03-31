@@ -261,7 +261,7 @@ namespace ClassicUO.Configuration
                         }
                         catch (Exception e)
                         {
-                            Log.Message(LogTypes.Error, e.Message);
+                            Log.Message(LogTypes.Error, e.StackTrace);
                         }
                       
                     }

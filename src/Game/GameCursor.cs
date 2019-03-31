@@ -236,9 +236,8 @@ namespace ClassicUO.Game
         {
             Graphic = AssignGraphicByState();
 
-            if (/*Texture == null || Texture.IsDisposed ||*/ _needGraphicUpdate)
+            if (_needGraphicUpdate)
             {
-                //Texture = FileManager.Art.GetTexture(Graphic);
                 _needGraphicUpdate = false;
 
                 if (_cursor != IntPtr.Zero)
@@ -252,7 +251,7 @@ namespace ClassicUO.Game
                     id -= 0x206A;
                 int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-                ref CursorInfo info = ref _cursorPixels[war, id];
+                ref readonly CursorInfo info = ref _cursorPixels[war, id];
 
                 fixed (ushort* ptr = info.Pixels)
                     _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);

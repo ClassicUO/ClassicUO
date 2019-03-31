@@ -701,6 +701,13 @@ namespace ClassicUO.Game.Scenes
                 vertex[3].Position = vertex[1].Position;
                 vertex[3].Position.Y += texture.Height;
 
+                for (int j = 0; j < 4; j++)
+                {
+                    ref SpriteVertex v = ref vertex[j];
+                    v.Hue.X = l.Color;
+                    v.Hue.Y = 13;
+                    v.Hue.Z = 0f;
+                }
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = new Vector3(l.Color, 13, 0f);
                 batcher.DrawSprite(texture, vertex);
             }
