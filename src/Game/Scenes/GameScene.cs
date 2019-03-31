@@ -74,6 +74,7 @@ namespace ClassicUO.Game.Scenes
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
         private bool _deathScreenActive;
         private Label _deathScreenLabel;
+        private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
 
         public GameScene() : base()
         {
@@ -663,15 +664,15 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
+
         private void DrawLights(Batcher2D batcher)
         {          
             batcher.GraphicsDevice.SetRenderTarget(null);
-
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
-            float li = World.Light.IsometricLevel;
 
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, new Vector4(li, li, li, 1), 0, 0);
-            SDL2EX.ClearColor(0, 0, 0, 1);
+            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = World.Light.IsometricLevel;
+
+            batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, _vectorClear, 0, 0);
 
             if (_deathScreenActive || !UseLights)
                 return;
