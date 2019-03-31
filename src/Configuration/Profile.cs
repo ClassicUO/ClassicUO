@@ -331,10 +331,17 @@ namespace ClassicUO.Configuration
             string anchorsPath = Path.Combine(path, "anchors.bin");
             if (File.Exists(anchorsPath))
             {
-                using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                try
                 {
-                    Engine.AnchorManager.Restore(reader, gumps);
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                    {
+                        Engine.AnchorManager.Restore(reader, gumps);
+                    }
                 }
+                catch (Exception e)
+                {
+                    Log.Message(LogTypes.Error, e.StackTrace);
+                }             
             }
 
             return gumps;
