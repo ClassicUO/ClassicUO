@@ -414,13 +414,9 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    if (obj == lightObject && obj is Item item/* (obj is Item || obj is AnimatedItemEffect effect && effect.Source is Item)*/)
+                    if (obj == lightObject && obj is Item item)
                     {
-                        //light.ID = item.ItemData.Layer;
-                        //if (obj is Item it)
-                            light.ID = item.LightID;
-                        //else
-                        //    light.ID = ((Item) ((AnimatedItemEffect) obj).Source).LightID;
+                        light.ID = item.LightID;
                     }
                     else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
                         light.ID = data.Layer;
@@ -673,10 +669,6 @@ namespace ClassicUO.Game.Scenes
 
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
             float li = World.Light.IsometricLevel;
-
-            //SDL2EX.ClearColor(li, li, li, 1);
-            //SDL2EX.Clearr(0x00004000);
-            //SDL2EX.ClearColor(0, 0, 0, 1);
 
             batcher.GraphicsDevice.Clear(ClearOptions.Target, new Vector4(li, li, li, 1), 0, 0);
             SDL2EX.ClearColor(0, 0, 0, 1);

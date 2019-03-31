@@ -277,6 +277,8 @@ namespace ClassicUO.Game
             Player = null;
             Map.Dispose();
             Map = null;
+            Light.Overall = Light.RealOverall = 0;
+            Light.Personal = Light.RealPersonal = 0;
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
