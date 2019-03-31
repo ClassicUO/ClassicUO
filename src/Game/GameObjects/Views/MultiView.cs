@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -90,6 +91,12 @@ namespace ClassicUO.Game.GameObjects
 
             //    batcher.DrawRectangle(_texture, new Rectangle((int)position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height), Vector3.Zero);
             //}
+
+            if (ItemData.IsLight)
+            {
+                Engine.SceneManager.GetScene<GameScene>()
+                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
+            }
 
             return true;
         }

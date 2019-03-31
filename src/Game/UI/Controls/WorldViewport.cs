@@ -35,6 +35,13 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly GameScene _scene;
         private Rectangle _rect;
+        private readonly BlendState _blend = new BlendState()
+        {
+            ColorSourceBlend = Blend.Zero,
+            ColorDestinationBlend = Blend.SourceColor,
+
+            ColorBlendFunction = BlendFunction.Add
+        };
 
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
@@ -53,9 +60,26 @@ namespace ClassicUO.Game.UI.Controls
             _rect.Width = Width;
             _rect.Height = Height;
 
+
+            // draw regular world
             batcher.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
+            // draw lights
+            batcher.SetBlendState(_blend);
+            batcher.Draw2D(_scene.Darkness, _rect, Vector3.Zero);
+            batcher.SetBlendState(null);
+
+            // draw overheads
+            _scene.DrawOverheads(batcher);
+
             return base.Draw(batcher, position, hue);
+        }
+
+
+        public override void Dispose()
+        {
+            _blend?.Dispose();
+            base.Dispose(); 
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)

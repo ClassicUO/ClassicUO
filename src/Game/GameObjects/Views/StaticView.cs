@@ -119,11 +119,11 @@ namespace ClassicUO.Game.GameObjects
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);
 
-            //if (ItemData.IsLight)
-            //{
-            //    Engine.SceneManager.GetScene<GameScene>()
-            //          .AddLight(this, this, (int)position.X + Texture.Width / 2, (int)position.Y + Texture.Height / 2);
-            //}
+            if (ItemData.IsLight)
+            {
+                Engine.SceneManager.GetScene<GameScene>()
+                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
+            }
 
             if (_border)
             {

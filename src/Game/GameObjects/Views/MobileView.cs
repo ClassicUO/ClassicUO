@@ -412,6 +412,13 @@ namespace ClassicUO.Game.GameObjects
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
+
+
+                if (item.ItemData.IsLight)
+                {
+                    Engine.SceneManager.GetScene<GameScene>()
+                          .AddLight(this, item, (IsFlipped ? (int)position.X + Bounds.X + 44 : (int)position.X - Bounds.X ), (int)position.Y + y + 22);
+                }
             }
 
         }

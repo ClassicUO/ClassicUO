@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             Bounds.X = (Texture.Width >> 1) - 22 - (int)Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(Offset.Z - Offset.Y);
 
-            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
+            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[Graphic];
 
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
@@ -191,6 +192,13 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Engine.DebugInfo.EffectsRendered++;
+
+
+            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            {
+                Engine.SceneManager.GetScene<GameScene>()
+                      .AddLight(Source, Source, (int)position.X + 22, (int)position.Y + 22);
+            }
 
             return true;
         }
