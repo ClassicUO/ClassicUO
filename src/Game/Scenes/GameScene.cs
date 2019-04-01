@@ -641,10 +641,10 @@ namespace ClassicUO.Game.Scenes
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    if (!_renderList[i].TryGetTarget(out var obj))
-                        continue;
+                    //if (!_renderList[i].TryGetTarget(out var obj))
+                    //    continue;
 
-                    //ref var obj = ref _renderList[i];
+                    var obj = _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {

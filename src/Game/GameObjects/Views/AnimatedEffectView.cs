@@ -42,8 +42,8 @@ namespace ClassicUO.Game.GameObjects
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
+            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero;
+            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
 
             return state;
         });
@@ -52,8 +52,8 @@ namespace ClassicUO.Game.GameObjects
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
+           /* state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
+            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
 
             return state;
         });
@@ -62,8 +62,8 @@ namespace ClassicUO.Game.GameObjects
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
+            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
+            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
 
             return state;
         });
@@ -72,8 +72,8 @@ namespace ClassicUO.Game.GameObjects
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
+            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
+            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
 
             return state;
         });
@@ -82,9 +82,9 @@ namespace ClassicUO.Game.GameObjects
         {
             BlendState state = new BlendState();
 
-            state.AlphaSourceBlend = state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
-            state.AlphaDestinationBlend = state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor;
-            state.AlphaBlendFunction = state.ColorBlendFunction = BlendFunction.ReverseSubtract;
+            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
+            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor;
+            /*state.AlphaBlendFunction =*/ state.ColorBlendFunction = BlendFunction.ReverseSubtract;
 
             return state;
         });
