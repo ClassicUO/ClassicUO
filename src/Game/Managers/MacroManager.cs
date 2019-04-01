@@ -1040,7 +1040,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    enum MacroType
+    internal enum MacroType
     {
         None = 0,
         Say,
@@ -1146,7 +1146,7 @@ namespace ClassicUO.Game.Managers
         Begging,
         Cartography,
         DetectingHidden,
-        Enticement,
+        Discordance,
         EvaluatingIntelligence,
         ForensicEvaluation,
         Hiding,
@@ -1317,6 +1317,6 @@ namespace ClassicUO.Game.Managers
         Follower,
         Object,
         Mobile,
-        MscTotalCount
+        MscTotalCount,
     }
 }
