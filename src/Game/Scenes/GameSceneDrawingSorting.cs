@@ -323,8 +323,10 @@ namespace ClassicUO.Game.Scenes
                     for (int i = 0; i < obj.Overheads.Count; i++)
                     {
                         TextOverhead v = obj.Overheads[i];
+                        //v.RealScreenPosition.X = drawX;
+                        //v.RealScreenPosition.Y = drawY;
                         ref var bounds = ref v.Bounds;
-                        bounds.X = (v.Texture.Width >> 1) - 22;
+                        bounds.X = (v.Texture.Width / 2) - 22;
                         bounds.Y = offY + v.Texture.Height;
                         bounds.Width = v.Texture.Width;
                         bounds.Height = v.Texture.Height;

@@ -77,11 +77,11 @@ namespace ClassicUO.Game.GameObjects
             width *= scale;
             height *= scale;
 
-            if (position.X < Bounds.X)
+            if (position.X - 6 < Bounds.X)
             {
                 if (!EdgeDetection)
                     return false;
-                position.X = Bounds.X;
+                position.X = Bounds.X + 6;
             }
             else if (position.X > (Engine.Profile.Current.GameWindowSize.X + 6) * scale - width)
             {
