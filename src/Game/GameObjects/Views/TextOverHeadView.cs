@@ -97,8 +97,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (position.Y - 6 < Bounds.Y)
                     position.Y = Bounds.Y + 6;
-                else if (position.Y > Engine.Profile.Current.GameWindowSize.Y * scale - height)
-                    position.Y = Engine.Profile.Current.GameWindowSize.Y * scale - height;
+                else if (position.Y - 6 > Engine.Profile.Current.GameWindowSize.Y * scale - height)
+                    position.Y = (Engine.Profile.Current.GameWindowSize.Y * scale - height) + 6;
 
 
                 position /= scale;
