@@ -73,7 +73,7 @@ namespace ClassicUO.Game
 
     internal static class Chat
     {
-        private const ushort defaultHue = 0x0017;
+        private const ushort defaultHue = 946;
         private static readonly Mobile _system = new Mobile(Serial.INVALID)
         {
             Graphic = Graphic.INVARIANT, Name = "System"
