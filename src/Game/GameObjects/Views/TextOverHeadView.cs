@@ -70,22 +70,27 @@ namespace ClassicUO.Game.GameObjects
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                int x = 0; //Engine.Profile.Current.GameWindowPosition.X;
-                int y = 0; //Engine.Profile.Current.GameWindowPosition.Y;
+                int x = Engine.Profile.Current.GameWindowPosition.X;
+                int y = Engine.Profile.Current.GameWindowPosition.Y;
                 int width = Texture.Width - Bounds.X;
                 int height = Texture.Height - Bounds.Y;
 
                 float scale = gs.Scale;
 
-                if (position.X < x + Bounds.X)
-                    position.X = x + Bounds.X;
-                else if (position.X > x + ( Engine.Profile.Current.GameWindowSize.X ) * scale - width)
-                    position.X = x + ( Engine.Profile.Current.GameWindowSize.X ) * scale - width;
+                //if (position.X < x + Bounds.X)
+                //    position.X = x + Bounds.X;
+                //else if (position.X > x + (Engine.Profile.Current.GameWindowSize.X) * scale - width)
+                //    position.X = x + (Engine.Profile.Current.GameWindowSize.X) * scale - width;
 
-                if (position.Y < y + Bounds.Y)
-                    position.Y = y + Bounds.Y;
-                else if (position.Y > y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height)
-                    position.Y = y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height;
+                //if (position.Y < y + Bounds.Y)
+                //    position.Y = y + Bounds.Y;
+                //else if (position.Y > y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height)
+                //    position.Y = y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height;
+
+              
+                position /= scale;
+                position.X -= x;
+                position.Y -= y;
             }
 
             bool ok = base.Draw(batcher, position, objectList);

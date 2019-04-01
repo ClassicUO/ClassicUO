@@ -140,6 +140,8 @@ namespace ClassicUO.Renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
         {
+            EnsureStarted();
+
             if (texture == null || texture.IsDisposed)
                 return false;
 
