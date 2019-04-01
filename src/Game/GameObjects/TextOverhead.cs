@@ -103,7 +103,6 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
 
-
             TimeToLive -= frameMS;
 
             if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
@@ -122,8 +121,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 Dispose();
             }
-            else if (IsOverlapped && AlphaHue != 120)
-                ProcessAlpha(120);
+            else if (IsOverlapped && AlphaHue != 160)
+                ProcessAlpha(160);
             else if (!IsOverlapped && AlphaHue != 0xFF)
                 ProcessAlpha(0xFF);
         }

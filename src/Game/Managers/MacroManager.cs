@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Managers
 
                         return;
                     case 0:
-                        _lastMacro = _lastMacro.Right;
+                        _lastMacro = _lastMacro?.Right;
                         break;
                 }
             }
@@ -179,6 +179,9 @@ namespace ClassicUO.Game.Managers
 
         private int Process(MacroObject macro)
         {
+            if (macro == null)
+                return 0;
+
             int result = 0;
 
             switch (macro.Code)
@@ -513,6 +516,9 @@ namespace ClassicUO.Game.Managers
                     GameActions.AllNames();
 
                     break;
+                case MacroType.LastObject:
+                    GameActions.DoubleClick(GameActions.LastObject);
+                    break;
                 case MacroType.LastTarget:
 
                     if (WaitForTargetTimer == 0)
@@ -642,7 +648,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
-
+                    Chat.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
                     break;
                 case MacroType.SaveDesktop:
                     Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
@@ -731,32 +737,36 @@ namespace ClassicUO.Game.Managers
                             res = Constants.MAX_VIEW_RANGE;
 
                         World.ViewRange = res;
+
+                        Chat.Print($"ViewRange is now {res}.");
                     }
                     break;
                 case MacroType.IncreaseUpdateRange:
                     World.ViewRange++;
                     if (World.ViewRange > Constants.MAX_VIEW_RANGE)
                         World.ViewRange = Constants.MAX_VIEW_RANGE;
+
+                    Chat.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.DecreaseUpdateRange:
                     World.ViewRange--;
                     if (World.ViewRange < Constants.MIN_VIEW_RANGE)
                         World.ViewRange = Constants.MIN_VIEW_RANGE;
-
+                    Chat.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-
+                    Chat.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.MinUpdateRange:
                     World.ViewRange = Constants.MIN_VIEW_RANGE;
-
+                    Chat.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-
+                    Chat.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
@@ -1037,7 +1047,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    enum MacroType
+    internal enum MacroType
     {
         None = 0,
         Say,
@@ -1143,7 +1153,7 @@ namespace ClassicUO.Game.Managers
         Begging,
         Cartography,
         DetectingHidden,
-        Enticement,
+        Discordance,
         EvaluatingIntelligence,
         ForensicEvaluation,
         Hiding,
@@ -1314,6 +1324,6 @@ namespace ClassicUO.Game.Managers
         Follower,
         Object,
         Mobile,
-        MscTotalCount
+        MscTotalCount,
     }
 }

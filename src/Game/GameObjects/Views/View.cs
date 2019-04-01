@@ -118,7 +118,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
             bool hasShadow = HasShadow && position.Z >= 1000;
@@ -130,7 +129,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 float w = Bounds.Width / 2f;
                 float h = Bounds.Height / 2f;
-                Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
+                Vector3 center = position;
+                center.X -= Bounds.X - 44 + w;
+                center.Y -= Bounds.Y + h;
                 float sinx = (float) Math.Sin(Rotation) * w;
                 float cosx = (float) Math.Cos(Rotation) * w;
                 float siny = (float) Math.Sin(Rotation) * h;
@@ -238,6 +239,7 @@ namespace ClassicUO.Game.GameObjects
 
             MousePick(list, vertex, isTransparent);
 
+            Texture.Ticks = Engine.Ticks;
             return true;
         }
 

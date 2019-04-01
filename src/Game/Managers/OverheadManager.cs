@@ -51,12 +51,6 @@ namespace ClassicUO.Game.Managers
         {
             if (_firstNode != null)
             {
-                //if (_edge == null)
-                //{
-                //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                //    _edge.SetData(new Color[] { Color.LightBlue });
-                //}
-
                 int skip = 0;
 
                 for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
@@ -72,14 +66,10 @@ namespace ClassicUO.Game.Managers
 
                     if (owner is Mobile m)
                     {
-                        GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+                        GetAnimationDimensions(m, 0xFF, out int centerX, out int centerY, out int width, out int height);
 
-                        position = new Vector3
-                        {
-                            X = position.X + m.Offset.X,
-                            Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8),
-                            Z = position.Z
-                        };
+                        position.X = position.X + m.Offset.X;
+                        position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
                     }
                     else if (owner.Texture != null)
                         position.Y -= owner.Texture.Height / 2;
@@ -95,14 +85,10 @@ namespace ClassicUO.Game.Managers
 
                             if (ov.Parent is Mobile mm)
                             {
-                                GetAnimationDimensions(mm, 0xFF, out int height, out int centerY);
+                                GetAnimationDimensions(mm, 0xFF, out int centerX, out int centerY, out int width, out int height);
 
-                                pos2 = new Vector3
-                                {
-                                    X = pos2.X + mm.Offset.X,
-                                    Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8),
-                                    Z = pos2.Z
-                                };
+                                pos2.X = pos2.X + mm.Offset.X;
+                                pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
                             }
                             else if (ov.Parent.Texture != null)
                                 pos2.Y -= ov.Parent.Texture.Height / 2;
@@ -133,12 +119,8 @@ namespace ClassicUO.Game.Managers
                     else
                         skip--;
 
+
                     overhead.Draw(batcher, position, list);
-
-                 
-
-                    //batcher.DrawRectangle(_edge, current, Vector3.Zero);
-
                 }
 
 
@@ -159,9 +141,6 @@ namespace ClassicUO.Game.Managers
 
             }
         }
-
-        //private Texture2D _edge;
-
 
         public void AddOverhead(TextOverhead overhead)
         {
@@ -212,7 +191,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
         {
             byte dir = 0 & 0x7F;
             byte animGroup = 0;
@@ -221,36 +200,33 @@ namespace ClassicUO.Game.Managers
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte)mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
-            if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
+            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
         public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
         {
             DrawTextOverheads(batcher, list);
 
+            Vector3 position = Vector3.Zero;
+
             foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
             {
                 Mobile parent = (Mobile)pair.Key;
-                var deque = pair.Value;
+                Deque<DamageOverhead> deque = pair.Value;
 
-                Vector3 position = Vector3.Zero;
        
                 position.X = parent.ScreenPosition.X - offset.X - 22;
                 position.Y = parent.ScreenPosition.Y - offset.Y - 22;
 
                 if (parent is Mobile m)
                 {
-                    GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+                    GetAnimationDimensions(m, 0xFF, out int centerX, out int centerY, out int width, out int height);
 
-                    position = new Vector3
-                    {
-                        X = position.X + m.Offset.X,
-                        Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8),
-                        Z = position.Z
-                    };
+                    position.X = position.X + m.Offset.X;
+                    position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
                 }
- 
+
                 foreach (DamageOverhead damageOverhead in deque)                  
                     damageOverhead.Draw(batcher, position, list);              
             }

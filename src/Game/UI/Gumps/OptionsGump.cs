@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            text = new Label("Close healtbar gump when:", true, HUE_FONT, font: FONT)
+            text = new Label("Close healthbar gump when:", true, HUE_FONT, font: FONT)
             {
                 Y = _hpComboBox.Bounds.Bottom + 20,
             };

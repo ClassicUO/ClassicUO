@@ -40,6 +40,8 @@ namespace ClassicUO.Game
 
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
+        
+        public static Serial LastObject { get; set; } = Serial.INVALID;
 
         internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
         {
@@ -86,6 +88,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(Serial serial)
         {
+            LastObject = serial;
             Socket.Send(new PDoubleClickRequest(serial));
         }
 

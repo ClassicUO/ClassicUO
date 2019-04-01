@@ -540,7 +540,7 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget?.Dispose();
                 _darkness?.Dispose();
 
-                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PreserveContents);
+                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
                 _darkness = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
@@ -641,10 +641,10 @@ namespace ClassicUO.Game.Scenes
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    if (!_renderList[i].TryGetTarget(out var obj))
-                        continue;
+                    //if (!_renderList[i].TryGetTarget(out var obj))
+                    //    continue;
 
-                    //ref var obj = ref _renderList[i];
+                    var obj = _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {
@@ -661,6 +661,18 @@ namespace ClassicUO.Game.Scenes
           
             DrawLights(batcher);
 
+            //batcher.Begin();
+            ////batcher.GraphicsDevice.SetRenderTarget(null);
+            //batcher.SetBlendState(_blendText);
+            //_overheadManager.Draw(batcher, _mouseOverList, _offset, 0, 0);
+            //batcher.SetBlendState(null);
+
+            //// workaround to set overheads clickable
+            //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+            //batcher.GraphicsDevice.SetRenderTarget(null);
+            //batcher.End();
+
+          
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
@@ -672,6 +684,7 @@ namespace ClassicUO.Game.Scenes
 
             _vectorClear.X = _vectorClear.Y = _vectorClear.Z = World.Light.IsometricLevel;
 
+            batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, _vectorClear, 0, 0);
 
             if (_deathScreenActive || !UseLights)
@@ -717,12 +730,11 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
         }
 
-        public void DrawOverheads(Batcher2D batcher)
+        public void DrawOverheads(Batcher2D batcher, int x, int y)
         {
             batcher.SetBlendState(_blendText);
             _overheadManager.Draw(batcher, _mouseOverList, _offset);
             batcher.SetBlendState(null);
-
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
         }
