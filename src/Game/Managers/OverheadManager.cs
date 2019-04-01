@@ -133,8 +133,8 @@ namespace ClassicUO.Game.Managers
                     else
                         skip--;
 
-                    position.X += x;
-                    position.Y += y;
+                    //position.X += x;
+                    //position.Y += y;
                     overhead.Draw(batcher, position, list);
 
                  
