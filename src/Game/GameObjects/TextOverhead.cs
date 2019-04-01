@@ -120,9 +120,8 @@ namespace ClassicUO.Game.GameObjects
             else if (TimeToLive <= 0 || AlphaHue == 0)
             {
                 Dispose();
-                return;
             }
-            if (IsOverlapped && AlphaHue != 160)
+            else if (IsOverlapped && AlphaHue != 160)
                 ProcessAlpha(160);
             else if (!IsOverlapped && AlphaHue != 0xFF)
                 ProcessAlpha(0xFF);
