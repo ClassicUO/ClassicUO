@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Managers
 
                         return;
                     case 0:
-                        _lastMacro = _lastMacro.Right;
+                        _lastMacro = _lastMacro?.Right;
                         break;
                 }
             }
@@ -179,6 +179,9 @@ namespace ClassicUO.Game.Managers
 
         private int Process(MacroObject macro)
         {
+            if (macro == null)
+                return 0;
+
             int result = 0;
 
             switch (macro.Code)
