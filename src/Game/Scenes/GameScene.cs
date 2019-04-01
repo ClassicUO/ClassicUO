@@ -733,7 +733,7 @@ namespace ClassicUO.Game.Scenes
         public void DrawOverheads(Batcher2D batcher, int x, int y)
         {
             batcher.SetBlendState(_blendText);
-            _overheadManager.Draw(batcher, _mouseOverList, _offset, x, y);
+            _overheadManager.Draw(batcher, _mouseOverList, _offset);
             batcher.SetBlendState(null);
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);

@@ -65,68 +65,66 @@ namespace ClassicUO.Game.GameObjects
 
 
             HueVector = ShaderHuesTraslator.GetHueVector(0);
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            float scale = gs.Scale;
+            int x = Engine.Profile.Current.GameWindowPosition.X;
+            int y = Engine.Profile.Current.GameWindowPosition.Y;
 
-            if (EdgeDetection)
+              
+            float width = Texture.Width - Bounds.X;
+            float height = Texture.Height - Bounds.Y;
+
+            width *= scale;
+            height *= scale;
+
+            if (position.X < Bounds.X)
             {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-                int x = Engine.Profile.Current.GameWindowPosition.X;
-                int y = Engine.Profile.Current.GameWindowPosition.Y;
-                float width = Texture.Width - Bounds.X;
-                float height = Texture.Height - Bounds.Y;
-
-                float scale = gs.Scale;
-
-                width *= scale;
-                height *= scale;
-
-                //if (position.X < x + Bounds.X)
-                //    position.X = x + Bounds.X;
-                //else if (position.X > x + (Engine.Profile.Current.GameWindowSize.X) * scale - width)
-                //    position.X = x + (Engine.Profile.Current.GameWindowSize.X) * scale - width;
-
-                //if (position.Y < y + Bounds.Y)
-                //    position.Y = y + Bounds.Y;
-                //else if (position.Y > y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height)
-                //    position.Y = y + (Engine.Profile.Current.GameWindowSize.Y) * scale - height;
-
-                if (position.X < Bounds.X + 6)
-                    position.X = Bounds.X + 6;
-                else if (position.X - 6 > Engine.Profile.Current.GameWindowSize.X * scale - width)
-                    position.X = (Engine.Profile.Current.GameWindowSize.X * scale - width) + 6;
-
-                if (position.Y - 6 < Bounds.Y)
-                    position.Y = Bounds.Y + 6;
-                else if (position.Y - 6 > Engine.Profile.Current.GameWindowSize.Y * scale - height)
-                    position.Y = (Engine.Profile.Current.GameWindowSize.Y * scale - height) + 6;
-
-
-                position /= scale;
-
-                position.X += x;
-                position.Y += y;
+                if (!EdgeDetection)
+                    return false;
+                position.X = Bounds.X;
+            }
+            else if (position.X > (Engine.Profile.Current.GameWindowSize.X + 6) * scale - width)
+            {
+                if (!EdgeDetection)
+                    return false;
+                position.X = (Engine.Profile.Current.GameWindowSize.X + 6) * scale - width;
             }
 
+            if (position.Y - 6 < Bounds.Y)
+            {
+                if (!EdgeDetection)
+                    return false;
+                position.Y = Bounds.Y + 6;
+            }
+            else if (position.Y > (Engine.Profile.Current.GameWindowSize.Y + 6) * scale - height)
+            {
+                if (!EdgeDetection)
+                    return false;
+                position.Y = (Engine.Profile.Current.GameWindowSize.Y + 6) * scale - height;
+            }              
+            
+
+            position /= scale;
+            position.X += x;
+            position.Y += y;
             bool ok = base.Draw(batcher, position, objectList);
-
-
-            //if (_edge == null)
-            //{
-            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-            //    _edge.SetData(new Color[] { Color.LightBlue });
-            //}
 
             //batcher.DrawRectangle(_edge, new Rectangle((int)position.X - Bounds.X, (int)position.Y - Bounds.Y, _text.Width, _text.Height), Vector3.Zero);
 
             return ok;
         }
 
-        private static Texture2D _edge;
-
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
-        {          
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
+        {
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            int x1 = Engine.Profile.Current.GameWindowPosition.X + 6;
+            int y1 = Engine.Profile.Current.GameWindowPosition.Y + 6;
+
+            int x = (int) (list.MousePosition.X / gs.Scale - vertex[0].Position.X);
+            int y = (int) (list.MousePosition.Y / gs.Scale - vertex[0].Position.Y);
+
+            x += x1;
+            y += y1;
 
             if (Texture.Contains(x, y))
                 list.Add(this, vertex[0].Position);            

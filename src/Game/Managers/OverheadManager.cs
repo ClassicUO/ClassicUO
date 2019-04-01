@@ -47,16 +47,10 @@ namespace ClassicUO.Game.Managers
 
         private TextOverhead _firstNode;
 
-        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list, int x, int y)
+        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list)
         {
             if (_firstNode != null)
             {
-                //if (_edge == null)
-                //{
-                //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                //    _edge.SetData(new Color[] { Color.LightBlue });
-                //}
-
                 int skip = 0;
 
                 for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
@@ -133,14 +127,8 @@ namespace ClassicUO.Game.Managers
                     else
                         skip--;
 
-                    //position.X += x;
-                    //position.Y += y;
+
                     overhead.Draw(batcher, position, list);
-
-                 
-
-                    //batcher.DrawRectangle(_edge, current, Vector3.Zero);
-
                 }
 
 
@@ -161,9 +149,6 @@ namespace ClassicUO.Game.Managers
 
             }
         }
-
-        //private Texture2D _edge;
-
 
         public void AddOverhead(TextOverhead overhead)
         {
@@ -227,16 +212,17 @@ namespace ClassicUO.Game.Managers
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset, int x, int y)
+        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
         {
-            DrawTextOverheads(batcher, list, x, y);
+            DrawTextOverheads(batcher, list);
+
+            Vector3 position = Vector3.Zero;
 
             foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
             {
                 Mobile parent = (Mobile)pair.Key;
                 var deque = pair.Value;
 
-                Vector3 position = Vector3.Zero;
        
                 position.X = parent.ScreenPosition.X - offset.X - 22;
                 position.Y = parent.ScreenPosition.Y - offset.Y - 22;
