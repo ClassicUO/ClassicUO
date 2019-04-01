@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    _colorBoxes[i, j].Draw(batcher, x, y);
+                    _colorBoxes[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
                 }
             }
 

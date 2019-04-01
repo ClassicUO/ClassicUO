@@ -738,7 +738,7 @@ namespace ClassicUO.Game.Managers
                 gump.InvokeMouseOver(position);
                
                 if (_mouseDownControls[0] == gump)
-                    AttemptDragControl(gump, position, true);
+                    AttemptDragControl(gump, position);
             }
 
             MouseOverControl = gump;

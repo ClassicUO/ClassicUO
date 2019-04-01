@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Controls
             batcher.SetBlendState(null);
 
             // draw overheads
-            _scene.DrawOverheads(batcher);
+            _scene.DrawOverheads(batcher, x, y);
 
             return base.Draw(batcher, x, y);
         }

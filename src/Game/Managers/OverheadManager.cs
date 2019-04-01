@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
 
         private TextOverhead _firstNode;
 
-        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list)
+        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list, int x, int y)
         {
             if (_firstNode != null)
             {
@@ -133,6 +133,8 @@ namespace ClassicUO.Game.Managers
                     else
                         skip--;
 
+                    position.X += x;
+                    position.Y += y;
                     overhead.Draw(batcher, position, list);
 
                  
@@ -225,9 +227,9 @@ namespace ClassicUO.Game.Managers
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
+        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset, int x, int y)
         {
-            DrawTextOverheads(batcher, list);
+            DrawTextOverheads(batcher, list, x, y);
 
             foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
             {
