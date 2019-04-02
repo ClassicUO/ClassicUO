@@ -501,7 +501,11 @@ namespace ClassicUO
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 StringBuilder sb = new StringBuilder();
+#if DEV_BUILD
+                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86");
+#else
                 sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86");
+#endif
                 sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
 
                 Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
@@ -515,8 +519,8 @@ namespace ClassicUO
             };
 #endif
 
-            // We can use the mono's dllmap feature, but 99% of people use VS to compile.
-            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+                // We can use the mono's dllmap feature, but 99% of people use VS to compile.
+                if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
                 string libsPath = Path.Combine(ExePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
@@ -715,7 +719,11 @@ namespace ClassicUO
             double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate + timeFixedUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+#if DEV_BUILD
+            Window.Title = string.Format("ClassicUO [dev] {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+#else
             Window.Title = string.Format("ClassicUO {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+#endif
         }
 
         private void OnInputUpdate(double totalMS, double frameMS)
