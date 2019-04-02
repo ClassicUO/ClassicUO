@@ -60,6 +60,9 @@ namespace ClassicUO.Game.Managers
 
         public void PlayMusic(int music)
         {
+            if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT)
+                return;
+
             float volume;
 
             if (Engine.SceneManager.CurrentScene is LoginScene)

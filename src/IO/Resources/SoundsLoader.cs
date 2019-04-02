@@ -75,7 +75,7 @@ namespace ClassicUO.IO.Resources
                             }
                             else
                             {
-                                ref UOFileIndex3D outInd = ref _file.Entries[checkIndex];
+                                ref readonly UOFileIndex3D outInd = ref _file.Entries[checkIndex];
 
                                 if (outInd.Length == 0)
                                     continue;
@@ -178,7 +178,7 @@ namespace ClassicUO.IO.Resources
         {
             if (!_sounds.TryGetValue(index, out Sound sound) && TryGetSound(index, out byte[] data, out string name))
             {
-                sound = new UOSound(name, data);
+                sound = new UOSound(name, index, data);
                 _sounds.Add(index, sound);
             }
 

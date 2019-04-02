@@ -10,8 +10,8 @@ namespace ClassicUO.IO.Audio
     {
         private readonly byte[] m_WaveBuffer;
 
-        public UOSound(string name, byte[] buffer)
-            : base(name)
+        public UOSound(string name, int index, byte[] buffer)
+            : base(name, index)
         {
             m_WaveBuffer = buffer;
         }

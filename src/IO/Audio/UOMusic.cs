@@ -21,7 +21,7 @@ namespace ClassicUO.IO.Audio
         string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
 
         public UOMusic(int index, string name, bool loop)
-            : base(name)
+            : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
