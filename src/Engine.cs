@@ -21,6 +21,8 @@
 
 #endregion
 
+#define DEV_BUILD
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,7 +55,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
 
-using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 namespace ClassicUO
 {
