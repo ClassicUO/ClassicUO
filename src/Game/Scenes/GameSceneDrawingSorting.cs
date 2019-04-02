@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
+                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDestroyed)
                 {
                     continue;
                 }

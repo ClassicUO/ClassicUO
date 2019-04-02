@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk : IDisposable
+    internal sealed class Chunk
     {
         public Chunk(ushort x, ushort y)
         {
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(int map) => FileManager.Map.GetIndex(map, X, Y);
 
-        public void Dispose()
+        public void Destroy()
         {
             for (int i = 0; i < 8; i++)
             {
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.Map
                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
                         if (obj != World.Player)
-                            obj.Dispose();
+                            obj.Destroy();
                     }
 
                     Tiles[i, j] = null;

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-            if (Mobile == null || Mobile.IsDisposed)
+            if (Mobile == null || Mobile.IsDestroyed)
             {
                 Dispose();
                 Engine.UI.RemoveTargetLineGump(Mobile);
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             Point gWinSize = Engine.Profile.Current.GameWindowSize;
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            if (Mobile != null && !Mobile.IsDisposed)
+            if (Mobile != null && !Mobile.IsDestroyed)
             {
                 float xx = (Mobile.RealScreenPosition.X + gWinPos.X) / scale;
                 float yy = (Mobile.RealScreenPosition.Y + gWinPos.Y) / scale;

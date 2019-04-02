@@ -44,7 +44,7 @@ namespace ClassicUO.Renderer
         ExtraHeight = 0x0100
     }
 
-    internal sealed class RenderedText : IDisposable
+    internal sealed class RenderedText
     {
         private string _text;
         private byte _font;
@@ -123,7 +123,7 @@ namespace ClassicUO.Renderer
 
         public bool SaveHitMap { get; set; }
 
-        public bool IsDisposed { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
         public int Width { get; private set; }
 
@@ -205,11 +205,11 @@ namespace ClassicUO.Renderer
             FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
-        public void Dispose()
+        public void Destroy()
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
-            IsDisposed = true;
+            IsDestroyed = true;
 
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Dispose();

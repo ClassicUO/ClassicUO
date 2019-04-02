@@ -290,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Mobile = World.Mobiles.Get(LocalSerial);
 
-            if (Mobile == null || Mobile.IsDisposed)
+            if (Mobile == null || Mobile.IsDestroyed)
             {
                 if (Engine.Profile.Current.CloseHealthBarType == 1)
                 {
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (Mobile != null && !Mobile.IsDisposed)
+            if (Mobile != null && !Mobile.IsDestroyed)
             {
                 if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {

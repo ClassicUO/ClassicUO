@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Managers
                 GameEffect effect = _effects[i];
                 effect.Update(totalMS, frameMS);
 
-                if (effect.IsDisposed)
+                if (effect.IsDestroyed)
                 {
                     _effects.RemoveAt(i--);
 
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            _effects.ForEach(s => s.Dispose());
+            _effects.ForEach(s => s.Destroy());
             _effects.Clear();
         }
     }

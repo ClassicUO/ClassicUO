@@ -39,7 +39,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class OverheadManager : IUpdateable, IDisposable
+    internal class OverheadManager : IUpdateable
     {
         private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
         private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Managers
                 {
                     GameObject owner = overhead.Parent;
 
-                    if (owner == null || overhead.IsDisposed || owner.IsDisposed)
+                    if (owner == null || overhead.IsDestroyed || owner.IsDestroyed)
                     {
                         continue;
                     }
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.Managers
                 var st = _staticToUpdate[i];
                 st.Update(totalMS, frameMS);
 
-                if (st.IsDisposed)
+                if (st.IsDestroyed)
                     _staticToUpdate.RemoveAt(i--);
             }
 
@@ -248,7 +248,7 @@ namespace ClassicUO.Game.Managers
                     DamageOverhead obj = deque[i];
                     obj.Update(totalMS, frameMS);
 
-                    if (obj.IsDisposed)
+                    if (obj.IsDestroyed)
                     {                       
                         deque.RemoveAt(i--);
                     }
@@ -283,13 +283,13 @@ namespace ClassicUO.Game.Managers
                 deque.RemoveFromBack();
         }
 
-        public void Dispose()
+        public void Clear()
         {
             foreach (var deque in _damageOverheads.Values)
             {
                 foreach (DamageOverhead damageOverhead in deque)
                 {
-                    damageOverhead.Dispose();
+                    damageOverhead.Destroy();
                 }
             }
 
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.Managers
             {
                 GameObject temp = last.Right;
 
-                last.Dispose();
+                last.Destroy();
 
                 last.Left = null;
                 last.Right = null;
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.Managers
 
             _firstNode = null;
 
-            _staticToUpdate.ForEach( s=> s.Dispose());
+            _staticToUpdate.ForEach( s=> s.Destroy());
             _staticToUpdate.Clear();
         }
     }

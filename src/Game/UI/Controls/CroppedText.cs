@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             base.Dispose();
-            _gameText?.Dispose();
+            _gameText?.Destroy();
         }
     }
 }

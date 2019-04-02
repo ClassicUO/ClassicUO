@@ -1644,15 +1644,15 @@ namespace ClassicUO.Game.GameObjects
             Plugin.UpdatePlayerPosition(X, Y , Z);
         }
 
-        public override void Dispose()
+        public override void Destroy()
         {
             Log.Message(LogTypes.Warning, "PlayerMobile disposed!");
-            base.Dispose();
+            base.Destroy();
         }
 
         public void CloseBank()
         {
-            Equipment[(int)Layer.Bank]?.Dispose();
+            Equipment[(int)Layer.Bank]?.Destroy();
         }
 
 

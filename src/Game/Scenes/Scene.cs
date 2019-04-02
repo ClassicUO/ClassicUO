@@ -34,7 +34,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IUpdateable
     {
         private AudioManager _audio;
 
@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        public bool IsDisposed { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
         public bool IsLoaded { get; private set; }
 
@@ -53,11 +53,11 @@ namespace ClassicUO.Game.Scenes
 
         public AudioManager Audio => _audio;
 
-        public virtual void Dispose()
+        public virtual void Destroy()
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
-            IsDisposed = true;
+            IsDestroyed = true;
             Unload();
         }
 
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Scenes
         private IEnumerable<IWaitCondition> CleaningResources()
         {
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
-            while (!IsDisposed)
+            while (!IsDestroyed)
             {
                 FileManager.Art.CleaUnusedResources();
 

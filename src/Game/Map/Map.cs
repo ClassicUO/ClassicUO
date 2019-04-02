@@ -37,7 +37,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Map : IDisposable
+    internal sealed class Map
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Map
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
-                    block.Dispose();
+                    block.Destroy();
                     block = null;
                     _usedIndices.RemoveAt(i--);
 
@@ -196,12 +196,12 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void Dispose()
+        public void Destroy()
         {
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref Chunk block = ref Chunks[_usedIndices[i]];
-                block.Dispose();
+                block.Destroy();
                 block = null;
                 _usedIndices.RemoveAt(i--);
             }

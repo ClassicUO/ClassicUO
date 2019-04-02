@@ -875,12 +875,12 @@ namespace ClassicUO.Game.GameObjects
             }
         } */
 
-        public override void Dispose()
+        public override void Destroy()
         {
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
 
-            base.Dispose();
+            base.Destroy();
         }
 
         internal struct Step

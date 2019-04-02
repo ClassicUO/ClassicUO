@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Item == null || Item.IsDisposed)
+            if (Item == null || Item.IsDestroyed)
                 Dispose();
 
             if (IsDisposed)
@@ -326,7 +326,7 @@ namespace ClassicUO.Game.UI.Controls
             if (World.ClientFlags.TooltipsEnabled)
                 return;
 
-            if (!Item.IsDisposed && Item.HasOverheads && Item.Overheads.Count != 0)
+            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count != 0)
             {
                 LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
 

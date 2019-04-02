@@ -84,19 +84,19 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
 
-            if (Source != null && Source.IsDisposed /*|| Distance > World.ViewRange*/)
+            if (Source != null && Source.IsDestroyed /*|| Distance > World.ViewRange*/)
             {
-                Dispose();
+                Destroy();
                 return;
             }
 
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
-                    Dispose();
+                    Destroy();
                 else if (LastChangeFrameTime < totalMS)
                 {
                     if (AnimDataFrame.FrameCount != 0)
@@ -164,11 +164,11 @@ namespace ClassicUO.Game.GameObjects
             TargetZ = z;
         }
 
-        public override void Dispose()
+        public override void Destroy()
         {
             Source = null;
             Target = null;
-            base.Dispose();
+            base.Destroy();
         }
     }
 }

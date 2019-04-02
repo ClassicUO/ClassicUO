@@ -289,9 +289,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public override void Dispose()
             {
                 base.Dispose();
-                _labelName.Dispose();
-                _labelPing.Dispose();
-                _labelPacketLoss.Dispose();
+                _labelName.Destroy();
+                _labelPing.Destroy();
+                _labelPacketLoss.Destroy();
             }
         }
     }

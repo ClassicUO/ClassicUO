@@ -226,7 +226,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            TxEntry?.Dispose();
+            TxEntry?.Destroy();
             TxEntry = null;
             base.Dispose();
         }

@@ -69,7 +69,7 @@ namespace ClassicUO.Game
 
                     if (value < 0 && Map != null)
                     {
-                        Map.Dispose();
+                        Map.Destroy();
                         Map = null;
                         return;
                     }
@@ -78,7 +78,7 @@ namespace ClassicUO.Game
                     {
                         if (MapIndex >= 0)
                         {
-                            Map.Dispose();                       
+                            Map.Destroy();                       
                         }
 
                         Position position = Player.Position;
@@ -134,7 +134,7 @@ namespace ClassicUO.Game
                     if (mob.Distance > ViewRange)
                         RemoveMobile(mob);
 
-                    if (mob.IsDisposed)
+                    if (mob.IsDestroyed)
                         _toRemove.Add(mob);
                 }
 
@@ -162,7 +162,7 @@ namespace ClassicUO.Game
                             RemoveItem(item);
                     }
 
-                    if (item.IsDisposed)
+                    if (item.IsDestroyed)
                         _toRemove.Add(item);
                 }
 
@@ -197,7 +197,7 @@ namespace ClassicUO.Game
         {
             Item item = Items.Get(serial);
 
-            if (item == null || item.IsDisposed)
+            if (item == null || item.IsDestroyed)
             {
                 Items.Remove(serial);
                 item = new Item(serial);
@@ -210,7 +210,7 @@ namespace ClassicUO.Game
         {
             Mobile mob = Mobiles.Get(serial);
 
-            if (mob == null || mob.IsDisposed)
+            if (mob == null || mob.IsDestroyed)
             {
                 Mobiles.Remove(serial);
                 mob = new Mobile(serial);
@@ -241,7 +241,7 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
-            item.Dispose();
+            item.Destroy();
 
             return true;
         }
@@ -253,7 +253,7 @@ namespace ClassicUO.Game
             if (mobile == null) return false;
             foreach (Item i in mobile.Items) RemoveItem(i);
             mobile.Items.Clear();
-            mobile.Dispose();
+            mobile.Destroy();
 
             return true;
         }
@@ -273,9 +273,9 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Items.Clear();
             Mobiles.Clear();
-            Player.Dispose();
+            Player.Destroy();
             Player = null;
-            Map.Dispose();
+            Map.Destroy();
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
@@ -295,15 +295,15 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
-                Map.Dispose();
+                Map.Destroy();
                 Map = null;
-                Player.Dispose();
+                Player.Destroy();
                 Player = null;
             }
 
             foreach (Item item in Items)
             {
-                if (noplayer && Player != null && !Player.IsDisposed)
+                if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (item.RootContainer == Player)
                         continue;
@@ -313,7 +313,7 @@ namespace ClassicUO.Game
 
             foreach (Mobile mob in Mobiles)
             {
-                if (noplayer && Player != null && !Player.IsDisposed)
+                if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (mob == Player)
                         continue;

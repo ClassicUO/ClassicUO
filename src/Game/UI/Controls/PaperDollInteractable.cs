@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Controls
                         isfake = true;
                         canPickUp = false;
                     }
-                    else if (item == null || item.IsDisposed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
+                    else if (item == null || item.IsDestroyed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
                         continue;
 
                     switch (_layerOrder[i])

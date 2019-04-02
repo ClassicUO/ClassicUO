@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
        
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || IsDisposed)
+            if (!AllowedToDraw || IsDestroyed)
                 return false;
 
             Engine.DebugInfo.ItemsRendered++;
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
 
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (IsDisposed || World.CorpseManager.Exists(Serial, 0))
+            if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
                 return false;
 
             byte dir = (byte) ((byte) Layer & 0x7F & 7);

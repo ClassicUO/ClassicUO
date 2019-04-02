@@ -195,7 +195,7 @@ namespace ClassicUO.IO
                                         for(GameObject right = obj.Right; obj!=null; obj = right, right = right?.Right)
                                         {
                                             if (obj is Static || (obj is AnimatedItemEffect ef && ef.Source is Static))
-                                                obj.Dispose();
+                                                obj.Destroy();
                                         }
                                     }
                                 }
@@ -388,7 +388,7 @@ namespace ClassicUO.IO
                                 for (GameObject obj = c.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
                                 {
                                     if (obj is Land ln)
-                                        ln.Dispose();
+                                        ln.Destroy();
                                 }
                             }
                         }

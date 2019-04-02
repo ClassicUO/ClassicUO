@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return false;
 
             if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)

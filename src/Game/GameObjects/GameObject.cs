@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
 
     }
 
-    internal abstract partial class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract partial class GameObject : IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
         public Vector3 Offset;
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool IsDisposed { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
         public int Distance
         {
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.GameObjects
                     var overhead = _overHeads[i];
                     overhead.Update(totalMS, frameMS);
 
-                    if (overhead.IsDisposed)
+                    if (overhead.IsDestroyed)
                         _overHeads.RemoveAt(i--);
                 }
             }
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 overhead = _overHeads[i];
 
-                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
+                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDestroyed)
                 {
                     overhead.Hue = hue;
                     _overHeads.RemoveAt(i);
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.GameObjects
                         limit3text++;
                         if (limit3text > 3)
                         {
-                            _overHeads[i].Dispose();
+                            _overHeads[i].Destroy();
                             _overHeads.RemoveAt(i);
                             i--;
                         }
@@ -278,7 +278,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    _overHeads[i].Dispose();
+                    _overHeads[i].Destroy();
                     _overHeads.RemoveAt(i);
                     i--;
                 }
@@ -304,17 +304,13 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        //~GameObject()
-        //{
-        //    Dispose();
-        //}
 
-        public virtual void Dispose()
+        public virtual void Destroy()
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
-            IsDisposed = true;
 
+            IsDestroyed = true;
             Disposed.Raise();
 
             _tile?.RemoveGameObject(this);
@@ -323,7 +319,7 @@ namespace ClassicUO.Game.GameObjects
             if (_overHeads != null)
             {
                 while (_overHeads.Count != 0)
-                    _overHeads.RemoveFromBack().Dispose();
+                    _overHeads.RemoveFromBack().Destroy();
                 _overHeads = null;
             }
 
@@ -338,8 +334,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Texture = null;
-
-            GC.SuppressFinalize(this);
         }
     }
 }

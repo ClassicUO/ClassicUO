@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
                     //Tile = World.Map.GetTile(tx, ty);
                 }
 
-                Dispose();
+                Destroy();
             }
             else
             {

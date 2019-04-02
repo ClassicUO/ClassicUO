@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
             if (World.ClientFlags.TooltipsEnabled)
                 return;
 
-            if (!Item.IsDisposed && Item.HasOverheads && Item.Overheads.Count > 0)
+            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count > 0)
             {
                 LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
 

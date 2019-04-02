@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_item.IsDisposed)
+            if (_item.IsDestroyed)
             {
                 Dispose();
                 return;

@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Scenes
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
 
-            _overheadManager?.Dispose();
+            _overheadManager?.Clear();
             _overheadManager = null;
             _journalManager?.Clear();
             _journalManager = null;
@@ -555,7 +555,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     _inqueue = false;
 
-                    if (_queuedObject != null && !_queuedObject.IsDisposed)
+                    if (_queuedObject != null && !_queuedObject.IsDestroyed)
                     {
                         _queuedAction();
                         _queuedObject = null;

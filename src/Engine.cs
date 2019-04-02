@@ -688,7 +688,7 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
                 _sceneManager.CurrentScene.Draw(_batcher);
 
 
@@ -759,7 +759,7 @@ namespace ClassicUO
 
             if (scene != null && scene.IsLoaded)
             {
-                if (scene.IsDisposed)
+                if (scene.IsDestroyed)
                     _sceneManager.Switch();
                 else
                     scene.Update(totalMS, frameMS);
@@ -768,7 +768,7 @@ namespace ClassicUO
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
                 _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }

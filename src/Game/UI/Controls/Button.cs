@@ -281,7 +281,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            for (int i = 0; i < _fontTexture.Length; i++) _fontTexture[i]?.Dispose();
+            for (int i = 0; i < _fontTexture.Length; i++) _fontTexture[i]?.Destroy();
             base.Dispose();
         }
     }

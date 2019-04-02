@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || IsDisposed)
+            if (!AllowedToDraw || IsDestroyed)
             {
                 return false;
             }

@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void AddLine(string text, byte font, Hue hue, bool isunicode)
         {
             if (_textEntries.Count >= 30)
-                _textEntries.RemoveFromFront().Dispose();
+                _textEntries.RemoveFromFront().Destroy();
 
             _textEntries.AddToBack(new ChatLineTime(text, font, isunicode, hue));
         }
@@ -456,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
             DisposeChatModePrefix();
         }
 
-        private class ChatLineTime : IUpdateable, IDisposable
+        private class ChatLineTime : IUpdateable
         {           
             private float _createdTime;
             private readonly RenderedText _renderedText;
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _alpha = 1.0f - (_createdTime / Constants.TIME_FADEOUT_TEXT);
                 }
                 if (_createdTime <= 0.0f)
-                    Dispose();
+                    Destroy();
 
                 //else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)
                 //    _alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
@@ -508,13 +508,13 @@ namespace ClassicUO.Game.UI.Gumps
                 return Text;
             }
 
-            public void Dispose()
+            public void Destroy()
             {
                 if (IsDispose)
                     return;
 
                 IsDispose = true;
-                _renderedText.Dispose();
+                _renderedText?.Destroy();
             }
         }
     }

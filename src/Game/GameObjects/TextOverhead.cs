@@ -92,15 +92,15 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsOverlapped { get; set; }
 
-        public override void Dispose()
+        public override void Destroy()
         {
-            _text?.Dispose();
-            base.Dispose();
+            _text?.Destroy();
+            base.Destroy();
         }
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
 
             TimeToLive -= frameMS;
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (TimeToLive <= 0 || AlphaHue == 0)
             {
-                Dispose();
+                Destroy();
             }
             else if (IsOverlapped && AlphaHue != 160)
                 ProcessAlpha(160);

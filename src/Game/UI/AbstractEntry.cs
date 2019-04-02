@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    abstract class AbstractEntry : IDisposable
+    abstract class AbstractEntry
     {
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
@@ -39,11 +39,11 @@ namespace ClassicUO.Game.UI
             MaxWidth = maxWidth;
         }
 
-        public void Dispose()
+        public void Destroy()
         {
-            RenderText?.Dispose();
+            RenderText?.Destroy();
             RenderText = null;
-            RenderCaret?.Dispose();
+            RenderCaret?.Destroy();
             RenderCaret = null;
         }
 

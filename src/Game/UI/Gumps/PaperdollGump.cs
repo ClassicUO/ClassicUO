@@ -288,7 +288,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Mobile != null && Mobile.IsDisposed)
+            if (Mobile != null && Mobile.IsDestroyed)
                 Mobile = null;
 
             if (Mobile == null)

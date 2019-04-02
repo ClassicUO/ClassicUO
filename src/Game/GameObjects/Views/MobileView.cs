@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
     {
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return false;
 
             bool mirror = false;

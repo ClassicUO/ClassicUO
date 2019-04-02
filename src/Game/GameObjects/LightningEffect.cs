@@ -54,13 +54,13 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
 
-            if (!IsDisposed)
+            if (!IsDestroyed)
             {
                 if (AnimIndex >= 10) //TODO: fix time
-                    Dispose();
+                    Destroy();
                 else
                 {
                     AnimationGraphic = (Graphic) (Graphic + AnimIndex);

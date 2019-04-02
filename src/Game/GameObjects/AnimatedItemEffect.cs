@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (!IsDisposed)
+            if (!IsDestroyed)
             {
                 (int x, int y, int z) = GetSource();
 

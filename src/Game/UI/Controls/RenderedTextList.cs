@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
 
             while (_entries.Count > 99)
             {
-                _entries.RemoveFromFront().Dispose();
+                _entries.RemoveFromFront().Destroy();
             }
 
             _entries.AddToBack(new RenderedText
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            for (int i = 0; i < _entries.Count; i++) _entries[i]?.Dispose();
+            for (int i = 0; i < _entries.Count; i++) _entries[i]?.Destroy();
             base.Dispose();
         }
     }

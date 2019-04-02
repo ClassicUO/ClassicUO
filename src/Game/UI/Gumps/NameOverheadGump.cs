@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Entity == null || Entity.IsDisposed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
+            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
             {
                 Dispose();
             }
@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _renderedText?.Dispose();
+            _renderedText?.Destroy();
             base.Dispose();
         }
     }
