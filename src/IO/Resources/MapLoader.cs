@@ -273,7 +273,7 @@ namespace ClassicUO.IO.Resources
                     var difl = _mapDifl[i];
                     var dif = _mapDif[i];
 
-                    if (difl == null || dif == null)
+                    if (difl == null || dif == null || difl.Length == 0 ||  dif.Length == 0)
                         continue;
 
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
@@ -300,7 +300,7 @@ namespace ClassicUO.IO.Resources
                     var difl = _staDifl[i];
                     var difi = _staDifi[i];
 
-                    if (difl == null || difi == null || _staDif[i] == null)
+                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 || _staDif[i].Length == 0)
                         continue;
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;

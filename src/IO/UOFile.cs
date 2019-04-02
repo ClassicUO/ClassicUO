@@ -48,10 +48,15 @@ namespace ClassicUO.IO
         protected virtual void Load(bool loadentries = true)
         {
             Log.Message(LogTypes.Trace, $"Loading file:\t\t{FilePath}");
+
             FileInfo fileInfo = new FileInfo(FilePath);
 
             if (!fileInfo.Exists)
-                throw new FileNotFoundException(fileInfo.FullName);
+            {
+                Log.Message(LogTypes.Error, $"{FilePath}  not exists.");
+                return;
+            }
+
             long size = fileInfo.Length;
 
             if (size > 0)
@@ -74,7 +79,9 @@ namespace ClassicUO.IO
                 }
             }
             else
-                throw new Exception($"{FilePath} size must be > 0");
+            {
+                Log.Message(LogTypes.Error, $"{FilePath}  size must be > 0");
+            }
         }
 
         public virtual void Dispose()
@@ -129,7 +136,7 @@ namespace ClassicUO.IO
 
         internal (int, int, bool) SeekByEntryIndex(int entryidx)
         {
-            if (entryidx < 0 || entryidx >= Entries.Length)
+            if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)
                 return (0, 0, false);
 
             ref readonly UOFileIndex3D e = ref Entries[entryidx];
