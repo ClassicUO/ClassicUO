@@ -324,9 +324,7 @@ namespace ClassicUO.Game
                                 it = gumpling.Item;
 
                                 break;
-                            case GumpPicBackpack backpack:
-                                it = backpack.Backpack;
-                                break;
+
 							case Control control when control.Tooltip is Item i:
 								it = i;
 								break;

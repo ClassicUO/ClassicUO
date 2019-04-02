@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int)Layer.Backpack];
 
-                Add(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
+                Add(_backpackGump = new GumpPicBackpack(0, 0, backpack)
                 {
                     AcceptMouseInput = true
                 });

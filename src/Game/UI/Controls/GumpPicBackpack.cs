@@ -31,12 +31,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class GumpPicBackpack : GumpPic
+    internal class GumpPicBackpack : ItemGumpPaperdoll
     {
-        public GumpPicBackpack(int x, int y, Item backpack) : base(x, y, 0xC4F6, 0)
+        public GumpPicBackpack(int x, int y, Item backpack) : base(x, y, backpack, World.Mobiles.Get(backpack.RootContainer), false)
         {
             Backpack = backpack;
             AcceptMouseInput = false;
+            CanPickUp = false;
         }
 
         public Item Backpack { get; protected set; }
@@ -86,6 +87,13 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (gs.IsHoldingItem && gs.IsMouseOverUI)
                         gs.DropHeldItemToContainer(Backpack);
+                    else
+                    {
+                        base.OnMouseUp(x, y, button);
+                        //if (!World.ClientFlags.TooltipsEnabled)
+                        //    GameActions.SingleClick(Backpack);
+                        //GameActions.OpenPopupMenu(Backpack);
+                    }
                 }
             }
         }
