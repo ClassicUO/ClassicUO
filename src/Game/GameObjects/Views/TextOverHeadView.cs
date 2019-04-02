@@ -37,8 +37,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly RenderedText _text;
 
-        protected bool EdgeDetection { get; set; }
-     
+        protected bool EdgeDetection { get; set; }  
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
