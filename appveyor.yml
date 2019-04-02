@@ -16,14 +16,15 @@ assembly_info:
   assembly_informational_version: '{version}-dev'
 environment:
   DEV_BUILD: true
-before_build:
-- cmd: nuget restore
-build:
-  project: c:\projects\classicuo\ClassicUO.sln
-  parallel: true
-  verbosity: minimal
-after_build:
-- cmd: 7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+build_script:
+- cmd: >-
+    nuget restore
+
+
+    msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
+
+
+    7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
