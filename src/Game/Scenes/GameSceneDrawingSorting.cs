@@ -353,60 +353,40 @@ namespace ClassicUO.Game.Scenes
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
                 else if (itemData.IsFoliage)
                 {
+                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
-                    if (obj is Static st)
+                    if (!check)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+                        check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
 
                         if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
+                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                    }
 
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
+                    if (check)
+                    {
 
-                        if (check)
-                        {
+                        Rectangle rect = new Rectangle((int)drawX - obj.FrameInfo.X,
+                                                       (int)drawY - obj.FrameInfo.Y,
+                                                       obj.FrameInfo.Width,
+                                                       obj.FrameInfo.Height);
 
-                            Rectangle rect = new Rectangle((int)drawX - st.FrameInfo.X,
-                                                           (int)drawY - st.FrameInfo.Y,
-                                                           st.FrameInfo.Width,
-                                                           st.FrameInfo.Height);
+                        Rectangle r = World.Player.GetOnScreenRectangle();
+                        check = Exstentions.InRect(ref rect, ref r);
+                    }
 
-                            Rectangle r = World.Player.GetOnScreenRectangle();
-                            check = Exstentions.InRect(ref rect, ref r);
-                        }
-
+                    if (obj is Static st)
+                    {                        
                         st.CharacterIsBehindFoliage = check;
                     }
                     else if (obj is Multi m)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                        if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
-
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
-
-                        if (check)
-                        {
-
-                            Rectangle rect = new Rectangle((int)drawX - m.FrameInfo.X,
-                                                           (int)drawY - m.FrameInfo.Y,
-                                                           m.FrameInfo.Width,
-                                                           m.FrameInfo.Height);
-
-                            var r = World.Player.GetOnScreenRectangle();
-                            check = Exstentions.InRect(ref rect, ref r);
-                        }
-
                         m.CharacterIsBehindFoliage = check;
                     }
+                    else if (obj is Item it)
+                    {
 
+                    }
                 }
 
                 if (_alphaChanged && !changinAlpha)

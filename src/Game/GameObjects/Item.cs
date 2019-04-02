@@ -424,6 +424,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
+        public bool CharacterIsBehindFoliage { get; set; }
 
         private StaticTiles? _itemData;
 

@@ -55,7 +55,21 @@ namespace ClassicUO.Game.GameObjects
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
-            
+
+            if (ItemData.IsFoliage)
+            {
+                if (CharacterIsBehindFoliage)
+                {
+                    if (AlphaHue != 76)
+                        ProcessAlpha(76);
+                }
+                else
+                {
+                    if (AlphaHue != 0xFF)
+                        ProcessAlpha(0xFF);
+                }
+            }
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
