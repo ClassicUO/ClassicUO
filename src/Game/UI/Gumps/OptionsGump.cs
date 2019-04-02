@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
             hpAreaItem.Add(text);
             _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 20, 150, new[]
             {
-                "None", "Mobile not exists", "Mobile is dead"
+                "None", "Mobile Out of Range", "Mobile is Dead"
             }, mode);
             hpAreaItem.Add(_healtbarType);
 
@@ -252,7 +252,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem highlightByFlagsItem = new ScrollAreaItem();
 
-            text = new Label("- Mobiles status", true, HUE_FONT, font: FONT)
+            text = new Label("- Mobile Status", true, HUE_FONT, font: FONT)
             {
                 Y = 10
             };
@@ -266,10 +266,10 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(highlightByFlagsItem);
 
 
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roofs", !Engine.Profile.Current.DrawRoofs, 0, 20);
+            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 20);
             _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
-            _enableCaveBorder = CreateCheckBox(rightArea, "Marking cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
+            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
 
             hpAreaItem = new ScrollAreaItem();
             text = new Label("- Fields: ", true, HUE_FONT, font: FONT)
@@ -364,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
 
-            _footStepsSound = CreateCheckBox(rightArea, "Footsteps sound", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
+            _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
             _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
 
@@ -486,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _zoomSizeArea = new ScrollAreaItem();
 
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after close game", FONT, HUE_FONT, true)
+                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 15,
@@ -494,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _zoomSizeArea.Add(_savezoomCheckbox);
 
-                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Restore scale after unpress Ctrl", FONT, HUE_FONT, true)
+                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 35,
@@ -509,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 10);
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
-            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black&White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
+            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             item = new ScrollAreaItem();
             text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
@@ -677,7 +677,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            Label text = new Label("Chat font:", true, HUE_FONT, 0, FONT);
+            Label text = new Label("Speech font:", true, HUE_FONT, 0, FONT);
 
             rightArea.Add(text);
 
@@ -706,11 +706,11 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
-            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 30, Engine.Profile.Current.SpeechHue, "Speech color", 20, 30);
-            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote color", 20, 0);
-            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party message color", 20, 0);
-            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild message color", 20, 0);
-            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance message color", 20, 0);
+            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 30, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 30);
+            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote Color", 20, 0);
+            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party Message Color", 20, 0);
+            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
+            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
 
             Add(rightArea, PAGE);
         }
@@ -719,12 +719,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 8;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.InnocentHue, "Innocent color", 20, 0);
-            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, "Friend color", 20, 0);
-            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.CriminalHue, "Criminal color", 20, 0);
-            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, "Animal color", 20, 0);
-            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer color", 20, 0);
-            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy color", 20, 0);
+            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.InnocentHue, "Innocent Color", 20, 0);
+            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, "Friend Color", 20, 0);
+            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.CriminalHue, "Criminal Color", 20, 0);
+            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, "Animal Color", 20, 0);
+            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer Color", 20, 0);
+            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy Color", 20, 0);
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
