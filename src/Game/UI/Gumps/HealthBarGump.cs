@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
             Heal2
         }
 
-        private Hue _barColor { get => (Mobile == null || (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)) ? (Hue)0 : (Hue)Notoriety.GetHue(Mobile.NotorietyFlag); }
+        private Hue _barColor { get => (Mobile == null || Mobile == World.Player || (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)) ? (Hue)0 : (Hue)Notoriety.GetHue(Mobile.NotorietyFlag); }
 
         public void Update()
         {
