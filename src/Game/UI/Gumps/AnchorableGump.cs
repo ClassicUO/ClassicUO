@@ -17,7 +17,11 @@ namespace ClassicUO.Game.UI.Gumps
     class AnchorableGump : Gump
     {
         public string AnchorGroupName { get; protected set; }
-
+        public virtual int GroupMatrixWidth { get; protected set; }
+        public virtual int GroupMatrixHeight { get; protected set; }
+        public int WidthMultiplier { get; protected set; } = 1;
+        public int HeightMultiplier { get; protected set; } = 1;
+        
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 

@@ -27,6 +27,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanBeSaved = true;
             AnchorGroupName = "spell";
+            GroupMatrixWidth = 44;
+            GroupMatrixHeight = 44;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()

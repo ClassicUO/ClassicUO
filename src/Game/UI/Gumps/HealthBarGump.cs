@@ -71,6 +71,9 @@ namespace ClassicUO.Game.UI.Gumps
             Heal2
         }
 
+        public override int GroupMatrixWidth { get => Width; protected set { } }
+        public override int GroupMatrixHeight { get => Height; protected set { } }
+        
         public HealthBarGump(Mobile mob) : this()
         {
             Mobile = mob;
