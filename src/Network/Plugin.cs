@@ -91,28 +91,7 @@ namespace ClassicUO.Network
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
 
-            IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
-
-            Log.Message(LogTypes.Trace, $"assembly: {assptr}");
-
-            if (assptr == IntPtr.Zero)
-            {
-                Log.Message(LogTypes.Error, "Invalid assemlby.");
-                return;
-            }
-
-            Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
-
-            IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
-
-            Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
-
-            if (installPtr == IntPtr.Zero)
-            {
-                Log.Message(LogTypes.Error, "Invalid entry point.");
-                return;
-            }
-
+            
 
             //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
             //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
@@ -146,8 +125,62 @@ namespace ClassicUO.Network
                 GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath)
             };
 
-            void* func = &header;          
-            Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+            void* func = &header;
+            try
+            {
+                IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
+
+                Log.Message(LogTypes.Trace, $"assembly: {assptr}");
+
+                if (assptr == IntPtr.Zero)
+                {
+                    throw new Exception("Invalid Assembly, Attempting managed load.");
+                }
+
+                Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
+
+                IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
+
+                Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
+
+                if (installPtr == IntPtr.Zero)
+                {
+                    throw new Exception("Invalid Entry Point, Attempting managed load.");
+                }
+                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+            }
+            catch
+            {
+                try
+                {
+                    var asm = Assembly.LoadFile(_path);
+                    var type = asm.GetType("Assistant.Engine");
+                    
+                    if (type == null)
+                    {
+                        Log.Message(LogTypes.Error,
+                            $"Unable to find Plugin Type, API requires the public class Engine in namespace Assistant.");
+                        return;
+                    }
+
+                    var meth = type.GetMethod("Install", BindingFlags.Public | BindingFlags.Static);
+                    if (meth == null)
+                    {
+                        Log.Message(LogTypes.Error, $"Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
+                        return;
+                    }
+
+                    meth.Invoke(null, new object[] {(IntPtr) func });
+                }
+                catch
+                {
+                    Log.Message(LogTypes.Error,
+                        $"Invalid plugin specified.");
+                    return;
+                }
+               
+            }
+           
 
             if (header.OnRecv != IntPtr.Zero)
                 _onRecv = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header.OnRecv);
