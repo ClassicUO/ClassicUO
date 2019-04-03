@@ -29,8 +29,9 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class SkillButtonGump : Gump
+    internal class SkillButtonGump : AnchorableGump
     {
+        private HoveredLabel _label;
         private ResizePic _buttonBackgroundNormal;
         private ResizePic _buttonBackgroundOver;
         private Skill _skill;
@@ -52,33 +53,39 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             CanBeSaved = true;
             WantUpdateSize = false;
+            AnchorGroupName = "spell";
+            WidthMultiplier = 2;
+            HeightMultiplier = 1;
+            GroupMatrixWidth = 44;
+            GroupMatrixHeight = 44;
         }
 
         private void BuildGump()
         {
-            Width = 120;
-            Height = 40;
+            Width = 88;
+            Height = 44;
 
             Add(_buttonBackgroundNormal = new ResizePic(0x24B8)
             {
-                Width = 120,
-                Height = 40
+                Width = Width,
+                Height = Height
             });
 
             Add(_buttonBackgroundOver = new ResizePic(0x24EA)
             {
-                Width = 120,
-                Height = 40
+                Width = Width,
+                Height = Height
             });
         
-            Add(new HoveredLabel(_skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(_label = new HoveredLabel(_skill.Name, true, 0, 1151, Width - 10, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 7,
+                X = 5,
                 Y = 5,
-                Height = 35,
+                Width = Width - 10,
                 AcceptMouseInput = true,
                 CanMove = true
             });
+            _label.Y = (Height / 2) - (_label.Height / 2);
         }
 
         protected override void OnMouseEnter(int x, int y)
@@ -98,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButton.Left)
                 GameActions.UseSkill(_skill.Index);
         }
-
+        
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
