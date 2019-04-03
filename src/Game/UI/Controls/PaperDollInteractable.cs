@@ -235,8 +235,20 @@ namespace ClassicUO.Game.UI.Controls
 
                             break;
 
+                        case Layer.Arms:
+                        case Layer.Torso:
+                            var robe = _mobile.Equipment[(int)Layer.Robe];
+
+                            if (robe != null)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        
+
                         case Layer.Helmet:
-                            var robe = _mobile.Equipment[(int) Layer.Robe];
+                            robe = _mobile.Equipment[(int) Layer.Robe];
 
                             if (robe != null)
                             {
