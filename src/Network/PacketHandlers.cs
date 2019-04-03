@@ -377,7 +377,7 @@ namespace ClassicUO.Network
                         World.Player.Luck = p.ReadUShort();
                         World.Player.DamageMin = p.ReadUShort();
                         World.Player.DamageMax = p.ReadUShort();
-                        World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
+                        World.Player.TithingPoints = p.ReadUInt();
                     }
 
                     if (type >= 6)
@@ -1220,7 +1220,7 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_6017)
                     p.Skip(1);
                 Serial containerSerial = p.ReadUInt();
-                Hue hue = p.Position + 2 <= p.Length ? p.ReadUShort() : p.ReadByte();
+                Hue hue = p.ReadUShort();
 
                 if (i == 0)
                 {
@@ -2383,7 +2383,7 @@ namespace ClassicUO.Network
             string header = p.ReadASCII();
             string footer = p.ReadUnicode();
             
-            string body = p.Position < p.Length ? p.ReadUnicode() : string.Empty;
+            string body = p.ReadUnicode();
 
             Engine.UI.GetByLocalSerial<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, (serial == World.Player.Serial)));
