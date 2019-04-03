@@ -684,8 +684,7 @@ namespace ClassicUO.Game.Scenes
 
 	    private void ParseFlags(Packet p)
 	    {
-            if (p.Position + 4 <= p.Length)
-		        World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
+		    World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
 		}
     }
 
