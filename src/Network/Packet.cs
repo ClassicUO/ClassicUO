@@ -24,6 +24,8 @@ using System.Text;
 
 using ClassicUO.Utility;
 
+using static System.String;
+
 namespace ClassicUO.Network
 {
     internal sealed class Packet : PacketBase
@@ -74,15 +76,16 @@ namespace ClassicUO.Network
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void EnsureSize(int length)
+        protected override bool EnsureSize(int length)
         {
-            if (length < 0 || Position + length > Length) throw new ArgumentOutOfRangeException("length");
+            return length < 0 || Position + length > Length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
-            EnsureSize(1);
+            if (EnsureSize(1))
+                return 0;
 
             return _data[Position++];
         }
@@ -99,19 +102,24 @@ namespace ClassicUO.Network
 
         public ushort ReadUShort()
         {
-            EnsureSize(2);
+            if (EnsureSize(2))
+                return 0;
+
             return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         public uint ReadUInt()
         {
-            EnsureSize(4);
+            if (EnsureSize(4))
+                return 0;
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
         public string ReadASCII()
         {
-            EnsureSize(1);
+            if (EnsureSize(1))
+                return Empty;
+
             StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadByte()) != '\0') sb.Append(c);
@@ -121,7 +129,9 @@ namespace ClassicUO.Network
 
         public string ReadASCII(int length, bool exitIfNull = false)
         {
-            EnsureSize(length);
+            if (EnsureSize(length))
+                return Empty;
+
             StringBuilder sb = new StringBuilder(length);
 
             for (int i = 0; i < length; i++)
@@ -143,7 +153,7 @@ namespace ClassicUO.Network
         {
             if (Position >= Length)
             {
-                return String.Empty;
+                return Empty;
             }
 
             int count = 0;
@@ -193,7 +203,9 @@ namespace ClassicUO.Network
 
         public string ReadUnicode()
         {
-            EnsureSize(2);
+            if (EnsureSize(2))
+                return string.Empty;
+
             StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
@@ -203,7 +215,9 @@ namespace ClassicUO.Network
 
         public string ReadUnicode(int length)
         {
-            EnsureSize(length);
+            if (EnsureSize(length))
+                return string.Empty;
+
             StringBuilder sb = new StringBuilder(length);
 
             for (int i = 0; i < length; i++)
@@ -215,9 +229,11 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        private static byte[] _emtpyBytes = { };
         public byte[] ReadArray(int count)
         {
-            EnsureSize(count);
+            if (EnsureSize(count))
+                return _emtpyBytes;
             byte[] array = new byte[count];
             Buffer.BlockCopy(_data, Position, array, 0, count);
             Position += count;
@@ -227,7 +243,8 @@ namespace ClassicUO.Network
 
         public string ReadUnicodeReversed(int length)
         {
-            EnsureSize(length);
+            if (EnsureSize(length))
+                return string.Empty;
             length /= 2;
             StringBuilder sb = new StringBuilder(length);
 
@@ -242,7 +259,8 @@ namespace ClassicUO.Network
 
         public string ReadUnicodeReversed()
         {
-            EnsureSize(2);
+            if (EnsureSize(2))
+                return string.Empty;
             StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
@@ -252,6 +270,9 @@ namespace ClassicUO.Network
 
         public ushort ReadUShortReversed()
         {
+            if (EnsureSize(2))
+                return 0;
+
             return (ushort) (ReadByte() | (ReadByte() << 8));
         }
     }
