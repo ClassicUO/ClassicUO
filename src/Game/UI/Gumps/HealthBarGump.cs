@@ -93,6 +93,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Mobile Mobile { get; private set; }
 
+        private Hue _barColor
+        {
+            get
+            {
+                return (Mobile == null || (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)) ? (Hue)0 : (Hue)Notoriety.GetHue(Mobile.NotorietyFlag);
+            }
+        }
+
         private void BuildGump()
         {
             LocalSerial = _partyMemeberSerial;
@@ -156,27 +164,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Hue color = 0;
                     Hue textColor = 0x0386;
                     Hue hitsColor = 0x0386;
 
                     if (Mobile != null)
                     {
                         hitsColor = 0;
-                        color = Notoriety.GetHue(Mobile.NotorietyFlag);
-
-                        if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
-                            color = 0;
-
                         _canChangeName = Mobile.IsRenamable;
 
                         if (_canChangeName)
-                        {
                             textColor = 0x000E;
-                        }
                     }
 
-                    Add(_background = new GumpPic(0, 0, 0x0804, color));
+                    Add(_background = new GumpPic(0, 0, 0x0804, _barColor));
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
                     Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
 
@@ -287,7 +287,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
 
-            Hue color = 0;
             Hue textColor = 0x0386;
             Hue hitsColor = 0x0386;
 
@@ -333,8 +332,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.MouseClick -= TextBoxOnMouseClick;
                     }
 
-                    if (_background.Hue != color)
-                        _background.Hue = color;
+                    if (_background.Hue != _barColor)
+                        _background.Hue = _barColor;
 
                     if (_hpLineRed.Hue != hitsColor)
                     {
@@ -373,14 +372,10 @@ namespace ClassicUO.Game.UI.Gumps
                         _name = Mobile.Name;
 
                     hitsColor = 0;
-                    color = Notoriety.GetHue(Mobile.NotorietyFlag);
-
-                    if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
-                        color = 0;
 
                     if (inparty)
                     {
-                        textColor = color;
+                        textColor = _barColor;
                     }
                     else
                     {
@@ -392,10 +387,6 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.MouseClick += TextBoxOnMouseClick;
                         }
                     }
-
-
-                    if (_background.Hue != color)
-                        _background.Hue = color;
 
                     if (inparty)
                     {
@@ -426,6 +417,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _bars[0].IsVisible = true;
                 }
+
+                if (_background.Hue != _barColor)
+                    _background.Hue = _barColor;
 
                 if (Mobile.IsPoisoned && !_poisoned)
                 {
