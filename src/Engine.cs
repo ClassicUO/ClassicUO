@@ -183,17 +183,17 @@ namespace ClassicUO
                 }
             }
         }
-        public static void DropFpsMinMaxValues()
-        {
-            FPSMax = 0;
-            FPSMin = Int32.MaxValue;
-        }
 
         public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
         public static int FPSMin { get; private set; } = Int32.MaxValue;
         public static int FPSMax { get; private set; }
+        public static void DropFpsMinMaxValues()
+        {
+            FPSMax = 0;
+            FPSMin = Int32.MaxValue;
+        }
 
         public static bool AllowWindowResizing
         {
