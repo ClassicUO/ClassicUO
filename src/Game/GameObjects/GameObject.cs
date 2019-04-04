@@ -147,9 +147,9 @@ namespace ClassicUO.Game.GameObjects
                 if (World.Player == null)
                     return ushort.MaxValue;
 
-                if (World.Player.IsMoving && this != World.Player)
+                if (this is Mobile m && m.IsMoving)
                 {
-                    Mobile.Step step = World.Player.Steps.Back();
+                    Mobile.Step step = m.Steps.Back();
 
                     return Position.DistanceTo(step.X, step.Y);
                 }
