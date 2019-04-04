@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
-        private Combobox _counterLayoutComboBox, _counterLayout;
+        private Combobox _counterLayout;
 
 
         private const byte FONT = 0xFF;
