@@ -63,53 +63,41 @@ namespace ClassicUO.Game.GameObjects
 
 
             HueVector = ShaderHuesTraslator.GetHueVector(0);
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-            float scale = gs.Scale;
+            float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+
             int x = Engine.Profile.Current.GameWindowPosition.X;
             int y = Engine.Profile.Current.GameWindowPosition.Y;
+            int w = Engine.Profile.Current.GameWindowSize.X;
+            int h = Engine.Profile.Current.GameWindowSize.Y;
 
-              
-            float width = Texture.Width - Bounds.X;
-            float height = Texture.Height - Bounds.Y;
-
-            width *= scale;
-            height *= scale;
-
-            if (position.X - 6 < Bounds.X)
-            {
-                if (!EdgeDetection)
-                    return false;
-                position.X = Bounds.X + 6;
-            }
-            else if (position.X > (Engine.Profile.Current.GameWindowSize.X + 6) * scale - width)
-            {
-                if (!EdgeDetection)
-                    return false;
-                position.X = (Engine.Profile.Current.GameWindowSize.X + 6) * scale - width;
-            }
-
-            if (position.Y - 6 < Bounds.Y)
-            {
-                if (!EdgeDetection)
-                    return false;
-                position.Y = Bounds.Y + 6;
-            }
-            else if (position.Y > (Engine.Profile.Current.GameWindowSize.Y + 6) * scale - height)
-            {
-                if (!EdgeDetection)
-                    return false;
-                position.Y = (Engine.Profile.Current.GameWindowSize.Y + 6) * scale - height;
-            }              
-            
 
             position /= scale;
-            position.X += x;
+            position.Z = 0;
+
+            position.X += x + 3;
             position.Y += y;
-            bool ok = base.Draw(batcher, position, objectList);
 
-            //batcher.DrawRectangle(_edge, new Rectangle((int)position.X - Bounds.X, (int)position.Y - Bounds.Y, _text.Width, _text.Height), Vector3.Zero);
+            float width = Texture.Width - Bounds.X - 6;
+            float height = Texture.Height - Bounds.Y - 6;
 
-            return ok;
+
+            if (position.X < x + Bounds.X + 6)
+                position.X = x + Bounds.X + 6;
+            else if (position.X > x + w - width)
+                position.X = x + w - width;
+
+            if (position.Y < y + Bounds.Y)
+                position.Y = y + Bounds.Y;
+            else if (position.Y > y + h - height)
+                position.Y = y + h - height;
+
+
+            base.Draw(batcher, position, objectList);
+
+
+           // batcher.DrawRectangle(Textures.GetTexture(Color.Gray), (int)(position.X - Bounds.X), (int) (position.Y - Bounds.Y), Bounds.Width - 3, Bounds.Height, Vector3.Zero);
+
+            return true;
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)

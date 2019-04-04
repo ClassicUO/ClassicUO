@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
         {
             byte dir = 0 & 0x7F;
             byte animGroup = 0;
@@ -129,10 +129,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte)mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int centerX, out centerY, out int w, out height);
-            if (centerX == 0 && centerY == 0 && w == 0 && height == 0)
-                height = mobile.IsMounted ? 100 : 60;
+            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
+
 
 
         protected override void CloseWithRightClick()
@@ -243,35 +243,39 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed || !SetName())
                 return false;
 
-            Point gWinPos = Engine.Profile.Current.GameWindowPosition;
-            Point gWinSize = Engine.Profile.Current.GameWindowSize;
+
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+
+            int gx = Engine.Profile.Current.GameWindowPosition.X;
+            int gy = Engine.Profile.Current.GameWindowPosition.Y;
+            int w = Engine.Profile.Current.GameWindowSize.X;
+            int h = Engine.Profile.Current.GameWindowSize.Y;
+
 
 
             if (Entity is Mobile m)
-            {                    
-               GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+            {
+                GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                float xx = (m.RealScreenPosition.X + gWinPos.X) / scale;
-                float yy = (m.RealScreenPosition.Y + gWinPos.Y) / scale;
-
-                X = (int)(xx + m.Offset.X) - (Width >> 1) + 22;
-                Y = (int)(yy + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) - (Height >> 1) + (m.IsMounted ? 0 : 22);
+                x = (int)((x + Entity.RealScreenPosition.X + m.Offset.X + (width / 2 + centerX)) / scale);
+                y = (int)((y + Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) ) / scale);
             }
             else
             {
-                X = (int)(Entity.RealScreenPosition.X / scale) - (Width >> 1) + 22;
-                Y = (int)(Entity.RealScreenPosition.Y / scale) - (Height >> 1);
+                x = (int)((x + Entity.RealScreenPosition.X) / scale);
+                y = (int)((y + Entity.RealScreenPosition.Y) / scale);
             }
 
+            x -= Width / 2;
+            y -= Height / 2;
+            x += gx + 3;
+            y += gy;
 
-            if (X < gWinPos.X || X + Width > gWinPos.X + gWinSize.X)
-                return false;
-            if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
-                return false;
 
-            x = X;
-            y = Y;
+            if (x < gx || x + Width > gx + w)
+                return false;
+            if (y < gy || y + Height > gy + h)
+                return false;
 
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, Vector3.Zero);
             

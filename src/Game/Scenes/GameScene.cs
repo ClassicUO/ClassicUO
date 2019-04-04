@@ -663,13 +663,14 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.Begin();
             ////batcher.GraphicsDevice.SetRenderTarget(null);
+            ////batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
             //batcher.SetBlendState(_blendText);
-            //_overheadManager.Draw(batcher, _mouseOverList, _offset, 0, 0);
+            //_overheadManager.Draw(batcher, _mouseOverList, _offset);
             //batcher.SetBlendState(null);
 
-            //// workaround to set overheads clickable
+            ////// workaround to set overheads clickable
             //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
-            //batcher.GraphicsDevice.SetRenderTarget(null);
+            ////batcher.GraphicsDevice.SetRenderTarget(null);
             //batcher.End();
 
           
@@ -728,12 +729,16 @@ namespace ClassicUO.Game.Scenes
 
             batcher.SetBlendState(null);
             batcher.End();
+
+
+            batcher.GraphicsDevice.SetRenderTarget(null);
+            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
         }
 
         public void DrawOverheads(Batcher2D batcher, int x, int y)
         {
             batcher.SetBlendState(_blendText);
-            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+            _overheadManager.Draw(batcher, _mouseOverList, _offset, x, y);
             batcher.SetBlendState(null);
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
