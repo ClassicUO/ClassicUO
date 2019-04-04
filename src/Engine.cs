@@ -187,6 +187,13 @@ namespace ClassicUO
         public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
+        public static int FPSMin { get; private set; } = Int32.MaxValue;
+        public static int FPSMax { get; private set; }
+        public static void DropFpsMinMaxValues()
+        {
+            FPSMax = 0;
+            FPSMin = Int32.MaxValue;
+        }
 
         public static bool AllowWindowResizing
         {
@@ -638,16 +645,24 @@ namespace ClassicUO
         {
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
+
             Profiler.EnterContext("Update");
+
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
+
             Ticks = (long) totalms;
             TicksFrame = (long) framems;
+
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_currentFpsTime >= 1.0)
             {
                 CurrentFPS = _totalFrames;
+
+                FPSMax = (CurrentFPS > FPSMax || FPSMax > FpsLimit) ? CurrentFPS : FPSMax;
+                FPSMin = (CurrentFPS < FPSMin && CurrentFPS != 0) ? CurrentFPS : FPSMin;
+
                 _totalFrames = 0;
                 _currentFpsTime = 0;
             }
@@ -695,7 +710,6 @@ namespace ClassicUO
 
             if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
                 _sceneManager.CurrentScene.Draw(_batcher);
-
 
             _uiManager.Draw(_batcher);
            
