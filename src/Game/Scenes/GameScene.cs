@@ -661,21 +661,6 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
           
             DrawLights(batcher);
-
-            //batcher.Begin();
-            ////batcher.GraphicsDevice.SetRenderTarget(null);
-            ////batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
-            //batcher.SetBlendState(_blendText);
-            //_overheadManager.Draw(batcher, _mouseOverList, _offset);
-            //batcher.SetBlendState(null);
-
-            ////// workaround to set overheads clickable
-            //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
-            ////batcher.GraphicsDevice.SetRenderTarget(null);
-            //batcher.End();
-
-          
-            batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
 
@@ -723,7 +708,6 @@ namespace ClassicUO.Game.Scenes
                     v.Hue.Y = 13;
                     v.Hue.Z = 0f;
                 }
-                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = new Vector3(l.Color, 13, 0f);
                 batcher.DrawSprite(texture, vertex);
             }
             _lightCount = 0;
@@ -731,9 +715,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetBlendState(null);
             batcher.End();
 
-
             batcher.GraphicsDevice.SetRenderTarget(null);
-            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
         }
 
         public void DrawOverheads(Batcher2D batcher, int x, int y)
