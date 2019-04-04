@@ -18,22 +18,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
-
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
@@ -104,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
         public virtual Hue Hue { get; set; }
 
         public virtual Graphic Graphic { get; set; }
-       
+
         public sbyte AnimIndex { get; set; }
 
         public int CurrentRenderIndex { get; set; }
@@ -208,7 +202,7 @@ namespace ClassicUO.Game.GameObjects
                 _tile = null;
             }
         }
-      
+
 
         public event EventHandler Disposed, OverheadAdded;
 
@@ -251,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
             if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
             else
                 width = 0;
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive)

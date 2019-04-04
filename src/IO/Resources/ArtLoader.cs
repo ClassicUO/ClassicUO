@@ -18,6 +18,8 @@ namespace ClassicUO.IO.Resources
         private UOFile _file;
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
 
+        private static readonly ushort[] _empty = { };
+
         public override void Load()
         {
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
@@ -39,6 +41,10 @@ namespace ClassicUO.IO.Resources
             if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
+
+                if (pixels.Length == 0 || w == 0 || h == 0)
+                    return null;
+
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
                 ResourceDictionary.Add(g, texture);
@@ -127,15 +133,22 @@ namespace ClassicUO.IO.Resources
             //else
             {
 
+                imageRectangle = Rectangle.Empty;
 
                 (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+
+                if (length == 0)
+                {
+                    width = height = 0;
+                    return _empty;
+                }
+
                 _file.Skip(4);
                 width = _file.ReadShort();
                 height = _file.ReadShort();
-                imageRectangle = Rectangle.Empty;
 
                 if (width == 0 || height == 0)
-                    return new ushort[0];
+                    return _empty;
 
                 ushort[] pixels = new ushort[width * height];
                 ushort* ptr = (ushort*) _file.PositionAddress;
@@ -226,6 +239,10 @@ namespace ClassicUO.IO.Resources
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
+
+            if (length == 0)
+                return new ushort[44 * 44];
+
             ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)
