@@ -661,6 +661,8 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
           
             DrawLights(batcher);
+
+            batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
 
@@ -714,8 +716,6 @@ namespace ClassicUO.Game.Scenes
 
             batcher.SetBlendState(null);
             batcher.End();
-
-            batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
         public void DrawOverheads(Batcher2D batcher, int x, int y)

@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
-        internal bool IsMoving => Steps.Count > 0;
+        internal bool IsMoving => Steps.Count != 0;
 
         public event EventHandler HitsChanged;
 

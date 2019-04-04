@@ -382,7 +382,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (obj is Item it)
                     {
-
+                        it.CharacterIsBehindFoliage = check;
                     }
                 }
 
