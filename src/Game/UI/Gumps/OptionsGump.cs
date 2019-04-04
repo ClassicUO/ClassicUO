@@ -23,18 +23,12 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.ComponentModel.Design;
-
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Network;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
-
-using System.Diagnostics;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -45,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -191,31 +185,17 @@ namespace ClassicUO.Game.UI.Gumps
             // Highlight    
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
-            //// smooth movements
-            //_smoothMovements = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
-            //{
-            //    IsChecked = Engine.Profile.Current.SmoothMovements
-            //};
-            //rightArea.AddChildren(_smoothMovements);
-
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
-            _holdDownKeyTab = CreateCheckBox(rightArea, "Hold down TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
+            _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
+            _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
 
-            // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
-
-            //text = new Label("- Mobiles HP", true, HUE_FONT, font: FONT)
-            //{
-            //    Y = 10
-            //};
-            //hpAreaItem.Add(text);
-
             _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT, true)
             {
-                X = 0, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
+                X = 0, Y = 10, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
             hpAreaItem.Add(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
@@ -223,12 +203,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 30, 150, new[]
+            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 10, 150, new[]
             {
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
-
 
             mode = Engine.Profile.Current.CloseHealthBarType;
             if (mode < 0 || mode > 2)
@@ -244,7 +223,6 @@ namespace ClassicUO.Game.UI.Gumps
                 "None", "Mobile Out of Range", "Mobile is Dead"
             }, mode);
             hpAreaItem.Add(_healtbarType);
-
 
             rightArea.Add(hpAreaItem);
 
@@ -788,6 +766,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
+                    _holdDownKeyAlt.IsChecked = true;
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
@@ -887,6 +866,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
+            Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
