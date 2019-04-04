@@ -2427,7 +2427,10 @@ namespace ClassicUO.Network
                 }
             }
             else
-                arrow.Dispose();
+            {
+                if (arrow != null)
+                    arrow.Dispose();
+            }
         }
 
         private static void UltimaMessengerR(Packet p)
