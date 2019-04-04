@@ -166,6 +166,7 @@ namespace ClassicUO.Game.Scenes
                     X = Engine.Profile.Current.DebugGumpPosition.X,
                     Y = Engine.Profile.Current.DebugGumpPosition.Y,
                 });
+                Engine.DropFpsMinMaxValues();
             }
 
             HeldItem = new ItemHold();
