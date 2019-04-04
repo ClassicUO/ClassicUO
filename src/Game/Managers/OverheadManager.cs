@@ -88,9 +88,10 @@ namespace ClassicUO.Game.Managers
 
                             if (ov.Parent is Mobile mm)
                             {
-                                GetAnimationDimensions(mm, 0xFF, out int centerX, out int centerY, out int width, out int height);
+                                GetAnimationDimensions(mm, 0, out int centerX, out int centerY, out int width, out int height);
 
                                 pos2.X += mm.Offset.X;
+                                pos2.X += (width / 2 + centerX);
                                 pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
                             }
                             else if (ov.Parent.Texture != null)

@@ -130,7 +130,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (frameIndex == 0xFF)
                 frameIndex = (byte)mobile.AnimIndex;
             FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
-            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0)
+                height = mobile.IsMounted ? 100 : 60;
         }
 
 
@@ -243,7 +244,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed || !SetName())
                 return false;
 
-
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
             int gx = Engine.Profile.Current.GameWindowPosition.X;
@@ -251,7 +251,8 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-
+            x = 0;
+            y = 0;
 
             if (Entity is Mobile m)
             {
@@ -262,21 +263,23 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                x = (int)((x + Entity.RealScreenPosition.X) / scale);
+                x = (int)((x + Entity.RealScreenPosition.X + 22) / scale);
                 y = (int)((y + Entity.RealScreenPosition.Y) / scale);
             }
-
+           
             x -= Width / 2;
             y -= Height / 2;
-            x += gx + 3;
-            y += gy;
+            x -= gx + 6;
+            y -= gy;
 
+            X = x;
+            Y = y;
 
             if (x < gx || x + Width > gx + w)
                 return false;
             if (y < gy || y + Height > gy + h)
                 return false;
-
+           
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, Vector3.Zero);
             
             base.Draw(batcher, x, y);

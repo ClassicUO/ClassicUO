@@ -363,7 +363,6 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-
                         Rectangle rect = new Rectangle((int)drawX - obj.FrameInfo.X,
                                                        (int)drawY - obj.FrameInfo.Y,
                                                        obj.FrameInfo.Width,
