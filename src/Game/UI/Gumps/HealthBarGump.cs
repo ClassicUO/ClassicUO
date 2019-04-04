@@ -65,12 +65,6 @@ namespace ClassicUO.Game.UI.Gumps
         private string _name;
         private bool _isDead;
 
-        private enum ButtonParty
-        {
-            Heal1,
-            Heal2
-        }
-
         public override int GroupMatrixWidth { get => Width; protected set { } }
         public override int GroupMatrixHeight { get => Height; protected set { } }
         
@@ -93,6 +87,283 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Mobile Mobile { get; private set; }
 
+        private enum ButtonParty
+        {
+            Heal1,
+            Heal2
+        }
+
+        private Hue _barColor { get => (Mobile == null || Mobile == World.Player || (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)) ? (Hue)0 : (Hue)Notoriety.GetHue(Mobile.NotorietyFlag); }
+
+        public void Update()
+        {
+            Clear();
+            Mobile = World.Mobiles.Get(LocalSerial);
+            BuildGump();
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (IsDisposed)
+                return;
+
+            bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
+
+            Hue textColor = 0x0386;
+            Hue hitsColor = 0x0386;
+
+            Mobile = World.Mobiles.Get(LocalSerial);
+
+            if (Mobile == null || Mobile.IsDestroyed)
+            {
+                if (Engine.Profile.Current.CloseHealthBarType == 1)
+                {
+                    Dispose();
+                    return;
+                }
+
+                if (_isDead)
+                    _isDead = false;
+
+                if (!_outOfRange)
+                {
+                    _poisoned = false;
+                    _yellowHits = false;
+                    _normalHits = true;
+
+                    _outOfRange = true;
+
+                    if (inparty)
+                    {
+                        hitsColor = textColor = 912;
+
+                        if (_partyNameLabel.Hue != textColor)
+                            _partyNameLabel.Hue = textColor;
+
+                        _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = false;
+
+                        _bars[1].IsVisible = false;
+                        _bars[2].IsVisible = false;
+                    }
+                    else
+                    {
+                        if (_textBox.Hue != textColor)
+                            _textBox.Hue = textColor;
+
+                        if (_canChangeName)
+                            _textBox.MouseClick -= TextBoxOnMouseClick;
+                    }
+
+                    if (_background.Hue != _barColor)
+                        _background.Hue = _barColor;
+
+                    if (_hpLineRed.Hue != hitsColor)
+                    {
+                        _hpLineRed.Hue = hitsColor;
+
+                        if (_manaLineRed != null && _stamLineRed != null)
+                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
+                    }
+
+
+                    _bars[0].IsVisible = false;
+                }
+            }
+
+            if (Mobile != null && !Mobile.IsDestroyed)
+            {
+                if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
+                {
+                    Dispose();
+                    return;
+                }
+
+                if (!Mobile.IsDead && _isDead)
+                {
+                    _isDead = false;
+                }
+
+                if (_outOfRange)
+                {
+                    if (Mobile.HitsMax == 0)
+                        GameActions.RequestMobileStatus(Mobile);
+
+                    _outOfRange = false;
+
+                    if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
+                        _name = Mobile.Name;
+
+                    hitsColor = 0;
+
+                    if (inparty)
+                    {
+                        textColor = _barColor;
+                    }
+                    else
+                    {
+                        _canChangeName = Mobile.IsRenamable;
+
+                        if (_canChangeName)
+                        {
+                            textColor = 0x000E;
+                            _textBox.MouseClick += TextBoxOnMouseClick;
+                        }
+                    }
+
+                    if (inparty)
+                    {
+                        if (_partyNameLabel.Hue != textColor)
+                            _partyNameLabel.Hue = textColor;
+
+                        _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = true;
+
+                        _bars[1].IsVisible = true;
+                        _bars[2].IsVisible = true;
+                    }
+                    else
+                    {
+                        if (_textBox.Hue != textColor)
+                            _textBox.Hue = textColor;
+
+                        if (_textBox.Text != _name)
+                            _textBox.Text = _name;
+                    }
+
+                    if (_hpLineRed.Hue != hitsColor)
+                    {
+                        _hpLineRed.Hue = hitsColor;
+
+                        if (_manaLineRed != null && _stamLineRed != null)
+                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
+                    }
+
+                    _bars[0].IsVisible = true;
+                }
+
+                if (_background.Hue != _barColor)
+                    _background.Hue = _barColor;
+
+                if (Mobile.IsPoisoned && !_poisoned)
+                {
+                    if (inparty)
+                        _bars[0].Hue = 63;
+                    else
+                        _bars[0].Graphic = LINE_POISONED;
+
+                    _poisoned = true;
+                    _normalHits = false;
+                }
+                else if (Mobile.IsYellowHits && !_yellowHits)
+                {
+                    if (inparty)
+                        _bars[0].Hue = 353;
+                    else
+                        _bars[0].Graphic = LINE_YELLOWHITS;
+                    _yellowHits = true;
+                    _normalHits = false;
+                }
+                else if (!_normalHits && !Mobile.IsPoisoned && !Mobile.IsYellowHits && (_poisoned || _yellowHits))
+                {
+                    if (inparty)
+                        _bars[0].Hue = 0;
+                    else
+                        _bars[0].Graphic = LINE_BLUE;
+                    _poisoned = false;
+                    _yellowHits = false;
+                    _normalHits = true;
+                }
+
+                int hits = CalculatePercents(Mobile.HitsMax, Mobile.Hits, inparty ? 96 : 109);
+
+                if (hits != _oldHits)
+                {
+                    _bars[0].Percent = hits;
+                    _oldHits = hits;
+                }
+            }
+
+            if (CanBeSaved)
+            {
+                if (World.Player.InWarMode != _oldWarMode)
+                {
+                    _oldWarMode = !_oldWarMode;
+
+                    _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
+                }
+
+                int mana = CalculatePercents(World.Player.ManaMax, World.Player.Mana, inparty ? 96 : 109);
+                int stam = CalculatePercents(World.Player.StaminaMax, World.Player.Stamina, inparty ? 96 : 109);
+
+                if (mana != _oldMana)
+                {
+                    _bars[1].Percent = mana;
+                    _oldMana = mana;
+                }
+
+                if (stam != _oldStam)
+                {
+                    _bars[2].Percent = stam;
+                    _oldStam = stam;
+                }
+            }
+        }
+
+        public override void Dispose()
+        {
+            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
+            {
+                NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
+            }
+
+            base.Dispose();
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((ButtonParty)buttonID)
+            {
+                case ButtonParty.Heal1:
+                    GameActions.CastSpell(29);
+                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTarget = LocalSerial;
+                    break;
+                case ButtonParty.Heal2:
+                    GameActions.CastSpell(11);
+                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTarget = LocalSerial;
+                    break;
+            }
+
+            Mouse.CancelDoubleClick = true;
+            Mouse.LastLeftButtonClickTime = 0;
+        }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+
+            writer.Write(Mobile.Serial);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            _partyMemeberSerial = LocalSerial = reader.ReadUInt32();
+
+            if (LocalSerial == World.Player)
+            {
+                Mobile = World.Player;
+                _name = Mobile.Name;
+                BuildGump();
+            }
+            else
+            {
+                Dispose();
+            }
+        }
+
         private void BuildGump()
         {
             LocalSerial = _partyMemeberSerial;
@@ -113,13 +384,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (CanBeSaved)
                 {
-                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
+                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) { X = 0, Y = -2 });
                 }
                 else
                 {
                     Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 150, 3, FontStyle.Fixed)
                     {
-                        X = 0, Y = -2
+                        X = 0,
+                        Y = -2
                     });
                 }
 
@@ -156,27 +428,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Hue color = 0;
                     Hue textColor = 0x0386;
                     Hue hitsColor = 0x0386;
 
                     if (Mobile != null)
                     {
                         hitsColor = 0;
-                        color = Notoriety.GetHue(Mobile.NotorietyFlag);
-
-                        if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
-                            color = 0;
-
                         _canChangeName = Mobile.IsRenamable;
 
                         if (_canChangeName)
-                        {
                             textColor = 0x000E;
-                        }
                     }
 
-                    Add(_background = new GumpPic(0, 0, 0x0804, color));
+                    Add(_background = new GumpPic(0, 0, 0x0804, _barColor));
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
                     Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
 
@@ -202,13 +466,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void Update()
-        {
-            Clear();
-            Mobile = World.Mobiles.Get(LocalSerial);
-            BuildGump();
-        }
-
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
             if (TargetManager.IsTargeting)
@@ -218,6 +475,22 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (_canChangeName)
                 _textBox.IsEditable = true;
+        }
+
+        private static int CalculatePercents(int max, int current, int maxValue)
+        {
+            if (max > 0)
+            {
+                max = (current * 100) / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = (maxValue * max) / 100;
+            }
+
+            return max;
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
@@ -278,230 +551,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (IsDisposed)
-                return;
-
-            bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
-
-            Hue color = 0;
-            Hue textColor = 0x0386;
-            Hue hitsColor = 0x0386;
-
-            Mobile = World.Mobiles.Get(LocalSerial);
-
-            if (Mobile == null || Mobile.IsDestroyed)
-            {
-                if (Engine.Profile.Current.CloseHealthBarType == 1)
-                {
-                    Dispose();
-                    return;
-                }
-
-                if (_isDead)
-                    _isDead = false;
-
-                if (!_outOfRange)
-                {
-                    _poisoned = false;
-                    _yellowHits = false;
-                    _normalHits = true;
-
-                    _outOfRange = true;
-
-                    if (inparty)
-                    {
-                        hitsColor = textColor = 912;
-
-                        if(_partyNameLabel.Hue != textColor)
-                            _partyNameLabel.Hue = textColor;
-
-                        _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = false;
-
-                        _bars[1].IsVisible = false;
-                        _bars[2].IsVisible = false;
-                    }
-                    else
-                    {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
-
-                        if (_canChangeName)
-                            _textBox.MouseClick -= TextBoxOnMouseClick;
-                    }
-
-                    if (_background.Hue != color)
-                        _background.Hue = color;
-
-                    if (_hpLineRed.Hue != hitsColor)
-                    {
-                        _hpLineRed.Hue = hitsColor;
-
-                        if (_manaLineRed != null && _stamLineRed != null)
-                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
-                    }
-
-
-                    _bars[0].IsVisible = false;                   
-                }
-            }
-
-            if (Mobile != null && !Mobile.IsDestroyed)
-            {
-                if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
-                {
-                    Dispose();
-                    return;
-                }
-
-                if (!Mobile.IsDead && _isDead)
-                {
-                    _isDead = false;
-                }
-
-                if (_outOfRange)
-                {
-                    if (Mobile.HitsMax == 0)
-                        GameActions.RequestMobileStatus(Mobile);
-
-                    _outOfRange = false;
-
-                    if (_name != Mobile.Name && !string.IsNullOrEmpty(Mobile.Name))
-                        _name = Mobile.Name;
-
-                    hitsColor = 0;
-                    color = Notoriety.GetHue(Mobile.NotorietyFlag);
-
-                    if (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)
-                        color = 0;
-
-                    if (inparty)
-                    {
-                        textColor = color;
-                    }
-                    else
-                    {
-                        _canChangeName = Mobile.IsRenamable;
-
-                        if (_canChangeName)
-                        {
-                            textColor = 0x000E;
-                            _textBox.MouseClick += TextBoxOnMouseClick;
-                        }
-                    }
-
-
-                    if (_background.Hue != color)
-                        _background.Hue = color;
-
-                    if (inparty)
-                    {
-                        if (_partyNameLabel.Hue != textColor)
-                            _partyNameLabel.Hue = textColor;
-
-                        _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = true;
-
-                        _bars[1].IsVisible = true;
-                        _bars[2].IsVisible = true;
-                    }
-                    else
-                    {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
-
-                        if (_textBox.Text != _name)
-                            _textBox.Text = _name;
-                    }
-
-                    if (_hpLineRed.Hue != hitsColor)
-                    {
-                        _hpLineRed.Hue = hitsColor;
-
-                        if (_manaLineRed != null && _stamLineRed != null)
-                            _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
-                    }
-
-                    _bars[0].IsVisible = true;
-                }
-
-                if (Mobile.IsPoisoned && !_poisoned)
-                {
-                    if (inparty)
-                        _bars[0].Hue = 63;
-                    else
-                        _bars[0].Graphic = LINE_POISONED;
-
-                    _poisoned = true;
-                    _normalHits = false;
-                }
-                else if (Mobile.IsYellowHits && !_yellowHits)
-                {
-                    if (inparty)
-                        _bars[0].Hue = 353;
-                    else
-                        _bars[0].Graphic = LINE_YELLOWHITS;
-                    _yellowHits = true;
-                    _normalHits = false;
-                }
-                else if (!_normalHits && !Mobile.IsPoisoned && !Mobile.IsYellowHits && (_poisoned || _yellowHits))
-                {
-                    if (inparty)
-                        _bars[0].Hue = 0;
-                    else
-                        _bars[0].Graphic = LINE_BLUE;
-                    _poisoned = false;
-                    _yellowHits = false;
-                    _normalHits = true;
-                }
-
-                int hits = CalculatePercents(Mobile.HitsMax, Mobile.Hits, inparty ? 96 : 109);
-
-                if (hits != _oldHits)
-                {
-                    _bars[0].Percent = hits;
-                    _oldHits = hits;
-                }
-            }
-
-            if (CanBeSaved)
-            {             
-                if (World.Player.InWarMode != _oldWarMode)
-                {
-                    _oldWarMode = !_oldWarMode;
-
-                    _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
-                }
-
-                int mana = CalculatePercents(World.Player.ManaMax, World.Player.Mana, inparty ? 96 : 109);
-                int stam = CalculatePercents(World.Player.StaminaMax, World.Player.Stamina, inparty ? 96 : 109);
-
-                if (mana != _oldMana)
-                {
-                    _bars[1].Percent = mana;
-                    _oldMana = mana;
-                }
-
-                if (stam != _oldStam)
-                {
-                    _bars[2].Percent = stam;
-                    _oldStam = stam;
-                }
-            }
-        }
-
-        public override void Dispose()
-        {
-            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
-            {
-                NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
-            }
-
-            base.Dispose();
-        }
-
         protected override void OnMouseEnter(int x, int y)
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
@@ -516,71 +565,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile.IsSelected = false;
             }
-        }
-
-        public override void OnButtonClick(int buttonID)
-        {
-            switch ((ButtonParty) buttonID)
-            {
-                case ButtonParty.Heal1:
-                    GameActions.CastSpell(29);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
-                    World.Party.PartyHealTarget = LocalSerial;
-                    break;
-                case ButtonParty.Heal2:
-                    GameActions.CastSpell(11);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
-                    World.Party.PartyHealTarget = LocalSerial;
-                    break;
-            }
-
-            Mouse.CancelDoubleClick = true;
-            Mouse.LastLeftButtonClickTime = 0;
-        }
-
-        //protected override bool Contains(int x, int y)
-        //{
-        //    return World.Party.GetPartyMember(_partyMemeberSerial) != null ?  x >= 0 && x <= Width && y >= 0 && y <= Height : base.Contains(x, y);
-        //}
-
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-
-            writer.Write(Mobile.Serial);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            _partyMemeberSerial = LocalSerial = reader.ReadUInt32();
-
-            if (LocalSerial == World.Player)
-            {
-                Mobile = World.Player;
-                _name = Mobile.Name;
-                BuildGump();
-            }
-            else
-            {
-                Dispose();
-            }
-        }
-
-        private static int CalculatePercents(int max, int current, int maxValue)
-        {
-            if (max > 0)
-            {
-                max = (current * 100) / max;
-
-                if (max > 100)
-                    max = 100;
-
-                if (max > 1)
-                    max = (maxValue * max) / 100;
-            }
-
-            return max;
         }
     }
 }
