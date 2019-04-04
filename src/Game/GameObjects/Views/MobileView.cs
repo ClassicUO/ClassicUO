@@ -78,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
 
             bool isAttack = Serial == World.LastAttack;
             bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
-            bool needHpLine = false;
+            //bool needHpLine = false;
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
             {
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 if (isAttack || this == TargetManager.LastGameObject)
                 {
                     Engine.UI.SetTargetLineGump(this);
-                    needHpLine = true;
+                    //needHpLine = true;
                 }
 
                 if (isAttack || isUnderMouse)
@@ -108,18 +108,12 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Width = FrameInfo.X + rect.Width;
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
+            //var r = GetOnScreenRectangle();
+            //batcher.DrawRectangle(Textures.GetTexture(Color.Red), r.X, r.Y, r.Width, r.Height , Vector3.Zero);
 
-            //if (_edge == null)
-            //{
-            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-            //    _edge.SetData(new Color[] { Color.LightBlue });
-            //}
-
-            //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
             Engine.DebugInfo.MobilesRendered++;
             return true;
         }
-        //private static Texture2D _edge;
 
         private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool shadow)
         {

@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
 
         private TextOverhead _firstNode;
 
-        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list)
+        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list, int startX, int startY)
         {
             if (_firstNode != null)
             {
@@ -63,12 +63,15 @@ namespace ClassicUO.Game.Managers
                     }
 
                     Vector3 position = owner.RealScreenPosition;
+                    //position.X += startX;
+                    //position.Y += startY;
 
                     if (owner is Mobile m)
                     {
-                        GetAnimationDimensions(m, 0xFF, out int centerX, out int centerY, out int width, out int height);
+                        GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                        position.X = position.X + m.Offset.X;
+                        position.X += m.Offset.X;
+                        position.X += (width / 2 + centerX);
                         position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
                     }
                     else if (owner.Texture != null)
@@ -85,9 +88,10 @@ namespace ClassicUO.Game.Managers
 
                             if (ov.Parent is Mobile mm)
                             {
-                                GetAnimationDimensions(mm, 0xFF, out int centerX, out int centerY, out int width, out int height);
+                                GetAnimationDimensions(mm, 0, out int centerX, out int centerY, out int width, out int height);
 
-                                pos2.X = pos2.X + mm.Offset.X;
+                                pos2.X += mm.Offset.X;
+                                pos2.X += (width / 2 + centerX);
                                 pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
                             }
                             else if (ov.Parent.Texture != null)
@@ -204,9 +208,9 @@ namespace ClassicUO.Game.Managers
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
+        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset, int startX, int startY)
         {
-            DrawTextOverheads(batcher, list);
+            DrawTextOverheads(batcher, list, startX, startY);
 
             Vector3 position = Vector3.Zero;
 
