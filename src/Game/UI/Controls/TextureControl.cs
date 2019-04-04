@@ -40,15 +40,21 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Texture is ArtTexture artTexture)
                 {
-                    //var rect = new Rectangle(position.X, position.Y, Width, Height);
-
                     int w = Width;
                     int h = Height;
 
                     if (artTexture.ImageRectangle.Width < Width)
+                    {
                         w = artTexture.ImageRectangle.Width;
+                        x += Width / 2 - w / 2;
+                    }
+
                     if (artTexture.ImageRectangle.Height < Height)
+                    {
                         h = artTexture.ImageRectangle.Height;
+                        y += Height / 2 - h / 2;
+                    }
+
 
                     var r = artTexture.ImageRectangle;
 
