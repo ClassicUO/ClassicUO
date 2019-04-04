@@ -1,16 +1,6 @@
-﻿using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
+﻿
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
-using SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -108,10 +98,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (Engine.AnchorManager[this] == null || Input.Keyboard.Alt)
+            if (Engine.AnchorManager[this] == null || Input.Keyboard.Alt || !Engine.Profile.Current.HoldDownKeyAltToCloseAnchored)
             {
                 Engine.AnchorManager.DisposeAllControls(this);
-
                 base.CloseWithRightClick();
             }
         }
