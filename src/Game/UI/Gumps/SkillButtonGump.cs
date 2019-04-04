@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButton.Left && !Input.Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }
         
