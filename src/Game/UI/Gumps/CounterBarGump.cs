@@ -37,13 +37,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_background = new AlphaBlendControl() { Width = Width, Height = Height });
 
-            //int x = 0;
-            //for (int i = 0; i < 50; i++)
-            //{
-            //    Add(new CounterItem() { X = x });
+            int x = 0;
+            for (int i = 0; i < 50; i++)
+            {
+                Add(new CounterItem() { X = x });
 
-            //    x += 20 + 10;
-            //}
+                x += 20 + 10;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -115,19 +115,21 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _time = (uint) Engine.Ticks + 100;
 
-                    _amount = 9000;
-                    //_amount = (ushort)World.Player.Equipment[(int)Layer.Backpack]?.Items?
-                    //   .Where(s => s.Graphic == _graphic)
-                    //                       .Sum(s => s.Amount);
+                   // _amount = 9000;
+                    _amount = (ushort)World.Player.Equipment[(int)Layer.Backpack]?.Items?
+                       .Where(s => s.Graphic == _graphic)?
+                                           .Sum(s => s.Amount);
                 }
             }
 
             public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                if (MouseIsOver)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Width, Vector3.Zero);
-
+              
                 //batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X, position.Y, Width, Width), ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false));
+
+
+                if (_graphic == 0)
+                    return false;
 
                 base.Draw(batcher, x, y);
 
@@ -137,6 +139,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     text = $"{text[0]}K+";
                 }
+
+                if (MouseIsOver)
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Width, Vector3.Zero);
+
 
                 batcher.DrawString(Fonts.Regular, text, X + 1, Width, Vector3.Zero);
 
