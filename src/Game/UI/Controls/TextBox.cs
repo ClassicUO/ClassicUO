@@ -191,14 +191,9 @@ namespace ClassicUO.Game.UI.Controls
                         break;
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
                         if (!ReplaceDefaultTextOnFirstKeyPress)
-                        {
                             TxEntry.RemoveChar(true);
-                        }
                         else
-                        {
                             ReplaceDefaultTextOnFirstKeyPress = false;
-                        }
-
                         break;
                     case SDL.SDL_Keycode.SDLK_LEFT:
                         TxEntry.SeekCaretPosition(-1);

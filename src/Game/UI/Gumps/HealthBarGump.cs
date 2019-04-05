@@ -19,7 +19,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
 using System.IO;
 
 using ClassicUO.Game.Data;
@@ -30,8 +29,6 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 using SDL2;
 
@@ -166,7 +163,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_manaLineRed != null && _stamLineRed != null)
                             _manaLineRed.Hue = _stamLineRed.Hue = hitsColor;
                     }
-
 
                     _bars[0].IsVisible = false;
                 }
@@ -343,7 +339,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
-
             writer.Write(Mobile.Serial);
         }
 
