@@ -258,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                x = (int)((x + Entity.RealScreenPosition.X + m.Offset.X + (width / 2 + centerX)) / scale);
+                x = (int)((x + Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
                 y = (int)((y + Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) ) / scale);
             }
             else

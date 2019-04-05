@@ -74,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
             position /= scale;
             position.Z = 0;
 
-            position.X += x + 3;
+            position.X += x + 6;
             position.Y += y;
 
             float width = Texture.Width - Bounds.X - 6;

@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
                         GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
                         position.X += m.Offset.X;
-                        position.X += (width / 2 + centerX);
+                        position.X += 22;
                         position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
                     }
                     else if (owner.Texture != null)
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Managers
                                 GetAnimationDimensions(mm, 0, out int centerX, out int centerY, out int width, out int height);
 
                                 pos2.X += mm.Offset.X;
-                                pos2.X += (width / 2 + centerX);
+                                pos2.X += 22;
                                 pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
                             }
                             else if (ov.Parent.Texture != null)
