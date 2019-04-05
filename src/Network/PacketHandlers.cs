@@ -34,6 +34,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -2073,12 +2074,12 @@ namespace ClassicUO.Network
             var allowGround = p.ReadBool();
             var targID = p.ReadUInt();
             var flags = p.ReadByte();
-            p.Skip((12));
+            p.Seek(18);
             var multiID = p.ReadUShort();
             var xOff = p.ReadUShort();
             var yOff = p.ReadUShort();
             var zOff = p.ReadUShort();
-            TargetManager.SetTargetingMulti(targID,multiID,TargetType.Neutral);
+            TargetManager.SetTargetingMulti(targID,multiID,xOff,yOff,zOff);
 
         }
 
