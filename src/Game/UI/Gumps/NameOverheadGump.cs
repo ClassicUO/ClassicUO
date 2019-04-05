@@ -269,8 +269,8 @@ namespace ClassicUO.Game.UI.Gumps
            
             x -= Width / 2;
             y -= Height / 2;
-            x -= gx + 6;
-            y -= gy;
+            x += gx + 6;
+            y += gy;
 
             X = x;
             Y = y;
