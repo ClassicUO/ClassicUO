@@ -41,10 +41,6 @@ namespace ClassicUO.IO.Resources
             if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
-
-                if (pixels.Length == 0 || w == 0 || h == 0)
-                    return null;
-
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
                 ResourceDictionary.Add(g, texture);
