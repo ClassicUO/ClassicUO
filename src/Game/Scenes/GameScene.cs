@@ -657,6 +657,20 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
                 }
+                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                {
+                    var m_MultiTarget = new Item(Serial.INVALID) {Graphic = TargetManager.MultiTargetInfo.Model};
+                    m_MultiTarget.IsMulti = true;                    
+                    
+
+                    if (SelectedObject != null && (SelectedObject is Land || SelectedObject is Static))
+                    {                        
+                        m_MultiTarget.Position = SelectedObject.Position + TargetManager.MultiTargetInfo.Offset;
+                        m_MultiTarget.CheckGraphicChange();
+                    }
+                    m_MultiTarget.Draw(batcher, m_MultiTarget.ScreenPosition, _mouseOverList);
+                }
+
             }
             batcher.End();
           

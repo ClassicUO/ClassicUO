@@ -43,12 +43,26 @@ namespace ClassicUO.Game.Managers
         Helpful,
         Cancel
     }
+    internal class MultiTargetInfo
+    {
+        public ushort XOff, YOff, ZOff, Model;
+        public Position Offset => new Position(XOff,YOff,(sbyte)ZOff);
 
+        public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z)
+        {
+            Model = model;
+            XOff = x;
+            YOff = y;
+            ZOff = z;
+        }
+    }
     internal static class TargetManager
     {
         private static Serial _targetCursorId;
         private static TargetType _targetCursorType;
-        private static int _multiModel;
+        private static MultiTargetInfo _multiModel;
+
+        public static MultiTargetInfo MultiTargetInfo => _multiModel;
         
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
@@ -60,6 +74,10 @@ namespace ClassicUO.Game.Managers
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(Serial.INVALID);
+            }
             IsTargeting = false;
         }
 
@@ -88,16 +106,23 @@ namespace ClassicUO.Game.Managers
 
         public static void CancelTarget()
         {
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(Serial.INVALID);
+            }
             GameActions.TargetCancel(TargetingState, _targetCursorId, (byte)_targetCursorType);
             IsTargeting = false;
+            
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, int model, TargetType targetType)
+        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z)
         {
-            SetTargeting(CursorTarget.MultiPlacement, deedSerial, targetType);
-            _multiModel = model;
+            SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
+            _multiModel = new MultiTargetInfo(model,x,y,z);
         }
 
+
+    
         private static void TargetXYZ(GameObject selectedEntity)
         {
             Graphic modelNumber = 0;
