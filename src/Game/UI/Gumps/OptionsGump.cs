@@ -74,6 +74,11 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
         private Checkbox _queryBeforAttackCheckbox;
 
+        //counters
+        private Checkbox _enableCounters, _highlightOnUse;
+        private Combobox _counterLayout;
+
+
         private const byte FONT = 0xFF;
         private const ushort HUE_FONT = 999;
 
@@ -111,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
             tc.Texture.SetData(pixels);
             Add(tc);
          
-            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "Generals") { IsSelected = true, ButtonParameter = 1 } );
+            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "General") { IsSelected = true, ButtonParameter = 1 } );
             Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") { ButtonParameter = 2 });
             Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") { ButtonParameter = 3 });
             Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macro") { ButtonParameter = 4 });
@@ -119,6 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") { ButtonParameter = 6 });
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") { ButtonParameter = 7 });
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") { ButtonParameter = 8 });
+            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
+
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
            
@@ -158,6 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildSpeech();
             BuildCombat();
             BuildTooltip();
+            BuildCounters();
 
             ChangePage(1);
         }
@@ -706,6 +714,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
+            Add(rightArea, PAGE);
+        }
+
+        private void BuildCounters()
+        {
+            const int PAGE = 9;
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", true, 0, 0);
+            _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", true, 0, 0);
+
+            
+            ScrollAreaItem layoutArea = new ScrollAreaItem();
+            Label text = new Label("Counter Layout:", true, HUE_FONT, font: FONT)
+            {
+                Y = _highlightOnUse.Bounds.Bottom + 5,
+            };
+                        layoutArea.Add(text);
+            _counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[]
+                {
+                    "Horizontal", "Vertical"
+            });
+            layoutArea.Add(_counterLayout);
+
+            NiceButton addButton = new NiceButton(190, 125, 130, 20, ButtonAction.Activate, "Add Counter") { IsSelectable = false, ButtonParameter = 1 };
+            Add(addButton, PAGE);
+
+            text = new Label("Active Counters:", true, HUE_FONT, font: FONT)
+            {
+                Y = layoutArea.Bounds.Bottom + 50
+            };
+
+
+            rightArea.Add(layoutArea);
+            rightArea.Add(text);
             Add(rightArea, PAGE);
         }
 
