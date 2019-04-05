@@ -504,15 +504,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _textBox.IsEditable = false;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
-        {
-            if (TargetManager.IsTargeting)
-            {
-                TargetManager.TargetGameObject(Mobile);
-                Mouse.LastLeftButtonClickTime = 0;
-            }
-        }
-
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (Mobile != null)
