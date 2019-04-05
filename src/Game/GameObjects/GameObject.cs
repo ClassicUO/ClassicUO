@@ -140,16 +140,39 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (World.Player == null)
                     return ushort.MaxValue;
+                if (this == World.Player)
+                    return 0;
+
+                int x, y;
 
                 if (this is Mobile m && m.IsMoving)
                 {
                     Mobile.Step step = m.Steps.Back();
-
-                    return Position.DistanceTo(step.X, step.Y);
+                    x = step.X;
+                    y = step.Y;
+                }
+                else
+                {
+                    x = X;
+                    y = Y;
                 }
 
-                return Position.DistanceTo(World.Player.Position);
+                int fx, fy;
 
+                if (World.Player.IsMoving)
+                {
+                    Mobile.Step step = World.Player.Steps.Back();
+
+                    fx = step.X;
+                    fy = step.Y;
+                }
+                else
+                {
+                    fx = World.Player.X;
+                    fy = World.Player.Y;
+                }
+
+                return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
 
