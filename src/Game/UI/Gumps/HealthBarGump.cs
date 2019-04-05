@@ -456,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
-                        ValidationRules = (uint)(Constants.RULES.LETTER | Constants.RULES.SPACE),
+                        SafeCharactersOnly = true,
                         Text = _name
                     });
 
