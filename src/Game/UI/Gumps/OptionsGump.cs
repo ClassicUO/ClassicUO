@@ -838,7 +838,7 @@ namespace ClassicUO.Game.UI.Gumps
                     WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                     if (systemchat != null)
-                        systemchat.SetChatVisibility(!_chatAfterEnter.IsChecked);
+                        systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
 
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
@@ -953,7 +953,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                 if (systemchat != null)
-                    systemchat.SetChatVisibility(!_chatAfterEnter.IsChecked);
+                    systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
 
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
