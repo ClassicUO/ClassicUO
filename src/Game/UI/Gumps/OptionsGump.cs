@@ -834,6 +834,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
                     _chatAfterEnter.IsChecked = false;
+
+                    WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                        systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
                     _alwaysRun.IsChecked = false;
@@ -941,8 +947,16 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
-            Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
+
+            if (Engine.Profile.Current.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
+            {
+                SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
+                if (systemchat != null)
+                    systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+
+                Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
+            }
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
