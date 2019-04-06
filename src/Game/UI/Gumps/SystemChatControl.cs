@@ -110,7 +110,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ToggleChatVisibility()
         {
-            textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
+            SetChatVisibility(!textBox.IsVisible);
+        }
+        public void SetChatVisibility(bool status)
+        {
+            textBox.IsVisible = _trans.IsVisible = status;
         }
 
         private ChatMode Mode
