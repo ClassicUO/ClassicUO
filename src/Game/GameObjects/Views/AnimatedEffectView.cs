@@ -140,6 +140,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
+
+                if (Source != null)
+                    Source.Texture = Texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 

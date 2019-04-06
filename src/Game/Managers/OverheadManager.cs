@@ -63,8 +63,6 @@ namespace ClassicUO.Game.Managers
                     }
 
                     Vector3 position = owner.RealScreenPosition;
-                    //position.X += startX;
-                    //position.Y += startY;
 
                     if (owner is Mobile m)
                     {
@@ -75,8 +73,10 @@ namespace ClassicUO.Game.Managers
                         position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
                     }
                     else if (owner.Texture != null)
+                    {
+                        position.X += 22;
                         position.Y -= owner.Texture.Height / 2;
-
+                    }
 
                     Rectangle current = new Rectangle((int) position.X - overhead.Bounds.X, (int) position.Y - overhead.Bounds.Y, overhead.Bounds.Width, overhead.Bounds.Height);
 
@@ -95,7 +95,11 @@ namespace ClassicUO.Game.Managers
                                 pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
                             }
                             else if (ov.Parent.Texture != null)
+                            {
+                                pos2.X += 22;
                                 pos2.Y -= ov.Parent.Texture.Height / 2;
+                            }
+
 
                             Rectangle next = new Rectangle((int)pos2.X - ov.Bounds.X, (int)pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
 
