@@ -359,6 +359,11 @@ namespace ClassicUO.Game.UI.Gumps
                         NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
                     Chat.PromptData = default;
                     break;
+
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
+                        ToggleChatVisibility();
+                    break;
             }
         }
 
@@ -369,13 +374,8 @@ namespace ClassicUO.Game.UI.Gumps
                 textBox.SetText(string.Empty);
                 text = string.Empty;
             }
-
             if (string.IsNullOrEmpty(text))
-            {
-                if (Engine.Profile.Current.ActivateChatAfterEnter)
-                    ToggleChatVisibility();
                 return;
-            }
 
             ChatMode sentMode = Mode;
             textBox.SetText(string.Empty);
