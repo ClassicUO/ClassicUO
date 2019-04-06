@@ -83,7 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0,
                 Y = Height - height - 3,
                 Width = Width,
-                Height = height - 3
+                Height = height - 3,
+                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true
             };
 
             Add(_trans = new AlphaBlendControl
@@ -91,7 +92,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = textBox.X,
                 Y = textBox.Y,
                 Width = Width,
-                Height = height + 5
+                Height = height + 5,
+                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true
             });
             Add(textBox);
 
@@ -357,7 +359,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (string.IsNullOrEmpty(text))
             {
-                textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
+                if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
                 return;
             }
 
