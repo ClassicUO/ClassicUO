@@ -360,6 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Chat.PromptData = default;
                     break;
 
+                case SDL.SDL_Keycode.SDLK_KP_ENTER:
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if (Engine.Profile.Current.ActivateChatAfterEnter && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
                         ToggleChatVisibility();
