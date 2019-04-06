@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            if (HeldItem.Enabled && HeldItem.Serial != container)
+            if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
                 ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 

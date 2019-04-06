@@ -222,8 +222,6 @@ namespace ClassicUO.Game.Scenes
             Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = Scale;
 
             Plugin.OnConnected();
-
-            //Engine.UI.Add(new CounterBarGump());
         }
 
         private void ChatOnMessage(object sender, UOMessageEventArgs e)

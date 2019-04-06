@@ -77,6 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
         private Combobox _counterLayout;
+        private HSliderBar _cellSize;
+        private TextBox _rows, _columns;
 
 
         private const byte FONT = 0xFF;
@@ -409,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
                 {
                     Text = Engine.Profile.Current.GameWindowSize.X.ToString(),
                     X = 30,
@@ -418,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 30,
                     UNumericOnly = true
                 }, "");
-                _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
                 {
                     Text = Engine.Profile.Current.GameWindowSize.Y.ToString(),
                     X = 100,
@@ -435,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
                 {
                     Text = Engine.Profile.Current.GameWindowPosition.X.ToString(),
                     X = 215,
@@ -444,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 30,
                     NumericOnly = true
                 });
-                _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(1, 5, 80, 80, false)
+                _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
                 {
                     Text = Engine.Profile.Current.GameWindowPosition.Y.ToString(),
                     X = 285,
@@ -723,33 +725,53 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", true, 0, 0);
-            _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", true, 0, 0);
+            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
+            _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
 
             
-            ScrollAreaItem layoutArea = new ScrollAreaItem();
+            ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("Counter Layout:", true, HUE_FONT, font: FONT)
             {
                 Y = _highlightOnUse.Bounds.Bottom + 5,
             };
-                        layoutArea.Add(text);
-            _counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[]
-                {
-                    "Horizontal", "Vertical"
-            });
-            layoutArea.Add(_counterLayout);
+            item.Add(text);
+            _counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[] { "Horizontal", "Vertical" }, Engine.Profile.Current.CounterBarIsVertical ? 1 : 0);
+            item.Add(_counterLayout);
+            rightArea.Add(item);
 
-            NiceButton addButton = new NiceButton(190, 125, 130, 20, ButtonAction.Activate, "Add Counter") { IsSelectable = false, ButtonParameter = 1 };
-            Add(addButton, PAGE);
 
-            text = new Label("Active Counters:", true, HUE_FONT, font: FONT)
+            item = new ScrollAreaItem();
+            text = new Label("Cell size:", true, HUE_FONT, font: FONT)
+            { Y = 30 };
+            item.Add(text);
+
+            _cellSize = new HSliderBar(text.Width + 10, text.Y + 5, 80, 30, 80, Engine.Profile.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            item.Add(_cellSize);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
+            _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
             {
-                Y = layoutArea.Bounds.Bottom + 50
-            };
+                X = 10,
+                Y = _cellSize.Y + 30,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.CounterBarRows.ToString(),
+            }, "Rows:");
 
+            _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
+            {
+                X = _rows.X + _rows.Width + 30,
+                Y = _cellSize.Y + 30,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.CounterBarColumns.ToString(),
+            }, "Columns:");
 
-            rightArea.Add(layoutArea);
-            rightArea.Add(text);
+            rightArea.Add(item);
+
             Add(rightArea, PAGE);
         }
 
@@ -891,6 +913,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _murdererColorPickerBox.SetColor(0x0023, FileManager.Hues.GetPolygoneColor(12, 0x0023));
                     _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
+                    break;
+                case 9:
+                    _enableCounters.IsChecked = false;
+                    _enableCounters.IsChecked = false;
+                    _columns.Text = "1";
+                    _rows.Text = "1";
+                    _cellSize.Value = 40;
                     break;
             }
         }
@@ -1083,6 +1112,27 @@ namespace ClassicUO.Game.UI.Gumps
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
 
+
+            // counters
+
+            bool before = Engine.Profile.Current.CounterBarEnabled;
+            Engine.Profile.Current.CounterBarEnabled = _enableCounters.IsChecked;
+            Engine.Profile.Current.CounterBarCellSize = _cellSize.Value;
+            Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
+            Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
+
+            Engine.Profile.Current.CounterBarIsVertical = _counterLayout.SelectedIndex != 0;    
+            Engine.UI.GetByLocalSerial<CounterBarGump>()?.SetDirection(Engine.Profile.Current.CounterBarIsVertical);
+
+
+            if (before != Engine.Profile.Current.CounterBarEnabled)
+            {
+                Engine.UI.GetByLocalSerial<CounterBarGump>()?.Dispose();
+                if (Engine.Profile.Current.CounterBarEnabled)
+                    Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns, Engine.Profile.Current.CounterBarIsVertical));
+            }
+
+
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
 
@@ -1143,6 +1193,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Label text = new Label(label, true, HUE_FONT, 0, FONT)
                 {
+                    X = elem.X - 10,
                     Y = elem.Y - 30
                 };
                 area.Add(text);

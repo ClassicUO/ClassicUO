@@ -480,6 +480,7 @@
     <None Include="libs\FNA\FNA.dll" />
     <None Include="libs\FNA\FNA.dll.config" />
     <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />

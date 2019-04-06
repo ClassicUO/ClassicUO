@@ -206,6 +206,14 @@ namespace ClassicUO.Configuration
             },
         };
 
+        [JsonProperty] public bool CounterBarEnabled { get; set; } = false;
+        [JsonProperty] public bool CounterBarHighlightOnUse { get; set; } = false;
+        [JsonProperty] public bool CounterBarIsVertical { get; set; } = false;
+        [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
+        [JsonProperty] public int CounterBarRows { get; set; } = 1;
+        [JsonProperty] public int CounterBarColumns { get; set; } = 1;
+
+
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
         public void Save(List<Gump> gumps = null)
