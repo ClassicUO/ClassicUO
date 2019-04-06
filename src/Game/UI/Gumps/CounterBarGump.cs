@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
             private TextureControl _controlPic;
             private Graphic _graphic;
             private uint _time;
-            private ushort _amount;
+            private int _amount;
 
 
             public CounterItem(int x, int y, int w, int h)
@@ -240,10 +240,19 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _time = (uint) Engine.Ticks + 100;
 
-                   // _amount = 9000;
-                    _amount = (ushort)World.Player.Equipment[(int)Layer.Backpack]?.Items?
-                       .Where(s => s.Graphic == _graphic)?
-                                           .Sum(s => s.Amount);
+                    _amount = 0;
+                    GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, ref _amount);
+                }
+            }
+
+            private static void GetAmount(Item parent, Graphic graphic, ref int amount)
+            {
+                foreach (Item item in parent.Items)
+                {
+                    GetAmount(item, graphic, ref amount);
+
+                    if (item.Graphic == graphic)
+                        amount += item.Amount;
                 }
             }
 
