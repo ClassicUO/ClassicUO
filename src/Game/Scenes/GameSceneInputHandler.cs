@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -29,17 +28,11 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
-using ClassicUO.Network;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using System.Diagnostics;
 using Microsoft.Xna.Framework;
-
 using SDL2;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
