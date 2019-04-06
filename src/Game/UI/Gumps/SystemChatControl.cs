@@ -31,8 +31,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Platforms;
 
-using Microsoft.Xna.Framework;
-
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -84,7 +82,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0,
                 Y = Height - height - 3,
                 Width = Width,
-                Height = height - 3
+                Height = height - 3,
+                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true
             };
 
             Add(_trans = new AlphaBlendControl
@@ -92,7 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = textBox.X,
                 Y = textBox.Y,
                 Width = Width,
-                Height = height + 5
+                Height = height + 5,
+                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true
             });
             Add(textBox);
 
@@ -107,7 +107,12 @@ namespace ClassicUO.Game.UI.Gumps
             Chat.Message += ChatOnMessage;
             Mode = ChatMode.Default;
         }
-        
+
+        public void ToggleChatVisibility()
+        {
+            textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
+        }
+
         private ChatMode Mode
         {
             get => _mode;
@@ -317,15 +322,13 @@ namespace ClassicUO.Game.UI.Gumps
             switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_q when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1:
-
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
                     textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-
                     break;
-                case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
 
+                case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
                     {
                         _messageHistoryIndex++;
@@ -334,12 +337,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                         textBox.SetText(string.Empty);
-
                     break;
+
                 case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
                     Mode = ChatMode.Default;
-
                     break;
+
                 case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
                     if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
                         NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
@@ -352,8 +355,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
+            if (!textBox.IsVisible)
+            {
+                textBox.SetText(string.Empty);
+                text = string.Empty;
+            }
+
             if (string.IsNullOrEmpty(text))
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    ToggleChatVisibility();
                 return;
+            }
+
             ChatMode sentMode = Mode;
             textBox.SetText(string.Empty);
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));

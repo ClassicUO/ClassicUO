@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -26,6 +24,9 @@ namespace ClassicUO.Game.Managers
         private Macro _firstNode;
         private long _nextTimer;
 
+        private WorldViewportGump viewport;
+        private SystemChatControl systemchat;
+
         private readonly byte[] _skillTable = 
         {
             1,  2,  35, 4,  6,  12,
@@ -44,7 +45,6 @@ namespace ClassicUO.Game.Managers
             Constants.SPELLBOOK_6_SPELLS_COUNT,
             Constants.SPELLBOOK_7_SPELLS_COUNT
         };
-
 
         public MacroManager(Macro[] macros)
         {
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.Managers
                 return 0;
 
             int result = 0;
-
+            
             switch (macro.Code)
             {
                 case MacroType.Say:
@@ -245,12 +245,12 @@ namespace ClassicUO.Game.Managers
                         string s = SDL.SDL_GetClipboardText();
                         if (!string.IsNullOrEmpty(s))
                         {
-                            WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                            viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                             if (viewport != null)
                             {
-                                SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-                                if (chat != null)
-                                    chat.textBox.Text += s;
+                                systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                                if (systemchat != null)
+                                    systemchat.textBox.Text += s;
                             }
                         }
                     }
@@ -830,6 +830,13 @@ namespace ClassicUO.Game.Managers
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
 
+                case MacroType.ToggleChatVisibility:
+                    viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                        systemchat.ToggleChatVisibility();
+                    break;
+
             }
 
 
@@ -1108,7 +1115,8 @@ namespace ClassicUO.Game.Managers
         BandageSelf,
         BandageTarget,
         ToggleGargoyleFly,
-        DefaultScale
+        DefaultScale,
+        ToggleChatVisibility
     }
 
     internal enum MacroSubType
