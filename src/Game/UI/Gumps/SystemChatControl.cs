@@ -108,7 +108,12 @@ namespace ClassicUO.Game.UI.Gumps
             Chat.Message += ChatOnMessage;
             Mode = ChatMode.Default;
         }
-        
+
+        public void ToggleChatVisibility()
+        {
+            textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
+        }
+
         private ChatMode Mode
         {
             get => _mode;
@@ -360,7 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (string.IsNullOrEmpty(text))
             {
                 if (Engine.Profile.Current.ActivateChatAfterEnter)
-                    textBox.IsVisible = _trans.IsVisible = !textBox.IsVisible;
+                    ToggleChatVisibility();
                 return;
             }
 
