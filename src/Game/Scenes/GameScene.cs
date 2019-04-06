@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Scenes
 
         public OverheadManager Overheads => _overheadManager;
 
-        private bool UseLights => World.Light.Personal < World.Light.Overall;
+        private bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
         public void DoubleClickDelayed(Serial serial)
             => _useItemQueue.Add(serial);
@@ -657,16 +657,18 @@ namespace ClassicUO.Game.Scenes
                 }
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
-                    var m_MultiTarget = new Item(Serial.INVALID) {Graphic = TargetManager.MultiTargetInfo.Model};
-                    m_MultiTarget.IsMulti = true;                    
-                    
+                    Item multiTarget = new Item(Serial.INVALID)
+                    {
+                        Graphic = TargetManager.MultiTargetInfo.Model,
+                        IsMulti = true
+                    };
 
                     if (SelectedObject != null && (SelectedObject is Land || SelectedObject is Static))
                     {                        
-                        m_MultiTarget.Position = SelectedObject.Position + TargetManager.MultiTargetInfo.Offset;
-                        m_MultiTarget.CheckGraphicChange();
+                        multiTarget.Position = SelectedObject.Position + TargetManager.MultiTargetInfo.Offset;
+                        multiTarget.CheckGraphicChange();
                     }
-                    m_MultiTarget.Draw(batcher, m_MultiTarget.ScreenPosition, _mouseOverList);
+                    multiTarget.Draw(batcher, multiTarget.ScreenPosition, _mouseOverList);
                 }
 
             }
@@ -698,14 +700,11 @@ namespace ClassicUO.Game.Scenes
             {
                 ref var l = ref _lights[i];
 
-                var texture = FileManager.Lights.GetTexture(l.ID);
+                SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
-                Vector3 pos = new Vector3(l.DrawX, l.DrawY, 0);
-
-                var vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position = pos;
-                vertex[0].Position.X -= texture.Width / 2;
-                vertex[0].Position.Y -= texture.Height / 2;
+                SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
+                vertex[0].Position.X = l.DrawX - texture.Width / 2;
+                vertex[0].Position.Y = l.DrawY - texture.Height / 2;
                 vertex[0].TextureCoordinate.Y = 0;
                 vertex[1].Position = vertex[0].Position;
                 vertex[1].Position.X += texture.Width;
