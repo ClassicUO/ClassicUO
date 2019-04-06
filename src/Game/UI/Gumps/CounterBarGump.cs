@@ -231,6 +231,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            {
+                if (button == MouseButton.Left)
+                {        
+                    Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                    Item item = backpack.FindItem(_graphic);
+                    if (item != null)
+                        GameActions.DoubleClick(item);
+                }
+
+                return true;
+            }
+
             public override void Update(double totalMS, double frameMS)
             {
                 base.Update(totalMS, frameMS);
