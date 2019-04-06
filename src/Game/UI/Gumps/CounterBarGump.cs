@@ -22,13 +22,13 @@ namespace ClassicUO.Game.UI.Gumps
         private AlphaBlendControl _background;
 
         private int _rows, _columns, _rectSize;
-        private bool _isVertical;
+        //private bool _isVertical;
 
         public CounterBarGump() : base(0, 0)
         {
         }
 
-        public CounterBarGump(int x, int y, int rectSize = 30, int rows = 1, int columns = 1, bool vertical = false) : base(0, 0)
+        public CounterBarGump(int x, int y, int rectSize = 30, int rows = 1, int columns = 1/*, bool vertical = false*/) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -44,17 +44,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (columns < 1)
                 columns = 1;
 
-            //if (vertical)
-            //{
-            //    int temp = rows;
-            //    rows = columns;
-            //    columns = temp;
-            //}
-     
             _rows = rows;
             _columns = columns;
             _rectSize = rectSize;
-            _isVertical = vertical;
+            //_isVertical = vertical;
 
             BuildGump();
         }
@@ -82,37 +75,97 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void SetDirection(bool isvertical)
+        public void SetLayout(int size, int rows, int columns)
         {
-            if (_isVertical == isvertical)
-                return;
+            bool ok = false;
 
-            _isVertical = isvertical;
+            //if (_isVertical != isvertical)
+            //{
+            //    _isVertical = isvertical;
+            //    int temp = _rows;
+            //    _rows = _columns;
+            //    _columns = temp;
+            //    ok = true;
+            //}
+           
+            if (size < 30)
+                size = 30;
+            else if (size > 80)
+                size = 80;
 
-            
-            int temp = _rows;
-            _rows = _columns;
-            _columns = temp;
-            
+            if (_rectSize != size)
+            {
+                ok = true;
+                _rectSize = size;
+            }
 
+            if (rows < 1)
+                rows = 1;
 
+            if (_rows != rows)
+            {
+                ok = true;
+                _rows = rows;
+            }
+
+            if (columns < 1)
+                columns = 1;
+
+            if (_columns != columns)
+            {
+                ok = true;
+                _columns = columns;
+            }
+
+            if (ok)
+            {
+                ApplyLayout();
+            }
+        }
+
+        private void ApplyLayout()
+        {
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
             _background.Width = Width;
             _background.Height = Height;
 
-            var items = GetControls<CounterItem>();
+            CounterItem[] items = GetControls<CounterItem>();
+
+            int[] indices = Enumerable.Range(0, items.Length).ToArray();
 
             for (int row = 0; row < _rows; row++)
             {
                 for (int col = 0; col < _columns; col++)
                 {
-                    int index = _isVertical ? col * _rows + row : row * _columns + col;
-                    CounterItem c = items[index];
+                    int index = /*_isVertical ? col * _rows + row :*/ row * _columns + col;
 
-                    c.X = col * _rectSize + 2;
-                    c.Y = row * _rectSize + 2;
+                    if (index < items.Length)
+                    {
+                        CounterItem c = items[index];
+
+                        c.X = col * _rectSize + 2;
+                        c.Y = row * _rectSize + 2;
+                        c.Width = _rectSize - 4;
+                        c.Height = _rectSize - 4;
+
+                        indices[index] = -1;
+                    }
+                    else
+                    {
+                        Add(new CounterItem(col * _rectSize + 2, row * _rectSize + 2, _rectSize - 4, _rectSize - 4));
+                    }
+
+                }
+            }
+
+            for (int i = 0; i < indices.Length; i++)
+            {
+                int index = indices[i];
+                if (index != -1 && index < items.Length)
+                {
+                    items[index].Dispose();
                 }
             }
         }
@@ -121,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.Write(_isVertical);
+            writer.Write(/*_isVertical*/ false);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -142,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            _isVertical = reader.ReadBoolean();
+            reader.ReadBoolean();
             _rows = reader.ReadInt32();
             _columns = reader.ReadInt32();
             _rectSize = reader.ReadInt32();

@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
-        private Combobox _counterLayout;
+        //private Combobox _counterLayout;
         private HSliderBar _cellSize;
         private TextBox _rows, _columns;
 
@@ -725,7 +725,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
+            _enableCounters = CreateCheckBox(rightArea, "Enable Counters [if disabled you lose all counters inside]", Engine.Profile.Current.CounterBarEnabled, 0, 0);
             _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
 
             
@@ -735,25 +735,28 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = _highlightOnUse.Bounds.Bottom + 5,
             };
             item.Add(text);
-            _counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[] { "Horizontal", "Vertical" }, Engine.Profile.Current.CounterBarIsVertical ? 1 : 0);
-            item.Add(_counterLayout);
+            //_counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[] { "Horizontal", "Vertical" }, Engine.Profile.Current.CounterBarIsVertical ? 1 : 0);
+            //item.Add(_counterLayout);
             rightArea.Add(item);
 
 
             item = new ScrollAreaItem();
             text = new Label("Cell size:", true, HUE_FONT, font: FONT)
-            { Y = 30 };
+            {
+                X = 10,
+                Y = 10
+            };
             item.Add(text);
 
-            _cellSize = new HSliderBar(text.Width + 10, text.Y + 5, 80, 30, 80, Engine.Profile.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _cellSize = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 80, 30, 80, Engine.Profile.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_cellSize);
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
             _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
             {
-                X = 10,
-                Y = _cellSize.Y + 30,
+                X = 20,
+                Y = _cellSize.Y + _cellSize.Height + 25,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true,
@@ -763,7 +766,7 @@ namespace ClassicUO.Game.UI.Gumps
             _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
             {
                 X = _rows.X + _rows.Width + 30,
-                Y = _cellSize.Y + 30,
+                Y = _cellSize.Y + _cellSize.Height + 25,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true,
@@ -1135,15 +1138,22 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
 
-            Engine.Profile.Current.CounterBarIsVertical = _counterLayout.SelectedIndex != 0;    
-            Engine.UI.GetByLocalSerial<CounterBarGump>()?.SetDirection(Engine.Profile.Current.CounterBarIsVertical);
+            
+            CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
 
+            if (counterGump != null)
+            {
+                counterGump.SetLayout(Engine.Profile.Current.CounterBarCellSize,
+                                      Engine.Profile.Current.CounterBarRows,
+                                      Engine.Profile.Current.CounterBarColumns);
+            }
+            
 
             if (before != Engine.Profile.Current.CounterBarEnabled)
             {
-                Engine.UI.GetByLocalSerial<CounterBarGump>()?.Dispose();
+                counterGump?.Dispose();
                 if (Engine.Profile.Current.CounterBarEnabled)
-                    Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns, Engine.Profile.Current.CounterBarIsVertical));
+                    Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns));
             }
 
 
