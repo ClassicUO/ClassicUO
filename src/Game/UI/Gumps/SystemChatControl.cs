@@ -370,11 +370,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!textBox.IsVisible)
+            if (!textBox.IsVisible && Engine.Profile.Current.ActivateChatAfterEnter)
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
             }
+
             if (string.IsNullOrEmpty(text))
                 return;
 
