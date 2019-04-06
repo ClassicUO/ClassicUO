@@ -777,8 +777,8 @@ namespace ClassicUO.Game.UI.Gumps
             // Name
             Label text = new Label(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 100,
-                Y = 10
+                X = 108,
+                Y = 12
             };
 
             _labels[(int) MobileStats.Name] = text;
@@ -787,13 +787,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             // Stat locks
             Add(_lockers[(int) StatType.Str] = new GumpPic(
-                                                                   LOCKER_COLUMN_X, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.StrLock), 0));
+                                                                   10,73 , GetStatLockGraphic(World.Player.StrLock), 0));
 
             Add(_lockers[(int) StatType.Dex] = new GumpPic(
-                                                                   LOCKER_COLUMN_X, ROW_2_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.DexLock), 0));
+                                                                   10,102 , GetStatLockGraphic(World.Player.DexLock), 0));
 
             Add(_lockers[(int) StatType.Int] = new GumpPic(
-                                                                   LOCKER_COLUMN_X, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGraphic(World.Player.IntLock), 0));
+                                                                   10,130 , GetStatLockGraphic(World.Player.IntLock), 0));
 
             _lockers[(int) StatType.Str].MouseClick += (sender, e) =>
             {
@@ -820,164 +820,132 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             // Str/dex/int text labels
-            int xOffset = COLUMN_1_X + COLUMN_1_ICON_WIDTH;
-            AddStatTextLabel(World.Player.Strength.ToString(), MobileStats.Strength, xOffset, ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
-            AddStatTextLabel(World.Player.Dexterity.ToString(), MobileStats.Dexterity, xOffset, ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
-            AddStatTextLabel(World.Player.Intelligence.ToString(), MobileStats.Intelligence, xOffset, ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            int xOffset = 60;
+            AddStatTextLabel(World.Player.Strength.ToString(), MobileStats.Strength, xOffset,73);
+            AddStatTextLabel(World.Player.Dexterity.ToString(), MobileStats.Dexterity, xOffset,102);
+            AddStatTextLabel(World.Player.Intelligence.ToString(), MobileStats.Intelligence, xOffset,130);
 
             // Hits/stam/mana
-            xOffset = COLUMN_2_X + COLUMN_2_ICON_WIDTH;
-
+            
             AddStatTextLabel(
                              World.Player.Hits.ToString(),
                              MobileStats.HealthCurrent,
-                             xOffset,
-                             ROW_1_Y + (ROW_HEIGHT / 2) - ROW_PADDING,
+                             117,66,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.HitsMax.ToString(),
                              MobileStats.HealthMax,
-                             xOffset,
-                             ROW_1_Y + ROW_HEIGHT - ROW_PADDING,
+                             117,79,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.Stamina.ToString(),
                              MobileStats.StaminaCurrent,
-                             xOffset,
-                             ROW_2_Y + (ROW_HEIGHT / 2) - ROW_PADDING,
+                             117,95,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.StaminaMax.ToString(),
                              MobileStats.StaminaMax,
-                             xOffset,
-                             ROW_2_Y + ROW_HEIGHT - ROW_PADDING,
+                             117,108,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.Mana.ToString(),
                              MobileStats.ManaCurrent,
-                             xOffset,
-                             ROW_3_Y + (ROW_HEIGHT / 2) - ROW_PADDING,
+                             117,124,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
-            AddStatTextLabel
-                (World.Player.ManaMax.ToString(),
-                 MobileStats.ManaMax,
-                 xOffset,
-                 ROW_3_Y + ROW_HEIGHT - ROW_PADDING,
-                 maxWidth: 40,
-                 alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.ManaMax.ToString(),
+                             MobileStats.ManaMax,
+                             117,137,
+                             maxWidth: 40,
+                             alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             // Current over max lines
-            Add(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
-            Add(new Line(xOffset, ROW_2_Y + 22, 30, 1, 0xFF383838));
-            Add(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(118, 79, 30, 1, 0xFF383838));
+            Add(new Line(118, 108, 30, 1, 0xFF383838));
+            Add(new Line(118, 137 , 30, 1, 0xFF383838));
 
             // Followers / max followers
-            xOffset = COLUMN_3_X + COLUMN_3_ICON_WIDTH;
 
-            AddStatTextLabel(
-                             World.Player.Followers.ToString(),
+            AddStatTextLabel($"{World.Player.Followers}/{World.Player.FollowersMax}",
                              MobileStats.Followers,
-                             xOffset,
-                             ROW_1_Y + (ROW_HEIGHT / 2) - ROW_PADDING,
-                             maxWidth: 40,
+                             192, 73,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
-            AddStatTextLabel(
-                             World.Player.FollowersMax.ToString(),
-                             MobileStats.FollowersMax,
-                             xOffset, ROW_1_Y + ROW_HEIGHT - ROW_PADDING,
-                             maxWidth: 40,
-                             alignment: TEXT_ALIGN_TYPE.TS_CENTER);
-            Add(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
 
             // Armor, weight / max weight
             AddStatTextLabel(
                              World.Player.ResistPhysical.ToString(),
                              MobileStats.AR,
-                             xOffset,
-                             ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING),
+                             196,102,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.Weight.ToString(),
                              MobileStats.WeightCurrent,
-                             xOffset,
-                             ROW_3_Y + (ROW_HEIGHT / 2) - ROW_PADDING,
+                             185,124,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
             AddStatTextLabel(
                              World.Player.WeightMax.ToString(),
                              MobileStats.WeightMax,
-                             xOffset,
-                             ROW_3_Y + ROW_HEIGHT - ROW_PADDING,
+                             185,137,
                              maxWidth: 40,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
-            Add(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+            Add(new Line(186, 137, 30, 1, 0xFF383838));
 
             // Hunger satisfaction, murder count, damage, gold
-            xOffset = COLUMN_4_X + COLUMN_4_ICON_WIDTH;
 
             AddStatTextLabel(
                              World.Player.Luck.ToString(), // FIXME: packet handling
                              MobileStats.HungerSatisfactionMinutes,
-                             xOffset + 20,
-                             ROW_0_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             282, 44 );
 
             AddStatTextLabel(
                              World.Player.StatsCap.ToString(), // FIXME: packet handling
                              MobileStats.MurderCount,
-                             xOffset,
-                             ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             260, 73 );
 
             AddStatTextLabel(
                              String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax),
                              MobileStats.Damage,
-                             xOffset,
-                             ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             260 , 102 );
 
             AddStatTextLabel(
                              World.Player.Gold.ToString(),
                              MobileStats.Gold,
-                             xOffset,
-                             ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             254, 132);
 
             // Timers
-            xOffset = COLUMN_5_X + COLUMN_5_ICON_WIDTH;
 
             AddStatTextLabel(
                              World.Player.ResistCold.ToString(), // FIXME: packet handling
                              MobileStats.CriminalTimerSeconds,
-                             xOffset,
-                             ROW_0_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             354,44);
 
             AddStatTextLabel(
                              World.Player.ResistFire.ToString(), // FIXME: packet handling
                              MobileStats.MurderCountDecayHours,
-                             xOffset,
-                             ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             354,73);
 
             AddStatTextLabel(
                              World.Player.ResistPoison.ToString(), // FIXME: packet handling
                              MobileStats.PvpCooldownSeconds,
-                             xOffset,
-                             ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             354,102);
 
             AddStatTextLabel(
                              World.Player.ResistEnergy.ToString(), // FIXME: packet handling
                              MobileStats.BandageTimerSeconds,
-                             xOffset,
-                             ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+                             354,131);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -1003,8 +971,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.StaminaMax].Text = World.Player.StaminaMax.ToString();
                 _labels[(int) MobileStats.ManaCurrent].Text = World.Player.Mana.ToString();
                 _labels[(int) MobileStats.ManaMax].Text = World.Player.ManaMax.ToString();
-                _labels[(int) MobileStats.Followers].Text = World.Player.Followers.ToString();
-                _labels[(int) MobileStats.FollowersMax].Text = World.Player.FollowersMax.ToString();
+                _labels[(int) MobileStats.Followers].Text = $"{World.Player.Followers}/{World.Player.FollowersMax}";
                 _labels[(int) MobileStats.AR].Text = World.Player.ResistPhysical.ToString();
                 _labels[(int) MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
                 _labels[(int) MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
@@ -1151,35 +1118,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private GumpPicWithWidth[] _fillBars = new GumpPicWithWidth[3];
 
-        private const int ROW_0_Y = 26;
-        private const int ROW_1_Y = 56;
-        private const int ROW_2_Y = 86;
-        private const int ROW_3_Y = 116;
-        private const int ROW_HEIGHT = 24;
-        private const int ROW_PADDING = 2;
-
-        private const int LOCKER_COLUMN_X = 10;
-        private const int LOCKER_COLUMN_WIDTH = 10;
-
-        private const int COLUMN_1_X = 20;
-        private const int COLUMN_1_WIDTH = 80;
-        private const int COLUMN_1_ICON_WIDTH = 35;
-
-        private const int COLUMN_2_X = 100;
-        private const int COLUMN_2_WIDTH = 60;
-        private const int COLUMN_2_ICON_WIDTH = 20;
-
-        private const int COLUMN_3_X = 160;
-        private const int COLUMN_3_WIDTH = 60;
-        private const int COLUMN_3_ICON_WIDTH = 30;
-
-        private const int COLUMN_4_X = 220;
-        private const int COLUMN_4_WIDTH = 80;
-        private const int COLUMN_4_ICON_WIDTH = 35;
-
-        private const int COLUMN_5_X = 300;
-        private const int COLUMN_5_WIDTH = 80;
-        private const int COLUMN_5_ICON_WIDTH = 55;
     }
 
 
