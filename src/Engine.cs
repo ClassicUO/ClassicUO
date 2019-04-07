@@ -98,17 +98,19 @@ namespace ClassicUO
         private bool _isMaximized;
         private bool _isHighDPI;
 
+        public static string SettingsFile = "settings.json";
+
         public bool IsQuitted { get; private set; }
 
         private Engine(Settings settings)
         {
             Instance = this;
-            _settings = settings ?? ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+            _settings = settings ?? ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
 
             if (_settings == null)
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, "settings.json file not found");
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `"+ SettingsFile + "`", "A `" + SettingsFile + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, SettingsFile + " file not found");
                 _settings = new Settings();
                 _settings.Save();
                 IsQuitted = true;
@@ -274,14 +276,11 @@ namespace ClassicUO
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
         public static bool IsRunningSlowly => _engine._isRunningSlowly;
-
-
+        
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
-
-
-
+                
         private static void Main(string[] args)
         {
             Configure();
@@ -300,8 +299,7 @@ namespace ClassicUO
                 }
             }
         }
-
-
+        
         private static bool CheckUpdate(string[] args)
         {
             string path = string.Empty;
@@ -390,7 +388,7 @@ namespace ClassicUO
 
             return false;
         }
-
+        
         private static Settings ArgsParser(string[] args)
         {
             Settings settings = null;
@@ -499,6 +497,11 @@ namespace ClassicUO
 
                         case "fixed_time_step":
                             settings.FixedTimeStep = bool.Parse(value);
+                            break;
+
+                        case "settings":
+                            Engine.SettingsFile = value;
+                            isValid = false;
                             break;
                     }
                 }

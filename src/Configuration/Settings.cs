@@ -67,6 +67,7 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "autologin")] public bool AutoLogin { get; set; } = false;
 
         [JsonProperty(PropertyName = "reconnect")] public bool Reconnect { get; set; } = false;
+
         [JsonProperty(PropertyName = "reconnect_time")] public int ReconnectTime { get; set; } = 0;
 
         [JsonProperty(PropertyName = "login_music")] public bool LoginMusic { get; set; } = true;
@@ -77,12 +78,11 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
         
-        [JsonProperty(PropertyName = "plugins")]
-        public string[] Plugins { get; set; } = {@".\Assistant\Razor.dll"};
+        [JsonProperty(PropertyName = "plugins")] public string[] Plugins { get; set; } = {@".\Assistant\Razor.dll"};
 
         public void Save()
         {
-            ConfigurationResolver.Save(this, Path.Combine(Engine.ExePath, "settings.json"));
+            ConfigurationResolver.Save(this, Path.Combine(Engine.ExePath, Engine.SettingsFile));
         }
     }
 }
