@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys", FONT, HUE_FONT, true)
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys (macro)", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 15,
@@ -245,11 +245,11 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 55,
                     IsChecked = Engine.Profile.Current.ActivateChatShiftEnterSupport
                 };
-                _activeChatArea.Add(_restorezoomCheckbox);
+                _activeChatArea.Add(_chatShiftEnterCheckbox);
 
                 rightArea.Add(_activeChatArea);
-                _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
 
+                _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
             }
 
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -891,6 +891,10 @@ namespace ClassicUO.Game.UI.Gumps
                     SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                     if (systemchat != null)
                         systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+
+                    _chatIgnodeHotkeysCheckbox.IsChecked = true;
+                    _chatAdditionalButtonsCheckbox.IsChecked = true;
+                    _chatShiftEnterCheckbox.IsChecked = true;
 
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
