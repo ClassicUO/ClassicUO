@@ -133,6 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _mode = value;
 
+                if (ChatVisibility)
                 switch (value)
                 {
                     case ChatMode.Default:
@@ -185,19 +186,18 @@ namespace ClassicUO.Game.UI.Gumps
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
                     AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Party:
                     AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Guild:
                     AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Alliance:
                     AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
-
                     break;
             }
         }
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textEntries.RemoveAt(i--);
             }
 
-            if (Mode == ChatMode.Default)
+            if ( Mode == ChatMode.Default && ChatVisibility )
             {
                 if (textBox.Text.Length == 1)
                 {
@@ -365,6 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case SDL.SDL_Keycode.SDLK_1 when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !ChatVisibility)
+                        ChatVisibility = true;
+                    break;
+
                 case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
                 case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
                 case SDL.SDL_Keycode.SDLK_COLON: // :
@@ -374,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_PERIOD: // .
                 case SDL.SDL_Keycode.SDLK_COMMA: // ,
                 case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
-                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !ChatVisibility)
+                    if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !ChatVisibility)
                         ChatVisibility = true;
                     break;
 

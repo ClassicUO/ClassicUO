@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys (macro)", FONT, HUE_FONT, true)
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys & macro", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 15,
