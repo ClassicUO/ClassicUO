@@ -414,70 +414,92 @@ namespace ClassicUO
 
                     switch (cmd)
                     {
-                        case "uopath":
-                            settings.UltimaOnlineDirectory = value;
-                            isValid = true;
+                        case "username":
+                            settings.Username = value;
                             break;
+
+                        case "password":
+                            settings.Password = Crypter.Encrypt(value);
+                            break;
+
                         case "ip":
                             settings.IP = value;
                             break;
+
                         case "port":
                             settings.Port = ushort.Parse(value);
-
                             break;
-                        case "username":
-                            settings.Username = value;
 
+                        case "uopath":
+                        case "ultimaonlinedirectory":
+                            settings.UltimaOnlineDirectory = value;
+                            isValid = true;
                             break;
-                        case "password":
-                            settings.Password = Crypter.Encrypt(value);
 
-                            break;
                         case "clientversion":
                             settings.ClientVersion = value;
                             isValid = true;
                             break;
+
                         case "lastcharname":
                             settings.LastCharacterName = value;
-
                             break;
+
+                        case "lastservernum":
+                            settings.LastServerNum = ushort.Parse(value);
+                            break;
+
                         case "fps":
+                        case "login_fps":
                             settings.MaxLoginFPS = int.Parse(value);
-
                             break;
+
                         case "debug":
                             settings.Debug = bool.Parse(value);
-
                             break;
+
                         case "profiler":
                             settings.Profiler = bool.Parse(value);
-
                             break;
+
+                        case "preload_maps":
+                            settings.PreloadMaps = bool.Parse(value);
+                            break;
+
                         case "saveaccount":
                             settings.SaveAccount = bool.Parse(value);
-
                             break;
+
                         case "autologin":
                             settings.AutoLogin = bool.Parse(value);
-
                             break;
+
+                        case "reconnect":
+                            settings.Reconnect = bool.Parse(value);
+                            break;
+
+                        case "reconnect_time":
+                            settings.ReconnectTime = int.Parse(value);
+                            break;
+
                         case "music":
+                        case "login_music":
                             settings.LoginMusic = bool.Parse(value);
-
                             break;
+
                         case "music_volume":
+                        case "login_music_volume":
                             settings.LoginMusicVolume = int.Parse(value);
-
                             break;
+
                         case "shard":
+                        case "shard_type":
                             settings.ShardType = int.Parse(value);
-
                             break;
+
                         case "fixed_time_step":
                             settings.FixedTimeStep = bool.Parse(value);
-
                             break;
-
                     }
                 }
 
