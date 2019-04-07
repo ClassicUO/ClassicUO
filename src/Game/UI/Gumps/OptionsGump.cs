@@ -226,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ |", FONT, HUE_FONT, true)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ | -", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 35,
