@@ -31,8 +31,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Platforms;
 
-using System.Diagnostics;
-
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
