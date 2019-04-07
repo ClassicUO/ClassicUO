@@ -81,16 +81,18 @@ namespace ClassicUO.Game.GameObjects
             float height = Texture.Height - Bounds.Y - 6;
 
 
-            if (position.X < x + Bounds.X + 6)
-                position.X = x + Bounds.X + 6;
-            else if (position.X > x + w - width)
-                position.X = x + w - width;
+            if (EdgeDetection)
+            {
+                if (position.X < x + Bounds.X + 6)
+                    position.X = x + Bounds.X + 6;
+                else if (position.X > x + w - width)
+                    position.X = x + w - width;
 
-            if (position.Y < y + Bounds.Y)
-                position.Y = y + Bounds.Y;
-            else if (position.Y > y + h - height)
-                position.Y = y + h - height;
-
+                if (position.Y < y + Bounds.Y)
+                    position.Y = y + Bounds.Y;
+                else if (position.Y > y + h - height)
+                    position.Y = y + h - height;
+            }
 
             base.Draw(batcher, position, objectList);
 

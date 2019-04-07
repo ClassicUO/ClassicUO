@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Managers
 
                             Rectangle next = new Rectangle((int)pos2.X - ov.Bounds.X, (int)pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
 
-                            overhead.IsOverlapped = current.Intersects(next);
+                            overhead.IsOverlapped = current.Intersects(next) && ov.AlphaHue != 0;
 
                             if (overhead.IsOverlapped)
                             {

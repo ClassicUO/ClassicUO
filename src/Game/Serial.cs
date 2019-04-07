@@ -25,11 +25,6 @@ namespace ClassicUO.Game
 {
     internal readonly struct Serial : IComparable<uint>
     {
-        public bool Equals(Serial other)
-        {
-            return Value == other.Value;
-        }
-
         public const uint INVALID = 0;
         public const uint MINUS_ONE = 0xFFFF_FFFF;
 
@@ -55,7 +50,6 @@ namespace ClassicUO.Game
         {
             return serial.Value;
         }
-
         public static bool operator ==(Serial s1, Serial s2)
         {
             return s1.Value == s2.Value;
@@ -93,9 +87,14 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj == null) return false;
 
             return obj is Serial other && Equals(other);
+        }
+
+        public bool Equals(Serial other)
+        {
+            return Value == other.Value;
         }
 
         public static Serial Parse(string str)

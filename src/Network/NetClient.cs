@@ -193,17 +193,6 @@ namespace ClassicUO.Network
 
             _socket.Close();
 
-            //if (_recvBuffer != null)
-            //{
-            //    lock (_pool)
-            //        _pool.AddFreeSegment(_recvBuffer);
-            //}
-
-            //if (_incompletePacketBuffer != null)
-            //{
-            //    lock (_pool)
-            //        _pool.AddFreeSegment(_incompletePacketBuffer);
-            //}
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
             _recvBuffer = null;
@@ -233,9 +222,6 @@ namespace ClassicUO.Network
             byte[] data = p.ToArray();
             Packet packet = new Packet(data, p.Length);
 
-            //if (Engine.Server.IsConnected)
-            //    Engine.Server.SendToPlugin(data, data.Length, p.IsDynamic, true);
-
             if (Plugin.ProcessSendPacket(data, packet.Length))
             {
                 PacketSended.Raise(packet);
@@ -252,7 +238,7 @@ namespace ClassicUO.Network
                 _queue = temp;
             }
 
-            while (_queue.Count > 0)
+            while (_queue.Count != 0)
             {
                 Packet p = _queue.Dequeue();
 

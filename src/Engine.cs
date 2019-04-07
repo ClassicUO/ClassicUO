@@ -291,6 +291,8 @@ namespace ClassicUO
             if (CheckUpdate(args))
                 return;
 
+            Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
+
             using (_engine = new Engine(ArgsParser(args)))
             {
                 if (!_engine.IsQuitted)
@@ -552,8 +554,8 @@ namespace ClassicUO
             };
 #endif
 
-                // We can use the mono's dllmap feature, but 99% of people use VS to compile.
-                if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+            // We can use the mono's dllmap feature, but 99% of people use VS to compile.
+            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
                 string libsPath = Path.Combine(ExePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
