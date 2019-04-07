@@ -118,7 +118,9 @@ namespace ClassicUO.Game.UI.Gumps
             get => textBox.IsVisible;
             set
             {
-                textBox.IsVisible = _trans.IsVisible = value;
+                if (value)
+                    textBox.SetText(string.Empty);
+                Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = _trans.IsVisible = value;
             }
         }
 
@@ -129,6 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _mode = value;
 
+                if (ChatVisibility)
                 switch (value)
                 {
                     case ChatMode.Default:
@@ -181,19 +184,18 @@ namespace ClassicUO.Game.UI.Gumps
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
                     AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Party:
                     AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Guild:
                     AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Alliance:
                     AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
-
                     break;
             }
         }
@@ -266,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textEntries.RemoveAt(i--);
             }
 
-            if (Mode == ChatMode.Default)
+            if ( Mode == ChatMode.Default && ChatVisibility )
             {
                 if (textBox.Text.Length == 1)
                 {
@@ -360,10 +362,36 @@ namespace ClassicUO.Game.UI.Gumps
                     Chat.PromptData = default;
                     break;
 
+                case SDL.SDL_Keycode.SDLK_1 when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !ChatVisibility)
+                        ChatVisibility = true;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
+                case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
+                case SDL.SDL_Keycode.SDLK_COLON: // :
+                case SDL.SDL_Keycode.SDLK_QUESTION: // ?
+                case SDL.SDL_Keycode.SDLK_SLASH: // /
+                case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
+                case SDL.SDL_Keycode.SDLK_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_KP_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_COMMA: // ,
+                case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
+                case SDL.SDL_Keycode.SDLK_MINUS: // -
+                case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
+                    if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !ChatVisibility)
+                        ChatVisibility = true;
+                    break;
+
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                    if (Engine.Profile.Current.ActivateChatAfterEnter && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
-                        ToggleChatVisibility();
+                    if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    {
+                        Mode = ChatMode.Default;
+                        if (Engine.Profile.Current.ActivateChatShiftEnterSupport && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
+                            ToggleChatVisibility();
+                    }
                     break;
             }
         }
@@ -374,6 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
+                Mode = ChatMode.Default;
             }
 
             if (string.IsNullOrEmpty(text))
