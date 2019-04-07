@@ -377,6 +377,14 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
+            if (Engine.Profile.Current.ActivateChatAfterEnter)
+            {
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                SystemChatControl chat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                if (chat != null && chat.ChatVisibility)
+                    return;
+            }
+
             _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
             _isCtrlDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
 
@@ -409,15 +417,6 @@ namespace ClassicUO.Game.Scenes
 
             if (macro != null)
             {
-                /*
-                if (Engine.Profile.Current.ActivateChatAfterEnter)
-                {
-                    WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    SystemChatControl chat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
-                    if (chat != null && chat.ChatVisibility)
-                        return;
-                }
-                */
                 _macroManager.SetMacroToExecute(macro.FirstNode);
                 _macroManager.WaitForTargetTimer = 0;
                 _macroManager.Update();

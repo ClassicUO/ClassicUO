@@ -895,6 +895,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
+                    _activeChatArea.IsVisible = (_chatAfterEnter.IsChecked);
 
                     //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = true;
@@ -946,7 +947,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
+
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
+                    _zoomSizeArea.IsVisible = (_zoomCheckbox.IsChecked);
+
                     break;
                 case 4: // commands
 
