@@ -118,6 +118,8 @@ namespace ClassicUO.Game.UI.Gumps
             get => textBox.IsVisible;
             set
             {
+                if (value)
+                    textBox.SetText(string.Empty);
                 textBox.IsVisible = _trans.IsVisible = value;
             }
         }
@@ -358,6 +360,19 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
                         NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
                     Chat.PromptData = default;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_1 when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
+                case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
+                case SDL.SDL_Keycode.SDLK_COLON: // :
+                case SDL.SDL_Keycode.SDLK_QUESTION: // ?
+                case SDL.SDL_Keycode.SDLK_SLASH: // /
+                case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
+                case SDL.SDL_Keycode.SDLK_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_COMMA: // ,
+                    if (Engine.Profile.Current.ActivateChatAfterEnter)
+                        ChatVisibility = true;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
