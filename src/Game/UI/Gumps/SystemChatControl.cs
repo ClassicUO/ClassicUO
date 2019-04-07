@@ -371,13 +371,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
                 case SDL.SDL_Keycode.SDLK_PERIOD: // .
                 case SDL.SDL_Keycode.SDLK_COMMA: // ,
-                    if (Engine.Profile.Current.ActivateChatAfterEnter)
+                case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons)
                         ChatVisibility = true;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                    if (Engine.Profile.Current.ActivateChatAfterEnter && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatShiftEnterSupport && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
                         ToggleChatVisibility();
                     break;
             }

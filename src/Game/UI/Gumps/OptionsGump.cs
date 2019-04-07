@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -89,6 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
+        private ScrollAreaItem _activeChatArea;
 
         public OptionsGump() : base(0, 0)
         {
@@ -201,12 +202,60 @@ namespace ClassicUO.Game.UI.Gumps
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
-            _chatAfterEnter = CreateCheckBox(rightArea, "Activate chat after `Enter` pressing", Engine.Profile.Current.ActivateChatAfterEnter, 0, 0);
+            
+
+
+
+
+
+            // [BLOCK] activate chat
+            {
+                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT, true)
+                {
+                    IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
+                };
+                _chatAfterEnter.MouseClick += (sender, e) =>
+                {
+                    _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
+                };
+
+                rightArea.Add(_chatAfterEnter);
+
+                _activeChatArea = new ScrollAreaItem();
+
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 15,
+                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
+                };
+                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
+
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ ", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 35,
+                    IsChecked = Engine.Profile.Current.ActivateChatAdditionalButtons
+                };
+                _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
+
+                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 55,
+                    IsChecked = Engine.Profile.Current.ActivateChatShiftEnterSupport
+                };
+                _activeChatArea.Add(_restorezoomCheckbox);
+
+                rightArea.Add(_activeChatArea);
+                _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
+
+            }
 
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
             _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT, true)
             {
-                X = 0, Y = 10, IsChecked = Engine.Profile.Current.ShowMobilesHP
+                X = 0, Y = 15, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
             hpAreaItem.Add(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
@@ -960,6 +1009,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
+
+            Engine.Profile.Current.ActivateChatIgnoreHotkeys = _chatIgnodeHotkeysCheckbox.IsChecked;
+            Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
+            Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
