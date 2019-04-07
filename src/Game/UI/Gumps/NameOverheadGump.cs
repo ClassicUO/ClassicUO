@@ -251,20 +251,18 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-            x = 0;
-            y = 0;
 
             if (Entity is Mobile m)
             {
                 GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                x = (int)((x + Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                y = (int)((y + Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) ) / scale);
+                x = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
+                y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) ) / scale);
             }
             else
             {
-                x = (int)((x + Entity.RealScreenPosition.X + 22) / scale);
-                y = (int)((y + Entity.RealScreenPosition.Y) / scale);
+                x = (int)((Entity.RealScreenPosition.X + 22) / scale);
+                y = (int)((Entity.RealScreenPosition.Y) / scale);
             }
            
             x -= Width / 2;

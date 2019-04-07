@@ -80,29 +80,30 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            if (Engine.Profile == null || Engine.Profile.Current == null)
+            if (Engine.Profile == null || Engine.Profile.Current == null || Mobile == null || Mobile.IsDestroyed)
                 return false;
 
-            Point gWinPos = Engine.Profile.Current.GameWindowPosition;
-            Point gWinSize = Engine.Profile.Current.GameWindowSize;
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            if (Mobile != null && !Mobile.IsDestroyed)
-            {
-                float xx = (Mobile.RealScreenPosition.X + gWinPos.X) / scale;
-                float yy = (Mobile.RealScreenPosition.Y + gWinPos.Y) / scale;
+            int gx = Engine.Profile.Current.GameWindowPosition.X;
+            int gy = Engine.Profile.Current.GameWindowPosition.Y;
+            int w = Engine.Profile.Current.GameWindowSize.X;
+            int h = Engine.Profile.Current.GameWindowSize.Y;
 
-                X = (int)(xx + Mobile.Offset.X) - Width / 2 + 22;
-                Y = (int)(yy + Mobile.Offset.Y - Mobile.Offset.Z) + 22;
-            }
+            x = (int)((Mobile.RealScreenPosition.X + Mobile.Offset.X - Width / 2 + 22) / scale);
+            y = (int)((Mobile.RealScreenPosition.Y + Mobile.Offset.Y - Mobile.Offset.Z + 22) / scale);
 
-            if (X < gWinPos.X || X + Width > gWinPos.X + gWinSize.X)
+            x += gx + 6;
+            y += gy;
+
+            X = x;
+            Y = y;
+
+            if (x < gx || x + Width > gx + w)
                 return false;
-            if (Y < gWinPos.Y || Y + Height > gWinPos.Y + gWinSize.Y)
+            if (y < gy || y + Height > gy + h)
                 return false;
 
-            x = X;
-            y = Y;
 
             return base.Draw(batcher, x, y);
         }
