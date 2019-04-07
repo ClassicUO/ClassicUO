@@ -31,6 +31,8 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Platforms;
 
+using System.Diagnostics;
+
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -120,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (value)
                     textBox.SetText(string.Empty);
-                textBox.IsVisible = _trans.IsVisible = value;
+                Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = _trans.IsVisible = value;
             }
         }
 
@@ -380,17 +382,10 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if (Engine.Profile.Current.ActivateChatAfterEnter)
                     {
+                        Mode = ChatMode.Default;
                         if (Engine.Profile.Current.ActivateChatShiftEnterSupport && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
-                        {
                             ToggleChatVisibility();
-                        }
-                        else
-                        {
-                            ChatVisibility = false;
-                            Mode = ChatMode.Default;
-                        }
                     }
-
                     break;
             }
         }
@@ -401,6 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
+                Mode = ChatMode.Default;
             }
 
             if (string.IsNullOrEmpty(text))

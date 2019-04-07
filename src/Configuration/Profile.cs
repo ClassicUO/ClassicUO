@@ -144,6 +144,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int CloseHealthBarType { get; set; } = 0; // 0 = none, 1 == not exists, 2 == is dead
 
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; } = false;
+        [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
         [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
