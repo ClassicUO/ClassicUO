@@ -631,6 +631,7 @@ namespace ClassicUO.Game.Scenes
 
             batcher.Begin();
             batcher.SetLightDirection(World.Light.IsometricDirection);
+
             if (!_deathScreenActive)
             {
                 RenderedObjectsCount = 0;
