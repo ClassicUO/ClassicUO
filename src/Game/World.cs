@@ -20,12 +20,14 @@
 #endregion
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -222,16 +224,17 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
+            if (Thread.CurrentThread.Name != "CUO_MAIN_THREAD")
+            {
+                Log.Message(LogTypes.Panic, "WRONG THREAD ACCESS. MAYBE IT WILL THROW AN EXCEPTION: " + Thread.CurrentThread.Name);
+            }
+
             Item item = Items.Get(serial);
 
             if (item == null)
-            {
-                //ToAdd.RemoveWhere(i => i == serial);
-
                 return false;
-            }
 
-            if (item.Layer != Layer.Invalid && item.RootContainer.IsValid)
+            if (item.Layer != Layer.Invalid)
             {
                 Entity e = Get(item.RootContainer);
                 if (e != null && e.HasEquipment)
@@ -240,6 +243,7 @@ namespace ClassicUO.Game
 
             foreach (Item i in item.Items)
                 RemoveItem(i);
+
             item.Items.Clear();
             item.Destroy();
 
@@ -250,8 +254,12 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Get(serial);
 
-            if (mobile == null) return false;
-            foreach (Item i in mobile.Items) RemoveItem(i);
+            if (mobile == null)
+                return false;
+
+            foreach (Item i in mobile.Items)
+                RemoveItem(i);
+
             mobile.Items.Clear();
             mobile.Destroy();
 
