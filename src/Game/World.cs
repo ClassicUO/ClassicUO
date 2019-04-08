@@ -226,7 +226,6 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            GC.Collect();
             if (Thread.CurrentThread.Name != "CUO_MAIN_THREAD")
             {
                 Log.Message(LogTypes.Panic, "WRONG THREAD ACCESS. MAYBE IT WILL THROW AN EXCEPTION: " + Thread.CurrentThread.Name);
