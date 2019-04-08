@@ -1100,8 +1100,13 @@ namespace ClassicUO.Network
             if (item.Container != 0)
             {
                 Entity cont = World.Get(item.Container);
-                cont.Items.Remove(item);
-                cont.Items.ProcessDelta();
+
+                if (cont != null)
+                {
+                    cont.Items.Remove(item);
+                    cont.Items.ProcessDelta();
+                }
+
                 item.Container = Serial.INVALID;
             }
 

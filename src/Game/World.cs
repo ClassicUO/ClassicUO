@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -224,6 +226,7 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
+            GC.Collect();
             if (Thread.CurrentThread.Name != "CUO_MAIN_THREAD")
             {
                 Log.Message(LogTypes.Panic, "WRONG THREAD ACCESS. MAYBE IT WILL THROW AN EXCEPTION: " + Thread.CurrentThread.Name);
