@@ -121,7 +121,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
 
         // movements
-        [JsonProperty] public bool EnablePathfind { get; set; } = true;
+        [JsonProperty] public bool EnablePathfind { get; set; } = false;
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
