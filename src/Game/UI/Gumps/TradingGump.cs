@@ -94,10 +94,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true,
@@ -126,10 +130,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true,

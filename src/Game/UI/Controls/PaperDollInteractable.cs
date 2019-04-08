@@ -74,18 +74,18 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             UpdateEntity();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
             if (_fakeItem != null)
             {
-                foreach (Item item in e)
+                foreach (Serial item in e)
                 {
-                    if (item.Serial == _fakeItem.Serial)
+                    if (item == _fakeItem.Serial)
                     {
                         _fakeItem = null;
                         break;

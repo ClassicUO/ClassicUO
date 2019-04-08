@@ -66,18 +66,18 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e)
+            foreach (Serial item in e)
             {
                 NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
             }

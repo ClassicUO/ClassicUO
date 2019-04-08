@@ -156,19 +156,22 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();  
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+                if (item == null || item.ItemData.Layer == (int)Layer.Hair || item.ItemData.Layer == (int)Layer.Beard || item.ItemData.Layer == (int)Layer.Face)
+                    continue;
                 CheckItemPosition(item);
                 Add(new ItemGump(item));
             }
