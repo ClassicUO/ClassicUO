@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -711,18 +711,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Activated chat ignore hotkeys & macro", FONT, HUE_FONT, true)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
-
                 _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ | -", FONT, HUE_FONT, true)
                 {
                     X = 20,
-                    Y = 35,
+                    Y = 15,
                     IsChecked = Engine.Profile.Current.ActivateChatAdditionalButtons
                 };
                 _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
@@ -730,10 +722,34 @@ namespace ClassicUO.Game.UI.Gumps
                 _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT, true)
                 {
                     X = 20,
-                    Y = 55,
+                    Y = 35,
                     IsChecked = Engine.Profile.Current.ActivateChatShiftEnterSupport
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
+
+                text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT, 0, FONT)
+                {
+                    X = 20,
+                    Y = 60,
+                };
+
+                _activeChatArea.Add(text);
+
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT, true)
+                {
+                    X = 40,
+                    Y = 85,
+                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
+                };
+                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
+
+                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins Razor/Steam [BETA]", FONT, HUE_FONT, true)
+                {
+                    X = 40,
+                    Y = 105,
+                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
+                };
+                _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
 
                 rightArea.Add(_activeChatArea);
 
@@ -964,6 +980,7 @@ namespace ClassicUO.Game.UI.Gumps
                         systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
 
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
+                    _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = (_chatAfterEnter.IsChecked);
@@ -1066,6 +1083,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Engine.Profile.Current.ActivateChatIgnoreHotkeys = _chatIgnodeHotkeysCheckbox.IsChecked;
+            Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
 

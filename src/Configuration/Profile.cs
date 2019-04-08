@@ -146,6 +146,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; } = false;
         [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
         [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
+        [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 

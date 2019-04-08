@@ -8,10 +8,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -319,6 +319,13 @@ namespace ClassicUO.Network
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
             bool result = true;
+
+            if (World.Player != null && 
+                Engine.Profile.Current.ActivateChatAfterEnter &&
+                Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins &&
+                Engine.Profile.Current.ActivateChatStatus &&
+                Engine.SceneManager.CurrentScene is GameScene gs)
+                return true;
 
             for (int i = 0; i < _plugins.Count; i++)
             {
