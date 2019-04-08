@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                 HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
             else
-                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
             {
