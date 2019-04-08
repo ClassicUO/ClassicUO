@@ -82,7 +82,20 @@ namespace ClassicUO.Configuration
 
         public void Save()
         {
-            ConfigurationResolver.Save(this, Path.Combine(Engine.ExePath, Engine.SettingsFile));
+            // Make a copy of the settings object that we will use in the saving process
+            Settings settingsToSave = JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
+
+            // Make sure we don't save username and password if `saveaccount` flag is not set
+            // NOTE: Even if we pass username and password via command-line arguments they won't be saved
+            if ( ! settingsToSave.SaveAccount)
+            {
+                settingsToSave.Username = string.Empty;
+                settingsToSave.Password = string.Empty;
+            }
+
+            // NOTE: We can do any other settings clean-ups here before we save them
+
+            ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, Engine.SettingsFile));
         }
     }
 }

@@ -883,7 +883,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdDownKeyAlt.IsChecked = true;
 
                     //_smoothMovements.IsChecked = true;
-                    _enablePathfind.IsChecked = true;
+                    _enablePathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;

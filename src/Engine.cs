@@ -55,6 +55,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
 
+using Newtonsoft.Json;
 
 namespace ClassicUO
 {
@@ -102,11 +103,20 @@ namespace ClassicUO
 
         public bool IsQuitted { get; private set; }
 
-        private Engine(Settings settings)
+        private Engine(string[] args)
         {
             Instance = this;
-            _settings = settings ?? ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
 
+            // By default try to load settings from main settings file
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
+
+            // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
+            // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
+            //   a new settings object and populate it with the passed settings
+            _settings = ArgsParser(args, _settings);
+
+            // If no still no settings after loading a file and parsing command-line settings,
+            //   then show an error, generate default settings file and exit
             if (_settings == null)
             {
                 SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `"+ SettingsFile + "`", "A `" + SettingsFile + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
@@ -115,7 +125,37 @@ namespace ClassicUO
                 _settings.Save();
                 IsQuitted = true;
                 return;
-            }         
+            }
+
+            // Debug: Show resulting settings object
+            Log.Message(LogTypes.Trace, "Settings loaded from `" + SettingsFile + "` and combined with parsed args:\n" + JsonConvert.SerializeObject(_settings, Formatting.Indented));
+
+            // Validate resulting settings object
+            // NOTE: Check that at least `UltimaOnlineDirectory` and `ClientVersion` properties are set
+            //   to some other than default values
+            Settings defaultSettings = new Settings();
+            bool settingsAreValid = true;
+
+            if (_settings.UltimaOnlineDirectory == defaultSettings.UltimaOnlineDirectory)
+                settingsAreValid = false;
+
+            if (_settings.ClientVersion == defaultSettings.ClientVersion)
+                settingsAreValid = false;
+
+            // If settings are invalid, then show an error and exit
+            if ( ! settingsAreValid)
+            {
+                SDL.SDL_ShowSimpleMessageBox(
+                    SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, 
+                    "Invalid settings", 
+                    "Please, check your settings.\nYou should at least set `ultimaonlinedirectory` and `clientversion`.", 
+                    SDL.SDL_GL_GetCurrentWindow()
+                );
+                Log.Message(LogTypes.Trace, "Invalid settings");
+                IsQuitted = true;
+                return;
+            }
+
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
@@ -293,7 +333,7 @@ namespace ClassicUO
 
             Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
 
-            using (_engine = new Engine(ArgsParser(args)))
+            using (_engine = new Engine(args))
             {
                 if (!_engine.IsQuitted)
                 {
@@ -390,15 +430,15 @@ namespace ClassicUO
 
             return false;
         }
-        
-        private static Settings ArgsParser(string[] args)
-        {
-            Settings settings = null;
 
+        private static Settings ArgsParser(string[] args, Settings settings = null)
+        {
             if (args.Length > 1)
             {
-                settings = new Settings();
-                bool isValid = false;
+                if (settings == null)
+                {
+                    settings = new Settings();
+                }
 
                 for (int i = 0; i < args.Length - 1; i += 2)
                 {
@@ -422,6 +462,10 @@ namespace ClassicUO
                             settings.Password = Crypter.Encrypt(value);
                             break;
 
+                        case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
+                            settings.Password = value;
+                            break;
+
                         case "ip":
                             settings.IP = value;
                             break;
@@ -430,17 +474,16 @@ namespace ClassicUO
                             settings.Port = ushort.Parse(value);
                             break;
 
-                        case "uopath":
                         case "ultimaonlinedirectory":
-                            settings.UltimaOnlineDirectory = value;
-                            isValid = true;
+                        case "uopath":
+                            settings.UltimaOnlineDirectory = value; // Required
                             break;
 
                         case "clientversion":
-                            settings.ClientVersion = value;
-                            isValid = true;
+                            settings.ClientVersion = value; // Required
                             break;
 
+                        case "lastcharactername":
                         case "lastcharname":
                             settings.LastCharacterName = value;
                             break;
@@ -449,8 +492,8 @@ namespace ClassicUO
                             settings.LastServerNum = ushort.Parse(value);
                             break;
 
-                        case "fps":
                         case "login_fps":
+                        case "fps":
                             settings.MaxLoginFPS = int.Parse(value);
                             break;
 
@@ -482,18 +525,18 @@ namespace ClassicUO
                             settings.ReconnectTime = int.Parse(value);
                             break;
 
-                        case "music":
                         case "login_music":
+                        case "music":
                             settings.LoginMusic = bool.Parse(value);
                             break;
 
-                        case "music_volume":
                         case "login_music_volume":
+                        case "music_volume":
                             settings.LoginMusicVolume = int.Parse(value);
                             break;
 
-                        case "shard":
                         case "shard_type":
+                        case "shard":
                             settings.ShardType = int.Parse(value);
                             break;
 
@@ -501,15 +544,16 @@ namespace ClassicUO
                             settings.FixedTimeStep = bool.Parse(value);
                             break;
 
-                        case "settings":
-                            Engine.SettingsFile = value;
-                            isValid = false;
-                            break;
+                        // FIXME: This is bad idea since the filename stored in `Engine.SettingsFile` is
+                        //   used not only for main settings file, but for character profile settings file
+                        //   as well. The "-settings" option should also have lower priority than other 
+                        //   and should be processed before we overwrite options one-by-one from 
+                        //   command-line arguments or from a shortcut.
+                        //case "settings":
+                        //    Engine.SettingsFile = value;
+                        //    break;
                     }
                 }
-
-                if (!isValid)
-                    settings = null;
             }
 
             return settings;
