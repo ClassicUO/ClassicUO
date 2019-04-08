@@ -751,7 +751,7 @@ namespace ClassicUO
 
             if (_time > IntervalFixedUpdate)
             {
-                _time = _time % IntervalFixedUpdate;
+                _time %= IntervalFixedUpdate;
                 Profiler.EnterContext("FixedUpdate");
                 OnFixedUpdate(totalms, framems);
                 Profiler.ExitContext("FixedUpdate");

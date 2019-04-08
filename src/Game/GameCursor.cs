@@ -330,7 +330,7 @@ namespace ClassicUO.Game
 								break;
                         }
 
-                        if (it != null && it.Properties.Count > 0)
+                        if (it != null && it.Properties.Count != 0)
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
@@ -376,11 +376,10 @@ namespace ClassicUO.Game
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-
             if (TargetManager.IsTargeting)
             {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
                 if (gs != null && !gs.IsHoldingItem)
                     return _cursorData[war, 12];
             }
