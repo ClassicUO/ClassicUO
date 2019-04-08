@@ -743,7 +743,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
 
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins Razor/Steam [BETA]", FONT, HUE_FONT, true)
+                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT, true)
                 {
                     X = 40,
                     Y = 105,
