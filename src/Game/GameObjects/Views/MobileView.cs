@@ -345,6 +345,9 @@ namespace ClassicUO.Game.GameObjects
                 if (hash == null)
                     return;
 
+
+                bool partial = hue == 0 && !IsHidden && item.ItemData.IsPartialHue;
+
                 if (hue == 0)
                 {
                     if (direction.Address != direction.PatchedAddress)
@@ -402,7 +405,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                     HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, !IsHidden && item.ItemData.IsPartialHue, 0, false);
+                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, partial, 0, false);
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
