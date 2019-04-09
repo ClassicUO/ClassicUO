@@ -313,6 +313,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static void GetAmount(Item parent, Graphic graphic, ref int amount)
             {
+                if (parent == null)
+                    return;
+
                 foreach (Item item in parent.Items)
                 {
                     GetAmount(item, graphic, ref amount);
