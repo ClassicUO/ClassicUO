@@ -199,7 +199,13 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
+                ref var data = ref BlockData[i][block];
+                data.MapAddress = realmapaddress;
+                data.StaticAddress = realstaticaddress;
+                data.StaticCount = realstaticcount;
+                data.OriginalMapAddress = realmapaddress;
+                data.OriginalStaticAddress = realstaticaddress;
+                data.OriginalStaticCount = realstaticcount;
             }
         }
 
@@ -509,16 +515,6 @@ namespace ClassicUO.IO.Resources
 
     internal struct IndexMap
     {
-        public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
-        {
-            MapAddress = mapAddress;
-            StaticAddress = staticAddress;
-            StaticCount = staticCount;
-            OriginalMapAddress = originalMapAddress;
-            OriginalStaticAddress = originalStaticAddress;
-            OriginalStaticCount = originalStaticCount;
-        }
-
         public ulong MapAddress;
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

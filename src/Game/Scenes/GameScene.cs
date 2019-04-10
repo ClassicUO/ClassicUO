@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Scenes
 
         public OverheadManager Overheads => _overheadManager;
 
-        private bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
+        public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
         public void DoubleClickDelayed(Serial serial)
             => _useItemQueue.Add(serial);
@@ -622,12 +622,17 @@ namespace ClassicUO.Game.Scenes
             return base.Draw(batcher);
         }
 
-
+        
         
         private void DrawWorld(Batcher2D batcher)
         {
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+
+            if (CircleOfTransparency.Circle == null)
+                CircleOfTransparency.Create(200);
+            CircleOfTransparency.Circle.Draw(batcher, Engine.WindowWidth / 2, Engine.WindowHeight / 2);
+
 
             batcher.Begin();
             batcher.SetLightDirection(World.Light.IsometricDirection);
@@ -644,7 +649,7 @@ namespace ClassicUO.Game.Scenes
                     //if (!_renderList[i].TryGetTarget(out var obj))
                     //    continue;
 
-                    var obj = _renderList[i];
+                    GameObject obj = _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {
@@ -655,7 +660,12 @@ namespace ClassicUO.Game.Scenes
                             RenderedObjectsCount++;
                         }
                     }
+
+                    //obj = null;
                 }
+
+                batcher.Stencil.DepthBufferEnable = false;
+
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
                     Item multiTarget = new Item(Serial.INVALID)
@@ -669,12 +679,12 @@ namespace ClassicUO.Game.Scenes
                         multiTarget.Position = SelectedObject.Position + TargetManager.MultiTargetInfo.Offset;
                         multiTarget.CheckGraphicChange();
                     }
-                    multiTarget.Draw(batcher, multiTarget.ScreenPosition, _mouseOverList);
+                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition, _mouseOverList);
                 }
 
             }
             batcher.End();
-          
+
             DrawLights(batcher);
 
             batcher.GraphicsDevice.SetRenderTarget(null);

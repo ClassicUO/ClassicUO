@@ -820,7 +820,13 @@ namespace ClassicUO.IO
                             realstaticcount = 1024;
                     }
                 }
-                BlockData[map][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
+                ref var data = ref BlockData[map][block];
+                data.MapAddress = realmapaddress;
+                data.StaticAddress = realstaticaddress;
+                data.StaticCount = realstaticcount;
+                data.OriginalMapAddress = realmapaddress;
+                data.OriginalStaticAddress = realstaticaddress;
+                data.OriginalStaticCount = realstaticcount;
             }
         }
     }
