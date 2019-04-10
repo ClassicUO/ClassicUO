@@ -22,6 +22,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading;
 
 using ClassicUO.Game.Data;
@@ -226,28 +228,49 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            if (Thread.CurrentThread.Name != "CUO_MAIN_THREAD")
+            // TODO: try to figure out the weird issue :)
+            try
             {
-                Log.Message(LogTypes.Panic, "WRONG THREAD ACCESS. MAYBE IT WILL THROW AN EXCEPTION: " + Thread.CurrentThread.Name);
+                Item item = Items.Get(serial);
+
+                if (item == null)
+                    return false;
+
+                if (item.Layer != Layer.Invalid)
+                {
+                    Entity e = Get(item.RootContainer);
+                    if (e != null && e.HasEquipment)
+                        e.Equipment[(int)item.Layer] = null;
+                }
+
+                foreach (Item i in item.Items)
+                    RemoveItem(i);
+
+                item.Items.Clear();
+                item.Destroy();
+
             }
-
-            Item item = Items.Get(serial);
-
-            if (item == null)
-                return false;
-
-            if (item.Layer != Layer.Invalid)
+            catch (Exception e)
             {
-                Entity e = Get(item.RootContainer);
-                if (e != null && e.HasEquipment)
-                    e.Equipment[(int) item.Layer] = null;
+                string path = Path.Combine(Engine.ExePath, "Logs");
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("ClassicUO [dev] - v" + Engine.Version);
+                sb.AppendLine("Thread: " + Thread.CurrentThread.Name);
+                sb.AppendLine("Serial that causes crash: " + serial);
+                sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
+                sb.AppendLine("Exception:\n" + e);
+
+                using (LogFile crashfile = new LogFile(path, "log_Error_World_RemoveItem.txt"))
+                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+
+                Chat.OnMessage(Player, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
+                Chat.OnMessage(null, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
+
             }
-
-            foreach (Item i in item.Items)
-                RemoveItem(i);
-
-            item.Items.Clear();
-            item.Destroy();
 
             return true;
         }
