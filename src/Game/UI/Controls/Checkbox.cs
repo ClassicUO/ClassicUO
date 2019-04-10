@@ -52,17 +52,15 @@ namespace ClassicUO.Game.UI.Controls
 
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
-            //Height = t.Height;
 
             _text = new RenderedText
             {
                 Font = font, Hue = color, IsUnicode = isunicode, MaxWidth = maxWidth, Text = text
             };
             Width += _text.Width;
-
             
             Height = Math.Max(t.Width, _text.Height);
-            CanMove = false;
+            CanMove = true;
             AcceptMouseInput = true;
         }
 
