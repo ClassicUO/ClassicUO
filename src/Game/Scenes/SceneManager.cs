@@ -48,8 +48,6 @@ namespace ClassicUO.Game.Scenes
 
             CurrentScene?.Destroy();
             CurrentScene = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             switch (type)
             {
