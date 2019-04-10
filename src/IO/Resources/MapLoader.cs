@@ -443,11 +443,11 @@ namespace ClassicUO.IO.Resources
             return mb;
         }
 
-        public IndexMap GetIndex(int map, int x, int y)
+        public ref IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;
 
-            return BlockData[map][block];
+            return ref BlockData[map][block];
         }
     }
 

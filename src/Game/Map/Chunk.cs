@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)
         {
-            IndexMap im = GetIndex(map);
+            ref readonly IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void LoadStatics(int map)
         {
-            IndexMap im = GetIndex(map);
+            ref readonly IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void LoadLand(int map)
         {
-            IndexMap im = GetIndex(map);
+            ref readonly IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -264,7 +264,7 @@ namespace ClassicUO.Game.Map
         //    }
         //}
 
-        private IndexMap GetIndex(int map) => FileManager.Map.GetIndex(map, X, Y);
+        private ref IndexMap GetIndex(int map) => ref FileManager.Map.GetIndex(map, X, Y);
 
         public void Destroy()
         {
