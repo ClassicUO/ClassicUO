@@ -664,7 +664,7 @@ namespace ClassicUO.Game.Scenes
                     //obj = null;
                 }
 
-                batcher.Stencil.DepthBufferEnable = false;
+                //batcher.Stencil.DepthBufferEnable = false;
 
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
