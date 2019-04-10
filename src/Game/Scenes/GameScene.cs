@@ -629,11 +629,6 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            if (CircleOfTransparency.Circle == null)
-                CircleOfTransparency.Create(200);
-            CircleOfTransparency.Circle.Draw(batcher, Engine.WindowWidth / 2, Engine.WindowHeight / 2);
-
-
             batcher.Begin();
             batcher.SetLightDirection(World.Light.IsometricDirection);
 
@@ -663,8 +658,6 @@ namespace ClassicUO.Game.Scenes
 
                     //obj = null;
                 }
-
-                //batcher.Stencil.DepthBufferEnable = false;
 
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
