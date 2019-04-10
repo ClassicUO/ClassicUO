@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
 
-                ref var weak = ref _renderList[_renderListCount];
+                //ref var weak = ref _renderList[_renderListCount];
 
                 //if (weak == null)
                 //    weak = new WeakReference<GameObject>(obj);
