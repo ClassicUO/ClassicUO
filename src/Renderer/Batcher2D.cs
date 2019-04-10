@@ -41,13 +41,17 @@ namespace ClassicUO.Renderer
         //    DepthBufferEnable = true,
         //    DepthBufferWriteEnable = true
         //};
-        //private readonly DepthStencilState _dssStencil = new DepthStencilState
-        //{
-        //    StencilEnable = true,
-        //    StencilFunction = CompareFunction.Always,
-        //    StencilPass = StencilOperation.Replace,
-        //    DepthBufferEnable = false,
-        //};
+        private readonly DepthStencilState _dssStencil = new DepthStencilState
+        {
+            StencilEnable = false,
+            DepthBufferEnable = false,
+            StencilFunction = CompareFunction.NotEqual,
+            ReferenceStencil = 1,
+            StencilMask = 1,
+            StencilFail = StencilOperation.Keep,
+            StencilDepthBufferFail = StencilOperation.Keep,
+            StencilPass = StencilOperation.Keep,
+        };
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
         private readonly Texture2D[] _textureInfo;
@@ -62,6 +66,8 @@ namespace ClassicUO.Renderer
 
         private int _numSprites;
         private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
+
+        public DepthStencilState Stencil => _dssStencil;
       
         public Batcher2D(GraphicsDevice device)
         {
@@ -90,7 +96,7 @@ namespace ClassicUO.Renderer
                 ScissorTestEnable = true
             };
 
-            _stencil = DepthStencilState.None;
+            _stencil = _dssStencil;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -653,7 +659,7 @@ namespace ClassicUO.Renderer
             if (!noflush)
                 Flush();
 
-            _stencil = stencil ?? DepthStencilState.None;
+            _stencil = stencil ?? _dssStencil;
         }
 
         private static short[] GenerateIndexArray()
