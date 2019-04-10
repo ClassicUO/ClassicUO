@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Managers
         {
             Engine.Input.MouseDragging += (sender, e) =>
             {
+                AttemptDragControl(MouseOverControl, Mouse.Position);
                 if (_isDraggingControl)
                     DoDragControl(Mouse.Position);
             };
@@ -737,8 +738,8 @@ namespace ClassicUO.Game.Managers
 
                 gump.InvokeMouseOver(position);
                
-                if (_mouseDownControls[0] == gump)
-                    AttemptDragControl(gump, position);
+                //if (_mouseDownControls[0] == gump)
+                //    AttemptDragControl(gump, position);
             }
 
             MouseOverControl = gump;
@@ -904,13 +905,14 @@ namespace ClassicUO.Game.Managers
 
                 if (_draggingControl == dragTarget)
                 {
-                    int deltaX = mousePosition.X - _dragOriginX;
-                    int deltaY = mousePosition.Y - _dragOriginY;
+                    var p = Mouse.LDroppedOffset;
+                    //int deltaX = mousePosition.X - _dragOriginX;
+                    //int deltaY = mousePosition.Y - _dragOriginY;
 
-                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                    if (attemptAlwaysSuccessful || Math.Abs(p.X) + Math.Abs(p.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
                     {
                         _isDraggingControl = true;
-                        dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
+                        dragTarget.InvokeDragBegin(p);
                     }
                 }
                 else
