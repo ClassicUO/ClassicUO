@@ -316,6 +316,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
+            _darkness?.Dispose();
             CommandManager.UnRegisterAll();
 
             Engine.UI?.Clear();
