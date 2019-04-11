@@ -264,8 +264,9 @@ namespace ClassicUO.Game
                 sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
                 sb.AppendLine("Exception:\n" + e);
 
-                using (LogFile crashfile = new LogFile(path, "log_Error_World_RemoveItem.txt"))
-                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+              
+
+                File.WriteAllText(Path.Combine(path, "log_Error_World_RemoveItem.txt"), sb.ToString());
 
                 Chat.OnMessage(Player, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
                 Chat.OnMessage(null, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
