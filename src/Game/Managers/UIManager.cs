@@ -55,7 +55,10 @@ namespace ClassicUO.Game.Managers
         {
             Engine.Input.MouseDragging += (sender, e) =>
             {
-                AttemptDragControl(MouseOverControl, Mouse.Position);
+                HandleMouseInput();
+
+                //if (_mouseDownControls[0] == MouseOverControl)
+                //    AttemptDragControl(MouseOverControl, Mouse.Position);
                 if (_isDraggingControl)
                     DoDragControl(Mouse.Position);
             };
@@ -737,9 +740,9 @@ namespace ClassicUO.Game.Managers
                 }
 
                 gump.InvokeMouseOver(position);
-               
-                //if (_mouseDownControls[0] == gump)
-                //    AttemptDragControl(gump, position);
+
+                if (_mouseDownControls[0] == gump)
+                    AttemptDragControl(gump, position);
             }
 
             MouseOverControl = gump;
