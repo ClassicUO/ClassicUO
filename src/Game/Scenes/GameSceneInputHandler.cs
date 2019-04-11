@@ -374,14 +374,19 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
+            _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+            _isCtrlDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
+
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-            if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
-                return;
-
-            _isShiftDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
-            _isCtrlDown = Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
+            if (Engine.Profile.Current.ActivateChatAfterEnter)
+            {
+                // Activate chat after `Enter` pressing, 
+                // If chat active - ignores hotkeys from cuo
+                if (Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
+                    return;
+            }
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
@@ -393,8 +398,8 @@ namespace ClassicUO.Game.Scenes
                     World.Player.Walk(dWalk, false);
                 else
                 {
-                    WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    SystemChatControl chat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                    WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    SystemChatControl chat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                     if (chat != null && chat.textBox.Text.Length == 0)
                         World.Player.Walk(dWalk, false);
                 }

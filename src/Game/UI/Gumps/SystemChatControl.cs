@@ -92,9 +92,26 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = textBox.Y,
                 Width = Width,
                 Height = height + 5,
-                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true
+                IsVisible = (Engine.Profile.Current.ActivateChatAfterEnter) ? false : true,
+                AcceptMouseInput = true
             });
             Add(textBox);
+
+            _trans.MouseClick += (sender, e) =>
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
+                    ToggleChatVisibility();
+            };
+            _trans.MouseEnter += (sender, e) =>
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    _trans.Alpha = 0.3f;
+            };
+            _trans.MouseExit += (sender, e) =>
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    _trans.Alpha = 0.5f;
+            };
 
             Add(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
             {
@@ -102,6 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = textBox.Y,
                 IsVisible = false
             });
+
             WantUpdateSize = false;
 
             Chat.Message += ChatOnMessage;
@@ -119,8 +137,17 @@ namespace ClassicUO.Game.UI.Gumps
             set
             {
                 if (value)
+                {
+                    Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = _trans.IsVisible = value;
+                    _trans.Y = textBox.Y;
                     textBox.SetText(string.Empty);
-                Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = _trans.IsVisible = value;
+                    textBox.SetKeyboardFocus();
+                }
+                else
+                {
+                    Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = value;
+                    _trans.Y = textBox.Y + ((Engine.Profile.Current.ActivateChatCompletelyHide) ? 20 : 10);
+                }
             }
         }
 
@@ -389,7 +416,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Engine.Profile.Current.ActivateChatAfterEnter)
                     {
                         Mode = ChatMode.Default;
-                        if (Engine.Profile.Current.ActivateChatShiftEnterSupport && !Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
+                        if (!(Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && Engine.Profile.Current.ActivateChatShiftEnterSupport))
                             ToggleChatVisibility();
                     }
                     break;

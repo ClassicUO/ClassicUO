@@ -320,6 +320,8 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
+            // Activate chat after `Enter` pressing, 
+            // If chat active - ignores hotkeys from Razor (Plugins)
             if (World.Player != null && 
                 Engine.Profile.Current.ActivateChatAfterEnter &&
                 Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins &&
