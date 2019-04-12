@@ -1541,6 +1541,8 @@ namespace ClassicUO.IO.Resources
                         }
 
                         i = lastSpace + 1;
+                        if (i >= len)
+                            break;
                         si = htmlData[i].Char;
                         solidWidth = htmlData[i].Flags & UOFONT_SOLID;
 
