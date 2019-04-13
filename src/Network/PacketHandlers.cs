@@ -661,7 +661,13 @@ namespace ClassicUO.Network
                         World.Player.UpdateAbilities();
                     }
 
-                    World.Get(item.Container)?.Items.Remove(item);
+                    Entity cont = World.Get(item.Container);
+
+                    if (cont != null)
+                    {
+                        cont.Items.Remove(item);
+                        cont.Items.ProcessDelta();
+                    }
                 }
 
                 if (World.RemoveItem(serial))
