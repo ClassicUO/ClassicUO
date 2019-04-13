@@ -61,7 +61,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
             {
-                CheckItemPosition(i);
+                //FIXME: this should be disabled. Server sends the right position
+                //CheckItemPosition(i);
                 Add(new ItemGump(i));
             }
         }
