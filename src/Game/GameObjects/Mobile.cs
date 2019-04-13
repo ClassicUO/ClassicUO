@@ -530,8 +530,10 @@ namespace ClassicUO.Game.GameObjects
                         float y = frameOffset;
 
                         MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Z) * frameOffset * (4.0f / framesPerTile)));
-                     
+                        Offset.X = x;
+                        Offset.Y = y;
+                        Offset.Z = ((step.Z - Z) * frameOffset * (4.0f / framesPerTile));
+
                         turnOnly = false;
                     }
                     else

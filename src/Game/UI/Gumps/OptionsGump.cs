@@ -1006,7 +1006,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case 9:
                     _enableCounters.IsChecked = false;
-                    _enableCounters.IsChecked = false;
+                    _highlightOnUse.IsChecked = false;
                     _columns.Text = "1";
                     _rows.Text = "1";
                     _cellSize.Value = 40;
@@ -1224,8 +1224,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarCellSize = _cellSize.Value;
             Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
+            Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
-            
+
+
             CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
 
             if (counterGump != null)
