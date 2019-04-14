@@ -503,10 +503,6 @@ namespace ClassicUO.Game.GameObjects
                         volume -= (volumeByDist * distance);
                     }
 
-                    //float soundByRange = Engine.Profile.Current.SoundVolume / (float) World.ViewRange;
-                    //soundByRange *= Distance;
-                    //float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / Constants.SOUND_DELTA;
-
                     Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
                     LastStepSoundTime = ticks + delaySound;
                 }
