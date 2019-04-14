@@ -100,6 +100,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Update(totalMS, frameMS);
 
+            if (Mobile == null || Mobile.IsDestroyed)
+                Dispose();
+
             if (IsDisposed)
                 return;
 
@@ -213,8 +216,11 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         return;
                     }
-
-                    gs.WearHeldItem(Mobile);
+                    
+                    if (Item == Mobile.Equipment[(int) Layer.Backpack])
+                        gs.DropHeldItemToContainer(Item);
+                    else
+                        gs.WearHeldItem(Mobile);
 
                 }
             }

@@ -360,7 +360,6 @@
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
     <Compile Include="Game\UI\Controls\GumpPic.cs" />
-    <Compile Include="Game\UI\Controls\GumpPicBackpack.cs" />
     <Compile Include="Game\UI\Controls\GumpPicContainer.cs" />
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
