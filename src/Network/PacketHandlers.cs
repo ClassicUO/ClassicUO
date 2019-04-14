@@ -1330,12 +1330,20 @@ namespace ClassicUO.Network
             ushort audio = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
+            ushort z = p.ReadUShort();
 
-            Position position = new Position(x, y, p.ReadSByte());
 
-            float soundByRange = Engine.Profile.Current.SoundVolume / (float)World.ViewRange;
-            soundByRange *= World.Player.Position.DistanceTo(position);
-            float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / Constants.SOUND_DELTA;
+            int distX = Math.Abs(x - World.Player.X);
+            int distY = Math.Abs(y - World.Player.Y);
+            int distance = Math.Max(distX, distY);
+
+            float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+
+            if (distance <= World.ViewRange && distance >= 1)
+            {
+                float volumeByDist = volume / World.ViewRange;
+                volume -= (volumeByDist * distance);
+            }
 
             Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(index, volume, true);
         }
