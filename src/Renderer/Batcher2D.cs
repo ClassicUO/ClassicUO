@@ -57,7 +57,7 @@ namespace ClassicUO.Renderer
         private readonly Texture2D[] _textureInfo;
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private readonly Vector3 _minVector3 = new Vector3(0, 0, -150);
         private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
         private DepthStencilState _stencil;
@@ -132,7 +132,7 @@ namespace ClassicUO.Renderer
             _drawingArea.Min = _minVector3;
             _drawingArea.Max.X = GraphicsDevice.Viewport.Width;
             _drawingArea.Max.Y = GraphicsDevice.Viewport.Height;
-            _drawingArea.Max.Z = int.MaxValue;
+            _drawingArea.Max.Z = 150;
 
             _customEffect = customEffect;
         }
@@ -585,11 +585,15 @@ namespace ClassicUO.Renderer
 
             _isometricEffect.ProjectionMatrix.SetValue(_matrixTransformMatrix);
             _isometricEffect.WorldMatrix.SetValue(_transformMatrix);
-            _isometricEffect.Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            //_projectionMatrixEffect.SetValue(matrixTransformMatrix);
-            //_worldMatrixEffect.SetValue(_transformMatrix);
 
-            //_viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            Vector2 vec = new Vector2
+            {
+                X = GraphicsDevice.Viewport.Width,
+                Y = GraphicsDevice.Viewport.Height
+            };
+
+            _isometricEffect.Viewport.SetValue(vec);
+
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
 
