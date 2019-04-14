@@ -153,8 +153,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.MouseClick -= TextBoxOnMouseClick;
                     }
 
-                    if (_background.Hue != _barColor)
-                        _background.Hue = _barColor;
+                    if (_background.Hue != 0)
+                        _background.Hue = 0;
 
                     if (_hpLineRed.Hue != hitsColor)
                     {
