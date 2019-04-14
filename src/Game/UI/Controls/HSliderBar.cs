@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _sliderX;
         private readonly RenderedText _text;
         private int _value = -1;
-        public EventHandler ValueChanged;
+        public event EventHandler ValueChanged;
 
         public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
         {
