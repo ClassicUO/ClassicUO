@@ -41,17 +41,17 @@ namespace ClassicUO.Renderer
     {
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
-        public static Vector3 SelectedHue { get; } = new Vector3(23, 1, 0);
+        public static readonly Vector3 SelectedHue = new Vector3(23, 1, 0);
 
-        public static Vector3 SelectedItemHue { get; } = new Vector3(0x0035, 1, 0);
+        public static readonly Vector3 SelectedItemHue = new Vector3(0x0035, 1, 0);
 
-        public static Vector3 GetHueVector(int hue)
+        public static void GetHueVector(ref Vector3 hueVector, int hue)
         {
-            return GetHueVector(hue, false, 0, false);
+            GetHueVector(ref hueVector, hue, false, 0, false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool noLighting)
         {
             ShadersEffectType type;
 
@@ -78,13 +78,17 @@ namespace ClassicUO.Renderer
                 type = ShadersEffectType.None;
             }
 
-            return new Vector3(hue, (int) type, alpha);
+            hueVector.X = hue;
+            hueVector.Y = (int) type;
+            hueVector.Z = alpha;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, ShadersEffectType type)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, ShadersEffectType type)
         {
-            return new Vector3(hue, (int) type, 0);
+            hueVector.X = hue;
+            hueVector.Y = (int)type;
+            hueVector.Z = 0;
         }
     }
 }

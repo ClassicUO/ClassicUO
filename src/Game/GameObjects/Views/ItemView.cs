@@ -71,15 +71,25 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector( IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
+            }
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
             {
-                Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
+                Vector3 offsetDrawPosition = Vector3.Zero;
+                offsetDrawPosition.X = position.X - 5;
+                offsetDrawPosition.Y = position.Y - 5;
                 base.Draw(batcher, offsetDrawPosition, objectList);
             }
 
@@ -180,11 +190,19 @@ namespace ClassicUO.Game.GameObjects
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                {
+                    HueVector.X = Constants.OUT_RANGE_COLOR;
+                    HueVector.Y = 1;
+                }
                 else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+                {
+                    HueVector.X = Constants.DEAD_RANGE_COLOR;
+                    HueVector.Y = 1;
+                }
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(color);
+                {
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, color);
+                }
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);

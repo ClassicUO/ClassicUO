@@ -62,19 +62,32 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = GetHueVector(Hue, IsStretched);
+            {
+                HueVector.X = Hue;
+
+                if (Hue != 0)
+                {
+                    HueVector.Y = IsStretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued;
+                }
+                else
+                {
+                    HueVector.Y = IsStretched ? (int)ShadersEffectType.Land : (int)ShadersEffectType.None;
+                }
+            }
 
             return IsStretched ? Draw3DStretched(batcher, position, objectList) : base.Draw(batcher, position, objectList);
         }
 
-        private static Vector3 GetHueVector(int hue, bool stretched)
-        {
-            return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
-        }
 
         private bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
@@ -170,20 +183,41 @@ namespace ClassicUO.Game.GameObjects
                         if (currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ)
                         {
                             for (int k = 0; k < 4; k++)
-                                vec[curI, curJ, k] = new Vector3(0, 0, 1);
+                            {
+                                ref var v = ref vec[ curI, curJ, k];
+                                v.X = 0;
+                                v.Y = 0;
+                                v.Z = 1;
+                            }
                         }
                         else
                         {
-                            vec[curI, curJ, 0] = new Vector3(-22.0f, 22.0f, (currentZ - rightZ) * 4);
+                            ref var v0 = ref vec[curI, curJ, 0];
+                            v0.X = -22;
+                            v0.Y = 22;
+                            v0.Z = (currentZ - rightZ) * 4;
                             Merge(ref vec[curI, curJ, 0], -22.0f, -22.0f, (leftZ - currentZ) * 4);
                             vec[curI, curJ, 0].Normalize();
-                            vec[curI, curJ, 1] = new Vector3(22.0f, 22.0f, (rightZ - bottomZ) * 4);
+
+
+                            ref var v1 = ref vec[curI, curJ, 1];
+                            v1.X = 22;
+                            v1.Y = 22;
+                            v1.Z = (rightZ - bottomZ) * 4;
                             Merge(ref vec[curI, curJ, 1], -22.0f, 22.0f, (currentZ - rightZ) * 4);
                             vec[curI, curJ, 1].Normalize();
-                            vec[curI, curJ, 2] = new Vector3(22.0f, -22.0f, (bottomZ - leftZ) * 4);
+
+                            ref var v2 = ref vec[curI, curJ, 2];
+                            v2.X = 22;
+                            v2.Y = -22;
+                            v2.Z = (bottomZ - leftZ) * 4;
                             Merge(ref vec[curI, curJ, 2], 22.0f, 22.0f, (rightZ - bottomZ) * 4);
                             vec[curI, curJ, 2].Normalize();
-                            vec[curI, curJ, 3] = new Vector3(-22.0f, -22.0f, (leftZ - currentZ) * 4);
+
+                            ref var v3 = ref vec[curI, curJ, 3];
+                            v3.X = -22;
+                            v3.Y = -22;
+                            v3.Z = (leftZ - currentZ) * 4;
                             Merge(ref vec[curI, curJ, 3], 22.0f, -22.0f, (bottomZ - leftZ) * 4);
                             vec[curI, curJ, 3].Normalize();
                         }
@@ -205,13 +239,26 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[3].Normal = _normals[2];
                 _vertex[2].Normal = _normals[3];
 
-                _vertex0_yOffset = new Vector3(22, -Rectangle.Left, 0);
-                _vertex1_yOffset = new Vector3(44, 22 - Rectangle.Bottom, 0);
-                _vertex2_yOffset = new Vector3(0, 22 - Rectangle.Top, 0);
-                _vertex3_yOffset = new Vector3(22, 44 - Rectangle.Right, 0);
+
+                _vertex0_yOffset.X = 22;
+                _vertex0_yOffset.Y = -Rectangle.Left;
+                _vertex0_yOffset.Z = 0;
+
+                _vertex1_yOffset.X = 44;
+                _vertex1_yOffset.Y = 22 - Rectangle.Bottom;
+                _vertex1_yOffset.Z = 0;
+
+                _vertex2_yOffset.X = 0;
+                _vertex2_yOffset.Y = 22 - Rectangle.Top;
+                _vertex2_yOffset.Z = 0;
+
+                _vertex3_yOffset.X = 22;
+                _vertex3_yOffset.Y = 44 - Rectangle.Right;
+                _vertex3_yOffset.Z = 0;
             }
 
-            Vector3 hue = ShaderHuesTraslator.GetHueVector(Hue);
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, Hue);
 
             if (_vertex[0].Hue != hue)
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;

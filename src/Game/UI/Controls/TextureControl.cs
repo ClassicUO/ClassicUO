@@ -34,7 +34,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 vec = ShaderHuesTraslator.GetHueVector(Hue, IsPartial, Alpha, false);
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartial, Alpha, false);
 
             if (ScaleTexture)
             {
@@ -58,11 +59,11 @@ namespace ClassicUO.Game.UI.Controls
 
                     var r = artTexture.ImageRectangle;
 
-                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, vec);
+                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, hue);
                 }
-                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, vec);
+                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, hue);
             }
-            return batcher.Draw2D(Texture, x, y, vec);
+            return batcher.Draw2D(Texture, x, y, hue);
         }
     }
 }

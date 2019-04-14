@@ -113,8 +113,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return false;
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, Item.Hue & 0x3FFF, _isPartialHue, Alpha, false);
 
-            return batcher.Draw2D(Texture, x, y, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
+            return batcher.Draw2D(Texture, x, y, hue);
         }
 
         protected override void UpdateLabel()

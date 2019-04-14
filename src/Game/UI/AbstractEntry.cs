@@ -172,7 +172,10 @@ namespace ClassicUO.Game.UI
         {
             if (_isSelection)
             {
-                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1, _selectionArea.Item2, Mouse.Position.X - _selectionArea.Item1, Mouse.Position.Y - _selectionArea.Item2, ShaderHuesTraslator.GetHueVector(222, false, 0.5f, false));
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, 222, false, 0.5f, false);
+
+                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1, _selectionArea.Item2, Mouse.Position.X - _selectionArea.Item1, Mouse.Position.Y - _selectionArea.Item2, hue);
             }
         }
 

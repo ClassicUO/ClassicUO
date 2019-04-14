@@ -153,13 +153,19 @@ namespace ClassicUO.Game.GameObjects
 
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
-            
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector( hue, isPartial, isTransparent ? .5f : 0, false);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (Blend)
             {

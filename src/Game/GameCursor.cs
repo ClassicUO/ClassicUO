@@ -278,7 +278,9 @@ namespace ClassicUO.Game
                 int x = Mouse.Position.X - _offset.X;
                 int y = Mouse.Position.Y - _offset.Y;
 
-                Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+
                 sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)

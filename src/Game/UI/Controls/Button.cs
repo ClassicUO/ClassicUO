@@ -191,7 +191,12 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             SpriteTexture texture = GetTextureByState();
-            batcher.Draw2D(texture, x, y, Width, Height, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
+
+            Vector3 hue = Vector3.Zero;
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha, false);
+
+            batcher.Draw2D(texture, x, y, Width, Height, hue);
 
             //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 

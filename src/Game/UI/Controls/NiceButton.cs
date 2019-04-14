@@ -113,7 +113,11 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsSelected)
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+            {
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0, false);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, hue);
+            }
             return base.Draw(batcher, x, y);
         }
     }

@@ -694,11 +694,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
+                Vector3 hue = Vector3.Zero;
+                if (IsTransparent)
+                    ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha, false);
+
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                batcher.Draw2D(_gumpTexture[0], x, y, color);
-                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, color);
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, color);
+                batcher.Draw2D(_gumpTexture[0], x, y, hue);
+                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, hue);
+                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, hue);
 
                 return base.Draw(batcher, x, y);
             }

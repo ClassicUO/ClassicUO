@@ -110,11 +110,19 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0, false);
+            }
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);

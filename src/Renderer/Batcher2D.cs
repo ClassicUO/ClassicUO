@@ -130,7 +130,9 @@ namespace ClassicUO.Renderer
             _started = true;
 
             _drawingArea.Min = _minVector3;
-            _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
+            _drawingArea.Max.X = GraphicsDevice.Viewport.Width;
+            _drawingArea.Max.Y = GraphicsDevice.Viewport.Height;
+            _drawingArea.Max.Z = int.MaxValue;
 
             _customEffect = customEffect;
         }
@@ -441,12 +443,18 @@ namespace ClassicUO.Renderer
             };
 
             for (int i = 0; i < 4; i++)
-                _vertexBufferUI[i].Position = new Vector3(posLeftTop[i, 0], posLeftTop[i, 1], 0);
+            {
+                _vertexBufferUI[i].Position.X = posLeftTop[i, 0];
+                _vertexBufferUI[i].Position.X = posLeftTop[i, 1];
+            }
 
             DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
 
             for (int i = 0; i < 4; i++)
-                _vertexBufferUI[i].Position = new Vector3(poTopRight[i, 0], poTopRight[i, 1], 0);
+            {
+                _vertexBufferUI[i].Position.X = poTopRight[i, 0];
+                _vertexBufferUI[i].Position.X = poTopRight[i, 1];
+            }
 
             DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
 

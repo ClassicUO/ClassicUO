@@ -61,8 +61,8 @@ namespace ClassicUO.Game.GameObjects
                 Texture = _text.Texture;
             }
 
+            HueVector = Vector3.Zero;
 
-            HueVector = ShaderHuesTraslator.GetHueVector(0);
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
             int x = Engine.Profile.Current.GameWindowPosition.X;

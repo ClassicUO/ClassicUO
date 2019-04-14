@@ -128,10 +128,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
-            batcher.Draw2D(Texture, x, y, huev);
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
+
+            batcher.Draw2D(Texture, x, y, hue);
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, huev);
+                batcher.Draw2D(Texture, x + 5, y + 5, hue);
             return base.Draw(batcher, x, y);
         }
 

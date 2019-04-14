@@ -250,8 +250,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-            DrawInternal(batcher, x, y, color);
+            Vector3 hue = Vector3.Zero;
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0, false);
+            DrawInternal(batcher, x, y, hue);
             return base.Draw(batcher, x, y);
         }
 
