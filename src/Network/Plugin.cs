@@ -80,6 +80,7 @@ namespace ClassicUO.Network
 
         private delegate void OnInstall(ref void* header);
 
+        public PluginHeader header;
 
         public void Load()
         {
@@ -354,7 +355,17 @@ namespace ClassicUO.Network
             for (int i = 0; i < _plugins.Count; i++)
             {
                 Plugin plugin = _plugins[i];
-                plugin._onUpdatePlayerPosition?.Invoke(x, y, z);
+                try
+                {
+                    // TODO: need fixed on razor side
+                    // if you quick entry (0.5-1 sec after start, without razor window loaded) - breaks CUO.
+                    // With this fix - the razor does not work, but client does not crashed.
+                    plugin._onUpdatePlayerPosition?.Invoke(x, y, z);
+                }
+                catch
+                {
+                    Log.Message(LogTypes.Error, $"Plugin initialization failed, please re login");
+                }
             }
         }
 

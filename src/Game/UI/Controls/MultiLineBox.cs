@@ -155,10 +155,10 @@ namespace ClassicUO.Game.UI.Controls
                         TxEntry.RemoveChar(true);
                         break;
                     case SDL.SDL_Keycode.SDLK_UP:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1));
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
                         break;
                     case SDL.SDL_Keycode.SDLK_DOWN:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height);
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height, false);
                         break;
                     case SDL.SDL_Keycode.SDLK_LEFT:
                         TxEntry.SeekCaretPosition(-1);

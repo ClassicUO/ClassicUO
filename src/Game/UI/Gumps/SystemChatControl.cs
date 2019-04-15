@@ -360,13 +360,23 @@ namespace ClassicUO.Game.UI.Gumps
             switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_q when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1:
+
+                    if (!ChatVisibility)
+                        ChatVisibility = true;
+
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
+
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
                     textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+
                     break;
 
                 case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
+
+                    if (!ChatVisibility)
+                        ChatVisibility = true;
+
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
                     {
                         _messageHistoryIndex++;
@@ -375,6 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                         textBox.SetText(string.Empty);
+
                     break;
 
                 case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
