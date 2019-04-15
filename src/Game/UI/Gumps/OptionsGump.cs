@@ -555,7 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
                     NiceButton nb;
                     rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, name)
                     {
-                        ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                        ButtonParameter = (int)Buttons.Last + 1 + rightArea.Children.Count,
                     });
 
                     nb.IsSelected = true;
@@ -580,9 +580,10 @@ namespace ClassicUO.Game.UI.Gumps
                         };
                         Add(_macroControl, PAGE);
                     };
-                });
-
-                dialog.CanCloseWithRightClick = true;
+                })
+                {
+                    CanCloseWithRightClick = true
+                };
                 Engine.UI.Add(dialog);
             };
 

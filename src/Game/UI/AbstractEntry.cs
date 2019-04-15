@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI
             IsChanged = true;
         }
 
-        public void UpdateCaretPosition()
+        public void UpdateCaretPosition(bool changes = false)
         {
             int x, y;
 
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI
             else
                 Offset = 0;
 
-            if (IsChanged)
+            if (!changes && IsChanged)
                 IsChanged = false;
         }
 
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        public void OnMouseClick(int x, int y)
+        public void OnMouseClick(int x, int y, bool mouseclick = true)
         {
             int oldPos = CaretIndex;
 
@@ -190,8 +190,11 @@ namespace ClassicUO.Game.UI
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
-            _selectionArea = (Mouse.Position.X, Mouse.Position.Y);
-            _isSelection = true;
+            if (mouseclick)
+            {
+                _selectionArea = (Mouse.Position.X, Mouse.Position.Y);
+                _isSelection = true;
+            }
         }
 
         private (int, int) _selectionArea;

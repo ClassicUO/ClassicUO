@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
                 {
                     X = x,
                     Y = y,
@@ -288,9 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 sb.Append('\n');
 
-                                if (entry.Text[Math.Min(Math.Max(curlen - 1, 0), chonline)] == '\n')
-                                    chonline++;
-
                                 entry.Text = entry.Text.Substring(chonline);
                             }
 
@@ -421,10 +418,6 @@ namespace ClassicUO.Game.UI.Gumps
         public void ScaleOnBackspace(MultiLineEntry entry)
         {
             var linech = entry.GetLinesCharsCount();
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
             int caretpos = entry.CaretIndex;
             for (int l = 0; l < linech.Length && !_scale; l++)
             {
@@ -437,10 +430,6 @@ namespace ClassicUO.Game.UI.Gumps
         public void ScaleOnDelete(MultiLineEntry entry)
         {
             var linech = entry.GetLinesCharsCount();
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
             int caretpos = entry.CaretIndex;
             for (int l = 0; l < linech.Length && !_scale; l++)
             {
@@ -454,10 +443,6 @@ namespace ClassicUO.Game.UI.Gumps
             var linech = entry.GetLinesCharsCount();
             // sepos = 1 if at end of whole text, -1 if at begin, else it will always be 0
             sbyte sepos = (sbyte)(entry.CaretIndex == 0 ? -1 : (entry.CaretIndex == entry.Text.Length ? 1 : 0));
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
             int caretpos = entry.CaretIndex;
 
             for (int l = 0; l < linech.Length; l++)
@@ -522,9 +507,9 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         var entry = m_Pages[curpage].TxEntry;
                         RefreshShowCaretPos(0, m_Pages[curpage]);
-                        if(text.Length==0 || text[text.Length - 1] != '\n')
+                        /*if(text.Length==0 || text[text.Length - 1] != '\n')
                             text = entry.InsertString(text + "\n");
-                        else
+                        else*/
                             text = entry.InsertString(text);
                         if (!string.IsNullOrEmpty(text))
                         {
@@ -550,16 +535,11 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                             oldcaretpos++;
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage], true);
                     }
                     else
                     {
                         int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
-                        for (int l = 0; l+1 < linechr.Length; l++)
-                        {
-                            if(l+1 % MaxBookLines != 0)
-                                linechr[l]++;
-                        }
                         for(int l = 0; l < linechr.Length; l++)
                         {
                             oldcaretpos += linechr[l];
@@ -572,18 +552,18 @@ namespace ClassicUO.Game.UI.Gumps
                                     break;
                             }
                         }
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage], true);
                     }
                     SetActivePage((oldpage >> 1) + (oldpage % 2) + 1);
                 }
             }
         }
 
-        private void RefreshShowCaretPos(int pos, MultiLineBox box)
+        private void RefreshShowCaretPos(int pos, MultiLineBox box, bool changes = false)
         {
             box.SetKeyboardFocus();
             box.TxEntry.SetCaretPosition(pos);
-            box.TxEntry.UpdateCaretPosition();
+            box.TxEntry.UpdateCaretPosition(changes);
         }
 
         internal sealed class PBookHeader : PacketWriter
@@ -625,6 +605,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private const int MaxBookLines = 8;
+        private const int MaxBookChars = 53;
         internal sealed class PBookData : PacketWriter
         {
             public PBookData( BookGump gump ) : base(0x66)
@@ -641,9 +622,22 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
                 WriteUShort( (ushort)changed.Count );
-                for( int i = changed.Count - 1; i >= 0; --i )
+                for ( int i = changed.Count - 1; i >= 0; --i )
                 {
                     WriteUShort( (ushort)(changed[i]) );
+                    MultiLineEntry mle = gump.m_Pages[changed[i] - 1].TxEntry;
+                    StringBuilder sb = new StringBuilder(mle.Text);
+                    if (sb.Length > 0)
+                    {
+                        var lcc = mle.GetLinesCharsCount();
+                        for (int l = Math.Min(MaxBookLines - 1, lcc.Length - 1); l >= 0; --l)
+                        {
+                            if (sb.Length < lcc[l] && (lcc[l] > (MaxBookChars - 1) || sb[lcc[l]] != '\n'))
+                            {
+                                sb.Insert(lcc[l], '\n');
+                            }
+                        }
+                    }
                     var splits = gump.m_Pages[changed[i]-1].Text.Split( '\n' );
                     int length = splits.Length;
                     bool allowdestack = true;
