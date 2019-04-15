@@ -20,13 +20,9 @@
 #endregion
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
-using ClassicUO.IO;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
@@ -155,20 +151,8 @@ namespace ClassicUO.Game.GameObjects
                     y = Y;
                 }
 
-                int fx, fy;
-
-                if (World.Player.IsMoving)
-                {
-                    Mobile.Step step = World.Player.Steps.Back();
-
-                    fx = step.X;
-                    fy = step.Y;
-                }
-                else
-                {
-                    fx = World.Player.X;
-                    fy = World.Player.Y;
-                }
+                int fx = World.RangeSize.X;
+                int fy = World.RangeSize.Y;
 
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
