@@ -44,6 +44,11 @@ namespace ClassicUO.Game.UI.Controls
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
 
+        private Point _lastClickPosition;
+        protected bool _requestedLabel;
+
+        private readonly List<FadeOutLabel> _labels = new List<FadeOutLabel>();
+
         public ItemGump(Item item)
         {
             AcceptMouseInput = true;
@@ -59,35 +64,29 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Item.Serial;
 
             WantUpdateSize = false;
-            ShowLabel = true;
-
-            if (!World.ClientFlags.TooltipsEnabled)
-            {
-                Item.OverheadAdded -= ItemOnOverheadAdded;
-                Item.OverheadAdded += ItemOnOverheadAdded;
-            }
         }
 
+        public bool RequestedLabel => _requestedLabel;
 
-
-        private static void ItemOnOverheadAdded(object sender, EventArgs e)
+        public void AddLabel(string text, Hue hue, byte font, bool isunicode)
         {
-            TextOverhead overhead = (TextOverhead)sender;
-            Item parent = overhead.Parent as Item;
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
 
-            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(parent);
+            _requestedLabel = false;
 
-            if (container == null)
+            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+            if (container == null || container.From != this)
             {
-                container = new LabelContainer(parent);
+                container = new LabelContainer(Item, this);
                 Engine.UI.Add(container);
             }
 
-            overhead.TimeToLive = 4000;
-
-            FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, (float) overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
-            container.Add(label);
+            container.SetOffsetCoordinates(_lastClickPosition);
+            container.Add(new FadeOutLabel(text, isunicode, hue, 4000, 0, font, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
         }
+
+
 
         public Item Item { get; }
 
@@ -95,7 +94,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool CanPickUp { get; set; }
 
-        public bool ShowLabel { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -116,13 +114,14 @@ namespace ClassicUO.Game.UI.Controls
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
                 if (!World.ClientFlags.TooltipsEnabled)
+                {
                     GameActions.SingleClick(Item);
+                    _requestedLabel = true;
+                }
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }
 
-            if (ShowLabel)
-                UpdateLabel();
             base.Update(totalMS, frameMS);
         }
 
@@ -287,6 +286,8 @@ namespace ClassicUO.Game.UI.Controls
                     _sendClickIfNotDClick = true;
                     float totalMS = Engine.Ticks;
                     _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                    _lastClickPosition.X = x;
+                    _lastClickPosition.Y = y;
                 }
             }
         }
@@ -295,15 +296,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
-
+            _lastClickPosition = Point.Zero;
             return true;
         }
 
         public override void Dispose()
         {
             Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
-            if (!World.ClientFlags.TooltipsEnabled)
-                Item.OverheadAdded -= ItemOnOverheadAdded;
             base.Dispose();
         }
 
@@ -322,45 +321,40 @@ namespace ClassicUO.Game.UI.Controls
         }
 
        
-
-        protected virtual void UpdateLabel()
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count != 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                container.X = ScreenCoordinateX + (Width >> 1) - (container.Width >> 1);
-                container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
-                
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-        }
-
        
         protected class LabelContainer : Gump
         {
-            public LabelContainer(Item item) : base(item, 0)
+            private readonly Control _from;
+            private Point _offset;
+
+            public LabelContainer(Item item, Control from) : base(item, 0)
             {
+                _from = from;
                 AcceptMouseInput = false;
                 CanMove = true;
                 WantUpdateSize = false;
             }
 
+            public Control From => _from;
+
             public override void Update(double totalMS, double frameMS)
             {
-                if (Children.Count == 0)
+                if (Children.Count == 0 || _from == null || _from.IsDisposed)
                     Dispose();
 
+                if (IsDisposed)
+                    return;
+
+                X = _from.ScreenCoordinateX + _offset.X - Width / 2;
+                Y = _from.ScreenCoordinateY + _offset.Y;
+
+                Engine.UI.MakeTopMostGumpOverAnother(this, _from);
                 base.Update(totalMS, frameMS);
+            }
+
+            public void SetOffsetCoordinates(Point offset)
+            {
+                _offset = offset;
             }
 
             public override void Add(Control c, int page = 0)

@@ -298,54 +298,11 @@ namespace ClassicUO.Game.Scenes
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
-                
-                if (obj.HasOverheads && obj.Overheads.Count != 0)
-                {
-                    int offY;
 
-                    if (ismobile && !mounted || iscorpse)
-                        offY = -22;
-                    else switch (obj)
-                    {
-                        case Multi _:
-                        case Static _: offY = -44;
-
-                            break;
-                        //case Item _:
-                        //    offY = 44;
-
-                            //break;
-                        default: offY = 0;
-
-                            break;
-                    }
-                
-                    for (int i = 0; i < obj.Overheads.Count; i++)
-                    {
-                        TextOverhead v = obj.Overheads[i];
-
-                        v.Bounds.X = (v.Texture.Width / 2);
-                        v.Bounds.Y = offY + v.Texture.Height;
-                        v.Bounds.Width = v.Texture.Width;
-                        v.Bounds.Height = v.Texture.Height;
-                        Overheads.AddOverhead(v);
-                        offY += v.Texture.Height;
-
-                        if (_alphaChanged)
-                        {
-                            if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                            {
-                                if (!v.IsOverlapped)
-                                    v.ProcessAlpha(0);
-                            }
-                            else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
-                            {
-                                v.ProcessAlpha(0xFF);
-                            }
-                        }
-                    }               
-                }
-                
+                if (obj._overheadMessageContainer != null && !obj._overheadMessageContainer.IsEmpty)
+                {                
+                    _overheadManager.AddOverhead(obj._overheadMessageContainer);
+                }                
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);

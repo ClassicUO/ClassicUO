@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Scenes
         private OverheadManager _overheadManager;
         private HotkeysManager _hotkeysManager;
         private MacroManager _macroManager;
-        private GameObject _selectedObject;
+        private IGameEntity _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _alphaChanged;
         private long _alphaTimer;
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Scenes
 
         public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
-        public GameObject SelectedObject
+        public IGameEntity SelectedObject
         {
             get => _selectedObject;
             set
@@ -668,9 +668,9 @@ namespace ClassicUO.Game.Scenes
                         IsMulti = true
                     };
 
-                    if (SelectedObject != null && (SelectedObject is Land || SelectedObject is Static))
+                    if (SelectedObject != null && SelectedObject is GameObject gobj && (gobj is Land || gobj is Static))
                     {                        
-                        multiTarget.Position = SelectedObject.Position + TargetManager.MultiTargetInfo.Offset;
+                        multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
                         multiTarget.CheckGraphicChange();
                     }
                     multiTarget.Draw(batcher, multiTarget.RealScreenPosition, _mouseOverList);
@@ -736,9 +736,9 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(Batcher2D batcher, int x, int y)
         {
-            batcher.SetBlendState(_blendText);
-            _overheadManager.Draw(batcher, _mouseOverList, _offset, x, y);
-            batcher.SetBlendState(null);
+            //batcher.SetBlendState(_blendText);
+            _overheadManager.Draw(batcher, _mouseOverList, x, y);
+           // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
         }

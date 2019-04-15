@@ -131,6 +131,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\GameObjects\OverheadMessage.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
@@ -253,6 +254,7 @@
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
     <Compile Include="Renderer\Effects.cs" />
+    <Compile Include="Renderer\SpriteRenderer.cs" />
     <Compile Include="Renderer\UI\Label.cs" />
     <Compile Include="Renderer\UI\UpdaterMenu.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
@@ -348,7 +350,6 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\Graphic.cs" />
     <Compile Include="Game\UI\Controls\Button.cs" />
     <Compile Include="Game\UI\Controls\Checkbox.cs" />
@@ -410,7 +411,6 @@
     <Compile Include="Game\Data\LayerOrder.cs" />
     <Compile Include="Game\GameObjects\Views\MobileView.cs" />
     <Compile Include="Game\GameObjects\Views\StaticView.cs" />
-    <Compile Include="Game\GameObjects\Views\TextOverHeadView.cs" />
     <Compile Include="Game\GameObjects\Views\TileView.cs" />
     <Compile Include="Game\GameObjects\Views\View.cs" />
     <Compile Include="Game\World.cs" />

@@ -44,8 +44,6 @@ namespace ClassicUO.Game.UI.Controls
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
 
-        private Point _clickedPoint;
-
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
             X = x;
@@ -119,50 +117,12 @@ namespace ClassicUO.Game.UI.Controls
             return batcher.Draw2D(Texture, x, y, hue);
         }
 
-        protected override void UpdateLabel()
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count > 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                container.X = ScreenCoordinateX + _clickedPoint.X - (container.Width >> 1);
-                container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
-
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-        }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            base.OnMouseClick(x, y, button);
-
-            if (button != MouseButton.Left)
-                return;
-
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-            if (gs == null || gs.IsHoldingItem)
-                return;
-
-            if (!_clickedCanDrag)
-            {
-                _clickedPoint = new Point(x, y);
-            }
-        }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {

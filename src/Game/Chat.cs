@@ -19,11 +19,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
 {
@@ -100,7 +104,43 @@ namespace ClassicUO.Game
                 case MessageType.Spell:
 				case MessageType.Regular:
 			    case MessageType.Label:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+
+                    if (parent is Item it && !it.OnGround)
+                    {
+                        Gump gump = Engine.UI.GetByLocalSerial<Gump>(it.Container);
+
+                        if (gump is PaperDollGump paperDoll)
+                        {
+
+                            var inter = paperDoll
+                                             .FindControls<PaperDollInteractable>()
+                                             .FirstOrDefault();
+
+                            var f = inter?.FindControls<ItemGump>()
+                                         .SingleOrDefault(s => s.RequestedLabel && s.Item == it);
+
+                            if (f != null)
+                                f.AddLabel(text, hue, (byte)font, unicode);
+                            else
+                                paperDoll.FindControls<EquipmentSlot>()
+                                         .Select(s => s.Children.OfType<ItemGump>().FirstOrDefault())
+                                         .SingleOrDefault(s => s != null && (s.RequestedLabel && s.Item == it))?
+                                         .AddLabel(text, hue, (byte)font, unicode);
+                        }
+                        else if (gump is ContainerGump container)
+                        {
+                            container
+                                   .FindControls<ItemGump>()?
+                                   .SingleOrDefault(s => s.RequestedLabel && s.Item == it)?
+                                   .AddLabel(text, hue, (byte)font, unicode); 
+                        }
+                        else if (gump != null)
+                        {
+                            Log.Message(LogTypes.Warning, $"Missing label handler for this control: '{gump}'. Report it!!");
+                        }
+                    }
+                    else
+                        parent?.AddOverhead(type, text, (byte)font, hue, unicode);
 					break;
 				case MessageType.Emote:
 				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);

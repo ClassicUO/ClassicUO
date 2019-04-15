@@ -138,7 +138,7 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void TargetGameObject(GameObject selectedEntity)
+        public static void TargetGameObject(IGameEntity selectedEntity)
         {
             if (selectedEntity == null || !IsTargeting)
                 return;
@@ -147,8 +147,8 @@ namespace ClassicUO.Game.Managers
             {
                 selectedEntity = effect.Source;
             }
-            else if (selectedEntity is TextOverhead overhead && overhead.Parent != null)
-                selectedEntity = overhead.Parent;
+            else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
+                selectedEntity = overhead.Parent.Parent;
 
             if (selectedEntity is Entity entity)
             {
@@ -167,19 +167,19 @@ namespace ClassicUO.Game.Managers
                     GameActions.TargetObject(entity, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
-            else
+            else if (selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
-                short z = selectedEntity.Position.Z;
+                short z = gobj.Position.Z;
 
-                if (selectedEntity is Static st)
+                if (gobj is Static st)
                 {
                     modelNumber = st.OriginalGraphic;
 
                     if (st.ItemData.IsSurface)
                         z += st.ItemData.Height;
                 }
-                else if (selectedEntity is Multi m)
+                else if (gobj is Multi m)
                 {
                     modelNumber = m.Graphic;
 
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
                         z += m.ItemData.Height;
                 }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
+                GameActions.TargetXYZ(gobj.Position.X, gobj.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
 

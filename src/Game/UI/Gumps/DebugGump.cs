@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, (Engine.FPSMin == Int32.MaxValue) ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, scene?.SelectedObject?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (scene?.SelectedObject as GameObject)?.Position ?? Position.INVALID);
                 _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
             }
             else
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private string ReadObject(GameObject obj)
+        private string ReadObject(IGameEntity obj)
         {
             if (obj != null && FullDisplayMode)
             {
@@ -124,8 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
                         else if (effect.Source is Static s)
                             return string.Format("Static ({0})  height: {1}  flags: {2}", s.Graphic, s.ItemData.Height, s.ItemData.Flags);
                         return string.Format("GameEffect");
-                    case TextOverhead overhead:
-                        return string.Format("TextOverhead hue: {0}", overhead.Hue);
+                    case MessageInfo overhead:
+                        return string.Format("TextOverhead type: {0}", overhead.Type);
                     case Land land:
                         return string.Format("Static ({0})  flags: {1}", land.Graphic, land.TileData.Flags);
                 }

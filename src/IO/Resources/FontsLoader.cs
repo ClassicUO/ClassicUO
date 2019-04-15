@@ -159,7 +159,7 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            // do nothing
         }
 
 
@@ -167,6 +167,33 @@ namespace ClassicUO.IO.Resources
         {
             return font < 20 && _unicodeFontAddress[font] != IntPtr.Zero;
         }
+
+
+        public (int, int) MeasureText(string text, byte font, bool isunicode, TEXT_ALIGN_TYPE align, ushort flags, int maxWidth = 200)
+        {
+            int width, height;
+            if (isunicode)
+            {
+                width = GetWidthUnicode(font, text);
+
+                if (width > maxWidth)
+                    width = GetWidthExUnicode(font, text, maxWidth, align, flags);
+
+                height = GetHeightUnicode(font, text, width, align, flags);
+            }
+            else
+            {
+                width = GetWidthASCII(font, text);
+
+                if (width > maxWidth)
+                    width = GetWidthExASCII(font, text, maxWidth, align, flags);
+
+                height = GetHeightASCII(font, text, width, align, flags);
+            }
+
+            return (width, height);
+        }
+
 
         public int GetWidthASCII(byte font, string str)
         {
@@ -209,6 +236,30 @@ namespace ClassicUO.IO.Resources
             {
                 textHeight += info.MaxHeight;
                 info = info.Next;
+            }
+
+            return textHeight;
+        }
+
+        public int GetHeightASCII(byte font, string str, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (width == 0)
+                width = GetWidthASCII(font, str);
+
+            MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
+
+            int textHeight = 0;
+
+            while (info != null)
+            {
+                if (IsUsingHTML)
+                    textHeight += MAX_HTML_TEXT_HEIGHT;
+                else
+                    textHeight += info.MaxHeight;
+                MultilinesFontInfo ptr = info;
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
             }
 
             return textHeight;

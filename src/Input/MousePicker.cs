@@ -38,9 +38,9 @@ namespace ClassicUO.Input
 
         public Point Position { get; set; }
 
-        public GameObject MouseOverObject => _overObject?.Object;
+        public IGameEntity MouseOverObject => _overObject?.Object;
 
-        public GameObject MouseOverTile => _overTile?.Object;
+        public IGameEntity MouseOverTile => _overTile?.Object;
 
         public Point MouseOverObjectPoint => _overObject?.InTexturePoint ?? Point.Zero;
 

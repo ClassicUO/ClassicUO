@@ -193,7 +193,8 @@ namespace ClassicUO
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
                 {
                     gump.ResizeWindow(new Point(WindowWidth, WindowHeight));
-                    gump.Location = new Point(-5, -5);
+                    gump.X = -5;
+                    gump.Y = -5;
                 }
             };
             Window.AllowUserResizing = true;

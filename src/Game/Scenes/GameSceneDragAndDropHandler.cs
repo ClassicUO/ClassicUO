@@ -33,6 +33,8 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
+using GameObject = ClassicUO.Game.GameObjects.GameObject;
+
 namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
@@ -137,7 +139,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
-            GameObject obj = SelectedObject;
+            GameObject obj = SelectedObject as GameObject;
             Serial serial;
 
             if (obj is Item item && item.ItemData.IsContainer)

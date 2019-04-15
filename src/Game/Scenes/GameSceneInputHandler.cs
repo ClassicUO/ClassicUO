@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Scenes
                     _continueRunning = true;
                 }
                 
-                _dragginObject = _mousePicker.MouseOverObject;
+                _dragginObject = _mousePicker.MouseOverObject as GameObject;
                 _dragOffset = _mousePicker.MouseOverObjectPoint;
                 
             }
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Scenes
                         case CursorTarget.Position:
                         case CursorTarget.Object:
                         case CursorTarget.MultiPlacement:
-                            GameObject obj = SelectedObject;
+                            var obj = SelectedObject;
                             if (obj != null)
                             {
                                 TargetManager.TargetGameObject(obj);
@@ -137,12 +137,11 @@ namespace ClassicUO.Game.Scenes
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            obj = SelectedObject;
-                            if (obj != null)
+                            if (SelectedObject is  GameObject obj2)
                             {
-                                TargetManager.TargetGameObject(obj);
+                                TargetManager.TargetGameObject(obj2);
                                 Mouse.LastLeftButtonClickTime = 0;
-                                Engine.UI.Add(new InfoGump(obj));
+                                Engine.UI.Add(new InfoGump(obj2));
 
                             }
                             break;
@@ -156,7 +155,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     SelectedObject = null;
       
-                    GameObject obj = _mousePicker.MouseOverObject;
+                    GameObject obj = _mousePicker.MouseOverObject as GameObject;
 
                     if (obj != null && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                     {
@@ -203,7 +202,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {                 
-                    GameObject obj = _mousePicker.MouseOverObject;
+                    GameObject obj = _mousePicker.MouseOverObject as GameObject;
 
                     switch (obj)
                     {
@@ -211,16 +210,14 @@ namespace ClassicUO.Game.Scenes
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            if (!obj.HasOverheads || obj.Overheads.Count == 0)
-                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
 
                         case Multi multi:
                             name = multi.Name;
                             if (string.IsNullOrEmpty(name))
                                 name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            if (!obj.HasOverheads || obj.Overheads.Count == 0)
-                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
 
                         case AnimatedItemEffect effect when effect.Source is Entity:
@@ -253,7 +250,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (e.Button == MouseButton.Left)
             {
-                GameObject obj = _mousePicker.MouseOverObject;
+                IGameEntity obj = _mousePicker.MouseOverObject;
 
                 switch (obj)
                 {
@@ -274,8 +271,7 @@ namespace ClassicUO.Game.Scenes
                         e.Result = true;
                         GameActions.DoubleClick(item);
                         break;
-
-                    case TextOverhead overhead when overhead.Parent is Entity entity:
+                    case MessageInfo msg when msg.Parent.Parent is Entity entity:
                         e.Result = true;
                         GameActions.DoubleClick(entity);
                         break;
@@ -287,9 +283,9 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && itemdata.IsSurface))
+                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject as GameObject, out var itemdata) && itemdata.IsSurface))
                     {
-                        GameObject obj = _mousePicker.MouseOverObject;
+                        GameObject obj = _mousePicker.MouseOverObject as GameObject;
 
                         if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {

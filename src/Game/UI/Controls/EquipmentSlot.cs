@@ -88,7 +88,6 @@ namespace ClassicUO.Game.UI.Controls
                     Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
                         HighlightOnMouseOver = false,
-                        ShowLabel = true,
                     });
 
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
@@ -192,27 +191,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            protected override void UpdateLabel()
-            {
-                if (World.ClientFlags.TooltipsEnabled)
-                    return;
-
-                if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count > 0)
-                {
-                    LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                    if (container == null)
-                    {
-                        container = new LabelContainer(Item);
-                        Engine.UI.Add(container);
-                    }
-
-                    container.X = ScreenCoordinateX;
-                    container.Y = ScreenCoordinateY;
-
-                    Engine.UI.MakeTopMostGumpOverAnother(container, this);
-                }
-            }
 
         }
     }

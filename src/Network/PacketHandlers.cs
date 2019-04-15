@@ -38,6 +38,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Platforms;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
@@ -288,7 +289,12 @@ namespace ClassicUO.Network
             {
                 ushort damage = p.ReadUShort();
 
-                Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
+                Engine.SceneManager.GetScene<GameScene>()
+                      .Overheads
+                      .AddDamage(mobile,
+                                 damage
+                                );
+                //new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
         }
 
@@ -2790,7 +2796,18 @@ namespace ClassicUO.Network
                     if (mobile != null)
                     {
                         byte damage = p.ReadByte();
-                        Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
+
+                        Engine.SceneManager.GetScene<GameScene>()
+                              .Overheads
+                              .AddDamage(mobile,damage);
+
+
+                        //new Mess(mobile,
+                        //         damage.ToString(), 
+                        //         hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), 
+                        //         font: 3, 
+                        //         isunicode: false, 
+                        //         timeToLive: 1500));
                     }
 
                     break;
