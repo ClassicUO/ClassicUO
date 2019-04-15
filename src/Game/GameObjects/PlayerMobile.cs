@@ -1642,6 +1642,9 @@ namespace ClassicUO.Game.GameObjects
                 World.Map.Center = new Point(X, Y);
 
             Plugin.UpdatePlayerPosition(X, Y , Z);
+
+            World.RangeSize.X = X;
+            World.RangeSize.Y = Y;
         }
 
         public override void Destroy()
