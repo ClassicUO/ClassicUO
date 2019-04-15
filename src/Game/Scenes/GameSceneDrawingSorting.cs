@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDestroyed)
+                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDestroyed || !obj.AllowedToDraw)
                 {
                     continue;
                 }
@@ -188,7 +188,6 @@ namespace ClassicUO.Game.Scenes
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
-                bool mounted = false;
                 bool ismobile = false;
 
                 StaticTiles itemData = default;
@@ -196,10 +195,9 @@ namespace ClassicUO.Game.Scenes
 
                 switch (obj)
                 {
-                    case Mobile mob:
+                    case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
-                        mounted = mob.IsMounted;
                         break;
                     default:
 
