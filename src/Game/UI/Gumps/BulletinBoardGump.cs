@@ -19,8 +19,8 @@ namespace ClassicUO.Game.UI.Gumps
     class BulletinBoardGump : Gump
     {
         //private HtmlControl _htmlControl;
-        private ScrollArea _area;
-        private Item _item;
+        private readonly ScrollArea _area;
+        private readonly Item _item;
 
         public BulletinBoardGump(Item item, int x, int y, string name) : base(item, 0)
         {
@@ -106,12 +106,14 @@ namespace ClassicUO.Game.UI.Gumps
 
     class BulletinBoardItem : Gump
     {
-        private ScrollFlag _scrollBar;
-        private MultiLineBox _textBox;
-        private TextBox _subjectTextbox;
-        private Button _buttonPost, _buttonReply, _buttonRemove;
+        private readonly ScrollFlag _scrollBar;
+        private readonly MultiLineBox _textBox;
+        private readonly TextBox _subjectTextbox;
+        private readonly Button _buttonPost;
+        private readonly Button _buttonReply;
+        private readonly Button _buttonRemove;
 
-        private Serial _msgSerial;
+        private readonly Serial _msgSerial;
 
         public BulletinBoardItem(Serial serial, Serial msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
         {

@@ -37,8 +37,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly int _columns;
         private readonly int _rows;
-        private int _cellHeight;
-        private int _cellWidth;
+        private readonly int _cellHeight;
+        private readonly int _cellWidth;
         private int _graduation, _selectedIndex;
         private ushort[] _hues;
         private readonly ushort[] _customPallete;

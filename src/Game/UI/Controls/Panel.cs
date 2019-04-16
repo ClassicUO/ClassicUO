@@ -38,10 +38,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _frame.Length; i++)
+            foreach (SpriteTexture t in _frame)
             {
-                if (_frame[i] != null)
-                    _frame[i].Ticks = (long) totalMS;
+                if (t != null)
+                    t.Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);

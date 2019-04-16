@@ -16,8 +16,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class ProfileGump : Gump
     {
         private ExpandableScroll _background;
-        private ScrollFlag _scrollBar;
-        private MultiLineBox _textBox;
+        private readonly ScrollFlag _scrollBar;
+        private readonly MultiLineBox _textBox;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
         {

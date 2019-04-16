@@ -38,7 +38,7 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Static
+    internal sealed partial class Static
     {
         private readonly bool _isFoliage, _isPartialHue;
         private readonly int _canBeTransparent;

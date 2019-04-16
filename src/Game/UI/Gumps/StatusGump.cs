@@ -916,7 +916,7 @@ namespace ClassicUO.Game.UI.Gumps
                              260, 73 );
 
             AddStatTextLabel(
-                             String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax),
+                             $"{World.Player.DamageMin}-{World.Player.DamageMax}",
                              MobileStats.Damage,
                              260 , 102 );
 
@@ -975,7 +975,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.AR].Text = World.Player.ResistPhysical.ToString();
                 _labels[(int) MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
                 _labels[(int) MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
-                _labels[(int) MobileStats.Damage].Text = String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax);
+                _labels[(int) MobileStats.Damage].Text = $"{World.Player.DamageMin}-{World.Player.DamageMax}";
                 _labels[(int) MobileStats.Gold].Text = World.Player.Gold.ToString();
                 _labels[(int) MobileStats.HungerSatisfactionMinutes].Text = World.Player.Luck.ToString(); // FIXME: packet handling
                 _labels[(int) MobileStats.MurderCount].Text = World.Player.StatsCap.ToString(); // FIXME: packet handling
@@ -1116,7 +1116,7 @@ namespace ClassicUO.Game.UI.Gumps
             Stam
         }
 
-        private GumpPicWithWidth[] _fillBars = new GumpPicWithWidth[3];
+        private readonly GumpPicWithWidth[] _fillBars = new GumpPicWithWidth[3];
 
     }
 

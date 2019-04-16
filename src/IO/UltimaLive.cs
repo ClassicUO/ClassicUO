@@ -545,11 +545,11 @@ namespace ClassicUO.IO
 
         internal class ULMapLoader : MapLoader
         {
-            private Thread _twriter;
+            private readonly Thread _twriter;
             internal AsyncWriterThread _writer;
             private FileStream[] _filesStaticsStream;
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
-            internal uint NumMaps { get; private set; }
+            internal uint NumMaps { get; }
             public ULMapLoader(uint maps)
             {
                 NumMaps = maps;
@@ -582,9 +582,9 @@ namespace ClassicUO.IO
             
             internal class AsyncWriterThread
             {
-                private ULMapLoader _Map;
+                private readonly ULMapLoader _Map;
                 internal ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
-                private AutoResetEvent m_Signal = new AutoResetEvent(false);
+                private readonly AutoResetEvent m_Signal = new AutoResetEvent(false);
                 public AsyncWriterThread(ULMapLoader map)
                 {
                     _Map = map;

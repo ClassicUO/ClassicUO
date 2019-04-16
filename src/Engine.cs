@@ -97,7 +97,7 @@ namespace ClassicUO
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private bool _isMaximized;
-        private bool _isHighDPI;
+        private readonly bool _isHighDPI;
 
         public static string SettingsFile = "settings.json";
 
@@ -134,10 +134,7 @@ namespace ClassicUO
             // NOTE: Check that at least `UltimaOnlineDirectory` and `ClientVersion` properties are set
             //   to some other than default values
             Settings defaultSettings = new Settings();
-            bool settingsAreValid = true;
-
-            if (_settings.UltimaOnlineDirectory == defaultSettings.UltimaOnlineDirectory)
-                settingsAreValid = false;
+            bool settingsAreValid = _settings.UltimaOnlineDirectory != defaultSettings.UltimaOnlineDirectory;
 
             if (_settings.ClientVersion == defaultSettings.ClientVersion)
                 settingsAreValid = false;

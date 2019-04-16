@@ -228,9 +228,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButton.Left)
             {
-                for (int i = 0; i < _gameText.Links.Count; i++)
+                foreach (WebLinkRect link in _gameText.Links)
                 {
-                    WebLinkRect link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
 

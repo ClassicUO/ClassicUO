@@ -52,11 +52,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private Label _mapName;
         private HtmlControl _description;
 
-        private Dictionary<uint, CityCollection> _maps;
+        private readonly Dictionary<uint, CityCollection> _maps;
 
         private int _selectedMapIndex;
 
-        private byte _selectedProfession;
+        private readonly byte _selectedProfession;
         private CityCollection _selectedMap;
         private CityInfo _selectedCity;
 
@@ -165,26 +165,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectCity(int index)
         {
-            if (_selectedMap != default(CityCollection))
+            var city = _selectedMap?.FirstOrDefault(c => c.Index == index);
+
+            if (city != null && _selectedMap.Index == city.Map)
             {
-                var city = _selectedMap.FirstOrDefault(c => c.Index == index);
+                var selectors = GetSelectors();
 
-                if (city != default(CityInfo) && _selectedMap.Index == city.Map)
-                {
-                    var selectors = GetSelectors();
+                foreach (var s in selectors)
+                    s.IsSelected = false;
 
-                    foreach (var s in selectors)
-                        s.IsSelected = false;
+                var citySelector = selectors.FirstOrDefault(s => s.ButtonID == city.Index);
 
-                    var citySelector = selectors.FirstOrDefault(s => s.ButtonID == city.Index);
+                if (citySelector != null)
+                    citySelector.IsSelected = true;
 
-                    if (citySelector != null)
-                        citySelector.IsSelected = true;
+                _selectedCity = city;
 
-                    _selectedCity = city;
-
-                    SetDescription(city);
-                }
+                SetDescription(city);
             }
         }
 
@@ -246,8 +243,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         internal class CityCollection : Gump, IEnumerable<CityInfo>
         {
             internal bool SkipSection = false;
-            private MapInfo _mapInfo;
-            private CityInfo[] _cities;
+            private readonly MapInfo _mapInfo;
+            private readonly CityInfo[] _cities;
 
             public int Index => _mapInfo.Index;
             public string Name => _mapInfo.Name;

@@ -179,10 +179,8 @@ namespace ClassicUO.Game.Managers
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
 
-            for (int i = 0; i < _hotkeys.Count; i++)
+            foreach (HotKeyCombination h in _hotkeys)
             {
-                var h = _hotkeys[i];
-
                 if (h.Key == key && h.Mod == mod)
                 {
                     return false;

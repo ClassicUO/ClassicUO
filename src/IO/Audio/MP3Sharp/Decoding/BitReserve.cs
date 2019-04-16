@@ -108,10 +108,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             buf[ofs++] = val & 0x02;
             buf[ofs++] = val & 0x01;
 
-            if (ofs == BUFSIZE)
-                offset = 0;
-            else
-                offset = ofs;
+            offset = ofs == BUFSIZE ? 0 : ofs;
         }
 
         /// <summary>

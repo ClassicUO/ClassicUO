@@ -56,22 +56,22 @@ namespace ClassicUO.Utility
 
             if (m_ThisFrameData.Count > 0)
             {
-                for (int i = 0; i < m_ThisFrameData.Count; i++)
+                foreach (Tuple<string[], double> t in m_ThisFrameData)
                 {
                     bool added = false;
 
-                    for (int j = 0; j < m_AllFrameData.Count; j++)
+                    foreach (ProfileData t1 in m_AllFrameData)
                     {
-                        if (m_AllFrameData[j].MatchesContext(m_ThisFrameData[i].Item1))
+                        if (t1.MatchesContext(t.Item1))
                         {
-                            m_AllFrameData[j].AddNewHitLength(m_ThisFrameData[i].Item2);
+                            t1.AddNewHitLength(t.Item2);
                             added = true;
 
                             break;
                         }
                     }
 
-                    if (!added) m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
+                    if (!added) m_AllFrameData.Add(new ProfileData(t.Item1, t.Item2));
                 }
 
                 m_ThisFrameData.Clear();

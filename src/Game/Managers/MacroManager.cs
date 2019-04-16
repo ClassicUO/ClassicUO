@@ -833,8 +833,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ToggleChatVisibility:
                     viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
-                    if (systemchat != null)
-                        systemchat.ToggleChatVisibility();
+                    systemchat?.ToggleChatVisibility();
                     break;
 
             }

@@ -15,7 +15,7 @@ namespace ClassicUO.IO.Audio
         MP3Stream m_Stream;
         const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
         readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
-        bool m_Repeat;
+        readonly bool m_Repeat;
         bool m_Playing;
 
         string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");

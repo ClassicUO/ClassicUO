@@ -78,7 +78,7 @@ namespace ClassicUO.Network
         protected override bool EnsureSize(int length)
         {
             if (length < 0)
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             if (IsDynamic)
             {

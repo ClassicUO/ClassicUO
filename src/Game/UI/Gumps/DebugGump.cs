@@ -111,23 +111,23 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (obj)
                 {
                     case Mobile mob:
-                        return string.Format("Mobile ({0})  graphic: {1}  flags: {2}  noto: {3}", mob.Serial, mob.Graphic, mob.Flags, mob.NotorietyFlag);
+                        return $"Mobile ({mob.Serial})  graphic: {mob.Graphic}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
                     case Item item:
-                        return string.Format("Item ({0})  graphic: {1}  flags: {2}  amount: {3}", item.Serial, item.Graphic, item.Flags, item.Amount);
+                        return $"Item ({item.Serial})  graphic: {item.Graphic}  flags: {item.Flags}  amount: {item.Amount}";
                     case Static st:
-                        return string.Format("Static ({0})  height: {1}  flags: {2}  Alpha: {3}", st.Graphic, st.ItemData.Height, st.ItemData.Flags, st.AlphaHue);
+                        return $"Static ({st.Graphic})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
                     case Multi multi:
-                        return string.Format("Multi ({0})  height: {1}  flags: {2}", multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags);
+                        return $"Multi ({multi.Graphic})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
                     case GameEffect effect:
                         if (effect.Source is Item i)
-                            return string.Format("Item ({0})  graphic: {1}  flags: {2}  amount: {3}", i.Serial, i.Graphic, i.Flags, i.Amount);
+                            return $"Item ({i.Serial})  graphic: {i.Graphic}  flags: {i.Flags}  amount: {i.Amount}";
                         else if (effect.Source is Static s)
-                            return string.Format("Static ({0})  height: {1}  flags: {2}", s.Graphic, s.ItemData.Height, s.ItemData.Flags);
-                        return string.Format("GameEffect");
+                            return $"Static ({s.Graphic})  height: {s.ItemData.Height}  flags: {s.ItemData.Flags}";
+                        return "GameEffect";
                     case MessageInfo overhead:
-                        return string.Format("TextOverhead type: {0}", overhead.Type);
+                        return $"TextOverhead type: {overhead.Type}";
                     case Land land:
-                        return string.Format("Static ({0})  flags: {1}", land.Graphic, land.TileData.Flags);
+                        return $"Static ({land.Graphic})  flags: {land.TileData.Flags}";
                 }
             }
             return string.Empty;

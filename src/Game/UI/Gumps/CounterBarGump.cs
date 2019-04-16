@@ -160,9 +160,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            for (int i = 0; i < indices.Length; i++)
+            foreach (int index in indices)
             {
-                int index = indices[i];
                 if (index != -1 && index < items.Length)
                 {
                     items[index].Dispose();
@@ -183,10 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(controls.Length);
 
-            for (int i = 0; i < controls.Length; i++)
+            foreach (CounterItem c in controls)
             {
-                var c = controls[i];
-
                 writer.Write(c.Graphic);
             }
         }

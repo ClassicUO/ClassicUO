@@ -208,8 +208,8 @@ namespace ClassicUO.Utility.Platforms
 
             private class WndRegEnt
             {
-                private int m_Handle;
-                private int m_Type; // 1 = get multi notifcations
+                private readonly int m_Handle;
+                private readonly int m_Type; // 1 = get multi notifcations
 
                 public int Handle { get { return m_Handle; } }
                 public int Type { get { return m_Type; } }
@@ -363,8 +363,8 @@ namespace ClassicUO.Utility.Platforms
                     hWnd = handle;
                     CommandManager.Register(cmd, MyCallback);
                 }
-                private uint Msg;
-                private IntPtr hWnd;
+                private readonly uint Msg;
+                private readonly IntPtr hWnd;
                 private void MyCallback(string[] args)
                 {
                     StringBuilder sb = new StringBuilder();

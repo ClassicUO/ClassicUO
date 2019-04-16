@@ -28,7 +28,7 @@ namespace ClassicUO.IO
         private StreamReader _reader;
         private List<string[]> _parts = new List<string[]>();
         private List<string[]> _groups = new List<string[]>();
-        private string _file;
+        private readonly string _file;
 
         private readonly int _minSize;
 

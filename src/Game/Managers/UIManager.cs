@@ -238,10 +238,8 @@ namespace ClassicUO.Game.Managers
             {
                 if (_keyboardFocusControl == null)
                 {
-                    for (int i = 0; i < _gumps.Count; i++)
+                    foreach (Control c in _gumps)
                     {
-                        Control c = _gumps[i];
-
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
@@ -260,8 +258,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (value != null && value.AcceptKeyboardInput)
                 {
-                    if (_keyboardFocusControl != null)
-                        _keyboardFocusControl.OnFocusLeft();
+                    _keyboardFocusControl?.OnFocusLeft();
                     _keyboardFocusControl = value;
                     value.OnFocusEnter();
                 }
@@ -781,10 +778,10 @@ namespace ClassicUO.Game.Managers
 
             if (mouseOverControls != null)
             {
-                for (int i = 0; i < mouseOverControls.Length; i++)
+                foreach (Control t in mouseOverControls)
                 {
-                    if (mouseOverControls[i].AcceptMouseInput)
-                        return mouseOverControls[i];
+                    if (t.AcceptMouseInput)
+                        return t;
                 }
             }
 

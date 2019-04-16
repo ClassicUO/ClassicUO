@@ -218,9 +218,8 @@ namespace ClassicUO.Game
             if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
                 return 0;
 
-            for (int i = 0; i < list.Count; i++)
+            foreach (PathObject obj in list)
             {
-                PathObject obj = list[i];
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 

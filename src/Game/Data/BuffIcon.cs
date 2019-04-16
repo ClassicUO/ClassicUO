@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Data
 
         public bool Equals(BuffIcon other)
         {
-            return Graphic.Equals(other.Graphic);
+            return  Graphic == other.Graphic;
         }
     }
 }

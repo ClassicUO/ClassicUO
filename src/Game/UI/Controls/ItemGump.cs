@@ -357,9 +357,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Children.Count > 0)
                 {
-                    for (int i = 0; i < Children.Count; i++)
+                    foreach (Control t in Children)
                     {
-                        Children[i].X = Width / 2 - (Children[i].Width >> 1);
+                        t.X = Width / 2 - (t.Width >> 1);
                     }
 
                     var a = Children[Children.Count - 1];

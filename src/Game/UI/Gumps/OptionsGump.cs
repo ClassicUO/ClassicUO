@@ -1231,13 +1231,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
 
-            if (counterGump != null)
-            {
-                counterGump.SetLayout(Engine.Profile.Current.CounterBarCellSize,
-                                      Engine.Profile.Current.CounterBarRows,
-                                      Engine.Profile.Current.CounterBarColumns);
-            }
-            
+            counterGump?.SetLayout(Engine.Profile.Current.CounterBarCellSize,
+                                   Engine.Profile.Current.CounterBarRows,
+                                   Engine.Profile.Current.CounterBarColumns);
+
 
             if (before != Engine.Profile.Current.CounterBarEnabled)
             {

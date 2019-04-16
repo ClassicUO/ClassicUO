@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
+        private readonly List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
         private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
 
@@ -540,17 +540,17 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
-                        for(int l = 0; l < linechr.Length; l++)
+                        foreach (int t in linechr)
                         {
-                            oldcaretpos += linechr[l];
-                            if (oldcaretpos > m_Pages[oldpage].Text.Length)
-                            {
-                                oldcaretpos = linechr[l];
-                                if (oldpage+1 < BookPageCount)
-                                    oldpage++;
-                                else
-                                    break;
-                            }
+                            oldcaretpos += t;
+
+                            if (oldcaretpos <= m_Pages[oldpage].Text.Length) continue;
+
+                            oldcaretpos = t;
+                            if (oldpage+1 < BookPageCount)
+                                oldpage++;
+                            else
+                                break;
                         }
                         RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage], true);
                     }
@@ -678,7 +678,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             int idx = Position;
                             Seek(7);
-                            gump.m_Pages[changed[i]].Text = gump.m_Pages[changed[i]].Text.Insert(0, string.Format("{0}\n", splits[j]));
+                            gump.m_Pages[changed[i]].Text = gump.m_Pages[changed[i]].Text.Insert(0, $"{splits[j]}\n");
                             changed.Insert(0, changed[i]);
                             WriteUShort((ushort)changed.Count);
                             Seek(idx);

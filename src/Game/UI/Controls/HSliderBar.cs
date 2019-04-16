@@ -142,8 +142,8 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gumpSpliderBackground != null)
             {
-                for (int i = 0; i < _gumpSpliderBackground.Length; i++)
-                    _gumpSpliderBackground[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpSpliderBackground)
+                    t.Ticks = (long) totalMS;
             }
 
             //ModifyPairedValues(_newValue - Value);

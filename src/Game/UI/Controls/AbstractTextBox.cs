@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         public abstract AbstractEntry EntryValue { get; }
 
-        public AbstractTextBox()
+        protected AbstractTextBox()
         {
         }
 

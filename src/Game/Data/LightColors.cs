@@ -42,8 +42,6 @@ namespace ClassicUO.Game.Data
                 case 0x1F2B:
                     color = 40;
                     break;
-                default:
-                    break;
             };
 
             if (id < 0x09FB || id > 0x0A14)

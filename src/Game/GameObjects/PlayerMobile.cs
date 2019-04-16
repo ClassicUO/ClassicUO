@@ -822,799 +822,803 @@ namespace ClassicUO.Game.GameObjects
             if (equippedGraphic != 0)
             {
                 ushort[] graphics = {equippedGraphic, 0};
-                ushort imageID = layerObject.ItemData.AnimID;
 
-                int count = 1;
-
-                ushort testGraphic = (ushort) (equippedGraphic - 1);
-
-                if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                if (layerObject != null)
                 {
-                    graphics[1] = testGraphic;
-                    count = 2;
-                }
-                else
-                {
-                    testGraphic = (ushort) ( equippedGraphic + 1 );
+                    ushort imageID = layerObject.ItemData.AnimID;
+
+                    int count = 1;
+
+                    ushort testGraphic = (ushort) (equippedGraphic - 1);
 
                     if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
                     }
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    Graphic g = graphics[i];
-
-                    switch (g)
+                    else
                     {
-                        case 0x0901: // Gargish Cyclone
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.InfusedThrow;
-
-                            goto done;
-                        case 0x0902: // Gargish Dagger
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x0905: // Glass Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0906: // serpentstone staff
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x090C: // Glass Sword
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0DF0:
-                        case 0x0DF1: // Black Staves
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x0DF2:
-                        case 0x0DF3:
-                        case 0x0DF4:
-                        case 0x0DF5: // Wands BookType A-D
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E81:
-                        case 0x0E82: // Shepherd's Crooks
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E85:
-                        case 0x0E86: // Pickaxes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E87:
-                        case 0x0E88: // Pitchforks
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0E89:
-                        case 0x0E8A: // Quarter Staves
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0EC2:
-                        case 0x0EC3: // Cleavers
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x0EC4:
-                        case 0x0EC5: // Skinning Knives
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F43:
-                        case 0x0F44: // Hatchets
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F45:
-                        case 0x0F46: // Double Axes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0F47:
-                        case 0x0F48: // Battle Axes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0F49:
-                        case 0x0F4A: // Axes
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0F4B:
-                        case 0x0F4C:
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.WhirlwindAttack;
-
-                            goto done;
-                        case 0x0F4D:
-                        case 0x0F4E: // Bardiches
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0F4F:
-                        case 0x0F50: // Crossbows
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0F51:
-                        case 0x0F52: // Daggers
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x0F5C:
-                        case 0x0F5D: // Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F5E:
-                        case 0x0F5F: // Broadswords
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x0F60:
-                        case 0x0F61: // Longswords
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0F62:
-                        case 0x0F63: // Spears
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x0FB5:
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x13AF:
-                        case 0x13B0: // War Axes
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x13B1:
-                        case 0x13B2: // Bows
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x13B3:
-                        case 0x13B4: // Clubs
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x13B7:
-                        case 0x13B8: // Scimitars
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x13B9:
-                        case 0x13BA: // Viking Swords
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x13FD: // Heavy Crossbows
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x13E3: // Smith's Hammers
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x13F6: // Butcher Knives
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x13F8: // Gnarled Staves
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x13FB: // Large Battle Axes
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x13FF: // Katana
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x1401: // Kryss
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x1402:
-                        case 0x1403: // Short Spears
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x1404:
-                        case 0x1405: // War Forks
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x1406:
-                        case 0x1407: // War Maces
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x1438:
-                        case 0x1439: // War Hammers
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x143A:
-                        case 0x143B: // Mauls
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x143C:
-                        case 0x143D: // Hammer Picks
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x143E:
-                        case 0x143F: // Halberds
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x1440:
-                        case 0x1441: // Cutlasses
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x1442:
-                        case 0x1443: // Two Handed Axes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x26BA: // Scythes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x26BB: // Bone Harvesters
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26BC: // Scepters
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26BD: // Bladed Staves
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x26BE: // Pikes
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26BF: // Double Bladed Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26C0: // Lances
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x26C1: // Crescent Blades
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C2: // Composite Bows
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26C3: // Repeating Crossbows
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26C4: // also Scythes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x26C5: // also Bone Harvesters
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C6: // also Scepters
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C7: // also Bladed Staves
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x26C8: // also Pikes
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26C9: // also Double Bladed Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26CA: // also Lances
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x26CB: // also Crescent Blades
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26CC: // also Composite Bows
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26CD: // also Repeating Crossbows
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x27A2: // No-Dachi
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.RidingSwipe;
-
-                            goto done;
-                        case 0x27A3: // Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x27A4: // Wakizashi
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27A5: // Yumi
-                            Abilities[0] = Ability.ArmorPierce;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27A6: // Tetsubo
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x27A7: // Lajatang
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.FrenziedWhirlwind;
-
-                            goto done;
-                        case 0x27A8: // Bokuto
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.NerveStrike;
-
-                            goto done;
-                        case 0x27A9: // Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27AA: // Fukya
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x27AB: // Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x27AD: // Kama
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.DefenseMastery;
-
-                            goto done;
-                        case 0x27AE: // Nunchaku
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.Feint;
-
-                            goto done;
-                        case 0x27AF: // Sai
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ArmorPierce;
-
-                            goto done;
-                        case 0x27ED: // also No-Dachi
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.RidingSwipe;
-
-                            goto done;
-                        case 0x27EE: // also Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x27EF: // also Wakizashi
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F0: // also Yumi
-                            Abilities[0] = Ability.ArmorPierce;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F1: // also Tetsubo
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x27F2: // also Lajatang
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.FrenziedWhirlwind;
-
-                            goto done;
-                        case 0x27F3: // also Bokuto
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.NerveStrike;
-
-                            goto done;
-                        case 0x27F4: // also Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F5: // also Fukya
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x27F6: // also Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x27F8: // Kama
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.DefenseMastery;
-
-                            goto done;
-                        case 0x27F9: // Nunchaku
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.Feint;
-
-                            goto done;
-                        case 0x27FA: // Sai
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ArmorPierce;
-
-                            goto done;
-                        case 0x2D1E: // Elven Composite Longbows
-                            Abilities[0] = Ability.ForceArrow;
-                            Abilities[1] = Ability.SerpentArrow;
-
-                            goto done;
-                        case 0x2D1F: // Magical Shortbows
-                            Abilities[0] = Ability.LightningArrow;
-                            Abilities[1] = Ability.PsychicAttack;
-
-                            goto done;
-                        case 0x2D20: // Elven Spellblades
-                            Abilities[0] = Ability.PsychicAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x2D21: // Assassin Spikes
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x2D22: // Leafblades
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x2D23: // War Cleavers
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D24: // Diamond Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D25: // Wild Staves
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ForceOfNature;
-
-                            goto done;
-                        case 0x2D26: // Rune Blades
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D27: // Radiant Scimitars
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D28: // Ornate Axes
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D29: // Elven Machetes
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D2A: // also Elven Composite Longbows
-                            Abilities[0] = Ability.ForceArrow;
-                            Abilities[1] = Ability.SerpentArrow;
-
-                            goto done;
-                        case 0x2D2B: // also Magical Shortbows
-                            Abilities[0] = Ability.LightningArrow;
-                            Abilities[1] = Ability.PsychicAttack;
-
-                            goto done;
-                        case 0x2D2C: // also Elven Spellblades
-                            Abilities[0] = Ability.PsychicAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x2D2D: // also Assassin Spikes
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x2D2E: // also Leafblades
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x2D2F: // also War Cleavers
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D30: // also Diamond Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D31: // also Wild Staves
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ForceOfNature;
-
-                            goto done;
-                        case 0x2D32: // also Rune Blades
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D33: // also Radiant Scimitars
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D34: // also Ornate Axes
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D35: // also Elven Machetes
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x4067: // Boomerang
-                            Abilities[0] = Ability.MysticArc;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x4068: // Dual Short Axes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x406B: // Soul Glaive
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x406C: // Cyclone
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.InfusedThrow;
-
-                            goto done;
-                        case 0x406D: // Dual Pointed Spear
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x406E: // Disc Mace
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x4072: // Blood Blade
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x4074: // Dread Sword
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x4075: // Gargish Talwar
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x4076: // Shortblade
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x48AE: // Gargish Cleaver
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48B0: // Gargish Battle Axe
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48B2: // Gargish Axe
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x48B4: // Gargish Bardiche
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x48B6: // Gargish Butcher Knife
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x48B8: // Gargish Gnarled Staff
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x48BA: // Gargish Katana
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x48BC: // Gargish Kryss
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48BE: // Gargish War Fork
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x48CA: // Gargish Lance
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48C0: // Gargish War Hammer
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x48C2: // Gargish Maul
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48C4: // Gargish Scyte
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x48C6: // Gargish Bone Harvester
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x48C8: // Gargish Pike
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48CD: // Gargish Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x48CE: // Gargish Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x48D0: // Gargish Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
+                        testGraphic = (ushort) ( equippedGraphic + 1 );
+
+                        if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                        {
+                            graphics[1] = testGraphic;
+                            count = 2;
+                        }
+                    }
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        Graphic g = graphics[i];
+
+                        switch (g)
+                        {
+                            case 0x0901: // Gargish Cyclone
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.InfusedThrow;
+
+                                goto done;
+                            case 0x0902: // Gargish Dagger
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x0905: // Glass Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x0906: // serpentstone staff
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x090C: // Glass Sword
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x0DF0:
+                            case 0x0DF1: // Black Staves
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x0DF2:
+                            case 0x0DF3:
+                            case 0x0DF4:
+                            case 0x0DF5: // Wands BookType A-D
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0E81:
+                            case 0x0E82: // Shepherd's Crooks
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0E85:
+                            case 0x0E86: // Pickaxes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0E87:
+                            case 0x0E88: // Pitchforks
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x0E89:
+                            case 0x0E8A: // Quarter Staves
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x0EC2:
+                            case 0x0EC3: // Cleavers
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x0EC4:
+                            case 0x0EC5: // Skinning Knives
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0F43:
+                            case 0x0F44: // Hatchets
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0F45:
+                            case 0x0F46: // Double Axes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x0F47:
+                            case 0x0F48: // Battle Axes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x0F49:
+                            case 0x0F4A: // Axes
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x0F4B:
+                            case 0x0F4C:
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.WhirlwindAttack;
+
+                                goto done;
+                            case 0x0F4D:
+                            case 0x0F4E: // Bardiches
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x0F4F:
+                            case 0x0F50: // Crossbows
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x0F51:
+                            case 0x0F52: // Daggers
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x0F5C:
+                            case 0x0F5D: // Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x0F5E:
+                            case 0x0F5F: // Broadswords
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+                            case 0x0F60:
+                            case 0x0F61: // Longswords
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x0F62:
+                            case 0x0F63: // Spears
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x0FB5:
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x13AF:
+                            case 0x13B0: // War Axes
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+                            case 0x13B1:
+                            case 0x13B2: // Bows
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x13B3:
+                            case 0x13B4: // Clubs
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x13B7:
+                            case 0x13B8: // Scimitars
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x13B9:
+                            case 0x13BA: // Viking Swords
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x13FD: // Heavy Crossbows
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x13E3: // Smith's Hammers
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x13F6: // Butcher Knives
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x13F8: // Gnarled Staves
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x13FB: // Large Battle Axes
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+                            case 0x13FF: // Katana
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+                            case 0x1401: // Kryss
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x1402:
+                            case 0x1403: // Short Spears
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x1404:
+                            case 0x1405: // War Forks
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x1406:
+                            case 0x1407: // War Maces
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+                            case 0x1438:
+                            case 0x1439: // War Hammers
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x143A:
+                            case 0x143B: // Mauls
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x143C:
+                            case 0x143D: // Hammer Picks
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x143E:
+                            case 0x143F: // Halberds
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x1440:
+                            case 0x1441: // Cutlasses
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x1442:
+                            case 0x1443: // Two Handed Axes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x26BA: // Scythes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x26BB: // Bone Harvesters
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26BC: // Scepters
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26BD: // Bladed Staves
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x26BE: // Pikes
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x26BF: // Double Bladed Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x26C0: // Lances
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x26C1: // Crescent Blades
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26C2: // Composite Bows
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+                            case 0x26C3: // Repeating Crossbows
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+                            case 0x26C4: // also Scythes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x26C5: // also Bone Harvesters
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26C6: // also Scepters
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26C7: // also Bladed Staves
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x26C8: // also Pikes
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x26C9: // also Double Bladed Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x26CA: // also Lances
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x26CB: // also Crescent Blades
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x26CC: // also Composite Bows
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+                            case 0x26CD: // also Repeating Crossbows
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+                            case 0x27A2: // No-Dachi
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.RidingSwipe;
+
+                                goto done;
+                            case 0x27A3: // Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+                            case 0x27A4: // Wakizashi
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27A5: // Yumi
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27A6: // Tetsubo
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x27A7: // Lajatang
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.FrenziedWhirlwind;
+
+                                goto done;
+                            case 0x27A8: // Bokuto
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.NerveStrike;
+
+                                goto done;
+                            case 0x27A9: // Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27AA: // Fukya
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x27AB: // Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+                            case 0x27AD: // Kama
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.DefenseMastery;
+
+                                goto done;
+                            case 0x27AE: // Nunchaku
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.Feint;
+
+                                goto done;
+                            case 0x27AF: // Sai
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ArmorPierce;
+
+                                goto done;
+                            case 0x27ED: // also No-Dachi
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.RidingSwipe;
+
+                                goto done;
+                            case 0x27EE: // also Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+                            case 0x27EF: // also Wakizashi
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27F0: // also Yumi
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27F1: // also Tetsubo
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x27F2: // also Lajatang
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.FrenziedWhirlwind;
+
+                                goto done;
+                            case 0x27F3: // also Bokuto
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.NerveStrike;
+
+                                goto done;
+                            case 0x27F4: // also Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                            case 0x27F5: // also Fukya
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x27F6: // also Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+                            case 0x27F8: // Kama
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.DefenseMastery;
+
+                                goto done;
+                            case 0x27F9: // Nunchaku
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.Feint;
+
+                                goto done;
+                            case 0x27FA: // Sai
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ArmorPierce;
+
+                                goto done;
+                            case 0x2D1E: // Elven Composite Longbows
+                                Abilities[0] = Ability.ForceArrow;
+                                Abilities[1] = Ability.SerpentArrow;
+
+                                goto done;
+                            case 0x2D1F: // Magical Shortbows
+                                Abilities[0] = Ability.LightningArrow;
+                                Abilities[1] = Ability.PsychicAttack;
+
+                                goto done;
+                            case 0x2D20: // Elven Spellblades
+                                Abilities[0] = Ability.PsychicAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+                            case 0x2D21: // Assassin Spikes
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x2D22: // Leafblades
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+                            case 0x2D23: // War Cleavers
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D24: // Diamond Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x2D25: // Wild Staves
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ForceOfNature;
+
+                                goto done;
+                            case 0x2D26: // Rune Blades
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D27: // Radiant Scimitars
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D28: // Ornate Axes
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x2D29: // Elven Machetes
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D2A: // also Elven Composite Longbows
+                                Abilities[0] = Ability.ForceArrow;
+                                Abilities[1] = Ability.SerpentArrow;
+
+                                goto done;
+                            case 0x2D2B: // also Magical Shortbows
+                                Abilities[0] = Ability.LightningArrow;
+                                Abilities[1] = Ability.PsychicAttack;
+
+                                goto done;
+                            case 0x2D2C: // also Elven Spellblades
+                                Abilities[0] = Ability.PsychicAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+                            case 0x2D2D: // also Assassin Spikes
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+                            case 0x2D2E: // also Leafblades
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+                            case 0x2D2F: // also War Cleavers
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D30: // also Diamond Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x2D31: // also Wild Staves
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ForceOfNature;
+
+                                goto done;
+                            case 0x2D32: // also Rune Blades
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D33: // also Radiant Scimitars
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x2D34: // also Ornate Axes
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x2D35: // also Elven Machetes
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+                            case 0x4067: // Boomerang
+                                Abilities[0] = Ability.MysticArc;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x4068: // Dual Short Axes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x406B: // Soul Glaive
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x406C: // Cyclone
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.InfusedThrow;
+
+                                goto done;
+                            case 0x406D: // Dual Pointed Spear
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x406E: // Disc Mace
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x4072: // Blood Blade
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x4074: // Dread Sword
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x4075: // Gargish Talwar
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x4076: // Shortblade
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x48AE: // Gargish Cleaver
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x48B0: // Gargish Battle Axe
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x48B2: // Gargish Axe
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x48B4: // Gargish Bardiche
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+                            case 0x48B6: // Gargish Butcher Knife
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x48B8: // Gargish Gnarled Staff
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x48BA: // Gargish Katana
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+                            case 0x48BC: // Gargish Kryss
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x48BE: // Gargish War Fork
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+                            case 0x48CA: // Gargish Lance
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x48C0: // Gargish War Hammer
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+                            case 0x48C2: // Gargish Maul
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+                            case 0x48C4: // Gargish Scyte
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+                            case 0x48C6: // Gargish Bone Harvester
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+                            case 0x48C8: // Gargish Pike
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+                            case 0x48CD: // Gargish Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+                            case 0x48CE: // Gargish Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+                            case 0x48D0: // Gargish Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                        }
                     }
                 }
 
-            done:;
+                done:;
             }
 
 

@@ -181,10 +181,8 @@ namespace ClassicUO.Game.UI.Gumps
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
 
-                    for (int i = 0; i < Children.Count; i++)
+                    foreach (Control child in Children)
                     {
-                        Control child = Children[i];
-
                         if (!child.IsVisible)
                             continue;
 

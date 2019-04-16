@@ -32,7 +32,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
-        private Checkbox _checkboxSaveAccount, _checkboxAutologin, _cryptPassword;
+        private readonly Checkbox _checkboxSaveAccount;
+        private readonly Checkbox _checkboxAutologin;
+        private Checkbox _cryptPassword;
         private readonly Button _nextArrow0;
 
         private float _time;
@@ -194,8 +196,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Engine.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
 
-        private ushort _buttonNormal = 0x15A4;
-        private ushort _buttonOver = 0x15A5;
+        private readonly ushort _buttonNormal = 0x15A4;
+        private readonly ushort _buttonOver = 0x15A5;
 
         public override void Update(double totalMS, double frameMS)
         {

@@ -118,9 +118,11 @@ namespace ClassicUO.Game.GameObjects
 
         private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
-            state.ColorSourceBlend = Blend.SourceAlpha;
-            state.ColorDestinationBlend = Blend.InverseSourceAlpha;
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Blend.SourceAlpha, ColorDestinationBlend = Blend.InverseSourceAlpha
+            };
+
             return state;
         });
 
