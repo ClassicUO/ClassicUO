@@ -212,7 +212,7 @@ namespace ClassicUO.Game.Scenes
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
-            Chat.Message += ChatOnMessage;
+            Chat.MessageReceived += ChatOnMessageReceived;
 
             if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
                 Scale = 1f;
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Scenes
             Plugin.OnConnected();
         }
 
-        private void ChatOnMessage(object sender, UOMessageEventArgs e)
+        private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
         {
             if (e.Type == MessageType.Command)
                 return;
@@ -339,7 +339,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             _hotkeysManager = null;
             _macroManager = null;
-            Chat.Message -= ChatOnMessage;
+            Chat.MessageReceived -= ChatOnMessageReceived;
             _blendText?.Dispose();
 
             base.Unload();

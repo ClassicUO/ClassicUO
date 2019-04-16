@@ -76,25 +76,16 @@ namespace ClassicUO.Game
    
 
     internal static class Chat
-    {
-        private const ushort defaultHue = 946;
-        private static readonly Mobile _system = new Mobile(Serial.INVALID)
-        {
-            Graphic = Graphic.INVARIANT, Name = "System"
-        };
-
+    {      
         public static PromptData PromptData { get; set; }
 
-        public static event EventHandler<UOMessageEventArgs> Message;
+        public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
-        public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
+        public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => Print(_system, message, hue, type, font, unicode);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
-
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+     
     
-        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
 			switch (type)
 			{
@@ -188,12 +179,12 @@ namespace ClassicUO.Game
                     break;
 			}
 
-			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
+			MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent);
 		}
 
 		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
         {
-            LocalizedMessage.Raise(args, entity ?? _system);
+            LocalizedMessageReceived.Raise(args, entity);
         }
 
 	}

@@ -283,7 +283,7 @@ namespace ClassicUO.Utility.Platforms
 
                             if ((wParam & 0x00010000) != 0)
                             {
-                                Chat.OnMessage(null, sb.ToString(), "System", hue, MessageType.Regular, MessageFont.Normal, true);
+                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, MessageFont.Normal, true);
                             }
                             else
                             {
