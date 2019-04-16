@@ -175,7 +175,33 @@ namespace ClassicUO.Game.UI
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, 222, false, 0.5f, false);
 
-                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1, _selectionArea.Item2, Mouse.Position.X - _selectionArea.Item1, Mouse.Position.Y - _selectionArea.Item2, hue);
+                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1 + x, _selectionArea.Item2 + y, Mouse.Position.X - (_selectionArea.Item1 + x), Mouse.Position.Y - (_selectionArea.Item2 + y), hue);
+            }
+            else if(_selectionArea != (0,0))
+            {
+                int start = -1, end = CaretIndex;
+                if (RenderText.IsUnicode)
+                    start = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                else
+                    start = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                if (start != -1)
+                {
+                    if(start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+                    int rx, ry;
+                    for(int i = start; i <= end; i++)
+                    {
+                        if (RenderText.IsUnicode)
+                            (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                        else
+                            (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                        RenderCaret.Draw(batcher, x + rx, y + ry);
+                    }
+                }
             }
         }
 
@@ -192,7 +218,7 @@ namespace ClassicUO.Game.UI
                 UpdateCaretPosition();
             if (mouseclick)
             {
-                _selectionArea = (Mouse.Position.X, Mouse.Position.Y);
+                _selectionArea = (x, y);
                 _isSelection = true;
             }
         }
@@ -214,6 +240,35 @@ namespace ClassicUO.Game.UI
             }
             CaretIndex = endindex;
             UpdateCaretPosition();
+        }
+
+        internal string GetSelectionText(bool remove)
+        {
+            if (_selectionArea == (0, 0))
+                return string.Empty;
+            int startidx, endidx = CaretIndex;
+            if (RenderText.IsUnicode)
+                startidx = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            else
+                startidx = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            if(startidx > CaretIndex)
+            {
+                int copy = startidx;
+                startidx = endidx;
+                endidx = copy;
+            }
+            else if(startidx == endidx || endidx == 0)
+            {
+                return string.Empty;
+            }
+            string str = Text.Substring(startidx, endidx - startidx);
+            if (remove)
+            {
+                Text = Text.Remove(startidx, endidx - startidx);
+                if(CaretIndex > startidx)
+                    CaretIndex -= endidx - startidx;
+            }
+            return str;
         }
 
         public void Clear()
