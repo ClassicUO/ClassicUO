@@ -27,7 +27,6 @@ namespace ClassicUO.Game.UI.Gumps
             _item = item;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
-            _item.Disposed += ItemOnDisposed;
 
             X = x;
             Y = y;
@@ -61,11 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_area);
         }
 
-        private void ItemOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
-        }
-
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
@@ -83,6 +77,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_item == null || _item.IsDestroyed)
+                Dispose();
+        }
+
 
         public void Add(BulletinBoardObject obj)
         {
@@ -96,7 +98,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
-                _item.Disposed -= ItemOnDisposed;
             }
 
             base.Dispose();

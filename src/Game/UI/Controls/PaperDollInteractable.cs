@@ -48,7 +48,6 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
             mobile.Items.Added += ItemsOnAdded;
             mobile.Items.Removed += ItemsOnRemoved;
-            mobile.Disposed += MobileOnDisposed;
         }
         
         public Mobile Mobile
@@ -64,12 +63,19 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_mobile == null || _mobile.IsDestroyed)
+                Dispose();
+        }
+
 
         public override void Dispose()
         {
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
-            Mobile.Disposed -= MobileOnDisposed;
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
@@ -94,11 +100,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             UpdateEntity();
-        }
-
-        private void MobileOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
         }
 
         public void Update()
