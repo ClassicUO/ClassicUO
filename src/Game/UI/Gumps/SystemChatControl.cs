@@ -112,6 +112,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Engine.Profile.Current.ActivateChatAfterEnter)
                     _trans.Alpha = 0.5f;
             };
+            _trans.DragBegin += (sender, e) =>
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
+                    ToggleChatVisibility();
+            };
 
             Add(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
             {
