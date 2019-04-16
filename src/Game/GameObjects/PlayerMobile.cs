@@ -40,47 +40,47 @@ namespace ClassicUO.Game.GameObjects
         private ushort _damageIncrease;
         private ushort _damageMax;
         private ushort _damageMin;
-        private ushort _defenseChanceInc;
+        private ushort _defenseChanceIncrease;
         private ushort _dexterity;
-        private ushort _dexterityInc;
+        private ushort _dexterityIncrease;
         private ushort _enhancePotions;
         private ushort _fasterCasting;
         private ushort _fasterCastRecovery;
         private byte _followers;
         private byte _followersMax;
         private uint _gold;
-        private ushort _hitChanceInc;
-        private ushort _hitPointsInc;
-        private ushort _hitPointsRegen;
+        private ushort _hitChanceIncrease;
+        private ushort _hitPointsIncrease;
+        private ushort _hitPointsRegeneration;
         private ushort _intelligence;
-        private ushort _intelligenceInc;
+        private ushort _intelligenceIncrease;
         private ushort _lowerManaCost;
         private ushort _lowerReagentCost;
         private ushort _luck;
-        private ushort _manaInc;
-        private ushort _manaRegen;
-        private ushort _maxColdcRes;
-        private ushort _maxDefChance;
-        private ushort _maxEnergRes;
-        private ushort _maxFireRes;
-        private ushort _maximumHitPointsInc;
-        private ushort _maximumManaInc;
-        private ushort _maximumStaminaInc;
-        private ushort _maxPhysicRes;
-        private ushort _maxPoisResUshort;
+        private ushort _manaIncrease;
+        private ushort _manaRegeneration;
+        private ushort _maxColdcResistence;
+        private ushort _maxDefenseChanceIncrease;
+        private ushort _maxEnergResistence;
+        private ushort _maxFireResistence;
+        private ushort _maxHitPointsIncrease;
+        private ushort _maxManaIncrease;
+        private ushort _maxStaminaIncrease;
+        private ushort _maxPhysicResistence;
+        private ushort _maxPoisResistenceUshort;
         private ushort _reflectPhysicalDamage;
-        private ushort _resistCold;
-        private ushort _resistEnergy;
-        private ushort _resistFire;
-        private ushort _resistPhysical;
-        private ushort _resistPoison;
-        private ushort _spellDamageInc;
-        private ushort _staminaInc;
-        private ushort _staminaRegen;
+        private ushort _coldResistance;
+        private ushort _energyResistance;
+        private ushort _fireResistance;
+        private ushort _physicalResistence;
+        private ushort _poisonResistance;
+        private ushort _spellDamageIncrease;
+        private ushort _staminaIncrease;
+        private ushort _staminaRegeneration;
         private ushort _statscap;
         private ushort _strength;
-        private ushort _strengthInc;
-        private ushort _swingSpeedInc;
+        private ushort _strengthIncrease;
+        private ushort _swingSpeedIncrease;
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
@@ -182,66 +182,66 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort ResistPhysical
+        public ushort PhysicalResistence
         {
-            get => _resistPhysical;
+            get => _physicalResistence;
             set
             {
-                if (_resistPhysical != value)
+                if (_physicalResistence != value)
                 {
-                    _resistPhysical = value;
+                    _physicalResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistFire
+        public ushort FireResistance
         {
-            get => _resistFire;
+            get => _fireResistance;
             set
             {
-                if (_resistFire != value)
+                if (_fireResistance != value)
                 {
-                    _resistFire = value;
+                    _fireResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistCold
+        public ushort ColdResistance
         {
-            get => _resistCold;
+            get => _coldResistance;
             set
             {
-                if (_resistCold != value)
+                if (_coldResistance != value)
                 {
-                    _resistCold = value;
+                    _coldResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistPoison
+        public ushort PoisonResistance
         {
-            get => _resistPoison;
+            get => _poisonResistance;
             set
             {
-                if (_resistPoison != value)
+                if (_poisonResistance != value)
                 {
-                    _resistPoison = value;
+                    _poisonResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistEnergy
+        public ushort EnergyResistance
         {
-            get => _resistEnergy;
+            get => _energyResistance;
             set
             {
-                if (_resistEnergy != value)
+                if (_energyResistance != value)
                 {
-                    _resistEnergy = value;
+                    _energyResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -338,27 +338,27 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort HitChanceInc
+        public ushort HitChanceIncrease
         {
-            get => _hitChanceInc;
+            get => _hitChanceIncrease;
             set
             {
-                if (_hitChanceInc != value)
+                if (_hitChanceIncrease != value)
                 {
-                    _hitChanceInc = value;
+                    _hitChanceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort SwingSpeedInc
+        public ushort SwingSpeedIncrease
         {
-            get => _swingSpeedInc;
+            get => _swingSpeedIncrease;
             set
             {
-                if (_swingSpeedInc != value)
+                if (_swingSpeedIncrease != value)
                 {
-                    _swingSpeedInc = value;
+                    _swingSpeedIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -390,118 +390,118 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort HitPointsRegen
+        public ushort HitPointsRegeneration
         {
-            get => _hitPointsRegen;
+            get => _hitPointsRegeneration;
             set
             {
-                if (_hitPointsRegen != value)
+                if (_hitPointsRegeneration != value)
                 {
-                    _hitPointsRegen = value;
+                    _hitPointsRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort StaminaRegen
+        public ushort StaminaRegeneration
         {
-            get => _staminaRegen;
+            get => _staminaRegeneration;
             set
             {
-                if (_staminaRegen != value)
+                if (_staminaRegeneration != value)
                 {
-                    _staminaRegen = value;
+                    _staminaRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ManaRegen
+        public ushort ManaRegeneration
         {
-            get => _manaRegen;
+            get => _manaRegeneration;
             set
             {
-                if (_manaRegen != value)
+                if (_manaRegeneration != value)
                 {
-                    _manaRegen = value;
+                    _manaRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxPhysicRes
+        public ushort MaxPhysicResistence
         {
-            get => _maxPhysicRes;
+            get => _maxPhysicResistence;
             set
             {
-                if (_maxPhysicRes != value)
+                if (_maxPhysicResistence != value)
                 {
-                    _maxPhysicRes = value;
+                    _maxPhysicResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxFireRes
+        public ushort MaxFireResistence
         {
-            get => _maxFireRes;
+            get => _maxFireResistence;
             set
             {
-                if (_maxFireRes != value)
+                if (_maxFireResistence != value)
                 {
-                    _maxFireRes = value;
+                    _maxFireResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxColdRes
+        public ushort MaxColdResistence
         {
-            get => _maxColdcRes;
+            get => _maxColdcResistence;
             set
             {
-                if (_maxColdcRes != value)
+                if (_maxColdcResistence != value)
                 {
-                    _maxColdcRes = value;
+                    _maxColdcResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxPoisonRes
+        public ushort MaxPoisonResistence
         {
-            get => _maxPoisResUshort;
+            get => _maxPoisResistenceUshort;
             set
             {
-                if (_maxPoisResUshort != value)
+                if (_maxPoisResistenceUshort != value)
                 {
-                    _maxPoisResUshort = value;
+                    _maxPoisResistenceUshort = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxEnergyRes
+        public ushort MaxEnergyResistence
         {
-            get => _maxEnergRes;
+            get => _maxEnergResistence;
             set
             {
-                if (_maxEnergRes != value)
+                if (_maxEnergResistence != value)
                 {
-                    _maxEnergRes = value;
+                    _maxEnergResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxDefChance
+        public ushort MaxDefenseChanceIncrease
         {
-            get => _maxDefChance;
+            get => _maxDefenseChanceIncrease;
             set
             {
-                if (_maxDefChance != value)
+                if (_maxDefenseChanceIncrease != value)
                 {
-                    _maxDefChance = value;
+                    _maxDefenseChanceIncrease = value;
                     _delta |= Delta.Attributes;
                 }
             }
@@ -533,27 +533,27 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort DefenseChanceInc
+        public ushort DefenseChanceIncrease
         {
-            get => _defenseChanceInc;
+            get => _defenseChanceIncrease;
             set
             {
-                if (_defenseChanceInc != value)
+                if (_defenseChanceIncrease != value)
                 {
-                    _defenseChanceInc = value;
+                    _defenseChanceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort SpellDamageInc
+        public ushort SpellDamageIncrease
         {
-            get => _spellDamageInc;
+            get => _spellDamageIncrease;
             set
             {
-                if (_spellDamageInc != value)
+                if (_spellDamageIncrease != value)
                 {
-                    _spellDamageInc = value;
+                    _spellDamageIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -598,118 +598,118 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort StrengthInc
+        public ushort StrengthIncrease
         {
-            get => _strengthInc;
+            get => _strengthIncrease;
             set
             {
-                if (_strengthInc != value)
+                if (_strengthIncrease != value)
                 {
-                    _strengthInc = value;
+                    _strengthIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort DexterityInc
+        public ushort DexterityIncrease
         {
-            get => _dexterityInc;
+            get => _dexterityIncrease;
             set
             {
-                if (_dexterityInc != value)
+                if (_dexterityIncrease != value)
                 {
-                    _dexterityInc = value;
+                    _dexterityIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort IntelligenceInc
+        public ushort IntelligenceIncrease
         {
-            get => _intelligenceInc;
+            get => _intelligenceIncrease;
             set
             {
-                if (_intelligenceInc != value)
+                if (_intelligenceIncrease != value)
                 {
-                    _intelligenceInc = value;
+                    _intelligenceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort HitPointsInc
+        public ushort HitPointsIncrease
         {
-            get => _hitPointsInc;
+            get => _hitPointsIncrease;
             set
             {
-                if (_hitPointsInc != value)
+                if (_hitPointsIncrease != value)
                 {
-                    _hitPointsInc = value;
+                    _hitPointsIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort StaminaInc
+        public ushort StaminaIncrease
         {
-            get => _staminaInc;
+            get => _staminaIncrease;
             set
             {
-                if (_staminaInc != value)
+                if (_staminaIncrease != value)
                 {
-                    _staminaInc = value;
+                    _staminaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ManaInc
+        public ushort ManaIncrease
         {
-            get => _manaInc;
+            get => _manaIncrease;
             set
             {
-                if (_manaInc != value)
+                if (_manaIncrease != value)
                 {
-                    _manaInc = value;
+                    _manaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumHitPointsInc
+        public ushort MaxHitPointsIncrease
         {
-            get => _maximumHitPointsInc;
+            get => _maxHitPointsIncrease;
             set
             {
-                if (_maximumHitPointsInc != value)
+                if (_maxHitPointsIncrease != value)
                 {
-                    _maximumHitPointsInc = value;
+                    _maxHitPointsIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumStaminaInc
+        public ushort MaxStaminaIncrease
         {
-            get => _maximumStaminaInc;
+            get => _maxStaminaIncrease;
             set
             {
-                if (_maximumStaminaInc != value)
+                if (_maxStaminaIncrease != value)
                 {
-                    _maximumStaminaInc = value;
+                    _maxStaminaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumManaInc
+        public ushort MaxManaIncrease
         {
-            get => _maximumManaInc;
+            get => _maxManaIncrease;
             set
             {
-                if (_maximumManaInc != value)
+                if (_maxManaIncrease != value)
                 {
-                    _maximumManaInc = value;
+                    _maxManaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -778,8 +778,7 @@ namespace ClassicUO.Game.GameObjects
 			        var delta = (realValue - skill.ValueFixed);
 			        var direction = (delta < 0 ? "decreased" : "increased");
 			
-			        if (displayMessage)
-                        GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
+                    GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
 			    }
 			
 			    skill.ValueFixed = realValue;
