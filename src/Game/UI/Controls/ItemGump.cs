@@ -45,7 +45,6 @@ namespace ClassicUO.Game.UI.Controls
         private bool _sendClickIfNotDClick;
 
         private Point _lastClickPosition;
-        protected bool _requestedLabel;
 
         private readonly List<FadeOutLabel> _labels = new List<FadeOutLabel>();
 
@@ -66,14 +65,10 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public bool RequestedLabel => _requestedLabel;
-
         public void AddLabel(string text, Hue hue, byte font, bool isunicode)
         {
             if (World.ClientFlags.TooltipsEnabled)
                 return;
-
-            _requestedLabel = false;
 
             LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
             if (container == null || container.From != this)
@@ -116,7 +111,6 @@ namespace ClassicUO.Game.UI.Controls
                 if (!World.ClientFlags.TooltipsEnabled)
                 {
                     GameActions.SingleClick(Item);
-                    _requestedLabel = true;
                 }
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;

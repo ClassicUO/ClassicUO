@@ -117,27 +117,56 @@ namespace ClassicUO.Game
                                              .FirstOrDefault();
 
                             var f = inter?.FindControls<ItemGump>()
-                                         .SingleOrDefault(s => s.RequestedLabel && s.Item == it);
+                                         .SingleOrDefault(s => s.Item == it);
 
                             if (f != null)
                                 f.AddLabel(text, hue, (byte)font, unicode);
                             else
-                                paperDoll.FindControls<EquipmentSlot>()
-                                         .Select(s => s.Children.OfType<ItemGump>().FirstOrDefault())
-                                         .SingleOrDefault(s => s != null && (s.RequestedLabel && s.Item == it))?
+                                paperDoll.FindControls<EquipmentSlot>()?
+                                         .SelectMany(s => s.Children)
+                                         .OfType<ItemGump>()
+                                         .SingleOrDefault(s => s.Item == it)?
                                          .AddLabel(text, hue, (byte)font, unicode);
                         }
                         else if (gump is ContainerGump container)
                         {
                             container
                                    .FindControls<ItemGump>()?
-                                   .SingleOrDefault(s => s.RequestedLabel && s.Item == it)?
+                                   .SingleOrDefault(s => s.Item == it)?
                                    .AddLabel(text, hue, (byte)font, unicode); 
                         }
-                        else if (gump != null)
+                        else
                         {
-                            Log.Message(LogTypes.Warning, $"Missing label handler for this control: '{gump}'. Report it!!");
+
+                            Entity ent = World.Get(it.RootContainer);
+
+                            gump = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+                            if (gump != null)
+                            {
+                                gump.FindControls<DataBox>()?
+                                       .SelectMany(s => s.Children)
+                                       .OfType<ItemGump>()
+                                       .SingleOrDefault(s => s.Item == it)?
+                                       .AddLabel(text, hue, (byte)font, unicode);
+                            }
+                            else
+                            {
+                                Serial serial = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
+                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+
+                                if (gump != null)
+                                {
+                                    gump.FindControls<DataBox>()?
+                                        .SelectMany(s => s.Children)
+                                        .OfType<ItemGump>()
+                                        .SingleOrDefault(s => s.Item == it)?
+                                        .AddLabel(text, hue, (byte)font, unicode);
+                                }
+                                else
+                                    Log.Message(LogTypes.Warning, $"Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                            }
                         }
+                        
                     }
                     else
                         parent?.AddOverhead(type, text, (byte)font, hue, unicode);
