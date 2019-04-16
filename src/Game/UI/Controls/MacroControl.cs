@@ -15,7 +15,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class MacroControl : Control
+    internal class MacroControl : Control
     {
         private readonly MacroCollectionControl _collection;
 
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Controls
     }
 
 
-    class MacroCollectionControl : Control
+    internal class MacroCollectionControl : Control
     {
         private readonly ScrollArea _scrollArea;
         private readonly List<Combobox> _comboboxes = new List<Combobox>();

@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.Managers
 {
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
-    struct StepInfo
+    internal struct StepInfo
     {
         public byte Direction;
         public byte OldDirection;
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
         public sbyte Z;
     }
 
-    class FastWalkStack
+    internal class FastWalkStack
     {
         private readonly uint[] _keys = new uint[Constants.MAX_FAST_WALK_STACK_SIZE];
 
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class WalkerManager
+    internal class WalkerManager
     {
         public long LastStepRequestTime { get; set; }
         public int UnacceptedPacketsCount { get; set; }

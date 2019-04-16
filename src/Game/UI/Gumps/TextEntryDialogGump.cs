@@ -9,7 +9,7 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TextEntryDialogGump : Gump
+    internal class TextEntryDialogGump : Gump
     {
         private readonly TextBox _textBox;
 

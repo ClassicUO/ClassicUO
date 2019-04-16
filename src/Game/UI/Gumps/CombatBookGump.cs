@@ -11,7 +11,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class CombatBookGump : Gump
+    internal class CombatBookGump : Gump
     {
         private readonly int _abilityCount = Constants.MAX_ABILITIES_COUNT;
         private readonly int _dictionaryPagesCount = 3;

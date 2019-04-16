@@ -157,8 +157,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-      
-        class ItemGumpFixed : ItemGump
+        private class ItemGumpFixed : ItemGump
         {
             private readonly Point _originalSize;
             private readonly Point _point;

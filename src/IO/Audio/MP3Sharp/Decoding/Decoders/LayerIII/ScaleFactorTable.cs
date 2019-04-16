@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class ScaleFactorTable
+    internal class ScaleFactorTable
     {
         private LayerIIIDecoder enclosingInstance;
         public int[] l;

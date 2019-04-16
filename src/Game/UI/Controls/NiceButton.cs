@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class NiceButton : HitBox
+    internal class NiceButton : HitBox
     {
         private bool _isSelected;
         private readonly ButtonAction _action;

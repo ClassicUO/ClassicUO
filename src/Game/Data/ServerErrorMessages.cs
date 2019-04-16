@@ -8,7 +8,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.Data
 {
-    static class ServerErrorMessages
+    internal static class ServerErrorMessages
     {
         private static readonly string[] _loginErrors =
         {

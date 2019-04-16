@@ -11,7 +11,7 @@ namespace ClassicUO.Utility.Coroutines
         bool Update();
     }
 
-    class WaitCondition : IWaitCondition
+    internal class WaitCondition : IWaitCondition
     {
         private readonly Func<bool> _condition;
 
@@ -23,7 +23,7 @@ namespace ClassicUO.Utility.Coroutines
         public bool Update() => _condition();
     }
 
-    class WaitCondition<T> : IWaitCondition
+    internal class WaitCondition<T> : IWaitCondition
     {
         private readonly Func<T, T> _update;
         private readonly Func<T, bool> _condition;

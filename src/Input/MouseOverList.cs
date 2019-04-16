@@ -163,7 +163,6 @@ namespace ClassicUO.Input
         private static bool PointInPolygon(Point p, Point[] poly)
         {
             // Taken from http://social.msdn.microsoft.com/forums/en-US/winforms/thread/95055cdc-60f8-4c22-8270-ab5f9870270a/
-            Point p1, p2;
             bool inside = false;
 
             if (poly.Length < 3) return inside;
@@ -172,6 +171,10 @@ namespace ClassicUO.Input
             for (int i = 0; i < poly.Length; i++)
             {
                 Point newPoint = new Point(poly[i].X, poly[i].Y);
+
+                Point p1;
+
+                Point p2;
 
                 if (newPoint.X > oldPoint.X)
                 {

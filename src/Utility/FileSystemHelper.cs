@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility
 {
-    static class FileSystemHelper
+    internal static class FileSystemHelper
     {
         public static string CreateFolderIfNotExists(string path, params string[] parts)
         {

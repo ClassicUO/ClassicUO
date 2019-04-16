@@ -11,7 +11,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class GumpsLoader : ResourceLoader<SpriteTexture>
+    internal class GumpsLoader : ResourceLoader<SpriteTexture>
     {
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();

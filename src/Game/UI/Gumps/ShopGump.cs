@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
             Clear
         }
 
-        class ShopItem : Control
+        private class ShopItem : Control
         {
             private readonly Label _amountLabel, _name;
 

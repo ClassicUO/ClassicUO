@@ -8,7 +8,7 @@ using SDL2;
 
 namespace ClassicUO.Input
 {
-    static class Keyboard
+    internal static class Keyboard
     {
         static Keyboard()
         {

@@ -14,7 +14,7 @@ using SDL2;
 
 namespace ClassicUO.Utility.Platforms
 {
-    static class UoAssist
+    internal static class UoAssist
     {
 
         private static CustomWindow _customWindow;
@@ -82,7 +82,7 @@ namespace ClassicUO.Utility.Platforms
             internal static extern uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen);
 
             [DllImport("user32.dll")]
-            static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+            private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
             [DllImport("user32.dll", SetLastError = true)]
             private static extern ushort RegisterClassW(

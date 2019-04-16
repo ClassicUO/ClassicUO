@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class AnimDataLoader : ResourceLoader
+    internal class AnimDataLoader : ResourceLoader
     {
         private UOFileMul _file;
 

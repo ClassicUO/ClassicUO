@@ -11,7 +11,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
     // REVIEW: there is no range checking, so buffer underflow or overflow
     // can silently occur.
-    sealed class BitReserve
+    internal sealed class BitReserve
     {
         /// <summary>
         ///     Size of the internal buffer to store the reserved bits.

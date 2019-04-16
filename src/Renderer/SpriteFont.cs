@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    sealed class SpriteFont
+    internal sealed class SpriteFont
     {
 
         private SpriteFont(Texture2D texture, List<Rectangle> glyph, List<Rectangle> cropping, List<char> characters, int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
@@ -276,9 +276,7 @@ namespace ClassicUO.Renderer
 
         private static void ConvertRgb565ToRgb888(ushort color, out byte r, out byte g, out byte b)
         {
-            int temp;
-
-            temp = (color >> 11) * 255 + 16;
+            int temp = (color >> 11) * 255 + 16;
             r = (byte)((temp / 32 + temp) / 32);
             temp = ((color & 0x07E0) >> 5) * 255 + 32;
             g = (byte)((temp / 64 + temp) / 64);
@@ -406,7 +404,7 @@ namespace ClassicUO.Renderer
         }
 
 
-        class BinReader : BinaryReader
+        private class BinReader : BinaryReader
         {
             public BinReader(Stream input) : base(input)
             {

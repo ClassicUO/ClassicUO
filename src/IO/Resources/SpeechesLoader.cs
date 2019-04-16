@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
-    class SpeechesLoader : ResourceLoader
+    internal class SpeechesLoader : ResourceLoader
     {
         private SpeechEntry[] _speech;
 

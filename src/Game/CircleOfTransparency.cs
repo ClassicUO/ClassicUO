@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
 {
-    class CircleOfTransparency
+    internal class CircleOfTransparency
     {
         private Texture2D _texture;
         private short _width, _height;

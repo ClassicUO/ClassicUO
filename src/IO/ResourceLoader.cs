@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO
 {
-    abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
+    internal abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
     {
         private readonly string[] _paths;
 
@@ -74,7 +74,7 @@ namespace ClassicUO.IO
         }
     }
 
-    abstract class ResourceLoader :  IDisposable
+    internal abstract class ResourceLoader :  IDisposable
     {
         private readonly string[] _paths;
 

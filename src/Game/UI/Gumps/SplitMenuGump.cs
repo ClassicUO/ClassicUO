@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class SplitMenuGump : Gump
+    internal class SplitMenuGump : Gump
     {
         private readonly HSliderBar _slider;
         private int _lastValue;

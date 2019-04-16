@@ -28,7 +28,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    interface IGameEntity
+    internal interface IGameEntity
     {
         bool IsSelected { get; set; }
     }

@@ -16,7 +16,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class BulletinBoardGump : Gump
+    internal class BulletinBoardGump : Gump
     {
         //private HtmlControl _htmlControl;
         private readonly ScrollArea _area;
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
     }
 
 
-    class BulletinBoardItem : Gump
+    internal class BulletinBoardItem : Gump
     {
         private readonly ScrollFlag _scrollBar;
         private readonly MultiLineBox _textBox;
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        enum ButtonType
+        private enum ButtonType
         {
             Post,
             Remove,
@@ -315,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    class BulletinBoardObject : ScrollAreaItem
+    internal class BulletinBoardObject : ScrollAreaItem
     {
         public BulletinBoardObject(Serial parent, Item serial, string text)
         {

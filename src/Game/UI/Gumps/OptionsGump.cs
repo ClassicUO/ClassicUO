@@ -84,8 +84,8 @@ namespace ClassicUO.Game.UI.Gumps
         private const byte FONT = 0xFF;
         private const ushort HUE_FONT = 999;
 
-        const int WIDTH = 700;
-        const int HEIGHT = 500;
+        private const int WIDTH = 700;
+        private const int HEIGHT = 500;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
@@ -377,7 +377,6 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 3;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            ScrollAreaItem item;
             Label text;
 
             // [BLOCK] game size
@@ -500,7 +499,7 @@ namespace ClassicUO.Game.UI.Gumps
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
-            item = new ScrollAreaItem();
+            ScrollAreaItem item = new ScrollAreaItem();
             text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
             {
                 Y = 30
@@ -1140,10 +1139,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gameWindowSizeWidth != Engine.Profile.Current.GameWindowSize.X || gameWindowSizeHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                Point n = vp.ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
+                if (vp != null)
+                {
+                    Point n = vp.ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
-                _gameWindowWidth.Text = n.X.ToString();
-                _gameWindowHeight.Text = n.Y.ToString();
+                    _gameWindowWidth.Text = n.X.ToString();
+                    _gameWindowHeight.Text = n.Y.ToString();
+                }
             }
 
             int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
@@ -1151,12 +1153,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || gameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
             {
-                vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                if (vp != null) vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
             }
 
             if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
             {
-                vp.CanMove = !_gameWindowLock.IsChecked;
+                if (vp != null) vp.CanMove = !_gameWindowLock.IsChecked;
                 Engine.Profile.Current.GameWindowLock = _gameWindowLock.IsChecked;
             }
 
@@ -1168,17 +1170,23 @@ namespace ClassicUO.Game.UI.Gumps
             
             if (Engine.Profile.Current.GameWindowFullSize != _gameWindowFullsize.IsChecked)
             {
-                Point n, loc;
+                Point n = Point.Zero, loc = Point.Zero;
 
                 if (_gameWindowFullsize.IsChecked)
                 {
-                    n = vp.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
-                    loc = Engine.Profile.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
+                    if (vp != null)
+                    {
+                        n = vp.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                        loc = Engine.Profile.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
+                    }
                 }
                 else
                 {
-                    n = vp.ResizeWindow(new Point(600, 480));
-                    loc = vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(20, 20);
+                    if (vp != null)
+                    {
+                        n = vp.ResizeWindow(new Point(600, 480));
+                        loc = vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(20, 20);
+                    }
                 }
 
                 _gameWindowPositionX.Text = loc.X.ToString();
@@ -1358,7 +1366,7 @@ namespace ClassicUO.Game.UI.Gumps
             return box;
         }
 
-        class ClickableColorBox : ColorBox
+        private class ClickableColorBox : ColorBox
         {
             private const int CELL = 12;
 
@@ -1395,7 +1403,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        class FontSelector : Control
+        private class FontSelector : Control
         {
             private readonly RadioButton[] _buttons = new RadioButton[20];
 

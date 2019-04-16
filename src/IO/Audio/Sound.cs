@@ -9,9 +9,9 @@ using static System.String;
 
 namespace ClassicUO.IO.Audio
 {
-    abstract class Sound : IComparable<Sound>, IDisposable
+    internal abstract class Sound : IComparable<Sound>, IDisposable
     {
-        string m_Name;
+        private string m_Name;
         public string Name
         {
             get { return m_Name; }
@@ -35,8 +35,8 @@ namespace ClassicUO.IO.Audio
         virtual protected void AfterStop() { }
         virtual protected void BeforePlay() { }
 
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
         protected DynamicSoundEffectInstance m_ThisInstance;
 
         protected int Frequency = 22050;

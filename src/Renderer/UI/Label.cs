@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer.UI
 {
-    class Label : Control
+    internal class Label : Control
     {
         private string _text;
         public Label(string text, int x, int y)

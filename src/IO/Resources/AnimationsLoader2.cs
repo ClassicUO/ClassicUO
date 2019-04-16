@@ -71,7 +71,7 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Color;
     }
 
-    class AnimationsLoader2 : ResourceLoader<AnimationFrameTexture>
+    internal class AnimationsLoader2 : ResourceLoader<AnimationFrameTexture>
     {
         private readonly Dictionary<int, List<MobTypeInfo>> _mobType = new Dictionary<int, List<MobTypeInfo>>();
         private readonly Dictionary<int, List<int>> _bodies = new Dictionary<int, List<int>>();

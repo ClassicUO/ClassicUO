@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Interfaces
 {
-    interface IPoolable
+    internal interface IPoolable
     {
         void OnPickup();
         void OnReturn();

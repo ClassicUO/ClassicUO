@@ -37,7 +37,7 @@ using GameObject = ClassicUO.Game.GameObjects.GameObject;
 
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
         private GameObject _dragginObject;
         private Point _dragOffset;

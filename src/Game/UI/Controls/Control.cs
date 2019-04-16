@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Controls
 	    {
 		    ClearTooltip();
 
-		    if (entity != null & !entity.IsDestroyed)
+		    if (entity != null && !entity.IsDestroyed)
 			    Tooltip = entity;
 	    }
 

@@ -21,7 +21,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class NameOverheadGump : Gump
+    internal class NameOverheadGump : Gump
     {
         private readonly AlphaBlendControl _background;
 

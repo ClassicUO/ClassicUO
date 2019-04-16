@@ -7,7 +7,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
     //REVIEW: the interface currently is too thin. There should be
     // methods to specify the output buffer, the synthesis filters and
     // possibly other objects used by the decoder. 
-    interface IFrameDecoder
+    internal interface IFrameDecoder
     {
         /// <summary>
         ///     Decodes one frame of MPEG audio.

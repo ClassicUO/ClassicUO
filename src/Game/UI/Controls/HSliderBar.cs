@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 Width = BarWidth;
-                Height = _gumpWidget.Height;
+                if (_gumpWidget != null) Height = _gumpWidget.Height;
                 //RecalculateSliderX();
                 CalculateOffset();
             }

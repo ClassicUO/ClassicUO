@@ -26,7 +26,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class MessageBoxGump : Gump
+    internal class MessageBoxGump : Gump
     {
         private readonly Action<bool> _action;
 
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
     }
 
 
-    class EntryDialog : Gump
+    internal class EntryDialog : Gump
     {
         private readonly Action<string> _action;
         private readonly TextBox _textBox;

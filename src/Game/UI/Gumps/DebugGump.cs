@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class DebugGump : Gump
+    internal class DebugGump : Gump
     {
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly Label _label;

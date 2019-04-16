@@ -505,7 +505,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public Layer Layer { get; }
 
-            public ushort[] Pallet { get; }
+            private ushort[] Pallet { get; }
 
             public int SelectedIndex { get; }
 

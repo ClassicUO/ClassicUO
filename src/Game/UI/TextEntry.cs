@@ -132,14 +132,10 @@ namespace ClassicUO.Game.UI
 
             if (ValidationRules != 0)
             {
-                bool allowChar = false;
-
                 foreach (char c1 in c)
                 {
-                    allowChar = false;
+                    bool allowChar = (ValidationRules & (uint)Constants.RULES.SYMBOL) != 0 && ((c1 >= 33 && c1 <= 47) || (c1 >= 58 && c1 <= 64) || (c1 >= 91 && c1 <= 96) || (c1 >= 123 && c1 <= 126));
 
-                    if ((ValidationRules & (uint)Constants.RULES.SYMBOL) != 0 && ((c1 >= 33 && c1 <= 47) || (c1 >= 58 && c1 <= 64) || (c1 >= 91 && c1 <= 96) || (c1 >= 123 && c1 <= 126)) )
-                        allowChar = true;
                     if ((ValidationRules & (uint)Constants.RULES.NUMERIC) != 0 && ((c1 >= 48 && c1 <= 57) || ((ValidationRules & (uint)Constants.RULES.UNUMERIC) == 0 && Text.Length == 0 && c1 == 45)))
                         allowChar = true;
                     if ((ValidationRules & (uint)Constants.RULES.LETTER) != 0 && ((c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122)))
@@ -167,13 +163,12 @@ namespace ClassicUO.Game.UI
             {
                 char[] ch = text.ToCharArray();
                 string safeString = "";
-                bool allowChar = false;
 
                 if (ch.Length > 0)
                 {
                     foreach (char c in ch)
                     {
-                        allowChar = false;
+                        bool allowChar = false;
 
                         var c1 = (int)Convert.ToChar(c);
 

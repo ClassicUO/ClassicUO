@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.IO
 {
-    class RandomAccessFileStream
+    internal class RandomAccessFileStream
     {
         public static FileStream CreateRandomAccessFile(string fileName, string mode)
         {

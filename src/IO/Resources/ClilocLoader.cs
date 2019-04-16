@@ -9,7 +9,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class ClilocLoader : ResourceLoader
+    internal class ClilocLoader : ResourceLoader
     {
         private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
 

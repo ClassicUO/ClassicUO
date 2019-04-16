@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    abstract class AbstractEntry
+    internal abstract class AbstractEntry
     {
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {

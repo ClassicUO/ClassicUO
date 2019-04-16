@@ -3,7 +3,7 @@
     /// <summary>
     ///     Class for layer II subbands in stereo mode.
     /// </summary>
-    class SubbandLayer2Stereo : SubbandLayer2
+    internal class SubbandLayer2Stereo : SubbandLayer2
     {
         protected internal int channel2_allocation;
         protected internal float[] channel2_c = { 0 };

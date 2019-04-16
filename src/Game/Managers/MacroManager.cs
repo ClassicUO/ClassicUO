@@ -844,7 +844,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class Macro : IEquatable<Macro>, INode<Macro>
+    internal class Macro : IEquatable<Macro>, INode<Macro>
     {
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
@@ -974,7 +974,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObject : INode<MacroObject>
+    internal class MacroObject : INode<MacroObject>
     {
         [JsonConstructor]
         public MacroObject(MacroType code, MacroSubType sub)
@@ -1036,7 +1036,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObjectString : MacroObject
+    internal class MacroObjectString : MacroObject
     {
         [JsonConstructor]
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)

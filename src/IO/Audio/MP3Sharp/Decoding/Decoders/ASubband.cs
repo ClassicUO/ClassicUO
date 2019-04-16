@@ -3,7 +3,7 @@
     /// <summary>
     ///     Abstract base class for subband classes of layer I and II
     /// </summary>
-    abstract class ASubband
+    internal abstract class ASubband
     {
         /*
         *  Changes from version 1.1 to 1.2:

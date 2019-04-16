@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.UI
 {
-    class Button : Control
+    internal class Button : Control
     {
         private enum StateType
         {

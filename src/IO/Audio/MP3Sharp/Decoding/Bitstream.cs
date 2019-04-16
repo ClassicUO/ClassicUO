@@ -10,7 +10,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     REVIEW: much of the parsing currently occurs in the various decoders.
     ///     This should be moved into this class and associated inner classes.
     /// </summary>
-    sealed class Bitstream
+    internal sealed class Bitstream
     {
         /// <summary>
         ///     Maximum size of the frame buffer:
@@ -243,7 +243,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         internal int syncHeader(sbyte syncmode)
         {
             bool sync;
-            int headerstring;
 
             // read additinal 2 bytes
             int bytesRead = readBytes(m_SyncBuffer, 0, 3);
@@ -253,8 +252,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
             //_baos.write(syncbuf, 0, 3); // E.B
 
-            headerstring = ((m_SyncBuffer[0] << 16) & 0x00FF0000) | ((m_SyncBuffer[1] << 8) & 0x0000FF00) |
-                           ((m_SyncBuffer[2] << 0) & 0x000000FF);
+            int headerstring = ((m_SyncBuffer[0] << 16) & 0x00FF0000) | ((m_SyncBuffer[1] << 8) & 0x0000FF00) |
+                               ((m_SyncBuffer[2] << 0) & 0x000000FF);
 
             do
             {

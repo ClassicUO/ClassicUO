@@ -6,7 +6,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
     /// <summary>
     ///     Class allowing WaveFormat Access
     /// </summary>
-    class WaveFile : RiffFile
+    internal class WaveFile : RiffFile
     {
         public const int MAX_WAVE_CHANNELS = 2;
         private readonly int m_NumSamples;

@@ -11,7 +11,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    class DefReader : IDisposable
+    internal class DefReader : IDisposable
     {
         private const char COMMENT = '#';
 

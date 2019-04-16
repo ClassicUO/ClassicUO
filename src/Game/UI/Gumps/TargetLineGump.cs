@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TargetLineGump : Gump
+    internal class TargetLineGump : Gump
     {
         private readonly GumpPic _background;
         private readonly GumpPicWithWidth _hp;

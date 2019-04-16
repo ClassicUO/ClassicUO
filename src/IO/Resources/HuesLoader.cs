@@ -10,7 +10,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class HuesLoader : ResourceLoader
+    internal class HuesLoader : ResourceLoader
     {
         public HuesGroup[] HuesRange { get; private set; }
 
