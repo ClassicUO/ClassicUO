@@ -50,9 +50,9 @@ namespace ClassicUO.Game.Managers
         {
             if (macros != null)
             {
-                foreach (Macro macro in macros)
+                for (int i = 0; i < macros.Length; i++)
                 {
-                    AppendMacro(macro);
+                    AppendMacro(macros[i]);
                 }
             }
         }
