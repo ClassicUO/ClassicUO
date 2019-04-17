@@ -758,6 +758,8 @@ namespace ClassicUO.Game.UI.Gumps
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
 
+            _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
+
             Add(rightArea, PAGE);
         }
 
