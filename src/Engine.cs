@@ -277,6 +277,8 @@ namespace ClassicUO
 
         public static Engine Instance { get; private set; }
 
+        public static int ThreadID { get; private set; }
+
         public static int WindowWidth
         {
             get => _engine._graphicDeviceManager.PreferredBackBufferWidth;
@@ -330,6 +332,7 @@ namespace ClassicUO
                 return;
 
             Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
+            ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             using (_engine = new Engine(args))
             {

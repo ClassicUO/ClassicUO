@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -230,27 +231,50 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
+            int step = 0;
+            Item item = null;
+            StackTrace trace = new StackTrace();
             // TODO: try to figure out the weird issue :)
             try
             {
-                Item item = Items.Get(serial);
+
+                item = Items.Get(serial);
+
+                step = 1;
 
                 if (item == null)
                     return false;
 
+                step = 2;
+
                 if (item.Layer != Layer.Invalid)
                 {
+                    step = 3;
+
                     Entity e = Get(item.RootContainer);
+
+                    step = 4;
+
                     if (e != null && e.HasEquipment)
+                    {
+                        step = 5;
                         e.Equipment[(int)item.Layer] = null;
+                        step = 6;
+                    }
                 }
 
+                step = 7;
                 foreach (Item i in item.Items)
+                {
                     RemoveItem(i);
+                }
+                step = 8;
 
                 item.Items.Clear();
-                item.Destroy();
+                step = 9;
 
+                item.Destroy();
+                step = 10;
             }
             catch (Exception e)
             {
@@ -261,10 +285,13 @@ namespace ClassicUO.Game
 
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("ClassicUO [dev] - v" + Engine.Version);
-                sb.AppendLine("Thread: " + Thread.CurrentThread.Name);
-                sb.AppendLine("Serial that causes crash: " + serial);
+                sb.AppendLine($"Thread: {Thread.CurrentThread.Name} - {Thread.CurrentThread.ManagedThreadId} - Engine ThreadID {Engine.ThreadID}");
+                sb.AppendLine($"Serial that causes crash: {serial} - {(item == null ? "NULL" : item.ToString())}");
                 sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
-                sb.AppendLine("Exception:\n" + e);
+                sb.AppendLine("Step: " + step);
+                sb.AppendLine("App trace:\n: " + trace);
+                sb.AppendLine("Exception Message:\n" + e.Message);
+                sb.AppendLine("Exception StackTrace:\n" + e.StackTrace);
 
               
 
