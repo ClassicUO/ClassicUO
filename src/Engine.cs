@@ -99,6 +99,7 @@ namespace ClassicUO
         private bool _isMaximized;
         private readonly bool _isHighDPI;
 
+        public static bool DebugFocus = false;
         public static string SettingsFile = "settings.json";
 
         public bool IsQuitted { get; private set; }

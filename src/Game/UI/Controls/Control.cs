@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
-        private static SpriteTexture _debugTexture;
+        private static SpriteTexture _debugTexture, _debugFocusTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
@@ -323,32 +323,32 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawDebug(Batcher2D batcher, int x, int y)
         {
-            if (IsVisible && Engine.GlobalSettings.Debug)
+            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {
-                if (_debugTexture == null)
+                if (Engine.DebugFocus && HasKeyboardFocus)
                 {
-                    _debugTexture = new SpriteTexture(1, 1);
-
-                    _debugTexture.SetData(new Color[1]
+                    if (_debugFocusTexture == null)
                     {
-                        Color.Green
-                    });
+                        _debugFocusTexture = new SpriteTexture(1, 1);
+                        _debugFocusTexture.SetData(new Color[1]
+                        {
+                            Color.Red
+                        });
+                    }
+                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
                 }
-
-                //int w, h;
-
-                //if (Texture == null)
-                //{
-                //    w = Width;
-                //    h = Height;
-                //}
-                //else
-                //{
-                //    w = Texture.Width;
-                //    h = Texture.Height;
-                //}
-
-                batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                else if (Engine.GlobalSettings.Debug)
+                {
+                    if (_debugTexture == null)
+                    {
+                        _debugTexture = new SpriteTexture(1, 1);
+                        _debugTexture.SetData(new Color[1]
+                        {
+                            Color.Green
+                        });
+                    }
+                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                }
             }
         }
 
