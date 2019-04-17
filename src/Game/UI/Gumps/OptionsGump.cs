@@ -385,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     IsChecked = Engine.Profile.Current.GameWindowFullSize
                 };
-                _gameWindowFullsize.MouseClick += (sender, e) =>
+                _gameWindowFullsize.ValueChanged += (sender, e) =>
                 {
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
                 };
@@ -465,7 +465,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     IsChecked = Engine.Profile.Current.EnableScaleZoom
                 };
-                _zoomCheckbox.MouseClick += (sender, e) =>
+                _zoomCheckbox.ValueChanged += (sender, e) =>
                 {
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
                 };
@@ -688,7 +688,6 @@ namespace ClassicUO.Game.UI.Gumps
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = !_sliderSpeechDelay.IsVisible; };
             rightArea.Add(_scaleSpeechDelay);
 
-          
             _sliderSpeechDelay = new HSliderBar(0, 0, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             rightArea.Add(_sliderSpeechDelay);
 
