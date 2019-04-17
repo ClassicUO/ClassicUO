@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI
             IsChanged = true;
         }
 
-        public void UpdateCaretPosition(bool changes = false)
+        public void UpdateCaretPosition()
         {
             int x, y;
 
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI
             else
                 Offset = 0;
 
-            if (!changes && IsChanged)
+            if (IsChanged)
                 IsChanged = false;
         }
 

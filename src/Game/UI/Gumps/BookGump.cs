@@ -539,7 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                             oldcaretpos++;
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage], true);
+                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
                     }
                     else
                     {
@@ -556,18 +556,19 @@ namespace ClassicUO.Game.UI.Gumps
                             else
                                 break;
                         }
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage], true);
+                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
                     }
+                    PageChanged[oldpage + 1] = true;//for the last page we are setting the changed status, this is the page we are on with caret.
                     SetActivePage((oldpage >> 1) + (oldpage % 2) + 1);
                 }
             }
         }
 
-        private void RefreshShowCaretPos(int pos, MultiLineBox box, bool changes = false)
+        private void RefreshShowCaretPos(int pos, MultiLineBox box)
         {
             box.SetKeyboardFocus();
             box.TxEntry.SetCaretPosition(pos);
-            box.TxEntry.UpdateCaretPosition(changes);
+            box.TxEntry.UpdateCaretPosition();
         }
 
         internal sealed class PBookHeader : PacketWriter
@@ -631,25 +632,27 @@ namespace ClassicUO.Game.UI.Gumps
                     WriteUShort( (ushort)(changed[i]) );
                     MultiLineEntry mle = gump.m_Pages[changed[i] - 1].TxEntry;
                     StringBuilder sb = new StringBuilder(mle.Text);
+                    int rows = 0;
                     if (sb.Length > 0)
                     {
-                        var lcc = mle.GetLinesCharsCount();
-                        for (int l = Math.Min(MaxBookLines - 1, lcc.Length - 1); l >= 0; --l)
+                        var lcc = mle.GetLinesCharsCount(mle.Text);
+                        rows = Math.Min(MaxBookLines, lcc.Length);
+                        int pos = lcc.Sum();
+                        for (int l = rows - 1; l >= 0; --l)
                         {
-                            if (sb.Length < lcc[l] && (lcc[l] > (MaxBookChars - 1) || sb[lcc[l]] != '\n'))
+                            if (pos > 0 && (lcc[l] == 0 || sb[pos - 1] != '\n'))
                             {
-                                sb.Insert(lcc[l], '\n');
+                                sb.Insert(pos, '\n');
                             }
+                            pos -= lcc[l];
                         }
                     }
-                    var splits = gump.m_Pages[changed[i]-1].Text.Split( '\n' );
+                    var splits = sb.ToString().Split( '\n' );
                     int length = splits.Length;
-                    bool allowdestack = true;
                     WriteUShort( (ushort)Math.Min(length, MaxBookLines) );
                     if( length > MaxBookLines && changed[i] >= gump.BookPageCount )
                     {
                         Log.Message( LogTypes.Error, $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost" );
-                        allowdestack = false;
                     }
                     for ( int j = 0; j < length; j++ )
                     {
@@ -677,16 +680,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                                 WriteASCII(splits[j]);
                             }
-                        }
-                        else if(allowdestack)
-                        {
-                            int idx = Position;
-                            Seek(7);
-                            gump.m_Pages[changed[i]].Text = gump.m_Pages[changed[i]].Text.Insert(0, $"{splits[j]}\n");
-                            changed.Insert(0, changed[i]);
-                            WriteUShort((ushort)changed.Count);
-                            Seek(idx);
-                            i++;
                         }
                     }
                 }
