@@ -330,7 +330,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_amount >= 1000)
                 {
-                    text = $"{text[0]}K+";
+                    if (text.Length > 4) 
+                    {
+                        if (text.Length > 5) // >= 100.000
+                            text = $"{text.Substring(0, 3)}K+";
+                        else // <= 10.000
+                            text = $"{text.Substring(0, 2)}K+";
+                    }
+                    else // 1.000
+                    {
+                        text = $"{text[0]}K+";
+                    }
                 }
 
                 batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
