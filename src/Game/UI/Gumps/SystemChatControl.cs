@@ -83,7 +83,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Height - height - 3,
                 Width = Width,
                 Height = height - 3,
-                IsVisible = (!Engine.Profile.Current.ActivateChatAfterEnter)
             };
 
             Add(_trans = new AlphaBlendControl
@@ -98,6 +97,11 @@ namespace ClassicUO.Game.UI.Gumps
             Add(textBox);
 
             _trans.MouseClick += (sender, e) =>
+            {
+                if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
+                    ToggleChatVisibility();
+            };
+            _trans.DragBegin += (sender, e) =>
             {
                 if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
                     ToggleChatVisibility();
