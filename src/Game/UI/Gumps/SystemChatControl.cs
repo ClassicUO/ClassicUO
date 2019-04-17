@@ -60,6 +60,18 @@ namespace ClassicUO.Game.UI.Gumps
         private int _messageHistoryIndex = -1;
         private ChatMode _mode = ChatMode.Default;
         private readonly AlphaBlendControl _trans;
+        
+        private bool _isActive;
+
+        public bool IsActive
+        {
+            get => _isActive;
+            set
+            {
+                _isActive = value;
+                textBox.X = (_isActive) ? 0 : 10;
+            }
+        }
 
         public readonly TextBox textBox;
 
@@ -84,6 +96,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = Width,
                 Height = height - 3,
             };
+
+            IsActive = (!Engine.Profile.Current.ActivateChatAfterEnter);
 
             Add(_trans = new AlphaBlendControl
             {
@@ -132,24 +146,24 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ToggleChatVisibility()
         {
-            ChatVisibility = !textBox.IsVisible;
+            ChatVisibility = !IsActive;
         }
 
         public bool ChatVisibility
         {
-            get => textBox.IsVisible;
+            get => IsActive;
             set
             {
                 if (value)
                 {
-                    Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = _trans.IsVisible = value;
+                    Engine.Profile.Current.ActivateChatStatus = IsActive = _trans.IsVisible = value;
                     _trans.Y = textBox.Y;
                     textBox.SetText(string.Empty);
                     textBox.SetKeyboardFocus();
                 }
                 else
                 {
-                    Engine.Profile.Current.ActivateChatStatus = textBox.IsVisible = value;
+                    Engine.Profile.Current.ActivateChatStatus = IsActive = value;
                     _trans.Y = textBox.Y + ((Engine.Profile.Current.ActivateChatCompletelyHide) ? 20 : 10);
                 }
             }
@@ -436,11 +450,15 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     break;
             }
+
+            if (!ChatVisibility)
+                return;
+
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!textBox.IsVisible && Engine.Profile.Current.ActivateChatAfterEnter)
+            if (!IsActive && Engine.Profile.Current.ActivateChatAfterEnter)
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
