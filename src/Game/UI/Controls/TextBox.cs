@@ -193,6 +193,7 @@ namespace ClassicUO.Game.UI.Controls
                         s = TxEntry.Text;
                         Parent?.OnKeyboardReturn(0, s);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
                         if (!IsEditable)
                             return;
@@ -201,21 +202,27 @@ namespace ClassicUO.Game.UI.Controls
                         else
                             ReplaceDefaultTextOnFirstKeyPress = false;
                         break;
+
                     case SDL.SDL_Keycode.SDLK_LEFT:
                         TxEntry.SeekCaretPosition(-1);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_RIGHT:
                         TxEntry.SeekCaretPosition(1);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_DELETE:
                         TxEntry.RemoveChar(false);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_HOME:
                         TxEntry.SetCaretPosition(0);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_END:
                         TxEntry.SetCaretPosition(Text.Length - 1);
                         break;
+
                     case SDL.SDL_Keycode.SDLK_TAB:
                         Parent.KeyboardTabToNextFocus(this);
                         break;

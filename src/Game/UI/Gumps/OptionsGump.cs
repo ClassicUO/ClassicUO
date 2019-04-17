@@ -982,7 +982,7 @@ namespace ClassicUO.Game.UI.Gumps
                     WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                     if (systemchat != null)
-                        systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+                        systemchat.IsActive = !_chatAfterEnter.IsChecked;
 
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
@@ -1083,7 +1083,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                 if (systemchat != null)
-                    systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+                    systemchat.IsActive = !_chatAfterEnter.IsChecked;
 
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
