@@ -11,7 +11,7 @@ using SDL2;
 
 namespace ClassicUO.Utility
 {
-    static class SDL2EX
+    internal static class SDL2EX
     {
         public delegate IntPtr OnSDLLoadObject(StringBuilder sb);
         public delegate IntPtr OnLoadFunction(IntPtr module, StringBuilder sb);

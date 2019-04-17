@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class FadeOutLabel : Label
+    internal class FadeOutLabel : Label
     {
         private float _timeToLive;
 

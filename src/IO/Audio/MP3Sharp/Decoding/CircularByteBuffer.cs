@@ -3,7 +3,7 @@
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 {
     [Serializable]
-class CircularByteBuffer
+    internal class CircularByteBuffer
     {
         private byte[] m_DataArray;
         private int m_Index;

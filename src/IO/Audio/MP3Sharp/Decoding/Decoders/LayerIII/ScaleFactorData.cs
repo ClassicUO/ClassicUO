@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class ScaleFactorData
+    internal class ScaleFactorData
     {
         public int[] l; /* [cb] */
         public int[][] s; /* [window][cb] */

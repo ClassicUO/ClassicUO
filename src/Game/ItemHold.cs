@@ -10,7 +10,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game
 {
-    class ItemHold
+    internal class ItemHold
     {
         public bool OnGround { get; private set; }
         public Position Position { get; private set; }

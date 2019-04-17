@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial { get; internal set; }
+        public Serial Serial { get; set; }
 
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
 

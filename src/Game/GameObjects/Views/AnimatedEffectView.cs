@@ -34,58 +34,62 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class AnimatedItemEffect
+    internal sealed partial class AnimatedItemEffect
     {
         private Graphic _displayedGraphic = Graphic.INVALID;
 
         private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+            };
 
-            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero;
-            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
-
+            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
   
         private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
+            };
 
-           /* state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
-            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One;
-
+            /* state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
         private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
+            };
 
-            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
-            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha;
-
+            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
         private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+            };
 
-            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor;
-            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
-
+            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
         private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>(() =>
         {
-            BlendState state = new BlendState();
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
+            };
 
-            /*state.AlphaSourceBlend =*/ state.ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor;
-            /*state.AlphaDestinationBlend =*/ state.ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor;
-            /*state.AlphaBlendFunction =*/ state.ColorBlendFunction = BlendFunction.ReverseSubtract;
-
+            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/ /*state.AlphaBlendFunction =*/
             return state;
         });
 
@@ -146,8 +150,11 @@ namespace ClassicUO.Game.GameObjects
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = (Texture.Width >> 1) - 22 - (int)Offset.X;
-            Bounds.Y = Texture.Height - 44 + (int)(Offset.Z - Offset.Y);
+            if (Texture != null)
+            {
+                Bounds.X = (Texture.Width >> 1) - 22 - (int) Offset.X;
+                Bounds.Y = Texture.Height - 44 + (int) (Offset.Z - Offset.Y);
+            }
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[Graphic];
 

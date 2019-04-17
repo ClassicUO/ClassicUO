@@ -10,7 +10,7 @@ using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class HotkeyControl : Control
+    internal class HotkeyControl : Control
     {
         private readonly List<HotkeyBox> _hotkesBoxes = new List<HotkeyBox>();
         private readonly HotkeyAction _key;
@@ -59,7 +59,8 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             if (_hotkesBoxes.Count != 0)
-                box.Y = _hotkesBoxes.LastOrDefault().Bounds.Bottom;
+            { box.Y = _hotkesBoxes[_hotkesBoxes.Count - 1].Bounds.Bottom; }
+
 
             _hotkesBoxes.Add(box);
 

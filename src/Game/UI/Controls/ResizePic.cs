@@ -70,8 +70,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-                _gumpTexture[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _gumpTexture)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 

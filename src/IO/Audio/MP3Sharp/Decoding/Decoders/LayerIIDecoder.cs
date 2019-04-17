@@ -5,7 +5,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
     /// <summary>
     ///     Implements decoding of MPEG Audio Layer II frames.
     /// </summary>
-    class LayerIIDecoder : LayerIDecoder, IFrameDecoder
+    internal class LayerIIDecoder : LayerIDecoder, IFrameDecoder
     {
         protected internal override void CreateSubbands()
         {

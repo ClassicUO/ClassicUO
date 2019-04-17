@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class LightningEffect
+    internal sealed partial class LightningEffect
     {
         private static readonly Point[] _offsets =
         {

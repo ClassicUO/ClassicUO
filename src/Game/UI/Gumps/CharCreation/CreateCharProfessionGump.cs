@@ -72,10 +72,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
 
-                if (charCreationGump != null)
-                {
-                    charCreationGump.SetProfession(info);
-                }
+                charCreationGump?.SetProfession(info);
             }
         }
 
@@ -111,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfoGump : Control
     {
-        private ProfessionInfo _info;
+        private readonly ProfessionInfo _info;
 
         public Action<ProfessionInfo> Selected;
 

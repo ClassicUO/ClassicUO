@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    class OverheadMessage
+    internal class OverheadMessage
     {
         private readonly Deque<MessageInfo> _messages;
         private Rectangle _rectangle;
@@ -337,7 +337,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    class OverheadDamage
+    internal class OverheadDamage
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
 
@@ -521,7 +521,7 @@ namespace ClassicUO.Game.GameObjects
 
     }
 
-    class MessageInfo : IGameEntity
+    internal class MessageInfo : IGameEntity
     {
         public RenderedText RenderedText;
         public float Time, SecondTime;

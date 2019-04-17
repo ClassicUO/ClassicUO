@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class MovingEffect
+    internal sealed partial class MovingEffect
     {
         private Graphic _displayedGraphic = Graphic.INVALID;
 

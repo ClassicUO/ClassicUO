@@ -2,7 +2,7 @@
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
-    class LoginBackground : Gump
+    internal class LoginBackground : Gump
     {
         public LoginBackground() : base (0, 0)
         {

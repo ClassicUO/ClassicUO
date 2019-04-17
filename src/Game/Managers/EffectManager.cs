@@ -45,8 +45,8 @@ namespace ClassicUO.Game.Managers
 
                     if (effect.Children.Count > 0)
                     {
-                        for (int j = 0; j < effect.Children.Count; j++)
-                            _effects.Add(effect.Children[j]);
+                        foreach (GameEffect t in effect.Children)
+                            _effects.Add(t);
                     }
                 }
             }

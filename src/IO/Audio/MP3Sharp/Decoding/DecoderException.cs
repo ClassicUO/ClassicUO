@@ -8,7 +8,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     errors that can occur when decoding MPEG audio.
     /// </summary>
     [Serializable]
-class DecoderException : MP3SharpException
+    internal class DecoderException : MP3SharpException
     {
         private int m_ErrorCode;
 

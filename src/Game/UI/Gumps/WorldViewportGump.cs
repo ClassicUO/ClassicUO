@@ -69,8 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Point n = ResizeWindow(_lastSize);
 
                     OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
-                    if (options != null)
-                        options.UpdateVideo();
+                    options?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
                         NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
@@ -154,8 +153,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
-            if (options != null)
-                options.UpdateVideo();
+            options?.UpdateVideo();
         }
 
         private void Resize()
@@ -205,8 +203,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _borders.Length; i++)
-                _borders[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _borders)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 

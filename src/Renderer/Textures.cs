@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    static class Textures
+    internal static class Textures
     {
         private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
 

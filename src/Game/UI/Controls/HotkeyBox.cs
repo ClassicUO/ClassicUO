@@ -16,7 +16,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class HotkeyBox : Control
+    internal class HotkeyBox : Control
     {
         private readonly HoveredLabel _label;
         private readonly Button _buttonOK, _buttonCancel;
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Controls
             IsActive = false;       
         }
 
-        enum ButtonState
+        private enum ButtonState
         {
             Ok,
             Cancel

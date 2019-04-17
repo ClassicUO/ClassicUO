@@ -106,10 +106,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 int action = int.Parse(parts[5]);
 
-                if (action == 0)
-                    ButtonAction = ButtonAction.SwitchPage;
-                else
-                    ButtonAction = ButtonAction.Activate;
+                ButtonAction = action == 0 ? ButtonAction.SwitchPage : ButtonAction.Activate;
             }
             
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
@@ -170,10 +167,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            for (int i = 0; i < _textures.Length; i++)
+            foreach (SpriteTexture t in _textures)
             {
-                if (_textures[i] != null)
-                    _textures[i].Ticks = Engine.Ticks;
+                if (t != null)
+                    t.Ticks = Engine.Ticks;
             }
         }
 
@@ -284,9 +281,11 @@ namespace ClassicUO.Game.UI.Controls
             return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
-        public override void Dispose()
+        public sealed override void Dispose()
         {
-            for (int i = 0; i < _fontTexture.Length; i++) _fontTexture[i]?.Destroy();
+            foreach (RenderedText t in _fontTexture)
+                t?.Destroy();
+
             base.Dispose();
         }
     }

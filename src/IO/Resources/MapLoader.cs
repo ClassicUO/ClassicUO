@@ -11,7 +11,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class MapLoader : ResourceLoader
+    internal class MapLoader : ResourceLoader
     {
         internal const int MAPS_COUNT = 6;
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];

@@ -229,7 +229,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        private static byte[] _emtpyBytes = { };
+        private static readonly byte[] _emtpyBytes = { };
         public byte[] ReadArray(int count)
         {
             if (EnsureSize(count))

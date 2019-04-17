@@ -28,7 +28,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Static : GameObject
+    internal sealed partial class Static : GameObject
     {
         private StaticTiles? _itemData;
 

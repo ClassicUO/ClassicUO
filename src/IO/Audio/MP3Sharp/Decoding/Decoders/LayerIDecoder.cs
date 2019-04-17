@@ -6,7 +6,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
     /// <summary>
     ///     Implements decoding of MPEG Audio Layer I frames.
     /// </summary>
-    class LayerIDecoder : IFrameDecoder
+    internal class LayerIDecoder : IFrameDecoder
     {
         protected internal ABuffer buffer;
         protected internal Crc16 crc;

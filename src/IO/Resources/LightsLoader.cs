@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class LightsLoader : ResourceLoader<SpriteTexture>
+    internal class LightsLoader : ResourceLoader<SpriteTexture>
     {
         private  UOFileMul _file;
 

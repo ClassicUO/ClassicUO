@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    abstract class AbstractEntry
+    internal abstract class AbstractEntry
     {
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
@@ -180,10 +180,7 @@ namespace ClassicUO.Game.UI
             else if(_selectionArea != (0,0))
             {
                 int start = -1, end = CaretIndex;
-                if (RenderText.IsUnicode)
-                    start = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-                else
-                    start = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
                 if (start != -1)
                 {
                     if(start > end)
@@ -192,9 +189,12 @@ namespace ClassicUO.Game.UI
                         start = end;
                         end = copy;
                     }
-                    int rx, ry;
+
                     for(int i = start; i <= end; i++)
                     {
+                        int rx;
+                        int ry;
+
                         if (RenderText.IsUnicode)
                             (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort)RenderText.FontStyle);
                         else
@@ -209,10 +209,7 @@ namespace ClassicUO.Game.UI
         {
             int oldPos = CaretIndex;
 
-            if (RenderText.IsUnicode)
-                CaretIndex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-            else
-                CaretIndex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            CaretIndex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
@@ -227,11 +224,7 @@ namespace ClassicUO.Game.UI
         private bool _isSelection = false;
         internal void OnSelectionEnd(int x, int y)
         {
-            int endindex;
-            if (RenderText.IsUnicode)
-                endindex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-            else
-                endindex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            int endindex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
             _isSelection = false;
             if (endindex == CaretIndex)
             {
@@ -246,11 +239,8 @@ namespace ClassicUO.Game.UI
         {
             if (_selectionArea == (0, 0))
                 return string.Empty;
-            int startidx, endidx = CaretIndex;
-            if (RenderText.IsUnicode)
-                startidx = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-            else
-                startidx = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            int endidx = CaretIndex;
+            int startidx = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
             if(startidx > CaretIndex)
             {
                 int copy = startidx;

@@ -50,9 +50,9 @@ namespace ClassicUO.Game.Managers
         {
             if (macros != null)
             {
-                foreach (Macro macro in macros)
+                for (int i = 0; i < macros.Length; i++)
                 {
-                    AppendMacro(macro);
+                    AppendMacro(macros[i]);
                 }
             }
         }
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        Chat.Say(mos.Text, hue, type);
+                        GameActions.Say(mos.Text, hue, type);
                     }
 
                     break;
@@ -648,7 +648,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
-                    Chat.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
+                    GameActions.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
                     break;
                 case MacroType.SaveDesktop:
                     Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
@@ -738,7 +738,7 @@ namespace ClassicUO.Game.Managers
 
                         World.ViewRange = res;
 
-                        Chat.Print($"ViewRange is now {res}.");
+                        GameActions.Print($"ViewRange is now {res}.");
                     }
                     break;
                 case MacroType.IncreaseUpdateRange:
@@ -746,27 +746,27 @@ namespace ClassicUO.Game.Managers
                     if (World.ViewRange > Constants.MAX_VIEW_RANGE)
                         World.ViewRange = Constants.MAX_VIEW_RANGE;
 
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.DecreaseUpdateRange:
                     World.ViewRange--;
                     if (World.ViewRange < Constants.MIN_VIEW_RANGE)
                         World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.MinUpdateRange:
                     World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
@@ -833,8 +833,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ToggleChatVisibility:
                     viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
-                    if (systemchat != null)
-                        systemchat.ToggleChatVisibility();
+                    systemchat?.ToggleChatVisibility();
                     break;
 
             }
@@ -845,7 +844,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class Macro : IEquatable<Macro>, INode<Macro>
+    internal class Macro : IEquatable<Macro>, INode<Macro>
     {
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
@@ -975,7 +974,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObject : INode<MacroObject>
+    internal class MacroObject : INode<MacroObject>
     {
         [JsonConstructor]
         public MacroObject(MacroType code, MacroSubType sub)
@@ -1037,7 +1036,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObjectString : MacroObject
+    internal class MacroObjectString : MacroObject
     {
         [JsonConstructor]
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)

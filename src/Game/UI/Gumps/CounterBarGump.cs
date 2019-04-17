@@ -17,7 +17,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class CounterBarGump : Gump
+    internal class CounterBarGump : Gump
     {
         private AlphaBlendControl _background;
 
@@ -160,9 +160,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            for (int i = 0; i < indices.Length; i++)
+            foreach (int index in indices)
             {
-                int index = indices[i];
                 if (index != -1 && index < items.Length)
                 {
                     items[index].Dispose();
@@ -183,10 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(controls.Length);
 
-            for (int i = 0; i < controls.Length; i++)
+            foreach (CounterItem c in controls)
             {
-                var c = controls[i];
-
                 writer.Write(c.Graphic);
             }
         }
@@ -214,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-        class CounterItem : Control
+        private class CounterItem : Control
         {
             private TextureControl _controlPic;
             private Graphic _graphic;
@@ -333,7 +330,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_amount >= 1000)
                 {
-                    text = $"{text[0]}K+";
+                    if (text.Length > 4) 
+                    {
+                        if (text.Length > 5) // >= 100.000
+                            text = $"{text.Substring(0, 3)}K+";
+                        else // <= 10.000
+                            text = $"{text.Substring(0, 2)}K+";
+                    }
+                    else // 1.000
+                    {
+                        text = $"{text[0]}K+";
+                    }
                 }
 
                 batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);

@@ -21,7 +21,7 @@
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class LightningEffect : GameEffect
+    internal sealed partial class LightningEffect : GameEffect
     {
         public LightningEffect(Hue hue)
         {

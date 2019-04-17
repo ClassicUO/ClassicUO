@@ -38,7 +38,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private sbyte _maxGroundZ;
@@ -537,7 +537,7 @@ namespace ClassicUO.Game.Scenes
     }
 
 
-    class ArrayWeak<T> where T : class
+    internal class ArrayWeak<T> where T : class
     {
         private T[] _array;
 

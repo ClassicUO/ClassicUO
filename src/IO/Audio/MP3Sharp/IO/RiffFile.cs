@@ -6,7 +6,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
     /// <summary>
     ///     Class to manage RIFF files
     /// </summary>
-    class RiffFile
+    internal class RiffFile
     {
         protected const int DDC_SUCCESS = 0; // The operation succeded
         protected const int DDC_FAILURE = 1; // The operation failed for unspecified reasons

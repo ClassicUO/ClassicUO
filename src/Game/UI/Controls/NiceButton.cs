@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class NiceButton : HitBox
+    internal class NiceButton : HitBox
     {
         private bool _isSelected;
         private readonly ButtonAction _action;
@@ -76,16 +76,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal static NiceButton GetSelected(Control p, int group)
         {
-            IEnumerable<NiceButton> list;
-
-            if (p is ScrollArea)
-            {
-                list = p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>());
-            }
-            else
-            {
-                list = p.FindControls<NiceButton>();
-            }
+            IEnumerable<NiceButton> list = p is ScrollArea ? p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>()) : p.FindControls<NiceButton>();
 
             foreach (var b in list)
             {

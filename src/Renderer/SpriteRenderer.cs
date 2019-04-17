@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    static class SpriteRenderer
+    internal static class SpriteRenderer
     {
         /* The main target of this class it to reduce the amount of properties around the objects.
            Than it will be useful in future when i'll implement the ECS system*/

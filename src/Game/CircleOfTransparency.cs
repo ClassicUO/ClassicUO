@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
 {
-    class CircleOfTransparency
+    internal class CircleOfTransparency
     {
         private Texture2D _texture;
         private short _width, _height;
@@ -63,17 +63,19 @@ namespace ClassicUO.Game
 
         private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
         {
-            DepthStencilState state = new DepthStencilState();
+            DepthStencilState state = new DepthStencilState
+            {
+                DepthBufferEnable = false,
+                StencilEnable = true,
+                StencilFunction = CompareFunction.Always,
+                ReferenceStencil = 1,
+                StencilMask = 1,
+                StencilFail = StencilOperation.Keep,
+                StencilDepthBufferFail = StencilOperation.Keep,
+                StencilPass = StencilOperation.Replace
+            };
 
-            state.DepthBufferEnable = false;
-            state.StencilEnable = true;
-            state.StencilFunction = CompareFunction.Always;
-            state.ReferenceStencil = 1;
-            state.StencilMask = 1;
 
-            state.StencilFail = StencilOperation.Keep;
-            state.StencilDepthBufferFail = StencilOperation.Keep;
-            state.StencilPass = StencilOperation.Replace;
 
             return state;
         });

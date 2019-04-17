@@ -4,7 +4,7 @@ using ClassicUO.Input;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class AnchorableGump : Gump
+    internal class AnchorableGump : Gump
     {
         public string AnchorGroupName { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }

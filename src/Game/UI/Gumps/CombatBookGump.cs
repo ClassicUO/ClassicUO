@@ -11,10 +11,10 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class CombatBookGump : Gump
+    internal class CombatBookGump : Gump
     {
-        private int _abilityCount = Constants.MAX_ABILITIES_COUNT;
-        private int _dictionaryPagesCount = 3;
+        private readonly int _abilityCount = Constants.MAX_ABILITIES_COUNT;
+        private readonly int _dictionaryPagesCount = 3;
         private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
 
         public CombatBookGump(int x, int y) : base(0 ,0)

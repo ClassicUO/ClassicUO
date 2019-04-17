@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Controls
 	    {
 		    ClearTooltip();
 
-		    if (entity != null & !entity.IsDestroyed)
+		    if (entity != null && !entity.IsDestroyed)
 			    Tooltip = entity;
 	    }
 
@@ -467,10 +467,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool initializedKeyboardFocusedControl = false;
 
-            for (int i = 0; i < _children.Count; i++)
+            foreach (Control c in _children)
             {
-                Control c = _children[i];
-
                 if (!c.IsInitialized && !IsDisposed)
                 {
                     c.Initialize();

@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer.UI
 {
-    class Panel : Control
+    internal class Panel : Control
     {
         private readonly Color _color;
         public Panel(int x, int y, int w, int h, Color color)

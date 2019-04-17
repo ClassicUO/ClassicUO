@@ -5,7 +5,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// <summary>
     /// Implements a Huffman decoder.
     /// </summary>
-    sealed class Huffman
+    internal sealed class Huffman
     {
         private const int MXOFF = 250;
         private const int HTN = 34;

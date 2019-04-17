@@ -135,15 +135,15 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 Width = BarWidth;
-                Height = _gumpWidget.Height;
+                if (_gumpWidget != null) Height = _gumpWidget.Height;
                 //RecalculateSliderX();
                 CalculateOffset();
             }
 
             if (_gumpSpliderBackground != null)
             {
-                for (int i = 0; i < _gumpSpliderBackground.Length; i++)
-                    _gumpSpliderBackground[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpSpliderBackground)
+                    t.Ticks = (long) totalMS;
             }
 
             //ModifyPairedValues(_newValue - Value);

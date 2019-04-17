@@ -9,7 +9,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// <author>
     ///     Mat McGowan
     /// </author>
-    class OutputChannels
+    internal class OutputChannels
     {
         /// <summary>
         ///     Flag to indicate output should include both channels.

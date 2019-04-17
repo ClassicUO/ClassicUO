@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class UseAbilityButtonGump : AnchorableGump
+    internal class UseAbilityButtonGump : AnchorableGump
     {
         private AbilityDefinition _definition;
         private GumpPic _button;

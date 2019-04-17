@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ClassicUO.Network
 {
-    class Updater
+    internal class Updater
     {
         private const string REPO_USER = "andreakarasho";
         private const string REPO_NAME = "ClassicUO";

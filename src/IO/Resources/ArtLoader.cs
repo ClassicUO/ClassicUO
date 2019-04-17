@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    class ArtLoader : ResourceLoader<ArtTexture>
+    internal class ArtLoader : ResourceLoader<ArtTexture>
     {
         private UOFile _file;
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();

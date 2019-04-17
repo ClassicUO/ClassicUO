@@ -692,7 +692,7 @@ namespace ClassicUO.Renderer
         }
     }
 
-    class Resources
+    internal class Resources
     {
         private static byte[] GetResource(string name)
         {

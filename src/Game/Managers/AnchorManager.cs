@@ -211,8 +211,8 @@ namespace ClassicUO.Game.Managers
 
         public class AnchorGroup
         {
-            AnchorableGump[,] controlMatrix;
-            int updateCount = 0;
+            private AnchorableGump[,] controlMatrix;
+            private int updateCount = 0;
 
             public AnchorGroup(AnchorableGump initial)
             {

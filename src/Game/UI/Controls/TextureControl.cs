@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class TextureControl : Control
+    internal class TextureControl : Control
     {
         public TextureControl()
         {

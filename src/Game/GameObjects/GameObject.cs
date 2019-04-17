@@ -28,7 +28,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    interface IGameEntity
+    internal interface IGameEntity
     {
         bool IsSelected { get; set; }
     }
@@ -199,9 +199,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public event EventHandler Disposed;
-        public event EventHandler OverheadAdded; 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
         {
@@ -231,9 +228,6 @@ namespace ClassicUO.Game.GameObjects
             //OverheadAdded?.Raise(this);
         }
 
-        public void InvokeOverHeadAdd(MessageType type, string text, byte font, Hue hue, bool isunicode)
-            => OverheadAdded.Raise();
-
 
         protected virtual void OnPositionChanged()
         {
@@ -247,7 +241,6 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             IsDestroyed = true;
-            Disposed.Raise();
 
             _tile?.RemoveGameObject(this);
             _tile = null;

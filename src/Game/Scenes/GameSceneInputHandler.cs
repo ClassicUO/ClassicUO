@@ -39,7 +39,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
         private double _dequeueAt;
         private bool _inqueue;
@@ -154,10 +154,8 @@ namespace ClassicUO.Game.Scenes
                 else if (IsHoldingItem)
                 {
                     SelectedObject = null;
-      
-                    GameObject obj = _mousePicker.MouseOverObject as GameObject;
 
-                    if (obj != null && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                    if (_mousePicker.MouseOverObject is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                     {
                         switch (obj)
                         {
@@ -285,9 +283,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject as GameObject, out var itemdata) && itemdata.IsSurface))
                     {
-                        GameObject obj = _mousePicker.MouseOverObject as GameObject;
-
-                        if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                        if (_mousePicker.MouseOverObject is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
                             e.Result = true;

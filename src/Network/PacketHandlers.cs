@@ -325,7 +325,7 @@ namespace ClassicUO.Network
                     World.Player.Mana = p.ReadUShort();
                     World.Player.ManaMax = p.ReadUShort();
                     World.Player.Gold = p.ReadUInt();
-                    World.Player.ResistPhysical = p.ReadUShort();
+                    World.Player.PhysicalResistence = p.ReadUShort();
                     World.Player.Weight = p.ReadUShort();
 
 
@@ -340,13 +340,13 @@ namespace ClassicUO.Network
                         int deltaInt = intell - currentInt;
 
                         if (deltaStr != 0)
-                            Chat.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
                         if (deltaDex != 0)
-                            Chat.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
 
                         if (deltaInt != 0)
-                            Chat.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
                     }
 
                     World.Player.Strength = str;
@@ -377,10 +377,10 @@ namespace ClassicUO.Network
 
                     if (type >= 4) //AOS
                     {
-                        World.Player.ResistFire = p.ReadUShort();
-                        World.Player.ResistCold = p.ReadUShort();
-                        World.Player.ResistPoison = p.ReadUShort();
-                        World.Player.ResistEnergy = p.ReadUShort();
+                        World.Player.FireResistance = p.ReadUShort();
+                        World.Player.ColdResistance = p.ReadUShort();
+                        World.Player.PoisonResistance = p.ReadUShort();
+                        World.Player.EnergyResistance = p.ReadUShort();
                         World.Player.Luck = p.ReadUShort();
                         World.Player.DamageMin = p.ReadUShort();
                         World.Player.DamageMax = p.ReadUShort();
@@ -389,18 +389,18 @@ namespace ClassicUO.Network
 
                     if (type >= 6)
                     {
-                        World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
                         World.Player.DamageIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
                         World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
-                        World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
+                        World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
                         World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
                         World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
                         World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort) 0 : p.ReadUShort();
@@ -633,7 +633,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, name, hue, type, font);
+            Chat.HandleMessage(entity, text, name, hue, type, font);
         }
 
         private static void DeleteObject(Packet p)
@@ -1033,7 +1033,7 @@ namespace ClassicUO.Network
 
             if (code < 5)
             {
-                Chat.OnMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, MessageFont.Normal);
+                Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, MessageFont.Normal);
             }
         }
 
@@ -2326,7 +2326,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, name, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
+            Chat.HandleMessage(entity, text, name, hue, type, (MessageFont)Engine.Profile.Current.ChatFont, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -2877,7 +2877,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, text, name, hue, type, font, true);
+            Chat.HandleMessage(entity, text, name, hue, type, font, true);
         }
 
         private static void UnicodePrompt(Packet p)

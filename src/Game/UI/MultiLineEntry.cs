@@ -87,8 +87,8 @@ namespace ClassicUO.Game.UI
                     c = text;
 
                     text = text.Remove(Math.Min(Math.Max(0, text.Length - 1), text.Length - count));
-                    c = (c.Length > text.Length) ? c.Substring(text.Length) : null;
-                    count -= c.Length;
+                    c = c.Length > text.Length ? c.Substring(text.Length) : null;
+                    if (c != null) count -= c.Length;
                 }
                 else
                     c = null;
@@ -123,10 +123,7 @@ namespace ClassicUO.Game.UI
                         CaretIndex--;
                     }
 
-                    if (CaretIndex < text.Length)
-                        text = text.Remove(CaretIndex, 1);
-                    else
-                        text = text.Remove(text.Length - 1);
+                    text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
                     width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }

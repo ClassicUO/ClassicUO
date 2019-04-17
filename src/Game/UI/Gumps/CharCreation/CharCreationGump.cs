@@ -87,11 +87,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 			SetAttributes();
 
-			if (_selectedProfession.DescriptionIndex > 0)
-				SetStep(CharCreationStep.ChooseCity);
-			else
-				SetStep(CharCreationStep.ChooseTrade);
-		}
+            SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+        }
 
 		public void CreateCharacter(byte profession)
         {

@@ -12,7 +12,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
-    class FontsLoader : ResourceLoader
+    internal class FontsLoader : ResourceLoader
     {
         private const int UOFONT_SOLID = 0x0001;
         private const int UOFONT_ITALIC = 0x0002;

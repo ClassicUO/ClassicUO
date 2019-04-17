@@ -19,7 +19,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
+    internal class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
     {
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];

@@ -90,20 +90,22 @@ namespace ClassicUO.Game.UI.Controls
 
         private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
         {
-            DepthStencilState state = new DepthStencilState();
+            DepthStencilState state = new DepthStencilState
+            {
+                DepthBufferEnable = false,
+                StencilEnable = false,
+                StencilFunction = CompareFunction.Always,
+                ReferenceStencil = 1,
+                StencilMask = 1,
+                StencilFail = StencilOperation.Keep,
+                StencilDepthBufferFail = StencilOperation.Keep,
+                StencilPass = StencilOperation.Replace,
+                TwoSidedStencilMode = false
+            };
 
-            state.DepthBufferEnable = false;
-            state.StencilEnable = false;
 
-            state.StencilFunction = CompareFunction.Always;
-            state.ReferenceStencil = 1;
-            state.StencilMask = 1;
 
-            state.StencilFail = StencilOperation.Keep;
-            state.StencilDepthBufferFail = StencilOperation.Keep;
-            state.StencilPass = StencilOperation.Replace;
 
-            state.TwoSidedStencilMode = false;
 
             return state;
         });
@@ -111,8 +113,11 @@ namespace ClassicUO.Game.UI.Controls
 
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
-            BlendState blend = new BlendState();
-            blend.ColorWriteChannels = ColorWriteChannels.None;
+            BlendState blend = new BlendState
+            {
+                ColorWriteChannels = ColorWriteChannels.None
+            };
+
             return blend;
         });
 

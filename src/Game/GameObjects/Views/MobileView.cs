@@ -63,7 +63,8 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo = Rectangle.Empty;
             Rectangle rect = Rectangle.Empty;
 
-            Hue hue = 0, targetColor = 0;
+            Hue hue = 0;
+
             if (Engine.Profile.Current.HighlightMobilesByFlags)
             {
                 if (IsPoisoned)
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
             {
-                targetColor = Notoriety.GetHue(NotorietyFlag);
+                Hue targetColor = Notoriety.GetHue(NotorietyFlag);
 
                 if (isAttack || this == TargetManager.LastGameObject)
                 {

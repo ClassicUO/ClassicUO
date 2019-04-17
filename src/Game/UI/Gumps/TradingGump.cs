@@ -30,7 +30,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TradingGump : Gump
+    internal class TradingGump : Gump
     {
         private Checkbox _myCheckbox;
         private GumpPic _hisPic;
@@ -204,14 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
 
-            if (HeIsAccepting)
-            {
-                _hisPic = new GumpPic(266, 160, 0x0869, 0);
-            }
-            else
-            {
-                _hisPic = new GumpPic(266, 160, 0x0867, 0);
-            }
+            _hisPic = HeIsAccepting ? new GumpPic(266, 160, 0x0869, 0) : new GumpPic(266, 160, 0x0867, 0);
 
             Add(_hisPic);
         }

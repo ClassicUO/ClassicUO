@@ -176,10 +176,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
             {
-                if (characterGump.CharacterIndex == index)
-                    characterGump.Hue = SELECTED_COLOR;
-                else
-                    characterGump.Hue = NORMAL_COLOR;
+                characterGump.Hue = characterGump.CharacterIndex == index ? SELECTED_COLOR : NORMAL_COLOR;
             }
         }
 

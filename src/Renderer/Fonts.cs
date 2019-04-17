@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Renderer
 {
-    static class Fonts
+    internal static class Fonts
     {
         public static void Load()
         {

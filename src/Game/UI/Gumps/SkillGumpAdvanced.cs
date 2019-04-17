@@ -168,7 +168,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
             }
 
-            for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.Add(_skillListEntries[i]);
+            foreach (SkillListEntry t in _skillListEntries)
+                _scrollArea.Add(t);
 
             Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
             Add(new Label(_totalReal.ToString(), true, 1153) { X = 220, Y = 320 });

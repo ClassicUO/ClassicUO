@@ -8,7 +8,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game
 {
-    static class Constants
+    internal static class Constants
     {
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;

@@ -28,7 +28,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Utility
 {
-    static class ReflectionHolder
+    internal static class ReflectionHolder
     {
         public static Dictionary<string, string> GetGameObjectProperties<T>(T obj) where T : GameObject
         {

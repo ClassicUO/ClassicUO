@@ -10,15 +10,15 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
 {
-    class UOMusic : Sound
+    internal class UOMusic : Sound
     {
-        MP3Stream m_Stream;
-        const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
-        readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
-        bool m_Repeat;
-        bool m_Playing;
+        private MP3Stream m_Stream;
+        private const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
+        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
+        private readonly bool m_Repeat;
+        private bool m_Playing;
 
-        string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
+        private string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
 
         public UOMusic(int index, string name, bool loop)
             : base(name, index)

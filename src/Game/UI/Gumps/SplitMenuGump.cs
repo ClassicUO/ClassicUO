@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class SplitMenuGump : Gump
+    internal class SplitMenuGump : Gump
     {
         private readonly HSliderBar _slider;
         private int _lastValue;
@@ -148,8 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if(_itemGump != null && _itemGump.IsAlive)
             {
-                ItemGump gump = _itemGump.Target as ItemGump;
-                if (gump != null)
+                if (_itemGump.Target is ItemGump gump)
                 {
                     gump.Disposed -= ItemGumpOnDisposed;
                 }

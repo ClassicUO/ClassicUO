@@ -3,7 +3,7 @@
     /// <summary>
     ///     Class for layer II subbands in single channel mode.
     /// </summary>
-    class SubbandLayer2 : ASubband
+    internal class SubbandLayer2 : ASubband
     {
         // this table contains 3 requantized samples for each legal codeword
         // when grouped in 5 bits, i.e. 3 quantization steps per sample

@@ -72,23 +72,16 @@ namespace ClassicUO.Game.UI.Gumps
             LocalSerial = _spellBook.Serial;
             _spellBook.Items.Added += ItemsOnAdded;
             _spellBook.Items.Removed += ItemsOnRemoved;
-            _spellBook.Disposed += SpellBookOnDisposed;
 
             OnEntityUpdate(_spellBook);
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private void SpellBookOnDisposed(object sender, EventArgs e)
-        {          
-            Dispose();
-        }
-
         public override void Dispose()
         {
             _spellBook.Items.Added -= ItemsOnAdded;
             _spellBook.Items.Removed -= ItemsOnRemoved;
-            _spellBook.Disposed -= SpellBookOnDisposed;
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
             Engine.UI.SavePosition(LocalSerial, Location);
@@ -696,6 +689,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnEntityUpdate(Entity entity)
         {
+            if (entity == null) 
+                return;
+
             switch (entity.Graphic)
             {
                 default:
@@ -754,6 +750,13 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_spellBook == null || _spellBook.IsDestroyed)
+                Dispose();
+
+            if (IsDisposed)
+                return;
+
             if(_lastPressed!=null)
             {
                 _clickTiming -= (float)frameMS;

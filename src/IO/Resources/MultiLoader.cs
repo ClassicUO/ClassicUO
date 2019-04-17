@@ -11,7 +11,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class MultiLoader : ResourceLoader
+    internal class MultiLoader : ResourceLoader
     {
         private UOFileMul _file;
         private UOFileUopNoFormat _fileUop;

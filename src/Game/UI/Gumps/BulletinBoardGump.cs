@@ -16,18 +16,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class BulletinBoardGump : Gump
+    internal class BulletinBoardGump : Gump
     {
         //private HtmlControl _htmlControl;
-        private ScrollArea _area;
-        private Item _item;
+        private readonly ScrollArea _area;
+        private readonly Item _item;
 
         public BulletinBoardGump(Item item, int x, int y, string name) : base(item, 0)
         {
             _item = item;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
-            _item.Disposed += ItemOnDisposed;
 
             X = x;
             Y = y;
@@ -61,11 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_area);
         }
 
-        private void ItemOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
-        }
-
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
@@ -83,6 +77,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_item == null || _item.IsDestroyed)
+                Dispose();
+        }
+
 
         public void Add(BulletinBoardObject obj)
         {
@@ -96,7 +98,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
-                _item.Disposed -= ItemOnDisposed;
             }
 
             base.Dispose();
@@ -104,14 +105,16 @@ namespace ClassicUO.Game.UI.Gumps
     }
 
 
-    class BulletinBoardItem : Gump
+    internal class BulletinBoardItem : Gump
     {
-        private ScrollFlag _scrollBar;
-        private MultiLineBox _textBox;
-        private TextBox _subjectTextbox;
-        private Button _buttonPost, _buttonReply, _buttonRemove;
+        private readonly ScrollFlag _scrollBar;
+        private readonly MultiLineBox _textBox;
+        private readonly TextBox _subjectTextbox;
+        private readonly Button _buttonPost;
+        private readonly Button _buttonReply;
+        private readonly Button _buttonRemove;
 
-        private Serial _msgSerial;
+        private readonly Serial _msgSerial;
 
         public BulletinBoardItem(Serial serial, Serial msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
         {
@@ -242,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        enum ButtonType
+        private enum ButtonType
         {
             Post,
             Remove,
@@ -312,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    class BulletinBoardObject : ScrollAreaItem
+    internal class BulletinBoardObject : ScrollAreaItem
     {
         public BulletinBoardObject(Serial parent, Item serial, string text)
         {

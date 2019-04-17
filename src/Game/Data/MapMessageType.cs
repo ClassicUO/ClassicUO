@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Data
 {
-    enum MapMessageType
+    internal enum MapMessageType
     {
         Add = 1,
         Insert,

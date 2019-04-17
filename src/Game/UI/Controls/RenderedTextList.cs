@@ -56,36 +56,36 @@ namespace ClassicUO.Game.UI.Controls
             int height = 0;
             int maxheight = _scrollBar.Value + _scrollBar.Height;
 
-            for (int i = 0; i < _entries.Count; i++)
+            foreach (RenderedText t in _entries)
             {
-                if (height + _entries[i].Height <= _scrollBar.Value)
+                if (height + t.Height <= _scrollBar.Value)
                 {
                     // this entry is above the renderable area.
-                    height += _entries[i].Height;
+                    height += t.Height;
                 }
-                else if (height + _entries[i].Height <= maxheight)
+                else if (height + t.Height <= maxheight)
                 {
                     int yy = height - _scrollBar.Value;
 
                     if (yy < 0)
                     {
                         // this entry starts above the renderable area, but exists partially within it.
-                        _entries[i].Draw(batcher, mx, y, _entries[i].Width, _entries[i].Height + yy, 0, -yy);
-                        my += _entries[i].Height + yy;
+                        t.Draw(batcher, mx, y, t.Width, t.Height + yy, 0, -yy);
+                        my += t.Height + yy;
                     }
                     else
                     {
                         // this entry is completely within the renderable area.
-                        _entries[i].Draw(batcher, mx, my);
-                        my += _entries[i].Height;
+                        t.Draw(batcher, mx, my);
+                        my += t.Height;
                     }
 
-                    height += _entries[i].Height;
+                    height += t.Height;
                 }
                 else
                 {
                     int yyy = maxheight - height;
-                    _entries[i].Draw(batcher, mx, y + _scrollBar.Height - yyy, _entries[i].Width, yyy, 0, 0);
+                    t.Draw(batcher, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
 
                     // can't fit any more entries - so we break!
                     break;
@@ -108,7 +108,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
             int height = 0;
-            for (int i = 0; i < _entries.Count; i++) height += _entries[i].Height;
+            foreach (RenderedText t in _entries)
+                height += t.Height;
+
             height -= _scrollBar.Height;
 
             if (height > 0)
@@ -163,7 +165,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            for (int i = 0; i < _entries.Count; i++) _entries[i]?.Destroy();
+            foreach (RenderedText t in _entries)
+                t?.Destroy();
+
             base.Dispose();
         }
     }

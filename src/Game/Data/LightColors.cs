@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Data
 {
-    static class LightColors
+    internal static class LightColors
     {
         public static ushort GetHue(ushort id)
         {
@@ -41,8 +41,6 @@ namespace ClassicUO.Game.Data
                 case 0x19BB:
                 case 0x1F2B:
                     color = 40;
-                    break;
-                default:
                     break;
             };
 

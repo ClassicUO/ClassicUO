@@ -40,12 +40,12 @@ namespace ClassicUO.Game.UI.Controls
         private float _value;
         private float _timeUntilNextClick;
         private readonly SpriteTexture _upButton;
-        private SpriteTexture _downButton;
+        private readonly SpriteTexture _downButton;
         private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Rectangle _rectUpButton, _rectDownButton;
 
-        private bool _showButtons;
+        private readonly bool _showButtons;
 
         public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {

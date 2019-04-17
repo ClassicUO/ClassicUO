@@ -79,8 +79,8 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(_spell.GumpIconSmallID); // 4
             writer.Write(_spell.Regs.Length); // 4
 
-            for (int i = 0; i < _spell.Regs.Length; i++)
-                writer.Write((int)_spell.Regs[i]); // 4
+            foreach (Reagents t in _spell.Regs)
+                writer.Write((int)t); // 4
 
             writer.Write(_spell.ManaCost); // 4
             writer.Write(_spell.MinSkill); // 4

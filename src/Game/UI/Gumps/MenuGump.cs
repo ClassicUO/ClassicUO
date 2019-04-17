@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class MenuGump : Gump
+    internal class MenuGump : Gump
     {
         private readonly ContainerHorizontal _container;
         private bool _isDown, _isLeft;
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
             _slider.MaxValue = _container.MaxValue;
         }
 
-        class ContainerHorizontal : Control
+        private class ContainerHorizontal : Control
         {
             private int _maxWidth;
             private bool _update = true;
@@ -181,10 +181,8 @@ namespace ClassicUO.Game.UI.Gumps
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
 
-                    for (int i = 0; i < Children.Count; i++)
+                    foreach (Control child in Children)
                     {
-                        Control child = Children[i];
-
                         if (!child.IsVisible)
                             continue;
 
@@ -240,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     }
 
-    class GrayMenuGump : Gump
+    internal class GrayMenuGump : Gump
     {
         private readonly ResizePic _resizePic;
         public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)
