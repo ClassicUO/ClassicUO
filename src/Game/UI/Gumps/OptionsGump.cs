@@ -680,20 +680,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 7;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            ScrollAreaItem item = new ScrollAreaItem();
 
             _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
-            item.Add(_scaleSpeechDelay);
-            rightArea.Add(item);
-            item = new ScrollAreaItem();
-            Label text = new Label("- Speech delay:", true, HUE_FONT, font: FONT);
-            item.Add(text);
-            _sliderSpeechDelay = new HSliderBar(100, 5, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-            item.Add(_sliderSpeechDelay);
-            rightArea.Add(item);
+            _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = !_sliderSpeechDelay.IsVisible; };
+            rightArea.Add(_scaleSpeechDelay);
+
+          
+            _sliderSpeechDelay = new HSliderBar(0, 0, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            rightArea.Add(_sliderSpeechDelay);
 
             // [BLOCK] activate chat
             {
@@ -702,7 +699,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 15,
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
                 };
-                _chatAfterEnter.MouseClick += (sender, e) =>
+                _chatAfterEnter.ValueChanged += (sender, e) =>
                 {
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
                 };
@@ -735,7 +732,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatCompletelyHideCheckbox);
 
-                text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT, 0, FONT)
+                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT, 0, FONT)
                 {
                     X = 20,
                     Y = 80,
