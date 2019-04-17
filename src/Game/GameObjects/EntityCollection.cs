@@ -43,7 +43,9 @@ namespace ClassicUO.Game.GameObjects
 
         public IEnumerator<T> GetEnumerator()
         {
-            return _entities.Values.GetEnumerator();
+            return _entities.Select(s => s.Value).GetEnumerator();
+
+            //return _entities.Values.GetEnumerator();
         }
 
         public event EventHandler<CollectionChangedEventArgs<Serial>> Added, Removed;
