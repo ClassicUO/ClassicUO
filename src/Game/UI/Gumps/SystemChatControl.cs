@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     Engine.Profile.Current.ActivateChatStatus = value;
-                    _trans.Y = textBox.Y + ((Engine.Profile.Current.ActivateChatCompletelyHide) ? 20 : 10);
+                    _trans.Y = textBox.Y + 20;
                 }
 
                 textBox.IsEditable = (_isActive) ? true : false;
@@ -121,27 +121,6 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true
             });
             Add(textBox);
-
-            _trans.MouseClick += (sender, e) =>
-            {
-                if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
-                    ToggleChatVisibility();
-            };
-            _trans.DragBegin += (sender, e) =>
-            {
-                if (Engine.Profile.Current.ActivateChatAfterEnter && _trans.Y != textBox.Y)
-                    ToggleChatVisibility();
-            };
-            _trans.MouseEnter += (sender, e) =>
-            {
-                if (Engine.Profile.Current.ActivateChatAfterEnter)
-                    _trans.Alpha = 0.3f;
-            };
-            _trans.MouseExit += (sender, e) =>
-            {
-                if (Engine.Profile.Current.ActivateChatAfterEnter)
-                    _trans.Alpha = 0.5f;
-            };
 
             Add(_currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
             {
@@ -444,12 +423,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     break;
             }
-
-            Debug.WriteLine("press key, status = {0}", IsActive);
-
-            if (!IsActive)
-                return;
-
         }
 
         public override void OnKeyboardReturn(int textID, string text)
