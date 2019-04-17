@@ -60,6 +60,7 @@ namespace ClassicUO.Game.UI
                 Text = "_"
             };
         }
+        public bool IsEditable { get; set; }
 
         public bool IsPassword { get; set; }
 

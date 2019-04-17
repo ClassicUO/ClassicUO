@@ -108,6 +108,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetText(string text, bool append = false)
         {
+            if (!IsEditable)
+                return;
+
             int oldidx = TxEntry.CaretIndex;
 
             if (text == null)
@@ -120,20 +123,17 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
-            {
                 return;
-            }
 
             if (Height != TxEntry.Height)
-            {
                 Height = TxEntry.Height;
-            }
 
             if (TxEntry.IsChanged)
             {
                 TxEntry.UpdateCaretPosition();
                 TextChanged.Raise(this);
             }
+
             base.Update(totalMS, frameMS);
         }
 
@@ -141,19 +141,17 @@ namespace ClassicUO.Game.UI.Controls
         {
             TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
-            if (IsEditable)
-            {
-                if (HasKeyboardFocus)
-                {
-                    TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
-                }
-            }
+            if (IsEditable && HasKeyboardFocus)
+                TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
 
             return base.Draw(batcher, x, y);
         }
 
         protected override void OnTextInput(string c)
         {
+            if (!IsEditable)
+                return;
+
             if (ReplaceDefaultTextOnFirstKeyPress)
             {
                 TxEntry.Clear();
@@ -166,12 +164,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             string s;
 
-            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
             {
-                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
-                {
+                if (!IsEditable)
                     return;
-                }
+
+                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                    return;
 
                 s = SDL.SDL_GetClipboardText();
                 if (!string.IsNullOrEmpty(s))
@@ -195,6 +194,8 @@ namespace ClassicUO.Game.UI.Controls
                         Parent?.OnKeyboardReturn(0, s);
                         break;
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                        if (!IsEditable)
+                            return;
                         if (!ReplaceDefaultTextOnFirstKeyPress)
                             TxEntry.RemoveChar(true);
                         else
