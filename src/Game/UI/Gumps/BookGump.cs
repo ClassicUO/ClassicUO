@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
         }
 
-        private Button m_Forward, m_Backward;
+        private GumpPic m_Forward, m_Backward;
         private void BuildGump(string[] pages)
         {
             Add( new GumpPic( 0, 0, 0x1FE, 0 )
@@ -65,16 +65,9 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true
             } );
 
-            Add(m_Backward = new Button( (int)Buttons.Backwards, 0x1FF, 0x1FF, 0x1FF )
-            {
-                ButtonAction = ButtonAction.Activate,
-            } );
+            Add(m_Backward = new GumpPic(0, 0, 0x1FF, 0));
 
-            Add(m_Forward =  new Button( (int)Buttons.Forward, 0x200, 0x200, 0x200 )
-            {
-                X = 356,
-                ButtonAction = ButtonAction.Activate
-            } );
+            Add(m_Forward = new GumpPic(356, 0, 0x200, 0));
             m_Forward.MouseClick += ( sender,e ) => {
                 if (e.Button == MouseButton.Left && sender is Control ctrl)
                 {

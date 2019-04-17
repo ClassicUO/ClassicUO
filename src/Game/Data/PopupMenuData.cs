@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Data
 
             for (int i = 0; i < count; i++)
             {             
-                Hue hue = 0xFFFF, replacedHue = 0;
+                Hue hue = 0xFFFF;
                 int cliloc;
                 ushort index, flags;
 
@@ -69,13 +69,13 @@ namespace ClassicUO.Game.Data
                         p.Skip(2);
 
                     if ((flags & 0x20) != 0)
-                        replacedHue = (Hue) (p.ReadUShort() & 0x3FFF);
+                        hue = (Hue) (p.ReadUShort() & 0x3FFF);
                 }
 
                 if ((flags & 0x01) != 0)
                     hue = 0x0386;
 
-                items[i] = new PopupMenuItem(cliloc, index, hue, replacedHue, flags);
+                items[i] = new PopupMenuItem(cliloc, index, hue, flags);
             }
 
             return new PopupMenuData(serial, items);
