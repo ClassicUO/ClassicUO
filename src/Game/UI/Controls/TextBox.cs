@@ -108,9 +108,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetText(string text, bool append = false)
         {
-            if (!IsEditable)
-                return;
-
             int oldidx = TxEntry.CaretIndex;
 
             if (text == null)
@@ -181,6 +178,8 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (!TxEntry.IsPassword && Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
             {
+                if (!IsEditable)
+                    key = SDL.SDL_Keycode.SDLK_c;
                 string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
                 SDL.SDL_SetClipboardText(txt);
             }
@@ -190,8 +189,11 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
-                        s = TxEntry.Text;
-                        Parent?.OnKeyboardReturn(0, s);
+                        if (IsEditable)
+                        {
+                            s = TxEntry.Text;
+                            Parent?.OnKeyboardReturn(0, s);
+                        }
                         break;
 
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -212,6 +214,8 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case SDL.SDL_Keycode.SDLK_DELETE:
+                        if (!IsEditable)
+                            return;
                         TxEntry.RemoveChar(false);
                         break;
 
