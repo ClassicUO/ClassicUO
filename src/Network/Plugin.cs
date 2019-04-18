@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility;
@@ -37,9 +38,13 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnDisconnected _onDisconnected;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusGained _onFocusGained;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusLost _onFocusLost;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
+
 
         private readonly string _path;
-        
+
 
         private Plugin(string path)
         {
@@ -91,8 +96,8 @@ namespace ClassicUO.Network
             _castSpell = GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
-
-            
+            _requestMove = RequestMove;
+            _setTitle = SetWindowTitle;
 
             //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
             //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
@@ -123,7 +128,9 @@ namespace ClassicUO.Network
                 CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
                 GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
                 HWND = hwnd,
-                GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath)
+                GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath),
+                RequestMove = Marshal.GetFunctionPointerForDelegate(_requestMove),
+                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle)
             };
 
             void* func = &header;
@@ -173,13 +180,13 @@ namespace ClassicUO.Network
 
                     meth.Invoke(null, new object[] {(IntPtr) func });
                 }
-                catch
+                catch (Exception err)
                 {
                     Log.Message(LogTypes.Error,
-                        $"Invalid plugin specified.");
+                        $"Invalid plugin specified. {err.Message} {err.StackTrace}");
                     return;
                 }
-               
+
             }
            
 
@@ -205,7 +212,8 @@ namespace ClassicUO.Network
                 _onFocusGained = Marshal.GetDelegateForFunctionPointer<OnFocusGained>(header.OnFocusGained);
             if (header.OnFocusLost != IntPtr.Zero)
                 _onFocusLost = Marshal.GetDelegateForFunctionPointer<OnFocusLost>(header.OnFocusLost);
-
+            if (header.Tick != IntPtr.Zero)
+                _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
             IsValid = true;
 
             //Marshal.FreeHGlobal(headerPtr);
@@ -216,6 +224,10 @@ namespace ClassicUO.Network
         private static string GetUOFilePath()
             => FileManager.UoFolderPath;
 
+        private static void SetWindowTitle(string str)
+        {
+            Engine.Instance.Window.Title = str;
+        }
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
             FileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
@@ -224,7 +236,12 @@ namespace ClassicUO.Network
             info.CompressedSize = compressedsize;
         }
 
-        private static bool GetPlayerPosition(out int x, out int y, out int z)
+        private static bool RequestMove(int dir, bool run)
+        {
+            return World.Player.Walk((Direction) dir, run);
+        }
+
+    private static bool GetPlayerPosition(out int x, out int y, out int z)
         {
             if (World.Player != null)
             {
@@ -238,6 +255,16 @@ namespace ClassicUO.Network
             x = y = z = 0;
 
             return false;
+        }
+
+        internal static void Tick()
+        {
+            for (int i = 0; i < _plugins.Count; i++)
+            {
+                _plugins[i]._tick?.Invoke();
+
+            }
+
         }
 
 
