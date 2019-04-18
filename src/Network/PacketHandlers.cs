@@ -2021,7 +2021,10 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
             bool oldpacket = p.ID == 0x93;
             bool editable = p.ReadBool();
-            p.Skip(1);
+            if(!oldpacket)
+                editable = p.ReadBool();
+            else
+                p.Skip(1);
             UIManager ui = Engine.UI;
             BookGump bgump = ui.GetByLocalSerial<BookGump>(serial);
 

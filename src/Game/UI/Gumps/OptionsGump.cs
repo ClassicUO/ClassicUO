@@ -385,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     IsChecked = Engine.Profile.Current.GameWindowFullSize
                 };
-                _gameWindowFullsize.MouseClick += (sender, e) =>
+                _gameWindowFullsize.ValueChanged += (sender, e) =>
                 {
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
                 };
@@ -465,7 +465,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     IsChecked = Engine.Profile.Current.EnableScaleZoom
                 };
-                _zoomCheckbox.MouseClick += (sender, e) =>
+                _zoomCheckbox.ValueChanged += (sender, e) =>
                 {
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
                 };
@@ -688,7 +688,6 @@ namespace ClassicUO.Game.UI.Gumps
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = !_sliderSpeechDelay.IsVisible; };
             rightArea.Add(_scaleSpeechDelay);
 
-          
             _sliderSpeechDelay = new HSliderBar(0, 0, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             rightArea.Add(_sliderSpeechDelay);
 
@@ -724,18 +723,10 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                _chatCompletelyHideCheckbox = new Checkbox(0x00D2, 0x00D3, "Fully hide chat", FONT, HUE_FONT, true)
-                {
-                    X = 20,
-                    Y = 55,
-                    IsChecked = Engine.Profile.Current.ActivateChatCompletelyHide
-                };
-                _activeChatArea.Add(_chatCompletelyHideCheckbox);
-
                 var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT, 0, FONT)
                 {
                     X = 20,
-                    Y = 80,
+                    Y = 60,
                 };
 
                 _activeChatArea.Add(text);
@@ -743,7 +734,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT, true)
                 {
                     X = 40,
-                    Y = 105,
+                    Y = 85,
                     IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
@@ -751,7 +742,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT, true)
                 {
                     X = 40,
-                    Y = 125,
+                    Y = 105,
                     IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
@@ -766,6 +757,8 @@ namespace ClassicUO.Game.UI.Gumps
             _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
+
+            _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
 
             Add(rightArea, PAGE);
         }
@@ -982,7 +975,7 @@ namespace ClassicUO.Game.UI.Gumps
                     WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                     if (systemchat != null)
-                        systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+                        systemchat.IsActive = !_chatAfterEnter.IsChecked;
 
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
@@ -1083,7 +1076,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
                 if (systemchat != null)
-                    systemchat.ChatVisibility = !_chatAfterEnter.IsChecked;
+                    systemchat.IsActive = !_chatAfterEnter.IsChecked;
 
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
@@ -1092,7 +1085,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
-            Engine.Profile.Current.ActivateChatCompletelyHide = _chatCompletelyHideCheckbox.IsChecked;
 
             // video
             Engine.Profile.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;

@@ -122,6 +122,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
+            if (!IsEditable)
+                return;
             string s = TxEntry.InsertString(c);
             if (!string.IsNullOrEmpty(s))
                 Parent?.OnKeyboardReturn(PasteCommandID, s);
@@ -132,6 +134,8 @@ namespace ClassicUO.Game.UI.Controls
             int oldidx = TxEntry.CaretIndex;
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
+                if (!IsEditable)
+                    return;
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
                     return;
 
@@ -144,6 +148,8 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
             {
+                if (!IsEditable)
+                    key = SDL.SDL_Keycode.SDLK_c;
                 string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
                 SDL.SDL_SetClipboardText(txt);
             }
@@ -151,9 +157,12 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
-                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
+                        if (IsEditable)
+                            Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                         break;
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                        if (!IsEditable)
+                            return;
                         if (Parent is Gumps.BookGump bbook)
                             bbook.ScaleOnBackspace(TxEntry);
                         TxEntry.RemoveChar(true);
@@ -171,6 +180,8 @@ namespace ClassicUO.Game.UI.Controls
                         TxEntry.SeekCaretPosition(1);
                         break;
                     case SDL.SDL_Keycode.SDLK_DELETE:
+                        if (!IsEditable)
+                            return;
                         if (Parent is Gumps.BookGump dbook)
                             dbook.ScaleOnDelete(TxEntry);
                         TxEntry.RemoveChar(false);

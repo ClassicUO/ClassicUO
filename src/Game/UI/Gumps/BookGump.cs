@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
-        private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
+        private int ActiveInternalPage => Math.Max(0, m_Pages.FindIndex(t => t.HasKeyboardFocus));
 
         private void SetActivePage( int page )
         {
