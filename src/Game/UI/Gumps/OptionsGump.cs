@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _chatCompletelyHideCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
 
@@ -981,7 +981,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
-                    _chatCompletelyHideCheckbox.IsChecked = false;
                     _activeChatArea.IsVisible = (_chatAfterEnter.IsChecked);
 
                     break;
