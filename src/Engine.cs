@@ -746,6 +746,7 @@ namespace ClassicUO
             OnInputUpdate(totalms, framems);
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
+            Plugin.Tick();
             // ###############################
             Profiler.ExitContext("Update");
 
