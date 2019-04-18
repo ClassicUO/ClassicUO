@@ -33,11 +33,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class PopupMenuGump : Gump
     {
-        private readonly PopupMenuData _data;
-
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
-            _data = data;
             CloseIfClickOutside = true;
             //ControlInfo.IsModal = true;
             //ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
@@ -87,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (e.Button == MouseButton.Left)
                     {
                         HitBox l = (HitBox) sender;
-                        GameActions.ResponsePopupMenu(_data.Serial, (ushort) l.Tag);
+                        GameActions.ResponsePopupMenu(data.Serial, (ushort) l.Tag);
                         Dispose();
                     }
                 };
