@@ -150,6 +150,14 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
 
+                        var textControl = c.Children.OfType<TextureControl>().FirstOrDefault();
+
+                        if (textControl != null)
+                        {
+                            textControl.Width = c.Width;
+                            textControl.Height = c.Height;
+                        }
+
                         indices[index] = -1;
                     }
                     else
