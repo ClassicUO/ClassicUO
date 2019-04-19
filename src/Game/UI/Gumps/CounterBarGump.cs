@@ -217,6 +217,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 items[i].SetGraphic(reader.ReadUInt16());
             }
+
+            IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
         }
 
 

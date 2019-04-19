@@ -784,7 +784,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters [if disabled you lose all counters inside]", Engine.Profile.Current.CounterBarEnabled, 0, 0);
+            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
             _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
 
             
@@ -1234,9 +1234,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (before != Engine.Profile.Current.CounterBarEnabled)
             {
-                counterGump?.Dispose();
-                if (Engine.Profile.Current.CounterBarEnabled)
-                    Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns));
+                if (counterGump == null)
+                {
+                    if (Engine.Profile.Current.CounterBarEnabled)
+                        Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns));
+                }
+                else
+                {
+                    counterGump.IsEnabled = counterGump.IsVisible = Engine.Profile.Current.CounterBarEnabled;
+                }
             }
 
 

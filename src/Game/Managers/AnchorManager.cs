@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save(BinaryWriter writer)
         {
-            int VERSION = 1;
+            const int VERSION = 1;
             var groups = reverseMap.Values.Distinct().ToList();
 
             writer.Write(VERSION);
