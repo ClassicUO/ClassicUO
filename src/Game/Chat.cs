@@ -148,8 +148,12 @@ namespace ClassicUO.Game
                             }
                             else
                             {
-                                Serial serial = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
-                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+                                Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
+
+                                if (item == null)
+                                    break;
+
+                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
 
                                 if (gump != null)
                                 {
