@@ -1199,7 +1199,29 @@ namespace ClassicUO.Game.UI.Gumps
             }
             
             // fonts
-            Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+            
+            if (Engine.Profile.Current.ChatFont != _fontSelectorChat.GetSelectedFont())
+            {
+                Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                if (viewport != null)
+                {
+                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                    {
+                        systemchat.Dispose();
+
+                        viewport.Add(new SystemChatControl(
+                            5, 
+                            5,
+                            Engine.Profile.Current.GameWindowSize.X, 
+                            Engine.Profile.Current.GameWindowSize.Y
+                        ));
+                    }
+                }
+            }
+
 
             // combat
             Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
