@@ -379,6 +379,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             Label text;
 
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+
             // [BLOCK] game size
             {
                 _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
@@ -495,7 +497,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 10);
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
