@@ -1197,9 +1197,29 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
-            
+
             // fonts
-            Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+            var _fontValue = _fontSelectorChat.GetSelectedFont();
+
+            if (Engine.Profile.Current.ChatFont != _fontValue)
+            {
+                Engine.Profile.Current.ChatFont = _fontValue;
+
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                if (viewport != null)
+                {
+                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                    {
+                        viewport.ReloadChatControl(new SystemChatControl(
+                            5,
+                            5,
+                            Engine.Profile.Current.GameWindowSize.X,
+                            Engine.Profile.Current.GameWindowSize.Y
+                        ));
+                    }
+                }
+            }
 
             // combat
             Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
@@ -1258,14 +1278,11 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionY.Text = gump.Y.ToString();
         }
 
-
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
             return base.Draw(batcher, x, y);
         }
-
-
 
         private enum Buttons
         {
