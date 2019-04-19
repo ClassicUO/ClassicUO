@@ -79,8 +79,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
                     Engine.Profile.Current.ActivateChatStatus = value;
-                    _trans.Y = textBox.Y + 20;
+                    _trans.Y = textBox.Y + height + 3;
                 }
 
                 textBox.IsEditable = (_isActive) ? true : false;
@@ -135,6 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             Mode = ChatMode.Default;
 
             IsActive = (!Engine.Profile.Current.ActivateChatAfterEnter);
+
         }
 
         public void ToggleChatVisibility()
