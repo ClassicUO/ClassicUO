@@ -131,6 +131,9 @@ namespace ClassicUO.Game
 
                             Entity ent = World.Get(it.RootContainer);
 
+                            if (ent == null)
+                                break;
+
                             gump = Engine.UI.GetByLocalSerial<TradingGump>(ent);
                             if (gump != null)
                             {
