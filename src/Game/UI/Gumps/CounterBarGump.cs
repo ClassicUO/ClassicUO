@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             CounterItem[] items = GetControls<CounterItem>();
 
-            int[] indices = Enumerable.Range(0, items.Length).ToArray();
+            int[] indices = new int[items.Length];
 
             for (int row = 0; row < _rows; row++)
             {
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
 
-                        var textControl = c.Children.OfType<TextureControl>().FirstOrDefault();
+                        TextureControl textControl = c.Children.OfType<TextureControl>().FirstOrDefault();
 
                         if (textControl != null)
                         {
@@ -168,9 +168,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            foreach (int index in indices)
+            for (int i = 0; i < indices.Length; i++)
             {
-                if (index != -1 && index < items.Length)
+                int index = indices[i];
+
+                if (index >= 0 && index < items.Length)
                 {
                     items[index].Dispose();
                 }

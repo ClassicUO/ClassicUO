@@ -50,9 +50,12 @@ namespace ClassicUO.Game.Managers
         private bool _isDraggingControl;
         private Control _keyboardFocusControl;
         private bool _needSort;
+        private AnchorManager _anchorManager;
 
         public UIManager()
         {
+            _anchorManager = new AnchorManager();
+
             Engine.Input.MouseDragging += (sender, e) =>
             {
                 HandleMouseInput();
@@ -219,6 +222,8 @@ namespace ClassicUO.Game.Managers
             Engine.Input.KeyUp += (sender, e) => { _keyboardFocusControl?.InvokeKeyUp(e.keysym.sym, e.keysym.mod); };
             Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
+
+        public AnchorManager AnchorManager => _anchorManager;
 
         public IReadOnlyList<Control> Gumps => _gumps;
 
