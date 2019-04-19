@@ -497,7 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
+            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 10);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
