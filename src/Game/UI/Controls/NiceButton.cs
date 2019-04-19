@@ -18,15 +18,15 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ButtonAction _action;
         private readonly int _groupnumber;
 
-        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0) : base(x, y, w, h)
+        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER) : base(x, y, w, h)
         {
             _action = action;
             Label label;
-            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align)
             {
-                X = -2,
+                X = align == TEXT_ALIGN_TYPE.TS_CENTER ? -2 : 0,
             });
-            label.Y = (h - label.Height) / 2;
+            label.Y = (h - label.Height) >> 1;
             _groupnumber = groupnumber;
         }
 
