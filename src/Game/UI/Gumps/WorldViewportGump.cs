@@ -36,8 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
         private const int BORDER_HEIGHT = 5;
         private readonly GameBorder _border;
         private readonly Button _button;
-        private readonly SystemChatControl _systemChatControl;
         private readonly WorldViewport _viewport;
+        private SystemChatControl _systemChatControl;
         private bool _clicked;
         private int _worldHeight;
         private int _worldWidth;
@@ -145,6 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
+
             Location = position;
 
             Engine.Profile.Current.GameWindowPosition = position;
@@ -178,7 +179,18 @@ namespace ClassicUO.Game.UI.Gumps
             if (newSize.Y < 480)
                 newSize.Y = 480;
 
-            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            Resize();
+            _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+
+            return newSize;
+        }
+
+        public void ReloadChatControl(SystemChatControl chat)
+        {
+            _systemChatControl.Dispose();
+            _systemChatControl = chat;
+            Add(_systemChatControl);
+            Resize();
         }
 
     }
