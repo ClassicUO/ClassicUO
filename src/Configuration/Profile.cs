@@ -285,7 +285,7 @@ namespace ClassicUO.Configuration
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
             {
-                Engine.AnchorManager.Save(writer);
+                Engine.UI.AnchorManager.Save(writer);
             }
         }
 
@@ -350,7 +350,7 @@ namespace ClassicUO.Configuration
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
                     {
-                        Engine.AnchorManager.Restore(reader, gumps);
+                        Engine.UI.AnchorManager.Restore(reader, gumps);
                     }
                 }
                 catch (Exception e)

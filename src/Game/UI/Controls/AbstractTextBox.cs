@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 SetKeyboardFocus();
-                EntryValue.OnMouseClick(x, y);
+                EntryValue?.OnMouseClick(x, y);
             }
         }
 
@@ -54,13 +54,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButton.Left)
             {
-                EntryValue.OnSelectionEnd(x, y);
+                EntryValue?.OnSelectionEnd(x, y);
             }
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            EntryValue.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
+            EntryValue?.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
 
             return base.Draw(batcher, x, y);
         }

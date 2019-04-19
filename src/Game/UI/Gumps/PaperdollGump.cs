@@ -68,6 +68,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Title = mobileTitle;
                 BuildGump();
             }
+            else 
+                Dispose();
         }
 
         public string Title { get; }

@@ -485,7 +485,9 @@ namespace ClassicUO.Game.UI.Controls
      
         public Control[] HitTest(Point position)
         {
-            //List<Control> results = new List<Control>();
+            if (!IsVisible)
+                return null;
+
             Stack<Control> results = new Stack<Control>();
 
             if (Bounds.Contains(position.X - ParentX, position.Y - ParentY))
@@ -494,8 +496,6 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (AcceptMouseInput)
                         results.Push(this);
-                    //results.Add(this);
-                    //results.Insert(0, this);  //results.Push(this);
 
                     foreach (Control c in Children)
                     {
@@ -507,8 +507,6 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 for (int j = cl.Length - 1; j >= 0; j--)
                                     results.Push(cl[j]);
-                                //results.Insert(0, cl[j]);
-                                //results.AddRange(cl);
                             }
                         }
                     }
@@ -524,8 +522,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return null;
-
-            //return results.Count == 0 ? null : results/*.OrderBy(s => s.Priority)*/;
         }
 
         public Control GetFirstControlAcceptKeyboardInput()

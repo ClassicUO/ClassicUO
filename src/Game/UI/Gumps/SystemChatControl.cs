@@ -79,8 +79,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
                     Engine.Profile.Current.ActivateChatStatus = value;
-                    _trans.Y = textBox.Y + 20;
+                    _trans.Y = textBox.Y + height + 3;
                 }
 
                 textBox.IsEditable = (_isActive) ? true : false;
@@ -101,9 +102,9 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
 
-            textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            textBox = new TextBox(Engine.Profile.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
                 Y = Height - height - 3,
@@ -135,6 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             Mode = ChatMode.Default;
 
             IsActive = (!Engine.Profile.Current.ActivateChatAfterEnter);
+
         }
 
         public void ToggleChatVisibility()
@@ -260,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (textBox != null)
             {
-                int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 textBox.Y = Height - height - 3;
                 textBox.Width = Width;
                 textBox.Height = height - 3;

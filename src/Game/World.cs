@@ -258,7 +258,12 @@ namespace ClassicUO.Game
                     if (e != null && e.HasEquipment)
                     {
                         step = 5;
-                        e.Equipment[(int)item.Layer] = null;
+                        int index = (int) item.Layer;
+
+                        if (index < e.Equipment.Length)
+                        {
+                            e.Equipment[(int)item.Layer] = null;
+                        }
                         step = 6;
                     }
                 }

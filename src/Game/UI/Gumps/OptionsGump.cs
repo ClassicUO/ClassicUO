@@ -379,6 +379,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             Label text;
 
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+
             // [BLOCK] game size
             {
                 _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
@@ -495,7 +497,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 10);
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
@@ -784,7 +785,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters [if disabled you lose all counters inside]", Engine.Profile.Current.CounterBarEnabled, 0, 0);
+            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
             _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
 
             
@@ -1197,9 +1198,29 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
-            
+
             // fonts
-            Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+            var _fontValue = _fontSelectorChat.GetSelectedFont();
+
+            if (Engine.Profile.Current.ChatFont != _fontValue)
+            {
+                Engine.Profile.Current.ChatFont = _fontValue;
+
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                if (viewport != null)
+                {
+                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                    {
+                        viewport.ReloadChatControl(new SystemChatControl(
+                            5,
+                            5,
+                            Engine.Profile.Current.GameWindowSize.X,
+                            Engine.Profile.Current.GameWindowSize.Y
+                        ));
+                    }
+                }
+            }
 
             // combat
             Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
@@ -1234,9 +1255,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (before != Engine.Profile.Current.CounterBarEnabled)
             {
-                counterGump?.Dispose();
-                if (Engine.Profile.Current.CounterBarEnabled)
-                    Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns));
+                if (counterGump == null)
+                {
+                    if (Engine.Profile.Current.CounterBarEnabled)
+                        Engine.UI.Add(new CounterBarGump(200, 200, Engine.Profile.Current.CounterBarCellSize, Engine.Profile.Current.CounterBarRows, Engine.Profile.Current.CounterBarColumns));
+                }
+                else
+                {
+                    counterGump.IsEnabled = counterGump.IsVisible = Engine.Profile.Current.CounterBarEnabled;
+                }
             }
 
 
@@ -1252,14 +1279,11 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionY.Text = gump.Y.ToString();
         }
 
-
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
             return base.Draw(batcher, x, y);
         }
-
-
 
         private enum Buttons
         {
