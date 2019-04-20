@@ -253,7 +253,23 @@ namespace ClassicUO.Game.GameObjects
                         if (hue == 0)
                         {
                             if (direction.Address != direction.PatchedAddress)
-                                hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
+                            {
+                                ref var idx = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
+                                hue = idx.Color;
+
+                                if (hue != 0)
+                                {
+                                    isPartial = true;
+
+                                    //uint flag = idx.Flags & 0x80000000;
+
+                                    //if (flag != 0)
+                                    //{
+                                    //    Engine.SceneManager.GetScene<GameScene>()
+                                    //          .AddLight(this, this, (int)(IsFlipped ? (position.X + Bounds.X) : position.X - Bounds.X + frame.CenterX) , (int)position.Y - Bounds.Y + 44);
+                                    //}
+                                }
+                            }
                         }
                     }
 

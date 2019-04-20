@@ -421,9 +421,13 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
                         light.ID = data.Layer;
+                    else if (obj is Mobile mobile)
+                    {
+                        light.ID = 1;
+                    }
                     else
                     {
-                        // not handled
+                        return;
                     }
                 }
 
