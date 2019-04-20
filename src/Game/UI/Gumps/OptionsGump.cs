@@ -379,6 +379,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             Label text;
 
+            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+
             // [BLOCK] game size
             {
                 _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
@@ -495,8 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 10);
-            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 0);
+            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 10);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
@@ -1197,9 +1198,29 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
-            
+
             // fonts
-            Engine.Profile.Current.ChatFont = _fontSelectorChat.GetSelectedFont();
+            var _fontValue = _fontSelectorChat.GetSelectedFont();
+
+            if (Engine.Profile.Current.ChatFont != _fontValue)
+            {
+                Engine.Profile.Current.ChatFont = _fontValue;
+
+                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                if (viewport != null)
+                {
+                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                    if (systemchat != null)
+                    {
+                        viewport.ReloadChatControl(new SystemChatControl(
+                            5,
+                            5,
+                            Engine.Profile.Current.GameWindowSize.X,
+                            Engine.Profile.Current.GameWindowSize.Y
+                        ));
+                    }
+                }
+            }
 
             // combat
             Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
@@ -1258,14 +1279,11 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionY.Text = gump.Y.ToString();
         }
 
-
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
             return base.Draw(batcher, x, y);
         }
-
-
 
         private enum Buttons
         {
