@@ -47,11 +47,11 @@ namespace ClassicUO.Renderer
 
         public static void GetHueVector(ref Vector3 hueVector, int hue)
         {
-            GetHueVector(ref hueVector, hue, false, 0, false);
+            GetHueVector(ref hueVector, hue, false, 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool noLighting)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha)
         {
             ShadersEffectType type;
 

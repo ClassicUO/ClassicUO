@@ -157,6 +157,9 @@ namespace ClassicUO.Game.Scenes
 
                     if (_mousePicker.MouseOverObject is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                     {
+                        if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+                            obj = it;
+
                         switch (obj)
                         {
                             case Mobile mobile:
@@ -303,6 +306,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _dragginObject;
 
+                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+                        obj = it;
+
                     switch (obj)
                     {
                         case Mobile mobile:
@@ -337,6 +343,9 @@ namespace ClassicUO.Game.Scenes
                 if (!IsHoldingItem)
                 {
                     GameObject obj = _dragginObject;
+
+                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+                        obj = it;
 
                     switch (obj)
                     {

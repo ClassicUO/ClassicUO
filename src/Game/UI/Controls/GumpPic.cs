@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha, true);
+            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha);
 
             batcher.Draw2D(Texture, x, y, hue);
 

@@ -82,7 +82,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ShaderHuesTraslator.GetHueVector(ref HueVector, IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0, false);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0);
             }
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
