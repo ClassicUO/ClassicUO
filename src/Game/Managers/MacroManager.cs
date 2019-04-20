@@ -612,6 +612,9 @@ namespace ClassicUO.Game.Managers
                     {
                         Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
 
+                        if (mob == null)
+                            break;
+
                         if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 

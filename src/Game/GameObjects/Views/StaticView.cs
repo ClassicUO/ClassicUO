@@ -121,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0, false);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
             }
 
             Engine.DebugInfo.StaticsRendered++;

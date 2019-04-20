@@ -691,7 +691,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hue = Vector3.Zero;
                 if (IsTransparent)
-                    ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha, false);
+                    ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                 batcher.Draw2D(_gumpTexture[0], x, y, hue);

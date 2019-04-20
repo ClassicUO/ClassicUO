@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI
                 y = Engine.WindowHeight - (_renderedText.Height + 8);
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, false);
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f);
 
             batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, hue);
 

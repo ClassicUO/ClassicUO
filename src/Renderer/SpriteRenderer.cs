@@ -28,7 +28,7 @@ namespace ClassicUO.Renderer
             Vector3 huev = Vector3.Zero;
 
             if (hue != 0)
-                ShaderHuesTraslator.GetHueVector(ref huev, hue, ispartial, 0, false);
+                ShaderHuesTraslator.GetHueVector(ref huev, hue, ispartial, 0);
 
             Engine.Batcher.Draw2D(texture, x, y, huev);
         }
@@ -42,7 +42,7 @@ namespace ClassicUO.Renderer
             Vector3 huev = Vector3.Zero;
 
             if (hue != 0)
-                ShaderHuesTraslator.GetHueVector(ref huev, hue, ispartial, 0, false);
+                ShaderHuesTraslator.GetHueVector(ref huev, hue, ispartial, 0);
 
             Engine.Batcher.Draw2D(texture, x, y, width, height, huev);
         }

@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f, false);
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f);
 
             batcher.Draw2D(_line, x + 30, y + 50, 260, 1, hue);
             batcher.Draw2D(_line, x + 95, y+ 50, 1, 200, hue);

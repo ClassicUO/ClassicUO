@@ -282,7 +282,7 @@ namespace ClassicUO.Game
                 int y = Mouse.Position.Y - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
 
                 sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
 
