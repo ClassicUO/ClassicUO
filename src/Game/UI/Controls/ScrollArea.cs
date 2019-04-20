@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void OnPageChanged()
         {
-            int maxheight = Children.Max(o => o.Height);
+            int maxheight = Children.Sum(o => o.IsVisible ? o.Height : 0);
             Height = maxheight;
             Parent?.OnPageChanged();
         }
