@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             Control c = Parent;
             while(c != null)
             {
-                if (c is ScrollAreaItem area)
+                if (c is ScrollArea area)
                 {
                     _nestedBoxes.Add(box);
                     if (!_opened)
@@ -78,7 +78,6 @@ namespace ClassicUO.Game.UI.Controls
                         GenerateButtons();
                         foreach (MultiSelectionShrinkbox msb in _nestedBoxes)
                         {
-                            msb.Y = Y + Height;
                             msb.IsVisible = true;
                             msb.OnPageChanged();
                         }
