@@ -31,6 +31,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
                     hue = targetColor;
             }
 
-            bool drawShadow = !IsDead && !IsHidden;
+            bool drawShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
@@ -190,6 +191,15 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
+
+
+                 
+                if (Engine.AuraManager.IsEnabled)
+                    Engine.AuraManager.Draw(batcher,
+                                            IsFlipped ? (int)position.X + drawX + 44 : (int)position.X - drawX,
+                                            (int)position.Y - drawY + (IsMounted ? 22 : 0), Notoriety.GetHue(NotorietyFlag));
+
+
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
                 {
                     if (shadow)
@@ -222,7 +232,6 @@ namespace ClassicUO.Game.GameObjects
                     base.Draw(batcher, position, objecList);
                     position.Z -= DELTA_SHADOW;
                 }
-
 
                
                 if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
@@ -280,6 +289,7 @@ namespace ClassicUO.Game.GameObjects
                 Pick(frame, Bounds, position, objecList);
             }
         }
+
 
         private void DrawEquipment(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
         {

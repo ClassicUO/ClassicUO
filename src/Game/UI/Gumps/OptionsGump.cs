@@ -53,8 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight;
-        private Combobox _shardType;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows;
+        private Combobox _shardType, _auraType;
         private HSliderBar _lightBar;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
@@ -527,6 +527,28 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_lightBar);
             rightArea.Add(item);
 
+
+            _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.ShadowsEnabled
+            };
+            rightArea.Add(_enableShadows);
+
+
+            item = new ScrollAreaItem();
+            text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
+            {
+                Y = 10
+            };
+            item.Add(text);
+            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] { "None", "Warmode", "Ctrl+Shift", "Always" })
+            {
+                SelectedIndex = Engine.Profile.Current.AuraUnderFeetType
+            };
+            item.Add(_auraType);
+            rightArea.Add(item);
+
+
             Add(rightArea, PAGE);
         }
 
@@ -948,6 +970,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
 
+                    _enableShadows.IsChecked = true;
+                    _auraType.SelectedIndex = 0;
+
                     _windowSizeArea.IsVisible = (!_gameWindowFullsize.IsChecked);
                     _zoomSizeArea.IsVisible = (_zoomCheckbox.IsChecked);
 
@@ -1198,6 +1223,11 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
+
+
+            Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
+            Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
+
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();

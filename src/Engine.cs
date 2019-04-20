@@ -88,6 +88,7 @@ namespace ClassicUO
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private InputManager _inputManager;
+        private AuraManager _auraManager;
         private double _statisticsTimer;
         private float _time;
         private int _totalFrames;
@@ -308,6 +309,8 @@ namespace ClassicUO
         public static Settings GlobalSettings => _engine._settings;
 
         public static SceneManager SceneManager => _engine._sceneManager;
+
+        public static AuraManager AuraManager => _engine._auraManager;
 
         public static string ExePath { get; private set; }
 
@@ -669,6 +672,8 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
+            _auraManager = new AuraManager();
+            _auraManager.CreateAuraTexture();
 
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();

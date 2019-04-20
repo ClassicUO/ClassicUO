@@ -133,6 +133,7 @@
     <Compile Include="Game\GameObjects\OverheadMessage.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
+    <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
