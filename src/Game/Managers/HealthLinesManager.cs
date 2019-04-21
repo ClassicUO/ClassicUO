@@ -9,6 +9,7 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using MathHelper = ClassicUO.Utility.MathHelper;
 
@@ -33,7 +34,9 @@ namespace ClassicUO.Game.Managers
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
 
-           
+
+            Texture2D black = Textures.GetTexture(Color.Black);
+            Texture2D red = Textures.GetTexture(Color.Red);
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -78,8 +81,8 @@ namespace ClassicUO.Game.Managers
                 }
 
 
-                batcher.Draw2D(Textures.GetTexture(Color.Black), x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, Vector3.Zero);
-                batcher.Draw2D(Textures.GetTexture(Color.Red), x, y, BAR_WIDTH, BAR_HEIGHT, Vector3.Zero);
+                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, Vector3.Zero);
+                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, Vector3.Zero);
 
                 Color color;
                 
