@@ -104,6 +104,8 @@ namespace ClassicUO
 
         public bool IsQuitted { get; private set; }
 
+        private SpriteBatch _spriteBatch;
+
         private Engine(string[] args)
         {
             Instance = this;
@@ -695,6 +697,8 @@ namespace ClassicUO
 
 
             UoAssist.Start();
+
+            _spriteBatch = new SpriteBatch(_graphicDeviceManager.GraphicsDevice);
 
             base.Initialize();
         }

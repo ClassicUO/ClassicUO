@@ -760,15 +760,13 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(Batcher2D batcher, int x, int y)
         {
+            _healthLinesManager.Draw(batcher, Scale);
+
             //batcher.SetBlendState(_blendText);
             _overheadManager.Draw(batcher, _mouseOverList, x, y);
            // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
-
-
-
-            _healthLinesManager.Draw(batcher, Scale);
         }
 
 
