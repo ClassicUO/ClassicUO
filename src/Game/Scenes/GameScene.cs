@@ -57,6 +57,7 @@ namespace ClassicUO.Game.Scenes
         private OverheadManager _overheadManager;
         private HotkeysManager _hotkeysManager;
         private MacroManager _macroManager;
+        private HealthLinesManager _healthLinesManager;
         private IGameEntity _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _alphaChanged;
@@ -176,6 +177,7 @@ namespace ClassicUO.Game.Scenes
             _macroManager = new MacroManager(Engine.Profile.Current.Macros);
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
+            _healthLinesManager = new HealthLinesManager();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
             
@@ -763,6 +765,10 @@ namespace ClassicUO.Game.Scenes
            // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+
+
+
+            _healthLinesManager.Draw(batcher, Scale);
         }
 
 
