@@ -591,6 +591,9 @@ namespace ClassicUO.Network
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
+            World.RangeSize.X = x;
+            World.RangeSize.Y = y;
+
             if (Engine.Profile.Current.UseCustomLightLevel)
                 World.Light.Overall = Engine.Profile.Current.LightLevel;
 
@@ -723,6 +726,8 @@ namespace ClassicUO.Network
             World.Player.CloseBank();
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
+            World.RangeSize.X = x;
+            World.RangeSize.Y = y;
             World.Player.Direction = dir;
             World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
             World.Player.Walker.ResendPacketSended = false;
