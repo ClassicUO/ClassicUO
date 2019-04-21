@@ -50,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Right { get; set; }
 
         protected virtual bool CanCreateOverheads => true;
-        public OverheadMessage OverheadMessageContainer { get; private set; };
+        public OverheadMessage OverheadMessageContainer { get; private set; }
 
         public Vector3 ScreenPosition => _screenPosition;
 
