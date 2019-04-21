@@ -71,10 +71,17 @@ namespace ClassicUO.Game.Managers
 
             _auraHueVector.X = hue;
 
-            batcher.SetBlendState(BlendState.Additive);
+            batcher.SetBlendState(_blend);
             batcher.Draw2D(AuraTexture, x, y, _auraHueVector);
             batcher.SetBlendState(null);
         }
+
+        private readonly BlendState _blend = new BlendState()
+        {
+            ColorSourceBlend = Blend.SourceAlpha,
+            ColorDestinationBlend = Blend.InverseSourceAlpha
+        };
+
 
     }
 }
