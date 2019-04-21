@@ -52,10 +52,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (c is ScrollArea area)
                 {
                     _nestedBoxes.Add(box);
-                    if (!_opened)
-                        box.IsVisible = false;
                     box.Width = Width - box.X;
                     area.Add(box);
+                    if (!_opened)
+                    {
+                        box.IsVisible = false;
+                    }
+                    box.OnPageChanged();
                     return true;
                 }
                 c = c.Parent;
@@ -171,7 +174,7 @@ namespace ClassicUO.Game.UI.Controls
                     else
                         h = FileManager.Fonts.GetHeightASCII(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
                     width = w;
-                    height = h;
+                    height = h + 2;
                 }
             }
 
@@ -188,9 +191,9 @@ namespace ClassicUO.Game.UI.Controls
                 index++;
             }
 
-            var totalHeight = _buttons.Max(o => o.Y + o.Height);
+            var totalHeight = _buttons.Length > 0 ? _buttons.Max(o => o.Y + o.Height) : _label.Height;
 
-            Height = totalHeight + 2;//this is for extra spacing
+            Height = totalHeight;
         }
 
         private void ClearButtons()
