@@ -183,7 +183,7 @@ namespace ClassicUO.Network
                 catch (Exception err)
                 {
                     Log.Message(LogTypes.Error,
-                        $"Invalid plugin specified. {err.Message} {err.StackTrace}");
+                        $"Invalid plugin specified. {err} {err.StackTrace}");
                     return;
                 }
 

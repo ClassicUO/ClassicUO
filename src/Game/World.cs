@@ -295,7 +295,7 @@ namespace ClassicUO.Game
                 sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
                 sb.AppendLine("Step: " + step);
                 sb.AppendLine("App trace:\n: " + trace);
-                sb.AppendLine("Exception Message:\n" + e.Message);
+                sb.AppendLine("Exception Message:\n" + e);
                 sb.AppendLine("Exception StackTrace:\n" + e.StackTrace);
 
               
