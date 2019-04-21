@@ -155,7 +155,8 @@ namespace ClassicUO.Game.GameObjects
                     return;
 
                 drawCenterY = frame.CenterY;
-                drawY = drawCenterY + (int)(Offset.Z / 4) - 22 - (int)(Offset.Y - Offset.Z - 3);
+                int yOff = (int) (Offset.Z / 4) - 22 - (int) (Offset.Y - Offset.Z - 3);
+                drawY = drawCenterY + yOff;
 
                 if (IsFlipped)
                     drawX = -22 + (int)Offset.X;
@@ -197,7 +198,7 @@ namespace ClassicUO.Game.GameObjects
                 if (Engine.AuraManager.IsEnabled)
                     Engine.AuraManager.Draw(batcher,
                                             IsFlipped ? (int)position.X + drawX + 44 : (int)position.X - drawX,
-                                            (int)position.Y - drawY + (IsMounted ? 22 : 0), Notoriety.GetHue(NotorietyFlag));
+                                            (int)position.Y - yOff, Notoriety.GetHue(NotorietyFlag));
 
 
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
