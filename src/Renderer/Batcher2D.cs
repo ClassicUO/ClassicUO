@@ -145,7 +145,6 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices)
         {
             EnsureStarted();
@@ -181,7 +180,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
         {
             if (texture == null || texture.IsDisposed)
