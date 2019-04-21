@@ -29,10 +29,8 @@ namespace ClassicUO.Game
         public short Height => _height;
 
 
-        private uint[] CreateTexture(int radius, ref short width, ref short height)
+        public static uint[] CreateTexture(int radius, ref short width, ref short height)
         {
-            _texture?.Dispose();
-
             int fixRadius = radius + 1;
             int mulRadius = fixRadius * 2;
 
@@ -54,7 +52,7 @@ namespace ClassicUO.Game
 
                     int pos = posX + y;
 
-                    pixels[pos] = pic; // HuesHelper.RgbaToArgb(pic);
+                    pixels[pos] = pic;
                 }
             }
 
@@ -125,7 +123,7 @@ namespace ClassicUO.Game
                 _circle._texture = null;
             }
 
-            uint[] pixels = _circle.CreateTexture(radius, ref _circle._width, ref _circle._height);
+            uint[] pixels = CreateTexture(radius, ref _circle._width, ref _circle._height);
 
             _circle.Radius = radius;
 

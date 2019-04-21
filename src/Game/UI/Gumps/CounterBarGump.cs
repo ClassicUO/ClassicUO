@@ -360,7 +360,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_graphic != 0)
                 {
                     Vector3 hue = Vector3.Zero;
-                    ShaderHuesTraslator.GetHueVector(ref hue, 59, ShadersEffectType.Hued);
+                    hue.X = 59;
+                    hue.Y = 1;
 
                     batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, hue);
                 }

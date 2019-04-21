@@ -146,7 +146,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
+        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices)
         {
             EnsureStarted();
 
@@ -250,7 +250,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            return DrawSprite(texture, _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, Vector3 hue)
@@ -298,7 +298,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            return DrawSprite(texture, _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, Vector3 hue)
@@ -344,7 +344,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
             
-            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            return DrawSprite(texture, _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
@@ -385,7 +385,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            return DrawSprite(texture, _vertexBufferUI);
         }
 
         public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, Vector3 hue)
@@ -448,7 +448,7 @@ namespace ClassicUO.Renderer
                 _vertexBufferUI[i].Position.X = posLeftTop[i, 1];
             }
 
-            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            DrawSprite(texture, _vertexBufferUI);
 
             for (int i = 0; i < 4; i++)
             {
@@ -456,7 +456,7 @@ namespace ClassicUO.Renderer
                 _vertexBufferUI[i].Position.X = poTopRight[i, 1];
             }
 
-            DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
+            DrawSprite(texture, _vertexBufferUI);
 
             return true;
         }
@@ -656,7 +656,7 @@ namespace ClassicUO.Renderer
 
         private bool _useScissor;
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetBlendState(BlendState blend, bool noflush = false)
         {
             if (!noflush)
@@ -665,7 +665,7 @@ namespace ClassicUO.Renderer
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetStencil(DepthStencilState stencil, bool noflush = false)
         {
             if (!noflush)

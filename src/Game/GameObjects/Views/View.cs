@@ -242,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
                 };
 
                 Vector3 hue = Vector3.Zero;
-                hue.Y = 12;
+                hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
 
                 vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
 

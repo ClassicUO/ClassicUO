@@ -297,9 +297,9 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
 
-                if (obj._overheadMessageContainer != null && !obj._overheadMessageContainer.IsEmpty)
+                if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty)
                 {                
-                    _overheadManager.AddOverhead(obj._overheadMessageContainer);
+                    _overheadManager.AddOverhead(obj.OverheadMessageContainer);
                 }                
 
                 if (ismobile || iscorpse)

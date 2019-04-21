@@ -71,7 +71,8 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
-	    
+        public bool IsMouseOverViewport => Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl is WorldViewport;
+
         private void MoveCharacterByInputs()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
@@ -87,217 +88,232 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void OnMouseDown(object sender, MouseEventArgs e)
+        // LEFT
+        private void OnLeftMouseDown(object sender, EventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (!IsMouseOverViewport)
+                return;
+
+            if (_rightMousePressed)
             {
-                if (_rightMousePressed)
-                {
-                    _continueRunning = true;
-                }
-                
-                _dragginObject = _mousePicker.MouseOverObject as GameObject;
-                _dragOffset = _mousePicker.MouseOverObjectPoint;
-                
+                _continueRunning = true;
             }
-            else if (e.Button == MouseButton.Right)
-            {
-                if (!_rightMousePressed)
-                {
-                    _rightMousePressed = true;
-                    _continueRunning = false;
-                }
-            }
+
+            _dragginObject = _mousePicker.MouseOverObject as GameObject;
+            _dragOffset = _mousePicker.MouseOverObjectPoint;
         }
-
-        private void OnMouseUp(object sender, MouseEventArgs e)
+        private void OnLeftMouseUp(object sender, EventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (!IsMouseOverViewport)
+                return;
+
+            if (_dragginObject != null)
+                _dragginObject = null;
+
+            if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
+                return;
+
+            if (TargetManager.IsTargeting)
             {
-                if (_dragginObject != null)
-                    _dragginObject = null;
-
-                if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
-                    return;
-
-                if (TargetManager.IsTargeting)
+                switch (TargetManager.TargetingState)
                 {
-                    switch (TargetManager.TargetingState)
-                    {
-                        case CursorTarget.Position:
-                        case CursorTarget.Object:
-                        case CursorTarget.MultiPlacement:
-                            var obj = SelectedObject;
-                            if (obj != null)
-                            {
-                                TargetManager.TargetGameObject(obj);
-                                Mouse.LastLeftButtonClickTime = 0;
-                            }
-
-                            break;
-
-                        case CursorTarget.SetTargetClientSide:
-                            if (SelectedObject is  GameObject obj2)
-                            {
-                                TargetManager.TargetGameObject(obj2);
-                                Mouse.LastLeftButtonClickTime = 0;
-                                Engine.UI.Add(new InfoGump(obj2));
-
-                            }
-                            break;
-
-                        default:
-                            Log.Message(LogTypes.Warning, "Not implemented.");
-                            break;
-                    }
-                }
-                else if (IsHoldingItem)
-                {
-                    SelectedObject = null;
-
-                    if (_mousePicker.MouseOverObject is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
-                    {
-                        if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                            obj = it;
-
-                        switch (obj)
+                    case CursorTarget.Position:
+                    case CursorTarget.Object:
+                    case CursorTarget.MultiPlacement:
+                        var obj = SelectedObject;
+                        if (obj != null)
                         {
-                            case Mobile mobile:
-                                // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
-                                MergeHeldItem(mobile);
-                                break;
-
-                            case Item item:
-                                if (item.IsCorpse)
-                                    MergeHeldItem(item);
-                                else
-                                {
-                                    SelectedObject = item;
-
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
-                                        MergeHeldItem(item);
-                                    else
-                                        DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
-                                }
-                                break;
-
-                            case Multi multi:
-                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
-                                break;
-
-                            case Static st:
-                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
-                                break;
-
-                            case Land _:
-                                DropHeldItemToWorld(obj.Position);
-                                break;
-
-                            default:
-                                Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
-                                return;
+                            TargetManager.TargetGameObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
                         }
-                    }
-                    else
-                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
+
+                        break;
+
+                    case CursorTarget.SetTargetClientSide:
+                        if (SelectedObject is GameObject obj2)
+                        {
+                            TargetManager.TargetGameObject(obj2);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            Engine.UI.Add(new InfoGump(obj2));
+
+                        }
+                        break;
+
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+                        break;
                 }
-                else
-                {                 
-                    GameObject obj = _mousePicker.MouseOverObject as GameObject;
+            }
+            else if (IsHoldingItem)
+            {
+                SelectedObject = null;
+
+                if (_mousePicker.MouseOverObject is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                {
+                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+                        obj = it;
 
                     switch (obj)
                     {
-                        case Static st:
-                            string name = st.Name;
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        case Mobile mobile:
+                            // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
+                            MergeHeldItem(mobile);
+                            break;
+
+                        case Item item:
+                            if (item.IsCorpse)
+                                MergeHeldItem(item);
+                            else
+                            {
+                                SelectedObject = item;
+
+                                if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
+                                    MergeHeldItem(item);
+                                else
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
+                            }
                             break;
 
                         case Multi multi:
-                            name = multi.Name;
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
                             break;
 
-                        case AnimatedItemEffect effect when effect.Source is Entity:
-                        case Entity _:
-                            if (!_inqueue)
-                            {
-                                _inqueue = true;
-                                _queuedObject = obj is AnimatedItemEffect ef ? (Entity)ef.Source : (Entity)obj;
-                                _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                                _queuedAction = () =>
-                                {
-                                    if (!World.ClientFlags.TooltipsEnabled)
-                                        GameActions.SingleClick(_queuedObject);
-                                    GameActions.OpenPopupMenu(_queuedObject);
-                                };
-                            }
+                        case Static st:
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
                             break;
+
+                        case Land _:
+                            DropHeldItemToWorld(obj.Position);
+                            break;
+
+                        default:
+                            Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
+                            return;
                     }
-                    
                 }
+                else
+                    Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
             }
-            else if (e.Button == MouseButton.Right)
+            else
             {
-                if (_rightMousePressed)
-                    _rightMousePressed = false;
-            }
-        }
-
-        private void OnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
-        {
-            if (e.Button == MouseButton.Left)
-            {
-                IGameEntity obj = _mousePicker.MouseOverObject;
+                GameObject obj = _mousePicker.MouseOverObject as GameObject;
 
                 switch (obj)
                 {
-                    case Item item:
-                        e.Result = true;
-                        GameActions.DoubleClick(item);
+                    case Static st:
+                        string name = st.Name;
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                         break;
 
-                    case Mobile mob:
-                        e.Result = true;
-                        if (World.Player.InWarMode && World.Player != mob)
-                            GameActions.Attack(mob);
-                        else
-                            GameActions.DoubleClick(mob);
+                    case Multi multi:
+                        name = multi.Name;
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                         break;
 
-                    case GameEffect effect when effect.Source is Item item:
-                        e.Result = true;
-                        GameActions.DoubleClick(item);
-                        break;
-                    case MessageInfo msg when msg.Parent.Parent is Entity entity:
-                        e.Result = true;
-                        GameActions.DoubleClick(entity);
+                    case AnimatedItemEffect effect when effect.Source is Entity:
+                    case Entity _:
+                        if (!_inqueue)
+                        {
+                            _inqueue = true;
+                            _queuedObject = obj is AnimatedItemEffect ef ? (Entity)ef.Source : (Entity)obj;
+                            _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                            _queuedAction = () =>
+                            {
+                                if (!World.ClientFlags.TooltipsEnabled)
+                                    GameActions.SingleClick(_queuedObject);
+                                GameActions.OpenPopupMenu(_queuedObject);
+                            };
+                        }
                         break;
                 }
 
-                ClearDequeued();
             }
-            else if (e.Button == MouseButton.Right)
+        }
+        private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            IGameEntity obj = _mousePicker.MouseOverObject;
+
+            switch (obj)
             {
-                if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
+                case Item item:
+                    e.Result = true;
+                    GameActions.DoubleClick(item);
+                    break;
+
+                case Mobile mob:
+                    e.Result = true;
+                    if (World.Player.InWarMode && World.Player != mob)
+                        GameActions.Attack(mob);
+                    else
+                        GameActions.DoubleClick(mob);
+                    break;
+
+                case GameEffect effect when effect.Source is Item item:
+                    e.Result = true;
+                    GameActions.DoubleClick(item);
+                    break;
+                case MessageInfo msg when msg.Parent.Parent is Entity entity:
+                    e.Result = true;
+                    GameActions.DoubleClick(entity);
+                    break;
+            }
+
+            ClearDequeued();
+        }
+
+
+        // RIGHT
+        private void OnRightMouseDown(object sender, EventArgs e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            if (!_rightMousePressed)
+            {
+                _rightMousePressed = true;
+                _continueRunning = false;
+            }
+        }
+        private void OnRightMouseUp(object sender, EventArgs e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            if (_rightMousePressed)
+                _rightMousePressed = false;
+        }
+        private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
+            {
+                if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject as GameObject, out var itemdata) && itemdata.IsSurface))
                 {
-                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject as GameObject, out var itemdata) && itemdata.IsSurface))
+                    if (_mousePicker.MouseOverObject is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        if (_mousePicker.MouseOverObject is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
-                        {
-                            World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
-                            e.Result = true;
-                        }
+                        World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
+                        e.Result = true;
                     }
                 }
             }
         }
 
-        private void OnMouseMove(object sender, MouseEventArgs e)
+
+        // MOUSE MOVING
+        private void OnMouseMoving(object sender, EventArgs e)
         {
+            if (!IsMouseOverViewport)
+                return;
+
             if (Mouse.LButtonPressed && !IsHoldingItem)
             {
                 Point offset = Mouse.LDroppedOffset;
@@ -336,42 +352,65 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void OnMouseDragBegin(object sender, MouseEventArgs e)
+
+        // MOUSE WHEEL
+        private void OnMouseWheel(object sender, bool e)
         {
-            if (e.Button == MouseButton.Left)
+            if (!IsMouseOverViewport)
+                return;
+
+            if (!Engine.Profile.Current.EnableScaleZoom || !Input.Keyboard.Ctrl)
+                return;
+
+            if (!e)
+                ScalePos++;
+            else
+                ScalePos--;
+
+            if (Engine.Profile.Current.SaveScaleAfterClose)
+                Engine.Profile.Current.ScaleZoom = Scale;
+        }
+
+
+        // MOUSE DRAG
+        private void OnMouseDragBegin(object sender, EventArgs e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            if (!IsHoldingItem)
             {
-                if (!IsHoldingItem)
+                GameObject obj = _dragginObject;
+
+                if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+                    obj = it;
+
+                switch (obj)
                 {
-                    GameObject obj = _dragginObject;
+                    case Mobile mobile:
+                        GameActions.RequestMobileStatus(mobile);
 
-                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                        obj = it;
+                        Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
-                    switch (obj)
-                    {
-                        case Mobile mobile:
-                            GameActions.RequestMobileStatus(mobile);
+                        if (mobile == World.Player)
+                            StatusGumpBase.GetStatusGump()?.Dispose();
 
-                            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
+                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                        HealthBarGump currentHealthBarGump;
+                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                        Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                        break;
 
-                            if (mobile == World.Player)
-                                StatusGumpBase.GetStatusGump()?.Dispose();
-
-                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                            HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-                            break;
-
-                        case Item item:
-							PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-                            break;
-                    }
-
-                    _dragginObject = null;
+                    case Item item:
+                        PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                        break;
                 }
+
+                _dragginObject = null;
             }
         }
+
+
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {

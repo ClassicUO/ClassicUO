@@ -17,12 +17,14 @@ namespace ClassicUO.Utility
         public delegate IntPtr OnLoadFunction(IntPtr module, StringBuilder sb);
 
         public delegate void OnGlColor4f(float r, float g, float b, float a);
+        public delegate void OnGlColor4fub(byte r, byte g, byte b, byte a);
 
 
         private static readonly OnSDLLoadObject _loadObject;
         private static readonly OnLoadFunction _loadFunction;
 
         private static readonly OnGlColor4f _glColor4F;
+        private static readonly OnGlColor4fub _glColor4Fub;
 
         static SDL2EX()
         {
@@ -48,11 +50,14 @@ namespace ClassicUO.Utility
             _loadFunction = Marshal.GetDelegateForFunctionPointer<OnLoadFunction>(loadFunc);
 
             _glColor4F = Marshal.GetDelegateForFunctionPointer<OnGlColor4f>(SDL.SDL_GL_GetProcAddress("glColor4f"));
+            _glColor4Fub = Marshal.GetDelegateForFunctionPointer<OnGlColor4fub>(SDL.SDL_GL_GetProcAddress("glColor4ub"));
 
         }
 
         public static void glColor4f(float r, float g, float b, float a)
             => _glColor4F(r, g, b, a);
+        public static void glColor4ub(byte r, byte g, byte b, byte a)
+            => _glColor4Fub(r, g, b, a);
 
         public static IntPtr SDL_LoadObject(string name)
         {

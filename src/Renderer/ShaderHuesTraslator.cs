@@ -26,19 +26,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    public enum ShadersEffectType
-    {
-        None = 0,
-        Hued = 1,
-        PartialHued = 2,
-        Land = 6,
-        LandHued = 7,
-        Spectral = 10,
-        Shadow = 12
-    }
-
     internal static class ShaderHuesTraslator
     {
+        public const byte SHADER_NONE = 0;
+        public const byte SHADER_HUED = 1;
+        public const byte SHADER_PARTIAL_HUED = 2;
+        public const byte SHADER_LAND = 6;
+        public const byte SHADER_LAND_HUED = 7;
+        public const byte SHADER_SPECTRAL = 10;
+        public const byte SHADER_SHADOW = 12;
+        public const byte SHADER_LIGHTS = 13;
+
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
         public static readonly Vector3 SelectedHue = new Vector3(23, 1, 0);
@@ -53,7 +51,7 @@ namespace ClassicUO.Renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha)
         {
-            ShadersEffectType type;
+            byte type;
 
             if ((hue & 0x8000) != 0)
             {
@@ -65,29 +63,29 @@ namespace ClassicUO.Renderer
                 partial = false;
 
             if ((hue & SPECTRAL_COLOR_FLAG) != 0)
-                type = ShadersEffectType.Spectral;
+                type = SHADER_SPECTRAL;
             else if (hue != 0)
             {
                 if (partial)
-                    type = ShadersEffectType.PartialHued;
+                    type = SHADER_PARTIAL_HUED;
                 else
-                    type = ShadersEffectType.Hued;
+                    type = SHADER_HUED;
             }
             else
             {
-                type = ShadersEffectType.None;
+                type = SHADER_NONE;
             }
 
             hueVector.X = hue;
-            hueVector.Y = (int) type;
+            hueVector.Y = type;
             hueVector.Z = alpha;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, ShadersEffectType type)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, byte type)
         {
             hueVector.X = hue;
-            hueVector.Y = (int)type;
+            hueVector.Y = type;
             hueVector.Z = 0;
         }
     }

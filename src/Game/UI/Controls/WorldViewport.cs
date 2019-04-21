@@ -58,9 +58,12 @@ namespace ClassicUO.Game.UI.Controls
             batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
 
             // draw lights
-            batcher.SetBlendState(_blend);
-            batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
-            batcher.SetBlendState(null);
+            if (_scene.UseLights)
+            {
+                batcher.SetBlendState(_blend);
+                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
+                batcher.SetBlendState(null);
+            }
 
             // draw overheads
             _scene.DrawOverheads(batcher, x, y);
