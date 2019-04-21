@@ -46,6 +46,8 @@ namespace ClassicUO.Game.UI.Controls
 
         internal bool NestBox(MultiSelectionShrinkbox box)
         {
+            if (_nestedBoxes.Contains(box))
+                return false;
             Control c = Parent;
             while(c != null)
             {

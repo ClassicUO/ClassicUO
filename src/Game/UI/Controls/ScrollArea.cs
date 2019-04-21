@@ -215,7 +215,10 @@ namespace ClassicUO.Game.UI.Controls
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
             int height = 0;
             for (int i = 1; i < Children.Count; i++)
-                height += Children[i].Height;
+            {
+                if(Children[i].IsVisible)
+                    height += Children[i].Height;
+            }
 
             height -= _scrollBar.Height;
 
