@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add(_arrow = new GumpPic(1, 1, 0x15E1, 0));
             _arrow.MouseClick += (sender, state) =>
-            { Opened = !_opened; };
+            { if(state.Button == MouseButton.Left) Opened = !_opened; };
 
             SetItemsValue(items);
         }
@@ -229,7 +229,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            Opened = !_opened;
+            if(_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButton.Left)
+                Opened = !_opened;
             return base.OnMouseDoubleClick(x, y, button);
         }
 

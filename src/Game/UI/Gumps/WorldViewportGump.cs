@@ -26,6 +26,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -163,6 +164,8 @@ namespace ClassicUO.Game.UI.Gumps
             _border.Height = Height;
             _button.X = Width - _button.Width / 2;
             _button.Y = Height - _button.Height / 2;
+            _worldWidth = Width - (BORDER_WIDTH * 2);
+            _worldHeight = Height - (BORDER_WIDTH * 2);
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
             _systemChatControl.Width = _worldWidth;
@@ -179,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (newSize.Y < 480)
                 newSize.Y = 480;
 
-            Resize();
+            //Resize();
             _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
 
             return newSize;
