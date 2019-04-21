@@ -36,21 +36,53 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsEmpty => _messages.Count == 0;
 
-        public void AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type)
+        private static float CalculateTimeToLive(RenderedText rtext)
+        {
+            float timeToLive;
+
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
+
+                if (delay < 10)
+                    delay = 10;
+
+                timeToLive = 4000 * rtext.LinesCount * delay / 100.0f;
+            }
+            else
+            {
+                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
+
+                timeToLive = (delay >> 31) + delay;
+            }
+
+            timeToLive += Engine.Ticks;
+
+            return timeToLive;
+        }
+
+        public void AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type, bool ishealthmessage = false)
         {
             for (int i = 0; i < _messages.Count; i++)
             {
                 var a = _messages[i];
 
-                if (type == MessageType.Label && a.RenderedText != null && a.RenderedText.Text == msg && a.Type == type)
+                if (type == MessageType.Label && a.RenderedText != null && (ishealthmessage && a.IsHealthMessage || a.RenderedText.Text == msg) && a.Type == type)
                 {
-                    if (a.RenderedText.Hue != hue)
+                    if (a.RenderedText.Hue != hue || ishealthmessage)
                     {
                         a.RenderedText.Hue = hue;
-                        a.RenderedText.CreateTexture();
+
+                        if (ishealthmessage)
+                        {
+                            a.Time = CalculateTimeToLive(a.RenderedText);
+                            a.RenderedText.Text = msg;
+                        }
+                        else
+                            a.RenderedText.CreateTexture();
                     }
 
-                    _messages.RemoveAt(i--);
+                    _messages.RemoveAt(i);
 
                     if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
                         _messages.AddToFront(a);
@@ -80,33 +112,16 @@ namespace ClassicUO.Game.GameObjects
                 Text = msg
             };
 
-            float timeToLive;
-
-            if (Engine.Profile.Current.ScaleSpeechDelay)
-            {
-                int delay = Engine.Profile.Current.SpeechDelay;
-
-                if (delay < 10)
-                    delay = 10;
-
-                timeToLive = 4000 * rtext.LinesCount * delay / 100.0f;
-            }
-            else
-            {
-                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
-
-                timeToLive = (delay >> 31) + delay;
-            }
-
-            timeToLive += Engine.Ticks;
+           
 
             var msgInfo = new MessageInfo()
             {
                 Alpha = 0,
                 RenderedText = rtext,
-                Time = timeToLive,
+                Time = CalculateTimeToLive(rtext),
                 Type = type,
                 Parent = this,
+                IsHealthMessage = ishealthmessage
             };
 
             int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && (ef.Source is Static || ef.Source is Item) ? 0 : 5;
@@ -528,6 +543,7 @@ namespace ClassicUO.Game.GameObjects
         public float Alpha;
         public MessageType Type;
         public int X, Y, OffsetY;
+        public bool IsHealthMessage;
 
         public OverheadMessage Parent;
 

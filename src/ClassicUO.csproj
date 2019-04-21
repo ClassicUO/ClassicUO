@@ -113,6 +113,7 @@
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\HealthPercentageHues.cs" />
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />

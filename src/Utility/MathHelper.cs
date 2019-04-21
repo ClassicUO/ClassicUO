@@ -56,5 +56,9 @@ namespace ClassicUO.Utility
             val1 = (int)(0xFFFFFFFF & b);
             val2 = (int) (b >> 32);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int PercetangeOf(int current, int max)
+            => current / max * 100;
     }
 }

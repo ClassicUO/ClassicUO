@@ -94,7 +94,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HighlightGameObjects { get; set; } = false;
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
         [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
-        [JsonProperty] public int MobileHPType { get; set; } = 0;
+        [JsonProperty] public int MobileHPType { get; set; } = 0; // 0 = %, 1 = line, 2 = both
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
         [JsonProperty] public bool TreeToStumps { get; set; } = false;
         [JsonProperty] public bool EnableCaveBorder { get; set; } = false;

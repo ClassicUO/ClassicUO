@@ -214,7 +214,7 @@ namespace ClassicUO.Game.GameObjects
             AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
+        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f, bool ishealthmessage = false)
         {
             if (string.IsNullOrEmpty(text))
                 return;
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.GameObjects
             if (OverheadMessageContainer == null)
                 OverheadMessageContainer = new OverheadMessage(this);
 
-            OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type);
+            OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
 
             //OverheadAdded?.Raise(this);
         }
