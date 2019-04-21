@@ -26,20 +26,8 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    //public enum ShadersEffectType
-    //{
-    //    None = 0,
-    //    Hued = 1,
-    //    PartialHued = 2,
-    //    Land = 6,
-    //    LandHued = 7,
-    //    Spectral = 10,
-    //    Shadow = 12
-    //}
-
     internal static class ShaderHuesTraslator
     {
-
         public const byte SHADER_NONE = 0;
         public const byte SHADER_HUED = 1;
         public const byte SHADER_PARTIAL_HUED = 2;

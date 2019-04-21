@@ -727,7 +727,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     ref SpriteVertex v = ref vertex[j];
                     v.Hue.X = l.Color;
-                    v.Hue.Y = 13;
+                    v.Hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                     v.Hue.Z = 0f;
                 }
                 batcher.DrawSprite(texture, vertex);
