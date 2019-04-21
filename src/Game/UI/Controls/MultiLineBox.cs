@@ -163,9 +163,10 @@ namespace ClassicUO.Game.UI.Controls
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
                         if (!IsEditable)
                             return;
-                        if (Parent is Gumps.BookGump bbook)
-                            bbook.ScaleOnBackspace(TxEntry);
-                        TxEntry.RemoveChar(true);
+                        if (Parent is Gumps.BookGump)
+                            ((Gumps.BookGump)Parent).Scale(TxEntry, true);
+                        else
+                            TxEntry.RemoveChar(true);
                         break;
                     case SDL.SDL_Keycode.SDLK_UP:
                         TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
@@ -182,9 +183,10 @@ namespace ClassicUO.Game.UI.Controls
                     case SDL.SDL_Keycode.SDLK_DELETE:
                         if (!IsEditable)
                             return;
-                        if (Parent is Gumps.BookGump dbook)
-                            dbook.ScaleOnDelete(TxEntry);
-                        TxEntry.RemoveChar(false);
+                        if (Parent is Gumps.BookGump)
+                            ((Gumps.BookGump)Parent).Scale(TxEntry, false);
+                        else
+                            TxEntry.RemoveChar(false);
                         break;
                     case SDL.SDL_Keycode.SDLK_HOME:
                         if (Parent is Gumps.BookGump hbook)

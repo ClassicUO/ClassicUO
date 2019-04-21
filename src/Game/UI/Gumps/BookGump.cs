@@ -412,27 +412,25 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private bool _scale = false;
-        public void ScaleOnBackspace(MultiLineEntry entry)
+        public void Scale(MultiLineEntry entry, bool fromleft)
         {
-            var linech = entry.GetLinesCharsCount();
+            var linech = entry.GetLinesCharsCount(entry.Text);
             int caretpos = entry.CaretIndex;
-            for (int l = 0; l < linech.Length && !_scale; l++)
+            (int, int) selection = entry.GetSelectionArea();
+            bool multilinesel = false;
+            if (selection.Item1 != -1)
+                multilinesel = true;
+            if (!multilinesel)
             {
-                caretpos -= linech[l];
-                _scale = caretpos == -linech[l];
+                for (int l = 0; l < linech.Length && !_scale; l++)
+                {
+                    caretpos -= linech[l];
+                    _scale = fromleft ? caretpos == -linech[l] : caretpos == 0;
+                }
+                if(fromleft)
+                    _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
             }
-            _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
-        }
-
-        public void ScaleOnDelete(MultiLineEntry entry)
-        {
-            var linech = entry.GetLinesCharsCount();
-            int caretpos = entry.CaretIndex;
-            for (int l = 0; l < linech.Length && !_scale; l++)
-            {
-                caretpos -= linech[l];
-                _scale = caretpos == 0;
-            }
+            entry.RemoveChar(fromleft);
         }
 
         public void OnHomeOrEnd(MultiLineEntry entry, bool home)

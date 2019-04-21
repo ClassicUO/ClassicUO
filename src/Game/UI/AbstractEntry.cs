@@ -98,24 +98,46 @@ namespace ClassicUO.Game.UI
 
         public int Offset { get; set; }
 
-        public void RemoveChar(bool fromleft)
+        public bool RemoveChar(bool fromleft)
         {
-            if (fromleft)
+            int start = -1, end = CaretIndex;
+            if (_selectionArea != (0, 0))
+            {
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                if (start != -1)
+                {
+                    if (start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+                    CaretIndex = start;
+                }
+                else
+                    return false;
+            }
+            else if (fromleft)
             {
                 if (CaretIndex < 1)
-                    return;
+                    return false;
                 CaretIndex--;
             }
             else
             {
                 if (CaretIndex >= Text.Length)
-                    return;
+                    return false;
             }
-
-            if (CaretIndex < Text.Length)
+            
+            if(start != -1)
+            {
+                Text = Text.Remove(start, end - start);
+            }
+            else if (CaretIndex < Text.Length)
                 Text = Text.Remove(CaretIndex, 1);
             else if (CaretIndex > Text.Length)
                 Text = Text.Remove(Text.Length - 1);
+            return true;
         }
 
         public void SeekCaretPosition(int value)
@@ -233,6 +255,26 @@ namespace ClassicUO.Game.UI
             }
             CaretIndex = endindex;
             UpdateCaretPosition();
+        }
+
+        internal (int, int) GetSelectionArea()
+        {
+            int start = -1, end = CaretIndex;
+            if (_selectionArea != (0, 0))
+            {
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                if (start != -1)
+                {
+                    if (start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+                    CaretIndex = start;
+                }
+            }
+            return (start, end);
         }
 
         internal string GetSelectionText(bool remove)
