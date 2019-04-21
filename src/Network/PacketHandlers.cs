@@ -2186,21 +2186,27 @@ namespace ClassicUO.Network
                 UoAssist.SignalHits();
             }
 
-            if (Engine.Profile.Current.ShowMobilesHP && (Engine.Profile.Current.MobileHPType == 0 || Engine.Profile.Current.MobileHPType == 2))
+            if (Engine.Profile.Current.ShowMobilesHP)
             {
-                int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
+                int type = Engine.Profile.Current.MobileHPType;
 
-                if (oldPerc != newPerc)
+                if (type == 0 || type == 2)
                 {
-                    Hue[] hues = HealthPercentageHues.Hues;
+                    int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
 
-                    int index = (newPerc + 5) / 10 % hues.Length;
-
-                    if (index >= 0 && index < hues.Length)
+                    if (oldPerc != newPerc)
                     {
-                        mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+                        Hue[] hues = HealthPercentageHues.Hues;
+
+                        int index = (newPerc + 5) / 10 % hues.Length;
+
+                        if (index >= 0 && index < hues.Length)
+                        {
+                            mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+                        }
                     }
                 }
+                    
             }
         }
 
