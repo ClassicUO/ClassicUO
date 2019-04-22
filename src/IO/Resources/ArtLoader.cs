@@ -13,10 +13,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    class ArtLoader : ResourceLoader<ArtTexture>
+    internal class ArtLoader : ResourceLoader<ArtTexture>
     {
         private UOFile _file;
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
+
+        private static readonly ushort[] _empty = { };
 
         public override void Load()
         {
@@ -127,15 +129,22 @@ namespace ClassicUO.IO.Resources
             //else
             {
 
+                imageRectangle = Rectangle.Empty;
 
                 (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+
+                if (length == 0)
+                {
+                    width = height = 0;
+                    return _empty;
+                }
+
                 _file.Skip(4);
                 width = _file.ReadShort();
                 height = _file.ReadShort();
-                imageRectangle = Rectangle.Empty;
 
                 if (width == 0 || height == 0)
-                    return new ushort[0];
+                    return _empty;
 
                 ushort[] pixels = new ushort[width * height];
                 ushort* ptr = (ushort*) _file.PositionAddress;
@@ -226,6 +235,10 @@ namespace ClassicUO.IO.Resources
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
+
+            if (length == 0)
+                return new ushort[44 * 44];
+
             ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)

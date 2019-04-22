@@ -122,6 +122,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
+            if (!IsEditable)
+                return;
             string s = TxEntry.InsertString(c);
             if (!string.IsNullOrEmpty(s))
                 Parent?.OnKeyboardReturn(PasteCommandID, s);
@@ -129,36 +131,48 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            string s = null;
             int oldidx = TxEntry.CaretIndex;
             if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
+                if (!IsEditable)
+                    return;
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
                     return;
 
-                s = SDL.SDL_GetClipboardText();
+                string s = SDL.SDL_GetClipboardText();
                 if (!string.IsNullOrEmpty(s))
                 {
                     Parent?.OnKeyboardReturn(PasteCommandID, s);
                     return;
                 }
             }
+            else if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+            {
+                if (!IsEditable)
+                    key = SDL.SDL_Keycode.SDLK_c;
+                string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
+                SDL.SDL_SetClipboardText(txt);
+            }
             else switch (key)
                 {
                     case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
-                        Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
+                        if (IsEditable)
+                            Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
                         break;
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                        if (Parent is Gumps.BookGump bbook)
-                            bbook.ScaleOnBackspace(TxEntry);
-                        TxEntry.RemoveChar(true);
+                        if (!IsEditable)
+                            return;
+                        if (Parent is Gumps.BookGump)
+                            ((Gumps.BookGump)Parent).Scale(TxEntry, true);
+                        else
+                            TxEntry.RemoveChar(true);
                         break;
                     case SDL.SDL_Keycode.SDLK_UP:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1));
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
                         break;
                     case SDL.SDL_Keycode.SDLK_DOWN:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height);
+                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height, false);
                         break;
                     case SDL.SDL_Keycode.SDLK_LEFT:
                         TxEntry.SeekCaretPosition(-1);
@@ -167,9 +181,12 @@ namespace ClassicUO.Game.UI.Controls
                         TxEntry.SeekCaretPosition(1);
                         break;
                     case SDL.SDL_Keycode.SDLK_DELETE:
-                        if (Parent is Gumps.BookGump dbook)
-                            dbook.ScaleOnDelete(TxEntry);
-                        TxEntry.RemoveChar(false);
+                        if (!IsEditable)
+                            return;
+                        if (Parent is Gumps.BookGump)
+                            ((Gumps.BookGump)Parent).Scale(TxEntry, false);
+                        else
+                            TxEntry.RemoveChar(false);
                         break;
                     case SDL.SDL_Keycode.SDLK_HOME:
                         if (Parent is Gumps.BookGump hbook)
@@ -194,7 +211,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            TxEntry?.Dispose();
+            TxEntry?.Destroy();
             TxEntry = null;
             base.Dispose();
         }

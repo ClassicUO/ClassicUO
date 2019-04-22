@@ -6,7 +6,7 @@ using ClassicUO.Game.UI.Gumps.CharCreation;
 
 namespace ClassicUO.IO.Resources
 {
-    class ProfessionLoader : ResourceLoader
+    internal class ProfessionLoader : ResourceLoader
     {
         public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
         public override void Load()

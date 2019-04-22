@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
-        internal bool IsMoving => Steps.Count > 0;
+        internal bool IsMoving => Steps.Count != 0;
 
         public event EventHandler HitsChanged;
 
@@ -492,12 +492,16 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    float soundByRange = Engine.Profile.Current.SoundVolume / (float) World.ViewRange;
-                    soundByRange *= Distance;
-                    float volume = (Engine.Profile.Current.SoundVolume - soundByRange) / Constants.SOUND_DELTA;
+    
+                    int distance = Distance;
 
-                    //if (volume > 0 && volume < 0.01f)
-                    //    volume = 0.01f;
+                    float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+
+                    if (distance <= World.ViewRange && distance >= 1)
+                    {
+                        float volumeByDist = volume / World.ViewRange;
+                        volume -= (volumeByDist * distance);
+                    }
 
                     Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
                     LastStepSoundTime = ticks + delaySound;
@@ -530,8 +534,10 @@ namespace ClassicUO.Game.GameObjects
                         float y = frameOffset;
 
                         MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Z) * frameOffset * (4.0f / framesPerTile)));
-                     
+                        Offset.X = x;
+                        Offset.Y = y;
+                        Offset.Z = ((step.Z - Z) * frameOffset * (4.0f / framesPerTile));
+
                         turnOnly = false;
                     }
                     else
@@ -710,6 +716,7 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     World.CorpseManager.Remove(0, Serial);
                                     World.RemoveMobile(this);
+                                    World.Mobiles.ProcessDelta();
                                 }
                             }
                         }
@@ -720,12 +727,14 @@ namespace ClassicUO.Game.GameObjects
                     {
                         World.CorpseManager.Remove(0, Serial);
                         World.RemoveMobile(this);
+                        World.Mobiles.ProcessDelta();
                     }
                 }
                 else if ((Serial & 0x80000000) != 0)
                 {
                     World.CorpseManager.Remove(0, Serial);
                     World.RemoveMobile(this);
+                    World.Mobiles.ProcessDelta();
                 }
 
                 LastAnimationChangeTime = Engine.Ticks + currentDelay;
@@ -875,12 +884,12 @@ namespace ClassicUO.Game.GameObjects
             }
         } */
 
-        public override void Dispose()
+        public override void Destroy()
         {
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
 
-            base.Dispose();
+            base.Destroy();
         }
 
         internal struct Step

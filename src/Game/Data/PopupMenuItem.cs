@@ -22,19 +22,18 @@ namespace ClassicUO.Game.Data
 {
     internal readonly struct PopupMenuItem
     {
-        public PopupMenuItem(int cliloc, ushort index, Hue hue, Hue replacedHue, ushort flags)
+        public PopupMenuItem(int cliloc, ushort index, Hue hue, Hue replaced, ushort flags)
         {
             Cliloc = cliloc;
             Index = index;
             Hue = hue;
-            ReplacedHue = replacedHue;
+            ReplacedHue = replaced;
             Flags = flags;
         }
 
         public readonly int Cliloc;
         public readonly ushort Index;
-        public readonly Hue Hue;
-        public readonly Hue ReplacedHue;
+        public readonly Hue Hue, ReplacedHue;
         public readonly ushort Flags;
     }
 }

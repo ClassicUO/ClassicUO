@@ -29,6 +29,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
         {
             bool result = false;
 
-            int alpha = (int) AlphaHue;
+            int alpha = AlphaHue;
 
             if (alpha > max)
             {
@@ -114,6 +115,17 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool DrawTransparent { get; set; }
+
+        private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Blend.SourceAlpha, ColorDestinationBlend = Blend.InverseSourceAlpha
+            };
+
+            return state;
+        });
+
 
 
         public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
@@ -191,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
                 if (dist <= maxDist)
                 {
                     isTransparent = dist <= 3;
-                    HueVector.Z = MathHelper.Lerp(1f, 1f - (dist / (float) maxDist), 0.5f);
+                    HueVector.Z = Microsoft.Xna.Framework.MathHelper.Lerp(1f, 1f - (dist / (float)maxDist), 0.5f);
                     //HueVector.Z = 1f - (dist / (float)maxDist);
                 }
                 else
@@ -229,13 +241,41 @@ namespace ClassicUO.Game.GameObjects
                     vertex[3]
                 };
 
-                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = ShaderHuesTraslator.GetHueVector(0, ShadersEffectType.Shadow);
+                Vector3 hue = Vector3.Zero;
+                hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
+
+                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
 
                 batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + Offset.Y - Offset.Z + 22), IsFlipped, 0);
             }
 
+            //if (DrawTransparent)
+            //{
+            //batcher.SetBlendState(_blend.Value);
+            //SDL2EX.glColor4f(1, 1, 1, 0.25f);
+
+            //}
+
+
             if (!batcher.DrawSprite(Texture, vertex))
+            {
+                //if (DrawTransparent)
+                //    batcher.SetBlendState(null);
                 return false;
+            }
+
+            //if (DrawTransparent)
+            //{
+            //    batcher.SetBlendState(null);
+
+
+            //    batcher.Stencil.StencilEnable = true;
+            //    batcher.DrawSprite(Texture, vertex);
+            //    batcher.Stencil.StencilEnable = false;
+            //}
+
+
+
 
             MousePick(list, vertex, isTransparent);
 

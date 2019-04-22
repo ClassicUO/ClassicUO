@@ -9,7 +9,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Managers
 {
-    class CorpseManager
+    internal class CorpseManager
     {
         private readonly Dictionary<Serial, CorpseInfo?> _corpses = new Dictionary<Serial, CorpseInfo?>();
 
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Managers
         public void Clear() => _corpses.Clear();
     }
 
-    readonly struct CorpseInfo
+    internal readonly struct CorpseInfo
     {
         public CorpseInfo(Serial corpseSerial, Serial objectSerial, Direction direction, bool isRunning)
         {

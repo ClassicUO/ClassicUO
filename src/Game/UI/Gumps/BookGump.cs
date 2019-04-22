@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
         }
 
-        private Button m_Forward, m_Backward;
+        private GumpPic m_Forward, m_Backward;
         private void BuildGump(string[] pages)
         {
             Add( new GumpPic( 0, 0, 0x1FE, 0 )
@@ -65,16 +65,9 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true
             } );
 
-            Add(m_Backward = new Button( (int)Buttons.Backwards, 0x1FF, 0x1FF, 0x1FF )
-            {
-                ButtonAction = ButtonAction.Activate,
-            } );
+            Add(m_Backward = new GumpPic(0, 0, 0x1FF, 0));
 
-            Add(m_Forward =  new Button( (int)Buttons.Forward, 0x200, 0x200, 0x200 )
-            {
-                X = 356,
-                ButtonAction = ButtonAction.Activate
-            } );
+            Add(m_Forward = new GumpPic(356, 0, 0x200, 0));
             m_Forward.MouseClick += ( sender,e ) => {
                 if (e.Button == MouseButton.Left && sender is Control ctrl)
                 {
@@ -111,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsEditable)
                 {
                     X = x,
                     Y = y,
@@ -136,9 +129,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
+        private readonly List<MultiLineBox> m_Pages = new List<MultiLineBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
-        private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
+        private int ActiveInternalPage => IsEditable ? m_Pages.FindIndex(t => t.HasKeyboardFocus) : m_Pages.FindIndex(t => t.MouseIsOver);
 
         private void SetActivePage( int page )
         {
@@ -246,13 +239,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 RefreshShowCaretPos(entry.Text.Length, box);
                                 _AtEnd = 1;
                             }
-                            else if (entry.CaretIndex == 0)
+                            else if (entry != null && entry.CaretIndex == 0)
                             {
                                 _AtEnd = -1;
                             }
                         }
                         else
-                            _AtEnd = (sbyte)(entry.CaretIndex == 0 ? -1 : (entry.CaretIndex + 1 >=  entry.Text.Length && curpage < BookPageCount ? 1 : 0));
+                            _AtEnd = (sbyte)(entry != null && entry.CaretIndex == 0 ? -1 : (entry.CaretIndex + 1 >=  entry.Text.Length && curpage < BookPageCount ? 1 : 0));
                     }
                     else
                         _AtEnd = 0;
@@ -263,43 +256,44 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
                     _scale = false;
-                    int caretpos = entry.CaretIndex, active = curpage;
-                    curpage++;
 
-                    if (curpage < BookPageCount) //if we are on the last page it doesn't need the front text backscaling
+                    if (entry != null)
                     {
-                        StringBuilder sb = new StringBuilder();
+                        int caretpos = entry.CaretIndex, active = curpage;
+                        curpage++;
 
-                        do
+                        if (curpage < BookPageCount) //if we are on the last page it doesn't need the front text backscaling
                         {
-                            entry = m_Pages[curpage].TxEntry;
-                            box = m_Pages[curpage];
-                            int curlen = entry.Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
-                            m_Pages[prevpage].TxEntry.SetCaretPosition(prevlen);
+                            StringBuilder sb = new StringBuilder();
 
-                            for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i)
+                            do
                             {
-                                sb.Append('\n');
-                            }
+                                entry = m_Pages[curpage].TxEntry;
+                                box = m_Pages[curpage];
+                                int curlen = entry.Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
+                                m_Pages[prevpage].TxEntry.SetCaretPosition(prevlen);
 
-                            sb.Append(entry.Text.Substring(0, chonline));
+                                for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i)
+                                {
+                                    sb.Append('\n');
+                                }
 
-                            if (curlen > 0)
-                            {
-                                sb.Append('\n');
+                                sb.Append(entry.Text.Substring(0, chonline));
 
-                                if (entry.Text[Math.Min(Math.Max(curlen - 1, 0), chonline)] == '\n')
-                                    chonline++;
+                                if (curlen > 0)
+                                {
+                                    sb.Append('\n');
 
-                                entry.Text = entry.Text.Substring(chonline);
-                            }
+                                    entry.Text = entry.Text.Substring(chonline);
+                                }
 
-                            m_Pages[prevpage].TxEntry.InsertString(sb.ToString());
-                            curpage++;
-                            sb.Clear();
-                        } while (curpage < BookPageCount);
+                                m_Pages[prevpage].TxEntry.InsertString(sb.ToString());
+                                curpage++;
+                                sb.Clear();
+                            } while (curpage < BookPageCount);
 
-                        m_Pages[active].TxEntry.SetCaretPosition(caretpos);
+                            m_Pages[active].TxEntry.SetCaretPosition(caretpos);
+                        }
                     }
                 }
             }
@@ -307,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage >= 0 && curpage + 1 < BookPageCount)
                 {
-                    if (entry.CaretIndex + 1 >= box.Text.Length)
+                    if (entry != null && entry.CaretIndex + 1 >= box.Text.Length)
                     {
                         if (_AtEnd > 0)
                         {
@@ -327,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage > 0)
                 {
-                    if (entry.CaretIndex == 0)
+                    if (entry != null && entry.CaretIndex == 0)
                     {
                         if (_AtEnd < 0)
                         {
@@ -347,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage > 0)
                 {
-                    if (entry.CaretIndex == 0)
+                    if (entry != null && entry.CaretIndex == 0)
                     {
                         if (_AtEnd < 0)
                         {
@@ -367,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (curpage + 1 < BookPageCount && curpage >= 0)
                 {
-                    if (entry.CaretIndex + 1 >= box.Text.Length)
+                    if (entry != null && entry.CaretIndex + 1 >= box.Text.Length)
                     {
                         if (_AtEnd > 0)
                         {
@@ -418,35 +412,25 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private bool _scale = false;
-        public void ScaleOnBackspace(MultiLineEntry entry)
+        public void Scale(MultiLineEntry entry, bool fromleft)
         {
-            var linech = entry.GetLinesCharsCount();
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
+            var linech = entry.GetLinesCharsCount(entry.Text);
             int caretpos = entry.CaretIndex;
-            for (int l = 0; l < linech.Length && !_scale; l++)
+            (int, int) selection = entry.GetSelectionArea();
+            bool multilinesel = false;
+            if (selection.Item1 != -1)
+                multilinesel = true;
+            if (!multilinesel)
             {
-                caretpos -= linech[l];
-                _scale = caretpos == -linech[l];
+                for (int l = 0; l < linech.Length && !_scale; l++)
+                {
+                    caretpos -= linech[l];
+                    _scale = fromleft ? caretpos == -linech[l] : caretpos == 0;
+                }
+                if(fromleft)
+                    _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
             }
-            _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
-        }
-
-        public void ScaleOnDelete(MultiLineEntry entry)
-        {
-            var linech = entry.GetLinesCharsCount();
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
-            int caretpos = entry.CaretIndex;
-            for (int l = 0; l < linech.Length && !_scale; l++)
-            {
-                caretpos -= linech[l];
-                _scale = caretpos == 0;
-            }
+            entry.RemoveChar(fromleft);
         }
 
         public void OnHomeOrEnd(MultiLineEntry entry, bool home)
@@ -454,10 +438,6 @@ namespace ClassicUO.Game.UI.Gumps
             var linech = entry.GetLinesCharsCount();
             // sepos = 1 if at end of whole text, -1 if at begin, else it will always be 0
             sbyte sepos = (sbyte)(entry.CaretIndex == 0 ? -1 : (entry.CaretIndex == entry.Text.Length ? 1 : 0));
-            for (int l = 0; l + 1 < linech.Length; l++)
-            {
-                linech[l]++;
-            }
             int caretpos = entry.CaretIndex;
 
             for (int l = 0; l < linech.Length; l++)
@@ -522,9 +502,9 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         var entry = m_Pages[curpage].TxEntry;
                         RefreshShowCaretPos(0, m_Pages[curpage]);
-                        if(text.Length==0 || text[text.Length - 1] != '\n')
+                        /*if(text.Length==0 || text[text.Length - 1] != '\n')
                             text = entry.InsertString(text + "\n");
-                        else
+                        else*/
                             text = entry.InsertString(text);
                         if (!string.IsNullOrEmpty(text))
                         {
@@ -555,25 +535,21 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
-                        for (int l = 0; l+1 < linechr.Length; l++)
+                        foreach (int t in linechr)
                         {
-                            if(l+1 % MaxBookLines != 0)
-                                linechr[l]++;
-                        }
-                        for(int l = 0; l < linechr.Length; l++)
-                        {
-                            oldcaretpos += linechr[l];
-                            if (oldcaretpos > m_Pages[oldpage].Text.Length)
-                            {
-                                oldcaretpos = linechr[l];
-                                if (oldpage+1 < BookPageCount)
-                                    oldpage++;
-                                else
-                                    break;
-                            }
+                            oldcaretpos += t;
+
+                            if (oldcaretpos <= m_Pages[oldpage].Text.Length) continue;
+
+                            oldcaretpos = t;
+                            if (oldpage+1 < BookPageCount)
+                                oldpage++;
+                            else
+                                break;
                         }
                         RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
                     }
+                    PageChanged[oldpage + 1] = true;//for the last page we are setting the changed status, this is the page we are on with caret.
                     SetActivePage((oldpage >> 1) + (oldpage % 2) + 1);
                 }
             }
@@ -625,6 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private const int MaxBookLines = 8;
+        private const int MaxBookChars = 53;
         internal sealed class PBookData : PacketWriter
         {
             public PBookData( BookGump gump ) : base(0x66)
@@ -641,17 +618,32 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
                 WriteUShort( (ushort)changed.Count );
-                for( int i = changed.Count - 1; i >= 0; --i )
+                for ( int i = changed.Count - 1; i >= 0; --i )
                 {
                     WriteUShort( (ushort)(changed[i]) );
-                    var splits = gump.m_Pages[changed[i]-1].Text.Split( '\n' );
+                    MultiLineEntry mle = gump.m_Pages[changed[i] - 1].TxEntry;
+                    StringBuilder sb = new StringBuilder(mle.Text);
+                    int rows = 0;
+                    if (sb.Length > 0)
+                    {
+                        var lcc = mle.GetLinesCharsCount(mle.Text);
+                        rows = Math.Min(MaxBookLines, lcc.Length);
+                        int pos = lcc.Sum();
+                        for (int l = rows - 1; l >= 0; --l)
+                        {
+                            if (pos > 0 && (lcc[l] == 0 || sb[pos - 1] != '\n'))
+                            {
+                                sb.Insert(pos, '\n');
+                            }
+                            pos -= lcc[l];
+                        }
+                    }
+                    var splits = sb.ToString().Split( '\n' );
                     int length = splits.Length;
-                    bool allowdestack = true;
                     WriteUShort( (ushort)Math.Min(length, MaxBookLines) );
                     if( length > MaxBookLines && changed[i] >= gump.BookPageCount )
                     {
                         Log.Message( LogTypes.Error, $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost" );
-                        allowdestack = false;
                     }
                     for ( int j = 0; j < length; j++ )
                     {
@@ -679,16 +671,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                                 WriteASCII(splits[j]);
                             }
-                        }
-                        else if(allowdestack)
-                        {
-                            int idx = Position;
-                            Seek(7);
-                            gump.m_Pages[changed[i]].Text = gump.m_Pages[changed[i]].Text.Insert(0, string.Format("{0}\n", splits[j]));
-                            changed.Insert(0, changed[i]);
-                            WriteUShort((ushort)changed.Count);
-                            Seek(idx);
-                            i++;
                         }
                     }
                 }

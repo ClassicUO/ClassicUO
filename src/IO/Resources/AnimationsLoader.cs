@@ -19,7 +19,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
+    internal class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
     {
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];
@@ -101,13 +101,17 @@ namespace ClassicUO.IO.Resources
                     {
                         line = line.Trim();
 
-                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
+                        if (line.Length == 0 || line[0] == '#')
                             continue;
 
                         string[] parts = line.Split(new[]
                         {
                             '\t', ' '
                         }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parts.Length < 3)
+                            continue;
+
                         int id = int.Parse(parts[0]);
 
                         if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)

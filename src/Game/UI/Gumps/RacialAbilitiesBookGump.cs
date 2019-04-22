@@ -11,7 +11,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class RacialAbilitiesBookGump : Gump
+    internal class RacialAbilitiesBookGump : Gump
     {
         private int _dictionaryPagesCount = 1;
         private int _abilityCount = 4;

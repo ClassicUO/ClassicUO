@@ -341,7 +341,7 @@ namespace ClassicUO.Utility
 
         bool System.Collections.IList.Contains(object value)
         {
-            return IsT(value) ? ((ICollection<T>) this).Contains((T) value) : false;
+            return IsT(value) && ((ICollection<T>) this).Contains((T) value);
         }
 
         int System.Collections.IList.IndexOf(object value)

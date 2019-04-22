@@ -11,7 +11,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     At -1.0, the input signal is attenuated by 6dB, at +1.0 the signal is
     ///     amplified by 6dB.
     /// </summary>
-    class Equalizer
+    internal class Equalizer
     {
         private const int BANDS = 32;
 

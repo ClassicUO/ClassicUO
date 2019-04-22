@@ -14,7 +14,7 @@ An open source implementation of the Ultima Online Classic Client.
             
 #### Current release
 
-[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/Pack4Duck/classicuo)
+[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/andreakarasho/classicuo)
 
 
 # Introduction

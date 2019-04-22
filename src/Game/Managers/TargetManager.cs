@@ -43,12 +43,26 @@ namespace ClassicUO.Game.Managers
         Helpful,
         Cancel
     }
+    internal class MultiTargetInfo
+    {
+        public ushort XOff, YOff, ZOff, Model;
+        public Position Offset => new Position(XOff,YOff,(sbyte)ZOff);
 
+        public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z)
+        {
+            Model = model;
+            XOff = x;
+            YOff = y;
+            ZOff = z;
+        }
+    }
     internal static class TargetManager
     {
         private static Serial _targetCursorId;
         private static TargetType _targetCursorType;
-        private static int _multiModel;
+        private static MultiTargetInfo _multiModel;
+
+        public static MultiTargetInfo MultiTargetInfo => _multiModel;
         
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
@@ -60,6 +74,10 @@ namespace ClassicUO.Game.Managers
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(Serial.INVALID);
+            }
             IsTargeting = false;
         }
 
@@ -88,16 +106,23 @@ namespace ClassicUO.Game.Managers
 
         public static void CancelTarget()
         {
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(Serial.INVALID);
+            }
             GameActions.TargetCancel(TargetingState, _targetCursorId, (byte)_targetCursorType);
             IsTargeting = false;
+            
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, int model, TargetType targetType)
+        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z)
         {
-            SetTargeting(CursorTarget.MultiPlacement, deedSerial, targetType);
-            _multiModel = model;
+            SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
+            _multiModel = new MultiTargetInfo(model,x,y,z);
         }
 
+
+    
         private static void TargetXYZ(GameObject selectedEntity)
         {
             Graphic modelNumber = 0;
@@ -113,7 +138,7 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void TargetGameObject(GameObject selectedEntity)
+        public static void TargetGameObject(IGameEntity selectedEntity)
         {
             if (selectedEntity == null || !IsTargeting)
                 return;
@@ -122,8 +147,8 @@ namespace ClassicUO.Game.Managers
             {
                 selectedEntity = effect.Source;
             }
-            else if (selectedEntity is TextOverhead overhead && overhead.Parent != null)
-                selectedEntity = overhead.Parent;
+            else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
+                selectedEntity = overhead.Parent.Parent;
 
             if (selectedEntity is Entity entity)
             {
@@ -142,19 +167,19 @@ namespace ClassicUO.Game.Managers
                     GameActions.TargetObject(entity, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
-            else
+            else if (selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
-                short z = selectedEntity.Position.Z;
+                short z = gobj.Position.Z;
 
-                if (selectedEntity is Static st)
+                if (gobj is Static st)
                 {
                     modelNumber = st.OriginalGraphic;
 
                     if (st.ItemData.IsSurface)
                         z += st.ItemData.Height;
                 }
-                else if (selectedEntity is Multi m)
+                else if (gobj is Multi m)
                 {
                     modelNumber = m.Graphic;
 
@@ -162,7 +187,7 @@ namespace ClassicUO.Game.Managers
                         z += m.ItemData.Height;
                 }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
+                GameActions.TargetXYZ(gobj.Position.X, gobj.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }
 

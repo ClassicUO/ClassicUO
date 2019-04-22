@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Coroutines
 {
-    class WaitTime : WaitCondition<float>
+    internal class WaitTime : WaitCondition<float>
     {
         public WaitTime(TimeSpan time) : base(
                                            (s) => s - Engine.TicksFrame,

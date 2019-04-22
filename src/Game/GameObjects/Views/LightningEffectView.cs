@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class LightningEffect
+    internal sealed partial class LightningEffect
     {
         private static readonly Point[] _offsets =
         {
@@ -48,13 +48,21 @@ namespace ClassicUO.Game.GameObjects
                 Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
-            
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+            }
 
             Engine.DebugInfo.EffectsRendered++;
             return base.Draw(batcher, position, list);

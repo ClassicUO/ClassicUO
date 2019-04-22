@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Support
 {
-    class SupportClass
+    internal class SupportClass
     {
         public static int URShift(int number, int bits)
         {

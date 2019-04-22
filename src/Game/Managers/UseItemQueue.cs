@@ -9,7 +9,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-    class UseItemQueue : IUpdateable
+    internal class UseItemQueue : IUpdateable
     {
         private readonly Deque<Serial> _actions = new Deque<Serial>();
         private long _timer;

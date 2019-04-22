@@ -1072,11 +1072,9 @@ namespace ClassicUO.Network
 
         private static int RemoveBit(ref byte b, int bit)
         {
-            int bit_num = 0;
-
             if (GetBit(b, bit) != -1)
             {
-                bit_num = 1 << (bit - 1);
+                int bit_num = 1 << (bit - 1);
                 b ^= (byte) bit_num;
             }
 

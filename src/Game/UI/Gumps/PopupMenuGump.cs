@@ -23,16 +23,18 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class PopupMenuGump : Gump
     {
-        private readonly PopupMenuData _data;
-
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
-            _data = data;
             CloseIfClickOutside = true;
             //ControlInfo.IsModal = true;
             //ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
@@ -51,10 +53,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string text = FileManager.Cliloc.GetString(item.Cliloc);
 
-                Label label = new Label(text, true, item.Hue, font: 1)
+                ushort hue = item.Hue;
+                if (item.ReplacedHue != 0)
+                {
+                    
+                    uint h = (HuesHelper.Color16To32(item.ReplacedHue));
+                    (byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(h);
+
+                    Color c = new Color(r, g, b, a);
+
+                    if (c.A == 0)
+                        c.A = 0xFF;
+
+                    FileManager.Fonts.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
+                }
+
+                Label label = new Label(text, true, 0xFFFF, font: 1, ishtml: false)
                 {
                     X = 10, Y = offsetY
                 };
+                FileManager.Fonts.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {
@@ -66,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (e.Button == MouseButton.Left)
                     {
                         HitBox l = (HitBox) sender;
-                        GameActions.ResponsePopupMenu(_data.Serial, (ushort) l.Tag);
+                        GameActions.ResponsePopupMenu(data.Serial, (ushort) l.Tag);
                         Dispose();
                     }
                 };

@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _sliderX;
         private readonly RenderedText _text;
         private int _value = -1;
-        public EventHandler ValueChanged;
+        public event EventHandler ValueChanged;
 
         public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
         {
@@ -135,15 +135,15 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 Width = BarWidth;
-                Height = _gumpWidget.Height;
+                if (_gumpWidget != null) Height = _gumpWidget.Height;
                 //RecalculateSliderX();
                 CalculateOffset();
             }
 
             if (_gumpSpliderBackground != null)
             {
-                for (int i = 0; i < _gumpSpliderBackground.Length; i++)
-                    _gumpSpliderBackground[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpSpliderBackground)
+                    t.Ticks = (long) totalMS;
             }
 
             //ModifyPairedValues(_newValue - Value);
@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            _text?.Dispose();
+            _text?.Destroy();
             base.Dispose();
         }
     }

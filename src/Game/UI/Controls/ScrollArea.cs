@@ -170,6 +170,11 @@ namespace ClassicUO.Game.UI.Controls
             _needUpdate = true;
         }
 
+        public override void OnPageChanged()
+        {
+            _needUpdate = true;
+        }
+
         public override void Remove(Control c)
         {
             if (c is ScrollAreaItem)
@@ -207,10 +212,13 @@ namespace ClassicUO.Game.UI.Controls
         private void CalculateScrollBarMaxValue()
         {
             _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
-            bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
+            bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
             int height = 0;
             for (int i = 1; i < Children.Count; i++)
-                height += Children[i].Height;
+            {
+                if(Children[i].IsVisible)
+                    height += Children[i].Height;
+            }
 
             height -= _scrollBar.Height;
 
@@ -240,6 +248,14 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Children.Count == 0)
                 Dispose();
+        }
+
+        public override void OnPageChanged()
+        {
+            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Height : 0) : 0;
+            IsVisible = maxheight > 0;
+            Height = maxheight;
+            Parent?.OnPageChanged();
         }
     }
 }

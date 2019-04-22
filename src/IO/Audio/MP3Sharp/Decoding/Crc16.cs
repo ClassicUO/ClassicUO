@@ -5,7 +5,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// <summary>
     ///     16-Bit CRC checksum
     /// </summary>
-    sealed class Crc16
+    internal sealed class Crc16
     {
         private static readonly short Polynomial;
         private short m_Crc;

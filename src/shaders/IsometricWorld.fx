@@ -72,22 +72,12 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	float alpha = 1 - IN.Hue.z;
 
-	if (mode == COLOR)
+	if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b ))
 	{
 		if (IN.Hue.x < HuesPerTexture)
 			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
 		else
 			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
-	}
-	else if (mode == PARTIAL_COLOR)
-	{
-		if (color.r == color.g && color.r == color.b)
-		{
-			if (IN.Hue.x < HuesPerTexture)
-				color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
-			else
-				color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
-		}
 	}
 	else if (mode == LAND)
 	{

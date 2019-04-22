@@ -24,12 +24,20 @@ namespace ClassicUO.Game.Managers
              new Vector2[] { new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
              new Vector2[] { new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) }
         };
-
+        
         private static readonly Point[] _anchorDirectionMatrix =
         {
-             new Point(-1, 0) ,
-             new Point(0, -1) ,
-             new Point(1, 0) ,
+             new Point(-1, 0),
+             new Point(0, -1),
+             new Point(1, 0),
+             new Point(0, 1)
+        };
+
+        private static readonly Point[] _anchorMultiplierMatrix =
+        {
+             new Point(0, 0),
+             new Point(0, 0),
+             new Point(1, 0),
              new Point(0, 1)
         };
 
@@ -39,15 +47,17 @@ namespace ClassicUO.Game.Managers
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                AnchorDirection direction = GetAnchorDirection(host, x, y);
-
-                if (this[host] == null)
-                    this[host] = new AnchorGroup(host);
-
-                if (this[host].IsEmptyDirection(host, direction))
+                Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+                if (relativePosition.HasValue)
                 {
-                    this[host].AnchorControlAt(draggedControl, host, direction);
-                    this[draggedControl] = this[host];
+                    if (this[host] == null)
+                        this[host] = new AnchorGroup(host);
+
+                    if (this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    {
+                        this[host].AnchorControlAt(draggedControl, host, relativePosition.Value);
+                        this[draggedControl] = this[host];
+                    }
                 }
             }
         }
@@ -56,13 +66,13 @@ namespace ClassicUO.Game.Managers
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                AnchorDirection direction = GetAnchorDirection(host, x, y);
-
-                if (this[host] == null || this[host].IsEmptyDirection(host, direction))
-                {
-                    var offset = _anchorDirectionMatrix[(int) direction] * new Point(draggedControl.Width, draggedControl.Height);
-                    return new Point(host.X + offset.X, host.Y + offset.Y);
-                }
+                Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+                if (relativePosition.HasValue)
+                    if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    {
+                        var offset = relativePosition.Value * new Point(host.GroupMatrixWidth, host.GroupMatrixHeight);
+                        return new Point(host.X + offset.X, host.Y + offset.Y);
+                    }
             }
 
             return draggedControl.Location;
@@ -129,7 +139,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save(BinaryWriter writer)
         {
-            int VERSION = 1;
+            const int VERSION = 1;
             var groups = reverseMap.Values.Distinct().ToList();
 
             writer.Write(VERSION);
@@ -153,19 +163,36 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private AnchorDirection GetAnchorDirection(AnchorableGump host, int x, int y)
+        private Point? GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
         {
-            var anchorPoint = new Vector2((float)x / host.Width, (float)y / host.Height);
-
-            for (AnchorDirection anchorDirection = AnchorDirection.Left; anchorDirection <= AnchorDirection.Bottom; anchorDirection++)
+            for (int xMult = 0; xMult < host.WidthMultiplier; xMult++)
             {
-                if (IsPointInPolygon(_anchorTriangles[ (int) anchorDirection], anchorPoint))
+                for (int yMult = 0; yMult < host.HeightMultiplier; yMult++)
                 {
-                    return anchorDirection;
+                    var snapX = x - (host.GroupMatrixWidth * xMult);
+                    var snapY = y - (host.GroupMatrixHeight * yMult);
+
+                    var anchorPoint = new Vector2((float)snapX / host.GroupMatrixWidth, (float)snapY / host.GroupMatrixHeight);
+
+                    if (xMult == 0)
+                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Left], anchorPoint))
+                            return new Point(-draggedControl.WidthMultiplier, yMult);
+
+                    if (yMult == 0)
+                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Top], anchorPoint))
+                            return new Point(xMult, -draggedControl.HeightMultiplier);
+
+                    if (xMult == host.WidthMultiplier - 1)
+                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Right], anchorPoint))
+                            return new Point(1 + xMult, yMult);
+
+                    if (yMult == host.HeightMultiplier - 1)
+                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Bottom], anchorPoint))
+                            return new Point(xMult, 1 + yMult);
                 }
             }
-
-            return AnchorDirection.Left;
+            
+            return null;
         }
 
         private bool IsPointInPolygon(Vector2[] polygon, Vector2 point)
@@ -184,13 +211,24 @@ namespace ClassicUO.Game.Managers
 
         public class AnchorGroup
         {
-            AnchorableGump[,] controlMatrix;
-            int updateCount = 0;
+            private AnchorableGump[,] controlMatrix;
+            private int updateCount = 0;
 
             public AnchorGroup(AnchorableGump initial)
             {
-                controlMatrix = new AnchorableGump[1, 1];
-                controlMatrix[0, 0] = initial;
+                controlMatrix = new AnchorableGump[initial.WidthMultiplier, initial.HeightMultiplier];
+                AddControlToMatrix(0, 0, initial);
+            }
+
+            private void AddControlToMatrix(int xinit, int yInit, AnchorableGump control)
+            {
+                for (int x = 0; x < control.WidthMultiplier; x++)
+                {
+                    for (int y = 0; y < control.HeightMultiplier; y++)
+                    {
+                        controlMatrix[x + xinit, y + yInit] = control;
+                    }
+                }
             }
 
             public AnchorGroup()
@@ -231,13 +269,21 @@ namespace ClassicUO.Game.Managers
 
             public void DetachControl(AnchorableGump control)
             {
-                var coords = GetControlCoordinates(control);
-                controlMatrix[coords.Value.X, coords.Value.Y] = null;
+                for (int x = 0; x < controlMatrix.GetLength(0); x++)
+                {
+                    for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    {
+                        if (controlMatrix[x, y] == control)
+                        {
+                            controlMatrix[x, y] = null;
+                        }
+                    }
+                }
             }
 
             public List<AnchorableGump> Restore(BinaryReader reader, List<Gump> gumps)
             {
-                List<AnchorableGump> groupGumps = new List<AnchorableGump>();
+                HashSet<AnchorableGump> groupGumps = new HashSet<AnchorableGump>();
 
                 uint xCount = reader.ReadUInt32();
                 uint yCount = reader.ReadUInt32();
@@ -263,7 +309,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                return groupGumps;
+                return groupGumps.ToList();
             }
 
             public void UpdateLocation(Control control, int deltaX, int deltaY)
@@ -272,14 +318,20 @@ namespace ClassicUO.Game.Managers
                 {
                     updateCount++;
 
+                    HashSet<Control> visited = new HashSet<Control>();
+
                     for (int x = 0; x < controlMatrix.GetLength(0); x++)
                     {
                         for (int y = 0; y < controlMatrix.GetLength(1); y++)
                         {
                             if (controlMatrix[x, y] != null && controlMatrix[x, y] != control)
                             {
-                                controlMatrix[x, y].X += deltaX;
-                                controlMatrix[x, y].Y += deltaY;
+                                if (!visited.Contains(controlMatrix[x, y]))
+                                {
+                                    controlMatrix[x, y].X += deltaX;
+                                    controlMatrix[x, y].Y += deltaY;
+                                    visited.Add(controlMatrix[x, y]);
+                                }
                             }
                         }
                     }
@@ -288,51 +340,66 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            public void AnchorControlAt(AnchorableGump control, AnchorableGump host, AnchorDirection direction)
+            public void AnchorControlAt(AnchorableGump control, AnchorableGump host, Point relativePosition)
             {
-                Point? hostDirection = GetControlCoordinates(host);
-                if (hostDirection.HasValue)
+                Point? hostPosition = GetControlCoordinates(host);
+                if (hostPosition.HasValue)
                 {
-                    var targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int)direction].X;
-                    var targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int)direction].Y;
+                    var targetX = hostPosition.Value.X + relativePosition.X;
+                    var targetY = hostPosition.Value.Y + relativePosition.Y;
 
                     if (IsEmptyDirection(targetX, targetY))
                     {
                         if (targetX < 0) // Create new column left
-                            ResizeMatrix(controlMatrix.GetLength(0) + 1, controlMatrix.GetLength(1), 1, 0);
-                        else if (targetX > controlMatrix.GetLength(0) - 1) // Create new column right
-                            ResizeMatrix(controlMatrix.GetLength(0) + 1, controlMatrix.GetLength(1), 0, 0);
+                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), control.WidthMultiplier, 0);
+                        else if (targetX > controlMatrix.GetLength(0) - control.WidthMultiplier) // Create new column right
+                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), 0, 0);
 
                         if (targetY < 0) //Create new row top
-                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + 1, 0, 1);
+                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, control.HeightMultiplier);
                         else if (targetY > controlMatrix.GetLength(1) - 1) // Create new row bottom
-                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + 1, 0, 0);
+                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, 0);
 
 
-                        hostDirection = GetControlCoordinates(host);
+                        hostPosition = GetControlCoordinates(host);
 
-                        if (hostDirection.HasValue)
+                        if (hostPosition.HasValue)
                         {
-                            targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int) direction].X;
-                            targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int) direction].Y;
-                            controlMatrix[targetX, targetY] = control;
+                            targetX = hostPosition.Value.X + relativePosition.X;
+                            targetY = hostPosition.Value.Y + relativePosition.Y;
+
+                            AddControlToMatrix(targetX, targetY, control);
                         }
                     }
                 }
             }
 
-            public bool IsEmptyDirection(AnchorableGump host, AnchorDirection direction)
+            public bool IsEmptyDirection(AnchorableGump draggedControl, AnchorableGump host, Point relativePosition)
             {
-                Point? hostDirection = GetControlCoordinates(host);
-                if (hostDirection.HasValue)
-                {
-                    var targetX = hostDirection.Value.X + _anchorDirectionMatrix[(int) direction].X;
-                    var targetY = hostDirection.Value.Y + _anchorDirectionMatrix[(int) direction].Y;
+                Point? hostPosition = GetControlCoordinates(host);
 
-                    return IsEmptyDirection(targetX, targetY);
+                bool isEmpty = true;
+
+                if (hostPosition.HasValue)
+                {
+                    var targetInitPosition = hostPosition.Value + relativePosition;
+
+                    for (int xOffset = 0; xOffset < draggedControl.WidthMultiplier; xOffset++)
+                    {
+                        for(int yOffset = 0; yOffset < draggedControl.HeightMultiplier; yOffset++)
+                        {
+                            isEmpty &= IsEmptyDirection(targetInitPosition.X + xOffset, targetInitPosition.Y + yOffset);
+                        }
+                    }
+                    
+                    //// TODO: loop through
+                    //var targetX = hostPosition.Value.X + relativePosition.X;
+                    //var targetY = hostPosition.Value.Y + relativePosition.Y;
+
+                    //return IsEmptyDirection(targetX, targetY);
                 }
 
-                return false;
+                return isEmpty;
             }
 
             public bool IsEmptyDirection(int x, int y)
@@ -368,6 +435,26 @@ namespace ClassicUO.Game.Managers
                         newMatrix[x + xInitial, y + yInitial] = controlMatrix[x, y];
 
                 controlMatrix = newMatrix;
+            }
+            
+            private void printMatrix()
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+
+                for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                {
+                    for (int x = 0; x < controlMatrix.GetLength(0); x++) 
+                    {
+                        if (controlMatrix[x, y] != null)
+                            Console.Write(" " + controlMatrix[x, y].LocalSerial + " ");
+                        else
+                            Console.Write(" ---------- ");
+                    }
+
+                    Console.WriteLine();
+                }
             }
         }
     }

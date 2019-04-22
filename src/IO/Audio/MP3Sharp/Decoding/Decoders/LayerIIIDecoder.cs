@@ -7,7 +7,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
     /// <summary>
     ///     Implements decoding of MPEG Audio Layer 3 frames.
     /// </summary>
-    sealed class LayerIIIDecoder : IFrameDecoder
+    internal sealed class LayerIIIDecoder : IFrameDecoder
     {
         private const int SSLIMIT = 18;
         private const int SBLIMIT = 32;

@@ -31,8 +31,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Platforms;
 
-using Microsoft.Xna.Framework;
-
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -77,14 +75,14 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
 
-            textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            textBox = new TextBox(Engine.Profile.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
                 Y = Height - height - 3,
                 Width = Width,
-                Height = height - 3
+                Height = height - 3,
             };
 
             Add(_trans = new AlphaBlendControl
@@ -92,7 +90,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = textBox.X,
                 Y = textBox.Y,
                 Width = Width,
-                Height = height + 5
+                Height = height + 5,
+                IsVisible = (!Engine.Profile.Current.ActivateChatAfterEnter),
+                AcceptMouseInput = true
             });
             Add(textBox);
 
@@ -102,10 +102,48 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = textBox.Y,
                 IsVisible = false
             });
+
             WantUpdateSize = false;
 
-            Chat.Message += ChatOnMessage;
+            Chat.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
+
+            IsActive = (!Engine.Profile.Current.ActivateChatAfterEnter);
+
+        }
+
+        private bool _isActive;
+
+        public bool IsActive
+        {
+            get => _isActive;
+            set
+            {
+                _isActive = value;
+
+                if (value)
+                {
+                    Engine.Profile.Current.ActivateChatStatus = _trans.IsVisible = value;
+                    _trans.Y = textBox.Y;
+                    textBox.Width = _trans.Width;
+                    textBox.SetText(string.Empty);
+                    textBox.SetKeyboardFocus();
+                }
+                else
+                {
+                    int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+                    Engine.Profile.Current.ActivateChatStatus = value;
+                    textBox.Width = 1;
+                    _trans.Y = textBox.Y + height + 3;
+                }
+
+                textBox.IsEditable = (_isActive) ? true : false;
+            }
+        }
+
+        public void ToggleChatVisibility()
+        {
+            IsActive = !IsActive;
         }
         
         private ChatMode Mode
@@ -115,6 +153,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _mode = value;
 
+                if (IsActive)
                 switch (value)
                 {
                     case ChatMode.Default:
@@ -160,33 +199,32 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void ChatOnMessage(object sender, UOMessageEventArgs e)
+        private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
         {
             switch (e.Type)
             {
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
                     AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Party:
                     AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Guild:
                     AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
-
                     break;
+
                 case MessageType.Alliance:
                     AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
-
                     break;
             }
         }
 
         public override void Dispose()
         {
-            Chat.Message -= ChatOnMessage;
+            Chat.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
 
@@ -217,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void AddLine(string text, byte font, Hue hue, bool isunicode)
         {
             if (_textEntries.Count >= 30)
-                _textEntries.RemoveFromFront().Dispose();
+                _textEntries.RemoveFromFront().Destroy();
 
             _textEntries.AddToBack(new ChatLineTime(text, font, isunicode, hue));
         }
@@ -226,9 +264,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (textBox != null)
             {
-                int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 textBox.Y = Height - height - 3;
-                textBox.Width = Width;
+                textBox.Width = (IsActive) ? Width : 1;
                 textBox.Height = height - 3;
                 _trans.Location = textBox.Location;
                 _trans.Width = Width;
@@ -252,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textEntries.RemoveAt(i--);
             }
 
-            if (Mode == ChatMode.Default)
+            if ( Mode == ChatMode.Default && IsActive)
             {
                 if (textBox.Text.Length == 1)
                 {
@@ -318,13 +356,21 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1:
 
+                    if (!IsActive)
+                        IsActive = true;
+
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
+
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
                     textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
 
                     break;
+
                 case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
+
+                    if (!IsActive)
+                        IsActive = true;
 
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
                     {
@@ -336,10 +382,11 @@ namespace ClassicUO.Game.UI.Gumps
                         textBox.SetText(string.Empty);
 
                     break;
+
                 case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
                     Mode = ChatMode.Default;
-
                     break;
+
                 case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
                     if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
                         NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
@@ -347,13 +394,53 @@ namespace ClassicUO.Game.UI.Gumps
                         NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
                     Chat.PromptData = default;
                     break;
+
+                case SDL.SDL_Keycode.SDLK_1 when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                        IsActive = true;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
+                case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
+                case SDL.SDL_Keycode.SDLK_COLON: // :
+                case SDL.SDL_Keycode.SDLK_QUESTION: // ?
+                case SDL.SDL_Keycode.SDLK_SLASH: // /
+                case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
+                case SDL.SDL_Keycode.SDLK_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_KP_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_COMMA: // ,
+                case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
+                case SDL.SDL_Keycode.SDLK_MINUS: // -
+                case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
+                    if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                        IsActive = true;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                    if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    {
+                        Mode = ChatMode.Default;
+                        if (!(Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && Engine.Profile.Current.ActivateChatShiftEnterSupport))
+                            ToggleChatVisibility();
+                    }
+                    break;
             }
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
+            if (!IsActive && Engine.Profile.Current.ActivateChatAfterEnter)
+            {
+                textBox.SetText(string.Empty);
+                text = string.Empty;
+                Mode = ChatMode.Default;
+            }
+
             if (string.IsNullOrEmpty(text))
                 return;
+
             ChatMode sentMode = Mode;
             textBox.SetText(string.Empty);
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
@@ -456,7 +543,7 @@ namespace ClassicUO.Game.UI.Gumps
             DisposeChatModePrefix();
         }
 
-        private class ChatLineTime : IUpdateable, IDisposable
+        private class ChatLineTime : IUpdateable
         {           
             private float _createdTime;
             private readonly RenderedText _renderedText;
@@ -476,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _createdTime = Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
-            public string Text => _renderedText.Text;
+            private string Text => _renderedText.Text;
 
             public bool IsDispose { get; private set; }
 
@@ -497,7 +584,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _alpha = 1.0f - (_createdTime / Constants.TIME_FADEOUT_TEXT);
                 }
                 if (_createdTime <= 0.0f)
-                    Dispose();
+                    Destroy();
 
                 //else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)
                 //    _alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
@@ -508,13 +595,13 @@ namespace ClassicUO.Game.UI.Gumps
                 return Text;
             }
 
-            public void Dispose()
+            public void Destroy()
             {
                 if (IsDispose)
                     return;
 
                 IsDispose = true;
-                _renderedText.Dispose();
+                _renderedText?.Destroy();
             }
         }
     }

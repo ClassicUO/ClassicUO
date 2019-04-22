@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class MultiMapLoader : ResourceLoader
+    internal class MultiMapLoader : ResourceLoader
     {
         private UOFile _file;
         private readonly UOFileMul[] _facets = new UOFileMul[6];

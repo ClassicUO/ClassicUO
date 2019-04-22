@@ -13,10 +13,11 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class MenuGump : Gump
+    internal class MenuGump : Gump
     {
         private readonly ContainerHorizontal _container;
         private bool _isDown, _isLeft;
+        private readonly HSliderBar _slider;
 
         public MenuGump(Serial serial, Serial serv, string name) : base(serial, serv)
         {
@@ -50,8 +51,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_container);
 
-
-
+            Add(_slider = new HSliderBar(40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar));
+            _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {
@@ -118,9 +119,12 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _container.Add(pic);
+
+            _container.CalculateWidth();
+            _slider.MaxValue = _container.MaxValue;
         }
 
-        class ContainerHorizontal : Control
+        private class ContainerHorizontal : Control
         {
             private int _maxWidth;
             private bool _update = true;
@@ -145,6 +149,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            public int MaxValue => _maxWidth;
+
             protected override void OnInitialize()
             {
                 _update = true;
@@ -155,12 +161,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (_update)
-                {
-                    _update = false;
+                //if (_update)
+                //{
+                //    _update = false;
 
-                    CalculateWidth();
-                }
+                //    CalculateWidth();
+                //}
             }
             
             public override bool Draw(Batcher2D batcher, int x, int y)
@@ -175,10 +181,8 @@ namespace ClassicUO.Game.UI.Gumps
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
 
-                    for (int i = 0; i < Children.Count; i++)
+                    foreach (Control child in Children)
                     {
-                        Control child = Children[i];
-
                         if (!child.IsVisible)
                             continue;
 
@@ -190,13 +194,13 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else if (width + child.Width <= maxWidth)
                         {
-                            child.Draw(batcher, x, y);
+                            child.Draw(batcher, child.X + x, y);
                         }
                         else
                         {
                             if (drawOnly1)
                             {
-                                child.Draw(batcher, x, y);
+                                child.Draw(batcher, child.X + x, y);
                                 drawOnly1 = false;
                             }
                         }
@@ -222,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _update = true;
             }
 
-            private void CalculateWidth()
+            public void CalculateWidth()
             {
                 _maxWidth = Children.Sum(s => s.Width) - Width;
 
@@ -234,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     }
 
-    class GrayMenuGump : Gump
+    internal class GrayMenuGump : Gump
     {
         private readonly ResizePic _resizePic;
         public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)

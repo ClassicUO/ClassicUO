@@ -3,7 +3,7 @@
     /// <summary>
     ///     Class for layer II subbands in joint stereo mode.
     /// </summary>
-    class SubbandLayer2IntensityStereo : SubbandLayer2
+    internal class SubbandLayer2IntensityStereo : SubbandLayer2
     {
         protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
         protected internal int channel2_scfsi;

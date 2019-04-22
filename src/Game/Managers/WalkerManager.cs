@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.Managers
 {
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
-    struct StepInfo
+    internal struct StepInfo
     {
         public byte Direction;
         public byte OldDirection;
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
         public sbyte Z;
     }
 
-    class FastWalkStack
+    internal class FastWalkStack
     {
         private readonly uint[] _keys = new uint[Constants.MAX_FAST_WALK_STACK_SIZE];
 
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class WalkerManager
+    internal class WalkerManager
     {
         public long LastStepRequestTime { get; set; }
         public int UnacceptedPacketsCount { get; set; }
@@ -88,6 +88,9 @@ namespace ClassicUO.Game.Managers
             {
                 World.Player.Position = new Position((ushort) x , (ushort)y, z);
 
+                World.RangeSize.X = x;
+                World.RangeSize.Y = y;
+
                 World.Player.AddToTile();
                 World.Player.ProcessDelta();
             }
@@ -115,9 +118,14 @@ namespace ClassicUO.Game.Managers
                 if (stepIndex >= CurrentWalkSequence)
                 {
                     StepInfos[stepIndex].Accepted = true;
+                    World.RangeSize.X = StepInfos[stepIndex].X;
+                    World.RangeSize.Y = StepInfos[stepIndex].Y;
                 }
                 else if (stepIndex == 0)
                 {
+                    World.RangeSize.X = StepInfos[0].X;
+                    World.RangeSize.Y = StepInfos[0].Y;
+
                     for (int i = 1; i < StepsCount; i++)
                         StepInfos[i - 1] = StepInfos[i];
 

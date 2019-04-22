@@ -17,7 +17,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer.UI
 {
-    class UpdaterMenu : Control
+    internal class UpdaterMenu : Control
     {
         public UpdaterMenu()
         {

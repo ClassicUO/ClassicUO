@@ -8,14 +8,14 @@ using SDL2;
 
 namespace ClassicUO.Game.Managers
 {
-    class HotKeyCombination
+    internal class HotKeyCombination
     {
         public SDL2.SDL.SDL_Keycode Key { get; set; }
         public SDL2.SDL.SDL_Keymod Mod { get; set; }
         public HotkeyAction KeyAction { get; set; }
     }
 
-    class HotkeysManager
+    internal class HotkeysManager
     {
         private readonly Dictionary<HotkeyAction, Action> _actions = new Dictionary<HotkeyAction, Action>();
 
@@ -179,10 +179,8 @@ namespace ClassicUO.Game.Managers
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
 
-            for (int i = 0; i < _hotkeys.Count; i++)
+            foreach (HotKeyCombination h in _hotkeys)
             {
-                var h = _hotkeys[i];
-
                 if (h.Key == key && h.Mod == mod)
                 {
                     return false;

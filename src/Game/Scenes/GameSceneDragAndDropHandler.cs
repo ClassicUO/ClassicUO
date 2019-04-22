@@ -33,9 +33,11 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
+using GameObject = ClassicUO.Game.GameObjects.GameObject;
+
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
         private GameObject _dragginObject;
         private Point _dragOffset;
@@ -137,7 +139,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
-            GameObject obj = SelectedObject;
+            GameObject obj = SelectedObject as GameObject;
             Serial serial;
 
             if (obj is Item item && item.ItemData.IsContainer)
@@ -159,7 +161,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            if (HeldItem.Enabled && HeldItem.Serial != container)
+            if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
                 ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
 

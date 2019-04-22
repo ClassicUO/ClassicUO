@@ -31,6 +31,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
     {
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return false;
 
             bool mirror = false;
@@ -63,7 +64,8 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo = Rectangle.Empty;
             Rectangle rect = Rectangle.Empty;
 
-            Hue hue = 0, targetColor = 0;
+            Hue hue = 0;
+
             if (Engine.Profile.Current.HighlightMobilesByFlags)
             {
                 if (IsPoisoned)
@@ -78,23 +80,23 @@ namespace ClassicUO.Game.GameObjects
 
             bool isAttack = Serial == World.LastAttack;
             bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
-            bool needHpLine = false;
+            //bool needHpLine = false;
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
             {
-                targetColor = Notoriety.GetHue(NotorietyFlag);
+                Hue targetColor = Notoriety.GetHue(NotorietyFlag);
 
                 if (isAttack || this == TargetManager.LastGameObject)
                 {
                     Engine.UI.SetTargetLineGump(this);
-                    needHpLine = true;
+                    //needHpLine = true;
                 }
 
                 if (isAttack || isUnderMouse)
                     hue = targetColor;
             }
 
-            bool drawShadow = !IsDead && !IsHidden;
+            bool drawShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
@@ -108,18 +110,12 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Width = FrameInfo.X + rect.Width;
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
+            //var r = GetOnScreenRectangle();
+            //batcher.DrawRectangle(Textures.GetTexture(Color.Red), r.X, r.Y, r.Width, r.Height , Vector3.Zero);
 
-            //if (_edge == null)
-            //{
-            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-            //    _edge.SetData(new Color[] { Color.LightBlue });
-            //}
-
-            //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
             Engine.DebugInfo.MobilesRendered++;
             return true;
         }
-        //private static Texture2D _edge;
 
         private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool shadow)
         {
@@ -159,7 +155,8 @@ namespace ClassicUO.Game.GameObjects
                     return;
 
                 drawCenterY = frame.CenterY;
-                drawY = drawCenterY + (int)(Offset.Z / 4) - 22 - (int)(Offset.Y - Offset.Z - 3);
+                int yOff = (int) (Offset.Z / 4) - 22 - (int) (Offset.Y - Offset.Z - 3);
+                drawY = drawCenterY + yOff;
 
                 if (IsFlipped)
                     drawX = -22 + (int)Offset.X;
@@ -195,6 +192,15 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
+
+
+                 
+                if (Engine.AuraManager.IsEnabled)
+                    Engine.AuraManager.Draw(batcher,
+                                            IsFlipped ? (int)position.X + drawX + 44 : (int)position.X - drawX,
+                                            (int)position.Y - yOff, Notoriety.GetHue(NotorietyFlag));
+
+
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
                 {
                     if (shadow)
@@ -228,11 +234,12 @@ namespace ClassicUO.Game.GameObjects
                     position.Z -= DELTA_SHADOW;
                 }
 
-
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
-                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+               
+                if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                {
+                    HueVector.X = Constants.DEAD_RANGE_COLOR;
+                    HueVector.Y = 1;
+                }
                 else
                 {
                     bool isPartial = IsHuman && hue == 0;
@@ -256,17 +263,34 @@ namespace ClassicUO.Game.GameObjects
                         if (hue == 0)
                         {
                             if (direction.Address != direction.PatchedAddress)
-                                hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
+                            {
+                                ref var idx = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
+                                hue = idx.Color;
+
+                                if (hue != 0)
+                                {
+                                    isPartial = true;
+
+                                    //uint flag = idx.Flags & 0x80000000;
+
+                                    //if (flag != 0)
+                                    //{
+                                    //    Engine.SceneManager.GetScene<GameScene>()
+                                    //          .AddLight(this, this, (int)(IsFlipped ? (position.X + Bounds.X) : position.X - Bounds.X + frame.CenterX) , (int)position.Y - Bounds.Y + 44);
+                                    //}
+                                }
+                            }
                         }
                     }
 
-                    HueVector = ShaderHuesTraslator.GetHueVector(hue, !IsHidden && isPartial, 0, false);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
 
                 base.Draw(batcher, position, objecList);
                 Pick(frame, Bounds, position, objecList);
             }
         }
+
 
         private void DrawEquipment(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
         {
@@ -351,6 +375,9 @@ namespace ClassicUO.Game.GameObjects
                 if (hash == null)
                     return;
 
+
+                bool partial = hue == 0 && !IsHidden && item.ItemData.IsPartialHue;
+
                 if (hue == 0)
                 {
                     if (direction.Address != direction.PatchedAddress)
@@ -404,11 +431,17 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = frame.Height;
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                    HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+                {
+                    HueVector.X = Constants.OUT_RANGE_COLOR;
+                    HueVector.Y = 1;
+                }
                 else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                    HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+                {
+                    HueVector.X = Constants.DEAD_RANGE_COLOR;
+                    HueVector.Y = 1;
+                }
                 else
-                    HueVector = ShaderHuesTraslator.GetHueVector(IsHidden ? 0x038E : hue, !IsHidden && item.ItemData.IsPartialHue, 0, false);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, IsHidden ? 0x038E : hue, partial, 0);
 
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);

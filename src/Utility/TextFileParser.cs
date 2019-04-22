@@ -175,7 +175,8 @@ namespace ClassicUO.Utility
         }
 
         private string RawLine;
-        void SaveRawLine()
+
+        private void SaveRawLine()
         {
             int size = _eol - _pos;
 

@@ -8,7 +8,7 @@ using SDL2;
 
 namespace ClassicUO.Utility
 {
-    static class KeysTranslator
+    internal static class KeysTranslator
     {
         private static readonly Dictionary<SDL.SDL_Keycode, string> _keys = new Dictionary<SDL.SDL_Keycode, string>()
         {

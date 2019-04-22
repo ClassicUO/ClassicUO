@@ -883,7 +883,7 @@ namespace ClassicUO.Network
             {
                 '.'
             }, StringSplitOptions.RemoveEmptyEntries);
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
+            WriteASCII($"{clientversion[0]}.{clientversion[1]}.{clientversion[2]}.{clientversion[3]}");
         }
     }
 

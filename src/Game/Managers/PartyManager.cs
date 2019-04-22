@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Managers
 
                     if (partyMember != null)
                     {
-                        Chat.OnMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
+                        Chat.HandleMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
                     }
 
                     break;
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Managers
 
                     if (partyLeaderEntity != null)
                     {
-                        Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
+                        Chat.HandleMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
                     }
 
                     World.Party.SetPartyLeader(serial);

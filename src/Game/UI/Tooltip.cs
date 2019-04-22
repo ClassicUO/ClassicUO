@@ -116,7 +116,11 @@ namespace ClassicUO.Game.UI
                 y = 0;
             else if (y > Engine.WindowHeight - (_renderedText.Height + 8))
                 y = Engine.WindowHeight - (_renderedText.Height + 8);
-            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f);
+
+            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, hue);
 
             return _renderedText.Draw(batcher, x, y);
         }

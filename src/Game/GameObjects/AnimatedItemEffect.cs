@@ -21,7 +21,7 @@
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class AnimatedItemEffect : GameEffect
+    internal sealed partial class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (!IsDisposed)
+            if (!IsDestroyed)
             {
                 (int x, int y, int z) = GetSource();
 

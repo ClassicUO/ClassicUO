@@ -251,12 +251,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             float cosRadians = (float) Math.Cos(radians);
             float sinRadians = (float) Math.Sin(radians);
-            Vector2 translatedPoint = new Vector2();
-            translatedPoint.X = point.X - pivot.X;
-            translatedPoint.Y = point.Y - pivot.Y;
-            Vector2 rotatedPoint = new Vector2();
-            rotatedPoint.X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X;
-            rotatedPoint.Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y;
+
+            Vector2 translatedPoint = new Vector2
+            {
+                X = point.X - pivot.X, Y = point.Y - pivot.Y
+            };
+
+            Vector2 rotatedPoint = new Vector2
+            {
+                X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X, Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y
+            };
 
             return rotatedPoint;
         }

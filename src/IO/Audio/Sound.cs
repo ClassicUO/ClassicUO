@@ -5,23 +5,25 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework.Audio;
 
+using static System.String;
+
 namespace ClassicUO.IO.Audio
 {
-    abstract class Sound : IDisposable
+    internal abstract class Sound : IComparable<Sound>, IDisposable
     {
-        string m_Name;
+        private string m_Name;
         public string Name
         {
             get { return m_Name; }
             private set
             {
-                if (!string.IsNullOrEmpty(value))
+                if (!IsNullOrEmpty(value))
                 {
                     m_Name = value.Replace(".mp3", "");
                 }
                 else
                 {
-                    m_Name = string.Empty;
+                    m_Name = Empty;
                 }
             }
         }
@@ -33,8 +35,8 @@ namespace ClassicUO.IO.Audio
         virtual protected void AfterStop() { }
         virtual protected void BeforePlay() { }
 
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
         protected DynamicSoundEffectInstance m_ThisInstance;
 
         protected int Frequency = 22050;
@@ -46,10 +48,13 @@ namespace ClassicUO.IO.Audio
             m_MusicInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
         }
 
-        public Sound(string name)
+        public Sound(string name, int index)
         {
-            Name = name;         
+            Name = name;
+            Index = index;
         }
+
+        public int Index { get; }
 
         public void Dispose()
         {
@@ -156,10 +161,12 @@ namespace ClassicUO.IO.Audio
         {
             List<Tuple<DynamicSoundEffectInstance, double>> list = (asEffect) ? m_EffectInstances : m_MusicInstances;
             int maxInstances = (asEffect) ? 32 : 2;
-            if (list.Count >= maxInstances)
-                return null;
-            else
-                return new DynamicSoundEffectInstance(Frequency, Channels); // shouldn't we be recycling these?
+            return list.Count >= maxInstances ? null : new DynamicSoundEffectInstance(Frequency, Channels);
+        }
+
+        public int CompareTo(Sound other)
+        {
+            return other == null ? -1 : Index.CompareTo(other.Index);
         }
     }
 }

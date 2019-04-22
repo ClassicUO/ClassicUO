@@ -14,7 +14,7 @@ using SDL2;
 
 namespace ClassicUO.Utility.Platforms
 {
-    static class UoAssist
+    internal static class UoAssist
     {
 
         private static CustomWindow _customWindow;
@@ -82,7 +82,7 @@ namespace ClassicUO.Utility.Platforms
             internal static extern uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen);
 
             [DllImport("user32.dll")]
-            static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+            private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
             [DllImport("user32.dll", SetLastError = true)]
             private static extern ushort RegisterClassW(
@@ -208,8 +208,8 @@ namespace ClassicUO.Utility.Platforms
 
             private class WndRegEnt
             {
-                private int m_Handle;
-                private int m_Type; // 1 = get multi notifcations
+                private readonly int m_Handle;
+                private readonly int m_Type; // 1 = get multi notifcations
 
                 public int Handle { get { return m_Handle; } }
                 public int Type { get { return m_Type; } }
@@ -283,7 +283,7 @@ namespace ClassicUO.Utility.Platforms
 
                             if ((wParam & 0x00010000) != 0)
                             {
-                                Chat.OnMessage(null, sb.ToString(), "System", hue, MessageType.Regular, MessageFont.Normal, true);
+                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, MessageFont.Normal, true);
                             }
                             else
                             {
@@ -363,8 +363,8 @@ namespace ClassicUO.Utility.Platforms
                     hWnd = handle;
                     CommandManager.Register(cmd, MyCallback);
                 }
-                private uint Msg;
-                private IntPtr hWnd;
+                private readonly uint Msg;
+                private readonly IntPtr hWnd;
                 private void MyCallback(string[] args)
                 {
                     StringBuilder sb = new StringBuilder();

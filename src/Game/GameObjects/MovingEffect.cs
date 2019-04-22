@@ -24,7 +24,7 @@ using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class MovingEffect : GameEffect
+    internal sealed partial class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
 
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
                     //Tile = World.Map.GetTile(tx, ty);
                 }
 
-                Dispose();
+                Destroy();
             }
             else
             {

@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class SBI
+    internal class SBI
     {
         public int[] l;
         public int[] s;

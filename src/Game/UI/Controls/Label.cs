@@ -82,6 +82,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public byte Font => _gText.Font;
 
+        public bool Unicode => _gText.IsUnicode;
+
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
@@ -94,7 +96,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             base.Dispose();
-            _gText.Dispose();
+            _gText.Destroy();
         }
     }
 }

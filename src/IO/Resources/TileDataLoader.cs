@@ -11,7 +11,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class TileDataLoader : ResourceLoader
+    internal class TileDataLoader : ResourceLoader
     {
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;

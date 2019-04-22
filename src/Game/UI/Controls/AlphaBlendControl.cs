@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class AlphaBlendControl : Control
+    internal sealed class AlphaBlendControl : Control
     {
         public AlphaBlendControl(float alpha = 0.5f)
         {
@@ -20,7 +20,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            return batcher.Draw2D(CheckerTrans.TransparentTexture, x, y, Width, Height, ShaderHuesTraslator.GetHueVector(0, false, Alpha, false));
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+            return batcher.Draw2D(CheckerTrans.TransparentTexture, x, y, Width, Height, hue);
         }
     }
 }

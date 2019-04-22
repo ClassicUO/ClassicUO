@@ -52,10 +52,7 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < str.Length; i++)
             {
-                if (capitalizeNext)
-                    sb.Append(char.ToUpper(str[i]));
-                else
-                    sb.Append(str[i]);
+                sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
                 capitalizeNext = " .,;!".Contains(str[i].ToString());
             }
 

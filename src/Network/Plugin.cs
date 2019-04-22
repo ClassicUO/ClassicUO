@@ -8,10 +8,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -37,9 +38,13 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnDisconnected _onDisconnected;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusGained _onFocusGained;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusLost _onFocusLost;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
+
 
         private readonly string _path;
-        
+
 
         private Plugin(string path)
         {
@@ -80,6 +85,7 @@ namespace ClassicUO.Network
 
         private delegate void OnInstall(ref void* header);
 
+        public PluginHeader header;
 
         public void Load()
         {
@@ -90,29 +96,8 @@ namespace ClassicUO.Network
             _castSpell = GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
-
-            IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
-
-            Log.Message(LogTypes.Trace, $"assembly: {assptr}");
-
-            if (assptr == IntPtr.Zero)
-            {
-                Log.Message(LogTypes.Error, "Invalid assemlby.");
-                return;
-            }
-
-            Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
-
-            IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
-
-            Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
-
-            if (installPtr == IntPtr.Zero)
-            {
-                Log.Message(LogTypes.Error, "Invalid entry point.");
-                return;
-            }
-
+            _requestMove = RequestMove;
+            _setTitle = SetWindowTitle;
 
             //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
             //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
@@ -143,11 +128,67 @@ namespace ClassicUO.Network
                 CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
                 GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
                 HWND = hwnd,
-                GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath)
+                GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath),
+                RequestMove = Marshal.GetFunctionPointerForDelegate(_requestMove),
+                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle)
             };
 
-            void* func = &header;          
-            Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+            void* func = &header;
+            try
+            {
+                IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
+
+                Log.Message(LogTypes.Trace, $"assembly: {assptr}");
+
+                if (assptr == IntPtr.Zero)
+                {
+                    throw new Exception("Invalid Assembly, Attempting managed load.");
+                }
+
+                Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
+
+                IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
+
+                Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
+
+                if (installPtr == IntPtr.Zero)
+                {
+                    throw new Exception("Invalid Entry Point, Attempting managed load.");
+                }
+                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+            }
+            catch
+            {
+                try
+                {
+                    var asm = Assembly.LoadFile(_path);
+                    var type = asm.GetType("Assistant.Engine");
+                    
+                    if (type == null)
+                    {
+                        Log.Message(LogTypes.Error,
+                            $"Unable to find Plugin Type, API requires the public class Engine in namespace Assistant.");
+                        return;
+                    }
+
+                    var meth = type.GetMethod("Install", BindingFlags.Public | BindingFlags.Static);
+                    if (meth == null)
+                    {
+                        Log.Message(LogTypes.Error, $"Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
+                        return;
+                    }
+
+                    meth.Invoke(null, new object[] {(IntPtr) func });
+                }
+                catch (Exception err)
+                {
+                    Log.Message(LogTypes.Error,
+                        $"Invalid plugin specified. {err} {err.StackTrace}");
+                    return;
+                }
+
+            }
+           
 
             if (header.OnRecv != IntPtr.Zero)
                 _onRecv = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header.OnRecv);
@@ -171,7 +212,8 @@ namespace ClassicUO.Network
                 _onFocusGained = Marshal.GetDelegateForFunctionPointer<OnFocusGained>(header.OnFocusGained);
             if (header.OnFocusLost != IntPtr.Zero)
                 _onFocusLost = Marshal.GetDelegateForFunctionPointer<OnFocusLost>(header.OnFocusLost);
-
+            if (header.Tick != IntPtr.Zero)
+                _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
             IsValid = true;
 
             //Marshal.FreeHGlobal(headerPtr);
@@ -182,6 +224,10 @@ namespace ClassicUO.Network
         private static string GetUOFilePath()
             => FileManager.UoFolderPath;
 
+        private static void SetWindowTitle(string str)
+        {
+            Engine.Instance.Window.Title = str;
+        }
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
             FileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
@@ -190,7 +236,12 @@ namespace ClassicUO.Network
             info.CompressedSize = compressedsize;
         }
 
-        private static bool GetPlayerPosition(out int x, out int y, out int z)
+        private static bool RequestMove(int dir, bool run)
+        {
+            return World.Player.Walk((Direction) dir, run);
+        }
+
+    private static bool GetPlayerPosition(out int x, out int y, out int z)
         {
             if (World.Player != null)
             {
@@ -204,6 +255,16 @@ namespace ClassicUO.Network
             x = y = z = 0;
 
             return false;
+        }
+
+        internal static void Tick()
+        {
+            for (int i = 0; i < _plugins.Count; i++)
+            {
+                _plugins[i]._tick?.Invoke();
+
+            }
+
         }
 
 
@@ -287,6 +348,15 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
+            // Activate chat after `Enter` pressing, 
+            // If chat active - ignores hotkeys from Razor (Plugins)
+            if (World.Player != null && 
+                Engine.Profile.Current.ActivateChatAfterEnter &&
+                Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins &&
+                Engine.Profile.Current.ActivateChatStatus &&
+                Engine.SceneManager.CurrentScene is GameScene gs)
+                return true;
+
             for (int i = 0; i < _plugins.Count; i++)
             {
                 Plugin plugin = _plugins[i];
@@ -312,7 +382,17 @@ namespace ClassicUO.Network
             for (int i = 0; i < _plugins.Count; i++)
             {
                 Plugin plugin = _plugins[i];
-                plugin._onUpdatePlayerPosition?.Invoke(x, y, z);
+                try
+                {
+                    // TODO: need fixed on razor side
+                    // if you quick entry (0.5-1 sec after start, without razor window loaded) - breaks CUO.
+                    // With this fix - the razor does not work, but client does not crashed.
+                    plugin._onUpdatePlayerPosition?.Invoke(x, y, z);
+                }
+                catch
+                {
+                    Log.Message(LogTypes.Error, $"Plugin initialization failed, please re login");
+                }
             }
         }
 

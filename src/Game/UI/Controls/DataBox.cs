@@ -21,7 +21,7 @@
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class DataBox : Control
+    internal class DataBox : Control
     {
         public DataBox(int x, int y, int w, int h)
         {

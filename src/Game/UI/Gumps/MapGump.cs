@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class MapGump : Gump
+    internal class MapGump : Gump
     {
         private readonly TextureControl _textureControl;
         private readonly List<Control> _container = new List<Control>();

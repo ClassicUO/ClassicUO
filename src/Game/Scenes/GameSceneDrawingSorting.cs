@@ -38,7 +38,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private sbyte _maxGroundZ;
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
+                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDestroyed || !obj.AllowedToDraw)
                 {
                     continue;
                 }
@@ -188,7 +188,6 @@ namespace ClassicUO.Game.Scenes
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
-                bool mounted = false;
                 bool ismobile = false;
 
                 StaticTiles itemData = default;
@@ -196,10 +195,9 @@ namespace ClassicUO.Game.Scenes
 
                 switch (obj)
                 {
-                    case Mobile mob:
+                    case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
-                        mounted = mob.IsMounted;
                         break;
                     default:
 
@@ -298,115 +296,49 @@ namespace ClassicUO.Game.Scenes
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
-                
-                if (obj.HasOverheads && obj.Overheads.Count != 0)
-                {
-                    int offY;
 
-                    if (ismobile && !mounted || iscorpse)
-                        offY = -22;
-                    else switch (obj)
-                    {
-                        case Multi _:
-                        case Static _: offY = -44;
-
-                            break;
-                        //case Item _:
-                        //    offY = 44;
-
-                            //break;
-                        default: offY = 0;
-
-                            break;
-                    }
-                
-                    for (int i = 0; i < obj.Overheads.Count; i++)
-                    {
-                        TextOverhead v = obj.Overheads[i];
-                        //v.RealScreenPosition.X = drawX;
-                        //v.RealScreenPosition.Y = drawY;
-                        ref var bounds = ref v.Bounds;
-                        bounds.X = (v.Texture.Width / 2) - 22;
-                        bounds.Y = offY + v.Texture.Height;
-                        bounds.Width = v.Texture.Width;
-                        bounds.Height = v.Texture.Height;
-                        Overheads.AddOverhead(v);
-                        offY += v.Texture.Height;
-
-                        if (_alphaChanged)
-                        {
-                            if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                            {
-                                if (!v.IsOverlapped)
-                                    v.ProcessAlpha(0);
-                            }
-                            else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
-                            {
-                                v.ProcessAlpha(0xFF);
-                            }
-                        }
-                    }               
-                }
-                
+                if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty)
+                {                
+                    _overheadManager.AddOverhead(obj.OverheadMessageContainer);
+                }                
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
                 else if (itemData.IsFoliage)
                 {
+                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
-                    if (obj is Static st)
+                    if (!check)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+                        check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
 
                         if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
+                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                    }
 
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
+                    if (check)
+                    {
+                        Rectangle rect = new Rectangle((int)drawX - obj.FrameInfo.X,
+                                                       (int)drawY - obj.FrameInfo.Y,
+                                                       obj.FrameInfo.Width,
+                                                       obj.FrameInfo.Height);
 
-                        if (check)
-                        {
+                        Rectangle r = World.Player.GetOnScreenRectangle();
+                        check = Exstentions.InRect(ref rect, ref r);
+                    }
 
-                            Rectangle rect = new Rectangle((int)drawX - st.FrameInfo.X,
-                                                           (int)drawY - st.FrameInfo.Y,
-                                                           st.FrameInfo.Width,
-                                                           st.FrameInfo.Height);
-
-                            Rectangle r = World.Player.GetOnScreenRectangle();
-                            check = Exstentions.InRect(ref rect, ref r);
-                        }
-
+                    if (obj is Static st)
+                    {                        
                         st.CharacterIsBehindFoliage = check;
                     }
                     else if (obj is Multi m)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                        if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
-
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
-
-                        if (check)
-                        {
-
-                            Rectangle rect = new Rectangle((int)drawX - m.FrameInfo.X,
-                                                           (int)drawY - m.FrameInfo.Y,
-                                                           m.FrameInfo.Width,
-                                                           m.FrameInfo.Height);
-
-                            var r = World.Player.GetOnScreenRectangle();
-                            check = Exstentions.InRect(ref rect, ref r);
-                        }
-
                         m.CharacterIsBehindFoliage = check;
                     }
-
+                    else if (obj is Item it)
+                    {
+                        it.CharacterIsBehindFoliage = check;
+                    }
                 }
 
                 if (_alphaChanged && !changinAlpha)
@@ -441,7 +373,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
 
-                ref var weak = ref _renderList[_renderListCount];
+                //ref var weak = ref _renderList[_renderListCount];
 
                 //if (weak == null)
                 //    weak = new WeakReference<GameObject>(obj);
@@ -605,7 +537,7 @@ namespace ClassicUO.Game.Scenes
     }
 
 
-    class ArrayWeak<T> where T : class
+    internal class ArrayWeak<T> where T : class
     {
         private T[] _array;
 

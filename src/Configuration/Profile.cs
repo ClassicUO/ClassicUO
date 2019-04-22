@@ -94,7 +94,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HighlightGameObjects { get; set; } = false;
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
         [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
-        [JsonProperty] public int MobileHPType { get; set; } = 0;
+        [JsonProperty] public int MobileHPType { get; set; } = 0; // 0 = %, 1 = line, 2 = both
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
         [JsonProperty] public bool TreeToStumps { get; set; } = false;
         [JsonProperty] public bool EnableCaveBorder { get; set; } = false;
@@ -121,10 +121,11 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
 
         // movements
-        [JsonProperty] public bool EnablePathfind { get; set; } = true;
+        [JsonProperty] public bool EnablePathfind { get; set; } = false;
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
+        [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
@@ -141,6 +142,13 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseCustomLightLevel { get; set; } = false;
         [JsonProperty] public byte LightLevel { get; set; } = 0;
         [JsonProperty] public int CloseHealthBarType { get; set; } = 0; // 0 = none, 1 == not exists, 2 == is dead
+
+        [JsonProperty] public bool ActivateChatAfterEnter { get; set; } = false;
+        [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
+        [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
+        [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
+        [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
+        [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
@@ -204,6 +212,19 @@ namespace ClassicUO.Configuration
             },
         };
 
+        [JsonProperty] public bool CounterBarEnabled { get; set; } = false;
+        [JsonProperty] public bool CounterBarHighlightOnUse { get; set; } = false;
+        [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
+        [JsonProperty] public int CounterBarRows { get; set; } = 1;
+        [JsonProperty] public int CounterBarColumns { get; set; } = 1;
+
+
+        [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
+        [JsonProperty] public int AuraUnderFeetType { get; set; } = 0; // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
+
+
+
+
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
         public void Save(List<Gump> gumps = null)
@@ -220,7 +241,7 @@ namespace ClassicUO.Configuration
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
             // save settings.json
-            ConfigurationResolver.Save(this, Path.Combine(path, "settings.json"), new JsonSerializerSettings()
+            ConfigurationResolver.Save(this, Path.Combine(path, Engine.SettingsFile), new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.All,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
@@ -270,7 +291,7 @@ namespace ClassicUO.Configuration
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
             {
-                Engine.AnchorManager.Save(writer);
+                Engine.UI.AnchorManager.Save(writer);
             }
         }
 
@@ -335,7 +356,7 @@ namespace ClassicUO.Configuration
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
                     {
-                        Engine.AnchorManager.Restore(reader, gumps);
+                        Engine.UI.AnchorManager.Restore(reader, gumps);
                     }
                 }
                 catch (Exception e)

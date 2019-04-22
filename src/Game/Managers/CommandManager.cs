@@ -37,13 +37,14 @@ namespace ClassicUO.Game.Managers
             Register("info", (s) =>
             {
                 if (!TargetManager.IsTargeting)
-                {
                     TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, 6983686, 0);
-                }
                 else
-                {
                     TargetManager.CancelTarget();
-                }
+            });
+
+            Register("focus", (s) =>
+            {
+                Engine.DebugFocus = ! Engine.DebugFocus;
             });
         }
 

@@ -75,16 +75,20 @@ namespace ClassicUO.Network
             }
         }
 
-        protected override void EnsureSize(int length)
+        protected override bool EnsureSize(int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException("length");
+            if (length < 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             if (IsDynamic)
             {
                 while (Position + length > Length)
                     Array.Resize(ref _data, Length + length * 2);
+
+                return false;
             }
-            else if (Position + length > Length) throw new ArgumentOutOfRangeException("length");
+
+            return Position + length > Length;
         }
     }
 }

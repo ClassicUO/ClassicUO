@@ -21,6 +21,8 @@
 
 #endregion
 
+#define DEV_BUILD_
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,7 +55,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
 
-using SpriteFont = ClassicUO.Renderer.SpriteFont;
+using Newtonsoft.Json;
 
 namespace ClassicUO
 {
@@ -86,39 +88,80 @@ namespace ClassicUO
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private InputManager _inputManager;
+        private AuraManager _auraManager;
         private double _statisticsTimer;
         private float _time;
         private int _totalFrames;
         private UIManager _uiManager;
         private readonly Settings _settings;
-        private AnchorManager _anchorManager;
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private bool _isMaximized;
-        private bool _isHighDPI;
+        private readonly bool _isHighDPI;
+
+        public static bool DebugFocus = false;
+        public static string SettingsFile = "settings.json";
 
         public bool IsQuitted { get; private set; }
 
-        private Engine(Settings settings)
+        private SpriteBatch _spriteBatch;
+
+        private Engine(string[] args)
         {
             Instance = this;
-            _settings = settings ?? ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
+            // By default try to load settings from main settings file
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
+
+            // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
+            // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
+            //   a new settings object and populate it with the passed settings
+            _settings = ArgsParser(args, _settings);
+
+            // If no still no settings after loading a file and parsing command-line settings,
+            //   then show an error, generate default settings file and exit
             if (_settings == null)
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `setting.json`", "A `settings.json` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, "settings.json file not found");
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `"+ SettingsFile + "`", "A `" + SettingsFile + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, SettingsFile + " file not found");
                 _settings = new Settings();
                 _settings.Save();
                 IsQuitted = true;
                 return;
-            }         
+            }
+
+            // Debug: Show resulting settings object
+            Log.Message(LogTypes.Trace, "Settings loaded from `" + SettingsFile + "` and combined with parsed args:\n" + JsonConvert.SerializeObject(_settings, Formatting.Indented));
+
+            // Validate resulting settings object
+            // NOTE: Check that at least `UltimaOnlineDirectory` and `ClientVersion` properties are set
+            //   to some other than default values
+            Settings defaultSettings = new Settings();
+            bool settingsAreValid = _settings.UltimaOnlineDirectory != defaultSettings.UltimaOnlineDirectory;
+
+            if (_settings.ClientVersion == defaultSettings.ClientVersion)
+                settingsAreValid = false;
+
+            // If settings are invalid, then show an error and exit
+            if ( ! settingsAreValid)
+            {
+                SDL.SDL_ShowSimpleMessageBox(
+                    SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, 
+                    "Invalid settings", 
+                    "Please, check your settings.\nYou should at least set `ultimaonlinedirectory` and `clientversion`.", 
+                    SDL.SDL_GL_GetCurrentWindow()
+                );
+                Log.Message(LogTypes.Trace, "Invalid settings");
+                IsQuitted = true;
+                return;
+            }
+
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
-            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
 
             if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
@@ -150,7 +193,8 @@ namespace ClassicUO
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
                 {
                     gump.ResizeWindow(new Point(WindowWidth, WindowHeight));
-                    gump.Location = new Point(-5, -5);
+                    gump.X = -5;
+                    gump.Y = -5;
                 }
             };
             Window.AllowUserResizing = true;
@@ -186,6 +230,13 @@ namespace ClassicUO
         public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
+        public static int FPSMin { get; private set; } = Int32.MaxValue;
+        public static int FPSMax { get; private set; }
+        public static void DropFpsMinMaxValues()
+        {
+            FPSMax = 0;
+            FPSMin = Int32.MaxValue;
+        }
 
         public static bool AllowWindowResizing
         {
@@ -229,6 +280,8 @@ namespace ClassicUO
 
         public static Engine Instance { get; private set; }
 
+        public static int ThreadID { get; private set; }
+
         public static int WindowWidth
         {
             get => _engine._graphicDeviceManager.PreferredBackBufferWidth;
@@ -249,8 +302,6 @@ namespace ClassicUO
             }
         }
 
-        public static AnchorManager AnchorManager => _engine._anchorManager;
-
         public static UIManager UI => _engine._uiManager;
 
         public static InputManager Input => _engine._inputManager;
@@ -261,19 +312,18 @@ namespace ClassicUO
 
         public static SceneManager SceneManager => _engine._sceneManager;
 
+        public static AuraManager AuraManager => _engine._auraManager;
+
         public static string ExePath { get; private set; }
 
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
         public static bool IsRunningSlowly => _engine._isRunningSlowly;
-
-
+        
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
-
-
-
+                
         private static void Main(string[] args)
         {
             Configure();
@@ -284,7 +334,10 @@ namespace ClassicUO
             if (CheckUpdate(args))
                 return;
 
-            using (_engine = new Engine(ArgsParser(args)))
+            Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
+            ThreadID = Thread.CurrentThread.ManagedThreadId;
+
+            using (_engine = new Engine(args))
             {
                 if (!_engine.IsQuitted)
                 {
@@ -292,8 +345,7 @@ namespace ClassicUO
                 }
             }
         }
-
-
+        
         private static bool CheckUpdate(string[] args)
         {
             string path = string.Empty;
@@ -383,14 +435,14 @@ namespace ClassicUO
             return false;
         }
 
-        private static Settings ArgsParser(string[] args)
+        private static Settings ArgsParser(string[] args, Settings settings = null)
         {
-            Settings settings = null;
-
             if (args.Length > 1)
             {
-                settings = new Settings();
-                bool isValid = false;
+                if (settings == null)
+                {
+                    settings = new Settings();
+                }
 
                 for (int i = 0; i < args.Length - 1; i += 2)
                 {
@@ -406,75 +458,106 @@ namespace ClassicUO
 
                     switch (cmd)
                     {
-                        case "uopath":
-                            settings.UltimaOnlineDirectory = value;
-                            isValid = true;
+                        case "username":
+                            settings.Username = value;
                             break;
+
+                        case "password":
+                            settings.Password = Crypter.Encrypt(value);
+                            break;
+
+                        case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
+                            settings.Password = value;
+                            break;
+
                         case "ip":
                             settings.IP = value;
                             break;
+
                         case "port":
                             settings.Port = ushort.Parse(value);
-
                             break;
-                        case "username":
-                            settings.Username = value;
 
+                        case "ultimaonlinedirectory":
+                        case "uopath":
+                            settings.UltimaOnlineDirectory = value; // Required
                             break;
-                        case "password":
-                            settings.Password = Crypter.Encrypt(value);
 
-                            break;
                         case "clientversion":
-                            settings.ClientVersion = value;
-                            isValid = true;
+                            settings.ClientVersion = value; // Required
                             break;
+
+                        case "lastcharactername":
                         case "lastcharname":
                             settings.LastCharacterName = value;
-
                             break;
+
+                        case "lastservernum":
+                            settings.LastServerNum = ushort.Parse(value);
+                            break;
+
+                        case "login_fps":
                         case "fps":
                             settings.MaxLoginFPS = int.Parse(value);
-
                             break;
+
                         case "debug":
                             settings.Debug = bool.Parse(value);
-
                             break;
+
                         case "profiler":
                             settings.Profiler = bool.Parse(value);
-
                             break;
+
+                        case "preload_maps":
+                            settings.PreloadMaps = bool.Parse(value);
+                            break;
+
                         case "saveaccount":
                             settings.SaveAccount = bool.Parse(value);
-
                             break;
+
                         case "autologin":
                             settings.AutoLogin = bool.Parse(value);
-
                             break;
+
+                        case "reconnect":
+                            settings.Reconnect = bool.Parse(value);
+                            break;
+
+                        case "reconnect_time":
+                            settings.ReconnectTime = int.Parse(value);
+                            break;
+
+                        case "login_music":
                         case "music":
                             settings.LoginMusic = bool.Parse(value);
-
                             break;
+
+                        case "login_music_volume":
                         case "music_volume":
                             settings.LoginMusicVolume = int.Parse(value);
-
                             break;
+
+                        case "shard_type":
                         case "shard":
                             settings.ShardType = int.Parse(value);
-
                             break;
+
                         case "fixed_time_step":
                             settings.FixedTimeStep = bool.Parse(value);
-
                             break;
 
+                        // FIXME: This is bad idea since the filename stored in `Engine.SettingsFile` is
+                        //   used not only for main settings file, but for character profile settings file
+                        //   as well. The "-settings" option should also have lower priority than other 
+                        //   and should be processed before we overwrite options one-by-one from 
+                        //   command-line arguments or from a shortcut.
+                        //case "settings":
+                        //    Engine.SettingsFile = value;
+                        //    break;
                     }
                 }
-
-                if (!isValid)
-                    settings = null;
             }
 
             return settings;
@@ -501,7 +584,11 @@ namespace ClassicUO
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86");
+#if DEV_BUILD
+                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#else
+                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#endif
                 sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
 
                 Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
@@ -540,7 +627,6 @@ namespace ClassicUO
             _batcher = new Batcher2D(GraphicsDevice);
             _inputManager = new InputManager();
             _uiManager = new UIManager();
-            _anchorManager = new AnchorManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
@@ -588,6 +674,8 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
+            _auraManager = new AuraManager();
+            _auraManager.CreateAuraTexture();
 
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
@@ -609,6 +697,8 @@ namespace ClassicUO
 
 
             UoAssist.Start();
+
+            _spriteBatch = new SpriteBatch(_graphicDeviceManager.GraphicsDevice);
 
             base.Initialize();
         }
@@ -633,16 +723,24 @@ namespace ClassicUO
         {
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
+
             Profiler.EnterContext("Update");
+
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
+
             Ticks = (long) totalms;
             TicksFrame = (long) framems;
+
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_currentFpsTime >= 1.0)
             {
                 CurrentFPS = _totalFrames;
+
+                FPSMax = (CurrentFPS > FPSMax || FPSMax > FpsLimit) ? CurrentFPS : FPSMax;
+                FPSMin = (CurrentFPS < FPSMin && CurrentFPS != 0) ? CurrentFPS : FPSMin;
+
                 _totalFrames = 0;
                 _currentFpsTime = 0;
             }
@@ -653,6 +751,7 @@ namespace ClassicUO
             OnInputUpdate(totalms, framems);
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
+            Plugin.Tick();
             // ###############################
             Profiler.ExitContext("Update");
 
@@ -660,7 +759,7 @@ namespace ClassicUO
 
             if (_time > IntervalFixedUpdate)
             {
-                _time = _time % IntervalFixedUpdate;
+                _time %= IntervalFixedUpdate;
                 Profiler.EnterContext("FixedUpdate");
                 OnFixedUpdate(totalms, framems);
                 Profiler.ExitContext("FixedUpdate");
@@ -688,9 +787,8 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
                 _sceneManager.CurrentScene.Draw(_batcher);
-
 
             _uiManager.Draw(_batcher);
            
@@ -715,7 +813,11 @@ namespace ClassicUO
             double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate + timeFixedUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+#if DEV_BUILD
+            Window.Title = string.Format("ClassicUO [dev] {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+#else
             Window.Title = string.Format("ClassicUO {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+#endif
         }
 
         private void OnInputUpdate(double totalMS, double frameMS)
@@ -759,7 +861,7 @@ namespace ClassicUO
 
             if (scene != null && scene.IsLoaded)
             {
-                if (scene.IsDisposed)
+                if (scene.IsDestroyed)
                     _sceneManager.Switch();
                 else
                     scene.Update(totalMS, frameMS);
@@ -768,7 +870,7 @@ namespace ClassicUO
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDisposed)
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
                 _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }

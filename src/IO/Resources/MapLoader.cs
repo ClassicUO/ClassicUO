@@ -11,7 +11,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class MapLoader : ResourceLoader
+    internal class MapLoader : ResourceLoader
     {
         internal const int MAPS_COUNT = 6;
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
@@ -199,7 +199,13 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
+                ref var data = ref BlockData[i][block];
+                data.MapAddress = realmapaddress;
+                data.StaticAddress = realstaticaddress;
+                data.StaticCount = realstaticcount;
+                data.OriginalMapAddress = realmapaddress;
+                data.OriginalStaticAddress = realstaticaddress;
+                data.OriginalStaticCount = realstaticcount;
             }
         }
 
@@ -273,7 +279,7 @@ namespace ClassicUO.IO.Resources
                     var difl = _mapDifl[i];
                     var dif = _mapDif[i];
 
-                    if (difl == null || dif == null)
+                    if (difl == null || dif == null || difl.Length == 0 ||  dif.Length == 0)
                         continue;
 
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
@@ -300,7 +306,7 @@ namespace ClassicUO.IO.Resources
                     var difl = _staDifl[i];
                     var difi = _staDifi[i];
 
-                    if (difl == null || difi == null || _staDif[i] == null)
+                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 || _staDif[i].Length == 0)
                         continue;
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
@@ -437,11 +443,11 @@ namespace ClassicUO.IO.Resources
             return mb;
         }
 
-        public IndexMap GetIndex(int map, int x, int y)
+        public ref IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;
 
-            return BlockData[map][block];
+            return ref BlockData[map][block];
         }
     }
 
@@ -509,16 +515,6 @@ namespace ClassicUO.IO.Resources
 
     internal struct IndexMap
     {
-        public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
-        {
-            MapAddress = mapAddress;
-            StaticAddress = staticAddress;
-            StaticCount = staticCount;
-            OriginalMapAddress = originalMapAddress;
-            OriginalStaticAddress = originalStaticAddress;
-            OriginalStaticCount = originalStaticCount;
-        }
-
         public ulong MapAddress;
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

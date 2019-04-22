@@ -23,10 +23,7 @@ namespace ClassicUO.Utility
             switch (obj)
             {
                 case Static st:
-                    if (st.OriginalGraphic != st.Graphic)
-                        itemdata = FileManager.TileData.StaticData[st.OriginalGraphic];
-                    else
-                        itemdata = st.ItemData;
+                    itemdata = st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] : st.ItemData;
                     return true;
                 case Item item:
                     itemdata = item.ItemData;

@@ -19,11 +19,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
 {
@@ -72,25 +76,16 @@ namespace ClassicUO.Game
    
 
     internal static class Chat
-    {
-        private const ushort defaultHue = 946;
-        private static readonly Mobile _system = new Mobile(Serial.INVALID)
-        {
-            Graphic = Graphic.INVARIANT, Name = "System"
-        };
-
+    {      
         public static PromptData PromptData { get; set; }
 
-        public static event EventHandler<UOMessageEventArgs> Message;
+        public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
-        public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
+        public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => Print(_system, message, hue, type, font, unicode);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
-
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+     
     
-        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
 			switch (type)
 			{
@@ -100,7 +95,82 @@ namespace ClassicUO.Game
                 case MessageType.Spell:
 				case MessageType.Regular:
 			    case MessageType.Label:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+
+                    if (parent == null)
+                        break;
+
+                    if (parent is Item it && !it.OnGround)
+                    {
+                        Gump gump = Engine.UI.GetByLocalSerial<Gump>(it.Container);
+
+                        if (gump is PaperDollGump paperDoll)
+                        {
+
+                            var inter = paperDoll
+                                             .FindControls<PaperDollInteractable>()
+                                             .FirstOrDefault();
+
+                            var f = inter?.FindControls<ItemGump>()
+                                         .SingleOrDefault(s => s.Item == it);
+
+                            if (f != null)
+                                f.AddLabel(text, hue, (byte)font, unicode);
+                            else
+                                paperDoll.FindControls<EquipmentSlot>()?
+                                         .SelectMany(s => s.Children)
+                                         .OfType<ItemGump>()
+                                         .SingleOrDefault(s => s.Item == it)?
+                                         .AddLabel(text, hue, (byte)font, unicode);
+                        }
+                        else if (gump is ContainerGump container)
+                        {
+                            container
+                                   .FindControls<ItemGump>()?
+                                   .SingleOrDefault(s => s.Item == it)?
+                                   .AddLabel(text, hue, (byte)font, unicode); 
+                        }
+                        else
+                        {
+
+                            Entity ent = World.Get(it.RootContainer);
+
+                            if (ent == null || ent.IsDestroyed)
+                                break;
+
+                            gump = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+                            if (gump != null)
+                            {
+                                gump.FindControls<DataBox>()?
+                                       .SelectMany(s => s.Children)
+                                       .OfType<ItemGump>()
+                                       .SingleOrDefault(s => s.Item == it)?
+                                       .AddLabel(text, hue, (byte)font, unicode);
+                            }
+                            else
+                            {
+                                Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
+
+                                if (item == null)
+                                    break;
+
+                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
+
+                                if (gump != null)
+                                {
+                                    gump.FindControls<DataBox>()?
+                                        .SelectMany(s => s.Children)
+                                        .OfType<ItemGump>()
+                                        .SingleOrDefault(s => s.Item == it)?
+                                        .AddLabel(text, hue, (byte)font, unicode);
+                                }
+                                else
+                                    Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                            }
+                        }
+                        
+                    }
+                    else
+                        parent.AddOverhead(type, text, (byte)font, hue, unicode);
 					break;
 				case MessageType.Emote:
 				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);
@@ -119,12 +189,12 @@ namespace ClassicUO.Game
                     break;
 			}
 
-			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
+			MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent);
 		}
 
 		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
         {
-            LocalizedMessage.Raise(args, entity ?? _system);
+            LocalizedMessageReceived.Raise(args, entity);
         }
 
 	}

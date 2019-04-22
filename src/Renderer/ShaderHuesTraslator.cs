@@ -26,34 +26,32 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    public enum ShadersEffectType
-    {
-        None = 0,
-        Hued = 1,
-        PartialHued = 2,
-        Land = 6,
-        LandHued = 7,
-        Spectral = 10,
-        Shadow = 12
-    }
-
     internal static class ShaderHuesTraslator
     {
+        public const byte SHADER_NONE = 0;
+        public const byte SHADER_HUED = 1;
+        public const byte SHADER_PARTIAL_HUED = 2;
+        public const byte SHADER_LAND = 6;
+        public const byte SHADER_LAND_HUED = 7;
+        public const byte SHADER_SPECTRAL = 10;
+        public const byte SHADER_SHADOW = 12;
+        public const byte SHADER_LIGHTS = 13;
+
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
-        public static Vector3 SelectedHue { get; } = new Vector3(23, 1, 0);
+        public static readonly Vector3 SelectedHue = new Vector3(23, 1, 0);
 
-        public static Vector3 SelectedItemHue { get; } = new Vector3(0x0035, 1, 0);
+        public static readonly Vector3 SelectedItemHue = new Vector3(0x0035, 1, 0);
 
-        public static Vector3 GetHueVector(int hue)
+        public static void GetHueVector(ref Vector3 hueVector, int hue)
         {
-            return GetHueVector(hue, false, 0, false);
+            GetHueVector(ref hueVector, hue, false, 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha)
         {
-            ShadersEffectType type;
+            byte type;
 
             if ((hue & 0x8000) != 0)
             {
@@ -65,26 +63,30 @@ namespace ClassicUO.Renderer
                 partial = false;
 
             if ((hue & SPECTRAL_COLOR_FLAG) != 0)
-                type = ShadersEffectType.Spectral;
+                type = SHADER_SPECTRAL;
             else if (hue != 0)
             {
                 if (partial)
-                    type = ShadersEffectType.PartialHued;
+                    type = SHADER_PARTIAL_HUED;
                 else
-                    type = ShadersEffectType.Hued;
+                    type = SHADER_HUED;
             }
             else
             {
-                type = ShadersEffectType.None;
+                type = SHADER_NONE;
             }
 
-            return new Vector3(hue, (int) type, alpha);
+            hueVector.X = hue;
+            hueVector.Y = type;
+            hueVector.Z = alpha;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, ShadersEffectType type)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, byte type)
         {
-            return new Vector3(hue, (int) type, 0);
+            hueVector.X = hue;
+            hueVector.Y = type;
+            hueVector.Z = 0;
         }
     }
 }

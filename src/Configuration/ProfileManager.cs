@@ -42,13 +42,13 @@ namespace ClassicUO.Configuration
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
-            if (!File.Exists(Path.Combine(path, "settings.json")))
+            if (!File.Exists(Path.Combine(path, Engine.SettingsFile)))
             {
                 Current = new Profile(username, servername, charactername);
             }
             else
             {
-                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json"), 
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, Engine.SettingsFile), 
                 new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All,

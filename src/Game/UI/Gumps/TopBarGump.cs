@@ -243,6 +243,8 @@ namespace ClassicUO.Game.UI.Gumps
                         debugGump.SetInScreen();
                     }
 
+                    Engine.DropFpsMinMaxValues();
+
                     break;
             }
         }

@@ -5,7 +5,7 @@
     ///     Used for single channel mode
     ///     and in derived class for intensity stereo mode
     /// </summary>
-    class SubbandLayer1 : ASubband
+    internal class SubbandLayer1 : ASubband
     {
         // Factors and offsets for sample requantization
         public static readonly float[] TableFactor =

@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class UseAbilityButtonGump : AnchorableGump
+    internal class UseAbilityButtonGump : AnchorableGump
     {
         private AbilityDefinition _definition;
         private GumpPic _button;
@@ -27,6 +27,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanBeSaved = true;
             AnchorGroupName = "spell";
+            GroupMatrixWidth = 44;
+            GroupMatrixHeight = 44;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()

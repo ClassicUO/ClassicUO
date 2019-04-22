@@ -228,9 +228,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButton.Left)
             {
-                for (int i = 0; i < _gameText.Links.Count; i++)
+                foreach (WebLinkRect link in _gameText.Links)
                 {
-                    WebLinkRect link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
 
@@ -249,7 +248,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            _gameText?.Dispose();
+            _gameText?.Destroy();
             _gameText = null;
             base.Dispose();
         }

@@ -218,8 +218,11 @@ namespace ClassicUO.Game
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
-            _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
+            _offset.X = _draggedItemTexture.Width / 2;
+            _offset.Y = _draggedItemTexture.Height / 2;
+
+            _rect.Width = _draggedItemTexture.Width;
+            _rect.Height = _draggedItemTexture.Height;
         }
 
         private IntPtr  _cursor, _surface;
@@ -278,7 +281,9 @@ namespace ClassicUO.Game
                 int x = Mouse.Position.X - _offset.X;
                 int y = Mouse.Position.Y - _offset.Y;
 
-                Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
+
                 sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
@@ -324,15 +329,13 @@ namespace ClassicUO.Game
                                 it = gumpling.Item;
 
                                 break;
-                            case GumpPicBackpack backpack:
-                                it = backpack.Backpack;
-                                break;
+
 							case Control control when control.Tooltip is Item i:
 								it = i;
 								break;
                         }
 
-                        if (it != null && it.Properties.Count > 0)
+                        if (it != null && it.Properties.Count != 0)
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
@@ -378,11 +381,10 @@ namespace ClassicUO.Game
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-
             if (TargetManager.IsTargeting)
             {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
                 if (gs != null && !gs.IsHoldingItem)
                     return _cursorData[war, 12];
             }

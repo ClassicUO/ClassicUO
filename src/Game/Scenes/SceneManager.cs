@@ -46,10 +46,8 @@ namespace ClassicUO.Game.Scenes
             //else
             //    CurrentScene.Dispose();
 
-            CurrentScene?.Dispose();
+            CurrentScene?.Destroy();
             CurrentScene = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             switch (type)
             {
@@ -68,9 +66,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            CurrentScene.Load();
-
-
+            CurrentScene?.Load();
         }
 
         public void Switch()

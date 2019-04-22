@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,20 +18,162 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Utility
 {
     internal static class ZLib
     {
+        // thanks ServUO :)
+
+        private static readonly ICompressor _compressor;
+
+        static ZLib()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                _compressor = new Compressor64();
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                _compressor = new CompressorUnix64();
+            }
+            else
+            {
+                throw new NotSupportedException("Zlib not support this platform");
+            }      
+        }
+
+
         public static void Decompress(byte[] source, int offset, byte[] dest, int length)
         {
-            using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
+            _compressor.Decompress(dest, ref length, source, source.Length - offset);
+        }
+
+        private enum ZLibQuality
+        {
+            Default = -1,
+
+            None = 0,
+
+            Speed = 1,
+            Size = 9
+        }
+
+        private enum ZLibError
+        {
+            VersionError = -6,
+            BufferError = -5,
+            MemoryError = -4,
+            DataError = -3,
+            StreamError = -2,
+            FileError = -1,
+
+            Okay = 0,
+
+            StreamEnd = 1,
+            NeedDictionary = 2
+        }
+
+
+        private interface ICompressor
+        {
+            string Version { get; }
+
+            ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
+            ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
+
+            ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
+        }
+
+
+
+        private sealed class Compressor64 : ICompressor
+        {
+            public string Version => SafeNativeMethods.zlibVersion();
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
             {
-                ms.Seek(2, SeekOrigin.Begin);
-                using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress)) stream.Read(dest, 0, length);
+                return SafeNativeMethods.compress(dest, ref destLength, source, sourceLength);
+            }
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            {
+                return SafeNativeMethods.compress2(dest, ref destLength, source, sourceLength, quality);
+            }
+
+            public ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            {
+                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
+            }
+
+            internal class SafeNativeMethods
+            {
+                [DllImport("zlib")]
+                internal static extern string zlibVersion();
+
+                [DllImport("zlib")]
+                internal static extern ZLibError compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
+
+                [DllImport("zlib")]
+                internal static extern ZLibError compress2(
+                    byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
+
+                [DllImport("zlib")]
+                internal static extern ZLibError uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
+            }
+        }
+
+        private sealed class CompressorUnix64 : ICompressor
+        {
+            public string Version => SafeNativeMethods.zlibVersion();
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            {
+                long destLengthLong = destLength;
+                ZLibError z = SafeNativeMethods.compress(dest, ref destLengthLong, source, sourceLength);
+                destLength = (int) destLengthLong;
+
+                return z;
+            }
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            {
+                long destLengthLong = destLength;
+                ZLibError z = SafeNativeMethods.compress2(dest, ref destLengthLong, source, sourceLength, quality);
+                destLength = (int) destLengthLong;
+
+                return z;
+            }
+
+            public ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            {
+                long destLengthLong = destLength;
+                ZLibError z = SafeNativeMethods.uncompress(dest, ref destLengthLong, source, sourceLength);
+                destLength = (int) destLengthLong;
+
+                return z;
+            }
+
+            private class SafeNativeMethods
+            {
+                [DllImport("libz")]
+                internal static extern string zlibVersion();
+
+                [DllImport("libz")]
+                internal static extern ZLibError compress(byte[] dest, ref long destLength, byte[] source, long sourceLength);
+
+                [DllImport("libz")]
+                internal static extern ZLibError compress2(byte[] dest, ref long destLength, byte[] source, long sourceLength, ZLibQuality quality);
+
+                [DllImport("libz")]
+                internal static extern ZLibError uncompress(byte[] dest, ref long destLen, byte[] source, long sourceLen);
             }
         }
     }

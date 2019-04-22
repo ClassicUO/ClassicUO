@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Data
         Unicode
     }
 
-    struct PromptData
+    internal struct PromptData
     {
         public ConsolePrompt Prompt;
         public byte[] Data;

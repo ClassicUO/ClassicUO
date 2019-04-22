@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -26,6 +24,9 @@ namespace ClassicUO.Game.Managers
         private Macro _firstNode;
         private long _nextTimer;
 
+        private WorldViewportGump viewport;
+        private SystemChatControl systemchat;
+
         private readonly byte[] _skillTable = 
         {
             1,  2,  35, 4,  6,  12,
@@ -45,14 +46,13 @@ namespace ClassicUO.Game.Managers
             Constants.SPELLBOOK_7_SPELLS_COUNT
         };
 
-
         public MacroManager(Macro[] macros)
         {
             if (macros != null)
             {
-                foreach (Macro macro in macros)
+                for (int i = 0; i < macros.Length; i++)
                 {
-                    AppendMacro(macro);
+                    AppendMacro(macros[i]);
                 }
             }
         }
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.Managers
                 return 0;
 
             int result = 0;
-
+            
             switch (macro.Code)
             {
                 case MacroType.Say:
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        Chat.Say(mos.Text, hue, type);
+                        GameActions.Say(mos.Text, hue, type);
                     }
 
                     break;
@@ -245,12 +245,12 @@ namespace ClassicUO.Game.Managers
                         string s = SDL.SDL_GetClipboardText();
                         if (!string.IsNullOrEmpty(s))
                         {
-                            WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                            viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                             if (viewport != null)
                             {
-                                SystemChatControl chat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-                                if (chat != null)
-                                    chat.textBox.Text += s;
+                                systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+                                if (systemchat != null)
+                                    systemchat.textBox.Text += s;
                             }
                         }
                     }
@@ -612,6 +612,9 @@ namespace ClassicUO.Game.Managers
                     {
                         Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
 
+                        if (mob == null)
+                            break;
+
                         if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 
@@ -648,7 +651,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
-                    Chat.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
+                    GameActions.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
                     break;
                 case MacroType.SaveDesktop:
                     Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
@@ -738,7 +741,7 @@ namespace ClassicUO.Game.Managers
 
                         World.ViewRange = res;
 
-                        Chat.Print($"ViewRange is now {res}.");
+                        GameActions.Print($"ViewRange is now {res}.");
                     }
                     break;
                 case MacroType.IncreaseUpdateRange:
@@ -746,27 +749,27 @@ namespace ClassicUO.Game.Managers
                     if (World.ViewRange > Constants.MAX_VIEW_RANGE)
                         World.ViewRange = Constants.MAX_VIEW_RANGE;
 
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.DecreaseUpdateRange:
                     World.ViewRange--;
                     if (World.ViewRange < Constants.MIN_VIEW_RANGE)
                         World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.MinUpdateRange:
                     World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    Chat.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
@@ -830,6 +833,12 @@ namespace ClassicUO.Game.Managers
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
                     break;
 
+                case MacroType.ToggleChatVisibility:
+                    viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                    systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
+                    systemchat?.ToggleChatVisibility();
+                    break;
+
             }
 
 
@@ -838,7 +847,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class Macro : IEquatable<Macro>, INode<Macro>
+    internal class Macro : IEquatable<Macro>, INode<Macro>
     {
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
@@ -968,7 +977,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObject : INode<MacroObject>
+    internal class MacroObject : INode<MacroObject>
     {
         [JsonConstructor]
         public MacroObject(MacroType code, MacroSubType sub)
@@ -1030,7 +1039,7 @@ namespace ClassicUO.Game.Managers
     }
 
     [JsonObject]
-    class MacroObjectString : MacroObject
+    internal class MacroObjectString : MacroObject
     {
         [JsonConstructor]
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)
@@ -1108,7 +1117,8 @@ namespace ClassicUO.Game.Managers
         BandageSelf,
         BandageTarget,
         ToggleGargoyleFly,
-        DefaultScale
+        DefaultScale,
+        ToggleChatVisibility
     }
 
     internal enum MacroSubType

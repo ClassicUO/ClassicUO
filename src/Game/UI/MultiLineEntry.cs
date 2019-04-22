@@ -20,7 +20,7 @@
 #endregion
 
 using System;
-
+using System.Text;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -81,15 +81,14 @@ namespace ClassicUO.Game.UI
                 var newlines = GetLinesCharsCount(text);
                 if (newlines.Length > MaxLines)
                 {
-                    for (int l = 0; l + 1 < newlines.Length; l++)
-                        newlines[l]++;
-                    count = newlines.Length - MaxLines;
+                    count = 0;
                     for (int l = newlines.Length - 1; l >= MaxLines; --l)
                         count += newlines[l];
                     c = text;
-                    text = text.Remove(text.Length - count);
-                    c = c.Substring(Math.Min(c.Length - 1, text.Length + 1));
-                    count -= c.Length - 1;
+
+                    text = text.Remove(Math.Min(Math.Max(0, text.Length - 1), text.Length - count));
+                    c = c.Length > text.Length ? c.Substring(text.Length) : null;
+                    if (c != null) count -= c.Length;
                 }
                 else
                     c = null;
@@ -124,10 +123,7 @@ namespace ClassicUO.Game.UI
                         CaretIndex--;
                     }
 
-                    if (CaretIndex < text.Length)
-                        text = text.Remove(CaretIndex, 1);
-                    else
-                        text = text.Remove(text.Length - 1);
+                    text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
                     width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }
@@ -138,11 +134,11 @@ namespace ClassicUO.Game.UI
 
         public int[] GetLinesCharsCount()
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true);
         }
         public int[] GetLinesCharsCount(string text)
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true, true);
         }
     }
 }

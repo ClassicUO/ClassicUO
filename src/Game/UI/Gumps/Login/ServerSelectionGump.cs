@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Earth
             Add(new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
             {
-                X = 160, Y = 400
+                X = 160, Y = 400, ButtonAction = ButtonAction.Activate
             });
 
             // Sever Scroll Area Bg
@@ -175,9 +175,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 switch ((Buttons) buttonID)
                 {
                     case Buttons.Next:
+                    case Buttons.Earth:
                         if (loginScene.Servers.Any())
                             loginScene.SelectServer((byte) loginScene.Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
                         break;
+
                     case Buttons.Prev:
                         loginScene.StepBack();
                         break;
@@ -289,9 +291,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public override void Dispose()
             {
                 base.Dispose();
-                _labelName.Dispose();
-                _labelPing.Dispose();
-                _labelPacketLoss.Dispose();
+                _labelName.Destroy();
+                _labelPing.Destroy();
+                _labelPacketLoss.Destroy();
             }
         }
     }

@@ -52,17 +52,15 @@ namespace ClassicUO.Game.UI.Controls
 
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
-            //Height = t.Height;
 
             _text = new RenderedText
             {
                 Font = font, Hue = color, IsUnicode = isunicode, MaxWidth = maxWidth, Text = text
             };
             Width += _text.Width;
-
             
             Height = Math.Max(t.Width, _text.Height);
-            CanMove = false;
+            CanMove = true;
             AcceptMouseInput = true;
         }
 
@@ -93,10 +91,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _textures.Length; i++)
+            foreach (SpriteTexture t in _textures)
             {
-                if (_textures[i] != null)
-                    _textures[i].Ticks = (long) totalMS;
+                if (t != null)
+                    t.Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);
@@ -129,7 +127,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             base.Dispose();
-            _text?.Dispose();
+            _text?.Destroy();
         }
     }
 }

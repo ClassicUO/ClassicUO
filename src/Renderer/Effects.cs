@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    class IsometricEffect : Effect
+    internal class IsometricEffect : Effect
     {
         public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
         {
@@ -31,7 +31,7 @@ namespace ClassicUO.Renderer
         }
     }
 
-    class LightEffect : Effect
+    internal class LightEffect : Effect
     {
         public LightEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.LightEffect)
         {

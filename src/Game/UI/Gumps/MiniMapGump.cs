@@ -132,7 +132,10 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    batcher.Draw2D(_mobilesIndicator,x + w + gx, y + h + gy, 2, 2, ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
+                    Vector3 hue = Vector3.Zero;
+                    ShaderHuesTraslator.GetHueVector(ref hue, Notoriety.GetHue(mob.NotorietyFlag));
+
+                    batcher.Draw2D(_mobilesIndicator,x + w + gx, y + h + gy, 2, 2, hue);
                 }
 
                 //DRAW DOT OF PLAYER

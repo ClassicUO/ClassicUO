@@ -9,7 +9,7 @@ using Environment = System.Environment;
 
 namespace ClassicUO.Utility.Platforms
 {
-    static class Native
+    internal static class Native
     {
         private static readonly NativeLoader _loader;
 
@@ -48,16 +48,16 @@ namespace ClassicUO.Utility.Platforms
             public abstract int FreeLibrary(IntPtr module);
         }
 
-        class WinNativeLoader : NativeLoader
+        private class WinNativeLoader : NativeLoader
         {
             [DllImport("kernel32", EntryPoint = "LoadLibrary")]
-            static extern IntPtr LoadLibrary_WIN(string fileName);
+            private static extern IntPtr LoadLibrary_WIN(string fileName);
 
             [DllImport("kernel32", EntryPoint = "GetProcAddress")]
-            static extern IntPtr GetProcAddress_WIN(IntPtr module, string procName);
+            private static extern IntPtr GetProcAddress_WIN(IntPtr module, string procName);
 
             [DllImport("kernel32", EntryPoint = "FreeLibrary")]
-            static extern int FreeLibrary_WIN(IntPtr module);
+            private static extern int FreeLibrary_WIN(IntPtr module);
 
 
             public override IntPtr LoadLibrary(string name)
@@ -76,23 +76,23 @@ namespace ClassicUO.Utility.Platforms
             }
         }
 
-        class UnixNativeLoader : NativeLoader
+        private class UnixNativeLoader : NativeLoader
         {
             private const string LibName = "libdl";
 
             public const int RTLD_NOW = 0x002;
 
             [DllImport(LibName)]
-            static extern IntPtr dlopen(string fileName, int flags);
+            private static extern IntPtr dlopen(string fileName, int flags);
 
             [DllImport(LibName)]
-            static extern IntPtr dlsym(IntPtr handle, string name);
+            private static extern IntPtr dlsym(IntPtr handle, string name);
 
             [DllImport(LibName)]
-            static extern int dlclose(IntPtr handle);
+            private static extern int dlclose(IntPtr handle);
 
             [DllImport(LibName)]
-            static extern string dlerror();
+            private static extern string dlerror();
 
             public override IntPtr LoadLibrary(string name)
             {

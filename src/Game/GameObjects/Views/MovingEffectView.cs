@@ -29,14 +29,14 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class MovingEffect
+    internal sealed partial class MovingEffect
     {
         private Graphic _displayedGraphic = Graphic.INVALID;
 
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return false;
 
             if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
@@ -49,13 +49,21 @@ namespace ClassicUO.Game.GameObjects
             Bounds.X = (int)-Offset.X;
             Bounds.Y = (int)(Offset.Z - Offset.Y);
             Rotation = AngleToTarget;
-            
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+            }
 
             Engine.DebugInfo.EffectsRendered++;
             base.Draw(batcher, position, list);

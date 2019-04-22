@@ -55,13 +55,13 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _gumplingMidY => _gumpTop.Height;
 
-        private int _gumplingMidHeight => _expandableScrollHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander != null ? _gumpExpander.Height : 0);
+        private int _gumplingMidHeight => _expandableScrollHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
-        private int _gumplingBottomY => _expandableScrollHeight - _gumpBottom.Height - (_gumpExpander != null ? _gumpExpander.Height : 0);
+        private int _gumplingBottomY => _expandableScrollHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
-        private int _gumplingExpanderX => (Width - (_gumpExpander != null ? _gumpExpander.Width : 0)) >> 1;
+        private int _gumplingExpanderX => (Width - (_gumpExpander?.Width ?? 0)) >> 1;
 
-        private int _gumplingExpanderY => _expandableScrollHeight - (_gumpExpander != null ? _gumpExpander.Height : 0) - c_GumplingExpanderY_Offset;
+        private int _gumplingExpanderY => _expandableScrollHeight - (_gumpExpander?.Height ?? 0) - c_GumplingExpanderY_Offset;
 
         public int TitleGumpID
         {
@@ -143,8 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _gumplingTitleGumpIDDelta = false;
 
-                if (_gumplingTitle != null)
-                    _gumplingTitle.Dispose();
+                _gumplingTitle?.Dispose();
                 Add(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
             }
 

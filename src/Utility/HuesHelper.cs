@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility
 {
-    static class HuesHelper
+    internal static class HuesHelper
     {
         private static readonly byte[] _table = new byte[32]
         {

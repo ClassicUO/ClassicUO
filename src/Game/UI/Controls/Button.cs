@@ -106,10 +106,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 int action = int.Parse(parts[5]);
 
-                if (action == 0)
-                    ButtonAction = ButtonAction.SwitchPage;
-                else
-                    ButtonAction = ButtonAction.Activate;
+                ButtonAction = action == 0 ? ButtonAction.SwitchPage : ButtonAction.Activate;
             }
             
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
@@ -170,10 +167,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            for (int i = 0; i < _textures.Length; i++)
+            foreach (SpriteTexture t in _textures)
             {
-                if (_textures[i] != null)
-                    _textures[i].Ticks = Engine.Ticks;
+                if (t != null)
+                    t.Ticks = Engine.Ticks;
             }
         }
 
@@ -191,7 +188,12 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             SpriteTexture texture = GetTextureByState();
-            batcher.Draw2D(texture, x, y, Width, Height, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, false) : Vector3.Zero);
+
+            Vector3 hue = Vector3.Zero;
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+
+            batcher.Draw2D(texture, x, y, Width, Height, hue);
 
             //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
@@ -279,9 +281,11 @@ namespace ClassicUO.Game.UI.Controls
             return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
-        public override void Dispose()
+        public sealed override void Dispose()
         {
-            for (int i = 0; i < _fontTexture.Length; i++) _fontTexture[i]?.Dispose();
+            foreach (RenderedText t in _fontTexture)
+                t?.Destroy();
+
             base.Dispose();
         }
     }

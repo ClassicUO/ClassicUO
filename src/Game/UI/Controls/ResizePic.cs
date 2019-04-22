@@ -70,8 +70,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-                _gumpTexture[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _gumpTexture)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
@@ -250,8 +251,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-            DrawInternal(batcher, x, y, color);
+            Vector3 hue = Vector3.Zero;
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
+            DrawInternal(batcher, x, y, hue);
             return base.Draw(batcher, x, y);
         }
 

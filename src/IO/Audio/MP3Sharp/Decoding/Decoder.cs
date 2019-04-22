@@ -6,7 +6,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// <summary>
     ///     Encapsulates the details of decoding an MPEG audio frame.
     /// </summary>
-    class Decoder
+    internal class Decoder
     {
         private static readonly Params DEFAULT_PARAMS = new Params();
         private readonly Params params_Renamed;

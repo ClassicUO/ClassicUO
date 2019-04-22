@@ -9,7 +9,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// terminating byte, the code fragment can "unread" it, so that the next read operation on the input stream will reread the byte
     /// that was pushed back.
     /// </summary>
-    class PushbackStream
+    internal class PushbackStream
     {
         private readonly int m_BackBufferSize;
         private readonly CircularByteBuffer m_CircularByteBuffer;

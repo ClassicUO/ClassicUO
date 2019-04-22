@@ -1,0 +1,43 @@
+version: 0.0.1.{build}
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  only:
+  - dev
+image: Visual Studio 2017
+configuration: Release
+platform: x64
+clone_folder: c:\projects\classicuo
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}-dev'
+environment:
+  DEV_BUILD: true
+build_script:
+- cmd: >-
+    nuget restore
+
+
+    msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
+
+
+    7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+artifacts:
+- path: ClassicUO-dev-preview-release.zip
+  name: ClassicUO
+deploy:
+- provider: GitHub
+  tag: ClassicUO-dev-preview
+  release: ClassicUO-dev-preview
+  description: 'Appveyor autodeploy.\nThis build may not be safe: use it at your own risk.\nIt does not contain Razor.'
+  auth_token:
+    secure: sFMPr0POE5r5CFP5XbTD0e5pZVRO/12A3LgkqKVDD2uB2Webo6gstCTm63KzcbaW
+  artifact: ClassicUO-dev-preview-release.zip
+  draft: false
+  prerelease: true
+  force_update: true
+  on:
+    branch: dev

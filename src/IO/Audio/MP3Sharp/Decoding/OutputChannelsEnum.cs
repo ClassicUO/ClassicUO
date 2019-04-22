@@ -1,6 +1,6 @@
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 {
-    enum OutputChannelsEnum
+    internal enum OutputChannelsEnum
     {
         BOTH_CHANNELS = 0,
         LEFT_CHANNEL = 1,

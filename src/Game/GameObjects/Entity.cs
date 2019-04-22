@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial { get; internal set; }
+        public Serial Serial { get; set; }
 
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
 
@@ -192,11 +192,11 @@ namespace ClassicUO.Game.GameObjects
             _delta = Delta.None;
         }
 
-        public override void Dispose()
+        public override void Destroy()
         {
             _equipment = null;
             _properties.Clear();
-            base.Dispose();
+            base.Destroy();
         }
 
 

@@ -62,17 +62,11 @@ namespace ClassicUO.Game.UI.Gumps
             _updateTotal = false;
 
 
-            if (isBuyGump)
-                Add(new GumpPic(0, 0, 0x0870, 0));
-            else
-                Add(new GumpPic(0, 0, 0x0872, 0));
+            Add(isBuyGump ? new GumpPic(0, 0, 0x0870, 0) : new GumpPic(0, 0, 0x0872, 0));
 
             Add(_shopScrollArea = new ScrollArea(30, 60, 225, 180, false, 130));
 
-            if (isBuyGump)
-                Add(new GumpPic(170, 214, 0x0871, 0));
-            else
-                Add(new GumpPic(170, 214, 0x0873, 0));
+            Add(isBuyGump ? new GumpPic(170, 214, 0x0871, 0) : new GumpPic(170, 214, 0x0873, 0));
 
             HitBox boxAccept = new HitBox(200, 406, 34, 30)
             {
@@ -365,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
             Clear
         }
 
-        class ShopItem : Control
+        private class ShopItem : Control
         {
             private readonly Label _amountLabel, _name;
 
@@ -687,18 +681,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update(double totalMS, double frameMS)
             {
-                for (int i = 0; i < _gumpTexture.Length; i++)
-                    _gumpTexture[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpTexture)
+                    t.Ticks = (long) totalMS;
+
                 base.Update(totalMS, frameMS);
             }
 
             public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
+                Vector3 hue = Vector3.Zero;
+                if (IsTransparent)
+                    ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                batcher.Draw2D(_gumpTexture[0], x, y, color);
-                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, color);
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, color);
+                batcher.Draw2D(_gumpTexture[0], x, y, hue);
+                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, hue);
+                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, hue);
 
                 return base.Draw(batcher, x, y);
             }

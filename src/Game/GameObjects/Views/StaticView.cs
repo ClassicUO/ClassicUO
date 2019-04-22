@@ -38,7 +38,7 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Static
+    internal sealed partial class Static
     {
         private readonly bool _isFoliage, _isPartialHue;
         private readonly int _canBeTransparent;
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || IsDisposed)
+            if (!AllowedToDraw || IsDestroyed)
                 return false;
 
             if (Texture == null || Texture.IsDisposed || _oldGraphic != Graphic)
@@ -110,11 +110,19 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
+            }
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);

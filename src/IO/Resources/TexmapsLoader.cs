@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class TexmapsLoader : ResourceLoader<SpriteTexture>
+    internal class TexmapsLoader : ResourceLoader<SpriteTexture>
     {
         private UOFile _file;
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];

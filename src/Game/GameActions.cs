@@ -113,6 +113,13 @@ namespace ClassicUO.Game
             }
         }
 
+
+        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+            => Print(null, message, hue, type, font, unicode);
+
+        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+            => Chat.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, unicode, "ENU");
+
         public static void SayParty(string message)
         {
             Socket.Send(new PPartyMessage(message, 0));
@@ -301,13 +308,9 @@ namespace ClassicUO.Game
             Socket.Send(new PPopupMenuSelection(serial, index));
         }
 
-        public static void SystemMessage(string message) => Chat.Print(message);
+        public static void MessageOverhead(string message, Serial entity) => Print(World.Get(entity), message);
 
-        public static void SystemMessage(string message, ushort hue) => Chat.Print(message, hue);
-
-        public static void MessageOverhead(string message, Serial entity) => World.Get(entity)?.Print(message);
-
-        public static void MessageOverhead(string message, ushort hue, Serial entity) => World.Get(entity)?.Print(message, hue);
+        public static void MessageOverhead(string message, ushort hue, Serial entity) => Print(World.Get(entity), message, hue);
 
         public static void AcceptTrade(Serial serial, bool accepted)
             => Socket.Send(new PTradeResponse(serial, 2, accepted));

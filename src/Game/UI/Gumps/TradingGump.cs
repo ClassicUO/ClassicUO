@@ -30,7 +30,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TradingGump : Gump
+    internal class TradingGump : Gump
     {
         private Checkbox _myCheckbox;
         private GumpPic _hisPic;
@@ -94,10 +94,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true,
@@ -126,10 +130,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true,
@@ -196,14 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
 
-            if (HeIsAccepting)
-            {
-                _hisPic = new GumpPic(266, 160, 0x0869, 0);
-            }
-            else
-            {
-                _hisPic = new GumpPic(266, 160, 0x0867, 0);
-            }
+            _hisPic = HeIsAccepting ? new GumpPic(266, 160, 0x0869, 0) : new GumpPic(266, 160, 0x0867, 0);
 
             Add(_hisPic);
         }

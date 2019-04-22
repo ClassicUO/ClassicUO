@@ -18,14 +18,21 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Threading;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -58,6 +65,8 @@ namespace ClassicUO.Game
 
         public static bool SkillsRequested { get; set; }
 
+        public static Point RangeSize;
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
@@ -69,7 +78,7 @@ namespace ClassicUO.Game
 
                     if (value < 0 && Map != null)
                     {
-                        Map.Dispose();
+                        Map.Destroy();
                         Map = null;
                         return;
                     }
@@ -78,7 +87,7 @@ namespace ClassicUO.Game
                     {
                         if (MapIndex >= 0)
                         {
-                            Map.Dispose();                       
+                            Map.Destroy();                       
                         }
 
                         Position position = Player.Position;
@@ -134,7 +143,7 @@ namespace ClassicUO.Game
                     if (mob.Distance > ViewRange)
                         RemoveMobile(mob);
 
-                    if (mob.IsDisposed)
+                    if (mob.IsDestroyed)
                         _toRemove.Add(mob);
                 }
 
@@ -162,7 +171,7 @@ namespace ClassicUO.Game
                             RemoveItem(item);
                     }
 
-                    if (item.IsDisposed)
+                    if (item.IsDestroyed)
                         _toRemove.Add(item);
                 }
 
@@ -197,7 +206,7 @@ namespace ClassicUO.Game
         {
             Item item = Items.Get(serial);
 
-            if (item == null || item.IsDisposed)
+            if (item == null || item.IsDestroyed)
             {
                 Items.Remove(serial);
                 item = new Item(serial);
@@ -210,7 +219,7 @@ namespace ClassicUO.Game
         {
             Mobile mob = Mobiles.Get(serial);
 
-            if (mob == null || mob.IsDisposed)
+            if (mob == null || mob.IsDestroyed)
             {
                 Mobiles.Remove(serial);
                 mob = new Mobile(serial);
@@ -222,26 +231,81 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            Item item = Items.Get(serial);
-
-            if (item == null)
+            int step = 0;
+            Item item = null;
+            StackTrace trace = new StackTrace();
+            // TODO: try to figure out the weird issue :)
+            try
             {
-                //ToAdd.RemoveWhere(i => i == serial);
 
-                return false;
+                item = Items.Get(serial);
+
+                step = 1;
+
+                if (item == null)
+                    return false;
+
+                step = 2;
+
+                if (item.Layer != Layer.Invalid)
+                {
+                    step = 3;
+
+                    Entity e = Get(item.RootContainer);
+
+                    step = 4;
+
+                    if (e != null && e.HasEquipment)
+                    {
+                        step = 5;
+                        int index = (int) item.Layer;
+
+                        if (index < e.Equipment.Length)
+                        {
+                            e.Equipment[(int)item.Layer] = null;
+                        }
+                        step = 6;
+                    }
+                }
+
+                step = 7;
+                foreach (Item i in item.Items)
+                {
+                    RemoveItem(i);
+                }
+                step = 8;
+
+                item.Items.Clear();
+                step = 9;
+
+                item.Destroy();
+                step = 10;
             }
-
-            if (item.Layer != Layer.Invalid && item.RootContainer.IsValid)
+            catch (Exception e)
             {
-                Entity e = Get(item.RootContainer);
-                if (e != null && e.HasEquipment)
-                    e.Equipment[(int) item.Layer] = null;
-            }
+                string path = Path.Combine(Engine.ExePath, "Logs");
 
-            foreach (Item i in item.Items)
-                RemoveItem(i);
-            item.Items.Clear();
-            item.Dispose();
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("ClassicUO [dev] - v" + Engine.Version);
+                sb.AppendLine($"Thread: {Thread.CurrentThread.Name} - {Thread.CurrentThread.ManagedThreadId} - Engine ThreadID {Engine.ThreadID}");
+                sb.AppendLine($"Serial that causes crash: {serial} - {(item == null ? "NULL" : item.ToString())}");
+                sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
+                sb.AppendLine("Step: " + step);
+                sb.AppendLine("App trace:\n: " + trace);
+                sb.AppendLine("Exception Message:\n" + e);
+                sb.AppendLine("Exception StackTrace:\n" + e.StackTrace);
+
+              
+
+                File.WriteAllText(Path.Combine(path, "log_Error_World_RemoveItem.txt"), sb.ToString());
+
+                Chat.HandleMessage(Player, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
+                Chat.HandleMessage(null, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
+
+            }
 
             return true;
         }
@@ -250,10 +314,14 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Get(serial);
 
-            if (mobile == null) return false;
-            foreach (Item i in mobile.Items) RemoveItem(i);
+            if (mobile == null)
+                return false;
+
+            foreach (Item i in mobile.Items)
+                RemoveItem(i);
+
             mobile.Items.Clear();
-            mobile.Dispose();
+            mobile.Destroy();
 
             return true;
         }
@@ -273,9 +341,9 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Items.Clear();
             Mobiles.Clear();
-            Player.Dispose();
+            Player.Destroy();
             Player = null;
-            Map.Dispose();
+            Map.Destroy();
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
@@ -295,15 +363,15 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
-                Map.Dispose();
+                Map.Destroy();
                 Map = null;
-                Player.Dispose();
+                Player.Destroy();
                 Player = null;
             }
 
             foreach (Item item in Items)
             {
-                if (noplayer && Player != null && !Player.IsDisposed)
+                if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (item.RootContainer == Player)
                         continue;
@@ -313,7 +381,7 @@ namespace ClassicUO.Game
 
             foreach (Mobile mob in Mobiles)
             {
-                if (noplayer && Player != null && !Player.IsDisposed)
+                if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (mob == Player)
                         continue;

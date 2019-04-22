@@ -40,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || IsDisposed)
+            if (!AllowedToDraw || IsDestroyed)
                 return false;
 
             if (Texture == null || Texture.IsDisposed)
@@ -69,13 +69,21 @@ namespace ClassicUO.Game.GameObjects
                         ProcessAlpha(0xFF);
                 }
             }
-            
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+            }
 
             //MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.MultiRendered++;

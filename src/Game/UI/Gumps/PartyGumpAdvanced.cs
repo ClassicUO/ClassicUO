@@ -179,10 +179,15 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-            batcher.Draw2D(_line, x + 30, y + 50, 260, 1, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, x + 95, y+ 50, 1, 200, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, x + 245, y + 50, 1, 200, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            batcher.Draw2D(_line, x + 30, y + 250, 260, 1, ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+
+
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f);
+
+            batcher.Draw2D(_line, x + 30, y + 50, 260, 1, hue);
+            batcher.Draw2D(_line, x + 95, y+ 50, 1, 200, hue);
+            batcher.Draw2D(_line, x + 245, y + 50, 1, 200, hue);
+            batcher.Draw2D(_line, x + 30, y + 250, 260, 1, hue);
 
             if (_edge == null)
             {
