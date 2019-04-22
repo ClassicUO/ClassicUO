@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{71F289FA-0EF8-4F72-A26E-A8280C0931C5}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>ClassicUO</RootNamespace>
     <AssemblyName>ClassicUO</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>

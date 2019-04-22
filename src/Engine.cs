@@ -21,7 +21,7 @@
 
 #endregion
 
-#define DEV_BUILD_
+#define DEV_BUILD
 
 using System;
 using System.Collections.Generic;
