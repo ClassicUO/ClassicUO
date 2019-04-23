@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 {
@@ -198,7 +199,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             switch (read)
             {
                 case 0:
-                    Trace.WriteLine("0 bytes read == sync?", "Bitstream");
+                    
+                    Log.Message(LogTypes.Trace,"Bitstream: 0 bytes read == sync?");
                     sync = true;
                     break;
 
@@ -295,19 +297,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (sync)
             {
                 sync = (((SupportClass.URShift(headerstring, 10)) & 3) != 3);
-                if (!sync) Trace.WriteLine("INVALID SAMPLE RATE DETECTED", "Bitstream");
+                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID SAMPLE RATE DETECTED");
             }
             // filter out invalid layer
             if (sync)
             {
                 sync = (((SupportClass.URShift(headerstring, 17)) & 3) != 0);
-                if (!sync) Trace.WriteLine("INVALID LAYER DETECTED", "Bitstream");
+                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID LAYER DETECTED");
             }
             // filter out invalid version
             if (sync)
             {
                 sync = (((SupportClass.URShift(headerstring, 19)) & 3) != 1);
-                if (!sync) Console.WriteLine("INVALID VERSION DETECTED");
+                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID VERSION DETECTED");
             }
 
             return sync;
@@ -425,8 +427,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     if (bytesread == -1 || bytesread == 0) // t/DD -- .NET returns 0 at end-of-stream!
                     {
                         // t/DD: this really SHOULD throw an exception here...
-                        Trace.WriteLine("readFully -- returning success at EOF? (" + bytesread + ")",
-                            "Bitstream");
+                        Log.Message(LogTypes.Trace,"Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
+                            );
                         while (len-- > 0)
                         {
                             b[offs++] = 0;
