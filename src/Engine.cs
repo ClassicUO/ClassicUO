@@ -104,6 +104,8 @@ namespace ClassicUO
 
         public bool IsQuitted { get; private set; }
 
+        public bool DisableUpdateWindowCaption { get; set; }
+
         private SpriteBatch _spriteBatch;
 
         private Engine(string[] args)
@@ -803,7 +805,7 @@ namespace ClassicUO
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
-            if (!_settings.Profiler)
+            if (!_settings.Profiler || DisableUpdateWindowCaption)
                 return;
 
             double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;

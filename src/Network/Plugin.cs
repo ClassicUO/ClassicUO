@@ -226,8 +226,17 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            Engine.Instance.Window.Title = str;
+            if (string.IsNullOrEmpty(str))
+            {
+                Engine.Instance.DisableUpdateWindowCaption = false;
+            }
+            else
+            {
+                Engine.Instance.DisableUpdateWindowCaption = true;
+                Engine.Instance.Window.Title = str;
+            }
         }
+
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
             FileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
