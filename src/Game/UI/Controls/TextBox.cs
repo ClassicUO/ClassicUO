@@ -159,80 +159,81 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            string s;
-
-            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
+            if (TxEntry != null)
             {
-                if (!IsEditable)
-                    return;
-
-                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
-                    return;
-
-                s = SDL.SDL_GetClipboardText();
-                if (!string.IsNullOrEmpty(s))
+                string s;
+                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {
-                    TxEntry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
-                    return;
+                    if (!IsEditable)
+                        return;
+
+                    if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                        return;
+
+                    s = SDL.SDL_GetClipboardText();
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        TxEntry.InsertString(s.Replace("\r", string.Empty).Replace('\n', ' '));//we remove every carriage-return (windows) and every newline (all systems) and put a blank space instead
+                        return;
+                    }
+                }
+                else if (!TxEntry.IsPassword && Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+                {
+                    if (!IsEditable)
+                        key = SDL.SDL_Keycode.SDLK_c;
+                    string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
+                    SDL.SDL_SetClipboardText(txt);
+                }
+                else
+                {
+                    switch (key)
+                    {
+                        case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                        case SDL.SDL_Keycode.SDLK_RETURN:
+                            if (IsEditable)
+                            {
+                                s = TxEntry.Text;
+                                Parent?.OnKeyboardReturn(0, s);
+                            }
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                            if (!IsEditable)
+                                return;
+                            if (!ReplaceDefaultTextOnFirstKeyPress)
+                                TxEntry.RemoveChar(true);
+                            else
+                                ReplaceDefaultTextOnFirstKeyPress = false;
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_LEFT:
+                            TxEntry.SeekCaretPosition(-1);
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_RIGHT:
+                            TxEntry.SeekCaretPosition(1);
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_DELETE:
+                            if (!IsEditable)
+                                return;
+                            TxEntry.RemoveChar(false);
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_HOME:
+                            TxEntry.SetCaretPosition(0);
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_END:
+                            TxEntry.SetCaretPosition(Text.Length - 1);
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_TAB:
+                            Parent.KeyboardTabToNextFocus(this);
+                            break;
+                    }
                 }
             }
-            else if (!TxEntry.IsPassword && Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
-            {
-                if (!IsEditable)
-                    key = SDL.SDL_Keycode.SDLK_c;
-                string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
-                SDL.SDL_SetClipboardText(txt);
-            }
-            else
-            {
-                switch (key)
-                {
-                    case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                    case SDL.SDL_Keycode.SDLK_RETURN:
-                        if (IsEditable)
-                        {
-                            s = TxEntry.Text;
-                            Parent?.OnKeyboardReturn(0, s);
-                        }
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                        if (!IsEditable)
-                            return;
-                        if (!ReplaceDefaultTextOnFirstKeyPress)
-                            TxEntry.RemoveChar(true);
-                        else
-                            ReplaceDefaultTextOnFirstKeyPress = false;
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_LEFT:
-                        TxEntry.SeekCaretPosition(-1);
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_RIGHT:
-                        TxEntry.SeekCaretPosition(1);
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_DELETE:
-                        if (!IsEditable)
-                            return;
-                        TxEntry.RemoveChar(false);
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_HOME:
-                        TxEntry.SetCaretPosition(0);
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_END:
-                        TxEntry.SetCaretPosition(Text.Length - 1);
-                        break;
-
-                    case SDL.SDL_Keycode.SDLK_TAB:
-                        Parent.KeyboardTabToNextFocus(this);
-                        break;
-                }
-            }
-
             base.OnKeyDown(key, mod);
         }
 
