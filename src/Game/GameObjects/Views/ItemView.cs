@@ -128,14 +128,24 @@ namespace ClassicUO.Game.GameObjects
         private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, Layer layer, byte animIndex)
         {
             Graphic graphic;
-            Hue color;
+            Hue color = 0;
             bool isequip = false;
 
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
+                var corpseGraphic = FileManager.Animations.DataIndex[graphic].CorpseGraphic;
+
+                if (corpseGraphic != graphic && corpseGraphic != 0)
+                {
+                    color = FileManager.Animations.DataIndex[graphic].CorpseColor;
+                    graphic = corpseGraphic;
+                }
+
                 FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
-                color = Hue;
+
+                if (color == 0)
+                    color = Hue;
             }
             else if (HasEquipment)
             {

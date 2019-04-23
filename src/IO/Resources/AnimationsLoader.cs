@@ -602,74 +602,12 @@ namespace ClassicUO.IO.Resources
                         int checkIndex = group[i];
                         if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
-
-                        int count = 0;
-
-                        int[] ignoreGroups =
-                        {
-                            -1, -1
-                        };
-
-                        switch (DataIndex[checkIndex].Type)
-                        {
-                            case ANIMATION_GROUPS_TYPE.MONSTER:
-                            case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                                count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
-                                ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
-                                break;
-                            case ANIMATION_GROUPS_TYPE.HUMAN:
-                            case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                                count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
-                                ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
-                                break;
-                            case ANIMATION_GROUPS_TYPE.ANIMAL:
-                                count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
-                                ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
-                                ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
-                                break;
-                        }
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            if (j == ignoreGroups[0] || j == ignoreGroups[1])
-                                continue;
-
-                            for (byte d = 0; d < 5; d++)
-                            {
-                                ref AnimationDirection dataIndex = ref DataIndex[index].Groups[j].Direction[d];
-                                ref AnimationDirection dataCheckIndex = ref DataIndex[checkIndex].Groups[j].Direction[d];
-
-
-                                dataIndex.BaseAddress = dataCheckIndex.BaseAddress;
-                                dataIndex.BaseSize = dataCheckIndex.BaseSize;
-                                dataIndex.Address = dataIndex.BaseAddress;
-                                dataIndex.Size = dataIndex.BaseSize;
-
-                                if (dataIndex.PatchedAddress == 0)
-                                {
-                                    dataIndex.PatchedAddress = dataCheckIndex.PatchedAddress;
-                                    dataIndex.PatchedSize = dataCheckIndex.PatchedSize;
-                                    dataIndex.FileIndex = dataCheckIndex.FileIndex;
-                                }
-
-                                if (dataIndex.BaseAddress == 0)
-                                {
-                                    dataIndex.BaseAddress = dataIndex.PatchedAddress;
-                                    dataIndex.BaseSize = dataIndex.PatchedSize;
-                                    dataIndex.Address = dataIndex.BaseAddress;
-                                    dataIndex.Size = dataIndex.BaseSize;
-                                }
-                            }
-                        }
-
-                        DataIndex[index].Type = DataIndex[checkIndex].Type;
-                        DataIndex[index].Flags = DataIndex[checkIndex].Flags;
-                        DataIndex[index].Graphic = (ushort)checkIndex;
-                        DataIndex[index].Color = (ushort)color;
+             
+                        DataIndex[index].Graphic = (ushort) checkIndex;
+                        DataIndex[index].Color = (ushort) color;
 
                         break;
+                        
                     }
                 }
             }
@@ -692,69 +630,8 @@ namespace ClassicUO.IO.Resources
                         if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
 
-                        int[] ignoreGroups =
-                        {
-                            -1, -1
-                        };
-
-                        switch (DataIndex[checkIndex].Type)
-                        {
-                            case ANIMATION_GROUPS_TYPE.MONSTER:
-                            case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                                ignoreGroups[0] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
-                                ignoreGroups[1] = (int)HIGHT_ANIMATION_GROUP.HAG_DIE_2;
-
-                                break;
-                            case ANIMATION_GROUPS_TYPE.HUMAN:
-                            case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                                ignoreGroups[0] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_1;
-                                ignoreGroups[1] = (int)PEOPLE_ANIMATION_GROUP.PAG_DIE_2;
-
-                                break;
-                            case ANIMATION_GROUPS_TYPE.ANIMAL:
-                                ignoreGroups[0] = (int)LOW_ANIMATION_GROUP.LAG_DIE_1;
-                                ignoreGroups[1] = (int)LOW_ANIMATION_GROUP.LAG_DIE_2;
-
-                                break;
-                        }
-
-                        if (ignoreGroups[0] == -1)
-                            continue;
-
-                        for (byte j = 0; j < 2; j++)
-                        {
-                            for (byte d = 0; d < 5; d++)
-                            {
-                                ref AnimationDirection dataIndex = ref DataIndex[index].Groups[ignoreGroups[j]].Direction[d];
-                                ref AnimationDirection dataCheck = ref DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d];
-
-                                dataIndex.BaseAddress = dataCheck.BaseAddress;
-                                dataIndex.BaseSize = dataCheck.BaseSize;
-                                dataIndex.Address = dataIndex.BaseAddress;
-                                dataIndex.Size = dataIndex.BaseSize;
-
-                                if (dataIndex.PatchedAddress == 0)
-                                {
-                                    dataIndex.PatchedAddress = dataCheck.PatchedAddress;
-                                    dataIndex.PatchedSize = dataCheck.PatchedSize;
-                                    dataIndex.FileIndex = dataCheck.FileIndex;
-                                }
-
-                                if (dataIndex.BaseAddress == 0)
-                                {
-                                    dataIndex.BaseAddress = dataIndex.PatchedAddress;
-                                    dataIndex.BaseSize = dataIndex.PatchedSize;
-                                    dataIndex.Address = dataIndex.BaseAddress;
-                                    dataIndex.Size = dataIndex.BaseSize;
-                                }
-                            }
-                        }
-
-
-                        DataIndex[index].Type = DataIndex[checkIndex].Type;
-                        DataIndex[index].Flags = DataIndex[checkIndex].Flags;
-                        DataIndex[index].Graphic = (ushort)checkIndex;
-                        DataIndex[index].Color = color;
+                        DataIndex[index].CorpseGraphic = (ushort)checkIndex;
+                        DataIndex[index].CorpseColor = color;
 
                         break;
                     }
@@ -2314,10 +2191,41 @@ namespace ClassicUO.IO.Resources
         LAG_ANIMATION_COUNT
     }
 
+    [Flags]
+    enum ANIMATION_FLAGS : uint
+    {
+        AF_NONE = 0x00000,
+        AF_UNKNOWN_1 = 0x00001,
+        AF_UNKNOWN_2 = 0x00002,
+        AF_UNKNOWN_4 = 0x00004,
+        AF_CAN_FLYING = 0x00008,
+        AF_UNKNOWN_10 = 0x00010,
+        AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED = 0x00020,
+        AF_CALCULATE_OFFSET_BY_LOW_GROUP = 0x00040,
+        AF_UNKNOWN_80 = 0x00080,
+        AF_UNKNOWN_100 = 0x00100,
+        AF_UNKNOWN_200 = 0x00200,
+        AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP = 0x00400,
+        AF_UNKNOWN_800 = 0x00800,
+        AF_UNKNOWN_1000 = 0x01000,
+        AF_UNKNOWN_2000 = 0x02000,
+        AF_UNKNOWN_4000 = 0x04000,
+        AF_UNKNOWN_8000 = 0x08000,
+        AF_USE_UOP_ANIMATION = 0x10000,
+        AF_UNKNOWN_20000 = 0x20000,
+        AF_UNKNOWN_40000 = 0x40000,
+        AF_UNKNOWN_80000 = 0x80000,
+        AF_FOUND = 0x80000000
+    }
+
     internal struct IndexAnimation
     {
         public ushort Graphic;
         public ushort Color;
+
+        public ushort CorpseGraphic;
+        public ushort CorpseColor;
+
         public ANIMATION_GROUPS_TYPE Type;
         public uint Flags;
         public sbyte MountedHeightOffset;

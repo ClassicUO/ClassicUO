@@ -754,6 +754,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     Graphic id = GetGraphicForAnimation();
+
+                    var corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+
+                    if (corpseGraphic != id && corpseGraphic != 0)
+                    {
+                        id = corpseGraphic;
+                    }
+
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 

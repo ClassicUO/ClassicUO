@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
 
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
-            if (fc > 0 && animIndex >= fc)
+            if (fc != 0 && animIndex >= fc)
                 animIndex = 0;
 
             if (animIndex < direction.FrameCount)

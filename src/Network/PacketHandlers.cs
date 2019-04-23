@@ -2385,7 +2385,6 @@ namespace ClassicUO.Network
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
             byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
-
             owner.SetAnimation(group, 0, 5, 1);
         }
 

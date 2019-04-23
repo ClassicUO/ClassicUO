@@ -646,6 +646,7 @@ namespace ClassicUO.Game.GameObjects
                     if ((direction.FrameCount == 0 || direction.FramesHashes == null))
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
+
                     if ((direction.Address != 0 && direction.Size != 0) || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
