@@ -203,13 +203,77 @@ namespace ClassicUO.Game.GameObjects
                 animation = _animAssociateTable[animation][(byte) group - 1];
         }
 
-        public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0, bool isequip = false)
+        private static void CalculateHight(Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
+        {
+            if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+            {
+                result = 0;
+            }
+            else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+            {
+                if (!iswalking)
+                    result = 2;
+                else if (isrun)
+                    result = 1;
+                else
+                    result = 0;
+            }
+            else
+            {
+                if (mobile.IsFlying)
+                    result = 19;
+                else if (!iswalking)
+                {
+                    if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_4) != 0)
+                        result = 8;
+                    else
+                        result = 1;
+                }
+                else if (isrun)
+                {
+                    if ((flags &  ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
+                        result = 19;
+                    else
+                        result = 0;
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+        }
+
+        public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0)
                 graphic = mobile.GetGraphicForAnimation();
-            ANIMATION_GROUPS groupIndex = FileManager.Animations.GetGroupIndex(graphic, isequip);
-            byte result = mobile.AnimationGroup;
+
+            ANIMATION_GROUPS_TYPE type = FileManager.Animations.DataIndex[graphic].Type;
+            ANIMATION_GROUPS_TYPE originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+
+
+            if (!FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
+            {
+                ushort newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+
+                if (graphic != newGraphic)
+                {
+                    graphic = newGraphic;
+                    ANIMATION_GROUPS_TYPE newType = FileManager.Animations.DataIndex[graphic].Type;
+
+                    if (newType != type)
+                    {
+                        originalType = type;
+                        type = newType;
+                    }
+                }
+            }
+
+            ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
+
+            //ANIMATION_GROUPS groupIndex = FileManager.Animations.GetGroupIndex(graphic, isequip);
+            byte result = 0; // mobile.AnimationGroup;
 
 
             //if (result != 0xFF && (mobile.Serial & 0x80000000) == 0 && (!mobile.AnimationFromServer || checkGraphic != 0))
@@ -223,54 +287,45 @@ namespace ClassicUO.Game.GameObjects
             bool isWalking = mobile.IsWalking;
             bool isRun = mobile.IsRunning;
 
-            if (mobile.Steps.Count > 0)
+            if (mobile.Steps.Count != 0)
             {
                 isWalking = true;
                 isRun = mobile.Steps.Front().Run;
             }
 
-            if (groupIndex == ANIMATION_GROUPS.AG_LOW)
+            if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
             {
-                if (isWalking)
+                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                 {
-                    if (isRun)
-                        result = (byte) LOW_ANIMATION_GROUP.LAG_RUN;
-                    else
-                        result = (byte) LOW_ANIMATION_GROUP.LAG_WALK;
+                    CalculateHight(mobile, flags, isRun, isWalking, ref result);
                 }
-                else if (mobile.AnimationGroup == 0xFF)
+                else
                 {
-                    result = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
-                    mobile.AnimIndex = 0;
+                    if (!isWalking)
+                        result = 2;
+                    else if (isRun)
+                        result = 1;
+                    else
+                        result = 0;
                 }
             }
-            else if (groupIndex == ANIMATION_GROUPS.AG_HIGHT)
+            else if (type == ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (isWalking)
-                {
-                    result = (byte) HIGHT_ANIMATION_GROUP.HAG_WALK;
-
-                    if (isRun)
-                    {
-                        if ((FileManager.Animations.DataIndex[graphic].Flags & 0x08) != 0)
-                            result = (byte) HIGHT_ANIMATION_GROUP.HAG_FLY;
-                    }
-                }
-                else if (mobile.AnimationGroup == 0xFF)
-                {
-                    if ((FileManager.Animations.DataIndex[graphic].Flags & 0x04) != 0)
-                        result = 8;                 
-                    else
-                    {
-                        result = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
-                        mobile.AnimIndex = 0;
-                    }
-                }
-
-                if (graphic == 151)
-                    result++;
+               CalculateHight(mobile, flags, isRun, isWalking, ref result);
             }
-            else if (groupIndex == ANIMATION_GROUPS.AG_PEOPLE)
+            else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+            {
+                if (!isWalking)
+                    result = 2;
+                else
+                {
+                    if (isRun)
+                        result = 1;
+                    else
+                        result = 0;
+                }
+            }
+            else
             {
                 bool inWar = mobile.InWarMode;
 
@@ -376,8 +431,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (!isequip)
-                CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
+            //if (!isequip)
+            //    CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
 
             return result;
         }

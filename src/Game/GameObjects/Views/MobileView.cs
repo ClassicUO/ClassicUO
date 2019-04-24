@@ -125,6 +125,20 @@ namespace ClassicUO.Game.GameObjects
             drawX = drawY = drawCenterY = 0;
 
 
+
+            var newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+
+            if (FileManager.Animations.DataIndex[newGraphic].GraphicConversion.HasValue ||
+                !FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
+            {
+                if (graphic != newGraphic)
+                {
+                    hue = FileManager.Animations.DataIndex[graphic].Color;
+                    graphic = newGraphic;
+                }
+            }
+
+
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
@@ -264,21 +278,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (direction.Address != direction.PatchedAddress)
                             {
-                                ref var idx = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
-                                hue = idx.Color;
-
-                                if (hue != 0)
-                                {
-                                    isPartial = true;
-
-                                    //uint flag = idx.Flags & 0x80000000;
-
-                                    //if (flag != 0)
-                                    //{
-                                    //    Engine.SceneManager.GetScene<GameScene>()
-                                    //          .AddLight(this, this, (int)(IsFlipped ? (position.X + Bounds.X) : position.X - Bounds.X + frame.CenterX) , (int)position.Y - Bounds.Y + 44);
-                                    //}
-                                }
+                                hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
                             }
                         }
                     }
@@ -346,8 +346,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
 
-            bool isequip = layer != Layer.Mount;
-            byte animGroup = Mobile.GetGroupForAnimation(this, graphic, isequip);
+            byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;
 
 
@@ -357,10 +356,10 @@ namespace ClassicUO.Game.GameObjects
 
             ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
-            if (direction.IsUOP && !isequip)
-                direction = ref FileManager.Animations.UOPDataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+            //if (direction.IsUOP && !isequip)
+            //    direction = ref FileManager.Animations.UOPDataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
-            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction, isequip))
+            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Engine.Ticks;

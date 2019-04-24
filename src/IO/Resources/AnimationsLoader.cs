@@ -126,6 +126,8 @@ namespace ClassicUO.IO.Resources
 
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
 
+
+
                         for (int i = 0; i < 5; i++)
                         {
                             if (testType == typeNames[i])
@@ -148,33 +150,16 @@ namespace ClassicUO.IO.Resources
 
 
 
-            for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
-                ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
-                int findID = 0;
+                if (DataIndex[i].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                    DataIndex[i].Type = CalculateTypeByGraphic(i);
+                DataIndex[i].Graphic = i;
+                DataIndex[i].CorpseGraphic = i;     
 
-                if (i < 200)
-                {
-                    findID = i * 110;
-                    groupTye = ANIMATION_GROUPS_TYPE.MONSTER;
-                }
-                else
-                {
-                    if (i < 400)
-                    {
-                        findID = i * 65 + 9000;
-                        groupTye = ANIMATION_GROUPS_TYPE.ANIMAL;
-                    }
-                    else
-                    {
-                        findID = (i - 200) * 175;
-                        groupTye = ANIMATION_GROUPS_TYPE.HUMAN;
-                    }
-                }
+                long offsetToData = DataIndex[i].CalculateOffset(i, out int count);
 
-                findID *= animIdxBlockSize;
-              
-                if (findID >= idxfile0.Length)
+                if (offsetToData >= idxfile0.Length)
                 {
                     DataIndex[i].Groups = new AnimationGroup[100];
                     UOPDataIndex[i].Groups = new AnimationGroup[100];
@@ -187,33 +172,12 @@ namespace ClassicUO.IO.Resources
                     continue;
                 }
 
-                DataIndex[i].Graphic = (ushort)i;
-                int count = 0;
 
-                switch (groupTye)
-                {
-                    case ANIMATION_GROUPS_TYPE.MONSTER:
-                    case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                        count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
-
-                        break;
-                    case ANIMATION_GROUPS_TYPE.HUMAN:
-                    case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                        count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
-
-                        break;
-                    case ANIMATION_GROUPS_TYPE.ANIMAL:
-                    default:
-                        count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
-
-                        break;
-                }
-
-                DataIndex[i].Type = groupTye;
-                IntPtr address = _files[0].IdxFile.StartAddress + findID;
+                long address = _files[0].IdxFile.StartAddress.ToInt64() + offsetToData;
                 DataIndex[i].Groups = new AnimationGroup[100];
                 UOPDataIndex[i].Groups = new AnimationGroup[100];
 
+                int offset = 0;
                 for (byte j = 0; j < 100; j++)
                 {
                     DataIndex[i].Groups[j].Direction = new AnimationDirection[5];
@@ -221,23 +185,21 @@ namespace ClassicUO.IO.Resources
 
                     if (j >= count)
                         continue;
-                    int offset = j * 5;
 
                     for (byte d = 0; d < 5; d++)
                     {
                         unsafe
                         {
-                            AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset + d) * animIdxBlockSize);
+                            AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset * animIdxBlockSize));
+                            offset++;
 
                             if ((long)aidx >= maxAddress0)
                                 break;
 
                             if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                             {
-                                DataIndex[i].Groups[j].Direction[d].BaseAddress = aidx->Position;
-                                DataIndex[i].Groups[j].Direction[d].BaseSize = aidx->Size;
-                                DataIndex[i].Groups[j].Direction[d].Address = DataIndex[i].Groups[j].Direction[d].BaseAddress;
-                                DataIndex[i].Groups[j].Direction[d].Size = DataIndex[i].Groups[j].Direction[d].BaseSize;
+                                DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
+                                DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
                             }
                         }
                     }
@@ -339,11 +301,9 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    int startAnimID = -1;
                     int animFile = 0;
-                    ushort realAnimID = 0;
+                    ushort realAnimID = 0xFFFF;
                     sbyte mountedHeightOffset = 0;
-                    ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
                     if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                     {
@@ -355,119 +315,17 @@ namespace ClassicUO.IO.Resources
 
                         if (realAnimID == 68)
                             realAnimID = 122;
-
-                        if (realAnimID < 200)
-                        {
-                            startAnimID = realAnimID * 110;
-                            groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                        }
-                        else
-                        {
-                            if (realAnimID < 400)
-                            {
-                                startAnimID = realAnimID * 65 + 9000;
-                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                            }
-                            else
-                            {
-                                startAnimID = (realAnimID - 200) * 175;
-                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
-                            }
-                        }
-
-                        //if (realAnimID < 200)
-                        //{
-                        //    startAnimID = realAnimID * 110;
-                        //    groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                        //}
-                        //else
-                        //{
-                        //    startAnimID = realAnimID * 65 + 9000;
-                        //    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                        //}
                        
                     }
                     else if (anim[1] != -1 && maxAddress3.HasValue && maxAddress3 != 0)
                     {
                         animFile = 2;
                         realAnimID = (ushort)anim[1];
-
-                        //if (realAnimID < 700)
-                        //{
-                        //    startAnimID = realAnimID * 110;
-                        //    groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                        //}
-                        //else if (realAnimID < 1400)
-                        //{
-                        //    startAnimID = (realAnimID - 700) * 65 + 77000;
-                        //    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                        //}
-                        //else
-                        //{
-                        //    startAnimID = (realAnimID - 1400) * 175 + 122500;
-                        //    groupType = ANIMATION_GROUPS_TYPE.HUMAN;
-                        //}
-
-                        if (realAnimID < 300)
-                        {
-                            if (FileManager.ClientVersion < ClientVersions.CV_70130)
-                            {
-                                startAnimID = realAnimID * 110; // 33000 + ((realAnimID - 300) * 110);
-                                groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                            }
-                            else
-                            {
-                                startAnimID = realAnimID * 65 + 9000;
-                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                            }
-                        }
-                        else
-                        {
-                            if (realAnimID < 400)
-                            {
-                                if (FileManager.ClientVersion < ClientVersions.CV_70130)
-                                {
-                                    startAnimID = realAnimID * 65 /*+ 9000*/;
-                                    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                                }
-                                else
-                                {
-                                    startAnimID = 33000 + ((realAnimID - 300) * 110);
-                                    groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                                }
-
-                            }
-                            else
-                            {
-                                startAnimID = 35000 + ((realAnimID - 400) * 175);
-                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
-                            }
-                        }
                     }
                     else if (anim[2] != -1 && maxAddress4.HasValue && maxAddress4 != 0)
                     {
                         animFile = 3;
                         realAnimID = (ushort)anim[2];
-
-                        if (realAnimID < 200)
-                        {
-                            startAnimID = realAnimID * 110;
-                            groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                        }
-                        else
-                        {
-                            if (realAnimID < 400)
-                            {
-                                startAnimID = realAnimID * 65 + 9000;
-                                groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                            }
-                            else
-                            {
-                                startAnimID = (realAnimID - 200) * 175;
-                                groupType = ANIMATION_GROUPS_TYPE.HUMAN;
-                            }
-                        }
-
                     }
                     else if (anim[3] != -1 && maxAddress5.HasValue && maxAddress5 != 0)
                     {
@@ -477,111 +335,52 @@ namespace ClassicUO.IO.Resources
                     
                         if (index == 0x0115 || index == 0x00C0)
                             mountedHeightOffset = 0;
-
-                        if (realAnimID != 34)
-                        {
-                            if (realAnimID < 200)
-                            {
-                                startAnimID = realAnimID * 110;
-                                groupType = ANIMATION_GROUPS_TYPE.MONSTER;
-                            }
-                            else
-                            {
-                                if (realAnimID < 400)
-                                {
-                                    startAnimID = realAnimID * 65 + 9000;
-                                    groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                                }
-                                else
-                                {
-                                    startAnimID = (realAnimID - 200) * 175;
-                                    groupType = ANIMATION_GROUPS_TYPE.HUMAN;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            startAnimID = 0x2BCA;
-                            groupType = ANIMATION_GROUPS_TYPE.ANIMAL;
-                        }
-
                     }
 
-
-                    if (startAnimID != -1 && animFile != 0)
+    
+                    if (realAnimID != 0xFFFF && animFile != 0)
                     {
-                        startAnimID = startAnimID * animIdxBlockSize;
                         UOFile currentIdxFile = _files[animFile].IdxFile;
+                        long addressOffset = DataIndex[index].CalculateOffset(realAnimID, out int count);
 
-                        if ((uint)startAnimID < currentIdxFile.Length)
+                        if (addressOffset < currentIdxFile.Length)
                         {
                             DataIndex[index].MountedHeightOffset = mountedHeightOffset;
+                            DataIndex[index].GraphicConversion = realAnimID;
+                            DataIndex[index].FileIndex = (byte) animFile;
 
-                            if (FileManager.ClientVersion < ClientVersions.CV_500A || groupType == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                            {
-                                if (realAnimID >= 200)
-                                {
-                                    if (realAnimID >= 400)
-                                        DataIndex[index].Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                                    else
-                                        DataIndex[index].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
-                                }
-                                else
-                                    DataIndex[index].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                            }
-                            else if (groupType != ANIMATION_GROUPS_TYPE.UNKNOWN) DataIndex[index].Type = groupType;
+                            addressOffset += currentIdxFile.StartAddress.ToInt64();
+                            long maxaddress = currentIdxFile.StartAddress.ToInt64() + currentIdxFile.Length;
 
-                            int count = 0;
-
-                            switch (DataIndex[index].Type)
-                            {
-                                case ANIMATION_GROUPS_TYPE.MONSTER:
-                                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-                                    count = (int)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
-
-                                    break;
-                                case ANIMATION_GROUPS_TYPE.HUMAN:
-                                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                                    count = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
-
-                                    break;
-                                case ANIMATION_GROUPS_TYPE.ANIMAL:
-                                default:
-                                    count = (int)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
-
-                                    break;
-                            }
-
-                            IntPtr address = currentIdxFile.StartAddress + startAnimID;
-                            IntPtr maxaddress = currentIdxFile.StartAddress + (int)currentIdxFile.Length;
+                            int offset = 0;
 
                             for (int j = 0; j < count; j++)
                             {
-                                int offset = j * 5;
-
                                 for (byte d = 0; d < 5; d++)
                                 {
                                     unsafe
                                     {
-                                        AnimIdxBlock* aidx = (AnimIdxBlock*)(address + (offset + d) * animIdxBlockSize);
+                                        AnimIdxBlock* aidx = (AnimIdxBlock*)(addressOffset + (offset * animIdxBlockSize));
+                                        offset++;
 
-                                        if ((long) aidx >= (long) maxaddress)
+                                        if ((long)aidx >= maxaddress)
                                         {
-                                            break;
+                                            continue;
                                         }
-                                       
+
                                         if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                         {
                                             ref AnimationDirection dataindex = ref DataIndex[index].Groups[j].Direction[d];
 
-                                            dataindex.PatchedAddress = aidx->Position;
-                                            dataindex.PatchedSize = aidx->Size;
+                                            dataindex.Address = aidx->Position;
+                                            dataindex.Size = aidx->Size;
                                             dataindex.FileIndex = animFile;
                                         }
                                     }
                                 }
                             }
                         }
+
                     }
                 }
             }
@@ -641,40 +440,40 @@ namespace ClassicUO.IO.Resources
 
             byte maxGroup = 0;
 
-            for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
-            {
-                UOPDataIndex[animID].Type = DataIndex[animID].Type;
+            //for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            //{
+            //    UOPDataIndex[animID].Type = DataIndex[animID].Type;
 
-                for (byte grpID = 0; grpID < 100; grpID++)
-                {
-                    string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
-                    ulong hash = UOFileUop.CreateHash(hashstring);
+            //    for (byte grpID = 0; grpID < 100; grpID++)
+            //    {
+            //        string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
+            //        ulong hash = UOFileUop.CreateHash(hashstring);
 
-                    if (hashes.TryGetValue(hash, out UopFileData data))
-                    {
-                        if (grpID > maxGroup)
-                            maxGroup = grpID;
+            //        if (hashes.TryGetValue(hash, out UopFileData data))
+            //        {
+            //            if (grpID > maxGroup)
+            //                maxGroup = grpID;
 
-                        DataIndex[animID].IsUOP = true;
-                        DataIndex[animID].Groups[grpID].UOPAnimData = data;
-                        UOPDataIndex[animID].IsUOP = true;
-                        UOPDataIndex[animID].Groups[grpID].UOPAnimData = data;
-                        UOPDataIndex[animID].Type = DataIndex[animID].Type;
+            //            DataIndex[animID].IsUOP = true;
+            //            DataIndex[animID].Groups[grpID].UOPAnimData = data;
+            //            UOPDataIndex[animID].IsUOP = true;
+            //            UOPDataIndex[animID].Groups[grpID].UOPAnimData = data;
+            //            UOPDataIndex[animID].Type = DataIndex[animID].Type;
 
-                        for (byte dirID = 0; dirID < 5; dirID++)
-                        {
-                            DataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
-                            UOPDataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
+            //            for (byte dirID = 0; dirID < 5; dirID++)
+            //            {
+            //                DataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
+            //                UOPDataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
 
-                            //dataIndex.BaseAddress = 0;
-                            //dataIndex.Address = 0;
+            //                //dataIndex.BaseAddress = 0;
+            //                //dataIndex.Address = 0;
 
-                            //dataIndex.BaseSize = 0;
-                            //dataIndex.Size = 0;
-                        }
-                    }
-                }
-            }
+            //                //dataIndex.BaseSize = 0;
+            //                //dataIndex.Size = 0;
+            //            }
+            //        }
+            //    }
+            //}
 
 
             if (_animGroupCount < maxGroup)
@@ -682,6 +481,7 @@ namespace ClassicUO.IO.Resources
 
             try
             {
+                return;
                 if (FileManager.ClientVersion > ClientVersions.CV_60144)
                 {
                     // AnimationSequence.uop
@@ -707,6 +507,12 @@ namespace ClassicUO.IO.Resources
 
                             //if (animID != 729 && animID != 735)
                             //    continue;
+
+
+                            if (animID == 25)
+                            {
+
+                            }
 
                             reader.Skip(48);
 
@@ -1116,6 +922,16 @@ namespace ClassicUO.IO.Resources
         }
 
 
+        public static uint CalculatePeopleGroupOffset(ushort graphic)
+            => (uint) ((((graphic - 400) * 175) + 35000) * Marshal.SizeOf<AnimIdxBlock>());
+        public static uint CalculateHighGroupOffset(ushort graphic)
+            => (uint)((graphic * 110) * Marshal.SizeOf<AnimIdxBlock>());
+        public static uint CalculateLowGroupOffset(ushort graphic)
+            => (uint)((((graphic - 200) * 65) + 22000) * Marshal.SizeOf<AnimIdxBlock>());
+        private static ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
+            => graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
+
+
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
 
         public bool IsReplacedByAnimationSequence(ushort graphic, out byte type)
@@ -1136,6 +952,8 @@ namespace ClassicUO.IO.Resources
 
         public void UpdateAnimationTable(uint flags)
         {
+
+            return;
             for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
                 for (int g = 0; g < 100; g++)
@@ -1473,7 +1291,7 @@ namespace ClassicUO.IO.Resources
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
 
-            switch (DataIndex[graphic].IsUOP && !isequip ? UOPDataIndex[graphic].Type : DataIndex[graphic].Type)
+            switch (DataIndex[graphic].Type)
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
@@ -1534,9 +1352,9 @@ namespace ClassicUO.IO.Resources
             return false;
         }
 
-        public bool LoadDirectionGroup(ref AnimationDirection animDir, bool isEquip = false)
+        public bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
-            if (animDir.IsUOP && !isEquip)
+            if (animDir.IsUOP)
                 return TryReadUOPAnimDimension(ref animDir);
 
             if (animDir.Address == 0 && animDir.Size == 0)
@@ -2221,10 +2039,14 @@ namespace ClassicUO.IO.Resources
     internal struct IndexAnimation
     {
         public ushort Graphic;
+
+        public ushort? GraphicConversion;
         public ushort Color;
 
         public ushort CorpseGraphic;
         public ushort CorpseColor;
+
+        public byte FileIndex;
 
         public ANIMATION_GROUPS_TYPE Type;
         public uint Flags;
@@ -2233,6 +2055,69 @@ namespace ClassicUO.IO.Resources
 
         // 100
         public AnimationGroup[] Groups;
+
+
+
+        public long CalculateOffset(ushort graphic, out int groupCount)
+        {
+            long result = 0;
+            groupCount = 0;
+
+            ANIMATION_GROUPS group = ANIMATION_GROUPS.AG_NONE;
+
+            switch (Type)
+            {
+                case ANIMATION_GROUPS_TYPE.MONSTER:
+
+                    if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                        group = ANIMATION_GROUPS.AG_PEOPLE;
+                    else if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                        group = ANIMATION_GROUPS.AG_LOW;
+                    else
+                        group = ANIMATION_GROUPS.AG_HIGHT;
+                    break;
+                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    result = AnimationsLoader.CalculateHighGroupOffset(graphic);
+                    groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    break;
+                case ANIMATION_GROUPS_TYPE.ANIMAL:
+
+                    if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    {
+                        if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                            group = ANIMATION_GROUPS.AG_PEOPLE;
+                        else if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                            group = ANIMATION_GROUPS.AG_LOW;
+                        else
+                            group = ANIMATION_GROUPS.AG_HIGHT;
+                    }
+                    else
+                        group = ANIMATION_GROUPS.AG_LOW;
+
+                    break;
+                default:
+                    group = ANIMATION_GROUPS.AG_PEOPLE;
+                    break;
+            }
+
+            switch (group)
+            {
+                case ANIMATION_GROUPS.AG_LOW:
+                    result = AnimationsLoader.CalculateLowGroupOffset(graphic);
+                    groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
+                    break;
+                case ANIMATION_GROUPS.AG_HIGHT:
+                    result = AnimationsLoader.CalculateHighGroupOffset(graphic);
+                    groupCount = (int) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
+                    break;
+                case ANIMATION_GROUPS.AG_PEOPLE:
+                    result = AnimationsLoader.CalculatePeopleGroupOffset(graphic);
+                    groupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+                    break;
+            }
+
+            return result;
+        }
     }
 
     internal struct AnimationGroup
