@@ -205,6 +205,12 @@ namespace ClassicUO.Game.GameObjects
 
         private static void CalculateHight(Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
         {
+            if (mobile.AnimationGroup != 0xFF)
+            {
+                result = mobile.AnimationGroup;
+                return;
+            }
+
             if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
             {
                 result = 0;
@@ -391,6 +397,10 @@ namespace ClassicUO.Game.GameObjects
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
 
                     mobile.AnimIndex = 0;
+                }
+                else
+                {
+                    result = mobile.AnimationGroup;
                 }
 
                
@@ -917,7 +927,7 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            //if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {

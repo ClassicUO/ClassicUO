@@ -271,17 +271,7 @@ namespace ClassicUO.Game.GameObjects
 
 
                     if (hue == 0)
-                    {
-                        hue = Hue;
-                     
-                        if (hue == 0)
-                        {
-                            if (direction.Address != direction.PatchedAddress)
-                            {
-                                hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
-                            }
-                        }
-                    }
+                        hue = Hue;                     
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
@@ -379,8 +369,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (hue == 0)
                 {
-                    if (direction.Address != direction.PatchedAddress)
-                        hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
+                    //if (direction.Address != direction.PatchedAddress)
+                    //    hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
                     if (hue == 0 && convertedItem.HasValue)
                         hue = convertedItem.Value.Color;
                 }

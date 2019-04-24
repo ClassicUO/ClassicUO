@@ -952,40 +952,38 @@ namespace ClassicUO.IO.Resources
 
         public void UpdateAnimationTable(uint flags)
         {
+            //for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            //{
+            //    for (int g = 0; g < 100; g++)
+            //    {
+            //        for (int d = 0; d < 5; d++)
+            //        {
+            //            bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
 
-            return;
-            for (int i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
-            {
-                for (int g = 0; g < 100; g++)
-                {
-                    for (int d = 0; d < 5; d++)
-                    {
-                        bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
+            //            if (DataIndex[i].Groups[g].Direction[d].FileIndex == 1)
+            //                replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.LordBlackthornsRevenge) != 0;
+            //            else if (DataIndex[i].Groups[g].Direction[d].FileIndex == 2)
+            //                replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
 
-                        if (DataIndex[i].Groups[g].Direction[d].FileIndex == 1)
-                            replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.LordBlackthornsRevenge) != 0;
-                        else if (DataIndex[i].Groups[g].Direction[d].FileIndex == 2)
-                            replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
+            //            if (replace)
+            //            {
+            //                DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].PatchedAddress;
+            //                DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].PatchedSize;
 
-                        if (replace)
-                        {
-                            DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].PatchedAddress;
-                            DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].PatchedSize;
+            //                //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].PatchedAddress;
+            //                //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].PatchedSize;
+            //            }
+            //            else
+            //            {
+            //                DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
+            //                DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
 
-                            //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].PatchedAddress;
-                            //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].PatchedSize;
-                        }
-                        else
-                        {
-                            DataIndex[i].Groups[g].Direction[d].Address = DataIndex[i].Groups[g].Direction[d].BaseAddress;
-                            DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
-
-                            //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].BaseAddress;
-                            //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].BaseSize;
-                        }
-                    }
-                }
-            }
+            //                //UOPAnim[i].Groups[g].Direction[d].Address = UOPAnim[i].Groups[g].Direction[d].BaseAddress;
+            //                //UOPAnim[i].Groups[g].Direction[d].Size = UOPAnim[i].Groups[g].Direction[d].BaseSize;
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -2130,10 +2128,6 @@ namespace ClassicUO.IO.Resources
     internal struct AnimationDirection
     {
         public byte FrameCount;
-        public long BaseAddress;
-        public uint BaseSize;
-        public long PatchedAddress;
-        public uint PatchedSize;
         public int FileIndex;
         public long Address;
         public uint Size;
