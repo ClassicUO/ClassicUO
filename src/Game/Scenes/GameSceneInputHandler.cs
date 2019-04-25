@@ -283,9 +283,6 @@ namespace ClassicUO.Game.Scenes
         }
         private void OnRightMouseUp(object sender, EventArgs e)
         {
-            if (!IsMouseOverViewport)
-                return;
-
             if (_rightMousePressed)
                 _rightMousePressed = false;
         }
