@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == null || Mobile.IsDestroyed)
             {
-                if (Engine.Profile.Current.CloseHealthBarType == 1)
+                if (Engine.Profile.Current.CloseHealthBarType != 0)
                 {
                     Dispose();
                     return;
