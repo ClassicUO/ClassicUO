@@ -128,24 +128,11 @@ namespace ClassicUO.Game.GameObjects
         private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, Layer layer, byte animIndex)
         {
             Graphic graphic;
-            Hue color = 0;
+            ushort color = 0;
 
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
-
-                var corpseGraphic = FileManager.Animations.DataIndex[graphic].CorpseGraphic;
-
-                if (FileManager.Animations.DataIndex[corpseGraphic].GraphicConversion.HasValue ||
-                    !FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
-                {
-                    if (graphic != corpseGraphic)
-                    {
-                        color = FileManager.Animations.DataIndex[graphic].CorpseColor;
-                        graphic = corpseGraphic;
-                    }
-                }
-
                 FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
 
                 if (color == 0)
@@ -170,9 +157,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             FileManager.Animations.AnimID = graphic;
-            ref IndexAnimation index = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID];
 
-            ref AnimationDirection direction = ref index.Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
+
+            byte animGroup = FileManager.Animations.AnimGroup;
+            ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(graphic, ref animGroup, ref color).Direction[FileManager.Animations.Direction];
+
 
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
@@ -180,9 +169,6 @@ namespace ClassicUO.Game.GameObjects
             int fc = direction.FrameCount;
             if (fc > 0 && animIndex >= fc)
                 animIndex = (byte)(fc - 1);
-
-            //if (color == 0)
-            //    color = index.Color;
 
             if (animIndex < direction.FrameCount)
             {

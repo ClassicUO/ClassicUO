@@ -259,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
 
-            if (!FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
+            if (!FileManager.Animations.DataIndex[graphic].HasBodyReplaced)
             {
                 ushort newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
 
@@ -299,58 +299,71 @@ namespace ClassicUO.Game.GameObjects
                 isRun = mobile.Steps.Front().Run;
             }
 
-            if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+            switch (type)
             {
-                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
-                {
+                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                    if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    {
+                        CalculateHight(mobile, flags, isRun, isWalking, ref result);
+                    }
+                    else
+                    {
+                        if (!isWalking)
+                            result = 2;
+                        else if (isRun)
+                            result = 1;
+                        else
+                            result = 0;
+                    }
+                    break;
+                case ANIMATION_GROUPS_TYPE.MONSTER:
                     CalculateHight(mobile, flags, isRun, isWalking, ref result);
-                }
-                else
-                {
+                    break;
+                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
                     if (!isWalking)
                         result = 2;
                     else if (isRun)
                         result = 1;
                     else
                         result = 0;
-                }
-            }
-            else if (type == ANIMATION_GROUPS_TYPE.MONSTER)
-            {
-               CalculateHight(mobile, flags, isRun, isWalking, ref result);
-            }
-            else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
-            {
-                if (!isWalking)
-                    result = 2;
-                else
+                    break;
+                default:
                 {
-                    if (isRun)
-                        result = 1;
-                    else
-                        result = 0;
-                }
-            }
-            else
-            {
-                bool inWar = mobile.InWarMode;
+                    bool inWar = mobile.InWarMode;
 
-                if (isWalking)
-                {
-                    if (isRun)
+                    if (isWalking)
                     {
-                        if (mobile.IsMounted)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
-                        else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
-                        else
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
+                        if (isRun)
+                        {
+                            if (mobile.IsMounted)
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
+                            else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
+                            else
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
 
-                        if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
+                            if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
+                            {
+                                if (mobile.IsMounted)
+                                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
+                                else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
+                                {
+                                    if (inWar)
+                                        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                                    else
+                                        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+                                }
+                                else if (inWar && !mobile.IsDead)
+                                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                                else
+                                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                            }
+                        }
+                        else
                         {
                             if (mobile.IsMounted)
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                            else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
+                            else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
                             {
                                 if (inWar)
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
@@ -363,81 +376,67 @@ namespace ClassicUO.Game.GameObjects
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
                         }
                     }
-                    else
+                    else if (mobile.AnimationGroup == 0xFF)
                     {
                         if (mobile.IsMounted)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                        else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
-                        {
-                            if (inWar)
-                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                            else
-                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-                        }
+                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
                         else if (inWar && !mobile.IsDead)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        {
+                            if (mobile.Equipment[(int) Layer.OneHanded] != null)
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                            else if (mobile.Equipment[(int) Layer.TwoHanded] != null)
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
+                            else
+                                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                        }
                         else
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                    }
-                }
-                else if (mobile.AnimationGroup == 0xFF)
-                {
-                    if (mobile.IsMounted)
-                        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
-                    else if (inWar && !mobile.IsDead)
-                    {
-                        if (mobile.Equipment[(int) Layer.OneHanded] != null)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                        else if (mobile.Equipment[(int) Layer.TwoHanded] != null)
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
-                        else
-                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                        mobile.AnimIndex = 0;
                     }
                     else
-                        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
-                    mobile.AnimIndex = 0;
-                }
-                else
-                {
-                    result = mobile.AnimationGroup;
-                }
+                    {
+                        result = mobile.AnimationGroup;
+                    }
 
                
 
-                if (mobile.Race == RaceType.GARGOYLE)
-                {
-                    if (mobile.IsFlying)
+                    if (mobile.Race == RaceType.GARGOYLE)
                     {
-                        if (result == 0 || result == 1)
-                            result = 62;
-                        else if (result == 2 || result == 3)
-                            result = 63;
-                        else if (result == 4)
-                            result = 64;
-                        else if (result == 6)
-                            result = 66;
-                        else if (result == 7 || result == 8)
-                            result = 65;
-                        else if (result >= 9 && result <= 11)
-                            result = 71;
-                        else if (result >= 12 && result <= 14)
-                            result = 72;
-                        else if (result == 15)
-                            result = 62;
-                        else if (result == 20)
-                            result = 77;
-                        else if (result == 31)
-                            result = 71;
-                        else if (result == 34)
-                            result = 78;
-                        else if (result >= 200 && result <= 259)
-                            result = 75;
-                        else if (result >= 260 && result <= 270) result = 75;
+                        if (mobile.IsFlying)
+                        {
+                            if (result == 0 || result == 1)
+                                result = 62;
+                            else if (result == 2 || result == 3)
+                                result = 63;
+                            else if (result == 4)
+                                result = 64;
+                            else if (result == 6)
+                                result = 66;
+                            else if (result == 7 || result == 8)
+                                result = 65;
+                            else if (result >= 9 && result <= 11)
+                                result = 71;
+                            else if (result >= 12 && result <= 14)
+                                result = 72;
+                            else if (result == 15)
+                                result = 62;
+                            else if (result == 20)
+                                result = 77;
+                            else if (result == 31)
+                                result = 71;
+                            else if (result == 34)
+                                result = 78;
+                            else if (result >= 200 && result <= 259)
+                                result = 75;
+                            else if (result >= 260 && result <= 270) result = 75;
 
 
-                        return result;
+                            return result;
+                        }
                     }
+
+                    break;
                 }
             }
 
