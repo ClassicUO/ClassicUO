@@ -908,7 +908,11 @@ namespace ClassicUO.IO.Resources
         private static ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
             => graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
 
-        private static AnimationGroup _empty = default;
+        private static AnimationGroup _empty = new AnimationGroup()
+        {
+            Direction = new AnimationDirection[5]
+        };
+
 
         public ref AnimationGroup GetBodyAnimationGroup(ushort graphic, ref byte group, ref ushort hue)
         {

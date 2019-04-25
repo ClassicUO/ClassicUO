@@ -375,39 +375,39 @@ namespace ClassicUO.Game.Scenes
         // MOUSE DRAG
         private void OnMouseDragBegin(object sender, EventArgs e)
         {
-            if (!IsMouseOverViewport)
-                return;
+            //if (!IsMouseOverViewport)
+            //    return;
 
-            if (!IsHoldingItem)
-            {
-                GameObject obj = _dragginObject;
+            //if (!IsHoldingItem)
+            //{
+            //    GameObject obj = _dragginObject;
 
-                if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                    obj = it;
+            //    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
+            //        obj = it;
 
-                switch (obj)
-                {
-                    case Mobile mobile:
-                        GameActions.RequestMobileStatus(mobile);
+            //    switch (obj)
+            //    {
+            //        case Mobile mobile:
+            //            GameActions.RequestMobileStatus(mobile);
 
-                        Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
+            //            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
-                        if (mobile == World.Player)
-                            StatusGumpBase.GetStatusGump()?.Dispose();
+            //            if (mobile == World.Player)
+            //                StatusGumpBase.GetStatusGump()?.Dispose();
 
-                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                        HealthBarGump currentHealthBarGump;
-                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                        Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-                        break;
+            //            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+            //            HealthBarGump currentHealthBarGump;
+            //            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+            //            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+            //            break;
 
-                    case Item item:
-                        PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-                        break;
-                }
+            //        case Item item:
+            //            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+            //            break;
+            //    }
 
-                _dragginObject = null;
-            }
+            //    _dragginObject = null;
+            //}
         }
 
 
