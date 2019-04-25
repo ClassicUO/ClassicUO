@@ -83,15 +83,16 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+   
 
-            if (IsDestroyed)
-                return;
-
-            if (Source != null && Source.IsDestroyed /*|| Distance > World.ViewRange*/)
+            if (Source != null && Source.IsDestroyed)
             {
                 Destroy();
                 return;
             }
+
+            if (IsDestroyed)
+                return;
 
             if (IsEnabled)
             {
