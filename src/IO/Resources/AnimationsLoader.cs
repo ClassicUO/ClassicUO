@@ -28,9 +28,13 @@ namespace ClassicUO.IO.Resources
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
         };
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
-        private byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
-        private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>(); 
+        private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
+        private readonly AnimationGroup _empty = new AnimationGroup()
+        {
+            Direction = new AnimationDirection[5]
+        };
+
 
 
         public ushort Color { get; set; }
@@ -448,7 +452,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
         private void LoadUop(Dictionary<ulong, UopFileData> hashes)
         {
             if (FileManager.ClientVersion <= ClientVersions.CV_60144)
@@ -596,21 +599,18 @@ namespace ClassicUO.IO.Resources
             reader.ReleaseData();
         }
 
+
+
         public static uint CalculatePeopleGroupOffset(ushort graphic)
             => (uint) ((((graphic - 400) * 175) + 35000) * Marshal.SizeOf<AnimIdxBlock>());
         public static uint CalculateHighGroupOffset(ushort graphic)
             => (uint)((graphic * 110) * Marshal.SizeOf<AnimIdxBlock>());
         public static uint CalculateLowGroupOffset(ushort graphic)
             => (uint)((((graphic - 200) * 65) + 22000) * Marshal.SizeOf<AnimIdxBlock>());
-        private static ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
+        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
             => graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
 
-        private static readonly AnimationGroup _empty = new AnimationGroup()
-        {
-            Direction = new AnimationDirection[5]
-        };
-
-
+      
         public AnimationGroup GetBodyAnimationGroup(ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
@@ -1450,39 +1450,72 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < _usedTextures.Count; i++)
             {
                 ToRemoveInfo info = _usedTextures[i];
-                ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
+                byte gro = (byte) info.Group;
 
-                if (dir.LastAccessTime < ticks)
+                for (int g = 0; g < 3; g++)
                 {
-                    for (int j = 0; j < dir.FrameCount; j++)
+
+                    ref var dataIndex = ref DataIndex[info.AnimID]; 
+                    AnimationGroup group;
+                    switch (g)
                     {
-                        ref var hash = ref dir.FramesHashes[j];
+                        case 0:
+                            if (dataIndex.Groups == null)
+                                continue;
 
-                        if (hash != null)
-                        {
-                            hash.Dispose();
-                            hash = null;
-                        }
+                            group = dataIndex.Groups[info.Group];
+                            break;
+                        case 1:
+                            if (dataIndex.BodyConvGroups == null)
+                                continue;
 
-                        //if (ResourceDictionary.TryGetValue(hash, out var texture))
-                        //{
-                        //    texture?.Dispose();
-                        //    ResourceDictionary.Remove(hash);
-                        //    hash = 0;
-                        //}
+                            group = dataIndex.BodyConvGroups[info.Group];
+                            break;
+                        case 2:
+                            if (dataIndex.UopGroups == null)
+                                continue;
+
+                            group = dataIndex.UopGroups[info.Group];
+                            break;
+
+                        default:
+                            continue;
                     }
 
-                    dir.FrameCount = 0;
-                    dir.FramesHashes = null;
-                    dir.LastAccessTime = 0;
-                    _usedTextures.RemoveAt(i--);
+                    ref var dir = ref group.Direction[info.Direction];
 
-                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                        break;
+                    if (dir.LastAccessTime < ticks)
+                    {
+                        for (int j = 0; j < dir.FrameCount; j++)
+                        {
+                            ref var hash = ref dir.FramesHashes[j];
+
+                            if (hash != null)
+                            {
+                                hash.Dispose();
+                                hash = null;
+                            }
+
+                            //if (ResourceDictionary.TryGetValue(hash, out var texture))
+                            //{
+                            //    texture?.Dispose();
+                            //    ResourceDictionary.Remove(hash);
+                            //    hash = 0;
+                            //}
+                        }
+
+                        dir.FrameCount = 0;
+                        dir.FramesHashes = null;
+                        dir.LastAccessTime = 0;
+                        _usedTextures.RemoveAt(i--);
+
+                        if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+                            break;
+                    }
+
                 }
             }
 
-            count = 0;
 
             //for (int i = 0; i < _usedUopTextures.Count; i++)
             //{
@@ -1519,7 +1552,6 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
         }
-
 
         public void Clear()
         {
