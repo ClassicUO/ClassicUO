@@ -145,9 +145,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
-            if (direction.IsUOP)
-                direction = ref FileManager.Animations.UOPDataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
-
+      
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
@@ -318,12 +316,36 @@ namespace ClassicUO.Game.GameObjects
             {
                 graphic = item.GetGraphicForAnimation();
                 mountHeight = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
+
+                var newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+
+                if (FileManager.Animations.DataIndex[newGraphic].GraphicConversion.HasValue ||
+                    !FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
+                {
+                    if (graphic != newGraphic)
+                    {
+                        hue = FileManager.Animations.DataIndex[graphic].Color;
+                        graphic = newGraphic;
+                    }
+                }
+
             }
             else if (item.ItemData.AnimID != 0)
             {
                 graphic = item.ItemData.AnimID;
 
-                if (FileManager.Animations.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                var newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+
+                if (FileManager.Animations.DataIndex[newGraphic].GraphicConversion.HasValue ||
+                    !FileManager.Animations.DataIndex[graphic].GraphicConversion.HasValue)
+                {
+                    if (graphic != newGraphic)
+                    {
+                        hue = FileManager.Animations.DataIndex[graphic].Color;
+                        graphic = newGraphic;
+                    }
+                }
+                else if (FileManager.Animations.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                     {

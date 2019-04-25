@@ -769,9 +769,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         int animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
-                        bool istotallyUOP = FileManager.Animations.DataIndex[id].IsUOP && FileManager.Animations.UOPDataIndex[id].Groups[animGroup].UOPAnimData.Offset != 0;
 
-                        ref AnimationDirection direction = ref istotallyUOP ? ref FileManager.Animations.UOPDataIndex[id].Groups[animGroup].Direction[dir] : ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                         FileManager.Animations.AnimID = id;
                         FileManager.Animations.AnimGroup = (byte)animGroup;
                         FileManager.Animations.Direction = dir;
