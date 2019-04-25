@@ -230,7 +230,7 @@ namespace ClassicUO.Game.GameObjects
                     result = 19;
                 else if (!iswalking)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_UNKNOWN_4) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0)
                         result = 8;
                     else
                         result = 1;

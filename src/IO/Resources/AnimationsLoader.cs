@@ -2034,7 +2034,7 @@ namespace ClassicUO.IO.Resources
         AF_NONE = 0x00000,
         AF_UNKNOWN_1 = 0x00001,
         AF_UNKNOWN_2 = 0x00002,
-        AF_UNKNOWN_4 = 0x00004,
+        AF_IDLE_AT_8_FRAME = 0x00004,
         AF_CAN_FLYING = 0x00008,
         AF_UNKNOWN_10 = 0x00010,
         AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED = 0x00020,
