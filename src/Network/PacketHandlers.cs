@@ -2386,6 +2386,8 @@ namespace ClassicUO.Network
 
             byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0);
             owner.SetAnimation(group, 0, 5, 1);
+            owner.ClearSteps();
+            owner.LastStepTime = Engine.Ticks;
         }
 
         private static void OpenGump(Packet p)

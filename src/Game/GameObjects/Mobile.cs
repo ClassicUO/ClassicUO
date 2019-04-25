@@ -317,7 +317,13 @@ namespace ClassicUO.Game.GameObjects
             GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
-            if (!IsMoving) LastStepTime = Engine.Ticks;
+
+            if (!IsMoving)
+            {
+                if (!IsWalking)
+                    SetAnimation(0xFF);
+                LastStepTime = Engine.Ticks;
+            }
             Direction moveDir = CalculateDirection(endX, endY, x, y);
             Step step = new Step();
 
@@ -457,7 +463,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
+            return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count == 0;
         }
 
         private void ProcessFootstepsSound()
@@ -513,7 +519,7 @@ namespace ClassicUO.Game.GameObjects
         {
             byte dir = (byte) GetDirectionForAnimation();
 
-            if (Steps.Count > 0)
+            if (Steps.Count != 0)
             {
                 bool turnOnly;
 
@@ -607,11 +613,11 @@ namespace ClassicUO.Game.GameObjects
                 else
                     frameIndex++;
                 Graphic id = GetGraphicForAnimation();
-                int animGroup = GetGroupForAnimation(this, id);
+                byte animGroup = GetGroupForAnimation(this, id);
 
                 if (animGroup == 64 || animGroup == 65)
                 {
-                    animGroup = InWarMode ? 65 : 64;
+                    animGroup = (byte) (InWarMode ? 65 : 64);
                     AnimationGroup = (byte) animGroup;
                 }
 
@@ -637,9 +643,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    ushort hue = 0;
+                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue).Direction[dir];
                     FileManager.Animations.AnimID = id;
-                    FileManager.Animations.AnimGroup = (byte) animGroup;
+                    FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;
                     if ((direction.FrameCount == 0 || direction.FramesHashes == null))
                         FileManager.Animations.LoadDirectionGroup(ref direction);

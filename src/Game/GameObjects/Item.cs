@@ -767,12 +767,12 @@ namespace ClassicUO.Game.GameObjects
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        int animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
+                        byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
-
-                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        ushort hue = 0;
+                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(id, ref animGroup, ref hue).Direction[FileManager.Animations.Direction];
                         FileManager.Animations.AnimID = id;
-                        FileManager.Animations.AnimGroup = (byte)animGroup;
+                        FileManager.Animations.AnimGroup = animGroup;
                         FileManager.Animations.Direction = dir;
                         if ((direction.FrameCount == 0 || direction.FramesHashes == null))
                             FileManager.Animations.LoadDirectionGroup(ref direction);

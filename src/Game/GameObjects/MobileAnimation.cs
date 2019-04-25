@@ -302,6 +302,13 @@ namespace ClassicUO.Game.GameObjects
             switch (type)
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
+
+                    if (mobile.AnimationGroup != 0xFF)
+                    {
+                        result = mobile.AnimationGroup;
+                        break;
+                    }
+
                     if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                     {
                         CalculateHight(mobile, flags, isRun, isWalking, ref result);

@@ -29,7 +29,6 @@ namespace ClassicUO.IO.Resources
         };
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
-       // private readonly DataReader _reader = new DataReader();
         private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
         private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>(); 
 
@@ -155,6 +154,7 @@ namespace ClassicUO.IO.Resources
 
                 if (DataIndex[i].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
                     DataIndex[i].Type = CalculateTypeByGraphic(i);
+
                 DataIndex[i].Graphic = i;
                 DataIndex[i].CorpseGraphic = i;     
 
@@ -1380,15 +1380,6 @@ namespace ClassicUO.IO.Resources
                 return false;
 
             UOFileMul file = _files[animDir.FileIndex];
-
-            long startAddress = (long) file.StartAddress;
-
-            if (animDir.Address + startAddress >= startAddress + file.Length)
-            {
-                animDir = DataIndex[DataIndex[AnimID].Graphic].Groups[AnimGroup].Direction[Direction];
-                file = _files[animDir.FileIndex];
-            }
-
             file.Seek(animDir.Address);
             ReadFramesPixelData(ref animDir, file);
 
