@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (isrun)
                 {
-                    if ((flags &  ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
                         result = 19;
                     else
                         result = 0;
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (FileManager.Animations.DataIndex[graphic].IsUOP && (isParent || !FileManager.Animations.DataIndex[graphic].IsValidMUL))
             {
-
+                // do nothing ?
             }
             else
             {

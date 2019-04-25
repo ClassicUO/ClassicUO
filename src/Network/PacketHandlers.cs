@@ -357,7 +357,8 @@ namespace ClassicUO.Network
                     {
                         World.Player.WeightMax = p.ReadUShort();
                         byte race = p.ReadByte();
-                        if (race <= 0) race = 1;
+                        if (race == 0)
+                            race = 1;
                         World.Player.Race = (RaceType) race;
                     }
                     else
