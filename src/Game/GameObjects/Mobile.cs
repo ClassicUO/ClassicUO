@@ -613,7 +613,7 @@ namespace ClassicUO.Game.GameObjects
                 else
                     frameIndex++;
                 Graphic id = GetGraphicForAnimation();
-                byte animGroup = GetGroupForAnimation(this, id);
+                byte animGroup = GetGroupForAnimation(this, id, true);
 
                 if (animGroup == 64 || animGroup == 65)
                 {
@@ -631,7 +631,7 @@ namespace ClassicUO.Game.GameObjects
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
                             id = mount.GetGraphicForAnimation();
-                            animGroup = GetGroupForAnimation(this, id);
+                            animGroup = GetGroupForAnimation(this, id, true);
 
                             break;
                     }
@@ -644,7 +644,7 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue).Direction[dir];
+                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[dir];
                     FileManager.Animations.AnimID = id;
                     FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;

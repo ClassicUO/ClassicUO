@@ -1805,7 +1805,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             Walker.LastStepRequestTime = Engine.Ticks + walkTime - nowDelta;
-            GetGroupForAnimation(this);
+            GetGroupForAnimation(this, 0, true);
 
             return true;
         }

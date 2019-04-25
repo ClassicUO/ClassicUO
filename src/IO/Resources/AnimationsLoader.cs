@@ -32,8 +32,6 @@ namespace ClassicUO.IO.Resources
         private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
         private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>(); 
 
-      
-
 
         public ushort Color { get; set; }
         public byte AnimGroup { get; set; }
@@ -70,6 +68,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
+            LoadUop(hashes);
 
             int animIdxBlockSize = UnsafeMemoryManager.SizeOf<AnimIdxBlock>();
             UOFile idxfile0 = _files[0]?.IdxFile;
@@ -111,7 +111,6 @@ namespace ClassicUO.IO.Resources
                             continue;
 
                         int id = int.Parse(parts[0]);
-
                         if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
                         string testType = parts[1].ToLower();
@@ -124,7 +123,7 @@ namespace ClassicUO.IO.Resources
 
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
 
-
+                       
 
                         for (int i = 0; i < 5; i++)
                         {
@@ -162,15 +161,16 @@ namespace ClassicUO.IO.Resources
 
                 if (offsetToData >= idxfile0.Length)
                 {
-                    DataIndex[i].Groups = new AnimationGroup[100];
+                    //DataIndex[i].Groups = new AnimationGroup[100];
 
-                    for (int j = 0; j < 100; j++)
-                    {
-                        DataIndex[i].Groups[j].Direction = new AnimationDirection[5];
-                    }
+                    //for (int j = 0; j < 100; j++)
+                    //{
+                    //    DataIndex[i].Groups[j].Direction = new AnimationDirection[5];
+                    //}
                     continue;
                 }
 
+                bool isValid = false;
 
                 long address = _files[0].IdxFile.StartAddress.ToInt64() + offsetToData;
                 DataIndex[i].Groups = new AnimationGroup[100];
@@ -178,7 +178,10 @@ namespace ClassicUO.IO.Resources
                 int offset = 0;
                 for (byte j = 0; j < 100; j++)
                 {
-                    DataIndex[i].Groups[j].Direction = new AnimationDirection[5];
+                    DataIndex[i].Groups[j] = new AnimationGroup
+                    {
+                        Direction = new AnimationDirection[5]
+                    };
 
                     if (j >= count)
                         continue;
@@ -197,10 +200,14 @@ namespace ClassicUO.IO.Resources
                             {
                                 DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
                                 DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
+
+                                isValid = true;
                             }
                         }
                     }
                 }
+
+                DataIndex[i].IsValidMUL = isValid;
             }
 
 
@@ -355,6 +362,7 @@ namespace ClassicUO.IO.Resources
 
                             for (int j = 0; j < count; j++)
                             {
+                                DataIndex[index].BodyConvGroups[j] = new AnimationGroup();
                                 if (DataIndex[index].BodyConvGroups[j].Direction == null)
                                     DataIndex[index].BodyConvGroups[j].Direction = new AnimationDirection[5];
 
@@ -406,7 +414,7 @@ namespace ClassicUO.IO.Resources
              
                         DataIndex[index].Graphic = (ushort) checkIndex;
                         DataIndex[index].Color = (ushort) color;
-
+                        DataIndex[index].IsValidMUL = true;
                         break;
                         
                     }
@@ -433,471 +441,125 @@ namespace ClassicUO.IO.Resources
 
                         DataIndex[index].CorpseGraphic = (ushort)checkIndex;
                         DataIndex[index].CorpseColor = color;
-
+                        DataIndex[index].IsValidMUL = true;
                         break;
                     }
                 }
             }
-
-
-            byte maxGroup = 0;
-
-            //for (int animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
-            //{
-            //    UOPDataIndex[animID].Type = DataIndex[animID].Type;
-
-            //    for (byte grpID = 0; grpID < 100; grpID++)
-            //    {
-            //        string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
-            //        ulong hash = UOFileUop.CreateHash(hashstring);
-
-            //        if (hashes.TryGetValue(hash, out UopFileData data))
-            //        {
-            //            if (grpID > maxGroup)
-            //                maxGroup = grpID;
-
-            //            DataIndex[animID].IsUOP = true;
-            //            DataIndex[animID].Groups[grpID].UOPAnimData = data;
-            //            UOPDataIndex[animID].IsUOP = true;
-            //            UOPDataIndex[animID].Groups[grpID].UOPAnimData = data;
-            //            UOPDataIndex[animID].Type = DataIndex[animID].Type;
-
-            //            for (byte dirID = 0; dirID < 5; dirID++)
-            //            {
-            //                DataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
-            //                UOPDataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
-
-            //                //dataIndex.BaseAddress = 0;
-            //                //dataIndex.Address = 0;
-
-            //                //dataIndex.BaseSize = 0;
-            //                //dataIndex.Size = 0;
-            //            }
-            //        }
-            //    }
-            //}
-
-
-            if (_animGroupCount < maxGroup)
-                _animGroupCount = maxGroup;
-
-            try
-            {
-                return;
-                if (FileManager.ClientVersion > ClientVersions.CV_60144)
-                {
-                    // AnimationSequence.uop
-                    // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
-                    UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT);
-
-                    //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
-                    DataReader reader = new DataReader();
-
-                    for (int i = 0; i < animSeq.Entries.Length; i++)
-                    {
-                        UOFileIndex3D entry = animSeq.Entries[i];
-
-                        if (entry.Offset != 0)
-                        {
-                            animSeq.Seek(entry.Offset);
-                            byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
-                            int decLen = entry.DecompressedLength;
-                            byte[] decbuffer = new byte[decLen];
-                            ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
-                            reader.SetData(decbuffer, decbuffer.Length);
-                            uint animID = reader.ReadUInt();
-
-                            //if (animID != 729 && animID != 735)
-                            //    continue;
-
-
-                            if (animID == 25)
-                            {
-
-                            }
-
-                            reader.Skip(48);
-
-                            int replaces = reader.ReadInt();
-
-                            StringBuilder sb = new StringBuilder();
-                            //sb.AppendLine($"AnimationID: 0x{animID:X4}\t Type: {replaces}");
-
-
-                            //UOPDataIndex[animID].Graphic = DataIndex[animID].Graphic;
-                            //UOPDataIndex[animID].Flags = DataIndex[animID].Flags;
-                            //UOPDataIndex[animID].IsUOP = true;
-                            //UOPDataIndex[animID].Color = DataIndex[animID].Color;
-                            //UOPDataIndex[animID].MountedHeightOffset = DataIndex[animID].MountedHeightOffset;
-                            //UOPDataIndex[animID].Type = DataIndex[animID].Type;
-
-                            //if (UOPDataIndex[animID].IsUOP)
-                            //{
-                            //    switch (replaces)
-                            //    {
-                            //        case 29:
-                            //            UOPDataIndex[animID].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                            //            break;
-                            //        case 31:
-                            //        case 32:
-                            //            UOPDataIndex[animID].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
-                            //            break;
-                            //        case 48:
-                            //        case 68:
-                            //            UOPDataIndex[animID].Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                            //            break;
-                            //    }
-                            //}
-
-
-
-                            for (int k = 0; k < replaces; k++)
-                            {
-                                int oldIdx = reader.ReadInt();
-                                uint frameCount = reader.ReadUInt();
-                                int newIDX = reader.ReadInt();
-                                int unknown = reader.ReadInt();
-
-                                //sb.AppendLine($"\t\t OldIndex: {oldIdx}\t\t Frames: {frameCount}\t\t NewIndex: {newIDX}\t\t Unknown: {unknown}");
-
-                                string hashstring = string.Empty;
-
-                                if (newIDX >= 0)
-                                    hashstring = $"build/animationlegacyframe/{animID:D6}/{newIDX:D2}.bin";
-
-                                ulong hash = UOFileUop.CreateHash(hashstring);
-
-                                if (hashes.TryGetValue(hash, out UopFileData data))
-                                {
-                                    if (frameCount == 0)
-                                    {
-
-                                      
-                                        //UOPDataIndex[animID].Groups[oldIdx].UOPAnimData = data;
-                                        DataIndex[animID].Groups[oldIdx].UOPAnimData = default;
-
-
-                                        for (int d = 0; d < 5; d++)
-                                        {
-                                            DataIndex[animID].Groups[oldIdx].Direction[d].IsUOP = true;
-                                          
-
-
-                                            //UOPDataIndex[animID].Groups[oldIdx].Direction[d].IsUOP = true;
-                                            //UOPDataIndex[animID].Groups[newIDX].Direction[d].IsUOP = true;
-
-                                         
-                                        }
-
-
-                                        if (!_animationSequenceReplacing.ContainsKey((ushort) animID))
-                                        {
-                                            _animationSequenceReplacing.Add((ushort) animID, (byte) replaces);                                           
-                                        }
-
-                                        if (animID == 0x01B0)
-                                        {
-                                            DataIndex[animID].MountedHeightOffset = 9;
-                                        }
-                                    }
-                                }
-
-
-                                reader.Skip(48);
-
-                                var unknownA = reader.ReadInt();
-
-                                //sb.AppendLine($"\t\t\t\t UnknownA: {unknownA}");
-
-                                if (unknownA > 0)
-                                {
-                                    for (int x = 0; x < unknownA; x++)
-                                    {
-                                        var unknownB = reader.ReadInt();
-                                        var effectCount = reader.ReadInt();
-
-                                        //sb.AppendLine($"\t\t\t\t\t\t UnknownB: {unknownB}\t\t EffectCount: {effectCount}");
-
-                                        for (int e = 0; e < effectCount; e++)
-                                        {
-                                            var effectUnknownA = reader.ReadInt();
-
-                                            var effectUnknownB = reader.ReadInt();
-
-                                            // loop here, but no data read
-
-                                            var effectUnknownC = reader.ReadInt();
-
-                                            //sb.AppendLine($"\t\t\t\t\t\t\t\t effectUnknownA: {effectUnknownA}\t\t effectUnknownB: {effectUnknownB}\t\t effectUnknownC: {effectUnknownC}");
-
-                                            for (int z = 0; z < effectUnknownC; z++)
-                                            {
-                                                var effectUnknownD = reader.ReadInt();
-
-                                                var effectUnknownE = reader.ReadInt();
-
-                                                //sb.AppendLine($"\t\t\t\t\t\t\t\t\t\t effectUnknownD: {effectUnknownD}\t\t effectUnknownE: {effectUnknownE}\t\t");
-                                            }
-
-
-                                            //				loop back to function here
-
-                                            var unknownF = reader.ReadInt();
-                                        }
-
-
-                                    }
-                                }
-
-                                var unknownC = reader.ReadInt();
-
-                                //sb.AppendLine($"\t\t\t\t UnknownC: {unknownC}");
-
-                                if (unknownC > 0)
-                                {
-                                    for (int x = 0; x < unknownC; x++)
-                                    {
-                                        var unknownD = reader.ReadInt();
-
-                                        //sb.AppendLine($"\t\t\t\t\t\t unknownD: {unknownD}");
-                                    }
-                                }
-                            }
-
-                            var a = sb.ToString();
-                            sb.Clear();
-                            var unknownZ = reader.ReadInt();
-
-                            if (unknownZ > 0)
-                            {
-                                const int TO_CHECK = 24;
-                                const int ID = 735;
-
-                                if (animID == ID)
-                                    sb.AppendLine("count unknownZ: " + unknownZ);
-
-
-
-                                for (int z = 0; z < unknownZ; z++)
-                                {
-                                    var unknownZ_0 = reader.ReadByte();
-                                    var unknownZ_1 = reader.ReadByte();
-                                    var unknownZ_2 = reader.ReadInt();
-
-                                    int indent = 1;
-                                    string tab = new string('\t', indent);
-
-                                    if (animID == ID)
-                                    {
-                                        sb.AppendLine(tab + "unknownZ_0: " + unknownZ_0);
-                                        sb.AppendLine(tab + "unknownZ_1: " + unknownZ_1);
-                                        sb.AppendLine(tab + "unknownZ_2: " + unknownZ_2);
-                                        sb.AppendLine();
-                                    }
-
-                                    if (unknownZ_0 == TO_CHECK && animID == ID)
-                                    {
-
-                                    }
-
-                                    if (unknownZ_1 == TO_CHECK && animID == ID)
-                                    {
-
-                                    }
-
-                                    if (unknownZ_2 == TO_CHECK && animID == ID)
-                                    {
-
-                                    }
-
-                                    // I don't know yet
-                                    {
-                                        var unknown_float_A = 0.0;
-
-                                        if (unknownZ_1 < 0)
-                                            unknown_float_A = 0.0;
-                                    }
-
-                                    /////////////////////////////////////////////////////////
-                                    var unknownZ_3 = reader.ReadInt();
-
-                                    if (unknownZ_3 >= 0)
-                                    {
-                                        sb.AppendLine(tab + "count unknownZ_3: " + unknownZ_3);
-                                        tab = new string('\t', ++indent);
-                                    }
-
-                                    for (int y = 0; y < unknownZ_3; y++)
-                                    {
-                                        var unknownY_0 = reader.ReadByte();
-                                        var unknownY_1 = reader.ReadInt();
-
-                                        if (animID == ID)
-                                        {
-                                            sb.AppendLine(tab + "unknownY_0: " + unknownY_0);
-                                            sb.AppendLine(tab + "unknownY_1: " + unknownY_1);
-                                            sb.AppendLine();
-                                        }
-
-                                        if (unknownY_0 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-
-                                        if (unknownY_1 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-                                    }
-
-                                    if (unknownZ_3 > 0)
-                                        indent--;
-                                    /////////////////////////////////////////////////////////
-
-
-
-                                    /////////////////////////////////////////////////////////
-                                    var unknownZ_4 = reader.ReadInt();
-
-                                    if (unknownZ_4 >= 0)
-                                    {
-                                        sb.AppendLine(tab + "count unknownZ_4: " + unknownZ_4);
-                                        tab = new string('\t', ++indent);
-                                    }
-
-                                    for (int x = 0; x < unknownZ_4; x++)
-                                    {
-                                        var unknownX_0 = reader.ReadByte();
-                                        var unknownX_1 = reader.ReadInt();
-                                        var unknownX_2 = reader.ReadInt();
-
-                                        if (animID == ID)
-                                        {
-                                            sb.AppendLine(tab + "unknownX_0: " + unknownX_0);
-                                            sb.AppendLine(tab + "unknownX_1: " + unknownX_1);
-                                            sb.AppendLine(tab + "unknownX_2: " + unknownX_2);
-                                            sb.AppendLine();
-                                        }
-
-                                        if (unknownX_0 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-
-                                        if (unknownX_1 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-
-                                        if (unknownX_2 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-                                    }
-
-                                    if (unknownZ_4 > 0)
-                                        indent--;
-                                    /////////////////////////////////////////////////////////
-
-
-
-                                    /////////////////////////////////////////////////////////
-                                    var unknownZ_5 = reader.ReadInt();
-
-                                    if (unknownZ_5 >= 0)
-                                    {
-                                        sb.AppendLine(tab + "count unknownZ_5: " + unknownZ_5);
-                                        tab = new string('\t', ++indent);
-                                    }
-
-                                    for (int w = 0; w < unknownZ_5; w++)
-                                    {
-                                        var unknownW_0 = reader.ReadByte();
-                                        var unknownW_1 = reader.ReadByte();
-
-                                        if (animID == ID)
-                                        {
-                                            sb.AppendLine(tab + "unknownW_0: " + unknownW_0);
-                                            sb.AppendLine(tab + "unknownW_1: " + unknownW_1);
-                                            sb.AppendLine();
-                                        }
-
-                                        if (unknownW_0 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-
-                                        if (unknownW_1 == TO_CHECK && animID == ID)
-                                        {
-
-                                        }
-
-                                        var unknownW_2 = reader.ReadInt();
-
-
-                                        if (unknownW_2 >= 0)
-                                        {
-                                            sb.AppendLine(tab + "count unknownW_2: " + unknownW_2);
-                                            tab = new string('\t', ++indent);
-                                        }
-
-                                        for (int v = 0; v < unknownW_2; v++)
-                                        {
-                                            var unknownV_0 = reader.ReadInt();
-
-                                            if (animID == ID)
-                                            {
-                                                sb.AppendLine(tab + "unknownV_0: " + unknownV_0);
-                                                sb.AppendLine();
-                                            }
-
-                                            if (unknownV_0 == TO_CHECK && animID == ID)
-                                            {
-
-                                            }
-
-                                        }
-
-                                        if (unknownW_2 > 0)
-                                        {
-                                            indent--;
-                                        }
-                                    }
-
-                                    if (unknownZ_5 > 0)
-                                        indent--;
-                                    /////////////////////////////////////////////////////////
-
-                                }
-                            }
-
-                            int toread = (int)(reader.Length - reader.Position);
-
-                            if (animID == 735)
-                                a = sb.ToString();
-
-                            if (toread > 0)
-                                throw new Exception("More data");
-
-                            // file.WriteAsync(sb.ToString());
-                        }
-                    }
-
-                    //file.Dispose();
-                    animSeq.Dispose();
-                    reader.ReleaseData();
-                }
-
-            }
-            catch
-            {
-
-            }
-
-
-
         }
 
+
+        private void LoadUop(Dictionary<ulong, UopFileData> hashes)
+        {
+            if (FileManager.ClientVersion <= ClientVersions.CV_60144)
+                return;
+
+            string animationSequencePath = Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop");
+
+            if (!File.Exists(animationSequencePath))
+            {
+                Log.Message(LogTypes.Warning, "AnimationSequence.uop not found");
+                return;
+            }
+
+            UOFileUop animSeq = new UOFileUop(animationSequencePath, ".bin", Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT);
+            DataReader reader = new DataReader();
+
+            for (int i = 0; i < animSeq.Entries.Length; i++)
+            {
+                UOFileIndex3D entry = animSeq.Entries[i];
+                if (entry.Offset == 0)
+                    continue;
+
+                animSeq.Seek(entry.Offset);
+                byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
+                int decLen = entry.DecompressedLength;
+                byte[] decbuffer = new byte[decLen];
+                ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+                reader.SetData(decbuffer, decbuffer.Length);
+                uint animID = reader.ReadUInt();
+                reader.Skip(48);
+                int replaces = reader.ReadInt();
+
+
+                for (byte grpID = 0; grpID < 100; grpID++)
+                {
+                    string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
+                    ulong hash = UOFileUop.CreateHash(hashstring);
+
+                    if (hashes.TryGetValue(hash, out var uopData))
+                    {
+                        if (DataIndex[animID] == null)
+                            DataIndex[animID] = new IndexAnimation()
+                            {
+                                UopGroups = new AnimationGroupUop[100]
+                            };
+
+
+                        if (DataIndex[animID].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                        {
+                            switch (replaces)
+                            {
+                                case 29:
+                                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+                                    break;
+                                case 31:
+                                case 32:
+                                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
+
+                                    break;
+                                case 48:
+                                case 68:
+                                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.HUMAN;
+
+                                    break;
+                            }
+                        }
+
+                        
+                        ref var g = ref DataIndex[animID].UopGroups[grpID];
+
+                        g = new AnimationGroupUop
+                        {
+                            Offset = uopData.Offset,
+                            CompressedLength = uopData.CompressedLength,
+                            DecompressedLength = uopData.DecompressedLength,
+                            FileIndex = uopData.FileIndex,
+                            Direction = new AnimationDirection[5]
+                        };
+
+
+                        for (int d = 0; d < 5; d++)
+                        {
+                            ref var di = ref g.Direction[d];
+                            di.IsUOP = true;
+                        }
+                    }
+                }
+
+
+                if (replaces == 48 || replaces == 68)
+                    continue;
+
+                for (int k = 0; k < replaces; k++)
+                {
+                    int oldGroup = reader.ReadInt();
+                    uint frameCount = reader.ReadUInt();
+                    int newGroup = reader.ReadInt();
+
+                    if (frameCount == 0 && DataIndex[animID] != null)
+                    {
+                        DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                    }
+
+                    reader.Skip(60);
+                }
+            }
+
+            animSeq.Dispose();
+            reader.ReleaseData();
+        }
 
         public static uint CalculatePeopleGroupOffset(ushort graphic)
             => (uint) ((((graphic - 400) * 175) + 35000) * Marshal.SizeOf<AnimIdxBlock>());
@@ -914,16 +576,15 @@ namespace ClassicUO.IO.Resources
         };
 
 
-        public ref AnimationGroup GetBodyAnimationGroup(ushort graphic, ref byte group, ref ushort hue)
+        public AnimationGroup GetBodyAnimationGroup(ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ref var index = ref DataIndex[graphic];
 
-                if (index.IsUOP)
+                if (index.IsUOP && (isParent || !index.IsValidMUL))
                 {
-                    // TODO UOP
-                    return ref _empty;
+                    return index.GetUopGroup(group);
                 }
 
                 ushort newGraphic = index.Graphic;
@@ -937,13 +598,16 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                return ref DataIndex[graphic].HasBodyReplaced ? ref DataIndex[graphic].BodyConvGroups[group] : ref DataIndex[graphic].Groups[group];
+                if (DataIndex[graphic].HasBodyReplaced)
+                    return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
+
+                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
             }
 
-            return ref _empty;
+            return _empty;
         }
 
-        public ref AnimationGroup GetCorpseAnimationGroup(ushort graphic, ref byte group, ref ushort hue)
+        public AnimationGroup GetCorpseAnimationGroup(ushort graphic, ref byte group, ref ushort hue)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -951,8 +615,7 @@ namespace ClassicUO.IO.Resources
 
                 if (index.IsUOP)
                 {
-                    // TODO UOP
-                    return ref _empty;
+                    return index.GetUopGroup(group);
                 }
 
                 ushort newGraphic = index.CorpseGraphic;
@@ -966,10 +629,13 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                return ref DataIndex[graphic].HasBodyReplaced ? ref DataIndex[graphic].BodyConvGroups[group] : ref DataIndex[graphic].Groups[group];
+                if (DataIndex[graphic].HasBodyReplaced)
+                    return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
+
+                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
             }
 
-            return ref _empty;
+            return _empty;
         }
 
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
@@ -1351,25 +1017,16 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public bool AnimationExists(ushort graphic, byte group, bool isequip = false)
+        public bool AnimationExists(ushort graphic, byte group)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
+                ushort hue = 0;
+                AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(graphic, ref group, ref hue, true).Direction[0];
 
-                //if (DataIndex[graphic].IsUOP && !isequip)
-                //    return UOPDataIndex[graphic].Groups[group].UOPAnimData.Offset != 0;
 
-                //ref AnimationDirection d = ref DataIndex[graphic].Groups[group].Direction[0];
-
-                ////ref AnimationDirection d = ref  (DataIndex[graphic].IsUOP && !isequip ? 
-                ////                                     ref UOPAnim[graphic].Groups[group].Direction[0] : 
-                ////                                     ref DataIndex[graphic].Groups[group].Direction[0]);
-
-                //if (d.IsUOP && !isequip)
-                //    return DataIndex[graphic].Groups[group].UOPAnimData.Offset != 0;
-
-                return (DataIndex[graphic].Groups[group].Direction[0].Address != 0 && DataIndex[graphic].Groups[group].Direction[0].Size != 0) ||
-                       DataIndex[graphic].Groups[group].Direction[0].IsUOP;
+                return (direction.Address != 0 && direction.Size != 0) ||
+                       direction.IsUOP;
             }
 
             return false;
@@ -1377,8 +1034,15 @@ namespace ClassicUO.IO.Resources
 
         public bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
-            if (animDir.IsUOP)
+            if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
+            {
+                var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+
+                if (animData == null || animData.Offset == 0)
+                    return false;
+
                 return TryReadUOPAnimDimension(ref animDir);
+            }
 
             if (animDir.Address == 0 && animDir.Size == 0)
                 return false;
@@ -1392,9 +1056,7 @@ namespace ClassicUO.IO.Resources
 
         private unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
-            ref AnimationGroup dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
-
-            ref UopFileData animData = ref dataindex.UOPAnimData;
+            var animData = DataIndex[AnimID].GetUopGroup(AnimGroup); //ref DataIndex[AnimID].Groups[AnimGroup];
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
@@ -1635,9 +1297,11 @@ namespace ClassicUO.IO.Resources
                     return;
                 }
 
+                ushort hue = 0;
+
                 if (dir < 5)
                 {
-                    AnimationDirection direction = DataIndex[id].Groups[animGroup].Direction[dir];
+                    AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[dir];
                     int fc = direction.FrameCount;
 
                     if (fc > 0)
@@ -1657,8 +1321,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
-
-                AnimationDirection direction1 = DataIndex[id].Groups[animGroup].Direction[0];
+                AnimationDirection direction1 = FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[0];
 
                 if (direction1.Address != 0 && direction1.Size != 0)
                 {
@@ -1673,7 +1336,7 @@ namespace ClassicUO.IO.Resources
                 }
                 else if (direction1.IsUOP)
                 {
-                    UopFileData animDataStruct = DataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
+                    var animDataStruct = DataIndex[AnimID].GetUopGroup(AnimGroup);
 
                     if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                     {
@@ -2052,6 +1715,14 @@ namespace ClassicUO.IO.Resources
 
     internal class IndexAnimation
     {
+        private readonly byte[] _uopReplaceGroupIndex = new byte[100];
+
+        public IndexAnimation()
+        {
+            for (byte i = 0; i < 100; i++)
+                _uopReplaceGroupIndex[i] = i;
+        }
+
         public ushort Graphic;
 
         public ushort GraphicConversion = 0x8000;
@@ -2067,13 +1738,21 @@ namespace ClassicUO.IO.Resources
         public sbyte MountedHeightOffset;
         public bool IsUOP => (Flags & (uint) ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
+        public bool IsValidMUL;
+
         public bool HasBodyReplaced => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
 
         // 100
         public AnimationGroup[] Groups;
         public AnimationGroup[] BodyConvGroups;
+        public AnimationGroupUop[] UopGroups;
 
 
+        public AnimationGroupUop GetUopGroup(byte group) => group < 100 && UopGroups != null ? UopGroups[_uopReplaceGroupIndex[group]] : null;
+
+
+        public void ReplaceUopGroup(byte old, byte newG)
+            => _uopReplaceGroupIndex[old] = newG;
 
         public long CalculateOffset(ushort graphic, out int groupCount)
         {
@@ -2137,11 +1816,18 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    internal struct AnimationGroup
+
+    internal class AnimationGroup
     {
-        // 5
-        public AnimationDirection[] Direction;
-        public UopFileData UOPAnimData;
+        public AnimationDirection[] Direction { get; set; }
+    }
+
+    internal class AnimationGroupUop : AnimationGroup
+    {
+        public uint Offset;
+        public uint CompressedLength;
+        public uint DecompressedLength;
+        public int FileIndex;
     }
 
     internal struct AnimationDirection
