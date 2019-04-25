@@ -45,6 +45,12 @@ namespace ClassicUO.Game.Data
         DragonsBlood,
         DemonBone,
 
+        // More extras usable as reagents
+        Blackmoor,
+        Bloodspawn,
+        DeadWood,
+        WyrmHeart,
+
         // None
         None
     }

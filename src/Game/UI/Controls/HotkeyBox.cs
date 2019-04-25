@@ -132,6 +132,7 @@ namespace ClassicUO.Game.UI.Controls
         private void LabelOnMouseUp(object sender, MouseEventArgs e)
         {
             IsActive = true;
+            SetKeyboardFocus();
         }
 
 

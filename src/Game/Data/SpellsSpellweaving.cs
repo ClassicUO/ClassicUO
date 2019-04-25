@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsSpellweaving
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsSpellweaving()
         {
@@ -82,10 +81,7 @@ namespace ClassicUO.Game.Data
                     16, new SpellDefinition("Arcane Empowerment", 616, 0x59E7, "Aslavdra", 50, 24, Reagents.None)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

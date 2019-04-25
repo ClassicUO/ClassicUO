@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Data
             TithingCost = 0;
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Data
             ManaCost = 0;
             MinSkill = 0;
             TithingCost = 0;
-            PowerWords = string.Empty;
+            PowerWords = powerwords;
         }
 
 
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Data
 
                         break;
                     case Reagents.SpidersSilk:
-                        sb.Append("Spiders' Silk");
+                        sb.Append("Spiders Silk");
 
                         break;
                     // pagan reagents
@@ -143,7 +143,10 @@ namespace ClassicUO.Game.Data
 
                         break;
                     default:
-                        sb.Append("Unknown reagent");
+                        if (Regs[i] < Reagents.None)
+                            sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
+                        else
+                            sb.Append("Unknown reagent");
 
                         break;
                 }

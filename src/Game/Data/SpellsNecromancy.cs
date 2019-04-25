@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsNecromancy
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsNecromancy()
         {
@@ -85,83 +84,7 @@ namespace ClassicUO.Game.Data
                     17, new SpellDefinition("Exorcism", 117, 0x5010, "Ort Corp Grav", 40, 80, Reagents.NoxCrystal, Reagents.GraveDust)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
-
-        public static string[][] SpellsSpecialsName =>
-            new string[17][]
-            {
-                new[]
-                {
-                    "Animate Dead", "Uus Corp"
-                },
-                new[]
-                {
-                    "Blood Oath", "In Jux Mani Xen"
-                },
-                new[]
-                {
-                    "Corpse Skin", "In Aglo Corp Ylem"
-                },
-                new[]
-                {
-                    "Curse Weapon", "An Sanct Gra Char"
-                },
-                new[]
-                {
-                    "Evil Omen", "Pas Tym An Sanct"
-                },
-                new[]
-                {
-                    "Horrific Beast", "Rel Xen Vas Bal"
-                },
-                new[]
-                {
-                    "Lich Form", "Rel Xen Corp Ort"
-                },
-                new[]
-                {
-                    "Mind Rot", "Wis An Ben"
-                },
-                new[]
-                {
-                    "Pain Spike", "In Sar"
-                },
-                new[]
-                {
-                    "Poison Strike", "In Vas Nox"
-                },
-                new[]
-                {
-                    "Strangle", "In Bal Nox"
-                },
-                new[]
-                {
-                    "Summon Familiar", "Kal Xen Bal"
-                },
-                new[]
-                {
-                    "Vampiric Embrace", "Rel Xen An Sanct"
-                },
-                new[]
-                {
-                    "Vengeful Spirit", "Kal Xen Bal Beh"
-                },
-                new[]
-                {
-                    "Wither", "Kal Vas An Flam"
-                },
-                new[]
-                {
-                    "Wraith Form", "Rel Xen Um"
-                },
-                new[]
-                {
-                    "Exorcism", "Ort Corp Grav"
-                }
-            };
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

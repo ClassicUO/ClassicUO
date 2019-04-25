@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsBushido
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsBushido()
         {
@@ -52,10 +51,7 @@ namespace ClassicUO.Game.Data
                     6, new SpellDefinition("Momentum Strike", 406, 0x5425, string.Empty, 10, 70, Reagents.None)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

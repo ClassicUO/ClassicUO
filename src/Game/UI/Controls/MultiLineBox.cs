@@ -131,29 +131,31 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            int oldidx = TxEntry.CaretIndex;
-            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            if (TxEntry != null)
             {
-                if (!IsEditable)
-                    return;
-                if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
-                    return;
-
-                string s = SDL.SDL_GetClipboardText();
-                if (!string.IsNullOrEmpty(s))
+                int oldidx = TxEntry.CaretIndex;
+                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
                 {
-                    Parent?.OnKeyboardReturn(PasteCommandID, s);
-                    return;
+                    if (!IsEditable)
+                        return;
+                    if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
+                        return;
+
+                    string s = SDL.SDL_GetClipboardText();
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        Parent?.OnKeyboardReturn(PasteCommandID, s);
+                        return;
+                    }
                 }
-            }
-            else if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
-            {
-                if (!IsEditable)
-                    key = SDL.SDL_Keycode.SDLK_c;
-                string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
-                SDL.SDL_SetClipboardText(txt);
-            }
-            else switch (key)
+                else if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+                {
+                    if (!IsEditable)
+                        key = SDL.SDL_Keycode.SDLK_c;
+                    string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
+                    SDL.SDL_SetClipboardText(txt);
+                }
+                else switch (key)
                 {
                     case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
@@ -204,8 +206,7 @@ namespace ClassicUO.Game.UI.Controls
                         Parent.KeyboardTabToNextFocus(this);
                         break;
                 }
-
-
+            }
             base.OnKeyDown(key, mod);
         }
 

@@ -155,6 +155,7 @@
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />

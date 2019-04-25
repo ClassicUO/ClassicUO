@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
     {
         Neutral,
         Harmful,
-        Helpful,
+        Beneficial,
         Cancel
     }
     internal class MultiTargetInfo

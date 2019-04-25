@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsChivalry
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsChivalry()
         {
@@ -64,10 +63,7 @@ namespace ClassicUO.Game.Data
                     10, new SpellDefinition("Sacred Journey", 210, 0x5109,0x5109, "Sanctum Viatas", 20, 5, 10, Reagents.None)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

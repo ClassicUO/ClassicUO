@@ -508,14 +508,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case SpellBookType.Magery:
                     SpellDefinition def = SpellsMagery.GetSpell(offset + 1);
                     name = def.Name;
-                    abbreviature = SpellsMagery.SpecialReagentsChars[offset][1];
+                    abbreviature = SpellsMagery.SpecialReagentsChars[offset];
                     reagents = def.CreateReagentListString("\n");
                     break;
 
                 case SpellBookType.Necromancy:
                     def = SpellsNecromancy.GetSpell(offset + 1);
                     name = def.Name;
-                    abbreviature = SpellsNecromancy.SpellsSpecialsName[offset][1];
+                    abbreviature = def.PowerWords;
                     reagents = def.CreateReagentListString("\n");
                     break;
 
@@ -622,69 +622,6 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
-        }
-
-        private void CreateSpellDetailsPage(int page, bool isright, int circle, in SpellDefinition spell)
-        {
-            if (_spellBookType == SpellBookType.Magery)
-            {
-                Add(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
-                {
-                    X = isright ? 64 + 162 : 85, Y = 10
-                }, page);
-            }
-
-            GumpPic spellImage = new GumpPic(isright ? 225 : 62, 40, (Graphic) (spell.GumpIconID - 0x1298), 0)
-            {
-                LocalSerial = (uint) (Graphic) (spell.GumpIconID - 0x1298), Tag = spell.ID
-            };
-
-            spellImage.DragBegin += (sender, e) =>
-            {
-                Control ctrl = (Control) sender;
-                SpellDefinition def = SpellsMagery.GetSpell((int) ctrl.Tag);
-
-                UseSpellButtonGump gump = new UseSpellButtonGump(def)
-                {
-                    X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
-                };
-                Engine.UI.Add(gump);
-                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
-            };
-            Add(spellImage, page);
-
-            Label spellnameLabel = new Label(spell.Name, false, 0x0288, 80, 6)
-            {
-                X = isright ? 275 : 112, Y = 34
-            };
-            Add(spellnameLabel, page);
-
-            if (spell.Regs.Length > 0)
-            {
-                Add(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
-
-                Add(new Label("Reagents:", false, 0x0288, font: 6)
-                {
-                    X = isright ? 225 : 62, Y = 92
-                }, page);
-                string reagList = spell.CreateReagentListString(",\n");
-
-                if (_spellBookType == SpellBookType.Magery)
-                {
-                    int y = spellnameLabel.Height < 24 ? 31 : 24;
-                    y += spellnameLabel.Height;
-
-                    Add(new Label(SpellsMagery.SpecialReagentsChars[spell.ID - 1][1], false, 0x0288, font: 8)
-                    {
-                        X = isright ? 275 : 112, Y = y
-                    }, page);
-                }
-
-                Add(new Label(reagList, false, 0x0288, font: 9)
-                {
-                    X = isright ? 225 : 62, Y = 114
-                }, page);
-            }
         }
 
         private void OnEntityUpdate(Entity entity)
