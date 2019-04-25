@@ -632,8 +632,8 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                //entity.Graphic = graphic;
-                entity.Name = name;
+                if (string.IsNullOrEmpty(entity.Name))
+                    entity.Name = name;
                 entity.ProcessDelta();
             }
 
