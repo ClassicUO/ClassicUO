@@ -36,14 +36,14 @@ namespace ClassicUO.Game
 {
     internal static class GameActions
     {
-        private static Action<Item, int, int, int?> _pickUpAction;
+        private static Func<Item, int, int, int?, bool> _pickUpAction;
 
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
         
         public static Serial LastObject { get; set; } = Serial.INVALID;
 
-        internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
+        internal static void Initialize(Func<Item, int, int, int?, bool> onPickUpAction)
         {
             _pickUpAction = onPickUpAction;
         }

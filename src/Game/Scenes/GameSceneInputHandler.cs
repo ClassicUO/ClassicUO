@@ -320,7 +320,13 @@ namespace ClassicUO.Game.Scenes
                     GameObject obj = _dragginObject;
 
                     if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                        obj = it;
+                    {
+                        if (PickupItemBegin(it, _dragOffset.X, _dragOffset.Y))
+                        {
+                            obj.Destroy();
+                            return;
+                        }
+                    }
 
                     switch (obj)
                     {

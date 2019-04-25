@@ -62,15 +62,15 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void PickupItemBegin(Item item, int x, int y, int? amount = null)
+        private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
             if (World.Player.IsDead || item == null || item.IsCorpse || (item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE)))
-                return;
+                return false;
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
-                    return;
+                    return false;
 
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
                 {
@@ -79,18 +79,20 @@ namespace ClassicUO.Game.Scenes
                 };
                 Engine.UI.Add(gump);
                 Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+
+                return true;
             }
             else
             {
-                PickupItemDirectly(item, x, y, amount ?? item.Amount);
+                return PickupItemDirectly(item, x, y, amount ?? item.Amount);
             }
         }
 
-        private void PickupItemDirectly(Item item, int x, int y, int amount)
+        private bool PickupItemDirectly(Item item, int x, int y, int amount)
         {
             if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
             {
-                return;
+                return false;
             }
 
             HeldItem.Clear();
@@ -119,6 +121,8 @@ namespace ClassicUO.Game.Scenes
             CloseItemGumps(item);
            
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
+
+            return true;
         }
 
         private void CloseItemGumps(Item item)
