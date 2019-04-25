@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsNinjitsu
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsNinjitsu()
         {
@@ -58,10 +57,7 @@ namespace ClassicUO.Game.Data
                     8, new SpellDefinition("Mirror Image", 508, 0x5327, string.Empty, 10, 40, Reagents.None)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

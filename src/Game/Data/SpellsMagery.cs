@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsMagery
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spellList;
 
         static SpellsMagery()
         {
@@ -233,17 +232,14 @@ namespace ClassicUO.Game.Data
                     64, new SpellDefinition("Water Elemental", 64, 0x1B97, Reagents.Bloodmoss, Reagents.MandrakeRoot, Reagents.SpidersSilk)
                 }
             };
-            _spellList = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spellList;
 
         public static string[] CircleNames { get; } =
         {
             "First Circle", "Second Circle", "Third Circle", "Fourth Circle", "Fifth Circle", "Sixth Circle", "Seventh Circle", "Eighth Circle"
         };
 
-        public static string[][] SpecialReagentsChars { get; } =
+        public static string[][] SpecialReagentsChars { get; internal set; } =
         {
             new[]
             {

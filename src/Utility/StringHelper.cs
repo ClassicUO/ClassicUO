@@ -102,5 +102,18 @@ namespace ClassicUO.Utility
             }
             return sb.ToString();
         }
+
+        public static string RemoveUpperLowerChars(string str, bool removelower = true)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return "";
+            StringBuilder sb = new StringBuilder(str.Length);
+            for(int i = 0; i<str.Length; i++)
+            {
+                if(char.IsUpper(str[i]) == removelower || str[i] == ' ')
+                    sb.Append(str[i]);
+            }
+            return sb.ToString();
+        }
     } 
 }

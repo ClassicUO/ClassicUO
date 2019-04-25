@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsNecromancy
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsNecromancy()
         {
@@ -85,10 +84,7 @@ namespace ClassicUO.Game.Data
                     17, new SpellDefinition("Exorcism", 117, 0x5010, "Ort Corp Grav", 40, 80, Reagents.NoxCrystal, Reagents.GraveDust)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static string[][] SpellsSpecialsName =>
             new string[17][]

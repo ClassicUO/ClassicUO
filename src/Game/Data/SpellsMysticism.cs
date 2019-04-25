@@ -26,7 +26,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsMysticism
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        private static readonly List<SpellDefinition> _spells;
 
         static SpellsMysticism()
         {
@@ -82,10 +81,7 @@ namespace ClassicUO.Game.Data
                     16, new SpellDefinition("Rising Colossus", 693, 0x5DCF, "Kal Vas Xen Corp Ylem", 50, 83, Reagents.DemonBone, Reagents.DragonsBlood, Reagents.FertileDirt, Reagents.Nightshade)
                 }
             };
-            _spells = _spellsDict.Values.ToList();
         }
-
-        public static IReadOnlyList<SpellDefinition> Spells => _spells;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Data
 
                         break;
                     case Reagents.SpidersSilk:
-                        sb.Append("Spiders' Silk");
+                        sb.Append("Spiders Silk");
 
                         break;
                     // pagan reagents
@@ -143,7 +143,10 @@ namespace ClassicUO.Game.Data
 
                         break;
                     default:
-                        sb.Append("Unknown reagent");
+                        if (Regs[i] < Reagents.None)
+                            sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
+                        else
+                            sb.Append("Unknown reagent");
 
                         break;
                 }
