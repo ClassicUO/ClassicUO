@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Data
             TithingCost = 0;
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Data
             ManaCost = 0;
             MinSkill = 0;
             TithingCost = 0;
-            PowerWords = string.Empty;
+            PowerWords = powerwords;
         }
 
 
