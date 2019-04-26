@@ -443,7 +443,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
             {
                 _vertexBufferUI[i].Position.X = posLeftTop[i, 0];
-                _vertexBufferUI[i].Position.X = posLeftTop[i, 1];
+                _vertexBufferUI[i].Position.Y = posLeftTop[i, 1];
             }
 
             DrawSprite(texture, _vertexBufferUI);
@@ -451,7 +451,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
             {
                 _vertexBufferUI[i].Position.X = poTopRight[i, 0];
-                _vertexBufferUI[i].Position.X = poTopRight[i, 1];
+                _vertexBufferUI[i].Position.Y = poTopRight[i, 1];
             }
 
             DrawSprite(texture, _vertexBufferUI);
