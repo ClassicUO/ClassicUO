@@ -115,7 +115,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == null || Mobile.IsDestroyed)
             {
-                if (Engine.Profile.Current.CloseHealthBarType != 0)
+                if ((Engine.Profile.Current.CloseHealthBarType == 1 /*&& !World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)*/) || 
+                    (Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     Dispose();
                     return;
