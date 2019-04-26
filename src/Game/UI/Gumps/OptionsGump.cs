@@ -1064,7 +1064,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            Engine.Profile.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
+            if (Engine.Profile.Current.EnableCaveBorder != _enableCaveBorder.IsChecked)
+            {
+                Engine.Profile.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
+                FileManager.Art.ClearCaveTextures();
+            }
+
             Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
             Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;

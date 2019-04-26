@@ -273,6 +273,19 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public void ClearCaveTextures()
+        {
+            for (ushort index = 0x053B; index <= 0x0554; index++)
+            {
+                if (index == 0x0550)
+                    continue;
+
+                GetTexture(index).Ticks = 0;
+            }
+
+            CleaUnusedResources();
+        }
+
         private ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
