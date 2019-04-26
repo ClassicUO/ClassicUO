@@ -356,23 +356,44 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
-                if (useObjectHandles)
+                if (obj is AnimatedItemEffect effect && effect.Source is Item it2)
                 {
-                    // TODO: animateditem effect doesnt work          
-                    obj.UseObjectHandles = (ismobile || iscorpse ||   (obj is Item it && !it.IsLocked && !it.IsMulti) ||
-                                            (obj is AnimatedItemEffect effect && effect.Source is Item it2 && !it2.IsLocked && !it2.IsMulti)) && !obj.ClosedObjectHandles;
-                    _objectHandlesCount++;
+                    if (useObjectHandles)
+                    {
+                        it2.UseObjectHandles = /*!it2.IsLocked && */!it2.IsMulti && !it2.ClosedObjectHandles;
+
+                        _objectHandlesCount++;
+                    }
+                    else if (it2.ClosedObjectHandles)
+                    {
+                        it2.ClosedObjectHandles = false;
+                        it2.ObjectHandlesOpened = false;
+                    }
+                    else if (it2.UseObjectHandles)
+                    {
+                        it2.ObjectHandlesOpened = false;
+                        it2.UseObjectHandles = false;
+                    }
                 }
-                else if (obj.ClosedObjectHandles)
+                else
                 {
-                    obj.ClosedObjectHandles = false;
-                    obj.ObjectHandlesOpened = false;
+                    if (useObjectHandles)
+                    {
+                        obj.UseObjectHandles = (ismobile || iscorpse || (obj is Item it && !it.IsLocked && !it.IsMulti)) && !obj.ClosedObjectHandles;
+                        _objectHandlesCount++;
+                    }
+                    else if (obj.ClosedObjectHandles)
+                    {
+                        obj.ClosedObjectHandles = false;
+                        obj.ObjectHandlesOpened = false;
+                    }
+                    else if (obj.UseObjectHandles)
+                    {
+                        obj.ObjectHandlesOpened = false;
+                        obj.UseObjectHandles = false;
+                    }
                 }
-                else if (obj.UseObjectHandles)
-                {
-                    obj.ObjectHandlesOpened = false;
-                    obj.UseObjectHandles = false;
-                }
+
 
 
                 //ref var weak = ref _renderList[_renderListCount];
@@ -388,6 +409,8 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
+
 
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)

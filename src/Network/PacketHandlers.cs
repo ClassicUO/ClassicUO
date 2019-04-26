@@ -563,7 +563,7 @@ namespace ClassicUO.Network
             {
                 item.AllowedToDraw = false;
 
-                World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
+                World.AddEffect(new AnimatedItemEffect(item.Serial, x, y, z, item.Graphic, item.Hue, -1));
             }
             if (item.OnGround)
                 item.AddToTile();
@@ -3358,7 +3358,7 @@ namespace ClassicUO.Network
             if (item.ItemData.IsAnimated)
             {
                 item.AllowedToDraw = false;
-                World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
+                World.AddEffect(new AnimatedItemEffect(item.Serial, position.X, position.Y, position.Z, item.Graphic, item.Hue, -1));
             }
 
             if (item.OnGround)

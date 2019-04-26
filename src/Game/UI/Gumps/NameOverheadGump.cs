@@ -259,10 +259,15 @@ namespace ClassicUO.Game.UI.Gumps
                 x = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
                 y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) ) / scale);
             }
+            else if (Entity.Texture != null)
+            {
+                x = (int)((Entity.RealScreenPosition.X + 22) / scale);
+                y = (int)((Entity.RealScreenPosition.Y - Entity.Texture.Height / 2) / scale);
+            }
             else
             {
                 x = (int)((Entity.RealScreenPosition.X + 22) / scale);
-                y = (int)((Entity.RealScreenPosition.Y) / scale);
+                y = (int)((Entity.RealScreenPosition.Y + 22) / scale);
             }
            
             x -= Width / 2;

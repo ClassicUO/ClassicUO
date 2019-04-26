@@ -67,7 +67,10 @@ namespace ClassicUO.Game.GameObjects
                     Item item = (Item) source;
 
                     if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
-                        item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    {
+                        item.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
+                    }
+
                     SetSource(item);
                 }
                 else
@@ -86,11 +89,14 @@ namespace ClassicUO.Game.GameObjects
                 (int x, int y, int z) = GetSource();
 
                 if (Source != null)
+                {
                     Offset = Source.Offset;
+                    Source.RealScreenPosition = RealScreenPosition;
+                }
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
-                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);                    
                     AddToTile();                  
                 }
             }
