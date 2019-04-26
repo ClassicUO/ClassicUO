@@ -174,7 +174,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (index >= 0 && index < items.Length)
                 {
-                    items[index].Dispose();
+                    items[i].Parent = null;
+                    items[i].Dispose();
                 }
             }
         }
