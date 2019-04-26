@@ -119,7 +119,9 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: _box._font, align: TEXT_ALIGN_TYPE.TS_LEFT)
                     {
-                        X = 2, Y = index * 15, Tag = index
+                        X = 2,
+                        Y = index * 15,
+                        Tag = index
                     };
                     label.MouseClick += Label_MouseClick;
                     labels[index] = label;
@@ -136,6 +138,7 @@ namespace ClassicUO.Game.UI.Controls
                     foreach (var label in labels)
                     {
                         label.Y = 0;
+                        label.Width = maxWidth;
                         scrollArea.Add(label);
                     }
 
@@ -145,7 +148,10 @@ namespace ClassicUO.Game.UI.Controls
                 else
                 {
                     foreach (var label in labels)
+                    {
+                        label.Width = maxWidth;
                         Add(label);
+                    }
                     background.Height = totalHeight;
                 }
 
@@ -156,12 +162,9 @@ namespace ClassicUO.Game.UI.Controls
                 ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
             }
 
-            //public event EventHandler<int> OnOptionSelected;
-
             private void Label_MouseClick(object sender, MouseEventArgs e)
             {
                 _box.SelectedIndex = (int) ((Label) sender).Tag;
-                //OnOptionSelected?.Invoke(this, (int) ((Label) sender).Tag);
             }
         }
     }
