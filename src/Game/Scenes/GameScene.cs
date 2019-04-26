@@ -271,7 +271,6 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.Spell:
-
                     name = e.Name;
                     text = e.Text;
                     break;

@@ -21,14 +21,17 @@
 
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 using ClassicUO.Utility;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.Data
 {
     internal readonly struct SpellDefinition : IEquatable<SpellDefinition>
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
+        internal static Dictionary<string, TargetType> WordToTargettype = new Dictionary<string, TargetType>();
 
         public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
         {
@@ -56,7 +59,7 @@ namespace ClassicUO.Game.Data
             TithingCost = 0;
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, TargetType target, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -66,9 +69,8 @@ namespace ClassicUO.Game.Data
             ManaCost = 0;
             MinSkill = 0;
             TithingCost = 0;
-            PowerWords = powerwords;
+            WordToTargettype.Add(PowerWords = powerwords, target);
         }
-
 
         public readonly string Name;
         public readonly int ID;

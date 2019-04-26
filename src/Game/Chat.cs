@@ -23,7 +23,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -89,10 +89,21 @@ namespace ClassicUO.Game
         {
 			switch (type)
 			{
-			    case MessageType.Focus:
+                case MessageType.Spell:
+                {
+                    hue = 0x3B1; //gray color per default
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out TargetType targetType))
+                    {
+                        if (targetType == TargetType.Beneficial)
+                            hue = 0x059;
+                        else if(targetType == TargetType.Harmful)
+                            hue = 0x020;
+                    }
+                    goto case MessageType.Label;
+                }
+                case MessageType.Focus:
 			    case MessageType.Whisper:
 			    case MessageType.Yell:
-                case MessageType.Spell:
 				case MessageType.Regular:
 			    case MessageType.Label:
 
