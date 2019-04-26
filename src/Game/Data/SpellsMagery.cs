@@ -266,5 +266,16 @@ namespace ClassicUO.Game.Data
         {
             return _spellsDict.TryGetValue(index, out SpellDefinition spell) ? spell : SpellDefinition.EmptySpell;
         }
+
+        public static void SetSpell(int id, in SpellDefinition newspell)
+        {
+            _spRegsChars = null;
+            _spellsDict[id] = newspell;
+        }
+
+        internal static void Clear()
+        {
+            _spellsDict.Clear();
+        }
     }
 }

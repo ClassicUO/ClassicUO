@@ -199,5 +199,50 @@ namespace ClassicUO.Game.Data
                 return SpellsMysticism.GetSpell((fullidx - 77) % 100);
             return SpellsBardic.GetSpell(fullidx % 100);
         }
+
+        public static void FullIndexSetModifySpell(int fullidx, int id, int iconid, int smalliconid, int minskill, int manacost, int tithing, string name, string words, TargetType target, params Reagents[] regs)
+        {
+            if (fullidx < 1 || fullidx > 799)
+                return;
+            SpellDefinition sd  = FullIndexGetSpell(fullidx);
+            if(sd.ID == fullidx)//we are not using an emptyspell spelldefinition
+            {
+                if (iconid == 0)
+                    iconid = sd.GumpIconID;
+                if (smalliconid == 0)
+                    smalliconid = sd.GumpIconSmallID;
+                if (tithing == 0)
+                    tithing = sd.TithingCost;
+                if (manacost == 0)
+                    manacost = sd.ManaCost;
+                if (minskill == 0)
+                    minskill = sd.MinSkill;
+                if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words)
+                {
+                    WordToTargettype.Remove(sd.PowerWords);
+                }
+                else if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name)
+                {
+                    WordToTargettype.Remove(sd.Name);
+                }
+            }
+            sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
+            if (fullidx < 100)
+                SpellsMagery.SetSpell(id, sd);
+            else if (fullidx < 200)
+                SpellsNecromancy.SetSpell(id, sd);
+            else if (fullidx < 300)
+                SpellsChivalry.SetSpell(id, sd);
+            else if (fullidx < 500)
+                SpellsBushido.SetSpell(id, sd);
+            else if (fullidx < 600)
+                SpellsNinjitsu.SetSpell(id, sd);
+            else if (fullidx < 678)
+                SpellsSpellweaving.SetSpell(id, sd);
+            else if (fullidx < 700)
+                SpellsMysticism.SetSpell(id - 77, sd);
+            else
+                SpellsBardic.SetSpell(id, sd);
+        }
     }
 }

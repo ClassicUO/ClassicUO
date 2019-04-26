@@ -75,5 +75,15 @@ namespace ClassicUO.Game.Data
 
             return SpellDefinition.EmptySpell;
         }
+
+        public static void SetSpell(int id, in SpellDefinition newspell)
+        {
+            _spellsDict[id] = newspell;
+        }
+
+        internal static void Clear()
+        {
+            _spellsDict.Clear();
+        }
     }
 }
