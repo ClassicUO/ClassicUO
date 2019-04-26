@@ -24,45 +24,33 @@ using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.Data
 {
-    internal static class SpellsChivalry
+    internal static class SpellsBardic
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
 
-        static SpellsChivalry()
+        static SpellsBardic()
         {
             _spellsDict = new Dictionary<int, SpellDefinition>
             {
                 // Spell List
                 {
-                    1, new SpellDefinition("Cleanse by Fire", 201, 0x5100, 0x5100, "Expor Flamus", 10, 5, 10, TargetType.Beneficial, Reagents.None)
+                    1, new SpellDefinition("Inspire", 701, 0x945, 0x945, "Uus Por", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    2, new SpellDefinition("Close Wounds", 202, 0x5101, 0x5101, "Obsu Vulni", 10, 0, 10, TargetType.Beneficial, Reagents.None)
+                    2, new SpellDefinition("Invigorate", 702, 0x946, 0x946, "An Zu", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    3, new SpellDefinition("Consecrate Weapon", 203, 0x5102, 0x5102, "Consecrus Arma", 10, 15, 10, TargetType.Neutral, Reagents.None)
+                    3, new SpellDefinition("Resilience", 703, 0x947, 0x947, "Kal Mani Tym", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    4, new SpellDefinition("Dispel Evil", 204, 0x5103,0x5103, "Dispiro Malas", 10, 35, 10, TargetType.Neutral, Reagents.None)
+                    4, new SpellDefinition("Perseverance", 704, 0x948,0x948, "Uus Jux Sanct", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    5, new SpellDefinition("Divine Fury", 205, 0x5104,0x5104, "Divinum Furis", 10, 25, 10, TargetType.Neutral, Reagents.None)
+                    5, new SpellDefinition("Tribulation", 705, 0x949,0x949, "In Jux Hur Rel", 30, 90, 16, TargetType.Harmful, Reagents.None)
                 },
                 {
-                    6, new SpellDefinition("Enemy of One", 206, 0x5105,0x5105, "Forul Solum", 20, 45, 10, TargetType.Neutral, Reagents.None)
-                },
-                {
-                    7, new SpellDefinition("Holy Light", 207, 0x5106,0x5106, "Augus Luminos", 20, 55, 10, TargetType.Harmful, Reagents.None)
-                },
-                {
-                    8, new SpellDefinition("Noble Sacrifice", 208, 0x5107,0x5107, "Dium Prostra", 20, 65, 30, TargetType.Beneficial, Reagents.None)
-                },
-                {
-                    9, new SpellDefinition("Remove Curse", 209, 0x5108,0x5108, "Extermo Vomica", 20, 5, 10, TargetType.Beneficial, Reagents.None)
-                },
-                {
-                    10, new SpellDefinition("Sacred Journey", 210, 0x5109,0x5109, "Sanctum Viatas", 20, 5, 10, TargetType.Neutral, Reagents.None)
+                    6, new SpellDefinition("Despair", 706, 0x94A,0x94A, "Kal Des Mani Tym", 30, 90, 18, TargetType.Harmful, Reagents.None)
                 }
             };
         }

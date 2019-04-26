@@ -21,16 +21,19 @@
 
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 using ClassicUO.Utility;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.Data
 {
     internal readonly struct SpellDefinition : IEquatable<SpellDefinition>
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
+        internal static Dictionary<string, TargetType> WordToTargettype = new Dictionary<string, TargetType>();
 
-        public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minskill, int tithingcost, TargetType target, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -38,12 +41,13 @@ namespace ClassicUO.Game.Data
             GumpIconSmallID = gumpSmallIconID;
             Regs = regs;
             ManaCost = manacost;
-            MinSkill = minkill;
+            MinSkill = minskill;
             PowerWords = powerwords;
             TithingCost = tithingcost;
+            AddToWatchedSpell(powerwords, name, target);
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minskill, TargetType target, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -51,12 +55,13 @@ namespace ClassicUO.Game.Data
             GumpIconSmallID = gumpIconID;
             Regs = regs;
             ManaCost = manacost;
-            MinSkill = minkill;
+            MinSkill = minskill;
             PowerWords = powerwords;
             TithingCost = 0;
+            AddToWatchedSpell(powerwords, name, target);
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, TargetType target, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -67,8 +72,19 @@ namespace ClassicUO.Game.Data
             MinSkill = 0;
             TithingCost = 0;
             PowerWords = powerwords;
+            AddToWatchedSpell(powerwords, name, target);
         }
 
+        private static void AddToWatchedSpell(string power, string name, TargetType target)
+        {
+            if (target != TargetType.Neutral)
+            {
+                if (!string.IsNullOrEmpty(power))
+                    WordToTargettype[power] = target;
+                else if (!string.IsNullOrEmpty(name))
+                    WordToTargettype[name] = target;
+            }
+        }
 
         public readonly string Name;
         public readonly int ID;
@@ -161,6 +177,27 @@ namespace ClassicUO.Game.Data
         public bool Equals(SpellDefinition other)
         {
             return ID.Equals(other.ID);
+        }
+
+        public static SpellDefinition FullIndexGetSpell(int fullidx)
+        {
+            if (fullidx < 1 || fullidx > 799)
+                return EmptySpell;
+            else if (fullidx < 100)
+                return SpellsMagery.GetSpell(fullidx);
+            else if(fullidx < 200)
+                return SpellsNecromancy.GetSpell(fullidx % 100);
+            else if(fullidx < 300)
+                return SpellsChivalry.GetSpell(fullidx % 100);
+            else if(fullidx < 500)
+                return SpellsBushido.GetSpell(fullidx % 100);
+            else if(fullidx < 600)
+                return SpellsNinjitsu.GetSpell(fullidx % 100);
+            else if(fullidx < 678)
+                return SpellsSpellweaving.GetSpell(fullidx % 100);
+            else if(fullidx < 700)
+                return SpellsMysticism.GetSpell((fullidx - 77) % 100);
+            return SpellsBardic.GetSpell(fullidx % 100);
         }
     }
 }

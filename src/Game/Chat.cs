@@ -23,7 +23,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -82,17 +82,27 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
-
      
     
         public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
 			switch (type)
 			{
-			    case MessageType.Focus:
+                case MessageType.Spell:
+                {
+                    hue = Constants.NEUTRAL_LABEL_COLOR; //gray color per default
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out TargetType targetType))
+                    {
+                        if (targetType == TargetType.Beneficial)
+                            hue = Constants.BENEFIC_LABEL_COLOR;
+                        else if(targetType == TargetType.Harmful)
+                            hue = Constants.HARMFUL_LABEL_COLOR;
+                    }
+                    goto case MessageType.Label;
+                }
+                case MessageType.Focus:
 			    case MessageType.Whisper:
 			    case MessageType.Yell:
-                case MessageType.Spell:
 				case MessageType.Regular:
 			    case MessageType.Label:
 

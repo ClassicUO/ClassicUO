@@ -335,6 +335,9 @@ namespace ClassicUO.Game.Managers
                                         case MacroSubType.MysticismSpellbook:
                                             type = SpellBookType.Mysticism;
                                             break;
+                                        case MacroSubType.BardSpellbook:
+                                            type = SpellBookType.Bardic;
+                                            break;
                                     }
 
                                     NetClient.Socket.Send(new POpenSpellBook((byte)type));

@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Clear();
             _pageCornerLeft = _pageCornerRight = null;
-            GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount);
+            GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
             Add(new GumpPic(0, 0, bookGraphic, 0));
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
@@ -424,72 +424,75 @@ namespace ClassicUO.Game.UI.Gumps
                     def = SpellsMysticism.GetSpell(idx);
                     break;
 
+                case SpellBookType.Bardic:
+                    def = SpellsBardic.GetSpell(idx);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
             return def;
         }
 
-        private void GetBookInfo(SpellBookType type, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount)
+        private void GetBookInfo(SpellBookType type, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount)
         {
             switch (type)
             {
                 case SpellBookType.Magery:
-                    maxSpellsCount = 64;
+                    maxSpellsCount = SpellsMagery.MaxSpellCount;
                     bookGraphic = 0x08AC;
                     minimizedGraphic = 0x08BA;
                     iconStartGraphic = 0x08C0;
-                    spellIndexOffset = 0;
                     break;
 
                 case SpellBookType.Necromancy:
-                    maxSpellsCount = 17;
+                    maxSpellsCount = SpellsNecromancy.MaxSpellCount;
                     bookGraphic = 0x2B00;
                     minimizedGraphic = 0x2B03;
                     iconStartGraphic = 0x5000;
-                    spellIndexOffset = 64;
                     break;
 
                 case SpellBookType.Chivalry:
-                    maxSpellsCount = 10;
+                    maxSpellsCount = SpellsChivalry.MaxSpellCount;
                     bookGraphic = 0x2B01;
                     minimizedGraphic = 0x2B04;
                     iconStartGraphic = 0x5100;
-                    spellIndexOffset = 81;
                     break;
 
                 case SpellBookType.Bushido:
-                    maxSpellsCount = 6;
+                    maxSpellsCount = SpellsBushido.MaxSpellCount;
                     bookGraphic = 0x2B07;
                     minimizedGraphic = 0x2B09;
                     iconStartGraphic = 0x5400;
-                    spellIndexOffset = 91;
                     break;
 
                 case SpellBookType.Ninjitsu:
-                    maxSpellsCount = 8;
+                    maxSpellsCount = SpellsNinjitsu.MaxSpellCount;
                     bookGraphic = 0x2B06;
                     minimizedGraphic = 0x2B08;
                     iconStartGraphic = 0x5300;
-                    spellIndexOffset = 97;
                     break;
 
                 case SpellBookType.Spellweaving:
-                    maxSpellsCount = 16;
+                    maxSpellsCount = SpellsSpellweaving.MaxSpellCount;
                     bookGraphic = 0x2B2F;
                     minimizedGraphic = 0x2B2D;
                     iconStartGraphic = 0x59D8;
-                    spellIndexOffset = 105;
                     break;
 
                 case SpellBookType.Mysticism:
-                    maxSpellsCount = 16;
+                    maxSpellsCount = SpellsMysticism.MaxSpellCount;
                     bookGraphic = 0x2B32;
-                    minimizedGraphic = 0; // TODO: i dunno
+                    minimizedGraphic = 0x2B30;
                     iconStartGraphic = 0x5DC0;
-                    spellIndexOffset = 121;
                     break;
 
+                case SpellBookType.Bardic:
+                    maxSpellsCount = SpellsBardic.MaxSpellCount;
+                    bookGraphic = 0x8AC;
+                    minimizedGraphic = 0x2B27;
+                    iconStartGraphic = 0x945;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -554,6 +557,13 @@ namespace ClassicUO.Game.UI.Gumps
                     reagents = def.CreateReagentListString("\n");
                     break;
 
+                case SpellBookType.Bardic:
+                    def = SpellsBardic.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = string.Empty;
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -602,6 +612,14 @@ namespace ClassicUO.Game.UI.Gumps
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
                     break;
+
+                case SpellBookType.Bardic:
+                    def = SpellsBardic.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
+                    y = 140;
+                    text = $"Upkeep Cost: {def.TithingCost}\nMana cost: {manaCost}\nMin. Skill: {minSkill}";
+                    return;
             }
 
             text = $"Mana cost: {manaCost}\nMin. Skill: {minSkill}";
@@ -658,6 +676,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 0x2D9D:
                     _spellBookType = SpellBookType.Mysticism;
+                    break;
+
+                case 0x225A:
+                case 0x225B:
+                    _spellBookType = SpellBookType.Bardic;
                     break;
             }
 
