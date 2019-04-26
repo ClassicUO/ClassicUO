@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.Write(/*_isVertical*/ false);
+            writer.Write((byte)1);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            reader.ReadBoolean();
+            byte version = reader.ReadByte();
             _rows = reader.ReadInt32();
             _columns = reader.ReadInt32();
             _rectSize = reader.ReadInt32();

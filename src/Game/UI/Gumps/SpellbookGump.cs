@@ -131,12 +131,9 @@ namespace ClassicUO.Game.UI.Gumps
             _maxPage = (dictionaryPagesCount >> 1) + ((totalSpells + 1) >> 1);
 
             int offs = 0;
-            bool isMageSpellbook = false;
 
             if (_spellBookType == SpellBookType.Magery)
             {
-                isMageSpellbook = true;
-
                 Add(new Button((int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
                 {
                     X = 58, Y = 175, ButtonAction = ButtonAction.Activate, ToPage = 1
@@ -249,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             int page1 = (dictionaryPagesCount >> 1) + 1;
-            int topTextY = _spellBookType == SpellBookType.Magery ? 10 : 6;
+            int topTextY = 6;
 
             for (int i = 0, spellsDone = 0; i < maxSpellsCount; i++)
             {
@@ -289,7 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Label text = new Label(SpellsMagery.CircleNames[i >> 3], false, 0x0288, font: 6)
                         {
                             X = topTextX,
-                            Y = topTextY
+                            Y = topTextY + 4
                         };
                         Add(text, page1);
 
@@ -318,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Label text = new Label(SpellsBardic.GetUsedSkillName(i), false, 0x0288, font: 6)
                         {
                             X = topTextX,
-                            Y = topTextY
+                            Y = topTextY + 4
                         };
                         Add(text, page1);
 
@@ -398,7 +395,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(text, page1);
                 }
 
-                if (!isMageSpellbook)
+                if (_spellBookType != SpellBookType.Magery)
                 {
                     GetSpellRequires(i, out int requiriesY, out string requires);
 
