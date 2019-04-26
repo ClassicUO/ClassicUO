@@ -20,8 +20,11 @@
 #endregion
 
 using System;
+using System.Net.Sockets;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
 
@@ -110,7 +113,7 @@ namespace ClassicUO.Game.Managers
             {
                 World.HouseManager.Remove(Serial.INVALID);
             }
-            GameActions.TargetCancel(TargetingState, _targetCursorId, (byte)_targetCursorType);
+            NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte)_targetCursorType));
             IsTargeting = false;
             
         }
@@ -134,7 +137,7 @@ namespace ClassicUO.Game.Managers
                 z += st.ItemData.Height;
             }
 
-            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
+            NetClient.Socket.Send(new PTargetXYZ(selectedEntity.X, selectedEntity.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType));
             ClearTargetingWithoutTargetCancelPacket();
         }
 
@@ -164,7 +167,32 @@ namespace ClassicUO.Game.Managers
                     _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
                 }
                 else
-                    GameActions.TargetObject(entity, _targetCursorId, (byte)_targetCursorType);
+                {
+                    if (Engine.Profile.Current.EnabledCriminalActionQuery && TargetManager.TargeringType == TargetType.Harmful)
+                    {
+                        Mobile m = World.Mobiles.Get(entity);
+
+                        if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                        {
+
+                            QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                                       s =>
+                                                                       {
+                                                                           if (s)
+                                                                           {
+                                                                               NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte)_targetCursorType));
+                                                                               ClearTargetingWithoutTargetCancelPacket();
+                                                                           }
+                                                                       });
+
+                            Engine.UI.Add(messageBox);
+                            return;
+                        }
+                    }
+
+                    NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte)_targetCursorType));
+                    ClearTargetingWithoutTargetCancelPacket();
+                }
                 Mouse.CancelDoubleClick = true;
             }
             else if (selectedEntity is GameObject gobj)
@@ -186,12 +214,10 @@ namespace ClassicUO.Game.Managers
                     if (m.ItemData.IsSurface)
                         z += m.ItemData.Height;
                 }
-
-                GameActions.TargetXYZ(gobj.Position.X, gobj.Position.Y, z, modelNumber, _targetCursorId, (byte)_targetCursorType);
+                NetClient.Socket.Send(new PTargetXYZ(gobj.X, gobj.Y, z, modelNumber, _targetCursorId, (byte) _targetCursorType));
                 Mouse.CancelDoubleClick = true;
+                ClearTargetingWithoutTargetCancelPacket();
             }
-
-            ClearTargetingWithoutTargetCancelPacket();
         }
     }
 }

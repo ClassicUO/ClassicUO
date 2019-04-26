@@ -218,44 +218,6 @@ namespace ClassicUO.Game
             Socket.Send(new PStatusRequest(serial));
         }
 
-        public static void TargetCancel(CursorTarget type, Serial cursorID, byte cursorType)
-        {
-            Socket.Send(new PTargetCancel(type, cursorID, cursorType));
-        }
-
-        public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
-        {
-            Entity e = World.Get(entity);
-            if (e == null)
-                return;
-
-            if (Engine.Profile.Current.EnabledCriminalActionQuery && TargetManager.TargeringType == TargetType.Harmful)
-            {
-                Mobile m = World.Mobiles.Get(entity);
-
-                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
-                {
-
-                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                               s =>
-                                                               {
-                                                                   if (s)
-                                                                       Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
-                                                               });
-
-                    Engine.UI.Add(messageBox);
-                    return;
-                }
-            }
-
-            Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
-        }
-
-        public static void TargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType)
-        {
-            Socket.Send(new PTargetXYZ(x, y, z, modelNumber, cursorID, targetType));
-        }
-
         public static void CastSpellFromBook(int index, Serial bookSerial)
         {
             if (index >= 0)
