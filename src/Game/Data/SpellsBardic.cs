@@ -28,6 +28,19 @@ namespace ClassicUO.Game.Data
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
+        internal static string GetUsedSkillName(int spellid)
+        {
+            int div = (MaxSpellCount * 3) >> 3;
+            if (div <= 0)
+                div = 1;
+            int group = spellid / div;
+
+            if (group == 0)
+                return "Provocation";
+            else if (group == 1)
+                return "Peacemaking";
+            return "Discordance";
+        }
 
         static SpellsBardic()
         {

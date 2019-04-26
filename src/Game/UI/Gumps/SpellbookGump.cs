@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = indexX, Y = 10
                     };
                     Add(text, page);
-                    if (isMageSpellbook)
+                    if (_spellBookType == SpellBookType.Magery)
                     {
                         text = new Label(SpellsMagery.CircleNames[(i - 1) * 2 + j % 2], false, 0x0288, font: 6)
                         {
@@ -250,8 +250,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int page1 = (dictionaryPagesCount >> 1) + 1;
             int topTextY = _spellBookType == SpellBookType.Magery ? 10 : 6;
-            bool haveReagents = _spellBookType <= SpellBookType.Necromancy;
-            bool haveAbbreviature = _spellBookType != SpellBookType.Bushido && _spellBookType != SpellBookType.Ninjitsu;
 
             for (int i = 0, spellsDone = 0; i < maxSpellsCount; i++)
             {
@@ -270,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (spellsDone % 2 != 0)
                     {
                         iconX = 225;
-                        topTextX = 244 - 20;
+                        topTextX = 224;
                         iconTextX = 275;
                         iconSerial = 1000 + (uint)i;
                     }
@@ -284,46 +282,73 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GetSpellNames(i, out string name, out string abbreviature, out string reagents);
 
-                if (isMageSpellbook)
+                switch(_spellBookType)
                 {
-                    Label text = new Label(SpellsMagery.CircleNames[i >> 3], false, 0x0288, font: 6)
+                    case SpellBookType.Magery:
                     {
-                        X = topTextX, Y = topTextY
-                    };
-                    Add(text, page1);
-
-                    text = new Label(name, false, 0x0288, 80, 6)
-                    {
-                        X = iconTextX, Y = 34
-                    };
-                    Add(text, page1);
-                    int abbreviatureY = 26;
-
-                    if (text.Height < 24)
-                        abbreviatureY = 31;
-                    abbreviatureY += text.Height;
-
-                    text = new Label(abbreviature, false, 0x0288, font: 8)
-                    {
-                        X = iconTextX, Y = abbreviatureY
-                    };
-                    Add(text, page1);
-                }
-                else
-                {
-                    Label text = new Label(name, false, 0x0288, font: 6)
-                    {
-                        X = topTextX, Y = topTextY
-                    };
-                    Add(text, page1);
-
-                    if (haveAbbreviature)
-                    {
-                        text = new Label(abbreviature, false, 0x0288, 80, 6)
+                        Label text = new Label(SpellsMagery.CircleNames[i >> 3], false, 0x0288, font: 6)
                         {
-                            X = iconTextX, Y = 34
+                            X = topTextX,
+                            Y = topTextY
                         };
                         Add(text, page1);
+
+                        text = new Label(name, false, 0x0288, 80, 6)
+                        {
+                            X = iconTextX,
+                            Y = 34
+                        };
+                        Add(text, page1);
+                        int abbreviatureY = 26;
+
+                        if (text.Height < 24)
+                            abbreviatureY = 31;
+                        abbreviatureY += text.Height;
+
+                        text = new Label(abbreviature, false, 0x0288, font: 8)
+                        {
+                            X = iconTextX,
+                            Y = abbreviatureY
+                        };
+                        Add(text, page1);
+                        break;
+                    }
+                    case SpellBookType.Bardic:
+                    {
+                        Label text = new Label(SpellsBardic.GetUsedSkillName(i), false, 0x0288, font: 6)
+                        {
+                            X = topTextX,
+                            Y = topTextY
+                        };
+                        Add(text, page1);
+
+                        text = new Label(name, false, 0x0288, 80, 6)
+                        {
+                            X = iconTextX,
+                            Y = 34
+                        };
+                        Add(text, page1);
+                        break;
+                    }
+                    default:
+                    {
+                        Label text = new Label(name, false, 0x0288, font: 6)
+                        {
+                            X = topTextX,
+                            Y = topTextY
+                        };
+                        Add(text, page1);
+
+                        if (!string.IsNullOrEmpty(abbreviature))
+                        {
+                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            {
+                                X = iconTextX,
+                                Y = 34
+                            };
+                            Add(text, page1);
+                        }
+                        break;
                     }
                 }
 
@@ -356,7 +381,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(icon, page1);
 
-                if (haveReagents)
+                if (!string.IsNullOrEmpty(reagents))
                 {
                     Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
 
