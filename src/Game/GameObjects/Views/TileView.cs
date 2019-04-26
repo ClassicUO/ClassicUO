@@ -85,6 +85,30 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+            //if (IsStretched)
+            //{
+
+            //    Vector3.Add(ref position, ref _vertex0_yOffset, out _vertex[0].Position);
+            //    Vector3.Add(ref position, ref _vertex1_yOffset, out _vertex[1].Position);
+            //    Vector3.Add(ref position, ref _vertex2_yOffset, out _vertex[2].Position);
+            //    Vector3.Add(ref position, ref _vertex3_yOffset, out _vertex[3].Position);
+            //    int z = Z * 4;
+
+            //    _vertex[0].Position.Y += z;
+            //    _vertex[1].Position.Y += z;
+            //    _vertex[2].Position.Y += z;
+            //    _vertex[3].Position.Y += z;
+
+            //    SpriteRenderer.DrawLand(this, Hue, (int)position.X, (int)position.Y, _vertex);
+            //    return true;
+
+            //}
+            //else
+            //{
+            //    SpriteRenderer.DrawLandArt(Graphic, Hue, (int) position.X, (int) position.Y);
+            //    return true;
+            //}
+
             return IsStretched ? Draw3DStretched(batcher, position, objectList) : base.Draw(batcher, position, objectList);
         }
 

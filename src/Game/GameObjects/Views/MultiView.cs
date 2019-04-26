@@ -88,6 +88,7 @@ namespace ClassicUO.Game.GameObjects
             //MessageOverHead(batcher, position, Bounds.Y - 44);
             Engine.DebugInfo.MultiRendered++;
 
+            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
             base.Draw(batcher, position, objectList);
             //if (_isFoliage)
             //{

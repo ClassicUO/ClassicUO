@@ -40,11 +40,13 @@ namespace ClassicUO.IO.Resources
         {
             if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
+                ushort[] pixels = ReadStaticArt((ushort) g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
                 ResourceDictionary.Add(g, texture);
             }
+            //else
+            //    texture.Ticks = Engine.Ticks + 3000;
             return texture;
         }
 
@@ -53,11 +55,13 @@ namespace ClassicUO.IO.Resources
             if (!_landDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 const int SIZE = 44;
-                ushort[] pixels = ReadLandArt((ushort)g);
+                ushort[] pixels = ReadLandArt((ushort) g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetDataHitMap16(pixels);
                 _landDictionary.Add(g, texture);
             }
+            //else
+            //    texture.Ticks = Engine.Ticks + 3000;
             return texture;
         }
 

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
-            if ( _originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
+            if (_originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _originalGraphic = DisplayedGraphic;
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
@@ -90,6 +90,7 @@ namespace ClassicUO.Game.GameObjects
                 Vector3 offsetDrawPosition = Vector3.Zero;
                 offsetDrawPosition.X = position.X - 5;
                 offsetDrawPosition.Y = position.Y - 5;
+                //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
                 base.Draw(batcher, offsetDrawPosition, objectList);
             }
 
@@ -98,6 +99,9 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
             }
+
+           // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
+           // return true;
 
             return base.Draw(batcher, position, objectList);
         }
@@ -127,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, Layer layer, byte animIndex)
         {
-            Graphic graphic;
+            ushort graphic;
             ushort color = 0;
 
             if (layer == Layer.Invalid)
@@ -138,7 +142,12 @@ namespace ClassicUO.Game.GameObjects
                 if (color == 0)
                     color = Hue;
             }
-            else if (HasEquipment)
+            else if (HasEquipment && Utility.MathHelper.InRange(Amount, 0x0190, 0x0193) || 
+                     Utility.MathHelper.InRange(Amount, 0x00B7, 0x00BA) || 
+                     Utility.MathHelper.InRange(Amount, 0x025D, 0x0260) || 
+                     Utility.MathHelper.InRange(Amount, 0x029A, 0x029B) || 
+                     Utility.MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
+                     Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9)
             {
                 Item itemEquip = Equipment[(int)layer];
 
@@ -160,7 +169,11 @@ namespace ClassicUO.Game.GameObjects
 
 
             byte animGroup = FileManager.Animations.AnimGroup;
-            ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(graphic, ref animGroup, ref color).Direction[FileManager.Animations.Direction];
+
+            var gr = layer == Layer.Invalid ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
+                : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+
+            ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
 
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))

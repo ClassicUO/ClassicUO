@@ -127,6 +127,8 @@ namespace ClassicUO.Game.GameObjects
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, position, objectList);
 
+            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
+
             if (ItemData.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()

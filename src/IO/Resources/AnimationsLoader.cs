@@ -319,11 +319,7 @@ namespace ClassicUO.IO.Resources
                         realAnimID = (ushort)anim[0];
 
                         if (index == 0x00C0 || index == 793)
-                            mountedHeightOffset = -9;
-
-                        if (realAnimID == 68)
-                            realAnimID = 122;
-                       
+                            mountedHeightOffset = -9;                       
                     }
                     else if (anim[1] != -1 && maxAddress3.HasValue && maxAddress3 != 0)
                     {
@@ -394,7 +390,6 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -611,7 +606,7 @@ namespace ClassicUO.IO.Resources
             => graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
 
       
-        public AnimationGroup GetBodyAnimationGroup(ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
+        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -635,8 +630,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (DataIndex[graphic].HasBodyReplaced)
-                    return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
+                if (DataIndex[graphic].HasBodyReplaced && DataIndex[graphic].BodyConvGroups != null)
+                    return DataIndex[graphic].BodyConvGroups[group];
 
                 return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
             }
@@ -644,7 +639,7 @@ namespace ClassicUO.IO.Resources
             return _empty;
         }
 
-        public AnimationGroup GetCorpseAnimationGroup(ushort graphic, ref byte group, ref ushort hue)
+        public AnimationGroup GetCorpseAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -1061,7 +1056,7 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(graphic, ref group, ref hue, true).Direction[0];
+                AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true).Direction[0];
 
 
                 return (direction.Address != 0 && direction.Size != 0) ||
@@ -1322,7 +1317,7 @@ namespace ClassicUO.IO.Resources
             _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
 
-        public unsafe void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
+        public unsafe void GetAnimationDimensions(byte frameIndex, ushort id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {
             if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
@@ -1340,7 +1335,7 @@ namespace ClassicUO.IO.Resources
 
                 if (dir < 5)
                 {
-                    AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     int fc = direction.FrameCount;
 
                     if (fc > 0)
@@ -1354,13 +1349,13 @@ namespace ClassicUO.IO.Resources
                             y = animationFrameTexture.CenterY;
                             w = animationFrameTexture.Width;
                             h = animationFrameTexture.Height;
-                            _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
+                            _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
                             return;
                         }
                     }
                 }
-                AnimationDirection direction1 = FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[0];
+                AnimationDirection direction1 = FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
 
                 if (direction1.Address != 0 && direction1.Size != 0)
                 {
@@ -1369,7 +1364,7 @@ namespace ClassicUO.IO.Resources
                         UOFileMul file = _files[direction1.FileIndex];
                         file.Seek(direction1.Address);
                         ReadFrameDimensionData(frameIndex, out x, out y, out w, out h, file);
-                        _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
+                        _animDimensionCache[id] = new Rectangle(x, y, w, h);
                         return;
                     }
                 }
@@ -1407,7 +1402,7 @@ namespace ClassicUO.IO.Resources
                             y = reader.ReadShort();
                             w = reader.ReadShort();
                             h = reader.ReadShort();
-                            _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
+                            _animDimensionCache[id] = new Rectangle(x, y, w, h);
                             reader.ReleaseData();
 
                             return;
@@ -1481,6 +1476,9 @@ namespace ClassicUO.IO.Resources
                         default:
                             continue;
                     }
+
+                    if (group == null)
+                        continue;
 
                     ref var dir = ref group.Direction[info.Direction];
 
