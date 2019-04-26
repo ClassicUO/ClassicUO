@@ -82,7 +82,6 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
-
      
     
         public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
@@ -91,13 +90,13 @@ namespace ClassicUO.Game
 			{
                 case MessageType.Spell:
                 {
-                    hue = 0x3B1; //gray color per default
+                    hue = Constants.NEUTRAL_LABEL_COLOR; //gray color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out TargetType targetType))
                     {
                         if (targetType == TargetType.Beneficial)
-                            hue = 0x059;
+                            hue = Constants.BENEFIC_LABEL_COLOR;
                         else if(targetType == TargetType.Harmful)
-                            hue = 0x020;
+                            hue = Constants.HARMFUL_LABEL_COLOR;
                     }
                     goto case MessageType.Label;
                 }

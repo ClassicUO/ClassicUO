@@ -70,46 +70,17 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
-          
-            // spell data
-            writer.Write(_spell.Name.Length); // 4
-            writer.WriteUTF8String(_spell.Name); // variable
+            writer.Write(0);//version - 4
             writer.Write(_spell.ID); // 4
-            writer.Write(_spell.GumpIconID); // 4
-            writer.Write(_spell.GumpIconSmallID); // 4
-            writer.Write(_spell.Regs.Length); // 4
-
-            foreach (Reagents t in _spell.Regs)
-                writer.Write((int)t); // 4
-
-            writer.Write(_spell.ManaCost); // 4
-            writer.Write(_spell.MinSkill); // 4
-            writer.Write(_spell.PowerWords.Length); // 4
-            writer.WriteUTF8String(_spell.PowerWords); // variable
-            writer.Write(_spell.TithingCost); // 4
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-         
-            string name = reader.ReadUTF8String(reader.ReadInt32());
+
+            int version = reader.ReadInt32();
             int id = reader.ReadInt32();
-            int gumpID = reader.ReadInt32();
-            int smallGumpID = reader.ReadInt32();
-            int reagsCount = reader.ReadInt32();
-            
-            Reagents[] reagents = new Reagents[reagsCount];
-
-            for (int i = 0; i < reagsCount; i++)
-                reagents[i] = (Reagents) reader.ReadInt32();
-
-            int manaCost = reader.ReadInt32();
-            int minSkill = reader.ReadInt32();
-            string powerWord = reader.ReadUTF8String(reader.ReadInt32());
-            int tithingCost = reader.ReadInt32();
-
-            _spell = new SpellDefinition(name, id, gumpID, smallGumpID, powerWord, manaCost, minSkill, tithingCost, reagents);
+            _spell = SpellDefinition.FullIndexGetSpell(id);
 
             BuildGump();
         }
