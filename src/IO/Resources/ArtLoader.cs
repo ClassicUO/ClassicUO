@@ -131,6 +131,7 @@ namespace ClassicUO.IO.Resources
             //    return pixels;
             //}
             //else
+
             {
 
                 imageRectangle = Rectangle.Empty;
@@ -208,6 +209,43 @@ namespace ClassicUO.IO.Resources
                         pixels[i * width] = 0;
                         pixels[i * width + width - 1] = 0;
                     }
+                }
+                else if (StaticFilters.IsCave(graphic) && Engine.Profile.Current != null && Engine.Profile.Current.EnableCaveBorder)
+                {
+                    for (int yy = 0; yy < height; yy++)
+                    {
+                        int startY = (yy != 0 ? -1 : 0);
+                        int endY = (yy + 1 < height ? 2 : 1);
+
+                        for (int xx = 0; xx < width; xx++)
+                        {
+                            ref var pixel = ref pixels[yy * width + xx];
+
+                            if (pixel == 0)
+                                continue;
+
+                            int startX = (xx != 0 ? -1 : 0);
+                            int endX = (xx + 1 < width ? 2 : 1);
+
+                            for (int i = startY; i < endY; i++)
+                            {
+                                int currentY = yy + i;
+
+                                for (int j = startX; j < endX; j++)
+                                {
+                                    int currentX = (int)xx + (int)j;
+
+                                    ref var currentPixel = ref pixels[currentY * width + currentX];
+
+                                    if (currentPixel == 0u)
+                                    {
+                                        pixel = 0x8000;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
 
                 int pos1 = 0;

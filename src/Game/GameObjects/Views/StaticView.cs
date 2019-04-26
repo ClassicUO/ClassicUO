@@ -45,22 +45,6 @@ namespace ClassicUO.Game.GameObjects
 
         private Graphic _oldGraphic;
 
-        private bool _border = false;
-        private static Texture2D _borderTexture;
-        private Color _borderColor = Color.Black;
-
-        public void SetBorder(bool status, byte width = 3, Color color = default)
-        {
-            _borderColor = color == default ? Color.Black : color;
-
-            _border = status;
-        }
-
-        public bool IsBordered()
-        {
-            return _border;
-        }
-
         public bool CharacterIsBehindFoliage { get; set; }
 
         public override bool TransparentTest(int z)
@@ -135,18 +119,9 @@ namespace ClassicUO.Game.GameObjects
                       .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
             }
 
-            if (_border)
-            {
-                if (_borderTexture == null)
-                {
-                    _borderTexture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                    _borderTexture.SetData(new Color[] { _borderColor });
-                }
-                batcher.DrawBorder(_borderTexture, new Rectangle((int)position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height));
-            }
-
             return true;
         }
+
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         {
