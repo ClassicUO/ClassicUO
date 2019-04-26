@@ -743,7 +743,6 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-
         public override void ProcessAnimation()
         {
             if (IsCorpse)
@@ -753,7 +752,7 @@ namespace ClassicUO.Game.GameObjects
                 if (LastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
-                    Graphic id = GetGraphicForAnimation();
+                    ushort id = GetGraphicForAnimation();
 
                     var corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
 
@@ -770,7 +769,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(id, ref animGroup, ref hue).Direction[FileManager.Animations.Direction];
+                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[FileManager.Animations.Direction];
                         FileManager.Animations.AnimID = id;
                         FileManager.Animations.AnimGroup = animGroup;
                         FileManager.Animations.Direction = dir;

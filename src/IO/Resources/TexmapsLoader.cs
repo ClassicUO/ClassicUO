@@ -98,15 +98,18 @@ namespace ClassicUO.IO.Resources
         {
             if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = GetTextmapTexture( (ushort) g, out int size);
+                ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
+
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
                 //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
+            //else
+            //    texture.Ticks = Engine.Ticks + 3000;
 
             return texture;
         }

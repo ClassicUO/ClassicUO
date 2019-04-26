@@ -119,14 +119,14 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
         {
-            Graphic graphic = GetGraphicForAnimation();
+            ushort graphic = GetGraphicForAnimation();
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic, true);
             sbyte animIndex = AnimIndex;
             drawX = drawY = drawCenterY = 0;
 
 
 
-            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(graphic, ref animGroup, ref hue, true).Direction[dir];
+            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
@@ -292,7 +292,7 @@ namespace ClassicUO.Game.GameObjects
 
             EquipConvData? convertedItem = null;
         
-            Graphic graphic;
+            ushort graphic;
             int mountHeight = 0;
 
             if (layer == Layer.Mount && IsHuman)
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
 
-           ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(graphic, ref animGroup, ref hue, false).Direction[dir];
+           ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, false).Direction[dir];
 
             if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;

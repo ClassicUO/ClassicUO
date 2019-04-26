@@ -442,9 +442,72 @@ namespace ClassicUO.Game.GameObjects
                 AnimationRepeat = false;
                 AnimationFromServer = true;
 
-                byte index = (byte) FileManager.Animations.GetGroupIndex(GetGraphicForAnimation());
 
-                AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
+                ushort graphic = GetGraphicForAnimation();
+
+                ANIMATION_GROUPS_TYPE type = FileManager.Animations.DataIndex[graphic].Type;
+
+                if (FileManager.Animations.DataIndex[graphic].IsUOP && !FileManager.Animations.DataIndex[graphic].IsValidMUL)
+                {
+                    // do nothing ?
+                }
+                else
+                {
+                    if (!FileManager.Animations.DataIndex[graphic].HasBodyReplaced)
+                    {
+                        ushort newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+                            ANIMATION_GROUPS_TYPE newType = FileManager.Animations.DataIndex[graphic].Type;
+
+                            if (newType != type)
+                            {
+                                type = newType;
+                            }
+                        }
+                    }
+                }
+
+                ANIMATION_FLAGS flags = (ANIMATION_FLAGS)FileManager.Animations.DataIndex[graphic].Flags;
+                ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
+
+                bool isLowExtended = false;
+                bool isLow = false;
+                if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                {
+                    isLowExtended = true;
+                    type = ANIMATION_GROUPS_TYPE.MONSTER;
+                }
+                else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                {
+                    type = ANIMATION_GROUPS_TYPE.ANIMAL;
+                    isLow = true;
+                }
+
+                switch (type)
+                {
+                    case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    case ANIMATION_GROUPS_TYPE.MONSTER:
+                        animGroup = ANIMATION_GROUPS.AG_HIGHT;
+                        break;
+                    case ANIMATION_GROUPS_TYPE.ANIMAL:
+                        animGroup = ANIMATION_GROUPS.AG_LOW;
+                        break;
+                    case ANIMATION_GROUPS_TYPE.HUMAN:
+                    case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+                        animGroup = ANIMATION_GROUPS.AG_PEOPLE;
+                        break;
+                }
+
+                if (animGroup == 0)
+                    return;
+
+                AnimationGroup = _animationIdle[ (byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+
+                if (isLowExtended && AnimationGroup == 18)
+                    AnimationGroup = 1;
             }
         }
 
@@ -612,7 +675,7 @@ namespace ClassicUO.Game.GameObjects
                     frameIndex--;
                 else
                     frameIndex++;
-                Graphic id = GetGraphicForAnimation();
+                ushort id = GetGraphicForAnimation();
                 byte animGroup = GetGroupForAnimation(this, id, true);
 
                 if (animGroup == 64 || animGroup == 65)
@@ -644,7 +707,7 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(id, ref animGroup, ref hue, true).Direction[dir];
+                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     FileManager.Animations.AnimID = id;
                     FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;

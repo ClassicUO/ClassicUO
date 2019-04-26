@@ -358,7 +358,9 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles)
                 {
-                    obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
+                    // TODO: animateditem effect doesnt work          
+                    obj.UseObjectHandles = (ismobile || iscorpse ||   (obj is Item it && !it.IsLocked && !it.IsMulti) ||
+                                            (obj is AnimatedItemEffect effect && effect.Source is Item it2 && !it2.IsLocked && !it2.IsMulti)) && !obj.ClosedObjectHandles;
                     _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)

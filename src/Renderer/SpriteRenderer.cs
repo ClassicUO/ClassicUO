@@ -183,19 +183,23 @@ namespace ClassicUO.Renderer
 
         public static void DrawLand(Land land, Hue hue, int x, int y, SpriteVertex[] vertices)
         {
-            Graphic id = land.Graphic;
-            Texture2D th = FileManager.Textmaps.GetTexture(id);
+            Texture2D th = FileManager.Textmaps.GetTexture(land.TileData.TexID);
 
             if (th == null)
             {
-                DrawLandArt(id, hue, x, y);
+                DrawLandArt(land.Graphic, hue, x, y);
             }
             else
             {
                 Vector3 huev = Vector3.Zero;
 
                 if (hue != 0)
-                    ShaderHuesTraslator.GetHueVector(ref huev, hue);
+                    ShaderHuesTraslator.GetHueVector(ref huev, hue, ShaderHuesTraslator.SHADER_LAND_HUED);
+                else
+                    ShaderHuesTraslator.GetHueVector(ref huev, hue, ShaderHuesTraslator.SHADER_LAND);
+
+                for (int i = 0; i < 4; i++)
+                    vertices[i].Hue = huev;
 
                 Engine.Batcher.DrawSprite(th, vertices);
             }
@@ -211,41 +215,152 @@ namespace ClassicUO.Renderer
             Vector3 huev = Vector3.Zero;
 
             if (hue != 0)
-                ShaderHuesTraslator.GetHueVector(ref huev, hue);
+                ShaderHuesTraslator.GetHueVector(ref huev, hue, ShaderHuesTraslator.SHADER_HUED);
 
 
+            SpriteVertex[] vertices = SpriteVertex.PolyBuffer;
 
-            //Engine.Batcher.DrawSprite(th, )
+            vertices[0].Position.X = x;
+            vertices[0].Position.Y = y;
+            vertices[0].TextureCoordinate.Y = 0;
+            vertices[1].Position = vertices[0].Position;
+            vertices[1].Position.X += 44;
+            vertices[1].TextureCoordinate.Y = 0;
+            vertices[2].Position = vertices[0].Position;
+            vertices[2].Position.Y += 44;
+            vertices[3].Position = vertices[1].Position;
+            vertices[3].Position.Y += 44;
+
+            for (int i = 0; i < 4; i++)
+                vertices[i].Hue = huev;
+
+            Engine.Batcher.DrawSprite(th, vertices);
         }
 
         public static void DrawStaticArt(Graphic graphic, Hue hue, int x, int y)
         {
+            Texture2D th = FileManager.Art.GetTexture(graphic);
 
+            if (th == null)
+                return;
+
+            Vector3 huev = Vector3.Zero;
+
+            if (hue != 0)
+                ShaderHuesTraslator.GetHueVector(ref huev, hue);
+
+            SpriteVertex[] vertices = SpriteVertex.PolyBuffer;
+
+            vertices[0].Position.X = x;
+            vertices[0].Position.Y = y;
+            vertices[0].Position.X -= (th.Width >> 1) - 22;
+            vertices[0].Position.Y -= th.Height - 44;
+            vertices[0].TextureCoordinate.Y = 0;
+            vertices[1].Position = vertices[0].Position;
+            vertices[1].Position.X += th.Width;
+            vertices[1].TextureCoordinate.Y = 0;
+            vertices[2].Position = vertices[0].Position;
+            vertices[2].Position.Y += th.Height;
+            vertices[3].Position = vertices[1].Position;
+            vertices[3].Position.Y += th.Height;
+
+            for (int i = 0; i < 4; i++)
+                vertices[i].Hue = huev;
+
+            Engine.Batcher.DrawSprite(th, vertices);
         }
 
-        public static void DrawStaticArtAnimated(Graphic graphic, Hue hue, int x, int y, int offset)
+        public static void DrawStaticArtAnimated(Graphic graphic, Hue hue, int x, int y, byte offset)
         {
-
+            DrawStaticArt( (Graphic)(graphic + offset), hue, x, y);
         }
 
         public static void DrawStaticArtRotated(Graphic graphic, Hue hue, int x, int y, float angle)
         {
+            Texture2D th = FileManager.Art.GetTexture(graphic);
 
+            if (th == null)
+                return;
+
+            Vector3 huev = Vector3.Zero;
+
+            if (hue != 0)
+                ShaderHuesTraslator.GetHueVector(ref huev, hue);
+
+
+            float w = th.Width / 2f;
+            float h = th.Height / 2f;
+            Vector3 center = Vector3.Zero;
+            center.X = x;
+            center.Y = y;
+            center.X -= ((th.Width >> 1) - 22) - 44 + w;
+            center.Y -= (th.Height - 44) + h;
+            float sinx = (float)Math.Sin(angle) * w;
+            float cosx = (float)Math.Cos(angle) * w;
+            float siny = (float)Math.Sin(angle) * h;
+            float cosy = (float)Math.Cos(angle) * h;
+
+            SpriteVertex[] vertices = SpriteVertex.PolyBufferFlipped;
+            vertices[0].Position = center;
+            vertices[0].Position.X += cosx - -siny;
+            vertices[0].Position.Y -= sinx + -cosy;
+            vertices[1].Position = center;
+            vertices[1].Position.X += cosx - siny;
+            vertices[1].Position.Y += -sinx + -cosy;
+            vertices[2].Position = center;
+            vertices[2].Position.X += -cosx - -siny;
+            vertices[2].Position.Y += sinx + cosy;
+            vertices[3].Position = center;
+            vertices[3].Position.X += -cosx - siny;
+            vertices[3].Position.Y += sinx + -cosy;
+
+            for (int i = 0; i < 4; i++)
+                vertices[i].Hue = huev;
+
+            Engine.Batcher.DrawSprite(th, vertices);
         }
 
-        public static void DrawStaticArtAnimatedRotated(Graphic graphic, Hue hue, int x, int y, float angle)
+        public static void DrawStaticArtAnimatedRotated(Graphic graphic, Hue hue, int x, int y, float angle, byte offset)
         {
-
+            DrawStaticArtRotated((Graphic) (graphic + offset), hue, x, y, angle);
         }
 
         public static void DrawStaticArtTransparent(Graphic graphic, Hue hue, int x, int y, bool selection)
         {
+            Texture2D th = FileManager.Art.GetTexture(graphic);
 
+            if (th == null)
+                return;
+
+            Vector3 huev = Vector3.Zero;
+
+            if (hue != 0)
+                ShaderHuesTraslator.GetHueVector(ref huev, hue, false, 0.5f);
+
+            SpriteVertex[] vertices = SpriteVertex.PolyBuffer;
+
+            vertices[0].Position.X = x;
+            vertices[0].Position.Y = y;
+            vertices[0].Position.X -= (th.Width >> 1) - 22;
+            vertices[0].Position.Y -= th.Height - 44;
+            vertices[0].TextureCoordinate.Y = 0;
+            vertices[1].Position = vertices[0].Position;
+            vertices[1].Position.X += th.Width;
+            vertices[1].TextureCoordinate.Y = 0;
+            vertices[2].Position = vertices[0].Position;
+            vertices[2].Position.Y += th.Height;
+            vertices[3].Position = vertices[1].Position;
+            vertices[3].Position.Y += th.Height;
+
+            for (int i = 0; i < 4; i++)
+                vertices[i].Hue = huev;
+
+            Engine.Batcher.DrawSprite(th, vertices);
         }
 
-        public static void DrawStaticArtAnimatedTransparent(Graphic graphic, Hue hue, int x, int y, bool selection)
+        public static void DrawStaticArtAnimatedTransparent(Graphic graphic, Hue hue, int x, int y, bool selection, byte offset)
         {
-
+            DrawStaticArtTransparent((Graphic) (graphic + offset), hue, x, y, selection);
         }
 
         public static void DrawLight()

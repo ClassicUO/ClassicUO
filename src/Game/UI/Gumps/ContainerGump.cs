@@ -74,6 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanBeSaved = true;
             LocalSerial = _item.Serial;
+            WantUpdateSize = false;
             _isCorspeContainer = _gumpID == 0x0009;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
@@ -81,9 +82,13 @@ namespace ClassicUO.Game.UI.Gumps
             _data = ContainerManager.Get(_gumpID);
             Graphic g = _data.Graphic;
 
-            Add(new GumpPicContainer(0, 0, g, 0, _item));
+            GumpPicContainer container;
+            Add(container = new GumpPicContainer(0, 0, g, 0, _item));
             if (_isCorspeContainer)
                 Add(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+
+            Width = container.Width;
+            Height = container.Height;
 
             ContainerGump gg = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
 
