@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -1661,6 +1662,28 @@ namespace ClassicUO.Game.GameObjects
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
         internal WalkerManager Walker { get; } = new WalkerManager();
+
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            const int TIME_TURN_TO_LASTTARGET = 2000;
+
+            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Engine.Ticks)
+            {
+                Mobile enemy = World.Mobiles.Get(World.LastAttack);
+
+                if (enemy != null)
+                {
+                    Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point( (int) enemy.RealScreenPosition.X, (int)enemy.RealScreenPosition.Y));
+
+                    if (Direction != direction)
+                        Walk(direction, false);
+                }
+            }
+        }
 
         public bool Walk(Direction direction, bool run)
         {
