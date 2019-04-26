@@ -439,56 +439,56 @@ namespace ClassicUO.Game.UI.Gumps
             switch (type)
             {
                 case SpellBookType.Magery:
-                    maxSpellsCount = 64;
+                    maxSpellsCount = SpellsMagery.MaxSpellCount;
                     bookGraphic = 0x08AC;
                     minimizedGraphic = 0x08BA;
                     iconStartGraphic = 0x08C0;
                     break;
 
                 case SpellBookType.Necromancy:
-                    maxSpellsCount = 17;
+                    maxSpellsCount = SpellsNecromancy.MaxSpellCount;
                     bookGraphic = 0x2B00;
                     minimizedGraphic = 0x2B03;
                     iconStartGraphic = 0x5000;
                     break;
 
                 case SpellBookType.Chivalry:
-                    maxSpellsCount = 10;
+                    maxSpellsCount = SpellsChivalry.MaxSpellCount;
                     bookGraphic = 0x2B01;
                     minimizedGraphic = 0x2B04;
                     iconStartGraphic = 0x5100;
                     break;
 
                 case SpellBookType.Bushido:
-                    maxSpellsCount = 6;
+                    maxSpellsCount = SpellsBushido.MaxSpellCount;
                     bookGraphic = 0x2B07;
                     minimizedGraphic = 0x2B09;
                     iconStartGraphic = 0x5400;
                     break;
 
                 case SpellBookType.Ninjitsu:
-                    maxSpellsCount = 8;
+                    maxSpellsCount = SpellsNinjitsu.MaxSpellCount;
                     bookGraphic = 0x2B06;
                     minimizedGraphic = 0x2B08;
                     iconStartGraphic = 0x5300;
                     break;
 
                 case SpellBookType.Spellweaving:
-                    maxSpellsCount = 16;
+                    maxSpellsCount = SpellsSpellweaving.MaxSpellCount;
                     bookGraphic = 0x2B2F;
                     minimizedGraphic = 0x2B2D;
                     iconStartGraphic = 0x59D8;
                     break;
 
                 case SpellBookType.Mysticism:
-                    maxSpellsCount = 16;
+                    maxSpellsCount = SpellsMysticism.MaxSpellCount;
                     bookGraphic = 0x2B32;
                     minimizedGraphic = 0x2B30;
                     iconStartGraphic = 0x5DC0;
                     break;
 
                 case SpellBookType.Bardic:
-                    maxSpellsCount = 6;
+                    maxSpellsCount = SpellsBardic.MaxSpellCount;
                     bookGraphic = 0x8AC;
                     minimizedGraphic = 0x2B27;
                     iconStartGraphic = 0x945;

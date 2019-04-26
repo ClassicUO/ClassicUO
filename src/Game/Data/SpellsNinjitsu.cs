@@ -27,6 +27,7 @@ namespace ClassicUO.Game.Data
     internal static class SpellsNinjitsu
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
+        internal static int MaxSpellCount => _spellsDict.Count;
 
         static SpellsNinjitsu()
         {
