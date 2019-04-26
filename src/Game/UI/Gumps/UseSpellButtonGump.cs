@@ -77,11 +77,29 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-
             int version = reader.ReadInt32();
-            int id = reader.ReadInt32();
-            _spell = SpellDefinition.FullIndexGetSpell(id);
+            int id;
+            if (version > 0)
+            {
+                string name = reader.ReadUTF8String(version);
+                id = reader.ReadInt32();
+                int gumpID = reader.ReadInt32();
+                int smallGumpID = reader.ReadInt32();
+                int reagsCount = reader.ReadInt32();
 
+                Reagents[] reagents = new Reagents[reagsCount];
+
+                for (int i = 0; i < reagsCount; i++)
+                    reagents[i] = (Reagents)reader.ReadInt32();
+
+                int manaCost = reader.ReadInt32();
+                int minSkill = reader.ReadInt32();
+                string powerWord = reader.ReadUTF8String(reader.ReadInt32());
+                int tithingCost = reader.ReadInt32();
+            }
+            else
+                id = reader.ReadInt32();
+            _spell = SpellDefinition.FullIndexGetSpell(id);
             BuildGump();
         }
 
