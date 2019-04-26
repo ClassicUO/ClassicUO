@@ -38,6 +38,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ushort _buttonimg;
         private readonly int _buttongroup;
         private string[] _items;
+        private int[] _correspondence;
         private NiceButton[] _buttons;
         private GumpPic[] _pics = null;
         private int _selectedIndex;
@@ -127,6 +128,29 @@ namespace ClassicUO.Game.UI.Controls
             SetItemsValue(items);
         }
 
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, string> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0)
+        {
+            WantUpdateSize = false;
+            X = x;
+            Y = y;
+            _buttonimg = button;
+            _buttongroup = group;
+            Width = width;
+
+            Add(_label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            {
+                X = 18,
+                Y = 0
+            });
+            Height = _label.Height;
+
+            Add(_arrow = new GumpPic(1, 1, 0x15E1, 0));
+            _arrow.MouseClick += (sender, state) =>
+            { if (state.Button == MouseButton.Left) Opened = !_opened; };
+
+            SetItemsValue(items);
+        }
+
         public int SelectedIndex
         {
             get => _selectedIndex;
@@ -141,11 +165,25 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public int SelectedItem
+        {
+            get => _correspondence != null && _selectedIndex >= 0 && _selectedIndex < _correspondence.Length ? _correspondence[_selectedIndex] : _selectedIndex;
+        }
+
         internal uint GetItemsLength => (uint)_items.Length;
 
         internal void SetItemsValue(string[] items)
         {
             _items = items;
+            _correspondence = null;
+            if (_opened)
+                GenerateButtons();
+        }
+
+        internal void SetItemsValue(Dictionary<int, string> items)
+        {
+            _items = items.Select(o => o.Value).ToArray();
+            _correspondence = items.Select(o => o.Key).ToArray();
             if (_opened)
                 GenerateButtons();
         }
