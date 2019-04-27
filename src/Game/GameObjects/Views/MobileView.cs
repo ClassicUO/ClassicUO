@@ -125,7 +125,6 @@ namespace ClassicUO.Game.GameObjects
             drawX = drawY = drawCenterY = 0;
 
 
-
             ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
             FileManager.Animations.AnimID = graphic;
@@ -316,14 +315,6 @@ namespace ClassicUO.Game.GameObjects
             else
                 return;
 
-
-            if (graphic == 226)
-            {
-                if (AnimationGroup == 23)
-                {
-
-                }
-            }
 
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;

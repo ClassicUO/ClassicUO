@@ -697,17 +697,15 @@ namespace ClassicUO.Game.GameObjects
                         }
                     default: //lightbrown/horse2
                         {
-                            graphic = 0x00C8;
-
+                            
+                            if (ItemData.AnimID != 0)
+                                graphic = ItemData.AnimID;
+                            else
+                                graphic = 0x00C8;
                             break;
                         }
                 }
 
-                /* TODO: maybe this code is wrong. The animID in this case doesn't work like expected.
-                
-                if (ItemData.AnimID != 0)
-                    graphic = ItemData.AnimID;
-                */
             }
             else if (IsCorpse)
                 return Amount;

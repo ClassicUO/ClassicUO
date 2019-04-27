@@ -39,11 +39,11 @@ namespace ClassicUO.Game.GameObjects
                 case 0x0192:
                 case 0x0193:
 
-                {
-                    g -= 2;
+                    {
+                        g -= 2;
 
-                    break;
-                }
+                        break;
+                    }
             }
 
             return g;
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Direction GetDirectionForAnimation()
         {
-            return Steps.Count != 0 ? (Direction) Steps.Front().Direction : Direction;
+            return Steps.Count != 0 ? (Direction)Steps.Front().Direction : Direction;
         }
 
 
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (mobile.IsMounted)
             {
-                return mobile.Equipment[(int) Layer.Mount].GetGraphicForAnimation();
+                return mobile.Equipment[(int)Layer.Mount].GetGraphicForAnimation();
             }
 
             return mobile.Graphic;
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) == 0)
                 {
-                     //LABEL_222:
+                    //LABEL_222:
                     LABEL_222(flags, ref v13);
                     return;
                 }
@@ -361,6 +361,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
+
+
+
+        private static void ConvertAnimation(ANIMATION_GROUPS_TYPE type)
+        {
+
+        }
+
+
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0, bool isParent = false)
         {
             Graphic graphic = checkGraphic;
@@ -397,7 +406,7 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
+            ANIMATION_FLAGS flags = (ANIMATION_FLAGS)FileManager.Animations.DataIndex[graphic].Flags;
 
             if (mobile.AnimationFromServer)
             {
@@ -430,8 +439,33 @@ namespace ClassicUO.Game.GameObjects
                             if (IsReplacedObjectAnimation(0, v13))
                                 originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-                            if (v13 > 12)
-                                v13 = 0; // 2
+
+                            switch (v13)
+                            {
+                                case 23:
+                                    v13 = 0;
+
+                                    break;
+                                case 24:
+                                    v13 = 1;
+
+                                    break;
+                                case 26:
+                                    v13 = 9;
+
+                                    break;
+                                case 28:
+                                    v13 = 10;
+
+                                    break;
+                                default:
+                                    v13 = 2;
+
+                                    break;
+                            }
+
+                            //if (v13 > 12)
+                            //    v13 = 0; // 2
                         }
                         else
                         {
@@ -441,7 +475,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 LABEL_190(flags, ref v13);
 
-                                return (byte) v13;
+                                return (byte)v13;
                             }
                         }
                     }
@@ -451,7 +485,7 @@ namespace ClassicUO.Game.GameObjects
                             originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
                         if (v13 > 8)
-                           v13 = 2;
+                            v13 = 2;
                     }
                 }
                 else
@@ -459,8 +493,11 @@ namespace ClassicUO.Game.GameObjects
                     if (IsReplacedObjectAnimation(2, v13))
                         originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-                    if (v13 > 21)
+                    if (!FileManager.Animations.AnimationExists(graphic, (byte) v13))
                         v13 = 1;
+
+                    if (v13 > 21)
+                        v13 = 1;   
                 }
 
 
@@ -700,10 +737,10 @@ namespace ClassicUO.Game.GameObjects
                         return (byte)v13;
 
                     default:
-                         LABEL_189:
+                    LABEL_189:
 
-                         LABEL_190(flags, ref v13);
-                         return (byte) v13; 
+                        LABEL_190(flags, ref v13);
+                        return (byte)v13;
                 }
 
                 // LABEL_188
@@ -779,218 +816,232 @@ namespace ClassicUO.Game.GameObjects
                     break;
                 default:
 
-                {
-
-                    //if (mobile.AnimationGroup != 0xFF)
-                    //{
-                    //    result = mobile.AnimationGroup;
-
-                    //    break;
-                    //}
-
-                    Item hand2 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.TwoHanded] : null;
-
-                    if (!isWalking)
                     {
-                        bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
-                        if (mobile.IsMounted)
+                        //if (mobile.AnimationGroup != 0xFF)
+                        //{
+                        //    result = mobile.AnimationGroup;
+
+                        //    break;
+                        //}
+
+                        Item hand2 = mobile.HasEquipment ? mobile.Equipment[(int)Layer.TwoHanded] : null;
+
+                        if (!isWalking)
                         {
-                            if (!haveLightAtHand2)
-                                result = 25;
-                            else
-                                result = 28;
-                        }
-                        else if (!mobile.InWarMode || mobile.IsDead)
-                        {
-                            if (!haveLightAtHand2)
-                                result = 4;
-                            else
-                                result = 0;
-                        }
-                        else if (haveLightAtHand2)
-                            result = 2;
-                        else
-                        {
-                            ushort[] handAnimIDs = {0, 0};
-                            Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+                            bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
-                            if (hand1 != null)
-                                handAnimIDs[0] = hand1.ItemData.AnimID;
-
-                            if (hand2 != null)
-                                handAnimIDs[1] = hand2.ItemData.AnimID;
-
-                            if (hand1 != null || hand2 != null)
-                                result = 8;
-
-                            //foreach (ushort handAnimID in handAnimIDs)
-                            //{
-                            //    if (handAnimID >= 0x0263 && handAnimID <= 0x028B)
-                            //    {
-                            //        bool ok = false;
-
-                            //        foreach (ushort handBaseGraphic in HANDS_BASE_ANIMID)
-                            //        {
-                            //            if (handBaseGraphic == handAnimID)
-                            //            {
-                            //                result = 8;
-                            //                ok = true;
-
-                            //                break;
-                            //            }
-                            //        }
-
-                            //        if (ok)
-                            //            break;
-                            //    }
-                            //}
-                        }
-                    }
-                    else if (mobile.IsMounted)
-                    {
-                        if (isRun)
-                            result = 24;
-                        else
-                            result = 23;
-                    }
-                    //else if (EquippedGraphic0x3E96)
-                    //{
-
-                    //}
-                    else if (isRun || !mobile.InWarMode || mobile.IsDead)
-                    {
-                        result = (byte) (isRun ? 2 : 0);
-
-                        if (hand2 != null)
-                        {
-                            ushort hand2Graphic = hand2.ItemData.AnimID;
-
-                            if (hand2Graphic < 0x0240 || hand2Graphic > 0x03E1)
-                                result = (byte)(isRun ? 3 : 1);
+                            if (mobile.IsMounted)
+                            {
+                                if (!haveLightAtHand2)
+                                    result = 25;
+                                else
+                                    result = 28;
+                            }
+                            else if (!mobile.InWarMode || mobile.IsDead)
+                            {
+                                if (!haveLightAtHand2)
+                                    result = 4;
+                                else
+                                    result = 0;
+                            }
+                            else if (haveLightAtHand2)
+                                result = 2;
                             else
                             {
-                                if (HAND2_BASE_ANIMID.Any(s => s == hand2Graphic))
+                                ushort[] handAnimIDs = { 0, 0 };
+                                Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int)Layer.OneHanded] : null;
+
+                                if (hand1 != null)
+                                    handAnimIDs[0] = hand1.ItemData.AnimID;
+
+                                if (hand2 != null)
+                                    handAnimIDs[1] = hand2.ItemData.AnimID;
+
+
+                                if (hand1 == null)
                                 {
+                                    if (hand2 != null)
+                                    {
+                                        result = 7;
+
+                                        foreach (ushort handAnimID in handAnimIDs)
+                                        {
+                                            if (handAnimID >= 0x0263 && handAnimID <= 0x028B)
+                                            {
+                                                bool ok = false;
+
+                                                foreach (ushort handBaseGraphic in HANDS_BASE_ANIMID)
+                                                {
+                                                    if (handBaseGraphic == handAnimID)
+                                                    {
+                                                        result = 8;
+                                                        ok = true;
+
+                                                        break;
+                                                    }
+                                                }
+
+                                                if (ok)
+                                                    break;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                        result = 7;
+                                }
+                                else
+                                {
+                                    result = 7;
+                                }
+
+                            }
+                        }
+                        else if (mobile.IsMounted)
+                        {
+                            if (isRun)
+                                result = 24;
+                            else
+                                result = 23;
+                        }
+                        //else if (EquippedGraphic0x3E96)
+                        //{
+
+                        //}
+                        else if (isRun || !mobile.InWarMode || mobile.IsDead)
+                        {
+                            result = (byte)(isRun ? 2 : 0);
+
+                            if (hand2 != null)
+                            {
+                                ushort hand2Graphic = hand2.ItemData.AnimID;
+
+                                if (hand2Graphic < 0x0240 || hand2Graphic > 0x03E1)
                                     result = (byte)(isRun ? 3 : 1);
+                                else
+                                {
+                                    if (HAND2_BASE_ANIMID.Any(s => s == hand2Graphic))
+                                    {
+                                        result = (byte)(isRun ? 3 : 1);
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            result = 15;
+                        }
+
+                        //bool inWar = mobile.InWarMode;
+
+                        //if (isWalking)
+                        //{
+                        //    if (isRun)
+                        //    {
+                        //        if (mobile.IsMounted)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
+                        //        else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
+                        //        else
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
+
+                        //        if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
+                        //        {
+                        //            if (mobile.IsMounted)
+                        //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
+                        //            else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
+                        //            {
+                        //                if (inWar)
+                        //                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        //                else
+                        //                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+                        //            }
+                        //            else if (inWar && !mobile.IsDead)
+                        //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        //            else
+                        //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        if (mobile.IsMounted)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
+                        //        else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
+                        //        {
+                        //            if (inWar)
+                        //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        //            else
+                        //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+                        //        }
+                        //        else if (inWar && !mobile.IsDead)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        //        else
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                        //    }
+                        //}
+                        //else if (mobile.AnimationGroup == 0xFF)
+                        //{
+                        //    if (mobile.IsMounted)
+                        //        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
+                        //    else if (inWar && !mobile.IsDead)
+                        //    {
+                        //        if (mobile.Equipment[(int) Layer.OneHanded] != null)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                        //        else if (mobile.Equipment[(int) Layer.TwoHanded] != null)
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
+                        //        else
+                        //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                        //    }
+                        //    else
+                        //        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                        //    mobile.AnimIndex = 0;
+                        //}
+                        //else
+                        //{
+                        //    result = mobile.AnimationGroup;
+                        //}
+
+
+
+                        //if (mobile.Race == RaceType.GARGOYLE)
+                        //{
+                        //    if (mobile.IsFlying)
+                        //    {
+                        //        if (result == 0 || result == 1)
+                        //            result = 62;
+                        //        else if (result == 2 || result == 3)
+                        //            result = 63;
+                        //        else if (result == 4)
+                        //            result = 64;
+                        //        else if (result == 6)
+                        //            result = 66;
+                        //        else if (result == 7 || result == 8)
+                        //            result = 65;
+                        //        else if (result >= 9 && result <= 11)
+                        //            result = 71;
+                        //        else if (result >= 12 && result <= 14)
+                        //            result = 72;
+                        //        else if (result == 15)
+                        //            result = 62;
+                        //        else if (result == 20)
+                        //            result = 77;
+                        //        else if (result == 31)
+                        //            result = 71;
+                        //        else if (result == 34)
+                        //            result = 78;
+                        //        else if (result >= 200 && result <= 259)
+                        //            result = 75;
+                        //        else if (result >= 260 && result <= 270) result = 75;
+
+
+                        //        return result;
+                        //    }
+                        //}
+
+                        break;
                     }
-                    else
-                    {
-                        result = 15;
-                    }
-
-                    //bool inWar = mobile.InWarMode;
-
-                    //if (isWalking)
-                    //{
-                    //    if (isRun)
-                    //    {
-                    //        if (mobile.IsMounted)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
-                    //        else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
-                    //        else
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
-
-                    //        if (!mobile.IsHuman && !FileManager.Animations.AnimationExists(graphic, result))
-                    //        {
-                    //            if (mobile.IsMounted)
-                    //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                    //            else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
-                    //            {
-                    //                if (inWar)
-                    //                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                    //                else
-                    //                    result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-                    //            }
-                    //            else if (inWar && !mobile.IsDead)
-                    //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                    //            else
-                    //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        if (mobile.IsMounted)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                    //        else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
-                    //        {
-                    //            if (inWar)
-                    //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                    //            else
-                    //                result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-                    //        }
-                    //        else if (inWar && !mobile.IsDead)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                    //        else
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                    //    }
-                    //}
-                    //else if (mobile.AnimationGroup == 0xFF)
-                    //{
-                    //    if (mobile.IsMounted)
-                    //        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
-                    //    else if (inWar && !mobile.IsDead)
-                    //    {
-                    //        if (mobile.Equipment[(int) Layer.OneHanded] != null)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                    //        else if (mobile.Equipment[(int) Layer.TwoHanded] != null)
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
-                    //        else
-                    //            result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                    //    }
-                    //    else
-                    //        result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
-                    //    mobile.AnimIndex = 0;
-                    //}
-                    //else
-                    //{
-                    //    result = mobile.AnimationGroup;
-                    //}
-
-
-
-                    //if (mobile.Race == RaceType.GARGOYLE)
-                    //{
-                    //    if (mobile.IsFlying)
-                    //    {
-                    //        if (result == 0 || result == 1)
-                    //            result = 62;
-                    //        else if (result == 2 || result == 3)
-                    //            result = 63;
-                    //        else if (result == 4)
-                    //            result = 64;
-                    //        else if (result == 6)
-                    //            result = 66;
-                    //        else if (result == 7 || result == 8)
-                    //            result = 65;
-                    //        else if (result >= 9 && result <= 11)
-                    //            result = 71;
-                    //        else if (result >= 12 && result <= 14)
-                    //            result = 72;
-                    //        else if (result == 15)
-                    //            result = 62;
-                    //        else if (result == 20)
-                    //            result = 77;
-                    //        else if (result == 31)
-                    //            result = 71;
-                    //        else if (result == 34)
-                    //            result = 78;
-                    //        else if (result >= 200 && result <= 259)
-                    //            result = 75;
-                    //        else if (result >= 260 && result <= 270) result = 75;
-
-
-                    //        return result;
-                    //    }
-                    //}
-
-                    break;
-                }
             }
 
             //if (!isequip)
@@ -999,7 +1050,7 @@ namespace ClassicUO.Game.GameObjects
             return result;
         }
 
-        static readonly ushort[] HANDS_BASE_ANIMID = 
+        static readonly ushort[] HANDS_BASE_ANIMID =
         {
             0x0263, 0x0264, 0x0265, 0x0266, 0x0267, 0x0268, 0x0269, 0x026D, 0x0270,
             0x0272, 0x0274, 0x027A, 0x027C, 0x027F, 0x0281, 0x0286, 0x0288, 0x0289,
@@ -1020,7 +1071,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     case ANIMATION_GROUPS.AG_LOW:
 
-                       
+
                         break;
                     case ANIMATION_GROUPS.AG_HIGHT:
 
@@ -1029,7 +1080,7 @@ namespace ClassicUO.Game.GameObjects
                             result = 25;
                             return;
                         }
-                       
+
                         break;
                     case ANIMATION_GROUPS.AG_PEOPLE:
                         if (result == 1)
@@ -1047,7 +1098,7 @@ namespace ClassicUO.Game.GameObjects
                         result == 0 || // people walk un armed / high walk
                         result == 1 || // walk armed / high stand
                         result == 15)  // walk warmode
-                        result = 22; // 22
+                    result = 22; // 22
                 else if (
                         result == 2 || // people run unarmed
                         result == 3 || // people run armed
@@ -1093,12 +1144,12 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS group = FileManager.Animations.GetGroupIndex(graphic);
 
             if (group == ANIMATION_GROUPS.AG_LOW)
-                return (byte) (getReplacedGroup(FileManager.Animations.GroupReplaces[0], index, (ushort) LOW_ANIMATION_GROUP.LAG_WALK) % (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
+                return (byte)(getReplacedGroup(FileManager.Animations.GroupReplaces[0], index, (ushort)LOW_ANIMATION_GROUP.LAG_WALK) % (ushort)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
 
             if (group == ANIMATION_GROUPS.AG_PEOPLE)
-                return (byte) (getReplacedGroup(FileManager.Animations.GroupReplaces[1], index, (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
+                return (byte)(getReplacedGroup(FileManager.Animations.GroupReplaces[1], index, (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
 
-            return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
+            return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
@@ -1145,9 +1196,9 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        private static bool TestStepNoChangeDirection( Mobile mob, byte group)
+        private static bool TestStepNoChangeDirection(Mobile mob, byte group)
         {
-            switch ( (PEOPLE_ANIMATION_GROUP) group)
+            switch ((PEOPLE_ANIMATION_GROUP)group)
             {
                 case PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST:
                 case PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED:
@@ -1207,7 +1258,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null)
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
                     {
                         if (action > 0)
                         {
@@ -1271,7 +1322,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
 
                 return 30;
             }
@@ -1318,7 +1369,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
 
                     return 20;
                 }
@@ -1344,7 +1395,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
-                if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
                 if (mode % 2 != 0) return 6;
 
                 return 5;
@@ -1374,7 +1425,7 @@ namespace ClassicUO.Game.GameObjects
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 3;
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
 
                     return 34;
                 }
@@ -1387,7 +1438,7 @@ namespace ClassicUO.Game.GameObjects
 
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
-            if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+            if (mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
 
             if (action > 0)
             {
@@ -1411,7 +1462,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 9;
 
-                    return mobile.Equipment[(int) Layer.Mount] != null ? (byte) 0xFF : (byte) 33;
+                    return mobile.Equipment[(int)Layer.Mount] != null ? (byte)0xFF : (byte)33;
                 }
 
                 return 3;
@@ -1426,7 +1477,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
-            return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte) 0xFF : (byte) 20;
+            return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte)0xFF : (byte)20;
         }
 
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
@@ -1439,7 +1490,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.Equipment[(int)Layer.Mount] != null) return 0xFF;
 
                     switch (action)
                     {
