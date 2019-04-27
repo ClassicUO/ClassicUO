@@ -55,18 +55,18 @@ namespace ClassicUO.IO.Resources
 
             int mapSize = width * height;
 
-            int startX = startx >> 1;
-            int endX = endx >> 1;
+            startx = startx >> 1;
+            endx = endx >> 1;
 
-            int widthDivisor = endX - startX;
+            int widthDivisor = endx - startx;
 
             if (widthDivisor == 0)
                 widthDivisor++;
 
-            int startY = starty >> 1;
-            int endY = endy >> 1;
+            starty = starty >> 1;
+            endy = endy >> 1;
 
-            int heightDivisor = endY - startY;
+            int heightDivisor = endy - starty;
 
             if (heightDivisor == 0)
                 heightDivisor++;
@@ -74,26 +74,26 @@ namespace ClassicUO.IO.Resources
             int pwidth = (width << 8) / widthDivisor;
             int pheight = (height << 8) / heightDivisor;
 
-            byte[] data = new byte[mapSize + (width - pwidth) + (height - pheight)];
+            byte[] data = new byte[mapSize];
 
             int x = 0, y = 0;
 
             int maxPixelValue = 1;
+            int startHeight = starty * pheight;
             while (_file.Position < _file.Length)
             {
                 byte pic = _file.ReadByte();
                 byte size = (byte)(pic & 0x7F);
                 bool colored = (pic & 0x80) != 0;
 
-                int startHeight = startY * pheight;
                 int currentHeight = y * pheight;
                 int posY = width * ((currentHeight - startHeight) >> 8);
 
                 for (int i = 0; i < size; i++)
                 {
-                    if (colored && x >= startX && x < endX && y >= startY && y < endY)
+                    if (colored && x >= startx && x < endx && y >= starty && y < endy)
                     {
-                        int position = posY + ((width * (x - startX)) >> 8);
+                        int position = posY + ((pwidth * (x - startx)) >> 8);
 
                         ref byte pixel = ref data[position];
 
@@ -112,7 +112,7 @@ namespace ClassicUO.IO.Resources
                     {
                         x = 0;
                         y++;
-                        currentHeight += height;
+                        currentHeight += pheight;
                         posY = width * ((currentHeight - startHeight) >> 8);
                     }
                 }
