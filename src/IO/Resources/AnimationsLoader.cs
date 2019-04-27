@@ -1039,9 +1039,9 @@ namespace ClassicUO.IO.Resources
 
                     return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
                 case ANIMATION_GROUPS_TYPE.MONSTER:
-                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
-
                     return (byte)(second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
+                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    return 8;
                 case ANIMATION_GROUPS_TYPE.HUMAN:
                 case ANIMATION_GROUPS_TYPE.EQUIPMENT:
 
