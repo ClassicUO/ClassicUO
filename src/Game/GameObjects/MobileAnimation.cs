@@ -57,12 +57,12 @@ namespace ClassicUO.Game.GameObjects
 
         private static void CalculateHight(Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
         {
-            if (mobile.AnimationGroup != 0xFF)
-            {
-                result = mobile.AnimationGroup;
+            //if (mobile.AnimationGroup != 0xFF)
+            //{
+            //    result = mobile.AnimationGroup;
 
-                return;
-            }
+            //    return;
+            //}
 
             if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
             {
