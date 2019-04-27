@@ -453,7 +453,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (!FileManager.Animations.DataIndex[graphic].HasBodyReplaced)
+                    if (!FileManager.Animations.DataIndex[graphic].HasBodyConversion)
                     {
                         ushort newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
 

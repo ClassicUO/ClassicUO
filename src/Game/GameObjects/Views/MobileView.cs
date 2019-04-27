@@ -317,9 +317,16 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
 
+            if (graphic == 226)
+            {
+                if (AnimationGroup == 23)
+                {
+
+                }
+            }
+
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;
-
 
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;

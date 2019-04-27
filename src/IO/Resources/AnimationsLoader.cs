@@ -621,7 +621,7 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.Graphic;
 
-                if (DataIndex[newGraphic].HasBodyReplaced || !index.HasBodyReplaced)
+                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                 {
                     if (graphic != newGraphic)
                     {
@@ -630,7 +630,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (DataIndex[graphic].HasBodyReplaced && DataIndex[graphic].BodyConvGroups != null)
+                if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
                     return DataIndex[graphic].BodyConvGroups[group];
 
                 return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
@@ -654,7 +654,7 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.CorpseGraphic;
 
-                if (DataIndex[newGraphic].HasBodyReplaced || !index.HasBodyReplaced)
+                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                 {
                     if (graphic != newGraphic)
                     {
@@ -663,7 +663,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (DataIndex[graphic].HasBodyReplaced)
+                if (DataIndex[graphic].HasBodyConversion)
                     return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
 
                 return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
@@ -702,7 +702,7 @@ namespace ClassicUO.IO.Resources
 
                 if (replace)
                 {
-                    if (!DataIndex[i].HasBodyReplaced)
+                    if (!DataIndex[i].HasBodyConversion)
                     {
                         DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
                     }
@@ -1809,7 +1809,7 @@ namespace ClassicUO.IO.Resources
 
         public bool IsValidMUL;
 
-        public bool HasBodyReplaced => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
+        public bool HasBodyConversion => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
 
         // 100
         public AnimationGroup[] Groups;
