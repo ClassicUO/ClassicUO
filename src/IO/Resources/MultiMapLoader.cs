@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+
+using ClassicUO.Utility.Logging;
 
 using ClassicUO.Renderer;
 
@@ -39,8 +37,11 @@ namespace ClassicUO.IO.Resources
 
         public unsafe SpriteTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
-            if (_file == null)
+            if (_file == null || _file.Length == 0)
+            {
+                Log.Message(LogTypes.Warning, $"MultiMap.rle is not loaded!");
                 return null;
+            }
 
             _file.Seek(0);
 
@@ -49,9 +50,9 @@ namespace ClassicUO.IO.Resources
 
             if (w < 1 || h < 1)
             {
+                Log.Message(LogTypes.Warning, $"Failed to load bounds from MultiMap.rle");
                 return null;
             }
-
 
             int mapSize = width * height;
 

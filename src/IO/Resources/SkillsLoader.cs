@@ -54,6 +54,16 @@ namespace ClassicUO.IO.Resources
 
             return value;
         }
+
+        internal void SetAllSkills(List<SkillEntry> arr)
+        {
+            _skills.Clear();
+            for(int i = 0; i < arr.Count; i++)
+            {
+                _skills[i] = arr[i];
+            }
+            SkillNames = _skills.Select(o => o.Value.Name).ToArray();
+        }
     }
 
     internal readonly struct SkillEntry

@@ -105,30 +105,17 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0)
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0) : this(x, y, width, indextext, hue, unicode, font, group, button)
         {
-            WantUpdateSize = false;
-            X = x;
-            Y = y;
-            _buttonimg = button;
-            _buttongroup = group;
-            Width = width;
-
-            Add(_label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
-            {
-                X = 18,
-                Y = 0
-            });
-            Height = _label.Height;
-
-            Add(_arrow = new GumpPic(1, 1, 0x15E1, 0));
-            _arrow.MouseClick += (sender, state) =>
-            { if(state.Button == MouseButton.Left) Opened = !_opened; };
-
             SetItemsValue(items);
         }
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, string> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0)
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, string> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0) : this(x, y, width, indextext, hue, unicode, font, group, button)
+        {
+            SetItemsValue(items);
+        }
+
+        private MultiSelectionShrinkbox(int x, int y, int width, string indextext, ushort hue, bool unicode, byte font, int group, ushort button)
         {
             WantUpdateSize = false;
             X = x;
@@ -147,8 +134,6 @@ namespace ClassicUO.Game.UI.Controls
             Add(_arrow = new GumpPic(1, 1, 0x15E1, 0));
             _arrow.MouseClick += (sender, state) =>
             { if (state.Button == MouseButton.Left) Opened = !_opened; };
-
-            SetItemsValue(items);
         }
 
         public int SelectedIndex
