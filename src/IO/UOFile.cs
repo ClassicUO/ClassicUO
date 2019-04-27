@@ -36,9 +36,11 @@ namespace ClassicUO.IO
         private protected MemoryMappedViewAccessor _accessor;
         private protected MemoryMappedFile _file;
 
-        public UOFile(string filepath)
+        public UOFile(string filepath, bool loadfile = false)
         {
             FilePath = filepath;
+            if (loadfile)
+                Load();
         }
 
         public string FilePath { get; private protected set; }

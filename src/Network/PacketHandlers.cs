@@ -2012,7 +2012,10 @@ namespace ClassicUO.Network
 
                 if (p.ID == 0xF5)
                     facet = p.ReadUShort();
-                gump.SetMapTexture(FileManager.Multimap.LoadFacet(facet, width, height, startX, startY, endX, endY));
+                if(FileManager.Multimap.HasFacet(facet))
+                    gump.SetMapTexture(FileManager.Multimap.LoadFacet(facet, width, height, startX, startY, endX, endY));
+                else
+                    gump.SetMapTexture(FileManager.Multimap.LoadMap(width, height, startX, startY, endX, endY));
             }
             else
             {
