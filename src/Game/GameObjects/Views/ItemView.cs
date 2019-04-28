@@ -247,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsCorpse)
             {
-                if (!IsSelected && Texture.Contains( x, y))
+                if (Texture.Contains( x, y))
                     SelectedObject.Object = this;
                 //if (SelectedObject.IsPointInCorpse(this, x - Bounds.X, y - Bounds.Y))
                 //{
