@@ -888,38 +888,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Cancel:
                     Dispose();
-
                     break;
+
                 case Buttons.Apply:
                     Apply();
-
                     break;
+
                 case Buttons.Default:
                     SetDefault();
-
                     break;
+
                 case Buttons.Ok:
                     Apply();
                     Dispose();
-
                     break;
+
                 case Buttons.NewMacro:
-
                     break;
+
                 case Buttons.DeleteMacro:
-
                     break;
-
-                //case Buttons.SpeechColor: break;
-                //case Buttons.EmoteColor: break;
-                //case Buttons.PartyMessageColor: break;
-                //case Buttons.GuildMessageColor: break;
-                //case Buttons.AllyMessageColor: break;
-                //case Buttons.InnocentColor: break;
-                //case Buttons.FriendColor: break;
-                //case Buttons.CriminalColor: break;
-                //case Buttons.EnemyColor: break;
-                //case Buttons.MurdererColor: break;
             }
         }
 
@@ -1245,10 +1233,8 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Personal = World.Light.RealPersonal;
             }
 
-
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
-
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();
@@ -1272,7 +1258,6 @@ namespace ClassicUO.Game.UI.Gumps
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
 
-
             // counters
 
             bool before = Engine.Profile.Current.CounterBarEnabled;
@@ -1281,7 +1266,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
             Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
-
 
             CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
 

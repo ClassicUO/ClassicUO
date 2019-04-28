@@ -21,9 +21,7 @@
 
 #endregion
 
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -64,6 +62,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Serial _partyMemeberSerial;
         private Label _partyNameLabel;
         private TextBox _textBox;
+
+        private bool _targetBroke = false;
 
         public HealthBarGump(Mobile mob) : this()
         {
@@ -181,7 +181,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
                     Dispose();
-
                     return;
                 }
 
@@ -476,8 +475,6 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
-        private bool _targetBroke = false;
-
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
             if (TargetManager.IsTargeting)
@@ -525,8 +522,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
                 }
             }
-
-
             return true;
         }
 
@@ -545,12 +540,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null) SelectedObject.Object = Mobile;
+            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+                SelectedObject.Object = Mobile;
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile != null && Mobile.IsSelected) SelectedObject.Object = null;
+            if (Mobile != null && Mobile.IsSelected)
+                SelectedObject.Object = null;
         }
 
         private enum ButtonParty
