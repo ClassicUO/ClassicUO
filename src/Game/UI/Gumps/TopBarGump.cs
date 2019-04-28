@@ -237,7 +237,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        Engine.Profile.Current.DebugGumpIsDisabled = debugGump.IsVisible;
                         debugGump.IsVisible = !debugGump.IsVisible;
                         debugGump.SetInScreen();
                     }
