@@ -126,7 +126,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+                SelectedObject.Object = this;
         }
 
         //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)

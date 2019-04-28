@@ -103,11 +103,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
             {
-                Vector3 offsetDrawPosition = Vector3.Zero;
-                offsetDrawPosition.X = posX - 5;
-                offsetDrawPosition.Y = posY - 5;
                 //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
-                base.Draw(batcher, posX, posY);
+                base.Draw(batcher, posX - 5, posY - 5);
             }
 
             if (ItemData.IsLight)
@@ -242,7 +239,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 base.Draw(batcher, posX, posY);
-                Select(IsFlipped ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
+                Select(IsFlipped ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
             }
         }
 
@@ -250,7 +247,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsCorpse)
             {
-                if (!IsSelected && Texture.Contains(x, y)) SelectedObject.Object = this;
+                if (!IsSelected && Texture.Contains( x, y))
+                    SelectedObject.Object = this;
                 //if (SelectedObject.IsPointInCorpse(this, x - Bounds.X, y - Bounds.Y))
                 //{
                 //    SelectedObject.Object = this;
@@ -258,7 +256,8 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
+                if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+                    SelectedObject.Object = this;
             }
         }
     }

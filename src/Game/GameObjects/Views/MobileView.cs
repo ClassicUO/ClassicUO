@@ -248,7 +248,7 @@ namespace ClassicUO.Game.GameObjects
 
                 base.Draw(batcher, posX, posY);
 
-                Select(mirror ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
+                Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
             }
         }
 
@@ -413,7 +413,7 @@ namespace ClassicUO.Game.GameObjects
 
                 base.Draw(batcher, posX, posY);
 
-                Select(mirror ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
+                Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
 
                 if (item.ItemData.IsLight)
                 {

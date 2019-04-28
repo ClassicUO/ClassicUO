@@ -184,7 +184,7 @@ namespace ClassicUO.Game.GameObjects
             //    batcher.Stencil.StencilEnable = true;
             //    batcher.DrawSprite(Texture, vertex);
             //    batcher.Stencil.StencilEnable = false;
-            //}
+            //}         
 
             Select(posX, posY);
 

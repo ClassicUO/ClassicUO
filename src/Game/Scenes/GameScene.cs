@@ -68,8 +68,6 @@ namespace ClassicUO.Game.Scenes
         private long _timePing;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
-        //private MousePicker _mousePicker;
-        //private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
 
         private int ScalePos
@@ -99,8 +97,6 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
-
-        public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
         public IGameEntity SelectedObject
         {
@@ -588,6 +584,16 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
                 SelectedObject = null;
+            else
+            {
+                if (_viewPortGump != null)
+                {
+                    Game.SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale);
+                    Game.SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale);
+                }
+                else
+                    Game.SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
+            }
         }
 
         public override bool Draw(Batcher2D batcher)

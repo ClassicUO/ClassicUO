@@ -17,7 +17,7 @@ namespace ClassicUO.Game
     {
         public static IGameEntity Object { get; set; }
 
-
+        public static Point TranslatedMousePositionByViewport;
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
@@ -102,11 +102,11 @@ namespace ClassicUO.Game
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                     if (mirror)
-                        x = xx + x + 44 - Mouse.Position.X;
+                        x = xx + x + 44 - TranslatedMousePositionByViewport.X;
                     else
-                        x = Mouse.Position.X - xx + x;
+                        x = TranslatedMousePositionByViewport.X - xx + x;
 
-                    y = Mouse.Position.Y - yy - y;
+                    y = TranslatedMousePositionByViewport.Y - yy - y;
 
                     if (frame.Contains(x, y))
                         return true;
@@ -197,11 +197,11 @@ namespace ClassicUO.Game
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                     if (mirror)
-                        x = xx + x + 44 - Mouse.Position.X;
+                        x = xx + x + 44 - TranslatedMousePositionByViewport.X;
                     else
-                        x = Mouse.Position.X - xx + x;
+                        x = TranslatedMousePositionByViewport.X - xx + x;
 
-                    y = Mouse.Position.Y - yy + y;
+                    y = TranslatedMousePositionByViewport.Y - yy + y;
 
                     if (frame.Contains(x, y))
                         return true;
@@ -215,7 +215,8 @@ namespace ClassicUO.Game
         {
             SpriteTexture texture = FileManager.Art.GetTexture(graphic);
 
-            if (texture != null) return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
+            if (texture != null)
+                return texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
 
             return false;
         }
@@ -224,7 +225,8 @@ namespace ClassicUO.Game
         {
             SpriteTexture texture = FileManager.Art.GetLandTexture(graphic);
 
-            if (texture != null) return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
+            if (texture != null)
+                return texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
 
             return false;
         }
@@ -234,8 +236,8 @@ namespace ClassicUO.Game
             //y -= 22;
             x += 22;
 
-            int testX = Mouse.Position.X - x;
-            int testY = Mouse.Position.Y;
+            int testX = TranslatedMousePositionByViewport.X - x;
+            int testY = TranslatedMousePositionByViewport.Y;
 
             int y0 = -rect.Left;
             int y1 = 22 - rect.Top;
