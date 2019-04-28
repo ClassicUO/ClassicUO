@@ -470,10 +470,7 @@ namespace ClassicUO.Game.Scenes
                     World.Player.Walk(dWalk, false);
                 else
                 {
-                    WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    SystemChatControl chat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
-
-                    if (chat != null && chat.textBox.Text.Length == 0)
+                    if (Engine.UI.SystemChat?.textBox.Text.Length == 0)
                         World.Player.Walk(dWalk, false);
                 }
             }

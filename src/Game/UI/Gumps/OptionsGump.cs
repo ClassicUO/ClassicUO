@@ -1016,11 +1016,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _chatAfterEnter.IsChecked = false;
 
-                    WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
-
-                    if (systemchat != null)
-                        systemchat.IsActive = !_chatAfterEnter.IsChecked;
+                    Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
 
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
@@ -1130,11 +1126,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Engine.Profile.Current.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
-                SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
-
-                if (systemchat != null)
-                    systemchat.IsActive = !_chatAfterEnter.IsChecked;
-
+                Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
@@ -1264,23 +1256,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;
-
                 WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-
-                if (viewport != null)
-                {
-                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-
-                    if (systemchat != null)
-                    {
-                        viewport.ReloadChatControl(new SystemChatControl(
-                                                                         5,
-                                                                         5,
-                                                                         Engine.Profile.Current.GameWindowSize.X,
-                                                                         Engine.Profile.Current.GameWindowSize.Y
-                                                                        ));
-                    }
-                }
+                viewport?.ReloadChatControl(new SystemChatControl(5, 5, Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y));
             }
 
             // combat

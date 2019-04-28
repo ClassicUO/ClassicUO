@@ -114,16 +114,23 @@ namespace ClassicUO.Game.UI.Gumps
             IsActive = !Engine.Profile.Current.ActivateChatAfterEnter;
         }
 
+        public void SetFocus()
+        {
+            textBox.IsEditable = true;
+            textBox.SetKeyboardFocus();
+            textBox.IsEditable = _isActive;
+        }
+
         public bool IsActive
         {
             get => _isActive;
             set
             {
-                _isActive = value;
+                _isActive = textBox.IsEditable = value;
 
-                if (value)
+                if (_isActive)
                 {
-                    Engine.Profile.Current.ActivateChatStatus = _trans.IsVisible = value;
+                    Engine.Profile.Current.ActivateChatStatus = _trans.IsVisible = true;
                     _trans.Y = textBox.Y;
                     textBox.Width = _trans.Width;
                     textBox.SetText(string.Empty);
@@ -132,12 +139,10 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-                    Engine.Profile.Current.ActivateChatStatus = value;
+                    Engine.Profile.Current.ActivateChatStatus = false;
                     textBox.Width = 1;
                     _trans.Y = textBox.Y + height + 3;
                 }
-
-                textBox.IsEditable = _isActive ? true : false;
             }
         }
 
