@@ -42,7 +42,6 @@ namespace ClassicUO.Game.Managers
         private Macro _firstNode;
         private MacroObject _lastMacro;
         private long _nextTimer;
-        private SystemChatControl systemchat;
 
         private WorldViewportGump viewport;
 
@@ -248,17 +247,7 @@ namespace ClassicUO.Game.Managers
                         string s = SDL.SDL_GetClipboardText();
 
                         if (!string.IsNullOrEmpty(s))
-                        {
-                            viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-
-                            if (viewport != null)
-                            {
-                                systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-
-                                if (systemchat != null)
-                                    systemchat.textBox.Text += s;
-                            }
-                        }
+                            Engine.UI.SystemChat.textBox.Text += s;
                     }
 
                     break;
@@ -909,14 +898,10 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.DefaultScale:
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
-
                     break;
 
                 case MacroType.ToggleChatVisibility:
-                    viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
-                    systemchat?.ToggleChatVisibility();
-
+                    Engine.UI.SystemChat?.ToggleChatVisibility();
                     break;
             }
 

@@ -234,6 +234,8 @@ namespace ClassicUO.Game.Managers
 
         public GameCursor GameCursor { get; private set; }
 
+        public SystemChatControl SystemChat { get; set; }
+
         public Control KeyboardFocusControl
         {
             get

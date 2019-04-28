@@ -85,7 +85,9 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
-            _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+
+            Engine.UI.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+
             Add(_border);
             Add(_button);
             Add(_viewport);
@@ -192,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void ReloadChatControl(SystemChatControl chat)
         {
             _systemChatControl.Dispose();
-            _systemChatControl = chat;
+            Engine.UI.SystemChat = _systemChatControl = chat;
             Add(_systemChatControl);
             Resize();
         }

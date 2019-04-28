@@ -22,7 +22,7 @@
 #endregion
 
 using System.IO;
-
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -498,6 +498,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (_canChangeName)
                 _textBox.IsEditable = false;
+
+            _textBox.SetKeyboardFocus();
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -529,6 +531,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(Mobile, _textBox.Text);
+                Engine.UI.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
         }
