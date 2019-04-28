@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ClassicUO.Game.Data;
@@ -459,20 +460,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
-        {
-            if (TargetManager.IsTargeting)
-            {
-                TargetManager.TargetGameObject(Mobile);
-                Mouse.LastLeftButtonClickTime = 0;
-            }
-            else if (_canChangeName)
-            {
-                _textBox.IsEditable = true;
-                _textBox.SetKeyboardFocus();
-            }
-        }
-
         private static int CalculatePercents(int max, int current, int maxValue)
         {
             if (max > 0)
@@ -489,17 +476,37 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        private bool _targetBroke = false;
+
+        private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
             if (TargetManager.IsTargeting)
             {
                 TargetManager.TargetGameObject(Mobile);
                 Mouse.LastLeftButtonClickTime = 0;
             }
-            else if (_canChangeName)
-                _textBox.IsEditable = false;
+            else if (_canChangeName && !_targetBroke)
+            {
+                _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
+            }
 
-            _textBox.SetKeyboardFocus();
+            _targetBroke = false;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (TargetManager.IsTargeting)
+            {
+                _targetBroke = true;
+                TargetManager.TargetGameObject(Mobile);
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+            else if (_canChangeName)
+            {
+                _textBox.IsEditable = false;
+                Engine.UI.SystemChat.SetFocus();
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
