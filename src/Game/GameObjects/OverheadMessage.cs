@@ -12,6 +12,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -465,13 +466,24 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (Parent.Texture != null)
                 {
-                    if (Parent is Item it && it.IsCorpse)
-                        offY = -22;
+                    x += 22;
+                    int yValue = Parent.Texture.Height / 2;
+
+                    if (Parent is Item it)
+                    {
+                        if (it.IsCorpse)
+                            offY = -22;
+                        else if (it.ItemData.IsAnimated)
+                        {
+                            Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
+                            if (texture != null)
+                                yValue = texture.Height / 2;
+                        }
+                    }
                     else if (Parent is Static || Parent is Multi)
                         offY = -44;
 
-                    x += 22;
-                    y -= Parent.Texture.Height / 2;
+                    y -= yValue;
                 }
             }
  
