@@ -27,6 +27,7 @@ namespace ClassicUO.Game.Data
     internal static class SpellsBardic
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
+        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
         internal static string GetUsedSkillName(int spellid)
         {
