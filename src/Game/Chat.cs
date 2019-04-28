@@ -90,7 +90,7 @@ namespace ClassicUO.Game
 			{
                 case MessageType.Spell:
                 {
-                    hue = Constants.NEUTRAL_LABEL_COLOR; //gray color per default
+                    //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out TargetType targetType))
                     {
                         if (targetType == TargetType.Beneficial)

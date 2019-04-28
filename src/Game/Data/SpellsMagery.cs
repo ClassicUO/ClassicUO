@@ -28,6 +28,7 @@ namespace ClassicUO.Game.Data
     internal static class SpellsMagery
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
+        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
 
         static SpellsMagery()
