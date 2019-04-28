@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _enableCounters, _highlightOnUse;
 
         //experimental
-        private Checkbox _enableSelectionArea;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -873,6 +873,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
 
             Add(rightArea, PAGE);
         }
@@ -1034,6 +1035,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 10:
                     _enableSelectionArea.IsChecked = false;
+                    _debugGumpIsDisabled.IsChecked = false;
 
                     break;
             }
@@ -1287,6 +1289,36 @@ namespace ClassicUO.Game.UI.Gumps
 
             // experimental
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
+
+            if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
+            {
+                DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
+
+                if (_debugGumpIsDisabled.IsChecked)
+                {
+                    if (debugGump != null)
+                        debugGump.IsVisible = false;
+                }
+                else
+                {
+                    if (debugGump == null)
+                    {
+                        debugGump = new DebugGump
+                        {
+                            X = Engine.Profile.Current.DebugGumpPosition.X,
+                            Y = Engine.Profile.Current.DebugGumpPosition.Y
+                        };
+                        Engine.UI.Add(debugGump);
+                    }
+                    else
+                    {
+                        debugGump.IsVisible = true;
+                        debugGump.SetInScreen();
+                    }
+                }
+
+                Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
+            }
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
