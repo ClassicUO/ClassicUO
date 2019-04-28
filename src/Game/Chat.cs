@@ -23,6 +23,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -95,12 +96,25 @@ namespace ClassicUO.Game
 
                 {
                     //server hue color per default
-                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out TargetType targetType))
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
-                        if (targetType == TargetType.Beneficial)
-                            hue = Constants.BENEFIC_LABEL_COLOR;
-                        else if (targetType == TargetType.Harmful)
-                            hue = Constants.HARMFUL_LABEL_COLOR;
+                        if (!string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        {
+                            StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
+                            sb.Replace("{power}", spell.PowerWords);
+                            sb.Replace("{spell}", spell.Name);
+                            text = sb.ToString().Trim();
+                        }
+                        //server hue color per default if not enabled
+                        if (Engine.Profile.Current.EnabledSpellHue)
+                        {
+                            if (spell.TargetType == TargetType.Beneficial)
+                                hue = Engine.Profile.Current.BeneficHue;
+                            else if (spell.TargetType == TargetType.Harmful)
+                                hue = Engine.Profile.Current.HarmfulHue;
+                            else
+                                hue = Engine.Profile.Current.NeutralHue;
+                        }
                     }
 
                     goto case MessageType.Label;

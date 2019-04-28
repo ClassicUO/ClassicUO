@@ -81,6 +81,11 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort AnimalHue { get; set; } = 0x03B2;
         [JsonProperty] public ushort EnemyHue { get; set; } = 0x0031;
         [JsonProperty] public ushort MurdererHue { get; set; } = 0x0023;
+        [JsonProperty] public ushort BeneficHue { get; set; } = 0x0059;
+        [JsonProperty] public ushort HarmfulHue { get; set; } = 0x0020;
+        [JsonProperty] public ushort NeutralHue { get; set; } = 0x03B1;
+        [JsonProperty] public bool EnabledSpellHue { get; set; } = false;
+        [JsonProperty] public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
 
         // visual
         [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
