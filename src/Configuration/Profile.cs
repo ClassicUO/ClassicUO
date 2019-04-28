@@ -148,6 +148,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
+        // Experimental
+        [JsonProperty] public bool EnableSelectionArea { get; set; } = false;
+
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
         [JsonProperty]
