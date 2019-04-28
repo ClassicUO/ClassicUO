@@ -106,7 +106,6 @@ namespace ClassicUO
 
         public bool DisableUpdateWindowCaption { get; set; }
 
-        private SpriteBatch _spriteBatch;
 
         private Engine(string[] args)
         {
@@ -699,8 +698,6 @@ namespace ClassicUO
 
 
             UoAssist.Start();
-
-            _spriteBatch = new SpriteBatch(_graphicDeviceManager.GraphicsDevice);
 
             base.Initialize();
         }

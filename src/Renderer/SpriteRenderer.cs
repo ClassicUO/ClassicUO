@@ -201,7 +201,7 @@ namespace ClassicUO.Renderer
                 for (int i = 0; i < 4; i++)
                     vertices[i].Hue = huev;
 
-                Engine.Batcher.DrawSprite(th, vertices);
+                Engine.Batcher.DrawSprite(th, ref vertices);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
                 vertices[i].Hue = huev;
 
-            Engine.Batcher.DrawSprite(th, vertices);
+            Engine.Batcher.DrawSprite(th, ref vertices);
         }
 
         public static void DrawStaticArt(Graphic graphic, Hue hue, int x, int y)
@@ -267,7 +267,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
                 vertices[i].Hue = huev;
 
-            Engine.Batcher.DrawSprite(th, vertices);
+            Engine.Batcher.DrawSprite(th, ref vertices);
         }
 
         public static void DrawStaticArtAnimated(Graphic graphic, Hue hue, int x, int y, byte offset)
@@ -317,7 +317,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
                 vertices[i].Hue = huev;
 
-            Engine.Batcher.DrawSprite(th, vertices);
+            Engine.Batcher.DrawSprite(th, ref vertices);
         }
 
         public static void DrawStaticArtAnimatedRotated(Graphic graphic, Hue hue, int x, int y, float angle, byte offset)
@@ -355,7 +355,7 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
                 vertices[i].Hue = huev;
 
-            Engine.Batcher.DrawSprite(th, vertices);
+            Engine.Batcher.DrawSprite(th, ref vertices);
         }
 
         public static void DrawStaticArtAnimatedTransparent(Graphic graphic, Hue hue, int x, int y, bool selection, byte offset)

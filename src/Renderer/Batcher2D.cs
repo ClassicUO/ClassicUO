@@ -65,7 +65,7 @@ namespace ClassicUO.Renderer
         private readonly IsometricEffect _isometricEffect;
 
         private int _numSprites;
-        private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
+        private SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
 
         public DepthStencilState Stencil => _dssStencil;
       
@@ -145,7 +145,7 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices)
+        public bool DrawSprite(Texture2D texture, ref SpriteVertex[] vertices)
         {
             EnsureStarted();
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Renderer
             _numSprites++;
 
 
-            DrawSprite(texture, vertices);
+            DrawSprite(texture, ref vertices);
         }
 
         public bool Draw2D(Texture2D texture, int x, int y, Vector3 hue)
@@ -248,7 +248,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, ref _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, Vector3 hue)
@@ -296,7 +296,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, ref _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, Vector3 hue)
@@ -342,7 +342,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
             
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, ref _vertexBufferUI);
         }
 
         public bool Draw2D(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
@@ -383,7 +383,7 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, ref _vertexBufferUI);
         }
 
         public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, Vector3 hue)
@@ -424,40 +424,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool DrawBorder(Texture2D texture, Rectangle r)
-        {
-            int[,] posLeftTop = { // => /
-                {r.X + (r.Width / 2) - 2, r.Y},
-                {r.X + r.Width - 2,r.Y + (r.Height / 2)},
-                {r.X + (r.Width / 2) + 2, r.Y + 2},
-                {r.X + r.Width + 2, r.Y + (r.Height / 2) + 2}
-            };
-
-            int[,] poTopRight = { // => \
-                {r.X, r.Y + (r.Height / 2)},
-                {r.X + (r.Width / 2), r.Y},
-                {r.X + 1, r.Y + (r.Height / 2) + 1},
-                {r.X + (r.Width / 2) + 1, r.Y + 1}
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                _vertexBufferUI[i].Position.X = posLeftTop[i, 0];
-                _vertexBufferUI[i].Position.Y = posLeftTop[i, 1];
-            }
-
-            DrawSprite(texture, _vertexBufferUI);
-
-            for (int i = 0; i < 4; i++)
-            {
-                _vertexBufferUI[i].Position.X = poTopRight[i, 0];
-                _vertexBufferUI[i].Position.Y = poTopRight[i, 1];
-            }
-
-            DrawSprite(texture, _vertexBufferUI);
-
-            return true;
-        }
+       
 
         public void DrawString(Renderer.SpriteFont spriteFont, string text, int x, int y, Vector3 color)
         {

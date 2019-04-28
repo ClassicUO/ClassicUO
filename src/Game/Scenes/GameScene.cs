@@ -749,7 +749,7 @@ namespace ClassicUO.Game.Scenes
                     v.Hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                     v.Hue.Z = 0f;
                 }
-                batcher.DrawSprite(texture, vertex);
+                batcher.DrawSprite(texture, ref vertex);
             }
             _lightCount = 0;
 

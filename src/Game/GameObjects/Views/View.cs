@@ -257,7 +257,7 @@ namespace ClassicUO.Game.GameObjects
             //}
 
 
-            if (!batcher.DrawSprite(Texture, vertex))
+            if (!batcher.DrawSprite(Texture, ref vertex))
             {
                 //if (DrawTransparent)
                 //    batcher.SetBlendState(null);

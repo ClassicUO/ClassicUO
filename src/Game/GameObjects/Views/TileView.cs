@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Land
     {
         private readonly Vector3[] _normals = new Vector3[4];
-        private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
+        private SpriteVertex[] _vertex = new SpriteVertex[4]
         {
             new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
         };
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[3].Hue = HueVector;
             }     
 
-            if (!batcher.DrawSprite(Texture, _vertex))
+            if (!batcher.DrawSprite(Texture, ref _vertex))
                 return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))
