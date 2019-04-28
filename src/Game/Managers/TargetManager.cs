@@ -116,8 +116,6 @@ namespace ClassicUO.Game.Managers
             MultiTargetInfo = new MultiTargetInfo(model, x, y, z);
         }
 
-
-
         private static void TargetXYZ(GameObject selectedEntity)
         {
             Graphic modelNumber = 0;
