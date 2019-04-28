@@ -765,9 +765,13 @@ namespace ClassicUO
                 Profiler.EnterContext("FixedUpdate");
                 OnFixedUpdate(totalms, framems);
                 Profiler.ExitContext("FixedUpdate");
+
+                
             }
             else
+            {
                 SuppressDraw();
+            }
 
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");

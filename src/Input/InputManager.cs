@@ -152,7 +152,9 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
                     MouseMoving.Raise();
-                    if (Mouse.IsDragging) MouseDragging.Raise();
+
+                    if (Mouse.IsDragging)
+                        MouseDragging.Raise();
 
                     if (Mouse.IsDragging && !_dragStarted)
                     {

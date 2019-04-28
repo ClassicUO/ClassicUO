@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Scenes
         private bool _rightMousePressed, _continueRunning, _useObjectHandles;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
-        public bool IsMouseOverViewport => Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl is WorldViewport;
+        public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
         private void MoveCharacterByInputs()
         {

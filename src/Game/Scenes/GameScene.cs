@@ -652,7 +652,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
+                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                            RenderedObjectsCount++;
                     }
 
                     //obj = null;

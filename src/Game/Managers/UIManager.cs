@@ -649,7 +649,7 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(Batcher2D batcher)
         {
-            SortControlsByInfo();
+            //SortControlsByInfo();
 
             batcher.GraphicsDevice.Clear(Color.Transparent);
             batcher.Begin();

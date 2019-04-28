@@ -31,7 +31,6 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Land
     {
         private readonly Vector3[] _normals = new Vector3[4];
-        private Vector3 _storedHue;
         private SpriteVertex[] _vertex = new SpriteVertex[4]
         {
             new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
@@ -53,7 +52,8 @@ namespace ClassicUO.Game.GameObjects
                 else
                 {
                     Texture = FileManager.Art.GetLandTexture(Graphic);
-                    Bounds = new Rectangle(0, 0, 44, 44);
+                    Bounds.Width = 44;
+                    Bounds.Height = 44;
                 }
             }
 
@@ -82,29 +82,6 @@ namespace ClassicUO.Game.GameObjects
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
             }
 
-            //if (IsStretched)
-            //{
-
-            //    Vector3.Add(ref position, ref _vertex0_yOffset, out _vertex[0].Position);
-            //    Vector3.Add(ref position, ref _vertex1_yOffset, out _vertex[1].Position);
-            //    Vector3.Add(ref position, ref _vertex2_yOffset, out _vertex[2].Position);
-            //    Vector3.Add(ref position, ref _vertex3_yOffset, out _vertex[3].Position);
-            //    int z = Z * 4;
-
-            //    _vertex[0].Position.Y += z;
-            //    _vertex[1].Position.Y += z;
-            //    _vertex[2].Position.Y += z;
-            //    _vertex[3].Position.Y += z;
-
-            //    SpriteRenderer.DrawLand(this, Hue, (int)position.X, (int)position.Y, _vertex);
-            //    return true;
-
-            //}
-            //else
-            //{
-            //    SpriteRenderer.DrawLandArt(Graphic, Hue, (int) position.X, (int) position.Y);
-            //    return true;
-            //}
 
             bool ok = IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY);
 
@@ -122,23 +99,6 @@ namespace ClassicUO.Game.GameObjects
         private bool Draw3DStretched(Batcher2D batcher, int posX, int posY)
         {
             Texture.Ticks = Engine.Ticks;
-
-
-            //if (Engine.Profile.Current.HighlightGameObjects)
-            //{
-            //    if (IsSelected)
-            //    {
-            //        if (_storedHue == Vector3.Zero)
-            //            _storedHue = HueVector;
-            //        HueVector = ShaderHuesTraslator.SelectedHue;
-            //    }
-            //    else if (_storedHue != Vector3.Zero)
-            //    {
-            //        HueVector = _storedHue;
-            //        _storedHue = Vector3.Zero;
-            //    }
-            //}
-
 
             _vertex[0].Position.X = posX + _vertex0_yOffset.X;
             _vertex[1].Position.X = posX + _vertex1_yOffset.X;
@@ -167,22 +127,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsStretched)
             {
-                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4)) SelectedObject.Object = this;
+                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
+                    SelectedObject.Object = this;
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
+                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y))
+                    SelectedObject.Object = this;
             }
         }
-
-        //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
-        //{
-        //    int x = list.MousePosition.X - (int)vertex[0].Position.X;
-        //    int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
-
-        //    if (Texture.Contains(x, y))
-        //        list.Add(this, vertex[0].Position);
-        //}
 
         private void UpdateStreched(int x, int y, sbyte z)
         {
@@ -288,12 +241,6 @@ namespace ClassicUO.Game.GameObjects
                 _vertex3_yOffset.X = 22;
                 _vertex3_yOffset.Y = 44 - Rectangle.Right;
             }
-
-            Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Hue);
-
-            if (_vertex[0].Hue != hue)
-                _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;
         }
 
         private static bool TestStretched(int x, int y, sbyte z, bool recurse)

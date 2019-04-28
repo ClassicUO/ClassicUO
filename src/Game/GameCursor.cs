@@ -189,14 +189,9 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (pixels != null && pixels.Length > 0)
+                    if (pixels != null && pixels.Length != 0)
                     {
-                        _cursorPixels[i, j] = new CursorInfo
-                        {
-                            Width = w,
-                            Height = h,
-                            Pixels = pixels
-                        };
+                        _cursorPixels[i, j] = new CursorInfo(pixels, w, h);
                     }
                 }
             }
@@ -490,10 +485,17 @@ namespace ClassicUO.Game
             return a - b;
         }
 
-        private struct CursorInfo
+        private readonly struct CursorInfo
         {
-            public ushort[] Pixels;
-            public int Width, Height;
+            public CursorInfo(ushort[] pixels, int w, int h)
+            {
+                Pixels = pixels;
+                Width = w;
+                Height = h;
+            }
+
+            public readonly ushort[] Pixels;
+            public readonly int Width, Height;
         }
     }
 }
