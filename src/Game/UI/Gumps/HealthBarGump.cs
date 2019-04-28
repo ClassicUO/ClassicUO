@@ -467,7 +467,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)
+            {
                 _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
+            }
         }
 
         private static int CalculatePercents(int max, int current, int maxValue)
