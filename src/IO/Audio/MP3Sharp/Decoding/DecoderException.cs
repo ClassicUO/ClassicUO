@@ -28,17 +28,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             m_ErrorCode = info.GetInt32("ErrorCode");
         }
 
-        public virtual int ErrorCode
-        {
-            get { return m_ErrorCode; }
-        }
+        public virtual int ErrorCode => m_ErrorCode;
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            if (info == null) throw new ArgumentNullException(nameof(info));
 
             info.AddValue("ErrorCode", m_ErrorCode);
             base.GetObjectData(info, context);

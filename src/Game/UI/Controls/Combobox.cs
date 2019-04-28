@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -29,11 +31,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Combobox : Control
     {
+        private readonly byte _font;
         private readonly Label _label;
         private readonly int _maxHeight;
         private string[] _items;
         private int _selectedIndex;
-        private readonly byte _font;
 
         public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 9)
         {
@@ -81,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal string GetSelectedItem => _label.Text;
 
-        internal uint GetItemsLength => (uint)_items.Length;
+        internal uint GetItemsLength => (uint) _items.Length;
 
         internal void SetItemsValue(string[] items)
         {
@@ -94,6 +96,7 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             OnBeforeContextMenu?.Invoke(this, null);
+
             var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
@@ -152,6 +155,7 @@ namespace ClassicUO.Game.UI.Controls
                         label.Width = maxWidth;
                         Add(label);
                     }
+
                     background.Height = totalHeight;
                 }
 

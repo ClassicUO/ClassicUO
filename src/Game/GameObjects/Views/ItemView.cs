@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,20 +18,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -38,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private Graphic _originalGraphic;
 
-       
+
         public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
@@ -114,15 +116,12 @@ namespace ClassicUO.Game.GameObjects
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
-           // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
-           // return true;
+            // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
+            // return true;
 
-           if (base.Draw(batcher, posX, posY))
-           {
-               return true;
-           }
+            if (base.Draw(batcher, posX, posY)) return true;
 
-           return false;
+            return false;
         }
 
         private bool DrawCorpse(Batcher2D batcher, int posX, int posY)
@@ -144,6 +143,7 @@ namespace ClassicUO.Game.GameObjects
                 Layer layer = LayerOrder.UsedLayers[dir, i];
                 DrawLayer(batcher, posX, posY, layer, animIndex);
             }
+
             return true;
         }
 
@@ -160,16 +160,17 @@ namespace ClassicUO.Game.GameObjects
                 if (color == 0)
                     color = Hue;
             }
-            else if (HasEquipment && Utility.MathHelper.InRange(Amount, 0x0190, 0x0193) || 
-                     Utility.MathHelper.InRange(Amount, 0x00B7, 0x00BA) || 
-                     Utility.MathHelper.InRange(Amount, 0x025D, 0x0260) || 
-                     Utility.MathHelper.InRange(Amount, 0x029A, 0x029B) || 
-                     Utility.MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
+            else if (HasEquipment && MathHelper.InRange(Amount, 0x0190, 0x0193) ||
+                     MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
+                     MathHelper.InRange(Amount, 0x025D, 0x0260) ||
+                     MathHelper.InRange(Amount, 0x029A, 0x029B) ||
+                     MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
                      Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9)
             {
-                Item itemEquip = Equipment[(int)layer];
+                Item itemEquip = Equipment[(int) layer];
 
                 if (itemEquip == null) return;
+
                 graphic = itemEquip.ItemData.AnimID;
 
                 if (FileManager.Animations.EquipConversions.TryGetValue(Amount, out Dictionary<ushort, EquipConvData> map))
@@ -188,18 +189,21 @@ namespace ClassicUO.Game.GameObjects
 
             byte animGroup = FileManager.Animations.AnimGroup;
 
-            var gr = layer == Layer.Invalid ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
-                : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+            var gr = layer == Layer.Invalid
+                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
+                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
+
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
+
             if (fc > 0 && animIndex >= fc)
-                animIndex = (byte)(fc - 1);
+                animIndex = (byte) (fc - 1);
 
             if (animIndex < direction.FrameCount)
             {
@@ -220,7 +224,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
-               
+
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -233,17 +237,12 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                    {
-                        color = 0x0023;
-                    }
+                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected) color = 0x0023;
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color);
                 }
 
                 base.Draw(batcher, posX, posY);
                 Select(IsFlipped ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
-
-                
             }
         }
 
@@ -251,10 +250,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsCorpse)
             {
-                if (!IsSelected && Texture.Contains(x, y))
-                {
-                    SelectedObject.Object = this;
-                }
+                if (!IsSelected && Texture.Contains(x, y)) SelectedObject.Object = this;
                 //if (SelectedObject.IsPointInCorpse(this, x - Bounds.X, y - Bounds.Y))
                 //{
                 //    SelectedObject.Object = this;
@@ -262,12 +258,8 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
-                {
-                    SelectedObject.Object = this;
-                }
-            }       
+                if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
+            }
         }
-
     }
 }

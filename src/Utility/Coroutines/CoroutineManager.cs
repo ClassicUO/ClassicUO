@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ClassicUO.Utility.Coroutines
 {
@@ -26,7 +22,7 @@ namespace ClassicUO.Utility.Coroutines
         public void Clear()
         {
             _coroutines.ForEach(s => s.Cancel());
-            _coroutines.ForEach( s=> s.Dispose());
+            _coroutines.ForEach(s => s.Dispose());
 
             _scheduled.Clear();
             _coroutines.Clear();
@@ -40,9 +36,9 @@ namespace ClassicUO.Utility.Coroutines
             _coroutines.ForEach(s =>
             {
                 s.Update();
+
                 if (s.Status != CoroutineStatus.Running && s.Status != CoroutineStatus.Paused)
                     _trashcan.Add(s);
-
             });
 
             for (int i = 0; i < _trashcan.Count; i++)

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Utility;
@@ -61,7 +56,7 @@ namespace ClassicUO.IO.Resources
                         ref UOFileIndex3D index = ref _file.Entries[id];
                         int count = _reader.ReadInt();
 
-                        index = new UOFileIndex3D(offset, csize, dsize, (int)MathHelper.Combine(count, index.Extra));
+                        index = new UOFileIndex3D(offset, csize, dsize, (int) MathHelper.Combine(count, index.Extra));
                     }
                 }
 
@@ -77,24 +72,24 @@ namespace ClassicUO.IO.Resources
         public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out bool add)
         {
             if (_fileUop != null && uopValid)
-            {             
+            {
                 graphic = _reader.ReadUShort();
 
                 x = _reader.ReadShort();
                 y = _reader.ReadShort();
                 z = _reader.ReadShort();
                 ushort flags = _reader.ReadUShort();
-              
+
                 uint clilocsCount = _reader.ReadUInt();
 
                 if (clilocsCount != 0)
-                    _reader.Skip( (int) (clilocsCount * 4));
+                    _reader.Skip((int) (clilocsCount * 4));
 
                 add = flags == 0;
             }
             else
             {
-                MultiBlock* block = (MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+                MultiBlock* block = (MultiBlock*) (_file.PositionAddress + index * _itemOffset);
 
                 graphic = block->ID;
                 x = block->X;
@@ -106,9 +101,12 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public void ReleaseLastMultiDataRead() => _reader?.ReleaseData();
+        public void ReleaseLastMultiDataRead()
+        {
+            _reader?.ReleaseData();
+        }
 
-    
+
         public int GetCount(int graphic, out bool uopValid)
         {
             int count;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -12,11 +8,12 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
 {
-    static class SelectedObject
+    internal static class SelectedObject
     {
         public static IGameEntity Object { get; set; }
 
@@ -25,10 +22,10 @@ namespace ClassicUO.Game
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
             bool mirror = false;
-            byte dir = (byte)mobile.GetDirectionForAnimation();
+            byte dir = (byte) mobile.GetDirectionForAnimation();
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
-          
+
             sbyte animIndex = mobile.AnimIndex;
 
             for (int i = -2; i < Constants.USED_LAYER_COUNT; i++)
@@ -38,48 +35,36 @@ namespace ClassicUO.Game
                 ushort graphic;
 
                 if (layer == Layer.Invalid)
-                {
                     graphic = mobile.GetGraphicForAnimation();
-
-                }
-                else if(mobile.HasEquipment)
+                else if (mobile.HasEquipment)
                 {
-                    Item item = mobile.Equipment[(int)layer];
+                    Item item = mobile.Equipment[(int) layer];
 
                     if (item == null)
                         continue;
 
                     if (layer == Layer.Mount)
-                    {
                         graphic = item.GetGraphicForAnimation();
-                    }
                     else if (item.ItemData.AnimID != 0)
                     {
                         if (Mobile.IsCovered(mobile, layer))
                             continue;
 
                         graphic = item.ItemData.AnimID;
+
                         if (FileManager.Animations.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
-                        {
                             if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
-                            {
                                 graphic = data.Graphic;
-                            }
-                        }
                     }
                     else
-                    {                    
                         continue;
-                    }
                 }
                 else
-                {
                     continue;
-                }
-               
+
 
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
-               
+
                 ushort hue = 0;
                 ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
@@ -91,6 +76,7 @@ namespace ClassicUO.Game
                     continue;
 
                 int fc = direction.FrameCount;
+
                 if (fc != 0 && animIndex >= fc)
                     animIndex = 0;
 
@@ -104,21 +90,19 @@ namespace ClassicUO.Game
                     int drawX;
 
                     int drawCenterY = frame.CenterY;
-                    int yOff = (int)(mobile.Offset.Z / 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
+                    int yOff = (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
                     int drawY = drawCenterY + yOff;
 
                     if (mirror)
-                        drawX = -22 + (int)mobile.Offset.X;
+                        drawX = -22 + (int) mobile.Offset.X;
                     else
-                        drawX = -22 - (int)mobile.Offset.X;
+                        drawX = -22 - (int) mobile.Offset.X;
 
                     int x = drawX + frame.CenterX;
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                     if (mirror)
-                    {
                         x = xx + x + 44 - Mouse.Position.X;
-                    }
                     else
                         x = Mouse.Position.X - xx + x;
 
@@ -127,11 +111,7 @@ namespace ClassicUO.Game
                     if (frame.Contains(x, y))
                         return true;
                 }
-
             }
-
-
-
 
 
             return false;
@@ -142,11 +122,11 @@ namespace ClassicUO.Game
             if (corpse == null || World.CorpseManager.Exists(corpse.Serial, 0))
                 return false;
 
-            byte dir = (byte)((byte)corpse.Layer & 0x7F & 7);
+            byte dir = (byte) ((byte) corpse.Layer & 0x7F & 7);
             bool mirror = false;
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             FileManager.Animations.Direction = dir;
-            byte animIndex = (byte)corpse.AnimIndex;
+            byte animIndex = (byte) corpse.AnimIndex;
 
             for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -160,14 +140,14 @@ namespace ClassicUO.Game
                     graphic = corpse.GetGraphicForAnimation();
                     FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(graphic, corpse.UsedLayer);
                 }
-                else if (corpse.HasEquipment && Utility.MathHelper.InRange(corpse.Amount, 0x0190, 0x0193) ||
-                         Utility.MathHelper.InRange(corpse.Amount, 0x00B7, 0x00BA) ||
-                         Utility.MathHelper.InRange(corpse.Amount, 0x025D, 0x0260) ||
-                         Utility.MathHelper.InRange(corpse.Amount, 0x029A, 0x029B) ||
-                         Utility.MathHelper.InRange(corpse.Amount, 0x02B6, 0x02B7) ||
+                else if (corpse.HasEquipment && MathHelper.InRange(corpse.Amount, 0x0190, 0x0193) ||
+                         MathHelper.InRange(corpse.Amount, 0x00B7, 0x00BA) ||
+                         MathHelper.InRange(corpse.Amount, 0x025D, 0x0260) ||
+                         MathHelper.InRange(corpse.Amount, 0x029A, 0x029B) ||
+                         MathHelper.InRange(corpse.Amount, 0x02B6, 0x02B7) ||
                          corpse.Amount == 0x03DB || corpse.Amount == 0x03DF || corpse.Amount == 0x03E2 || corpse.Amount == 0x02E8 || corpse.Amount == 0x02E9)
                 {
-                    Item itemEquip = corpse.Equipment[(int)layer];
+                    Item itemEquip = corpse.Equipment[(int) layer];
 
                     if (itemEquip == null)
                         continue;
@@ -181,14 +161,13 @@ namespace ClassicUO.Game
                     }
                 }
                 else
-                {                    
                     continue;
-                }
 
 
                 byte animGroup = FileManager.Animations.AnimGroup;
 
-                var gr = layer == Layer.Invalid ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
+                var gr = layer == Layer.Invalid
+                             ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
                              : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
                 ref var direction = ref gr.Direction[FileManager.Animations.Direction];
@@ -199,8 +178,9 @@ namespace ClassicUO.Game
 
 
                 int fc = direction.FrameCount;
+
                 if (fc > 0 && animIndex >= fc)
-                    animIndex = (byte)(fc - 1);
+                    animIndex = (byte) (fc - 1);
 
                 if (animIndex < direction.FrameCount)
                 {
@@ -217,9 +197,7 @@ namespace ClassicUO.Game
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                     if (mirror)
-                    {
                         x = xx + x + 44 - Mouse.Position.X;
-                    }
                     else
                         x = Mouse.Position.X - xx + x;
 
@@ -237,10 +215,7 @@ namespace ClassicUO.Game
         {
             SpriteTexture texture = FileManager.Art.GetTexture(graphic);
 
-            if (texture != null)
-            {               
-                return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
-            }
+            if (texture != null) return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
 
             return false;
         }
@@ -249,10 +224,7 @@ namespace ClassicUO.Game
         {
             SpriteTexture texture = FileManager.Art.GetLandTexture(graphic);
 
-            if (texture != null)
-            {
-                return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
-            }
+            if (texture != null) return texture.Contains(Mouse.Position.X - x, Mouse.Position.Y - y);
 
             return false;
         }
@@ -271,10 +243,9 @@ namespace ClassicUO.Game
             int y3 = 22 - rect.Bottom;
 
 
-            return ((testY >= testX * (y1 - y0) / -22 + y + y0) &&
-                    (testY >= testX * (y3 - y0) / 22 + y + y0) && (testY <= testX * (y3 - y2) / 22 + y + y2) &&
-                    (testY <= testX * (y1 - y2) / -22 + y + y2)); 
+            return testY >= testX * (y1 - y0) / -22 + y + y0 &&
+                   testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
+                   testY <= testX * (y1 - y2) / -22 + y + y2;
         }
-
     }
 }

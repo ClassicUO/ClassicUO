@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,31 +18,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
-using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static
     {
-        private readonly bool _isFoliage, _isPartialHue;
         private readonly int _canBeTransparent;
+        private readonly bool _isFoliage, _isPartialHue;
 
         private Graphic _oldGraphic;
 
@@ -82,9 +73,9 @@ namespace ClassicUO.Game.GameObjects
             if (_isFoliage)
             {
                 if (CharacterIsBehindFoliage)
-                {      
+                {
                     if (AlphaHue != 76)
-                        ProcessAlpha(76);                    
+                        ProcessAlpha(76);
                 }
                 else
                 {
@@ -108,6 +99,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = Hue;
                 bool isPartial = _isPartialHue;
+
                 if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
                 {
                     hue = 0x0023;
@@ -127,22 +119,20 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
+
             return true;
         }
 
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
-            {
-                SelectedObject.Object = this;
-            }
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
         }
 
         //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
         //{
 
-           
+
 
         //    //int x = list.MousePosition.X - (int) vertex[0].Position.X;
         //    //int y = list.MousePosition.Y - (int) vertex[0].Position.Y;

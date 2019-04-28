@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Renderer;
+﻿using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
@@ -21,6 +15,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ScaleTexture { get; set; }
 
+        public Hue Hue { get; set; }
+        public bool IsPartial { get; set; }
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -28,9 +25,6 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture != null)
                 Texture.Ticks = Engine.Ticks;
         }
-
-        public Hue Hue { get; set; }
-        public bool IsPartial { get; set; }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
@@ -61,8 +55,10 @@ namespace ClassicUO.Game.UI.Controls
 
                     return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, hue);
                 }
+
                 return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, hue);
             }
+
             return batcher.Draw2D(Texture, x, y, hue);
         }
     }

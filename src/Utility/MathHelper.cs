@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -47,18 +50,20 @@ namespace ClassicUO.Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong Combine(int val1, int val2)
         {
-            return (ulong)(long)val1 | ((ulong)(long)(val2) << 32);
+            return (ulong) val1 | ((ulong) val2 << 32);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetNumbersFromCombine(ulong b, out int val1, out int val2)
         {
-            val1 = (int)(0xFFFFFFFF & b);
+            val1 = (int) (0xFFFFFFFF & b);
             val2 = (int) (b >> 32);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int PercetangeOf(int current, int max)
-            => current / max * 100;
+        {
+            return current / max * 100;
+        }
     }
 }

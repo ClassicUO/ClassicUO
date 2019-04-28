@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 
-using ClassicUO.Utility;
 using ClassicUO.Game.Managers;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {
@@ -159,6 +161,7 @@ namespace ClassicUO.Game.Data
 
                         break;
                     default:
+
                         if (Regs[i] < Reagents.None)
                             sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
                         else
@@ -183,20 +186,28 @@ namespace ClassicUO.Game.Data
         {
             if (fullidx < 1 || fullidx > 799)
                 return EmptySpell;
-            else if (fullidx < 100)
+
+            if (fullidx < 100)
                 return SpellsMagery.GetSpell(fullidx);
-            else if(fullidx < 200)
+
+            if (fullidx < 200)
                 return SpellsNecromancy.GetSpell(fullidx % 100);
-            else if(fullidx < 300)
+
+            if (fullidx < 300)
                 return SpellsChivalry.GetSpell(fullidx % 100);
-            else if(fullidx < 500)
+
+            if (fullidx < 500)
                 return SpellsBushido.GetSpell(fullidx % 100);
-            else if(fullidx < 600)
+
+            if (fullidx < 600)
                 return SpellsNinjitsu.GetSpell(fullidx % 100);
-            else if(fullidx < 678)
+
+            if (fullidx < 678)
                 return SpellsSpellweaving.GetSpell(fullidx % 100);
-            else if(fullidx < 700)
+
+            if (fullidx < 700)
                 return SpellsMysticism.GetSpell((fullidx - 77) % 100);
+
             return SpellsBardic.GetSpell(fullidx % 100);
         }
 
@@ -204,29 +215,33 @@ namespace ClassicUO.Game.Data
         {
             if (fullidx < 1 || fullidx > 799)
                 return;
-            SpellDefinition sd  = FullIndexGetSpell(fullidx);
-            if(sd.ID == fullidx)//we are not using an emptyspell spelldefinition
+
+            SpellDefinition sd = FullIndexGetSpell(fullidx);
+
+            if (sd.ID == fullidx) //we are not using an emptyspell spelldefinition
             {
                 if (iconid == 0)
                     iconid = sd.GumpIconID;
+
                 if (smalliconid == 0)
                     smalliconid = sd.GumpIconSmallID;
+
                 if (tithing == 0)
                     tithing = sd.TithingCost;
+
                 if (manacost == 0)
                     manacost = sd.ManaCost;
+
                 if (minskill == 0)
                     minskill = sd.MinSkill;
+
                 if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words)
-                {
                     WordToTargettype.Remove(sd.PowerWords);
-                }
-                else if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name)
-                {
-                    WordToTargettype.Remove(sd.Name);
-                }
+                else if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name) WordToTargettype.Remove(sd.Name);
             }
+
             sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
+
             if (fullidx < 100)
                 SpellsMagery.SetSpell(id, sd);
             else if (fullidx < 200)

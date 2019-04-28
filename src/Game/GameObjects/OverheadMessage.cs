@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Input;
-using ClassicUO.Interfaces;
-using ClassicUO.IO;
+﻿using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -19,11 +11,8 @@ namespace ClassicUO.Game.GameObjects
     internal class OverheadMessage
     {
         private readonly Deque<MessageInfo> _messages;
-        private Rectangle _rectangle;
         private float _alpha;
-
-        public OverheadMessage Left { get; set; }
-        public OverheadMessage Right { get; set; }
+        private Rectangle _rectangle;
 
 
         public OverheadMessage(GameObject parent)
@@ -31,6 +20,9 @@ namespace ClassicUO.Game.GameObjects
             Parent = parent;
             _messages = new Deque<MessageInfo>();
         }
+
+        public OverheadMessage Left { get; set; }
+        public OverheadMessage Right { get; set; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
@@ -52,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
+                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
 
                 timeToLive = (delay >> 31) + delay;
             }
@@ -98,11 +90,11 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
 
-            RenderedText rtext = new RenderedText()
+            RenderedText rtext = new RenderedText
             {
                 Font = font,
                 MaxWidth = width,
@@ -113,9 +105,8 @@ namespace ClassicUO.Game.GameObjects
                 Text = msg
             };
 
-           
 
-            var msgInfo = new MessageInfo()
+            var msgInfo = new MessageInfo
             {
                 Alpha = 0,
                 RenderedText = rtext,
@@ -151,12 +142,12 @@ namespace ClassicUO.Game.GameObjects
                     _messages.RemoveAt(i--);
                 }
             }
-            
+
             if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
                 _messages.AddToFront(msgInfo);
-            else 
+            else
                 _messages.Insert(1, msgInfo);
-            
+
 
             if (_rectangle.Width < rtext.Width)
                 _rectangle.Width = rtext.Width;
@@ -166,6 +157,7 @@ namespace ClassicUO.Game.GameObjects
         public float IsOverlap(OverheadMessage firstNode)
         {
             int count = 0;
+
             for (var ov = firstNode; ov != null; ov = ov.Right)
             {
                 if (ov != this && ov._rectangle.Intersects(_rectangle))
@@ -177,10 +169,14 @@ namespace ClassicUO.Game.GameObjects
 
             float alpha = _alpha;
             _alpha = alpha * count;
+
             return alpha;
         }
 
-        public void SetAlpha(float alpha) => _alpha = alpha;
+        public void SetAlpha(float alpha)
+        {
+            _alpha = alpha;
+        }
 
         public void Update()
         {
@@ -205,9 +201,7 @@ namespace ClassicUO.Game.GameObjects
                     _messages.RemoveAt(i--);
                 }
                 else if (delta < 250)
-                {
                     c.Alpha = 1f - delta / 250;
-                }
                 else
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
@@ -241,7 +235,7 @@ namespace ClassicUO.Game.GameObjects
 
                 x += (int) m.Offset.X;
                 x += 22;
-                y += (int) ((m.Offset.Y - m.Offset.Z) - (height + centerY + 8));
+                y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
             }
             else if (Parent.Texture != null)
             {
@@ -257,15 +251,15 @@ namespace ClassicUO.Game.GameObjects
             x = (int) (x / scale);
             y = (int) (y / scale);
 
-            x -= (int)(screenX / scale);
-            y -= (int)(screenY / scale);
+            x -= (int) (screenX / scale);
+            y -= (int) (screenY / scale);
 
             x += screenX;
             y += screenY;
 
 
             if (x - _rectangle.Width / 2 + 6 < screenX)
-                x = screenX + (_rectangle.Width / 2 + 6);
+                x = screenX + _rectangle.Width / 2 + 6;
             else if (x > screenX + screenW - (_rectangle.Width / 2 - 3))
                 x = screenX + screenW - (_rectangle.Width / 2 - 3);
 
@@ -275,10 +269,8 @@ namespace ClassicUO.Game.GameObjects
                 y = screenY + screenH + offY;
 
 
-
             _rectangle.X = x - _rectangle.Width / 2;
             _rectangle.Y = y - offY - _rectangle.Height;
-
 
 
             //int startY = offY;
@@ -287,12 +279,8 @@ namespace ClassicUO.Game.GameObjects
                 ushort hue = 0;
 
                 if (Engine.Profile.Current.HighlightGameObjects)
-                {
                     if (item.IsSelected)
-                    {
                         hue = 23;
-                    }
-                }
 
                 item.X = x - item.RenderedText.Width / 2;
                 item.Y = y - offY - item.RenderedText.Height;
@@ -317,7 +305,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
-                frameIndex = (byte)mobile.AnimIndex;
+                frameIndex = (byte) mobile.AnimIndex;
             FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
@@ -332,6 +320,7 @@ namespace ClassicUO.Game.GameObjects
                 if (item.RenderedText.Texture.Contains(x - item.X, y - item.Y))
                 {
                     SelectedObject.Object = item;
+
                     return true;
                 }
             }
@@ -346,7 +335,7 @@ namespace ClassicUO.Game.GameObjects
 
             IsDestroyed = true;
 
-            foreach (var item in _messages)    
+            foreach (var item in _messages)
                 item.RenderedText.Destroy();
 
             _messages.Clear();
@@ -357,9 +346,9 @@ namespace ClassicUO.Game.GameObjects
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
 
-        private Rectangle _rectangle;
-
         private readonly Deque<MessageInfo> _messages;
+
+        private Rectangle _rectangle;
 
 
         public OverheadDamage(GameObject parent)
@@ -374,17 +363,19 @@ namespace ClassicUO.Game.GameObjects
         public bool IsEmpty => _messages.Count == 0;
 
         public void SetParent(GameObject parent)
-            => Parent = parent;
+        {
+            Parent = parent;
+        }
 
         public void Add(int damage)
         {
-            _messages.AddToFront(new MessageInfo()
+            _messages.AddToFront(new MessageInfo
             {
                 RenderedText = new RenderedText
                 {
                     IsUnicode = false,
                     Font = 3,
-                    Hue = (Hue)(Parent == World.Player ? 0x0034 : 0x0021),
+                    Hue = (Hue) (Parent == World.Player ? 0x0034 : 0x0021),
                     Text = damage.ToString()
                 },
                 Time = Engine.Ticks + 1500
@@ -421,9 +412,7 @@ namespace ClassicUO.Game.GameObjects
                     _messages.RemoveAt(i--);
                 }
                 else if (delta < 250)
-                {
                     c.Alpha = 1f - delta / 250;
-                }
                 else
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
@@ -452,7 +441,7 @@ namespace ClassicUO.Game.GameObjects
 
                 _rectangle.X = Parent.RealScreenPosition.X;
                 _rectangle.Y = Parent.RealScreenPosition.Y;
-            
+
                 if (Parent is Mobile m)
                 {
                     if (!m.IsMounted)
@@ -460,9 +449,9 @@ namespace ClassicUO.Game.GameObjects
 
                     GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                    x += (int)m.Offset.X;
+                    x += (int) m.Offset.X;
                     x += 22;
-                    y += (int)((m.Offset.Y - m.Offset.Z) - (height + centerY + 8));
+                    y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
                 else if (Parent.Texture != null)
                 {
@@ -476,6 +465,7 @@ namespace ClassicUO.Game.GameObjects
                         else if (it.ItemData.IsAnimated)
                         {
                             Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
+
                             if (texture != null)
                                 yValue = texture.Height / 2;
                         }
@@ -486,13 +476,13 @@ namespace ClassicUO.Game.GameObjects
                     y -= yValue;
                 }
             }
- 
 
-            x = (int)(x / scale);
-            y = (int)(y / scale);
 
-            x -= (int)(screenX / scale);
-            y -= (int)(screenY / scale);
+            x = (int) (x / scale);
+            y = (int) (y / scale);
+
+            x -= (int) (screenX / scale);
+            y -= (int) (screenY / scale);
 
             x += screenX;
             y += screenY;
@@ -503,12 +493,8 @@ namespace ClassicUO.Game.GameObjects
                 ushort hue = 0;
 
                 if (Engine.Profile.Current.HighlightGameObjects)
-                {
                     if (item.IsSelected)
-                    {
                         hue = 23;
-                    }
-                }
 
                 item.X = x - item.RenderedText.Width / 2;
                 item.Y = y - offY - item.RenderedText.Height - item.OffsetY;
@@ -526,7 +512,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
-                frameIndex = (byte)mobile.AnimIndex;
+                frameIndex = (byte) mobile.AnimIndex;
             FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
@@ -544,20 +530,18 @@ namespace ClassicUO.Game.GameObjects
 
             _messages.Clear();
         }
-
-
     }
 
     internal class MessageInfo : IGameEntity
     {
-        public RenderedText RenderedText;
-        public float Time, SecondTime;
         public float Alpha;
-        public MessageType Type;
-        public int X, Y, OffsetY;
         public bool IsHealthMessage;
 
         public OverheadMessage Parent;
+        public RenderedText RenderedText;
+        public float Time, SecondTime;
+        public MessageType Type;
+        public int X, Y, OffsetY;
 
         public bool IsSelected { get; set; }
     }

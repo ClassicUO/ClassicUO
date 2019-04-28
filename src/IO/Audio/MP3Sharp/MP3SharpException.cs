@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
+
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
@@ -38,13 +39,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         public void PrintStackTrace(StreamWriter ps)
         {
             if (InnerException == null)
-            {
                 SupportClass.WriteStackTrace(this, ps);
-            }
             else
-            {
                 SupportClass.WriteStackTrace(InnerException, Console.Error);
-            }
         }
     }
 }

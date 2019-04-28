@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,22 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {
     internal static class SpellsMagery
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
-        internal static int MaxSpellCount => _spellsDict.Count;
+
+        private static string[] _spRegsChars;
 
         static SpellsMagery()
         {
@@ -238,27 +242,31 @@ namespace ClassicUO.Game.Data
             };
         }
 
+        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
+        internal static int MaxSpellCount => _spellsDict.Count;
+
         public static string[] CircleNames { get; } =
         {
             "First Circle", "Second Circle", "Third Circle", "Fourth Circle", "Fifth Circle", "Sixth Circle", "Seventh Circle", "Eighth Circle"
         };
 
-        private static string[] _spRegsChars = null;
         public static string[] SpecialReagentsChars
         {
             get
             {
-                if(_spRegsChars == null)
+                if (_spRegsChars == null)
                 {
                     _spRegsChars = new string[_spellsDict.Max(o => o.Key)];
-                    for(int i = _spRegsChars.Length; i>0; --i)
+
+                    for (int i = _spRegsChars.Length; i > 0; --i)
                     {
                         if (_spellsDict.TryGetValue(i, out SpellDefinition sd))
-                            _spRegsChars[i - 1] = Utility.StringHelper.RemoveUpperLowerChars(sd.PowerWords);
+                            _spRegsChars[i - 1] = StringHelper.RemoveUpperLowerChars(sd.PowerWords);
                         else
                             _spRegsChars[i - 1] = string.Empty;
                     }
                 }
+
                 return _spRegsChars;
             }
         }

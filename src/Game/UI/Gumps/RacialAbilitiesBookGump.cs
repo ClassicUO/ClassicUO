@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -13,11 +7,19 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class RacialAbilitiesBookGump : Gump
     {
-        private int _dictionaryPagesCount = 1;
+        private static readonly string[] _humanNames = {"Strong Back", "Tough", "Workhorse", "Jack of All Trades"};
+        private static readonly string[] _elfNames =
+        {
+            "Night Sight", "Infused with Magic",
+            "Knowledge of Nature", "Difficult to Track",
+            "Perception", "Wisdom"
+        };
+        private static readonly string[] _gargoyleNames = {"Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight"};
         private int _abilityCount = 4;
+        private int _dictionaryPagesCount = 1;
+        private GumpPic _pageCornerLeft, _pageCornerRight;
         private int _pagesCount = 3;
         private int _tooltipOffset = 1112198;
-        private GumpPic _pageCornerLeft, _pageCornerRight;
 
         public RacialAbilitiesBookGump(int x, int y) : base(0, 0)
         {
@@ -31,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Add(new GumpPic(0,0,0x2B29, 0));
+            Add(new GumpPic(0, 0, 0x2B29, 0));
 
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
@@ -69,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    Label text = new Label("INDEX", false, 0x0288, font: 6) { X = indexX, Y = 10 };
+                    Label text = new Label("INDEX", false, 0x0288, font: 6) {X = indexX, Y = 10};
                     Add(text, page);
 
                     for (int i = 0; i < abilityOnPage; i++)
@@ -78,11 +80,12 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         bool passive = true;
+
                         text = new HoveredLabel(GetAbilityName(offs, ref passive), false, 0x0288, 0x33, font: 9)
                         {
                             X = dataX,
                             Y = 52 + y,
-                            AcceptMouseInput = true,
+                            AcceptMouseInput = true
                         };
 
                         Add(text, page);
@@ -113,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
                 string spellName = GetAbilityName(i, ref passive);
 
                 Label text = new Label(spellName, false, 0x0288, 100, 6)
-                    { X = iconTextX, Y = 34 };
+                    {X = iconTextX, Y = 34};
                 Add(text, page1);
 
                 if (passive)
@@ -127,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                GumpPic pic = new GumpPic(iconX, 40, (ushort)(iconStartGraphic), 0);
+                GumpPic pic = new GumpPic(iconX, 40, iconStartGraphic, 0);
 
                 Add(pic, page1);
                 pic.SetTooltip(FileManager.Cliloc.GetString(_tooltipOffset + i), 150);
@@ -146,16 +149,19 @@ namespace ClassicUO.Game.UI.Gumps
                     _abilityCount = 4;
                     iconStartGraphic = 0x5DD0;
                     _tooltipOffset = 1112198;
+
                     break;
                 case RaceType.ELF:
                     _abilityCount = 6;
                     iconStartGraphic = 0x5DD4;
                     _tooltipOffset = 1112202;
+
                     break;
                 case RaceType.GARGOYLE:
                     _abilityCount = 5;
                     iconStartGraphic = 0x5DDA;
                     _tooltipOffset = 1112208;
+
                     break;
             }
         }
@@ -167,14 +173,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             switch (World.Player.Race)
             {
-                case RaceType.HUMAN:return _humanNames[offset];
+                case RaceType.HUMAN: return _humanNames[offset];
                 case RaceType.ELF: return _elfNames[offset];
                 case RaceType.GARGOYLE:
+
                     if (offset == 0)
                         passive = false;
 
                     return _gargoyleNames[offset];
                 default:
+
                     return string.Empty;
             }
         }
@@ -202,12 +210,5 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
-
-        private static readonly string[] _humanNames = { "Strong Back", "Tough", "Workhorse", "Jack of All Trades"};
-        private static readonly string[] _elfNames = {  "Night Sight",         "Infused with Magic",
-            "Knowledge of Nature", "Difficult to Track",
-            "Perception",          "Wisdom"};
-        private static readonly string[] _gargoyleNames = { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
-
     }
 }

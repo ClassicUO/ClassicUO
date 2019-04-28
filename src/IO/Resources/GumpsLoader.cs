@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -44,8 +40,8 @@ namespace ClassicUO.IO.Resources
                 {
                     int ingump = defReader.ReadInt();
 
-               
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT 
+
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT
                                    || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
 
@@ -55,7 +51,7 @@ namespace ClassicUO.IO.Resources
                     {
                         int checkIndex = group[i];
 
-                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || 
+                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
                             _file.Entries[checkIndex].DecompressedLength == 0)
                             continue;
 
@@ -75,10 +71,12 @@ namespace ClassicUO.IO.Resources
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
+
                 texture = new SpriteTexture(w, h, false);
                 texture.SetDataHitMap16(pixels);
                 ResourceDictionary.Add(g, texture);
             }
+
             return texture;
         }
 
@@ -146,7 +144,7 @@ namespace ClassicUO.IO.Resources
 
         public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
         {
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex((int)index);
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex((int) index);
 
             if (extra == -1)
             {
@@ -165,7 +163,7 @@ namespace ClassicUO.IO.Resources
             //width = PaddedRowWidth(16, width, 4) >> 1;
             IntPtr dataStart = _file.PositionAddress;
             ushort[] pixels = new ushort[width * height];
-            int* lookuplist = (int*)dataStart;
+            int* lookuplist = (int*) dataStart;
 
             for (int y = 0; y < height; y++)
             {
@@ -175,7 +173,7 @@ namespace ClassicUO.IO.Resources
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = (length >> 2) - lookuplist[y];
-                GumpBlock* gmul = (GumpBlock*)(dataStart + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
                 int pos = y * width;
 
 
@@ -183,7 +181,7 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort val = gmul[i].Value;
 
-                    ushort a = (ushort)((val != 0 ? 0x8000 : 0) | val);
+                    ushort a = (ushort) ((val != 0 ? 0x8000 : 0) | val);
 
                     int count = gmul[i].Run;
 

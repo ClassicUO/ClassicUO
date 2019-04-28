@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using ClassicUO.Input;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -48,7 +47,6 @@ namespace ClassicUO.Game.UI.Controls
                 if (HandleClick())
                     base.OnCheckedChanged();
             }
-            
         }
 
         //protected override void OnMouseClick(int x, int y, MouseButton button)
@@ -60,11 +58,13 @@ namespace ClassicUO.Game.UI.Controls
         private bool HandleClick()
         {
             IEnumerable<RadioButton> en = Parent?.FindControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex && s != this);
+
             if (en == null)
                 return false;
 
             foreach (RadioButton button in en)
                 button.IsChecked = false;
+
             return true;
         }
     }

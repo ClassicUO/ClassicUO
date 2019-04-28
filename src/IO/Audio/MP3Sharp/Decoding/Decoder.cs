@@ -1,4 +1,5 @@
 using System;
+
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -12,18 +13,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private readonly Params params_Renamed;
         private Equalizer m_Equalizer;
 
-        private SynthesisFilter m_LeftChannelFilter;
-        private SynthesisFilter m_RightChannelFilter;
-
         private bool m_IsInitialized;
         private LayerIDecoder m_L1Decoder;
         private LayerIIDecoder m_L2Decoder;
         private LayerIIIDecoder m_L3Decoder;
 
+        private SynthesisFilter m_LeftChannelFilter;
+
         private ABuffer m_Output;
 
         private int m_OutputChannels;
         private int m_OutputFrequency;
+        private SynthesisFilter m_RightChannelFilter;
 
         /// <summary>
         ///     Creates a new Decoder instance with default parameters.
@@ -39,23 +40,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public Decoder(Params params0)
         {
             InitBlock();
+
             if (params0 == null)
                 params0 = DEFAULT_PARAMS;
 
             params_Renamed = params0;
 
             Equalizer eq = params_Renamed.InitialEqualizerSettings;
-            if (eq != null)
-            {
-                m_Equalizer.FromEqualizer = eq;
-            }
+            if (eq != null) m_Equalizer.FromEqualizer = eq;
         }
 
-        public static Params DefaultParams
-        {
-            get { return (Params) DEFAULT_PARAMS.Clone(); // MemberwiseClone();
-            }
-        }
+        public static Params DefaultParams => (Params) DEFAULT_PARAMS.Clone();
 
         public virtual Equalizer Equalizer
         {
@@ -67,6 +62,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 m_Equalizer.FromEqualizer = value;
 
                 float[] factors = m_Equalizer.BandFactors;
+
                 if (m_LeftChannelFilter != null)
                     m_LeftChannelFilter.EQ = factors;
 
@@ -81,7 +77,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public virtual ABuffer OutputBuffer
         {
-            set { m_Output = value; }
+            set => m_Output = value;
         }
 
         /// <summary>
@@ -89,20 +85,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         ///     by this decoder. This typically corresponds to the sample
         ///     rate encoded in the MPEG audio stream.
         /// </summary>
-        public virtual int OutputFrequency
-        {
-            get { return m_OutputFrequency; }
-        }
+        public virtual int OutputFrequency => m_OutputFrequency;
 
         /// <summary>
         ///     Retrieves the number of channels of PCM samples output by
         ///     this decoder. This usually corresponds to the number of
         ///     channels in the MPEG audio stream.
         /// </summary>
-        public virtual int OutputChannels
-        {
-            get { return m_OutputChannels; }
-        }
+        public virtual int OutputChannels => m_OutputChannels;
 
         /// <summary>
         ///     Retrieves the maximum number of samples that will be written to
@@ -112,10 +102,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         ///     an upper bound and fewer samples may actually be written, depending
         ///     upon the sample rate and number of channels.
         /// </summary>
-        public virtual int OutputBlockSize
-        {
-            get { return ABuffer.OBUFFERSIZE; }
-        }
+        public virtual int OutputBlockSize => ABuffer.OBUFFERSIZE;
 
         private void InitBlock()
         {
@@ -136,10 +123,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </returns>
         public virtual ABuffer DecodeFrame(Header header, Bitstream stream)
         {
-            if (!m_IsInitialized)
-            {
-                Initialize(header);
-            }
+            if (!m_IsInitialized) Initialize(header);
 
             int layer = header.layer();
 
@@ -173,40 +157,47 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             switch (layer)
             {
                 case 3:
+
                     if (m_L3Decoder == null)
                     {
                         m_L3Decoder = new LayerIIIDecoder(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                            (int) OutputChannelsEnum.BOTH_CHANNELS);
+                                                          (int) OutputChannelsEnum.BOTH_CHANNELS);
                     }
 
                     decoder = m_L3Decoder;
+
                     break;
 
                 case 2:
+
                     if (m_L2Decoder == null)
                     {
                         m_L2Decoder = new LayerIIDecoder();
+
                         m_L2Decoder.Create(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                            (int) OutputChannelsEnum.BOTH_CHANNELS);
+                                           (int) OutputChannelsEnum.BOTH_CHANNELS);
                     }
+
                     decoder = m_L2Decoder;
+
                     break;
 
                 case 1:
+
                     if (m_L1Decoder == null)
                     {
                         m_L1Decoder = new LayerIDecoder();
+
                         m_L1Decoder.Create(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                            (int) OutputChannelsEnum.BOTH_CHANNELS);
+                                           (int) OutputChannelsEnum.BOTH_CHANNELS);
                     }
+
                     decoder = m_L1Decoder;
+
                     break;
             }
 
-            if (decoder == null)
-            {
-                throw NewDecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
-            }
+            if (decoder == null) throw NewDecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
 
             return decoder;
         }
@@ -244,12 +235,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         internal class Params : ICloneable
         {
-            private Equalizer m_Equalizer;
             private OutputChannels m_OutputChannels;
 
             public virtual OutputChannels OutputChannels
             {
-                get { return m_OutputChannels; }
+                get => m_OutputChannels;
 
                 set
                 {
@@ -274,10 +264,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             ///     The Equalizer used to initialize the
             ///     EQ settings of the decoder.
             /// </returns>
-            public virtual Equalizer InitialEqualizerSettings
-            {
-                get { return m_Equalizer; }
-            }
+            public virtual Equalizer InitialEqualizerSettings { get; }
 
             public object Clone()
             {

@@ -14,20 +14,14 @@ namespace ClassicUO.Game.Managers
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
                 return;
 
-            float volume = (Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA);
-            
+            float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+
             if (Engine.Instance.IsActive)
             {
-                if (!Engine.Profile.Current.ReproduceSoundsInBackground)
-                {
-                    volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
-                }
+                if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
             }
-            else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
-            {
-                volume = 0;
-            }
-            
+            else if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
+
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -37,20 +31,14 @@ namespace ClassicUO.Game.Managers
 
         public void PlaySoundWithDistance(int index, float volume, bool spamCheck = false)
         {
-            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || (!Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground))
+            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || !Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground)
                 return;
 
             if (Engine.Instance.IsActive)
             {
-                if (!Engine.Profile.Current.ReproduceSoundsInBackground)
-                {
-                    volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
-                }
+                if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
             }
-            else if (!Engine.Profile.Current.ReproduceSoundsInBackground)
-            {
-                volume = 0;
-            }
+            else if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -86,10 +74,8 @@ namespace ClassicUO.Game.Managers
 
             Sound m = FileManager.Sounds.GetMusic(music);
 
-            if( m == null && _currentMusic != null )
-            {
+            if (m == null && _currentMusic != null)
                 StopMusic();
-            }
             else if (m != null && m != _currentMusic)
             {
                 StopMusic();
@@ -106,6 +92,7 @@ namespace ClassicUO.Game.Managers
                     return;
 
                 float volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
+
                 if (volume < -1 || volume > 1f)
                     return;
 
@@ -129,15 +116,9 @@ namespace ClassicUO.Game.Managers
             {
                 if (Engine.Instance.IsActive)
                 {
-                    if (!Engine.Profile.Current.ReproduceSoundsInBackground)
-                    {
-                        _currentMusic.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
-                    }
+                    if (!Engine.Profile.Current.ReproduceSoundsInBackground) _currentMusic.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
                 }
-                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0)
-                {
-                    _currentMusic.Volume = 0;
-                }
+                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0) _currentMusic.Volume = 0;
             }
 
             _currentMusic?.Update();

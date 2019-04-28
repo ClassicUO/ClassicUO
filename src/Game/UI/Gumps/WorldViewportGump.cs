@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.Scenes;
@@ -26,7 +28,6 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
-using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -38,11 +39,11 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly WorldViewport _viewport;
-        private SystemChatControl _systemChatControl;
         private bool _clicked;
+        private Point _lastSize, _savedSize;
+        private SystemChatControl _systemChatControl;
         private int _worldHeight;
         private int _worldWidth;
-        private Point _lastSize, _savedSize;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                     options?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                        NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
+                        NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
 
                     _clicked = false;
                 }
@@ -164,8 +165,8 @@ namespace ClassicUO.Game.UI.Gumps
             _border.Height = Height;
             _button.X = Width - _button.Width / 2;
             _button.Y = Height - _button.Height / 2;
-            _worldWidth = Width - (BORDER_WIDTH * 2);
-            _worldHeight = Height - (BORDER_WIDTH * 2);
+            _worldWidth = Width - BORDER_WIDTH * 2;
+            _worldHeight = Height - BORDER_WIDTH * 2;
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
             _systemChatControl.Width = _worldWidth;
@@ -195,7 +196,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_systemChatControl);
             Resize();
         }
-
     }
 
     internal class GameBorder : Control
@@ -234,6 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, Vector3.Zero);
             //dx
             batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, Vector3.Zero);
+
             return base.Draw(batcher, x, y);
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -41,6 +43,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private readonly HSliderBarStyle _style;
+        private readonly RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
         private SpriteTexture[] _gumpSpliderBackground;
@@ -49,9 +52,7 @@ namespace ClassicUO.Game.UI.Controls
 
         //private int _newValue;
         private int _sliderX;
-        private readonly RenderedText _text;
         private int _value = -1;
-        public event EventHandler ValueChanged;
 
         public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
         {
@@ -105,13 +106,17 @@ namespace ClassicUO.Game.UI.Controls
                     if (_value != oldValue)
                     {
                         ModifyPairedValues(_value - oldValue);
+
                         if (IsInitialized)
                             CalculateOffset();
                     }
+
                     ValueChanged.Raise();
                 }
             }
         }
+
+        public event EventHandler ValueChanged;
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -158,12 +163,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x , y, Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, Vector3.Zero);
                 batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, Vector3.Zero);
                 batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, Vector3.Zero);
             }
 
-            batcher.Draw2D(_gumpWidget, x+ _sliderX, y, Vector3.Zero);
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, Vector3.Zero);
             _text?.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
 
             return base.Draw(batcher, x, y);
@@ -272,6 +277,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_pairedSliders.Count == 0)
                 return;
+
             bool updateSinceLastCycle = true;
             int d = delta > 0 ? -1 : 1;
             int points = Math.Abs(delta);
@@ -304,6 +310,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!updateSinceLastCycle)
                         return;
+
                     updateSinceLastCycle = false;
                     sliderIndex = 0;
                 }

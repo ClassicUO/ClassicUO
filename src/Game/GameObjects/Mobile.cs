@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
-using System.Collections.Generic;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
+
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
-using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -72,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
             CalculateRandomIdleTime();
         }
 
-     
+
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
@@ -94,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-      
+
         public RaceType Race
         {
             get => _race;
@@ -291,7 +290,7 @@ namespace ClassicUO.Game.GameObjects
                 SetIdleAnimation();
 
             ProcessAnimation();
-        }     
+        }
 
         protected override void OnProcessDelta(Delta d)
         {
@@ -322,6 +321,7 @@ namespace ClassicUO.Game.GameObjects
                     SetAnimation(0xFF);
                 LastStepTime = Engine.Ticks;
             }
+
             Direction moveDir = CalculateDirection(endX, endY, x, y);
             Step step = new Step();
 
@@ -460,19 +460,17 @@ namespace ClassicUO.Game.GameObjects
                             graphic = newGraphic;
                             ANIMATION_GROUPS_TYPE newType = FileManager.Animations.DataIndex[graphic].Type;
 
-                            if (newType != type)
-                            {
-                                type = newType;
-                            }
+                            if (newType != type) type = newType;
                         }
                     }
                 }
 
-                ANIMATION_FLAGS flags = (ANIMATION_FLAGS)FileManager.Animations.DataIndex[graphic].Flags;
+                ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
                 bool isLow = false;
+
                 if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                 {
                     isLowExtended = true;
@@ -489,20 +487,23 @@ namespace ClassicUO.Game.GameObjects
                     case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
                     case ANIMATION_GROUPS_TYPE.MONSTER:
                         animGroup = ANIMATION_GROUPS.AG_HIGHT;
+
                         break;
                     case ANIMATION_GROUPS_TYPE.ANIMAL:
                         animGroup = ANIMATION_GROUPS.AG_LOW;
+
                         break;
                     case ANIMATION_GROUPS_TYPE.HUMAN:
                     case ANIMATION_GROUPS_TYPE.EQUIPMENT:
                         animGroup = ANIMATION_GROUPS.AG_PEOPLE;
+
                         break;
                 }
 
                 if (animGroup == 0)
                     return;
 
-                AnimationGroup = _animationIdle[ (byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+                AnimationGroup = _animationIdle[(byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
@@ -559,7 +560,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-    
+
                     int distance = Distance;
 
                     float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
@@ -567,7 +568,7 @@ namespace ClassicUO.Game.GameObjects
                     if (distance <= World.ViewRange && distance >= 1)
                     {
                         float volumeByDist = volume / World.ViewRange;
-                        volume -= (volumeByDist * distance);
+                        volume -= volumeByDist * distance;
                     }
 
                     Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
@@ -594,7 +595,7 @@ namespace ClassicUO.Game.GameObjects
 
                     //if ((byte) Direction == step.Direction)
                     if (X != step.X || Y != step.Y)
-                    {     
+                    {
                         float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                         float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                         float x = frameOffset;
@@ -603,7 +604,7 @@ namespace ClassicUO.Game.GameObjects
                         MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
                         Offset.X = x;
                         Offset.Y = y;
-                        Offset.Z = ((step.Z - Z) * frameOffset * (4.0f / framesPerTile));
+                        Offset.Z = (step.Z - Z) * frameOffset * (4.0f / framesPerTile);
 
                         turnOnly = false;
                     }
@@ -679,7 +680,7 @@ namespace ClassicUO.Game.GameObjects
                 if (animGroup == 64 || animGroup == 65)
                 {
                     animGroup = (byte) (InWarMode ? 65 : 64);
-                    AnimationGroup = (byte) animGroup;
+                    AnimationGroup = animGroup;
                 }
 
                 Item mount = Equipment[(int) Layer.Mount];
@@ -709,11 +710,12 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.AnimID = id;
                     FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;
-                    if ((direction.FrameCount == 0 || direction.Frames == null))
+
+                    if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
 
-                    if ((direction.Address != 0 && direction.Size != 0) || direction.IsUOP)
+                    if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
@@ -967,7 +969,6 @@ namespace ClassicUO.Game.GameObjects
             public bool Run;
 
 #if JAEDAN_MOVEMENT_PATCH || MOVEMENT2
-
             public byte Rej;
             public bool Anim;
             public byte Seq;

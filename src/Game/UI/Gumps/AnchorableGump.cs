@@ -1,24 +1,22 @@
-﻿
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class AnchorableGump : Gump
     {
-        public string AnchorGroupName { get; protected set; }
-        public virtual int GroupMatrixWidth { get; protected set; }
-        public virtual int GroupMatrixHeight { get; protected set; }
-        public int WidthMultiplier { get; protected set; } = 1;
-        public int HeightMultiplier { get; protected set; } = 1;
-        
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 
         public AnchorableGump(Serial local, Serial server) : base(local, server)
         {
-
         }
+
+        public string AnchorGroupName { get; protected set; }
+        public virtual int GroupMatrixWidth { get; protected set; }
+        public virtual int GroupMatrixHeight { get; protected set; }
+        public int WidthMultiplier { get; protected set; } = 1;
+        public int HeightMultiplier { get; protected set; } = 1;
 
         protected override void OnMove()
         {
@@ -28,7 +26,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.OnMove();
         }
-        
+
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             Engine.UI.AnchorManager[this]?.MakeTopMost();
@@ -38,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.OnMouseDown(x, y, button);
         }
-        
+
         protected override void OnMouseOver(int x, int y)
         {
             if (Engine.UI.IsDragging)
@@ -48,10 +46,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (ctrl != null)
                 {
                     Location = Engine.UI.AnchorManager.GetCandidateDropLocation(
-                        this, 
-                        ctrl, 
-                        ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
-                        ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
+                                                                                this,
+                                                                                ctrl,
+                                                                                ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
+                                                                                ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
                 }
             }
 
@@ -65,10 +63,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (ctrl != null)
             {
                 Engine.UI.AnchorManager.DropControl(
-                    this,
-                    ctrl,
-                    ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
-                    ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
+                                                    this,
+                                                    ctrl,
+                                                    ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
+                                                    ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
             }
 
             base.OnDragEnd(x, y);
@@ -88,7 +86,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockGumpPic.MouseClick += _lockGumpPic_MouseClick;
 
                 Add(_lockGumpPic);
-            } else if ((!Input.Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
+            }
+            else if ((!Input.Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
             {
                 Remove(_lockGumpPic);
                 _lockGumpPic.Dispose();
@@ -114,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             Engine.UI.AnchorManager.DetachControl(this);
-            
+
             base.Dispose();
         }
     }

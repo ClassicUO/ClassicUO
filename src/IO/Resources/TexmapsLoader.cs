@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -12,9 +8,9 @@ namespace ClassicUO.IO.Resources
 {
     internal class TexmapsLoader : ResourceLoader<SpriteTexture>
     {
-        private UOFile _file;
-        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
+        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
 
 
@@ -25,6 +21,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
+
             _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
@@ -36,6 +33,7 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     int index = defReader.ReadInt();
+
                     if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                         continue;
 
@@ -47,6 +45,7 @@ namespace ClassicUO.IO.Resources
 
                         if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                             continue;
+
                         _file.Entries[index] = _file.Entries[checkindex];
                     }
                 }
@@ -182,7 +181,7 @@ namespace ClassicUO.IO.Resources
                 int pos = i * size;
 
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
+                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }
 
             return pixels;

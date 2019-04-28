@@ -9,7 +9,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private readonly short[] buffer;
         private readonly int[] bufferp;
         private readonly int channels;
-        private readonly int frequency;
 
         /// <summary>
         ///     Constructor
@@ -19,31 +18,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             buffer = new short[OBUFFERSIZE];
             bufferp = new int[MAXCHANNELS];
             channels = number_of_channels;
-            frequency = sample_frequency;
+            SampleFrequency = sample_frequency;
 
             for (int i = 0; i < number_of_channels; ++i)
                 bufferp[i] = (short) i;
         }
 
-        public virtual int ChannelCount
-        {
-            get { return channels; }
-        }
+        public virtual int ChannelCount => channels;
 
-        public virtual int SampleFrequency
-        {
-            get { return frequency; }
-        }
+        public virtual int SampleFrequency { get; }
 
-        public virtual short[] Buffer
-        {
-            get { return buffer; }
-        }
+        public virtual short[] Buffer => buffer;
 
-        public virtual int BufferLength
-        {
-            get { return bufferp[0]; }
-        }
+        public virtual int BufferLength => bufferp[0];
 
         /// <summary>
         ///     Takes a 16 Bit PCM sample.
@@ -60,10 +47,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
             short s;
             float fs;
+
             for (int i = 0; i < 32;)
             {
                 fs = samples[i++];
-                fs = (fs > 32767.0f ? 32767.0f : (fs < -32767.0f ? -32767.0f : fs));
+                fs = fs > 32767.0f ? 32767.0f : fs < -32767.0f ? -32767.0f : fs;
 
                 //UPGRADE_WARNING: Narrowing conversions may produce unexpected results in C#. 'ms-help://MS.VSCC.2003/commoner/redir/redirect.htm?keyword="jlca1042"'
                 s = (short) fs;
@@ -101,7 +89,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public override void SetStopFlag()
         {
-
         }
     }
 }

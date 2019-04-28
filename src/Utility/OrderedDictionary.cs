@@ -1,4 +1,5 @@
 ﻿#region license
+
 //The MIT License(MIT)
 
 //Copyright(c) 2014 mattmc3
@@ -20,7 +21,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,19 +34,36 @@ using System.Linq;
 namespace ClassicUO.Collections
 {
     /// <summary>
-    /// A dictionary object that allows rapid hash lookups using keys, but also
-    /// maintains the key insertion order so that values can be retrieved by
-    /// key index.
+    ///     A dictionary object that allows rapid hash lookups using keys, but also
+    ///     maintains the key insertion order so that values can be retrieved by
+    ///     key index.
     /// </summary>
     public class OrderedDictionary<TKey, TValue> : IOrderedDictionary<TKey, TValue>
     {
+        #region IEnumerable<KeyValuePair<TKey, TValue>>
+
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion
 
         #region Fields/Properties
 
         private KeyedCollection2<TKey, KeyValuePair<TKey, TValue>> _keyedCollection;
 
         /// <summary>
-        /// Gets or sets the value associated with the specified key.
+        ///     Gets or sets the value associated with the specified key.
         /// </summary>
         /// <param name="key">The key associated with the value to get or set.</param>
         public TValue this[TKey key]
@@ -53,7 +73,7 @@ namespace ClassicUO.Collections
         }
 
         /// <summary>
-        /// Gets or sets the value at the specified index.
+        ///     Gets or sets the value at the specified index.
         /// </summary>
         /// <param name="index">The index of the value to get or set.</param>
         public TValue this[int index]
@@ -68,11 +88,7 @@ namespace ClassicUO.Collections
 
         public ICollection<TValue> Values => _keyedCollection.Select(x => x.Value).ToList();
 
-        public IEqualityComparer<TKey> Comparer
-        {
-            get;
-            private set;
-        }
+        public IEqualityComparer<TKey> Comparer { get; private set; }
 
         #endregion
 
@@ -91,19 +107,13 @@ namespace ClassicUO.Collections
         public OrderedDictionary(IOrderedDictionary<TKey, TValue> dictionary)
         {
             Initialize();
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
-            {
-                _keyedCollection.Add(pair);
-            }
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary) _keyedCollection.Add(pair);
         }
 
         public OrderedDictionary(IOrderedDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             Initialize(comparer);
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
-            {
-                _keyedCollection.Add(pair);
-            }
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary) _keyedCollection.Add(pair);
         }
 
         #endregion
@@ -113,14 +123,11 @@ namespace ClassicUO.Collections
         private void Initialize(IEqualityComparer<TKey> comparer = null)
         {
             Comparer = comparer;
+
             if (comparer != null)
-            {
                 _keyedCollection = new KeyedCollection2<TKey, KeyValuePair<TKey, TValue>>(x => x.Key, comparer);
-            }
             else
-            {
                 _keyedCollection = new KeyedCollection2<TKey, KeyValuePair<TKey, TValue>>(x => x.Key);
-            }
         }
 
         public void Add(TKey key, TValue value)
@@ -141,13 +148,9 @@ namespace ClassicUO.Collections
         public int IndexOf(TKey key)
         {
             if (_keyedCollection.Contains(key))
-            {
                 return _keyedCollection.IndexOf(_keyedCollection[key]);
-            }
-            else
-            {
-                return -1;
-            }
+
+            return -1;
         }
 
         public bool ContainsValue(TValue value)
@@ -167,27 +170,23 @@ namespace ClassicUO.Collections
 
         public KeyValuePair<TKey, TValue> GetItem(int index)
         {
-            if (index < 0 || index >= _keyedCollection.Count)
-            {
-                throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
-            }
+            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
+
             return _keyedCollection[index];
         }
 
         /// <summary>
-        /// Sets the value at the index specified.
+        ///     Sets the value at the index specified.
         /// </summary>
         /// <param name="index">The index of the value desired</param>
         /// <param name="value">The value to set</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the index specified does not refer to a KeyValuePair in this object
+        ///     Thrown when the index specified does not refer to a KeyValuePair in this object
         /// </exception>
         public void SetItem(int index, TValue value)
         {
-            if (index < 0 || index >= _keyedCollection.Count)
-            {
-                throw new ArgumentException($"The index is outside the bounds of the dictionary: {index}");
-            }
+            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException($"The index is outside the bounds of the dictionary: {index}");
+
             KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>(_keyedCollection[index].Key, value);
             _keyedCollection[index] = kvp;
         }
@@ -204,29 +203,26 @@ namespace ClassicUO.Collections
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= _keyedCollection.Count)
-            {
-                throw new ArgumentException($"The index was outside the bounds of the dictionary: {index}");
-            }
+            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException($"The index was outside the bounds of the dictionary: {index}");
+
             _keyedCollection.RemoveAt(index);
         }
 
         /// <summary>
-        /// Gets the value associated with the specified key.
+        ///     Gets the value associated with the specified key.
         /// </summary>
         /// <param name="key">The key associated with the value to get.</param>
         public TValue GetValue(TKey key)
         {
-            if (_keyedCollection.Contains(key) == false)
-            {
-                throw new ArgumentException($"The given key is not present in the dictionary: {key}");
-            }
+            if (_keyedCollection.Contains(key) == false) throw new ArgumentException($"The given key is not present in the dictionary: {key}");
+
             KeyValuePair<TKey, TValue> kvp = _keyedCollection[key];
+
             return kvp.Value;
         }
 
         /// <summary>
-        /// Sets the value associated with the specified key.
+        ///     Sets the value associated with the specified key.
         /// </summary>
         /// <param name="key">The key associated with the value to set.</param>
         /// <param name="value">The the value to set.</param>
@@ -234,14 +230,11 @@ namespace ClassicUO.Collections
         {
             KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>(key, value);
             int idx = IndexOf(key);
+
             if (idx > -1)
-            {
                 _keyedCollection[idx] = kvp;
-            }
             else
-            {
                 _keyedCollection.Add(kvp);
-            }
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -249,18 +242,19 @@ namespace ClassicUO.Collections
             if (_keyedCollection.Contains(key))
             {
                 value = _keyedCollection[key].Value;
+
                 return true;
             }
-            else
-            {
-                value = default;
-                return false;
-            }
+
+            value = default;
+
+            return false;
         }
 
         #endregion
 
         #region sorting
+
         public void SortKeys()
         {
             _keyedCollection.SortByKeys();
@@ -291,6 +285,7 @@ namespace ClassicUO.Collections
         {
             _keyedCollection.Sort((x, y) => comparison(x.Value, y.Value));
         }
+
         #endregion
 
         #region IDictionary<TKey, TValue>
@@ -360,24 +355,6 @@ namespace ClassicUO.Collections
 
         #endregion
 
-        #region IEnumerable<KeyValuePair<TKey, TValue>>
-
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion
-
-        #region IEnumerable
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion
-
         #region IOrderedDictionary
 
         IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
@@ -387,7 +364,7 @@ namespace ClassicUO.Collections
 
         void IOrderedDictionary.Insert(int index, object key, object value)
         {
-            Insert(index, (TKey)key, (TValue)value);
+            Insert(index, (TKey) key, (TValue) value);
         }
 
         void IOrderedDictionary.RemoveAt(int index)
@@ -398,7 +375,7 @@ namespace ClassicUO.Collections
         object IOrderedDictionary.this[int index]
         {
             get => this[index];
-            set => this[index] = (TValue)value;
+            set => this[index] = (TValue) value;
         }
 
         #endregion
@@ -407,7 +384,7 @@ namespace ClassicUO.Collections
 
         void IDictionary.Add(object key, object value)
         {
-            Add((TKey)key, (TValue)value);
+            Add((TKey) key, (TValue) value);
         }
 
         void IDictionary.Clear()
@@ -417,7 +394,7 @@ namespace ClassicUO.Collections
 
         bool IDictionary.Contains(object key)
         {
-            return _keyedCollection.Contains((TKey)key);
+            return _keyedCollection.Contains((TKey) key);
         }
 
         IDictionaryEnumerator IDictionary.GetEnumerator()
@@ -429,19 +406,19 @@ namespace ClassicUO.Collections
 
         bool IDictionary.IsReadOnly => false;
 
-        ICollection IDictionary.Keys => (ICollection)Keys;
+        ICollection IDictionary.Keys => (ICollection) Keys;
 
         void IDictionary.Remove(object key)
         {
-            Remove((TKey)key);
+            Remove((TKey) key);
         }
 
-        ICollection IDictionary.Values => (ICollection)Values;
+        ICollection IDictionary.Values => (ICollection) Values;
 
         object IDictionary.this[object key]
         {
-            get => this[(TKey)key];
-            set => this[(TKey)key] = (TValue)value;
+            get => this[(TKey) key];
+            set => this[(TKey) key] = (TValue) value;
         }
 
         #endregion
@@ -450,14 +427,14 @@ namespace ClassicUO.Collections
 
         void ICollection.CopyTo(Array array, int index)
         {
-            ((ICollection)_keyedCollection).CopyTo(array, index);
+            ((ICollection) _keyedCollection).CopyTo(array, index);
         }
 
-        int ICollection.Count => ((ICollection)_keyedCollection).Count;
+        int ICollection.Count => ((ICollection) _keyedCollection).Count;
 
-        bool ICollection.IsSynchronized => ((ICollection)_keyedCollection).IsSynchronized;
+        bool ICollection.IsSynchronized => ((ICollection) _keyedCollection).IsSynchronized;
 
-        object ICollection.SyncRoot => ((ICollection)_keyedCollection).SyncRoot;
+        object ICollection.SyncRoot => ((ICollection) _keyedCollection).SyncRoot;
 
         #endregion
     }
@@ -465,10 +442,9 @@ namespace ClassicUO.Collections
     public class KeyedCollection2<TKey, TItem> : KeyedCollection<TKey, TItem>
     {
         private const string DelegateNullExceptionMessage = "Delegate passed cannot be null";
-        private Func<TItem, TKey> _getKeyForItemDelegate;
+        private readonly Func<TItem, TKey> _getKeyForItemDelegate;
 
         public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate)
-            : base()
         {
             _getKeyForItemDelegate = getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
         }
@@ -516,11 +492,8 @@ namespace ClassicUO.Collections
 
         public void Sort(IComparer<TItem> comparer)
         {
-            List<TItem> list = base.Items as List<TItem>;
-            if (list != null)
-            {
-                list.Sort(comparer);
-            }
+            List<TItem> list = Items as List<TItem>;
+            if (list != null) list.Sort(comparer);
         }
     }
 
@@ -547,24 +520,40 @@ namespace ClassicUO.Collections
     public class DictionaryEnumerator<TKey, TValue> : IDictionaryEnumerator, IDisposable
     {
         private readonly IEnumerator<KeyValuePair<TKey, TValue>> impl;
-        public void Dispose() { impl.Dispose(); }
+
         public DictionaryEnumerator(IDictionary<TKey, TValue> value)
         {
             impl = value.GetEnumerator();
         }
-        public void Reset() { impl.Reset(); }
-        public bool MoveNext() { return impl.MoveNext(); }
+
+        public void Reset()
+        {
+            impl.Reset();
+        }
+
+        public bool MoveNext()
+        {
+            return impl.MoveNext();
+        }
+
         public DictionaryEntry Entry
         {
             get
             {
                 KeyValuePair<TKey, TValue> pair = impl.Current;
+
                 return new DictionaryEntry(pair.Key, pair.Value);
             }
         }
+
         public object Key => impl.Current.Key;
         public object Value => impl.Current.Value;
         public object Current => Entry;
+
+        public void Dispose()
+        {
+            impl.Dispose();
+        }
     }
 
     public interface IOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOrderedDictionary

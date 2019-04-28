@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Resources;
@@ -108,6 +110,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
             int height = 0;
+
             foreach (RenderedText t in _entries)
                 height += t.Height;
 
@@ -131,10 +134,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-            while (_entries.Count > 99)
-            {
-                _entries.RemoveFromFront().Destroy();
-            }
+            while (_entries.Count > 99) _entries.RemoveFromFront().Destroy();
 
             _entries.AddToBack(new RenderedText
             {
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
                 Hue = hue,
-                Font = (byte)font,
+                Font = (byte) font,
                 Text = text
             });
             _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;

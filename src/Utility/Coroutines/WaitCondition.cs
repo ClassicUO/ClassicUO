@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Coroutines
 {
@@ -20,13 +16,16 @@ namespace ClassicUO.Utility.Coroutines
             _condition = condition;
         }
 
-        public bool Update() => _condition();
+        public bool Update()
+        {
+            return _condition();
+        }
     }
 
     internal class WaitCondition<T> : IWaitCondition
     {
-        private readonly Func<T, T> _update;
         private readonly Func<T, bool> _condition;
+        private readonly Func<T, T> _update;
         private T _parameter;
 
         public WaitCondition(Func<T, T> update, Func<T, bool> condition, T startingValue)

@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO
 {
@@ -17,18 +11,19 @@ namespace ClassicUO.IO
     {
         private readonly string[] _paths;
 
-        protected ResourceLoader(string path) : this(new [] { path })
+        protected ResourceLoader(string path) : this(new[] {path})
         {
-
         }
 
         protected ResourceLoader(string[] paths)
         {
             _paths = paths;
         }
-        
 
-        protected ResourceLoader() { }
+
+        protected ResourceLoader()
+        {
+        }
 
         protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
 
@@ -74,13 +69,12 @@ namespace ClassicUO.IO
         }
     }
 
-    internal abstract class ResourceLoader :  IDisposable
+    internal abstract class ResourceLoader : IDisposable
     {
         private readonly string[] _paths;
 
-        protected ResourceLoader(string path) : this(new[] { path })
+        protected ResourceLoader(string path) : this(new[] {path})
         {
-
         }
 
         protected ResourceLoader(string[] paths)
@@ -89,13 +83,11 @@ namespace ClassicUO.IO
         }
 
 
-        protected ResourceLoader() { }
+        protected ResourceLoader()
+        {
+        }
 
         public bool IsDisposed { get; private set; }
-
-        public abstract void Load();
-
-        protected abstract void CleanResources();
 
 
         public void Dispose()
@@ -107,5 +99,9 @@ namespace ClassicUO.IO
 
             CleanResources();
         }
+
+        public abstract void Load();
+
+        protected abstract void CleanResources();
     }
 }

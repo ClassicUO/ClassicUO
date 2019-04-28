@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, bool ishtml = false)
         {
-            _gText = new RenderedText()
+            _gText = new RenderedText
             {
                 IsHTML = ishtml,
                 IsUnicode = isunicode,
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed) return false;
 
-            _gText.Draw(batcher, x , y);
+            _gText.Draw(batcher, x, y);
 
             return base.Draw(batcher, x, y);
         }

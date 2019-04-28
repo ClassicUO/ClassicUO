@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Input;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -30,7 +32,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class MultiLineBox : AbstractTextBox
     {
-        public MultiLineEntry TxEntry { get; private set; }
+        public const int PasteCommandID = 0x10000000;
+        public const int RetrnCommandID = 0x20000000;
+        public const int PasteRetnCmdID = 0x30000000;
 
         public MultiLineBox(MultiLineEntry txentry, bool editable)
         {
@@ -40,6 +44,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = editable;
         }
 
+        public MultiLineEntry TxEntry { get; private set; }
+
         public bool IsChanged => TxEntry.IsChanged;
 
         public Hue Hue
@@ -48,25 +54,35 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.Hue = value;
         }
 
-        public string Text { get => TxEntry.Text; set => SetText(value); }
+        public string Text
+        {
+            get => TxEntry.Text;
+            set => SetText(value);
+        }
 
         public int LinesCount => TxEntry.GetLinesCharsCount().Length;
-        public int GetCharsOnLine(int line)
-        {
-            int[] lnch = TxEntry.GetLinesCharsCount();
-            if (line < lnch.Length)
-                return lnch[line];
-            return 0;
-        }
 
         public bool ScissorsEnabled { get; set; }
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
-        public int MaxLines { get => TxEntry.MaxLines; set => TxEntry.MaxLines = value; }
-        public const int PasteCommandID = 0x10000000;
-        public const int RetrnCommandID = 0x20000000;
-        public const int PasteRetnCmdID = 0x30000000;
+        public int MaxLines
+        {
+            get => TxEntry.MaxLines;
+            set => TxEntry.MaxLines = value;
+        }
+
+        public override AbstractEntry EntryValue => TxEntry;
+
+        public int GetCharsOnLine(int line)
+        {
+            int[] lnch = TxEntry.GetLinesCharsCount();
+
+            if (line < lnch.Length)
+                return lnch[line];
+
+            return 0;
+        }
 
         public void SetText(string text)
         {
@@ -108,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                TxEntry.RenderText.Draw(batcher, x+ TxEntry.Offset, y);
+                TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
                 if (IsEditable)
                 {
@@ -124,7 +140,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (!IsEditable)
                 return;
+
             string s = TxEntry.InsertString(c);
+
             if (!string.IsNullOrEmpty(s))
                 Parent?.OnKeyboardReturn(PasteCommandID, s);
         }
@@ -134,17 +152,21 @@ namespace ClassicUO.Game.UI.Controls
             if (TxEntry != null)
             {
                 int oldidx = TxEntry.CaretIndex;
-                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+
+                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {
                     if (!IsEditable)
                         return;
+
                     if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
                         return;
 
                     string s = SDL.SDL_GetClipboardText();
+
                     if (!string.IsNullOrEmpty(s))
                     {
                         Parent?.OnKeyboardReturn(PasteCommandID, s);
+
                         return;
                     }
                 }
@@ -155,58 +177,79 @@ namespace ClassicUO.Game.UI.Controls
                     string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
                     SDL.SDL_SetClipboardText(txt);
                 }
-                else switch (key)
+                else
                 {
-                    case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                    case SDL.SDL_Keycode.SDLK_RETURN:
-                        if (IsEditable)
-                            Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
-                        break;
-                    case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                        if (!IsEditable)
-                            return;
-                        if (Parent is Gumps.BookGump)
-                            ((Gumps.BookGump)Parent).Scale(TxEntry, true);
-                        else
-                            TxEntry.RemoveChar(true);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_UP:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_DOWN:
-                        TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height, false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_LEFT:
-                        TxEntry.SeekCaretPosition(-1);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_RIGHT:
-                        TxEntry.SeekCaretPosition(1);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_DELETE:
-                        if (!IsEditable)
-                            return;
-                        if (Parent is Gumps.BookGump)
-                            ((Gumps.BookGump)Parent).Scale(TxEntry, false);
-                        else
-                            TxEntry.RemoveChar(false);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_HOME:
-                        if (Parent is Gumps.BookGump hbook)
-                            hbook.OnHomeOrEnd(TxEntry, true);
-                        else
-                            TxEntry.SetCaretPosition(0);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_END:
-                        if (Parent is Gumps.BookGump ebook)
-                            ebook.OnHomeOrEnd(TxEntry, false);
-                        else
-                            TxEntry.SetCaretPosition(Text.Length - 1);
-                        break;
-                    case SDL.SDL_Keycode.SDLK_TAB:
-                        Parent.KeyboardTabToNextFocus(this);
-                        break;
+                    switch (key)
+                    {
+                        case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                        case SDL.SDL_Keycode.SDLK_RETURN:
+
+                            if (IsEditable)
+                                Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_BACKSPACE:
+
+                            if (!IsEditable)
+                                return;
+
+                            if (Parent is BookGump)
+                                ((BookGump) Parent).Scale(TxEntry, true);
+                            else
+                                TxEntry.RemoveChar(true);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_UP:
+                            TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_DOWN:
+                            TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height, false);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_LEFT:
+                            TxEntry.SeekCaretPosition(-1);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_RIGHT:
+                            TxEntry.SeekCaretPosition(1);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_DELETE:
+
+                            if (!IsEditable)
+                                return;
+
+                            if (Parent is BookGump)
+                                ((BookGump) Parent).Scale(TxEntry, false);
+                            else
+                                TxEntry.RemoveChar(false);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_HOME:
+
+                            if (Parent is BookGump hbook)
+                                hbook.OnHomeOrEnd(TxEntry, true);
+                            else
+                                TxEntry.SetCaretPosition(0);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_END:
+
+                            if (Parent is BookGump ebook)
+                                ebook.OnHomeOrEnd(TxEntry, false);
+                            else
+                                TxEntry.SetCaretPosition(Text.Length - 1);
+
+                            break;
+                        case SDL.SDL_Keycode.SDLK_TAB:
+                            Parent.KeyboardTabToNextFocus(this);
+
+                            break;
+                    }
                 }
             }
+
             base.OnKeyDown(key, mod);
         }
 
@@ -216,7 +259,5 @@ namespace ClassicUO.Game.UI.Controls
             TxEntry = null;
             base.Dispose();
         }
-
-        public override AbstractEntry EntryValue => TxEntry;
     }
 }

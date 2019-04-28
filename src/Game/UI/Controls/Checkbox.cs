@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,8 +28,6 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -47,6 +47,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_textures[0] == null || _textures[1] == null)
             {
                 Dispose();
+
                 return;
             }
 
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 Font = font, Hue = color, IsUnicode = isunicode, MaxWidth = maxWidth, Text = text
             };
             Width += _text.Width;
-            
+
             Height = Math.Max(t.Width, _text.Height);
             CanMove = true;
             AcceptMouseInput = true;
@@ -104,6 +105,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return false;
+
             bool ok = base.Draw(batcher, x, y);
             batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, HueVector);
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
@@ -118,10 +120,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                IsChecked = !IsChecked;
-            }
+            if (button == MouseButton.Left) IsChecked = !IsChecked;
         }
 
         public override void Dispose()

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -15,10 +12,7 @@ namespace ClassicUO.Game.Managers
 
         public void Add(Serial corpse, Serial obj, Direction dir, bool run)
         {
-            if (!_corpses.ContainsKey(corpse))
-            {
-                _corpses[corpse] = new CorpseInfo(corpse, obj, dir, run);
-            }
+            if (!_corpses.ContainsKey(corpse)) _corpses[corpse] = new CorpseInfo(corpse, obj, dir, run);
         }
 
         public void Remove(Serial corpse, Serial obj)
@@ -29,10 +23,7 @@ namespace ClassicUO.Game.Managers
             {
                 Item item = World.Items.Get(corpse);
 
-                if (item != null)
-                {
-                    item.Layer = (Layer) ((c.Value.Direction & Direction.Mask) | (c.Value.IsRunning ? Direction.Running : 0));
-                }
+                if (item != null) item.Layer = (Layer) ((c.Value.Direction & Direction.Mask) | (c.Value.IsRunning ? Direction.Running : 0));
                 _corpses.Remove(c.Value.CorpseSerial);
             }
         }
@@ -49,7 +40,10 @@ namespace ClassicUO.Game.Managers
             return c.HasValue ? World.Items.Get(c.Value.CorpseSerial) : null;
         }
 
-        public void Clear() => _corpses.Clear();
+        public void Clear()
+        {
+            _corpses.Clear();
+        }
     }
 
     internal readonly struct CorpseInfo
@@ -64,6 +58,6 @@ namespace ClassicUO.Game.Managers
 
         public readonly Serial CorpseSerial, ObjectSerial;
         public readonly Direction Direction;
-        public readonly bool IsRunning;  
+        public readonly bool IsRunning;
     }
 }

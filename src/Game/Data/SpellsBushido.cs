@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
@@ -27,8 +30,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsBushido
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
-        internal static int MaxSpellCount => _spellsDict.Count;
 
         static SpellsBushido()
         {
@@ -55,6 +56,9 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
+        internal static int MaxSpellCount => _spellsDict.Count;
 
         public static SpellDefinition GetSpell(int spellIndex)
         {

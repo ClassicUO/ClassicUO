@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -63,6 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (indexMap.MapAddress == 0)
                         continue;
+
                     int mapY = by * 8;
                     MapBlock info = new MapBlock();
                     MapCells* infoCells = (MapCells*) &info.Cells;
@@ -165,10 +168,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (blockIndex >= maxBlockIndex)
                         break;
+
                     RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
 
                     if (!mbbv.HasValue)
                         break;
+
                     RadarMapBlock mb = mbbv.Value;
                     Chunk block = World.Map.Chunks[blockIndex];
                     int realBlockX = i * 8;
@@ -225,10 +230,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (gx < 0 || gx >= w)
                     continue;
+
                 int gy = py;
 
                 if (gy < 0 || gy >= h)
                     break;
+
                 int block = gy * w + gx;
 
                 if (data[block] == 0x8421)

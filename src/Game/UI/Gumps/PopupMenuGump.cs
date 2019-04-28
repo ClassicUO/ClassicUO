@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,17 +18,16 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -54,10 +54,10 @@ namespace ClassicUO.Game.UI.Gumps
                 string text = FileManager.Cliloc.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
+
                 if (item.ReplacedHue != 0)
                 {
-                    
-                    uint h = (HuesHelper.Color16To32(item.ReplacedHue));
+                    uint h = HuesHelper.Color16To32(item.ReplacedHue);
                     (byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(h);
 
                     Color c = new Color(r, g, b, a);

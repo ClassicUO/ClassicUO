@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -36,8 +36,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect
     {
-        private Graphic _displayedGraphic = Graphic.INVALID;
-
         private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
         {
             BlendState state = new BlendState
@@ -48,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
             /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
-  
+
         private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>(() =>
         {
             BlendState state = new BlendState
@@ -92,6 +90,7 @@ namespace ClassicUO.Game.GameObjects
             /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/ /*state.AlphaBlendFunction =*/
             return state;
         });
+        private Graphic _displayedGraphic = Graphic.INVALID;
 
         public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
@@ -102,12 +101,11 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             ushort hue = Hue;
+
             if (Source is Item i)
             {
                 if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(AnimationGraphic))
-                {
                     AnimIndex = 0;
-                }
                 else if (Engine.Profile.Current.FieldsType == 2)
                 {
                     if (StaticFilters.IsFireField(Graphic))
@@ -124,7 +122,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                         hue = 0x0070;
-                    } 
+                    }
                     else if (StaticFilters.IsPoisonField(Graphic))
                     {
                         AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
@@ -173,10 +171,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                {
-                    hue = 0x0023;
-                }
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected) hue = 0x0023;
 
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0);
             }
@@ -187,30 +182,36 @@ namespace ClassicUO.Game.GameObjects
                     batcher.SetBlendState(_multiplyBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
+
                     break;
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
+
                     break;
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
+
                     break;
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
+
                     break;
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
+
                     break;
                 default:
                     base.Draw(batcher, posX, posY);
+
                     break;
             }
 
@@ -222,16 +223,13 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
             }
+
             return true;
         }
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
-            {
-                SelectedObject.Object = this;
-            }
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
         }
-
     }
 }

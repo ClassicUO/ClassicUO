@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -85,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-        
+
         public PlayerMobile(Serial serial) : base(serial)
         {
             _sklls = new Skill[FileManager.Skills.SkillsCount];
@@ -94,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
-            }                
+            }
         }
 
         public IReadOnlyList<Skill> Skills => _sklls;
@@ -743,7 +745,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item FindBandage()
         {
-            Item backpack = Equipment[(int)Layer.Backpack];
+            Item backpack = Equipment[(int) Layer.Backpack];
             Item item = null;
 
             if (backpack != null)
@@ -759,7 +761,9 @@ namespace ClassicUO.Game.GameObjects
 
 
         public bool IsBuffIconExists(Graphic graphic)
-            => _buffIcons.ContainsKey(graphic);
+        {
+            return _buffIcons.ContainsKey(graphic);
+        }
 
         public void RemoveBuff(Graphic graphic)
         {
@@ -770,25 +774,25 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
         {
-			if (id < _sklls.Length)
-			{
-			    Skill skill = _sklls[id];
-			
-			    if (displayMessage && skill.ValueFixed != realValue)
-			    {
-			        var delta = (realValue - skill.ValueFixed);
-			        var direction = (delta < 0 ? "decreased" : "increased");
-			
+            if (id < _sklls.Length)
+            {
+                Skill skill = _sklls[id];
+
+                if (displayMessage && skill.ValueFixed != realValue)
+                {
+                    var delta = realValue - skill.ValueFixed;
+                    var direction = delta < 0 ? "decreased" : "increased";
+
                     GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
-			    }
-			
-			    skill.ValueFixed = realValue;
-			    skill.BaseFixed = baseValue;
-			    skill.Lock = @lock;
-			    skill.CapFixed = cap;
-			    _delta |= Delta.Skills;
-			}
-		}
+                }
+
+                skill.ValueFixed = realValue;
+                skill.BaseFixed = baseValue;
+                skill.Lock = @lock;
+                skill.CapFixed = cap;
+                _delta |= Delta.Skills;
+            }
+        }
 
         public void UpdateSkillLock(int id, Lock @lock)
         {
@@ -838,7 +842,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        testGraphic = (ushort) ( equippedGraphic + 1 );
+                        testGraphic = (ushort) (equippedGraphic + 1);
 
                         if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
                         {
@@ -1618,9 +1622,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                done:;
+                done: ;
             }
-
 
 
             if (Abilities[0] == Ability.Invalid)
@@ -1628,7 +1631,6 @@ namespace ClassicUO.Game.GameObjects
                 Abilities[0] = Ability.Disarm;
                 Abilities[1] = Ability.ParalyzingBlow;
             }
-        
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -1645,7 +1647,7 @@ namespace ClassicUO.Game.GameObjects
             if (World.Map != null && World.Map.Index >= 0)
                 World.Map.Center = new Point(X, Y);
 
-            Plugin.UpdatePlayerPosition(X, Y , Z);
+            Plugin.UpdatePlayerPosition(X, Y, Z);
         }
 
         public override void Destroy()
@@ -1656,7 +1658,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            Equipment[(int)Layer.Bank]?.Destroy();
+            Equipment[(int) Layer.Bank]?.Destroy();
         }
 
 
@@ -1677,7 +1679,7 @@ namespace ClassicUO.Game.GameObjects
                 if (enemy != null)
                 {
                     Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
-                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point( enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point(enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
 
                     if (Direction != direction)
                         Walk(direction, false);
@@ -1690,7 +1692,7 @@ namespace ClassicUO.Game.GameObjects
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || (Stamina <= 1 && !IsDead))
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
                 run = Engine.Profile.Current.AlwaysRun;
@@ -1708,7 +1710,7 @@ namespace ClassicUO.Game.GameObjects
                 x = walkStep.X;
                 y = walkStep.Y;
                 z = walkStep.Z;
-                oldDirection = (Direction)walkStep.Direction;
+                oldDirection = (Direction) walkStep.Direction;
             }
 
             sbyte oldZ = z;
@@ -1733,7 +1735,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
             else
@@ -1754,7 +1756,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
 
                 direction = newDir;
@@ -1770,26 +1772,26 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
-        
+
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;
-            step.OldDirection = (byte)(oldDirection & Direction.Mask);
-            step.Direction = (byte)direction;
+            step.OldDirection = (byte) (oldDirection & Direction.Mask);
+            step.Direction = (byte) direction;
             step.Timer = Engine.Ticks;
-            step.X = (ushort)x;
-            step.Y = (ushort)y;
+            step.X = (ushort) x;
+            step.Y = (ushort) y;
             step.Z = z;
-            step.NoRotation = ((step.OldDirection == (byte)direction) && (oldZ - z >= 11));
+            step.NoRotation = step.OldDirection == (byte) direction && oldZ - z >= 11;
 
             Walker.StepsCount++;
 
-            Steps.AddToBack(new Step()
+            Steps.AddToBack(new Step
             {
                 X = x,
                 Y = y,
                 Z = z,
-                Direction = (byte)direction,
+                Direction = (byte) direction,
                 Run = run
             });
 
@@ -1808,23 +1810,21 @@ namespace ClassicUO.Game.GameObjects
 
             int nowDelta = 0;
 
-            if (_lastDir == (int)direction && _lastMount == IsMounted && _lastRun == run)
+            if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
             {
-                nowDelta = (int)((Engine.Ticks - _lastStepTime) - walkTime + _lastDelta);
+                nowDelta = (int) (Engine.Ticks - _lastStepTime - walkTime + _lastDelta);
 
                 if (Math.Abs(nowDelta) > 70)
                     nowDelta = 0;
                 _lastDelta = nowDelta;
             }
             else
-            {
                 _lastDelta = 0;
-            }
 
-            _lastStepTime = (int)Engine.Ticks;
+            _lastStepTime = (int) Engine.Ticks;
             _lastRun = run;
             _lastMount = IsMounted;
-            _lastDir = (int)direction;
+            _lastDir = (int) direction;
 
 
             Walker.LastStepRequestTime = Engine.Ticks + walkTime - nowDelta;
@@ -2072,7 +2072,6 @@ namespace ClassicUO.Game.GameObjects
         public void ConfirmWalk(byte seq)
         {
 #if MOVEMENT2
-
             if (RequestedSteps.Count == 0)
             {
                 NetClient.Socket.Send(new PResend());
@@ -2103,7 +2102,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
 #elif JAEDAN_MOVEMENT_PATCH
-
             if (_stepsOutstanding == 0)
             {
                 Log.Message(LogTypes.Warning, $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
@@ -2115,12 +2113,11 @@ namespace ClassicUO.Game.GameObjects
                 _stepsOutstanding--;
             }
 #else
-     Walker.ConfirmWalk(seq);
+            Walker.ConfirmWalk(seq);
 #endif
         }
 
 #if JAEDAN_MOVEMENT_PATCH
-
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
 

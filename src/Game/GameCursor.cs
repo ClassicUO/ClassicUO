@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -31,11 +31,9 @@ using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
 
@@ -53,9 +51,15 @@ namespace ClassicUO.Game
             }
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
+
+        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
         private readonly Tooltip _tooltip;
+
+        private IntPtr _cursor, _surface;
         private SpriteTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
+
+        private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
         private Point _offset;
         private Rectangle _rect;
@@ -187,13 +191,12 @@ namespace ClassicUO.Game
 
                     if (pixels != null && pixels.Length > 0)
                     {
-                        _cursorPixels[i, j] = new CursorInfo()
+                        _cursorPixels[i, j] = new CursorInfo
                         {
                             Width = w,
                             Height = h,
                             Pixels = pixels
-                        }; 
-
+                        };
                     }
                 }
             }
@@ -212,7 +215,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private ItemHold _itemHold;
+        public bool IsLoading { get; set; }
 
         public void SetDraggedItem(ItemHold hold)
         {
@@ -225,16 +228,6 @@ namespace ClassicUO.Game
             _rect.Height = _draggedItemTexture.Height;
         }
 
-        private IntPtr  _cursor, _surface;
-
-        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
-
-        private struct CursorInfo
-        {
-            public ushort[] Pixels;
-            public int Width, Height;
-        }
-        
         public unsafe void Update(double totalMS, double frameMS)
         {
             Graphic = AssignGraphicByState();
@@ -257,7 +250,7 @@ namespace ClassicUO.Game
                 ref readonly CursorInfo info = ref _cursorPixels[war, id];
 
                 fixed (ushort* ptr = info.Pixels)
-                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
+                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
 
                 if (_surface != IntPtr.Zero)
                 {
@@ -293,6 +286,7 @@ namespace ClassicUO.Game
                     sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
                 }
             }
+
             DrawToolTip(sb, Mouse.Position);
         }
 
@@ -319,6 +313,7 @@ namespace ClassicUO.Game
                     if (Engine.UI.IsMouseOverAControl)
                     {
                         Item it = null;
+
                         switch (Engine.UI.MouseOverControl)
                         {
                             case EquipmentSlot equipmentSlot:
@@ -330,9 +325,10 @@ namespace ClassicUO.Game
 
                                 break;
 
-							case Control control when control.Tooltip is Item i:
-								it = i;
-								break;
+                            case Control control when control.Tooltip is Item i:
+                                it = i;
+
+                                break;
                         }
 
                         if (it != null && it.Properties.Count != 0)
@@ -344,7 +340,7 @@ namespace ClassicUO.Game
                             return;
                         }
                     }
-                  
+
                     if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
                     {
                         if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
@@ -358,24 +354,19 @@ namespace ClassicUO.Game
 
             if (Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-	            if (Engine.UI.MouseOverControl.Tooltip is string text)
-	            {
-		            if (_tooltip.Text != text)
-			            _tooltip.Clear();
+                if (Engine.UI.MouseOverControl.Tooltip is string text)
+                {
+                    if (_tooltip.Text != text)
+                        _tooltip.Clear();
 
-		            if (_tooltip.IsEmpty)
-			            _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
+                    if (_tooltip.IsEmpty)
+                        _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
 
-		            _tooltip.Draw(batcher, position.X, position.Y + 24);
-	            }
+                    _tooltip.Draw(batcher, position.X, position.Y + 24);
+                }
             }
-            else if (!_tooltip.IsEmpty)
-            {
-                _tooltip.Clear();
-            }
+            else if (!_tooltip.IsEmpty) _tooltip.Clear();
         }
-
-        public bool IsLoading { get; set; }
 
         private ushort AssignGraphicByState()
         {
@@ -439,36 +430,52 @@ namespace ClassicUO.Game
             switch (hashf)
             {
                 case 111:
+
                     return (int) Direction.West; // W
                 case 112:
+
                     return (int) Direction.Up; // NW
                 case 113:
+
                     return (int) Direction.North; // N
                 case 120:
+
                     return (int) Direction.West; // W
                 case 131:
+
                     return (int) Direction.West; // W
                 case 132:
+
                     return (int) Direction.Left; // SW
                 case 133:
+
                     return (int) Direction.South; // S
                 case 210:
+
                     return (int) Direction.North; // N
                 case 230:
+
                     return (int) Direction.South; // S
                 case 311:
+
                     return (int) Direction.East; // E
                 case 312:
+
                     return (int) Direction.Right; // NE
                 case 313:
+
                     return (int) Direction.North; // N
                 case 320:
+
                     return (int) Direction.East; // E
                 case 331:
+
                     return (int) Direction.East; // E
                 case 332:
+
                     return (int) Direction.Down; // SE
                 case 333:
+
                     return (int) Direction.South; // S
             }
 
@@ -481,6 +488,12 @@ namespace ClassicUO.Game
             int b = val < 0 ? 1 : 0;
 
             return a - b;
+        }
+
+        private struct CursorInfo
+        {
+            public ushort[] Pixels;
+            public int Width, Height;
         }
     }
 }

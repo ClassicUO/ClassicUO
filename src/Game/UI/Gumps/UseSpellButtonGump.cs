@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
@@ -32,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private SpellDefinition _spell;
 
-        public UseSpellButtonGump() : base(0 ,0)
+        public UseSpellButtonGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -48,9 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            LocalSerial = (uint)_spell.ID;
+            LocalSerial = (uint) _spell.ID;
 
-            Add(new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
+            Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
@@ -66,11 +68,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             return true;
         }
-        
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
-            writer.Write(0);//version - 4
+            writer.Write(0); //version - 4
             writer.Write(_spell.ID); // 4
         }
 
@@ -79,6 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(reader);
             int version = reader.ReadInt32();
             int id;
+
             if (version > 0)
             {
                 string name = reader.ReadUTF8String(version);
@@ -90,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Reagents[] reagents = new Reagents[reagsCount];
 
                 for (int i = 0; i < reagsCount; i++)
-                    reagents[i] = (Reagents)reader.ReadInt32();
+                    reagents[i] = (Reagents) reader.ReadInt32();
 
                 int manaCost = reader.ReadInt32();
                 int minSkill = reader.ReadInt32();
@@ -99,6 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
                 id = reader.ReadInt32();
+
             _spell = SpellDefinition.FullIndexGetSpell(id);
             BuildGump();
         }

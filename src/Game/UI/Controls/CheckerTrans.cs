@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,42 +33,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class CheckerTrans : Control
     {
-        private static SpriteTexture _transparentTexture/*, _transparentTexture2*/;
-
-        //public CheckerTrans(float alpha = 0.5f)
-        //{
-        //    _alpha = alpha;
-        //    AcceptMouseInput = false;
-        //}
-
-        public CheckerTrans(List<string> parts)
-        {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
-            AcceptMouseInput = false;
-        }
-
-        public static SpriteTexture TransparentTexture
-        {
-            get
-            {
-                if (_transparentTexture == null || _transparentTexture.IsDisposed)
-                {
-                    _transparentTexture = new SpriteTexture(1, 1);
-
-                    _transparentTexture.SetData(new Color[1]
-                    {
-                        Color.Black
-                    });
-                }
-
-                _transparentTexture.Ticks = Engine.Ticks;
-
-                return _transparentTexture;
-            }
-        }
+        private static SpriteTexture _transparentTexture /*, _transparentTexture2*/;
 
         //public static SpriteTexture TransparentTexture2
         //{
@@ -104,9 +71,6 @@ namespace ClassicUO.Game.UI.Controls
             };
 
 
-
-
-
             return state;
         });
 
@@ -120,6 +84,41 @@ namespace ClassicUO.Game.UI.Controls
 
             return blend;
         });
+
+        //public CheckerTrans(float alpha = 0.5f)
+        //{
+        //    _alpha = alpha;
+        //    AcceptMouseInput = false;
+        //}
+
+        public CheckerTrans(List<string> parts)
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Width = int.Parse(parts[3]);
+            Height = int.Parse(parts[4]);
+            AcceptMouseInput = false;
+        }
+
+        public static SpriteTexture TransparentTexture
+        {
+            get
+            {
+                if (_transparentTexture == null || _transparentTexture.IsDisposed)
+                {
+                    _transparentTexture = new SpriteTexture(1, 1);
+
+                    _transparentTexture.SetData(new Color[1]
+                    {
+                        Color.Black
+                    });
+                }
+
+                _transparentTexture.Ticks = Engine.Ticks;
+
+                return _transparentTexture;
+            }
+        }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {

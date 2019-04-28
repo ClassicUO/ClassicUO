@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 
 using Microsoft.Xna.Framework;
@@ -16,12 +11,14 @@ namespace ClassicUO.Renderer
 {
     internal static class SpriteRenderer
     {
+        private static readonly Texture2D[] _textureCache = new Texture2D[9];
         /* The main target of this class it to reduce the amount of properties around the objects.
            Than it will be useful in future when i'll implement the ECS system*/
-        
+
         public static void DrawGump(Graphic graphic, Hue hue, int x, int y, bool ispartial)
         {
             Texture2D texture = FileManager.Gumps.GetTexture(graphic);
+
             if (texture == null)
                 return;
 
@@ -36,6 +33,7 @@ namespace ClassicUO.Renderer
         public static void DrawGump(Graphic graphic, Hue hue, int x, int y, int width, int height, bool ispartial)
         {
             Texture2D texture = FileManager.Gumps.GetTexture(graphic);
+
             if (texture == null)
                 return;
 
@@ -46,9 +44,6 @@ namespace ClassicUO.Renderer
 
             Engine.Batcher.Draw2D(texture, x, y, width, height, huev);
         }
-
-
-        private static readonly Texture2D[] _textureCache = new Texture2D[9];
 
         public static void DrawGumpTiled(Graphic graphic, int x, int y, int width, int height)
         {
@@ -66,9 +61,7 @@ namespace ClassicUO.Renderer
                 else if (i > 4)
                     _textureCache[i - 1] = pth;
                 else
-                {
                     _textureCache[i] = pth;
-                }
             }
 
             int offsetTop = Math.Max(_textureCache[0].Height, _textureCache[2].Height) - _textureCache[1].Height;
@@ -176,8 +169,10 @@ namespace ClassicUO.Renderer
 
 
                 for (int xx = 0; xx < drawCountX; xx++)
+                {
                     for (int yy = 0; yy < drawCountY; yy++)
                         Engine.Batcher.Draw2D(_textureCache[i], drawX + xx, drawY + yy, drawWidth, drawHeight, Vector3.Zero);
+                }
             }
         }
 
@@ -186,9 +181,7 @@ namespace ClassicUO.Renderer
             Texture2D th = FileManager.Textmaps.GetTexture(land.TileData.TexID);
 
             if (th == null)
-            {
                 DrawLandArt(land.Graphic, hue, x, y);
-            }
             else
             {
                 Vector3 huev = Vector3.Zero;
@@ -272,7 +265,7 @@ namespace ClassicUO.Renderer
 
         public static void DrawStaticArtAnimated(Graphic graphic, Hue hue, int x, int y, byte offset)
         {
-            DrawStaticArt( (Graphic)(graphic + offset), hue, x, y);
+            DrawStaticArt((Graphic) (graphic + offset), hue, x, y);
         }
 
         public static void DrawStaticArtRotated(Graphic graphic, Hue hue, int x, int y, float angle)
@@ -293,12 +286,12 @@ namespace ClassicUO.Renderer
             Vector3 center = Vector3.Zero;
             center.X = x;
             center.Y = y;
-            center.X -= ((th.Width >> 1) - 22) - 44 + w;
-            center.Y -= (th.Height - 44) + h;
-            float sinx = (float)Math.Sin(angle) * w;
-            float cosx = (float)Math.Cos(angle) * w;
-            float siny = (float)Math.Sin(angle) * h;
-            float cosy = (float)Math.Cos(angle) * h;
+            center.X -= (th.Width >> 1) - 22 - 44 + w;
+            center.Y -= th.Height - 44 + h;
+            float sinx = (float) Math.Sin(angle) * w;
+            float cosx = (float) Math.Cos(angle) * w;
+            float siny = (float) Math.Sin(angle) * h;
+            float cosy = (float) Math.Cos(angle) * h;
 
             SpriteVertex[] vertices = SpriteVertex.PolyBufferFlipped;
             vertices[0].Position = center;
@@ -365,7 +358,6 @@ namespace ClassicUO.Renderer
 
         public static void DrawLight()
         {
-
         }
     }
 }

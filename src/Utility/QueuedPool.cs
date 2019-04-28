@@ -1,9 +1,6 @@
-﻿using ClassicUO.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
+using ClassicUO.Interfaces;
 
 namespace ClassicUO.Utility
 {
@@ -15,8 +12,10 @@ namespace ClassicUO.Utility
         {
             T result = null;
             result = _pool.Count > 0 ? _pool.Dequeue() : new T();
+
             if (result is IPoolable poolable)
                 poolable.OnPickup();
+
             return result;
         }
 
@@ -24,6 +23,7 @@ namespace ClassicUO.Utility
         {
             if (obj is IPoolable poolable)
                 poolable.OnReturn();
+
             if (obj != null)
                 _pool.Enqueue(obj);
         }

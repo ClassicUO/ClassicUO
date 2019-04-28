@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -12,7 +7,7 @@ namespace ClassicUO.IO.Resources
 {
     internal class LightsLoader : ResourceLoader<SpriteTexture>
     {
-        private  UOFileMul _file;
+        private UOFileMul _file;
 
         public override void Load()
         {
@@ -21,10 +16,11 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
+
             _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
         }
 
-       
+
         public override void CleanResources()
         {
         }
@@ -58,8 +54,8 @@ namespace ClassicUO.IO.Resources
                 for (int j = 0; j < width; j++)
                 {
                     ushort val = _file.ReadByte();
-                    val = (ushort)((val << 10) | (val << 5) | val);
-                    pixels[pos + j] = (ushort)((val != 0 ? 0x8000 : 0) | val);
+                    val = (ushort) ((val << 10) | (val << 5) | val);
+                    pixels[pos + j] = (ushort) ((val != 0 ? 0x8000 : 0) | val);
                 }
             }
 

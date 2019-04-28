@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -49,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             mobile.Items.Added += ItemsOnAdded;
             mobile.Items.Removed += ItemsOnRemoved;
         }
-        
+
         public Mobile Mobile
         {
             get => _mobile;
@@ -94,6 +96,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (item == _fakeItem.Serial)
                     {
                         _fakeItem = null;
+
                         break;
                     }
                 }
@@ -127,6 +130,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Mobile == null || Mobile.IsDestroyed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -138,34 +142,22 @@ namespace ClassicUO.Game.UI.Controls
             bool isGM = false;
 
             if (Mobile.Graphic == 0x0191 || Mobile.Graphic == 0x0193)
-            {
                 body = 0x000D;
-            }
             else if (Mobile.Graphic == 0x025D)
-            {
                 body = 0x000E;
-            }
             else if (Mobile.Graphic == 0x025E)
-            {
                 body = 0x000F;
-            }
             else if (Mobile.Graphic == 0x029A)
-            {
                 body = 0x029A;
-            }
             else if (Mobile.Graphic == 0x029B)
-            {
                 body = 0x299;
-            }
             else if (Mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
                 isGM = true;
             }
             else
-            {
                 body = 0x000C;
-            }
 
             if (isGM)
             {
@@ -175,6 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                     IsPaperdoll = true,
                     IsPartialHue = true
                 });
+
                 Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
@@ -221,10 +214,7 @@ namespace ClassicUO.Game.UI.Controls
                             case Layer.Torso:
                                 var robe = _mobile.Equipment[(int) Layer.Robe];
 
-                                if (robe != null)
-                                {
-                                    continue;
-                                }
+                                if (robe != null) continue;
 
                                 break;
 
@@ -245,10 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                                         {
                                             if (robe.Graphic < 0x2683)
                                             {
-                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
-                                                {
-                                                    break;
-                                                }
+                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F) break;
                                             }
 
                                             continue;
@@ -279,7 +266,7 @@ namespace ClassicUO.Game.UI.Controls
                     Add(_backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
                     {
                         AcceptMouseInput = true,
-                        CanPickUp = false,
+                        CanPickUp = false
                     });
                     _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
                 }
@@ -300,6 +287,5 @@ namespace ClassicUO.Game.UI.Controls
                     backpackGump.BringOnTop();
             }
         }
-
     }
 }

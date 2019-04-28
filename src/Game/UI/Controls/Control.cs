@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -213,6 +216,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Parent == null)
                     return null;
+
                 Control p = Parent;
 
                 while (p.Parent != null)
@@ -248,16 +252,11 @@ namespace ClassicUO.Game.UI.Controls
             set => _handlesKeyboardFocus = value;
         }
 
-        public virtual void OnPageChanged()
-        {
-
-        }
-
         public int ActivePage
         {
             get => _activePage;
             set
-            {              
+            {
                 _activePage = value;
 
                 OnPageChanged();
@@ -290,9 +289,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool WantUpdateSize { get; set; } = true;
 
-        public Vector3 HueVector { get; set; }
-
         public bool AllowedToDraw { get; set; }
+
+        public int TooltipMaxLength { get; private set; }
+
+        public Vector3 HueVector { get; set; }
 
         public SpriteTexture Texture { get; set; }
 
@@ -321,37 +322,6 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        private void DrawDebug(Batcher2D batcher, int x, int y)
-        {
-            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
-            {
-                if (Engine.DebugFocus && HasKeyboardFocus)
-                {
-                    if (_debugFocusTexture == null)
-                    {
-                        _debugFocusTexture = new SpriteTexture(1, 1);
-                        _debugFocusTexture.SetData(new Color[1]
-                        {
-                            Color.Red
-                        });
-                    }
-                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
-                }
-                else if (Engine.GlobalSettings.Debug)
-                {
-                    if (_debugTexture == null)
-                    {
-                        _debugTexture = new SpriteTexture(1, 1);
-                        _debugTexture.SetData(new Color[1]
-                        {
-                            Color.Green
-                        });
-                    }
-                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
-                }
-            }
-        }
-
         public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed || !IsInitialized) return;
@@ -369,7 +339,8 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         OnChildRemoved();
                         _children.RemoveAt(i--);
-                        continue;  
+
+                        continue;
                     }
 
                     c.Update(totalMS, frameMS);
@@ -385,7 +356,6 @@ namespace ClassicUO.Game.UI.Controls
                                 h = c.Bounds.Bottom;
                         }
                     }
-                    
                 }
 
                 if (WantUpdateSize)
@@ -400,31 +370,68 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public virtual void OnPageChanged()
+        {
+        }
+
+        private void DrawDebug(Batcher2D batcher, int x, int y)
+        {
+            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
+            {
+                if (Engine.DebugFocus && HasKeyboardFocus)
+                {
+                    if (_debugFocusTexture == null)
+                    {
+                        _debugFocusTexture = new SpriteTexture(1, 1);
+
+                        _debugFocusTexture.SetData(new Color[1]
+                        {
+                            Color.Red
+                        });
+                    }
+
+                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
+                }
+                else if (Engine.GlobalSettings.Debug)
+                {
+                    if (_debugTexture == null)
+                    {
+                        _debugTexture = new SpriteTexture(1, 1);
+
+                        _debugTexture.SetData(new Color[1]
+                        {
+                            Color.Green
+                        });
+                    }
+
+                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                }
+            }
+        }
+
         public void BringOnTop()
         {
             Engine.UI.MakeTopMostGump(this);
         }
-      
+
         public void SetTooltip(string text, int maxWidth = 0)
         {
-	        ClearTooltip();
+            ClearTooltip();
 
-			if (!String.IsNullOrEmpty(text))
+            if (!string.IsNullOrEmpty(text))
             {
                 Tooltip = text;
                 TooltipMaxLength = maxWidth;
             }
         }
 
-	    public void SetTooltip(Entity entity)
-	    {
-		    ClearTooltip();
+        public void SetTooltip(Entity entity)
+        {
+            ClearTooltip();
 
-		    if (entity != null && !entity.IsDestroyed)
-			    Tooltip = entity;
-	    }
-
-		public int TooltipMaxLength { get; private set; }
+            if (entity != null && !entity.IsDestroyed)
+                Tooltip = entity;
+        }
 
         public void ClearTooltip()
         {
@@ -433,10 +440,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus)
-            {
-                Engine.UI.KeyboardFocusControl = this;
-            }
+            if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
         }
 
         public event EventHandler Disposed;
@@ -451,10 +455,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Initialize()
         {
-            if (IsDisposed)
-            {
-                return;
-            }
+            if (IsDisposed) return;
 
             IsDisposed = false;
             IsEnabled = true;
@@ -482,7 +483,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-     
+
         public Control[] HitTest(Point position)
         {
             if (!IsVisible)
@@ -554,6 +555,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (c == null)
                 return;
+
             c.Parent = null;
             _children.Remove(c);
             OnChildRemoved();
@@ -590,7 +592,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);   
+            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
         }
 
         public void InvokeMouseCloseGumpWithRClick()
@@ -718,6 +720,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_mouseIsDown && !_attempToDrag)
             {
                 Point offset = Mouse.LDroppedOffset;
+
                 if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
                     || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
 
@@ -730,7 +733,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseEnter(int x, int y)
         {
-
         }
 
         protected virtual void OnMouseExit(int x, int y)
@@ -772,7 +774,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected virtual bool Contains(int x, int y)
-        {           
+        {
             return !IsDisposed;
         }
 
@@ -808,19 +810,19 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (!CanCloseWithRightClick)
                 return;
+
             Control parent = Parent;
 
             while (parent != null)
             {
                 if (!parent.CanCloseWithRightClick)
                     return;
+
                 parent = parent.Parent;
             }
 
             if (Parent == null)
-            {
                 Dispose();
-            }
             else
                 Parent.CloseWithRightClick();
         }
@@ -828,19 +830,23 @@ namespace ClassicUO.Game.UI.Controls
         public void KeyboardTabToNextFocus(Control c)
         {
             int startIndex = _children.IndexOf(c);
+
             for (int i = startIndex + 1; i < _children.Count; i++)
             {
                 if (_children[i].AcceptKeyboardInput)
                 {
                     _children[i].SetKeyboardFocus();
+
                     return;
                 }
             }
+
             for (int i = 0; i < startIndex; i++)
             {
                 if (_children[i].AcceptKeyboardInput)
                 {
                     _children[i].SetKeyboardFocus();
+
                     return;
                 }
             }

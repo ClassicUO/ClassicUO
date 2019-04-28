@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
@@ -31,9 +33,9 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollArea : Control
     {
         private readonly IScrollBar _scrollBar;
-        private bool _needUpdate = true;
-        private bool _isNormalScroll;
         private readonly int _scrollbarHeight;
+        private bool _isNormalScroll;
+        private bool _needUpdate = true;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
@@ -43,11 +45,12 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
             _isNormalScroll = normalScrollbar;
             _scrollbarHeight = scrollbarHeight;
+
             if (normalScrollbar)
-                _scrollBar = new ScrollBar( Width - 14, 0, Height);
+                _scrollBar = new ScrollBar(Width - 14, 0, Height);
             else
             {
-                _scrollBar = new ScrollFlag()
+                _scrollBar = new ScrollFlag
                 {
                     X = Width - 19, Height = h
                 };
@@ -189,7 +192,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem()
+            ScrollAreaItem item = new ScrollAreaItem
             {
                 CanMove = true
             };
@@ -214,9 +217,10 @@ namespace ClassicUO.Game.UI.Controls
             _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
             int height = 0;
+
             for (int i = 1; i < Children.Count; i++)
             {
-                if(Children[i].IsVisible)
+                if (Children[i].IsVisible)
                     height += Children[i].Height;
             }
 
@@ -227,7 +231,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (height > 0)
             {
-                _scrollBar.MaxValue =  height;
+                _scrollBar.MaxValue = height;
 
                 if (maxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;

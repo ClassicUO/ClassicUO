@@ -53,10 +53,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// <returns>
         ///     the channel code represented by this instance.
         /// </returns>
-        public virtual int ChannelsOutputCode
-        {
-            get { return outputChannels; }
-        }
+        public virtual int ChannelsOutputCode => outputChannels;
 
         /// <summary>
         ///     Retrieves the number of output channels represented
@@ -71,7 +68,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             get
             {
-                int count = (outputChannels == BOTH_CHANNELS) ? 2 : 1;
+                int count = outputChannels == BOTH_CHANNELS ? 2 : 1;
+
                 return count;
             }
         }
@@ -90,18 +88,23 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             switch (code)
             {
                 case (int) OutputChannelsEnum.LEFT_CHANNEL:
+
                     return LEFT;
 
                 case (int) OutputChannelsEnum.RIGHT_CHANNEL:
+
                     return RIGHT;
 
                 case (int) OutputChannelsEnum.BOTH_CHANNELS:
+
                     return BOTH;
 
                 case (int) OutputChannelsEnum.DOWNMIX_CHANNELS:
+
                     return DOWNMIX;
 
                 default:
+
                     throw new ArgumentException("Invalid channel code: " + code);
             }
         }
@@ -113,7 +116,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (o is OutputChannels)
             {
                 OutputChannels oc = (OutputChannels) o;
-                equals = (oc.outputChannels == outputChannels);
+                equals = oc.outputChannels == outputChannels;
             }
 
             return equals;

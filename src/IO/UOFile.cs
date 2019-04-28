@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -39,6 +39,7 @@ namespace ClassicUO.IO
         public UOFile(string filepath, bool loadfile = false)
         {
             FilePath = filepath;
+
             if (loadfile)
                 Load();
         }
@@ -56,6 +57,7 @@ namespace ClassicUO.IO
             if (!fileInfo.Exists)
             {
                 Log.Message(LogTypes.Error, $"{FilePath}  not exists.");
+
                 return;
             }
 
@@ -81,9 +83,7 @@ namespace ClassicUO.IO
                 }
             }
             else
-            {
                 Log.Message(LogTypes.Error, $"{FilePath}  size must be > 0");
-            }
         }
 
         public virtual void Dispose()
@@ -97,18 +97,12 @@ namespace ClassicUO.IO
 
         public void UnloadEntries()
         {
-            if (Entries != null)
-            {
-                Entries = null;
-            }
+            if (Entries != null) Entries = null;
         }
 
         internal void Fill(ref byte[] buffer, int count)
         {
-            fixed (byte* ptr = buffer)
-            {
-                Buffer.MemoryCopy((byte*)PositionAddress, ptr, count, count);
-            }
+            fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
 
             Position += count;
         }
@@ -144,6 +138,7 @@ namespace ClassicUO.IO
             ref readonly UOFileIndex3D e = ref Entries[entryidx];
 
             if (e.Offset < 0) return (0, 0, false);
+
             int length = e.Length & 0x7FFFFFFF;
             int extra = e.Extra;
 
@@ -155,6 +150,7 @@ namespace ClassicUO.IO
             }
 
             if (e.Length < 0) return (0, 0, false);
+
             Seek(e.Offset);
 
             return (length, extra, false);

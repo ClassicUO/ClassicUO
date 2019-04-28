@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -34,9 +33,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class CreateCharTradeGump : Gump
     {
         private readonly HSliderBar[] _attributeSliders;
-        private readonly HSliderBar[] _skillSliders;
         private readonly PlayerMobile _character;
         private readonly Combobox[] _skills;
+        private readonly HSliderBar[] _skillSliders;
 
         public CreateCharTradeGump(PlayerMobile character, ProfessionInfo profession) : base(0, 0)
         {
@@ -93,11 +92,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (var i = 0; i < CharCreationGump._skillsCount; i++)
             {
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
-                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i,1], HSliderBarStyle.MetalWidgetRecessedBar, true));
+                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i, 1], HSliderBarStyle.MetalWidgetRecessedBar, true));
                 y += 70;
             }
 
-			Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
             });
@@ -150,8 +149,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Dexterity = (ushort) _attributeSliders[1].Value;
                         _character.Intelligence = (ushort) _attributeSliders[2].Value;
 
-						charCreationGump.SetAttributes();
-					}
+                        charCreationGump.SetAttributes();
+                    }
 
                     break;
             }
@@ -163,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_skills.All(s => s.SelectedIndex >= 0))
             {
-                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count<Combobox>() > 1);
+                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
 
                 if (duplicated > 0)
                 {

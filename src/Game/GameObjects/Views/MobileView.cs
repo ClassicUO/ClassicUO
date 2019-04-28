@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -47,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             bool mirror = false;
-            byte dir = (byte)GetDirectionForAnimation();
+            byte dir = (byte) GetDirectionForAnimation();
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -99,10 +96,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawBody(batcher, posX, posY, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
-            if (IsHuman)
-            {
-                DrawEquipment(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
-            }
+            if (IsHuman) DrawEquipment(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
@@ -113,7 +107,7 @@ namespace ClassicUO.Game.GameObjects
             //batcher.DrawRectangle(Textures.GetTexture(Color.Red), r.X, r.Y, r.Width, r.Height , Vector3.Zero);
 
             Engine.DebugInfo.MobilesRendered++;
-  
+
 
             return true;
         }
@@ -121,7 +115,7 @@ namespace ClassicUO.Game.GameObjects
         private void DrawBody(Batcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
         {
             ushort graphic = GetGraphicForAnimation();
-            byte animGroup = Mobile.GetGroupForAnimation(this, graphic, true);
+            byte animGroup = GetGroupForAnimation(this, graphic, true);
             sbyte animIndex = AnimIndex;
             drawX = drawY = drawCenterY = 0;
 
@@ -131,12 +125,13 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
-      
+
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
+
             if (fc != 0 && animIndex >= fc)
                 animIndex = 0;
 
@@ -152,9 +147,9 @@ namespace ClassicUO.Game.GameObjects
                 drawY = drawCenterY + yOff;
 
                 if (IsFlipped)
-                    drawX = -22 + (int)Offset.X;
+                    drawX = -22 + (int) Offset.X;
                 else
-                    drawX = -22 - (int)Offset.X;
+                    drawX = -22 - (int) Offset.X;
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
@@ -184,12 +179,12 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = frame.Height;
 
 
-
-                 
                 if (Engine.AuraManager.IsEnabled)
+                {
                     Engine.AuraManager.Draw(batcher,
                                             IsFlipped ? posX + drawX + 44 : posX - drawX,
                                             posY - yOff, Notoriety.GetHue(NotorietyFlag));
+                }
 
 
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
@@ -215,11 +210,8 @@ namespace ClassicUO.Game.GameObjects
                         Bounds.Height = frame.Height;
                     }
                 }
-                else if (shadow)
-                {
-                    DrawInternal(batcher, posX, posY, true);
-                }
-    
+                else if (shadow) DrawInternal(batcher, posX, posY, true);
+
 
                 if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                 {
@@ -273,7 +265,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue)
         {
-            Item item = Equipment[(int)layer];
+            Item item = Equipment[(int) layer];
 
             if (item == null)
                 return;
@@ -286,14 +278,14 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             EquipConvData? convertedItem = null;
-        
+
             ushort graphic;
             int mountHeight = 0;
 
             if (layer == Layer.Mount && IsHuman)
             {
                 graphic = item.GetGraphicForAnimation();
-                mountHeight = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;        
+                mountHeight = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
             }
             else if (item.ItemData.AnimID != 0)
             {
@@ -312,14 +304,14 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
 
-            byte animGroup = Mobile.GetGroupForAnimation(this, graphic);
+            byte animGroup = GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;
 
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
 
-           ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, false).Direction[dir];
+            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, false).Direction[dir];
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
@@ -329,6 +321,7 @@ namespace ClassicUO.Game.GameObjects
 
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
+
             if (fc > 0 && animIndex >= fc)
                 animIndex = 0;
 
@@ -394,7 +387,6 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
-                
 
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 {
@@ -418,7 +410,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
                 }
- 
+
                 base.Draw(batcher, posX, posY);
 
                 Select(mirror ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
@@ -426,10 +418,9 @@ namespace ClassicUO.Game.GameObjects
                 if (item.ItemData.IsLight)
                 {
                     Engine.SceneManager.GetScene<GameScene>()
-                          .AddLight(this, item, (IsFlipped ? posX + Bounds.X + 44 : posX - Bounds.X ), posY + y + 22);
+                          .AddLight(this, item, IsFlipped ? posX + Bounds.X + 44 : posX - Bounds.X, posY + y + 22);
                 }
             }
-
         }
 
 
@@ -437,7 +428,7 @@ namespace ClassicUO.Game.GameObjects
         {
             SpriteVertex[] vertex;
 
-            if(IsFlipped)
+            if (IsFlipped)
             {
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position.X = posX;
@@ -501,10 +492,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object != this && Texture.Contains(x, y))
-            {
-                SelectedObject.Object = this;
-            }
+            if (SelectedObject.Object != this && Texture.Contains(x, y)) SelectedObject.Object = this;
 
             //if (SelectedObject.IsPointInMobile(this, x, y))
             //{

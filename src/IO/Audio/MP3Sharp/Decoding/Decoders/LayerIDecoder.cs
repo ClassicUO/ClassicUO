@@ -1,4 +1,3 @@
-
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
@@ -35,7 +34,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             ReadAllocation();
             ReadScaleFactorSelection();
 
-            if ((crc != null) || header.IsChecksumOK())
+            if (crc != null || header.IsChecksumOK())
             {
                 ReadScaleFactors();
 
@@ -44,7 +43,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
         }
 
         public virtual void Create(Bitstream stream0, Header header0, SynthesisFilter filtera, SynthesisFilter filterb,
-            ABuffer buffer0, int whichCh0)
+                                   ABuffer buffer0, int whichCh0)
         {
             stream = stream0;
             header = header0;
@@ -57,13 +56,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
         protected internal virtual void CreateSubbands()
         {
             int i;
+
             if (mode == Header.SINGLE_CHANNEL)
+            {
                 for (i = 0; i < num_subbands; ++i)
                     subbands[i] = new SubbandLayer1(i);
+            }
             else if (mode == Header.JOINT_STEREO)
             {
                 for (i = 0; i < header.intensity_stereo_bound(); ++i)
                     subbands[i] = new SubbandLayer1Stereo(i);
+
                 for (; i < num_subbands; ++i)
                     subbands[i] = new SubbandLayer1IntensityStereo(i);
             }
@@ -97,18 +100,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             bool readReady = false;
             bool writeReady = false;
             int hdrMode = header.mode();
+
             do
             {
                 int i;
+
                 for (i = 0; i < num_subbands; ++i)
                     readReady = subbands[i].read_sampledata(stream);
+
                 do
                 {
                     for (i = 0; i < num_subbands; ++i)
                         writeReady = subbands[i].put_next_sample(which_channels, filter1, filter2);
 
                     filter1.calculate_pcm_samples(buffer);
-                    if ((which_channels == OutputChannels.BOTH_CHANNELS) && (hdrMode != Header.SINGLE_CHANNEL))
+
+                    if (which_channels == OutputChannels.BOTH_CHANNELS && hdrMode != Header.SINGLE_CHANNEL)
                         filter2.calculate_pcm_samples(buffer);
                 } while (!writeReady);
             } while (!readReady);

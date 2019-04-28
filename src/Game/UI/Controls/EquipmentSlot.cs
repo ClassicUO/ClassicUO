@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -87,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
-                        HighlightOnMouseOver = false,
+                        HighlightOnMouseOver = false
                     });
 
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
@@ -131,19 +129,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Item != null)
             {
-            //    if (_canDrag && totalMS >= _pickupTime)
-            //    {
-            //        _canDrag = false;
-            //        AttempPickUp();
-            //    }
+                //    if (_canDrag && totalMS >= _pickupTime)
+                //    {
+                //        _canDrag = false;
+                //        AttempPickUp();
+                //    }
 
-            //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
-            //    {
-            //        if (!World.ClientFlags.TooltipsEnabled)
-            //            GameActions.SingleClick(Item);
-            //        GameActions.OpenPopupMenu(Item);
-            //        _sendClickIfNotDClick = false;
-            //    }
+                //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+                //    {
+                //        if (!World.ClientFlags.TooltipsEnabled)
+                //            GameActions.SingleClick(Item);
+                //        GameActions.OpenPopupMenu(Item);
+                //        _sendClickIfNotDClick = false;
+                //    }
 
                 //if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
                 //{
@@ -189,9 +187,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return true;
             }
-
-
-
         }
     }
 }

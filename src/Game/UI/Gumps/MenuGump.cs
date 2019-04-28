@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -16,8 +11,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MenuGump : Gump
     {
         private readonly ContainerHorizontal _container;
-        private bool _isDown, _isLeft;
         private readonly HSliderBar _slider;
+        private bool _isDown, _isLeft;
 
         public MenuGump(Serial serial, Serial serv, string name) : base(serial, serv)
         {
@@ -26,10 +21,11 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
 
             Add(new GumpPic(0, 0, 0x0910, 0));
+
             Add(new ColorBox(217, 49, 0, 0xFF000001)
             {
                 X = 40,
-                Y = 42,
+                Y = 42
             });
 
             Label label = new Label(name, false, 0x0386, 200, 1, FontStyle.Fixed)
@@ -40,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(label);
 
-            _container = new ContainerHorizontal()
+            _container = new ContainerHorizontal
             {
                 X = 40,
                 Y = 42,
@@ -57,36 +53,32 @@ namespace ClassicUO.Game.UI.Gumps
             HitBox left = new HitBox(25, 60, 10, 15)
             {
                 IsTransparent = true,
-                Alpha = 1,
+                Alpha = 1
             };
+
             left.MouseDown += (sender, e) =>
             {
                 _isDown = true;
                 _isLeft = true;
             };
 
-            left.MouseUp += (sender, e) =>
-            {
-                _isDown = false;
-            };
+            left.MouseUp += (sender, e) => { _isDown = false; };
             Add(left);
 
 
             HitBox right = new HitBox(260, 60, 10, 15)
             {
                 IsTransparent = true,
-                Alpha = 1,
+                Alpha = 1
             };
+
             right.MouseDown += (sender, e) =>
             {
                 _isDown = true;
                 _isLeft = false;
             };
 
-            right.MouseUp += (sender, e) =>
-            {
-                _isDown = false;
-            };
+            right.MouseUp += (sender, e) => { _isDown = false; };
             Add(right);
         }
 
@@ -94,10 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_isDown)
-            {
-                _container.Value += (_isLeft ? -1 : 1);
-            }
+            if (_isDown) _container.Value += _isLeft ? -1 : 1;
         }
 
 
@@ -108,8 +97,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x,
                 Y = y,
                 //LocalSerial = (uint) index,
-                AcceptMouseInput = true,
+                AcceptMouseInput = true
             };
+
             pic.MouseDoubleClick += (sender, e) =>
             {
                 NetClient.Socket.Send(new PMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index, graphic, hue));
@@ -126,14 +116,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ContainerHorizontal : Control
         {
-            private int _maxWidth;
             private bool _update = true;
             private int _value;
-
-            public ContainerHorizontal()
-            {
-
-            }
 
             public int Value
             {
@@ -142,14 +126,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (value < 0)
                         value = 0;
-                    else if (value > _maxWidth)
-                        value = _maxWidth;
+                    else if (value > MaxValue)
+                        value = MaxValue;
 
                     _value = value;
                 }
             }
 
-            public int MaxValue => _maxWidth;
+            public int MaxValue { get; private set; }
 
             protected override void OnInitialize()
             {
@@ -168,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //    CalculateWidth();
                 //}
             }
-            
+
             public override bool Draw(Batcher2D batcher, int x, int y)
             {
                 Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
@@ -190,12 +174,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (width + child.Width <= Value)
                         {
-
                         }
                         else if (width + child.Width <= maxWidth)
-                        {
                             child.Draw(batcher, child.X + x, y);
-                        }
                         else
                         {
                             if (drawOnly1)
@@ -228,19 +209,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void CalculateWidth()
             {
-                _maxWidth = Children.Sum(s => s.Width) - Width;
+                MaxValue = Children.Sum(s => s.Width) - Width;
 
-                if (_maxWidth < 0)
-                    _maxWidth = 0;
+                if (MaxValue < 0)
+                    MaxValue = 0;
             }
         }
-
-
     }
 
     internal class GrayMenuGump : Gump
     {
         private readonly ResizePic _resizePic;
+
         public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)
         {
             CanMove = true;
@@ -250,10 +230,11 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_resizePic = new ResizePic(0x13EC)
             {
                 Width = 400,
-                Height = 111111,
+                Height = 111111
             });
 
             Label l;
+
             Add(l = new Label(name, false, 0x0386, 370, 1)
             {
                 X = 20,
@@ -293,22 +274,27 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, 0));
 
                     Dispose();
+
                     break;
 
                 case 1: // continue
 
                     ushort index = 1;
+
                     foreach (RadioButton radioButton in Children.OfType<RadioButton>())
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic)ServerSerial.Value, index));
+                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index));
+
                             break;
                         }
 
                         index++;
                     }
+
                     Dispose();
+
                     break;
             }
         }

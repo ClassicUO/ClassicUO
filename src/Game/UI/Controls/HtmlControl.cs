@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -149,7 +151,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (UseFlagScrollbar)
                 {
-                    _scrollBar = new ScrollFlag()
+                    _scrollBar = new ScrollFlag
                     {
                         Location = new Point(Width - 14, 0)
                     };
@@ -159,10 +161,10 @@ namespace ClassicUO.Game.UI.Controls
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = /* _gameText.Height*//* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
 
-                Add((Control)_scrollBar);
+                Add((Control) _scrollBar);
             }
 
             //if (Width != _gameText.Width)
@@ -195,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _scrollBar.Height = Height;
                     _scrollBar.MinValue = 0;
-                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height +(HasBackground ? 8 : 0);
+                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height + (HasBackground ? 8 : 0);
                     //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                     WantUpdateSize = false;
                 }
@@ -210,7 +212,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return false;
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x ,y, Width, Height);
+
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {

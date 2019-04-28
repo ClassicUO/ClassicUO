@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -94,22 +96,20 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
+        {
+        }
+
+        public bool IsPartialHue { get; set; }
+
         private static ushort TransformHue(ushort hue)
         {
-            
             if (hue <= 2)
                 hue = 0;
 
             //if (hue < 2)
             //    hue = 1;
             return hue;
-        }
-
-        public bool IsPartialHue { get; set; }
-
-        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue( (ushort )( Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
-        {
-
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)

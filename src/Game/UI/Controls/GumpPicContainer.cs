@@ -51,8 +51,8 @@ namespace ClassicUO.Game.UI.Controls
                     gs.SelectedObject = Item;
                     gs.DropHeldItemToContainer(Item, x, y);
                 }
-                else 
-                    gs.Audio.PlaySound(0x0051);                       
+                else
+                    gs.Audio.PlaySound(0x0051);
             }
         }
     }

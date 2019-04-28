@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,16 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace ClassicUO.Utility.Logging
 {
     internal class Logger
     {
-        private int _indent;
-
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
             {
@@ -54,22 +53,22 @@ namespace ClassicUO.Utility.Logging
             }
         };
 
-        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>()
+        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>
         {
-            { ConsoleColor.Green, ConsoleColor.Black },
-            { ConsoleColor.Black, ConsoleColor.White },
-            { ConsoleColor.White, ConsoleColor.Black },
-            { ConsoleColor.DarkBlue, ConsoleColor.White },
-            { ConsoleColor.Cyan, ConsoleColor.Black },
-            { ConsoleColor.Magenta, ConsoleColor.Black },
-            { ConsoleColor.DarkGreen, ConsoleColor.Black },
-            { ConsoleColor.DarkGray, ConsoleColor.White },
-            { ConsoleColor.DarkCyan, ConsoleColor.Black },
-            { ConsoleColor.Gray, ConsoleColor.White },
-            { ConsoleColor.DarkRed, ConsoleColor.White },
-            { ConsoleColor.Yellow, ConsoleColor.Black }
-            
+            {ConsoleColor.Green, ConsoleColor.Black},
+            {ConsoleColor.Black, ConsoleColor.White},
+            {ConsoleColor.White, ConsoleColor.Black},
+            {ConsoleColor.DarkBlue, ConsoleColor.White},
+            {ConsoleColor.Cyan, ConsoleColor.Black},
+            {ConsoleColor.Magenta, ConsoleColor.Black},
+            {ConsoleColor.DarkGreen, ConsoleColor.Black},
+            {ConsoleColor.DarkGray, ConsoleColor.White},
+            {ConsoleColor.DarkCyan, ConsoleColor.Black},
+            {ConsoleColor.Gray, ConsoleColor.White},
+            {ConsoleColor.DarkRed, ConsoleColor.White},
+            {ConsoleColor.Yellow, ConsoleColor.Black}
         };
+        private int _indent;
 
         private bool _isLogging;
 

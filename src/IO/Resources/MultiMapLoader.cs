@@ -2,16 +2,16 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-using ClassicUO.Utility.Logging;
-
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
     internal class MultiMapLoader : ResourceLoader
     {
-        private UOFile _file;
         private readonly UOFileMul[] _facets = new UOFileMul[6];
+        private UOFile _file;
+
         internal bool HasFacet(int map)
         {
             return map >= 0 && map < _facets.Length && _facets[map] != null;
@@ -28,10 +28,7 @@ namespace ClassicUO.IO.Resources
             {
                 path = Path.Combine(FileManager.UoFolderPath, $"facet0{i}.mul");
 
-                if (File.Exists(path))
-                {
-                    _facets[i] = new UOFileMul(path, false);
-                }
+                if (File.Exists(path)) _facets[i] = new UOFileMul(path, false);
             }
         }
 
@@ -39,7 +36,8 @@ namespace ClassicUO.IO.Resources
         {
             if (_file == null || _file.Length == 0)
             {
-                Log.Message(LogTypes.Warning, $"MultiMap.rle is not loaded!");
+                Log.Message(LogTypes.Warning, "MultiMap.rle is not loaded!");
+
                 return null;
             }
 
@@ -50,7 +48,8 @@ namespace ClassicUO.IO.Resources
 
             if (w < 1 || h < 1)
             {
-                Log.Message(LogTypes.Warning, $"Failed to load bounds from MultiMap.rle");
+                Log.Message(LogTypes.Warning, "Failed to load bounds from MultiMap.rle");
+
                 return null;
             }
 
@@ -81,10 +80,11 @@ namespace ClassicUO.IO.Resources
 
             int maxPixelValue = 1;
             int startHeight = starty * pheight;
+
             while (_file.Position < _file.Length)
             {
                 byte pic = _file.ReadByte();
-                byte size = (byte)(pic & 0x7F);
+                byte size = (byte) (pic & 0x7F);
                 bool colored = (pic & 0x80) != 0;
 
                 int currentHeight = y * pheight;
@@ -118,14 +118,16 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
             if (maxPixelValue >= 1)
             {
                 int s = Marshal.SizeOf<HuesGroup>();
                 IntPtr ptr = Marshal.AllocHGlobal(s * FileManager.Hues.HuesRange.Length);
+
                 for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
                     Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * s, false);
 
-                ushort* huesData = (ushort*)(byte*)(ptr + 30800);
+                ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
                 ushort[] colorTable = new ushort[maxPixelValue];
 
@@ -134,7 +136,7 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < maxPixelValue; i++)
                 {
                     colorOffset -= 31;
-                    colorTable[i] = (ushort)(0x8000 | huesData[colorOffset / maxPixelValue]);
+                    colorTable[i] = (ushort) (0x8000 | huesData[colorOffset / maxPixelValue]);
                 }
 
                 ushort[] worldMap = new ushort[mapSize];
@@ -143,7 +145,7 @@ namespace ClassicUO.IO.Resources
                 {
                     byte bytepic = data[i];
 
-                    worldMap[i] = (ushort)(bytepic != 0 ? colorTable[bytepic - 1] : 0);
+                    worldMap[i] = (ushort) (bytepic != 0 ? colorTable[bytepic - 1] : 0);
                 }
 
                 Marshal.FreeHGlobal(ptr);
@@ -157,7 +159,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public unsafe SpriteTexture LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public SpriteTexture LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
                 return null;
@@ -167,10 +169,7 @@ namespace ClassicUO.IO.Resources
             int w = _facets[facet].ReadShort();
             int h = _facets[facet].ReadShort();
 
-            if (w < 1 || h < 1)
-            {
-                return null;
-            }
+            if (w < 1 || h < 1) return null;
 
             int startX = startx;
             int endX = endx;
@@ -196,8 +195,8 @@ namespace ClassicUO.IO.Resources
 
                     for (int j = 0; j < size; j++)
                     {
-                        if ((x >= startX && x < endX) && (y >= startY && y < endY))
-                            map[((y - startY) * pwidth) + (x - startX)] = color;
+                        if (x >= startX && x < endX && y >= startY && y < endY)
+                            map[(y - startY) * pwidth + (x - startX)] = color;
                         x++;
                     }
                 }

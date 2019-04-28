@@ -22,8 +22,6 @@
 #endregion
 
 using System;
-using System.IO;
-using System.IO.Compression;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.Utility
@@ -37,17 +35,11 @@ namespace ClassicUO.Utility
         static ZLib()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
                 _compressor = new Compressor64();
-            }
             else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
                 _compressor = new CompressorUnix64();
-            }
             else
-            {
                 throw new NotSupportedException("Zlib not support this platform");
-            }      
         }
 
 

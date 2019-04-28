@@ -9,9 +9,9 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
-using ClassicUO.Utility.Logging;
 
 using SDL2;
 
@@ -20,18 +20,12 @@ namespace ClassicUO.Game.Managers
     internal class MacroManager
     {
         private readonly uint[] _itemsInHand = new uint[2];
-        private MacroObject _lastMacro;
-        private Macro _firstNode;
-        private long _nextTimer;
 
-        private WorldViewportGump viewport;
-        private SystemChatControl systemchat;
-
-        private readonly byte[] _skillTable = 
+        private readonly byte[] _skillTable =
         {
-            1,  2,  35, 4,  6,  12,
+            1, 2, 35, 4, 6, 12,
             14, 15, 16, 19, 21, 0xFF /*imbuing*/,
-            23, 3,  46, 9,  30, 22,
+            23, 3, 46, 9, 30, 22,
             48, 32, 33, 47, 36, 38
         };
 
@@ -45,15 +39,18 @@ namespace ClassicUO.Game.Managers
             Constants.SPELLBOOK_6_SPELLS_COUNT,
             Constants.SPELLBOOK_7_SPELLS_COUNT
         };
+        private Macro _firstNode;
+        private MacroObject _lastMacro;
+        private long _nextTimer;
+        private SystemChatControl systemchat;
+
+        private WorldViewportGump viewport;
 
         public MacroManager(Macro[] macros)
         {
             if (macros != null)
             {
-                for (int i = 0; i < macros.Length; i++)
-                {
-                    AppendMacro(macros[i]);
-                }
+                for (int i = 0; i < macros.Length; i++) AppendMacro(macros[i]);
             }
         }
 
@@ -152,12 +149,14 @@ namespace ClassicUO.Game.Managers
                 {
                     case 2:
                         _lastMacro = null;
+
                         break;
                     case 1:
 
                         return;
                     case 0:
                         _lastMacro = _lastMacro?.Right;
+
                         break;
                 }
             }
@@ -183,7 +182,7 @@ namespace ClassicUO.Game.Managers
                 return 0;
 
             int result = 0;
-            
+
             switch (macro.Code)
             {
                 case MacroType.Say:
@@ -203,15 +202,18 @@ namespace ClassicUO.Game.Managers
                             case MacroType.Emote:
                                 type = MessageType.Emote;
                                 hue = Engine.Profile.Current.EmoteHue;
+
                                 break;
 
                             case MacroType.Whisper:
                                 type = MessageType.Whisper;
                                 hue = Engine.Profile.Current.WhisperHue;
+
                                 break;
 
                             case MacroType.Yell:
                                 type = MessageType.Yell;
+
                                 break;
                         }
 
@@ -240,15 +242,19 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.Paste:
+
                     if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
                     {
                         string s = SDL.SDL_GetClipboardText();
+
                         if (!string.IsNullOrEmpty(s))
                         {
                             viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+
                             if (viewport != null)
                             {
                                 systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
+
                                 if (systemchat != null)
                                     systemchat.textBox.Text += s;
                             }
@@ -287,23 +293,28 @@ namespace ClassicUO.Game.Managers
 
                                     break;
                                 case MacroSubType.Status:
+
                                     if (StatusGumpBase.GetStatusGump() == null)
-                                        StatusGumpBase.AddStatusGump(100 , 100);
+                                        StatusGumpBase.AddStatusGump(100, 100);
+
                                     break;
                                 case MacroSubType.Journal:
                                     JournalGump journalGump = Engine.UI.GetByLocalSerial<JournalGump>();
 
                                     if (journalGump == null)
-                                        Engine.UI.Add(new JournalGump() { X = 64, Y = 64 });
+                                        Engine.UI.Add(new JournalGump
+                                                          {X = 64, Y = 64});
                                     else
                                     {
                                         journalGump.SetInScreen();
                                         journalGump.BringOnTop();
                                     }
+
                                     break;
                                 case MacroSubType.Skills:
                                     World.SkillsRequested = true;
                                     NetClient.Socket.Send(new PSkillsRequest(World.Player));
+
                                     break;
                                 case MacroSubType.MageSpellbook:
                                 case MacroSubType.NecroSpellbook:
@@ -319,40 +330,51 @@ namespace ClassicUO.Game.Managers
                                     {
                                         case MacroSubType.NecroSpellbook:
                                             type = SpellBookType.Necromancy;
+
                                             break;
                                         case MacroSubType.PaladinSpellbook:
                                             type = SpellBookType.Chivalry;
+
                                             break;
                                         case MacroSubType.BushidoSpellbook:
                                             type = SpellBookType.Bushido;
+
                                             break;
                                         case MacroSubType.NinjitsuSpellbook:
                                             type = SpellBookType.Ninjitsu;
+
                                             break;
                                         case MacroSubType.SpellWeavingSpellbook:
                                             type = SpellBookType.Spellweaving;
+
                                             break;
                                         case MacroSubType.MysticismSpellbook:
                                             type = SpellBookType.Mysticism;
+
                                             break;
                                         case MacroSubType.BardSpellbook:
                                             type = SpellBookType.Bardic;
+
                                             break;
                                     }
 
-                                    NetClient.Socket.Send(new POpenSpellBook((byte)type));
+                                    NetClient.Socket.Send(new POpenSpellBook((byte) type));
 
                                     break;
                                 case MacroSubType.Chat:
                                     Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
                                     break;
                                 case MacroSubType.Backpack:
                                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+
                                     if (backpack != null)
                                         GameActions.DoubleClick(backpack);
+
                                     break;
                                 case MacroSubType.Owerview:
                                     MiniMapGump miniMapGump = Engine.UI.GetByLocalSerial<MiniMapGump>();
+
                                     if (miniMapGump == null)
                                         Engine.UI.Add(new MiniMapGump());
                                     else
@@ -360,6 +382,7 @@ namespace ClassicUO.Game.Managers
                                         miniMapGump.SetInScreen();
                                         miniMapGump.BringOnTop();
                                     }
+
                                     break;
                                 case MacroSubType.WorldMap:
                                     Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
@@ -368,17 +391,21 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Mail:
                                 case MacroSubType.PartyManifest:
                                     var party = Engine.UI.GetByLocalSerial<PartyGumpAdvanced>();
+
                                     if (party == null)
                                         Engine.UI.Add(new PartyGumpAdvanced());
                                     else
                                         party.BringOnTop();
+
                                     break;
 
                                 case MacroSubType.Guild:
                                     GameActions.OpenGuildGump();
+
                                     break;
                                 case MacroSubType.QuestLog:
                                     GameActions.RequestQuestMenu();
+
                                     break;
                                 case MacroSubType.PartyChat:
                                 case MacroSubType.CombatBook:
@@ -397,24 +424,34 @@ namespace ClassicUO.Game.Managers
                             switch (macro.SubCode)
                             {
                                 case MacroSubType.Configuration:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<OptionsGump>()?.Dispose();
+
                                     break;
                                 case MacroSubType.Paperdoll:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<PaperDollGump>()?.Dispose();
+
                                     break;
                                 case MacroSubType.Status:
+
                                     if (macro.Code == MacroType.Close)
                                         StatusGumpBase.GetStatusGump()?.Dispose();
+
                                     break;
                                 case MacroSubType.Journal:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<JournalGump>()?.Dispose();
+
                                     break;
                                 case MacroSubType.Skills:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<SkillGumpAdvanced>()?.Dispose();
+
                                     break;
                                 case MacroSubType.MageSpellbook:
                                 case MacroSubType.NecroSpellbook:
@@ -423,24 +460,30 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.NinjitsuSpellbook:
                                 case MacroSubType.SpellWeavingSpellbook:
                                 case MacroSubType.MysticismSpellbook:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<SpellbookGump>()?.Dispose();
+
                                     break;
                                 case MacroSubType.Chat:
                                     Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
                                 case MacroSubType.Owerview:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<MiniMapGump>()?.Dispose();
+
                                     break;
                                 case MacroSubType.Mail:
                                     Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
                                 case MacroSubType.PartyManifest:
+
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetByLocalSerial<PartyGumpAdvanced>()?.Dispose();
+
                                     break;
                                 case MacroSubType.PartyChat:
                                 case MacroSubType.CombatBook:
@@ -450,9 +493,10 @@ namespace ClassicUO.Game.Managers
 
                                     break;
                             }
+
                             break;
                     }
-                    
+
                     break;
 
                 case MacroType.OpenDoor:
@@ -469,9 +513,11 @@ namespace ClassicUO.Game.Managers
                         if (skill != 0xFF)
                             GameActions.UseSkill(skill);
                     }
+
                     break;
                 case MacroType.LastSkill:
                     GameActions.UseSkill(GameActions.LastSkillIndex);
+
                     break;
                 case MacroType.CastSpell:
                     int spell = macro.SubCode - MacroSubType.Clumsy + 1;
@@ -499,9 +545,11 @@ namespace ClassicUO.Game.Managers
                             GameActions.CastSpell(spell);
                         }
                     }
+
                     break;
                 case MacroType.LastSpell:
                     GameActions.CastSpell(GameActions.LastSpellIndex);
+
                     break;
                 case MacroType.Bow:
                 case MacroType.Salute:
@@ -511,9 +559,11 @@ namespace ClassicUO.Game.Managers
                     const string SALUTE = "salute";
 
                     GameActions.EmoteAction(index == 0 ? BOW : SALUTE);
+
                     break;
                 case MacroType.QuitGame:
                     Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
+
                     break;
                 case MacroType.AllNames:
                     GameActions.AllNames();
@@ -521,6 +571,7 @@ namespace ClassicUO.Game.Managers
                     break;
                 case MacroType.LastObject:
                     GameActions.DoubleClick(GameActions.LastObject);
+
                     break;
                 case MacroType.LastTarget:
 
@@ -534,7 +585,7 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                            TargetManager.TargetGameObject( World.Get(TargetManager.LastGameObject));
+                        TargetManager.TargetGameObject(World.Get(TargetManager.LastGameObject));
 
                         WaitForTargetTimer = 0;
                     }
@@ -544,6 +595,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.TargetSelf:
+
                     if (WaitForTargetTimer == 0)
                         WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
@@ -584,7 +636,7 @@ namespace ClassicUO.Game.Managers
                         if (backpack == null)
                             break;
 
-                        Item item = World.Player.Equipment[(int)Layer.OneHanded + handIndex];
+                        Item item = World.Player.Equipment[(int) Layer.OneHanded + handIndex];
 
                         if (item != null)
                         {
@@ -627,6 +679,7 @@ namespace ClassicUO.Game.Managers
                     break;
                 case MacroType.AttackLast:
                     GameActions.Attack(World.LastAttack);
+
                     break;
 
                 case MacroType.Delay:
@@ -646,7 +699,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.CloseGump:
 
                     Engine.UI.Gumps
-                          .Where( s=> !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
+                          .Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
                           .ToList()
                           .ForEach(s => s.Dispose());
 
@@ -654,35 +707,44 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     Engine.Profile.Current.AlwaysRun = !Engine.Profile.Current.AlwaysRun;
-                    GameActions.Print($"Always run is now { (Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
+                    GameActions.Print($"Always run is now {(Engine.Profile.Current.AlwaysRun ? "on" : "off")}.");
+
                     break;
                 case MacroType.SaveDesktop:
                     Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+
                     break;
 
                 case MacroType.EnableRangeColor:
                     Engine.Profile.Current.NoColorObjectsOutOfRange = true;
+
                     break;
                 case MacroType.DisableRangeColor:
                     Engine.Profile.Current.NoColorObjectsOutOfRange = false;
+
                     break;
 
                 case MacroType.ToggleRangeColor:
                     Engine.Profile.Current.NoColorObjectsOutOfRange = !Engine.Profile.Current.NoColorObjectsOutOfRange;
+
                     break;
 
                 case MacroType.AttackSelectedTarget:
+
                     // TODO:
                     break;
                 case MacroType.UseSelectedTarget:
+
                     // TODO:
                     break;
 
                 case MacroType.CurrentTarget:
+
                     // TODO:
                     break;
 
                 case MacroType.TargetSystemOnOff:
+
                     // TODO:
                     break;
 
@@ -707,6 +769,7 @@ namespace ClassicUO.Game.Managers
                         else
                         {
                             var bandage = World.Player.FindBandage();
+
                             if (bandage != null)
                             {
                                 WaitingBandageTarget = true;
@@ -718,6 +781,7 @@ namespace ClassicUO.Game.Managers
                     else
                     {
                         var bandage = World.Player.FindBandage();
+
                         if (bandage != null)
                         {
                             if (macro.Code == MacroType.BandageSelf)
@@ -725,7 +789,7 @@ namespace ClassicUO.Game.Managers
                             else
                             {
                                 // TODO: NewTargetSystem
-                                Log.Message(LogTypes.Warning, $"BandageTarget (NewTargetSystem) not implemented yet.");
+                                Log.Message(LogTypes.Warning, "BandageTarget (NewTargetSystem) not implemented yet.");
                             }
                         }
                     }
@@ -746,33 +810,41 @@ namespace ClassicUO.Game.Managers
 
                         GameActions.Print($"ViewRange is now {res}.");
                     }
+
                     break;
                 case MacroType.IncreaseUpdateRange:
                     World.ViewRange++;
+
                     if (World.ViewRange > Constants.MAX_VIEW_RANGE)
                         World.ViewRange = Constants.MAX_VIEW_RANGE;
 
                     GameActions.Print($"ViewRange is now {World.ViewRange}.");
+
                     break;
                 case MacroType.DecreaseUpdateRange:
                     World.ViewRange--;
+
                     if (World.ViewRange < Constants.MIN_VIEW_RANGE)
                         World.ViewRange = Constants.MIN_VIEW_RANGE;
                     GameActions.Print($"ViewRange is now {World.ViewRange}.");
+
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
                     GameActions.Print($"ViewRange is now {World.ViewRange}.");
+
                     break;
                 case MacroType.MinUpdateRange:
                     World.ViewRange = Constants.MIN_VIEW_RANGE;
                     GameActions.Print($"ViewRange is now {World.ViewRange}.");
+
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ViewRange = Constants.MAX_VIEW_RANGE;
                     GameActions.Print($"ViewRange is now {World.ViewRange}.");
+
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
@@ -794,7 +866,7 @@ namespace ClassicUO.Game.Managers
 
                             break;
                     }
-                    
+
 
                     break;
 
@@ -803,13 +875,14 @@ namespace ClassicUO.Game.Managers
 
                     if (buff != null)
                         buff.Dispose();
-                    else 
+                    else
                         Engine.UI.Add(new BuffGump(100, 100));
 
                     break;
                 case MacroType.InvokeVirtue:
-                    byte id = (byte) ( macro.SubCode - MacroSubType.Honor + 31);
+                    byte id = (byte) (macro.SubCode - MacroSubType.Honor + 31);
                     NetClient.Socket.Send(new PInvokeVirtueRequest(id));
+
                     break;
                 case MacroType.PrimaryAbility:
                     GameActions.UsePrimaryAbility();
@@ -820,12 +893,14 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.ToggleGargoyleFly:
+
                     if (World.Player.Race == RaceType.GARGOYLE)
                         NetClient.Socket.Send(new PToggleGargoyleFlying());
 
                     break;
                 case MacroType.EquipLastWeapon:
                     NetClient.Socket.Send(new PEquipLastWeapon());
+
                     break;
                 case MacroType.KillGumpOpen:
                     // TODO:
@@ -834,14 +909,15 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.DefaultScale:
                     Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+
                     break;
 
                 case MacroType.ToggleChatVisibility:
                     viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
                     systemchat = viewport?.FindControls<SystemChatControl>().SingleOrDefault();
                     systemchat?.ToggleChatVisibility();
-                    break;
 
+                    break;
             }
 
 
@@ -864,15 +940,23 @@ namespace ClassicUO.Game.Managers
 
         public string Name { get; }
 
-        [JsonIgnore] public Macro Left { get; set; }
-        [JsonIgnore] public Macro Right { get; set; }
-
         public SDL.SDL_Keycode Key { get; set; }
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
 
         public MacroObject FirstNode { get; set; }
+
+        public bool Equals(Macro other)
+        {
+            if (other == null)
+                return false;
+
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift;
+        }
+
+        [JsonIgnore] public Macro Left { get; set; }
+        [JsonIgnore] public Macro Right { get; set; }
 
         public static MacroObject Create(MacroType code)
         {
@@ -906,9 +990,7 @@ namespace ClassicUO.Game.Managers
 
 
             if (macro.FirstNode == null)
-            {
                 macro.FirstNode = item;
-            }
             else
             {
                 MacroObject o = macro.FirstNode;
@@ -929,53 +1011,45 @@ namespace ClassicUO.Game.Managers
             {
                 case MacroType.Walk:
                     offset = (int) MacroSubType.NW;
-                    count = (int) MacroSubType.Configuration - (int)MacroSubType.NW;
+                    count = (int) MacroSubType.Configuration - (int) MacroSubType.NW;
 
                     break;
                 case MacroType.Open:
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
-                    offset = (int)MacroSubType.Configuration;
-                    count = (int)MacroSubType.Anatomy - (int)MacroSubType.Configuration;
+                    offset = (int) MacroSubType.Configuration;
+                    count = (int) MacroSubType.Anatomy - (int) MacroSubType.Configuration;
 
                     break;
                 case MacroType.UseSkill:
-                    offset = (int)MacroSubType.Anatomy;
-                    count = (int)MacroSubType.LeftHand - (int)MacroSubType.Anatomy;
+                    offset = (int) MacroSubType.Anatomy;
+                    count = (int) MacroSubType.LeftHand - (int) MacroSubType.Anatomy;
 
                     break;
                 case MacroType.ArmDisarm:
-                    offset = (int)MacroSubType.LeftHand;
-                    count = (int)MacroSubType.Honor - (int)MacroSubType.LeftHand;
+                    offset = (int) MacroSubType.LeftHand;
+                    count = (int) MacroSubType.Honor - (int) MacroSubType.LeftHand;
 
                     break;
                 case MacroType.InvokeVirtue:
-                    offset = (int)MacroSubType.Honor;
-                    count = (int)MacroSubType.Clumsy - (int)MacroSubType.Honor;
+                    offset = (int) MacroSubType.Honor;
+                    count = (int) MacroSubType.Clumsy - (int) MacroSubType.Honor;
 
                     break;
                 case MacroType.CastSpell:
-                    offset = (int)MacroSubType.Clumsy;
-                    count = (int)MacroSubType.Hostile - (int)MacroSubType.Clumsy;
+                    offset = (int) MacroSubType.Clumsy;
+                    count = (int) MacroSubType.Hostile - (int) MacroSubType.Clumsy;
 
                     break;
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-                    offset = (int)MacroSubType.Hostile;
-                    count = (int)MacroSubType.MscTotalCount - (int)MacroSubType.Hostile;
+                    offset = (int) MacroSubType.Hostile;
+                    count = (int) MacroSubType.MscTotalCount - (int) MacroSubType.Hostile;
 
                     break;
             }
-        }
-
-        public bool Equals(Macro other)
-        {
-            if (other == null)
-                return false;
-
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift;
         }
     }
 
@@ -1035,10 +1109,13 @@ namespace ClassicUO.Game.Managers
         [JsonProperty] public MacroSubType SubCode { get; set; }
         [JsonProperty] public sbyte HasSubMenu { get; set; }
 
-        public virtual bool HasString() => false;
-
         [JsonIgnore] public MacroObject Left { get; set; }
         [JsonProperty] public MacroObject Right { get; set; }
+
+        public virtual bool HasString()
+        {
+            return false;
+        }
     }
 
     [JsonObject]
@@ -1050,8 +1127,7 @@ namespace ClassicUO.Game.Managers
             Text = str;
         }
 
-        [JsonProperty]
-        public string Text { get; set; }
+        [JsonProperty] public string Text { get; set; }
 
         public override bool HasString()
         {
@@ -1337,6 +1413,6 @@ namespace ClassicUO.Game.Managers
         Follower,
         Object,
         Mobile,
-        MscTotalCount,
+        MscTotalCount
     }
 }

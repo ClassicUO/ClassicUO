@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,51 +9,6 @@ namespace ClassicUO.Game
 {
     internal class CircleOfTransparency
     {
-        private Texture2D _texture;
-        private short _width, _height;
-
-        private CircleOfTransparency(int radius)
-        {
-            Radius = radius;
-        }
-
-        public int Radius { get; private set; }
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public short Width => _width;
-        public short Height => _height;
-
-
-        public static uint[] CreateTexture(int radius, ref short width, ref short height)
-        {
-            int fixRadius = radius + 1;
-            int mulRadius = fixRadius * 2;
-
-            uint[] pixels = new uint[mulRadius * mulRadius];
-
-            width = (short) mulRadius;
-            height = (short) mulRadius;
-
-            for (int x = -fixRadius; x < fixRadius; x++)
-            {
-                int mulX = x * x;
-                int posX = ((x + fixRadius) * mulRadius) + fixRadius;
-
-                for (int y = -fixRadius; y < fixRadius; y++)
-                {
-                    int r = (int) Math.Sqrt(mulX + (y * y));
-
-                    uint pic = (uint)((r <= radius) ? ((radius - r) & 0xFF) : 0);
-
-                    int pos = posX + y;
-
-                    pixels[pos] = pic;
-                }
-            }
-
-            return pixels;
-        }
-
         private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
         {
             DepthStencilState state = new DepthStencilState
@@ -74,7 +24,6 @@ namespace ClassicUO.Game
             };
 
 
-
             return state;
         });
 
@@ -85,6 +34,55 @@ namespace ClassicUO.Game
 
             return blend;
         });
+
+
+        private Texture2D _texture;
+        private short _width, _height;
+
+        private CircleOfTransparency(int radius)
+        {
+            Radius = radius;
+        }
+
+        public int Radius { get; private set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public short Width => _width;
+        public short Height => _height;
+
+        public static CircleOfTransparency Circle { get; private set; }
+
+
+        public static uint[] CreateTexture(int radius, ref short width, ref short height)
+        {
+            int fixRadius = radius + 1;
+            int mulRadius = fixRadius * 2;
+
+            uint[] pixels = new uint[mulRadius * mulRadius];
+
+            width = (short) mulRadius;
+            height = (short) mulRadius;
+
+            for (int x = -fixRadius; x < fixRadius; x++)
+            {
+                int mulX = x * x;
+                int posX = (x + fixRadius) * mulRadius + fixRadius;
+
+                for (int y = -fixRadius; y < fixRadius; y++)
+                {
+                    int r = (int) Math.Sqrt(mulX + y * y);
+
+                    uint pic = (uint) (r <= radius ? (radius - r) & 0xFF : 0);
+
+                    int pos = posX + y;
+
+                    pixels[pos] = pic;
+                }
+            }
+
+            return pixels;
+        }
+
         public void Draw(Batcher2D batcher, int x, int y)
         {
             if (_texture != null)
@@ -108,29 +106,24 @@ namespace ClassicUO.Game
             }
         }
 
-
-        private static CircleOfTransparency _circle;
-
-        public static CircleOfTransparency Circle=> _circle;
-
         public static CircleOfTransparency Create(int radius)
         {
-            if (_circle == null)
-                _circle = new CircleOfTransparency(radius);
+            if (Circle == null)
+                Circle = new CircleOfTransparency(radius);
             else
             {
-                _circle._texture.Dispose();
-                _circle._texture = null;
+                Circle._texture.Dispose();
+                Circle._texture = null;
             }
 
-            uint[] pixels = CreateTexture(radius, ref _circle._width, ref _circle._height);
+            uint[] pixels = CreateTexture(radius, ref Circle._width, ref Circle._height);
 
-            _circle.Radius = radius;
+            Circle.Radius = radius;
 
-            _circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, _circle._width, _circle.Height, false, SurfaceFormat.Color);
-            _circle._texture.SetData(pixels);
+            Circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, Circle._width, Circle.Height, false, SurfaceFormat.Color);
+            Circle._texture.SetData(pixels);
 
-            return _circle;
+            return Circle;
         }
     }
 }

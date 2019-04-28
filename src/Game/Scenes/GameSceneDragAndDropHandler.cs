@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-
-using GameObject = ClassicUO.Game.GameObjects.GameObject;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -64,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead || item == null || item.IsCorpse || (item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE)))
+            if (World.Player.IsDead || item == null || item.IsCorpse || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
@@ -75,25 +71,20 @@ namespace ClassicUO.Game.Scenes
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
                 {
                     X = Mouse.Position.X - 80,
-                    Y = Mouse.Position.Y - 40,
+                    Y = Mouse.Position.Y - 40
                 };
                 Engine.UI.Add(gump);
                 Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
 
                 return true;
             }
-            else
-            {
-                return PickupItemDirectly(item, x, y, amount ?? item.Amount);
-            }
+
+            return PickupItemDirectly(item, x, y, amount ?? item.Amount);
         }
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
-            {
-                return false;
-            }
+            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
@@ -104,22 +95,17 @@ namespace ClassicUO.Game.Scenes
                 item.Container = Serial.INVALID;
                 entity.Items.Remove(item);
 
-                if (entity.HasEquipment)
-                {
-                    entity.Equipment[ (int) item.Layer] = null;
-                }
+                if (entity.HasEquipment) entity.Equipment[(int) item.Layer] = null;
 
                 entity.Items.ProcessDelta();
             }
             else
-            {
                 item.RemoveFromTile();
-            }
 
             World.Items.Remove(item);
             World.Items.ProcessDelta();
             CloseItemGumps(item);
-           
+
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
 
             return true;
@@ -156,7 +142,7 @@ namespace ClassicUO.Game.Scenes
                 serial = Serial.MINUS_ONE;
 
             if (HeldItem.Enabled && HeldItem.Serial != serial)
-            { 
+            {
                 GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
@@ -191,7 +177,6 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
-
                 }
                 else
                 {

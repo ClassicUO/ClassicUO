@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using ClassicUO.Game.GameObjects;
@@ -40,11 +40,10 @@ namespace ClassicUO.Utility
             {
                 object value = prop.GetValue(obj, null);
 
-                dict[prop.Name] = (value == null ? "null" : value.ToString());
+                dict[prop.Name] = value == null ? "null" : value.ToString();
             }
 
             return dict;
         }
-
     }
 }

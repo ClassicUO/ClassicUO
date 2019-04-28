@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.IO
@@ -55,6 +56,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         public override void WriteBuffer(int val)
         {
             int rc = m_OutWave.WriteData(m_Buffer, m_Bufferp[0]);
+
             for (int i = 0; i < m_Channels; ++i)
                 m_Bufferp[i] = (short) i;
         }

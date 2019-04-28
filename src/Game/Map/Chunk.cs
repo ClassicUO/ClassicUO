@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
@@ -85,8 +81,8 @@ namespace ClassicUO.Game.Map
                         {
                             Graphic = tileID,
                             AverageZ = z,
-                            MinZ = z,
-                        };               
+                            MinZ = z
+                        };
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
@@ -116,6 +112,7 @@ namespace ClassicUO.Game.Map
 
                                 if (pos >= 64)
                                     continue;
+
                                 sbyte z = sb->Z;
 
                                 ushort staticX = (ushort) (bx + x);
@@ -124,7 +121,7 @@ namespace ClassicUO.Game.Map
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
                                     Position = new Position(staticX, staticY, z)
-                                };                  
+                                };
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
@@ -152,11 +149,11 @@ namespace ClassicUO.Game.Map
 
                 if (im.StaticAddress != 0)
                 {
-                    StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
+                    StaticsBlock* sb = (StaticsBlock*) im.StaticAddress;
 
                     if (sb != null)
                     {
-                        int count = (int)im.StaticCount;
+                        int count = (int) im.StaticCount;
 
                         for (int i = 0; i < count; i++, sb++)
                         {
@@ -168,10 +165,11 @@ namespace ClassicUO.Game.Map
 
                                 if (pos >= 64)
                                     continue;
+
                                 sbyte z = sb->Z;
 
-                                ushort staticX = (ushort)(bx + x);
-                                ushort staticY = (ushort)(by + y);
+                                ushort staticX = (ushort) (bx + x);
+                                ushort staticY = (ushort) (by + y);
 
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
@@ -196,8 +194,8 @@ namespace ClassicUO.Game.Map
 
             if (im.MapAddress != 0)
             {
-                MapBlock* block = (MapBlock*)im.MapAddress;
-                MapCells* cells = (MapCells*)&block->Cells;
+                MapBlock* block = (MapBlock*) im.MapAddress;
+                MapCells* cells = (MapCells*) &block->Cells;
                 int bx = X * 8;
                 int by = Y * 8;
 
@@ -206,18 +204,18 @@ namespace ClassicUO.Game.Map
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = y * 8 + x;
-                        ushort tileID = (ushort)(cells[pos].TileID & 0x3FFF);
+                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
                         Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
-                            MinZ = z,
+                            MinZ = z
                         };
 
-                        ushort tileX = (ushort)(bx + x);
-                        ushort tileY = (ushort)(by + y);
+                        ushort tileX = (ushort) (bx + x);
+                        ushort tileY = (ushort) (by + y);
 
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
@@ -264,7 +262,10 @@ namespace ClassicUO.Game.Map
         //    }
         //}
 
-        private ref IndexMap GetIndex(int map) => ref FileManager.Map.GetIndex(map, X, Y);
+        private ref IndexMap GetIndex(int map)
+        {
+            return ref FileManager.Map.GetIndex(map, X, Y);
+        }
 
         public void Destroy()
         {
@@ -314,7 +315,7 @@ namespace ClassicUO.Game.Map
                                 default: continue;
                             }
                         }
-   
+
 
                         if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
                             return false;

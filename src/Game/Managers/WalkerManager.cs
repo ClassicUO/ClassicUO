@@ -61,6 +61,7 @@ namespace ClassicUO.Game.Managers
 
     internal class WalkerManager
     {
+        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
         public long LastStepRequestTime { get; set; }
         public int UnacceptedPacketsCount { get; set; }
         public int StepsCount { get; set; }
@@ -71,8 +72,6 @@ namespace ClassicUO.Game.Managers
         public bool WalkingFailed { get; set; }
         public ushort CurrentPlayerZ { get; set; }
         public ushort NewPlayerZ { get; set; }
-
-        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
 
         public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 
@@ -86,7 +85,7 @@ namespace ClassicUO.Game.Managers
 
             if (x != -1)
             {
-                World.Player.Position = new Position((ushort) x , (ushort)y, z);
+                World.Player.Position = new Position((ushort) x, (ushort) y, z);
 
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
@@ -147,9 +146,6 @@ namespace ClassicUO.Game.Managers
                 WalkingFailed = true;
                 StepsCount = 0;
                 CurrentWalkSequence = 0;
-            }
-            else
-            {
             }
         }
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
@@ -11,14 +6,12 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class UseAbilityButtonGump : AnchorableGump
     {
-        private AbilityDefinition _definition;
         private GumpPic _button;
+        private AbilityDefinition _definition;
         private bool _isPrimary;
 
         public UseAbilityButtonGump() : base(0, 0)
@@ -34,10 +27,10 @@ namespace ClassicUO.Game.UI.Gumps
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
         {
             _isPrimary = primary;
-            Engine.UI.GetByLocalSerial<UseAbilityButtonGump>((uint)def.Index)?.Dispose();
+            Engine.UI.GetByLocalSerial<UseAbilityButtonGump>((uint) def.Index)?.Dispose();
             _definition = def;
             BuildGump();
-        } 
+        }
 
         private void BuildGump()
         {
@@ -64,8 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_isPrimary)
                     GameActions.UsePrimaryAbility();
-                else 
-                    GameActions.UseSecondaryAbility();              
+                else
+                    GameActions.UseSecondaryAbility();
             }
         }
 
@@ -95,12 +88,10 @@ namespace ClassicUO.Game.UI.Gumps
             byte index = (byte) World.Player.Abilities[_isPrimary ? 0 : 1];
 
             if ((index & 0x80) != 0)
-            {
                 _button.Hue = 38;
-            }
             else if (_button.Hue != 0)
                 _button.Hue = 0;
-            
+
 
             return base.Draw(batcher, x, y);
         }
@@ -112,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(_definition.Index);
             writer.Write(_definition.Name.Length);
             writer.WriteUTF8String(_definition.Name);
-            writer.Write((int)_definition.Icon);
+            writer.Write((int) _definition.Icon);
             writer.Write(_isPrimary);
         }
 

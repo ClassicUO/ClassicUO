@@ -51,6 +51,7 @@
             if (allocation != 0)
             {
                 sample = sample * factor + offset; // requantization
+
                 if (channels == OutputChannels.BOTH_CHANNELS)
                 {
                     float sample1 = sample * scalefactor, sample2 = sample * channel2_scalefactor;
@@ -68,6 +69,7 @@
                     filter1.input_sample(sample2, subbandnumber);
                 }
             }
+
             return true;
         }
     }

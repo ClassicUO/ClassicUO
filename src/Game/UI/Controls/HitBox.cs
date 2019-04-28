@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Renderer;
@@ -55,6 +57,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return;
+
             base.Update(totalMS, frameMS);
             _texture.Ticks = (long) totalMS;
         }
@@ -71,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, hue);
             }
-            
+
             return base.Draw(batcher, x, y);
         }
 

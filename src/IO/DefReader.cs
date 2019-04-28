@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -24,13 +20,13 @@ namespace ClassicUO.IO
         {
             ',', ' ', '{', '}'
         };
-
-        private StreamReader _reader;
-        private List<string[]> _parts = new List<string[]>();
-        private List<string[]> _groups = new List<string[]>();
         private readonly string _file;
 
         private readonly int _minSize;
+        private List<string[]> _groups = new List<string[]>();
+        private List<string[]> _parts = new List<string[]>();
+
+        private StreamReader _reader;
 
         public DefReader(string file, int minsize = 2)
         {
@@ -49,12 +45,25 @@ namespace ClassicUO.IO
 
         private bool IsEOF => Line + 1 >= LinesCount;
 
+
+        public void Dispose()
+        {
+            if (_reader == null)
+                return;
+
+            _reader.Dispose();
+            _reader = null;
+            _parts = null;
+            _groups = null;
+        }
+
         public bool Next()
         {
             if (!IsEOF)
             {
                 Line++;
                 Position = 0;
+
                 return true;
             }
 
@@ -87,21 +96,19 @@ namespace ClassicUO.IO
                 int groupEnd = line.IndexOf('}');
 
                 string[] p;
+
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
                     var firstpart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
                     var group = line.Substring(groupStart, groupEnd - groupStart + 1);
                     var lastpart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
-      
-                    p = firstpart.Concat(new [] { group }).Concat(lastpart).ToArray();
+
+                    p = firstpart.Concat(new[] {group}).Concat(lastpart).ToArray();
                 }
                 else
                     p = line.Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
-                if (p.Length >= _minSize)
-                {
-                    _parts.Add(p);
-                }
+                if (p.Length >= _minSize) _parts.Add(p);
             }
         }
 
@@ -144,10 +151,7 @@ namespace ClassicUO.IO
 
         public int ReadGroupInt(int index = 0)
         {
-            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group))
-            {
-                throw new Exception("It's not a group");
-            }
+            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group)) throw new Exception("It's not a group");
 
             if (index >= group.Length)
                 throw new IndexOutOfRangeException();
@@ -168,7 +172,6 @@ namespace ClassicUO.IO
                         return s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries)
                                 .Select(int.Parse)
                                 .ToArray();
-
                     }
 
                     Log.Message(LogTypes.Error, $"Missing }} at line {Line + 1}, in '{_file}'");
@@ -190,29 +193,44 @@ namespace ClassicUO.IO
 
                         return true;
                     }
+
                     throw new Exception("Wrong def file");
                 }
-            }       
+            }
+
             group = null;
+
             return false;
         }
 
-        private byte ReadByte(int line, int index) => byte.Parse(TokenAt(line, index));
-        private sbyte ReadSByte(int line, int index) => sbyte.Parse(TokenAt(line, index));
-        private short ReadShort(int line, int index) => short.Parse(TokenAt(line, index));
-        private ushort ReadUShort(int line, int index) => ushort.Parse(TokenAt(line, index));
-        private int ReadInt(int line, int index) => int.Parse(TokenAt(line, index));
-        private uint ReadUInt(int line, int index) => uint.Parse(TokenAt(line, index));
-
-
-        public void Dispose()
+        private byte ReadByte(int line, int index)
         {
-            if (_reader == null)
-                return;
-            _reader.Dispose();
-            _reader = null;
-            _parts = null;
-            _groups = null;
+            return byte.Parse(TokenAt(line, index));
+        }
+
+        private sbyte ReadSByte(int line, int index)
+        {
+            return sbyte.Parse(TokenAt(line, index));
+        }
+
+        private short ReadShort(int line, int index)
+        {
+            return short.Parse(TokenAt(line, index));
+        }
+
+        private ushort ReadUShort(int line, int index)
+        {
+            return ushort.Parse(TokenAt(line, index));
+        }
+
+        private int ReadInt(int line, int index)
+        {
+            return int.Parse(TokenAt(line, index));
+        }
+
+        private uint ReadUInt(int line, int index)
+        {
+            return uint.Parse(TokenAt(line, index));
         }
     }
 }

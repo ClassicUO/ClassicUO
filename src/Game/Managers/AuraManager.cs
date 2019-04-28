@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Input;
+﻿using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -12,8 +6,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
-    class AuraManager
+    internal class AuraManager
     {
+        private readonly BlendState _blend = new BlendState
+        {
+            ColorSourceBlend = Blend.SourceAlpha,
+            ColorDestinationBlend = Blend.InverseSourceAlpha
+        };
         private Vector3 _auraHueVector = new Vector3(0, 1, 0);
 
         public bool IsEnabled
@@ -31,7 +30,7 @@ namespace ClassicUO.Game.Managers
                     case 2 when Keyboard.Ctrl && Keyboard.Shift: return true;
                     case 3: return true;
                 }
-            }        
+            }
         }
 
         public Texture2D AuraTexture { get; private set; }
@@ -51,12 +50,12 @@ namespace ClassicUO.Game.Managers
 
                 if (pixel != 0)
                 {
-                    ushort value = (ushort)(pixel << 3);
+                    ushort value = (ushort) (pixel << 3);
 
                     if (value > 0xFF)
                         value = 0xFF;
 
-                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                    pixel = (uint) ((value << 24) | (value << 16) | (value << 8) | value);
                 }
             }
 
@@ -75,13 +74,5 @@ namespace ClassicUO.Game.Managers
             batcher.Draw2D(AuraTexture, x, y, _auraHueVector);
             batcher.SetBlendState(null);
         }
-
-        private readonly BlendState _blend = new BlendState()
-        {
-            ColorSourceBlend = Blend.SourceAlpha,
-            ColorDestinationBlend = Blend.InverseSourceAlpha
-        };
-
-
     }
 }

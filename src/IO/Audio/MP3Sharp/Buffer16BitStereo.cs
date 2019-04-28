@@ -1,10 +1,11 @@
 ﻿using System;
+
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
 {
     /// <summary>
-    ///     Internal class used to queue samples that are being obtained from an Mp3 stream. 
+    ///     Internal class used to queue samples that are being obtained from an Mp3 stream.
     ///     This class handles stereo 16-bit data! Switch it out if you want mono or something.
     /// </summary>
     internal class Buffer16BitStereo : ABuffer
@@ -29,16 +30,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <summary>
         ///     Gets the number of bytes remaining from the current position on the buffer.
         /// </summary>
-        public int BytesLeft
-        {
-            get
-            {
-                return m_End - m_Offset;
-            }
-        }
+        public int BytesLeft => m_End - m_Offset;
 
         /// <summary>
-        ///     Reads a sequence of bytes from the buffer and advances the position of the 
+        ///     Reads a sequence of bytes from the buffer and advances the position of the
         ///     buffer by the number of bytes read.
         /// </summary>
         /// <returns>
@@ -48,20 +43,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// </returns>
         public int Read(byte[] bufferOut, int offset, int count)
         {
-            if (bufferOut == null)
-            {
-                throw new ArgumentNullException(nameof(bufferOut));
-            }
-            if ((count + offset) > bufferOut.Length)
-            {
-                throw new ArgumentException("The sum of offset and count is larger than the buffer length");
-            }
+            if (bufferOut == null) throw new ArgumentNullException(nameof(bufferOut));
+
+            if (count + offset > bufferOut.Length) throw new ArgumentException("The sum of offset and count is larger than the buffer length");
+
             int remaining = BytesLeft;
             int copySize;
+
             if (count > remaining)
-            {
                 copySize = remaining;
-            }
             else
             {
                 // Copy an even number of sample frames
@@ -72,6 +62,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             Array.Copy(m_Buffer, m_Offset, bufferOut, offset, copySize);
 
             m_Offset += copySize;
+
             return copySize;
         }
 
@@ -82,8 +73,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <param name="sampleValue">The sample value.</param>
         public override void Append(int channel, short sampleValue)
         {
-            m_Buffer[m_Bufferp[channel]] = (byte)(sampleValue & 0xff);
-            m_Buffer[m_Bufferp[channel] + 1] = (byte)(sampleValue >> 8);
+            m_Buffer[m_Bufferp[channel]] = (byte) (sampleValue & 0xff);
+            m_Buffer[m_Bufferp[channel] + 1] = (byte) (sampleValue >> 8);
 
             m_Bufferp[channel] += CHANNELS * 2;
         }
@@ -94,7 +85,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <param name="channel">The channel.</param>
         /// <param name="samples">An array of sample values.</param>
         /// <remarks>
-        ///     The <paramref name="samples"/> parameter must have a length equal to
+        ///     The <paramref name="samples" /> parameter must have a length equal to
         ///     or greater than 32.
         /// </remarks>
         public override void AppendSamples(int channel, float[] samples)
@@ -104,24 +95,24 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 // samples is required.
                 throw new ArgumentNullException(nameof(samples));
             }
-            if (samples.Length < 32)
-            {
-                throw new ArgumentException("samples must have 32 values");
-            }
+
+            if (samples.Length < 32) throw new ArgumentException("samples must have 32 values");
+
             // Always, 32 samples are appended
             int pos = m_Bufferp[channel];
 
             for (int i = 0; i < 32; i++)
             {
                 float fs = samples[i];
+
                 if (fs > 32767.0f) // can this happen?
                     fs = 32767.0f;
                 else if (fs < -32767.0f)
                     fs = -32767.0f;
 
-                int sample = (int)fs;
-                m_Buffer[pos] = (byte)(sample & 0xff);
-                m_Buffer[pos + 1] = (byte)(sample >> 8);
+                int sample = (int) fs;
+                m_Buffer[pos] = (byte) (sample & 0xff);
+                m_Buffer[pos + 1] = (byte) (sample >> 8);
 
                 pos += CHANNELS * 2;
             }
@@ -132,7 +123,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <summary>
         ///     This implementation does not clear the buffer.
         /// </summary>
-        public override sealed void ClearBuffer()
+        public sealed override void ClearBuffer()
         {
             m_Offset = 0;
             m_End = 0;

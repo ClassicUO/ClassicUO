@@ -10,8 +10,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             FileStream newFile = null;
 
             if (mode.CompareTo("rw") == 0)
+            {
                 newFile = new FileStream(fileName, FileMode.OpenOrCreate,
-                    FileAccess.ReadWrite);
+                                         FileAccess.ReadWrite);
+            }
             else if (mode.CompareTo("r") == 0)
                 newFile = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             else

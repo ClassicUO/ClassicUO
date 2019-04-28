@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -83,6 +84,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_entities.ContainsKey(entity.Serial))
                 return false;
+
             _entities[entity.Serial] = entity;
             _added.Add(entity.Serial);
 
@@ -91,10 +93,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Remove(Serial serial)
         {
-            if (_entities.Remove(serial))
-            {           
-                _removed.Add(serial);
-            }
+            if (_entities.Remove(serial)) _removed.Add(serial);
         }
 
         public void Replace(T entity, Serial newSerial)

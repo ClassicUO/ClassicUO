@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-
-using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Utility
 {
@@ -19,29 +11,37 @@ namespace ClassicUO.Utility
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
-        {           
+        {
             switch (obj)
             {
                 case Static st:
                     itemdata = st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] : st.ItemData;
+
                     return true;
                 case Item item:
                     itemdata = item.ItemData;
+
                     return true;
                 case Multi multi:
                     itemdata = multi.ItemData;
+
                     return true;
                 case AnimatedItemEffect ef when ef.Source is Static s:
                     itemdata = s.ItemData;
+
                     return true;
                 default:
                     itemdata = default;
+
                     return false;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStaticItem(GameObject obj) => obj is Static || obj is Item;
+        public static bool IsStaticItem(GameObject obj)
+        {
+            return obj is Static || obj is Item;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNoDrawable(ushort g)

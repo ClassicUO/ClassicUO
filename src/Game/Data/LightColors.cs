@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Game.Data
+﻿namespace ClassicUO.Game.Data
 {
     internal static class LightColors
     {
@@ -28,21 +22,28 @@ namespace ClassicUO.Game.Data
             {
                 case 0x088C:
                     color = 31;
+
                     break;
                 case 0x0FAC:
                     color = 30;
+
                     break;
                 case 0x0FB1:
                     color = 60;
+
                     break;
                 case 0x1647:
                     color = 61;
+
                     break;
                 case 0x19BB:
                 case 0x1F2B:
                     color = 40;
+
                     break;
-            };
+            }
+
+            ;
 
             if (id < 0x09FB || id > 0x0A14)
             {
@@ -64,66 +65,41 @@ namespace ClassicUO.Game.Data
                                             {
                                                 if (id < 0x19AB || id > 0x19B6)
                                                 {
-                                                    if ((id >= 0x1ECD && id <= 0x1ECF) ||
-                                                        (id >= 0x1ED0 && id <= 0x1ED2))
-                                                    {
+                                                    if (id >= 0x1ECD && id <= 0x1ECF ||
+                                                        id >= 0x1ED0 && id <= 0x1ED2)
                                                         color = 1;
-                                                    }
                                                 }
                                                 else
-                                                {
                                                     color = 60;
-                                                }
                                             }
                                             else
-                                            {
                                                 color = 60;
-                                            }
                                         }
                                         else
-                                        {
                                             color = 61;
-                                        }
                                     }
                                     else
-                                    {
                                         color = 61;
-                                    }
                                 }
                                 else
-                                {
                                     color = 31;
-                                }
                             }
                             else
-                            {
                                 color = 666;
-                            }
                         }
                         else
-                        {
                             color = 666;
-                        }
                     }
                     else
-                    {
                         color = 666;
-                    }
                 }
                 else
-                {
                     color = 666;
-                }
             }
             else
-            {
                 color = 30;
-            }
 
-            if (id == 0x1FD4 || id == 0x0F6C)
-            {
-                color = 2;
-            }
+            if (id == 0x1FD4 || id == 0x0F6C) color = 2;
 
             if (id < 0x0E2D || id > 0x0E30)
             {
@@ -155,90 +131,68 @@ namespace ClassicUO.Game.Data
                                                                 {
                                                                     case 0x40FE:
                                                                         color = 40;
+
                                                                         break;
                                                                     case 0x40FF:
                                                                         color = 10;
+
                                                                         break;
                                                                     case 0x4100:
                                                                         color = 20;
+
                                                                         break;
                                                                     case 0x4101:
                                                                         color = 32;
+
                                                                         break;
                                                                     default:
-                                                                        if ((id >= 0x983B &&
-                                                                             id <= 0x983D) ||
-                                                                            (id >= 0x983F && id <= 0x9841))
-                                                                        {
+
+                                                                        if (id >= 0x983B &&
+                                                                            id <= 0x983D ||
+                                                                            id >= 0x983F && id <= 0x9841)
                                                                             color = 30;
-                                                                        }
+
                                                                         break;
                                                                 }
                                                             }
                                                             else
-                                                            {
                                                                 color = 31;
-                                                            }
                                                         }
                                                         else
-                                                        {
                                                             color = 1;
-                                                        }
                                                     }
                                                     else
-                                                    {
                                                         color = 31;
-                                                    }
                                                 }
                                                 else
-                                                {
                                                     color = 6;
-                                                }
                                             }
                                             else
-                                            {
                                                 color = 6;
-                                            }
                                         }
                                         else
-                                        {
                                             color = 1;
-                                        }
                                     }
                                     else
-                                    {
                                         color = 31;
-                                    }
                                 }
                                 else
-                                {
                                     color = 31;
-                                }
                             }
                             else
-                            {
                                 color = 31;
-                            }
                         }
                         else
-                        {
                             color = 31;
-                        }
                     }
                     else
-                    {
                         color = 6;
-                    }
                 }
                 else
-                {
                     color = 40;
-                }
             }
             else
-            {
                 color = 62;
-            }
 
             return color;
         }

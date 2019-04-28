@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.IO;
-using System.Linq;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
@@ -93,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0,
                 Y = 0,
                 Width = 30,
-                Height = 27,
+                Height = 27
             }, 2);
 
             Add(new Button(0, 5537, 5539, 5538)
@@ -108,6 +106,8 @@ namespace ClassicUO.Game.UI.Gumps
             ControlInfo.Layer = UILayer.Over;
         }
 
+        public bool IsMinimized { get; private set; }
+
         //private static TopBarGump _gump;
 
         public static void Create()
@@ -118,24 +118,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Engine.Profile.Current.TopbarGumpPosition.X < 0 || Engine.Profile.Current.TopbarGumpPosition.Y < 0)
                     Engine.Profile.Current.TopbarGumpPosition = Point.Zero;
-                
-                Engine.UI.Add(gump = new TopBarGump()
+
+                Engine.UI.Add(gump = new TopBarGump
                 {
                     X = Engine.Profile.Current.TopbarGumpPosition.X,
-                    Y = Engine.Profile.Current.TopbarGumpPosition.Y,
+                    Y = Engine.Profile.Current.TopbarGumpPosition.Y
                 });
 
                 if (Engine.Profile.Current.TopbarGumpIsMinimized)
                     gump.ChangePage(2);
             }
             else
-            {
                 Log.Message(LogTypes.Error, "TopBarGump already exists!!");
-            }
         }
 
-        public bool IsMinimized { get; private set; }
-       
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Right && (X != 0 || Y != 0))
@@ -162,10 +158,11 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             switch ((Buttons) buttonID)
-            {              
+            {
                 case Buttons.Map:
 
                     MiniMapGump miniMapGump = Engine.UI.GetByLocalSerial<MiniMapGump>();
+
                     if (miniMapGump == null)
                         Engine.UI.Add(new MiniMapGump());
                     else
@@ -177,6 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case Buttons.Paperdoll:
                     PaperDollGump paperdollGump = Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player);
+
                     if (paperdollGump == null)
                         GameActions.OpenPaperdoll(World.Player);
                     else
@@ -192,9 +190,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
 
                     if (backpackGump == null)
-                    {
                         GameActions.DoubleClick(backpack);
-                    }
                     else
                     {
                         backpackGump.SetInScreen();
@@ -206,7 +202,10 @@ namespace ClassicUO.Game.UI.Gumps
                     JournalGump journalGump = Engine.UI.GetByLocalSerial<JournalGump>();
 
                     if (journalGump == null)
-                        Engine.UI.Add(new JournalGump() { X = 64, Y = 64});
+                    {
+                        Engine.UI.Add(new JournalGump
+                                          {X = 64, Y = 64});
+                    }
                     else
                     {
                         journalGump.SetInScreen();
@@ -228,10 +227,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (debugGump == null)
                     {
-                        debugGump = new DebugGump()
+                        debugGump = new DebugGump
                         {
                             X = Engine.Profile.Current.DebugGumpPosition.X,
-                            Y = Engine.Profile.Current.DebugGumpPosition.Y,
+                            Y = Engine.Profile.Current.DebugGumpPosition.Y
                         };
 
                         Engine.UI.Add(debugGump);

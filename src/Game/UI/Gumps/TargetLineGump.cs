@@ -1,12 +1,8 @@
-﻿
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -22,7 +18,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
 
-            Add(_background = new GumpPic(0,0, 0x1068, 0));
+            Add(_background = new GumpPic(0, 0, 0x1068, 0));
             Add(_hp = new GumpPicWithWidth(0, 0, 0x1069, 0, 1));
 
             Mobile = mobile;
@@ -41,6 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Dispose();
                 Engine.UI.RemoveTargetLineGump(Mobile);
+
                 return;
             }
 
@@ -48,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (per > 0)
             {
-                per = (Mobile.Hits * 100) / per;
+                per = Mobile.Hits * 100 / per;
 
                 if (per > 100)
                     per = 100;
@@ -56,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (per < 1)
                     per = 0;
                 else
-                    per = (34 * per) / 100;
+                    per = 34 * per / 100;
             }
 
             _hp.Percent = per;
@@ -75,7 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _hp.Hue = 90;
 
 
-            _background.Hue = Notoriety.GetHue(Mobile.NotorietyFlag);;
+            _background.Hue = Notoriety.GetHue(Mobile.NotorietyFlag);
+            ;
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
@@ -90,8 +88,8 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-            x = (int)((Mobile.RealScreenPosition.X + Mobile.Offset.X - Width / 2 + 22) / scale);
-            y = (int)((Mobile.RealScreenPosition.Y + Mobile.Offset.Y - Mobile.Offset.Z + 22) / scale);
+            x = (int) ((Mobile.RealScreenPosition.X + Mobile.Offset.X - Width / 2 + 22) / scale);
+            y = (int) ((Mobile.RealScreenPosition.Y + Mobile.Offset.Y - Mobile.Offset.Z + 22) / scale);
 
             x += gx + 6;
             y += gy;
@@ -101,6 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (x < gx || x + Width > gx + w)
                 return false;
+
             if (y < gy || y + Height > gy + h)
                 return false;
 

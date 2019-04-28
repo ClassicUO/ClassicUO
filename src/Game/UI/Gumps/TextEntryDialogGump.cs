@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -46,14 +40,14 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_textBox);
 
-            Add(new Button((int)ButtonType.Ok, 0x047B, 0x047C, 0x047D)
+            Add(new Button((int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
             {
                 X = 117,
                 Y = 190,
                 ButtonAction = ButtonAction.Activate
             });
 
-            Add(new Button((int)ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
+            Add(new Button((int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
             {
                 X = 204,
                 Y = 190,
@@ -69,15 +63,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((ButtonType)buttonID)
+            switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
                     NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ButtonID, _textBox.Text, true));
                     Dispose();
+
                     break;
                 case ButtonType.Cancel:
                     NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ButtonID, _textBox.Text, false));
                     Dispose();
+
                     break;
             }
         }

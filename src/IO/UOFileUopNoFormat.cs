@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.IO.Resources;
 
@@ -32,6 +29,7 @@ namespace ClassicUO.IO
 
             if (ReadInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
+
             Skip(8);
             long nextblock = ReadLong();
             Skip(4);
@@ -39,6 +37,7 @@ namespace ClassicUO.IO
             Entries = new UOFileIndex3D[ReadInt()];
 
             int idx = 0;
+
             do
             {
                 Seek(nextblock);
@@ -57,7 +56,7 @@ namespace ClassicUO.IO
                     if (offset == 0)
                         continue;
 
-                    Entries[idx++] = new UOFileIndex3D((uint)(offset + headerLength), compressedLength, decompressedLength);
+                    Entries[idx++] = new UOFileIndex3D((uint) (offset + headerLength), compressedLength, decompressedLength);
                 }
             } while (nextblock != 0);
         }
@@ -69,6 +68,7 @@ namespace ClassicUO.IO
 
             if (ReadInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
+
             Skip(8);
             long nextblock = ReadLong();
             Skip(4);
@@ -91,10 +91,9 @@ namespace ClassicUO.IO
                     if (offset == 0)
                         continue;
 
-                    hashes.Add(hash, new UopFileData((uint)(offset + headerLength), (uint)compressedLength, (uint)decompressedLength, _indexFile));
+                    hashes.Add(hash, new UopFileData((uint) (offset + headerLength), (uint) compressedLength, (uint) decompressedLength, _indexFile));
                 }
             } while (nextblock != 0);
         }
     }
-
 }

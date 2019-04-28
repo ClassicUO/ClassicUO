@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,17 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.Map;
-using ClassicUO.Interfaces;
-using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
+
 using System;
 using System.Runtime.CompilerServices;
+
+using ClassicUO.Game.Map;
+using ClassicUO.Interfaces;
+
+using Microsoft.Xna.Framework;
+
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
@@ -36,25 +41,17 @@ namespace ClassicUO.Game.GameObjects
     internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
-        public Vector3 Offset;
-        private Tile _tile;
         private Point _screenPosition;
+        private Tile _tile;
+        public Vector3 Offset;
 
+        public Point RealScreenPosition;
 
-        protected GameObject()
-        {
-
-        }
-
-        public GameObject Left { get; set; }
-        public GameObject Right { get; set; }
 
         protected virtual bool CanCreateOverheads => true;
         public OverheadMessage OverheadMessageContainer { get; private set; }
 
         public Point ScreenPosition => _screenPosition;
-
-        public Point RealScreenPosition;
 
         public bool IsPositionChanged { get; protected set; }
 
@@ -134,6 +131,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (World.Player == null)
                     return ushort.MaxValue;
+
                 if (this == World.Player)
                     return 0;
 
@@ -158,6 +156,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public GameObject Left { get; set; }
+        public GameObject Right { get; set; }
+
         public virtual void Update(double totalMS, double frameMS)
         {
             OverheadMessageContainer?.Update();
@@ -175,7 +176,10 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddToTile() => AddToTile(X, Y);
+        public void AddToTile()
+        {
+            AddToTile(X, Y);
+        }
 
         public void AddToTile(Tile tile)
         {
@@ -207,7 +211,10 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
         }
 
-        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
+        public int DistanceTo(GameObject entity)
+        {
+            return Position.DistanceTo(entity.Position);
+        }
 
         public void AddOverhead(MessageType type, string message)
         {
@@ -231,7 +238,6 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual void OnPositionChanged()
         {
-
         }
 
 
@@ -246,7 +252,7 @@ namespace ClassicUO.Game.GameObjects
             _tile = null;
 
             OverheadMessageContainer?.Destroy();
-           
+
             Texture = null;
         }
     }

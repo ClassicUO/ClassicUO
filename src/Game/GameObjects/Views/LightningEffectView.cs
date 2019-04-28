@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -44,6 +45,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (_displayed > 0x4E29)
                     return false;
+
                 Texture = FileManager.Gumps.GetTexture(_displayed);
                 Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
@@ -60,11 +62,10 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
-            }
 
             Engine.DebugInfo.EffectsRendered++;
+
             return base.Draw(batcher, posX, posY);
         }
     }

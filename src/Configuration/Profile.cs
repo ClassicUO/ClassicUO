@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -49,12 +48,11 @@ namespace ClassicUO.Configuration
             CharacterName = charactername;
         }
 
-        [JsonProperty]
-        public string Username { get; }
-        [JsonProperty]
-        public string ServerName { get; }
-        [JsonProperty]
-        public string CharacterName { get; }
+        [JsonProperty] public string Username { get; }
+
+        [JsonProperty] public string ServerName { get; }
+
+        [JsonProperty] public string CharacterName { get; }
 
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
@@ -63,7 +61,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MusicVolume { get; set; } = 100;
         [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
         [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
-        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = false;
+        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; }
 
         // fonts and speech
         [JsonProperty] public byte ChatFont { get; set; } = 1;
@@ -89,26 +87,26 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ShowIncomingNames { get; set; } = true;
         [JsonProperty] public bool EnableStatReport { get; set; } = true;
         [JsonProperty] public bool EnableSkillReport { get; set; } = true;
-        [JsonProperty] public bool UseOldStatusGump { get; set; } = false;
-        [JsonProperty] public int BackpackStyle { get; set; } = 0;
-        [JsonProperty] public bool HighlightGameObjects { get; set; } = false;
+        [JsonProperty] public bool UseOldStatusGump { get; set; }
+        [JsonProperty] public int BackpackStyle { get; set; }
+        [JsonProperty] public bool HighlightGameObjects { get; set; }
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
-        [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
-        [JsonProperty] public int MobileHPType { get; set; } = 0; // 0 = %, 1 = line, 2 = both
+        [JsonProperty] public bool ShowMobilesHP { get; set; }
+        [JsonProperty] public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
-        [JsonProperty] public bool TreeToStumps { get; set; } = false;
-        [JsonProperty] public bool EnableCaveBorder { get; set; } = false;
-        [JsonProperty] public bool HideVegetation { get; set; } = false;
-        [JsonProperty] public int FieldsType { get; set; } = 0; // 0 = normal, 1 = static, 2 = tile
-        [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; } = false;
-        [JsonProperty] public bool UseCircleOfTransparency { get; set; } = false;
+        [JsonProperty] public bool TreeToStumps { get; set; }
+        [JsonProperty] public bool EnableCaveBorder { get; set; }
+        [JsonProperty] public bool HideVegetation { get; set; }
+        [JsonProperty] public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile
+        [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
+        [JsonProperty] public bool UseCircleOfTransparency { get; set; }
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
 
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
-        [JsonProperty] public bool EnableScaleZoom { get; set; } = false;
-        [JsonProperty] public bool SaveScaleAfterClose { get; set; } = false;
-        [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; } = false;
+        [JsonProperty] public bool EnableScaleZoom { get; set; }
+        [JsonProperty] public bool SaveScaleAfterClose { get; set; }
+        [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; }
 
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
 
@@ -121,7 +119,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
 
         // movements
-        [JsonProperty] public bool EnablePathfind { get; set; } = false;
+        [JsonProperty] public bool EnablePathfind { get; set; }
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
@@ -130,20 +128,20 @@ namespace ClassicUO.Configuration
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
-        [JsonProperty] public bool GameWindowLock { get; set; } = false;
-        [JsonProperty] public bool GameWindowFullSize { get; set; } = false;
+        [JsonProperty] public bool GameWindowLock { get; set; }
+        [JsonProperty] public bool GameWindowFullSize { get; set; }
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
-        [JsonProperty] public bool TopbarGumpIsMinimized { get; set; } = false;
-        [JsonProperty] public bool TopbarGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
+        [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(0, 0);
-        [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = false;
-        [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
-        [JsonProperty] public bool UseCustomLightLevel { get; set; } = false;
-        [JsonProperty] public byte LightLevel { get; set; } = 0;
-        [JsonProperty] public int CloseHealthBarType { get; set; } = 0; // 0 = none, 1 == not exists, 2 == is dead
+        [JsonProperty] public bool DebugGumpIsMinimized { get; set; }
+        [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
+        [JsonProperty] public bool UseCustomLightLevel { get; set; }
+        [JsonProperty] public byte LightLevel { get; set; }
+        [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
 
-        [JsonProperty] public bool ActivateChatAfterEnter { get; set; } = false;
+        [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
         [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
         [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
@@ -155,84 +153,86 @@ namespace ClassicUO.Configuration
         [JsonProperty]
         public Macro[] Macros { get; set; } =
         {
-            new Macro("Paperdoll", (SDL.SDL_Keycode)112, true, false, false)
+            new Macro("Paperdoll", (SDL.SDL_Keycode) 112, true, false, false)
             {
-                FirstNode = new MacroObject((MacroType)8, (MacroSubType)10)
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
                 {
                     HasSubMenu = 1
-                },         
+                }
             },
 
-            new Macro("Options", (SDL.SDL_Keycode)111, true, false, false)
+            new Macro("Options", (SDL.SDL_Keycode) 111, true, false, false)
             {
-                FirstNode = new MacroObject((MacroType)8, (MacroSubType)9)
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
                 {
                     HasSubMenu = 1
-                },
+                }
             },
 
-            new Macro("Journal", (SDL.SDL_Keycode)106, true, false, false)
+            new Macro("Journal", (SDL.SDL_Keycode) 106, true, false, false)
             {
-                FirstNode = new MacroObject((MacroType)8, (MacroSubType)12)
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
                 {
                     HasSubMenu = 1
-                },
+                }
             },
 
-            new Macro("Backpack", (SDL.SDL_Keycode)105, true, false, false)
+            new Macro("Backpack", (SDL.SDL_Keycode) 105, true, false, false)
             {
-                FirstNode = new MacroObject((MacroType)8, (MacroSubType)16)
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
                 {
                     HasSubMenu = 1
-                },
+                }
             },
 
-            new Macro("Radar", (SDL.SDL_Keycode)114, true, false, false)
+            new Macro("Radar", (SDL.SDL_Keycode) 114, true, false, false)
             {
-                FirstNode = new MacroObject((MacroType)8, (MacroSubType)17)
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
                 {
                     HasSubMenu = 1
-                },
+                }
             },
 
-            new Macro("Bow", (SDL.SDL_Keycode)98, false, true, false)
+            new Macro("Bow", (SDL.SDL_Keycode) 98, false, true, false)
             {
-                FirstNode = new MacroObject((MacroType)18, (MacroSubType)0)
+                FirstNode = new MacroObject((MacroType) 18, 0)
                 {
                     HasSubMenu = 0
-                },
+                }
             },
 
-            new Macro("Salute", (SDL.SDL_Keycode)115, false, true, false)
+            new Macro("Salute", (SDL.SDL_Keycode) 115, false, true, false)
             {
-                FirstNode = new MacroObject((MacroType)19, (MacroSubType)0)
+                FirstNode = new MacroObject((MacroType) 19, 0)
                 {
                     HasSubMenu = 0
-                },
-            },
+                }
+            }
         };
 
-        [JsonProperty] public bool CounterBarEnabled { get; set; } = false;
-        [JsonProperty] public bool CounterBarHighlightOnUse { get; set; } = false;
+        [JsonProperty] public bool CounterBarEnabled { get; set; }
+        [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
         [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
         [JsonProperty] public int CounterBarRows { get; set; } = 1;
         [JsonProperty] public int CounterBarColumns { get; set; } = 1;
 
 
         [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
-        [JsonProperty] public int AuraUnderFeetType { get; set; } = 0; // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
-
+        [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
 
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
+
         public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
                 throw new InvalidDataException();
+
             if (string.IsNullOrEmpty(Username))
                 throw new InvalidDataException();
+
             if (string.IsNullOrEmpty(CharacterName))
                 throw new InvalidDataException();
 
@@ -241,7 +241,7 @@ namespace ClassicUO.Configuration
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
             // save settings.json
-            ConfigurationResolver.Save(this, Path.Combine(path, Engine.SettingsFile), new JsonSerializerSettings()
+            ConfigurationResolver.Save(this, Path.Combine(path, Engine.SettingsFile), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
@@ -278,21 +278,13 @@ namespace ClassicUO.Configuration
                 {
                     writer.Write(gumps.Count);
 
-                    foreach (Gump gump in gumps)
-                    {
-                        gump.Save(writer);
-                    }
+                    foreach (Gump gump in gumps) gump.Save(writer);
                 }
                 else
-                {
                     writer.Write(0);
-                }
             }
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
-            {
-                Engine.UI.AnchorManager.Save(writer);
-            }
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin")))) Engine.UI.AnchorManager.Save(writer);
         }
 
         public List<Gump> ReadGumps()
@@ -300,6 +292,7 @@ namespace ClassicUO.Configuration
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
             string binpath = Path.Combine(path, "gumps.bin");
+
             if (!File.Exists(binpath))
                 return null;
 
@@ -324,7 +317,7 @@ namespace ClassicUO.Configuration
                             int y = reader.ReadInt32();
 
                             Type type = Type.GetType(typeName, true);
-                            Gump gump = (Gump)Activator.CreateInstance(type);
+                            Gump gump = (Gump) Activator.CreateInstance(type);
                             gump.Initialize();
                             gump.Restore(reader);
                             gump.X = x;
@@ -335,34 +328,28 @@ namespace ClassicUO.Configuration
                             if (gump.LocalSerial != 0)
                                 Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
 
-                            if (!gump.IsDisposed)
-                            {
-                                gumps.Add(gump);
-                            }
+                            if (!gump.IsDisposed) gumps.Add(gump);
                         }
                         catch (Exception e)
                         {
                             Log.Message(LogTypes.Error, e.StackTrace);
                         }
-                      
                     }
                 }
             }
 
             string anchorsPath = Path.Combine(path, "anchors.bin");
+
             if (File.Exists(anchorsPath))
             {
                 try
                 {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
-                    {
-                        Engine.UI.AnchorManager.Restore(reader, gumps);
-                    }
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath))) Engine.UI.AnchorManager.Restore(reader, gumps);
                 }
                 catch (Exception e)
                 {
                     Log.Message(LogTypes.Error, e.StackTrace);
-                }             
+                }
             }
 
             return gumps;

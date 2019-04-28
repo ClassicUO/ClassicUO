@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -46,8 +49,8 @@ namespace ClassicUO.Renderer
 
     internal sealed class RenderedText
     {
-        private string _text;
         private byte _font;
+        private string _text;
 
         public RenderedText()
         {
@@ -65,11 +68,12 @@ namespace ClassicUO.Renderer
                 if (_font != value)
                 {
                     if (value == 0xFF)
-                        value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                        value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
                     _font = value;
                 }
             }
         }
+
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }
@@ -140,10 +144,12 @@ namespace ClassicUO.Renderer
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
+
             Rectangle src = Rectangle.Empty;
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
+
             src.X = offsetX;
             src.Y = offsetY;
             int maxX = src.X + dwidth;
@@ -171,6 +177,7 @@ namespace ClassicUO.Renderer
 
             Vector3 huev = Vector3.Zero;
             huev.X = hue;
+
             if (hue != 0)
                 huev.Y = 1;
             huev.Z = alpha;
@@ -215,6 +222,7 @@ namespace ClassicUO.Renderer
         {
             if (IsDestroyed)
                 return;
+
             IsDestroyed = true;
 
             if (Texture != null && !Texture.IsDisposed)

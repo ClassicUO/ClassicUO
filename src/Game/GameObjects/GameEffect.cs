@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -77,17 +79,18 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = (AnimDataFrame.FrameInterval != 0 ?  AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+            Speed = AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-   
+
 
             if (Source != null && Source.IsDestroyed)
             {
                 Destroy();
+
                 return;
             }
 
@@ -101,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (LastChangeFrameTime < totalMS)
                 {
                     if (AnimDataFrame.FrameCount != 0)
-                    { 
+                    {
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
 
@@ -126,7 +129,10 @@ namespace ClassicUO.Game.GameObjects
             _children.Add(effect);
         }
 
-        protected (int x, int y, int z) GetSource() => Source == null ? (SourceX, SourceY, SourceZ) : (Source.X, Source.Y, Source.Z);
+        protected (int x, int y, int z) GetSource()
+        {
+            return Source == null ? (SourceX, SourceY, SourceZ) : (Source.X, Source.Y, Source.Z);
+        }
 
         public void SetSource(GameObject source)
         {

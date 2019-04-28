@@ -1011,8 +1011,10 @@ namespace ClassicUO.Game.GameObjects
             if (anim < FileManager.Animations.GroupReplaces.Length)
             {
                 foreach (Tuple<ushort, byte> tuple in FileManager.Animations.GroupReplaces[anim])
+                {
                     if (tuple.Item1 == v13)
                         return tuple.Item2 != 0xFF;
+                }
             }
 
             return false;

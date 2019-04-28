@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Text;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
@@ -68,20 +68,20 @@ namespace ClassicUO.Game.UI
 
             if (MaxCharCount > 0)
             {
-                if (Text.Length >= MaxCharCount)
-                {
-                    return c;
-                }
+                if (Text.Length >= MaxCharCount) return c;
             }
 
             string text = Text.Insert(CaretIndex, c);
             int count = c.Length;
+
             if (MaxLines > 0)
             {
                 var newlines = GetLinesCharsCount(text);
+
                 if (newlines.Length > MaxLines)
                 {
                     count = 0;
+
                     for (int l = newlines.Length - 1; l >= MaxLines; --l)
                         count += newlines[l];
                     c = text;
@@ -98,6 +98,7 @@ namespace ClassicUO.Game.UI
 
             count = CaretIndex += count;
             SetText(text, count);
+
             return c;
         }
 
@@ -120,6 +121,7 @@ namespace ClassicUO.Game.UI
                     {
                         if (CaretIndex < 1)
                             return;
+
                         CaretIndex--;
                     }
 
@@ -128,17 +130,19 @@ namespace ClassicUO.Game.UI
                     width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
+
             CaretIndex = Math.Min(text.Length, newcaretpos);
             Text = text;
         }
 
         public int[] GetLinesCharsCount()
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true);
         }
+
         public int[] GetLinesCharsCount(string text)
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width, true, true);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true);
         }
     }
 }

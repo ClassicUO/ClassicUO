@@ -12,37 +12,37 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private const double MY_PI = 3.14159265358979323846;
         // Note: These values are not in the same order
         // as in Annex 3-B.3 of the ISO/IEC DIS 11172-3 
-        private static readonly float cos1_64 = (float) (1.0/(2.0*Math.Cos(MY_PI/64.0)));
-        private static readonly float cos3_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*3.0/64.0)));
-        private static readonly float cos5_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*5.0/64.0)));
-        private static readonly float cos7_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*7.0/64.0)));
-        private static readonly float cos9_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*9.0/64.0)));
-        private static readonly float cos11_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*11.0/64.0)));
-        private static readonly float cos13_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*13.0/64.0)));
-        private static readonly float cos15_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*15.0/64.0)));
-        private static readonly float cos17_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*17.0/64.0)));
-        private static readonly float cos19_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*19.0/64.0)));
-        private static readonly float cos21_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*21.0/64.0)));
-        private static readonly float cos23_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*23.0/64.0)));
-        private static readonly float cos25_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*25.0/64.0)));
-        private static readonly float cos27_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*27.0/64.0)));
-        private static readonly float cos29_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*29.0/64.0)));
-        private static readonly float cos31_64 = (float) (1.0/(2.0*Math.Cos(MY_PI*31.0/64.0)));
-        private static readonly float cos1_32 = (float) (1.0/(2.0*Math.Cos(MY_PI/32.0)));
-        private static readonly float cos3_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*3.0/32.0)));
-        private static readonly float cos5_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*5.0/32.0)));
-        private static readonly float cos7_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*7.0/32.0)));
-        private static readonly float cos9_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*9.0/32.0)));
-        private static readonly float cos11_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*11.0/32.0)));
-        private static readonly float cos13_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*13.0/32.0)));
-        private static readonly float cos15_32 = (float) (1.0/(2.0*Math.Cos(MY_PI*15.0/32.0)));
-        private static readonly float cos1_16 = (float) (1.0/(2.0*Math.Cos(MY_PI/16.0)));
-        private static readonly float cos3_16 = (float) (1.0/(2.0*Math.Cos(MY_PI*3.0/16.0)));
-        private static readonly float cos5_16 = (float) (1.0/(2.0*Math.Cos(MY_PI*5.0/16.0)));
-        private static readonly float cos7_16 = (float) (1.0/(2.0*Math.Cos(MY_PI*7.0/16.0)));
-        private static readonly float cos1_8 = (float) (1.0/(2.0*Math.Cos(MY_PI/8.0)));
-        private static readonly float cos3_8 = (float) (1.0/(2.0*Math.Cos(MY_PI*3.0/8.0)));
-        private static readonly float cos1_4 = (float) (1.0/(2.0*Math.Cos(MY_PI/4.0)));
+        private static readonly float cos1_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI / 64.0)));
+        private static readonly float cos3_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 3.0 / 64.0)));
+        private static readonly float cos5_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 5.0 / 64.0)));
+        private static readonly float cos7_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 7.0 / 64.0)));
+        private static readonly float cos9_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 9.0 / 64.0)));
+        private static readonly float cos11_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 11.0 / 64.0)));
+        private static readonly float cos13_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 13.0 / 64.0)));
+        private static readonly float cos15_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 15.0 / 64.0)));
+        private static readonly float cos17_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 17.0 / 64.0)));
+        private static readonly float cos19_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 19.0 / 64.0)));
+        private static readonly float cos21_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 21.0 / 64.0)));
+        private static readonly float cos23_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 23.0 / 64.0)));
+        private static readonly float cos25_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 25.0 / 64.0)));
+        private static readonly float cos27_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 27.0 / 64.0)));
+        private static readonly float cos29_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 29.0 / 64.0)));
+        private static readonly float cos31_64 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 31.0 / 64.0)));
+        private static readonly float cos1_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI / 32.0)));
+        private static readonly float cos3_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 3.0 / 32.0)));
+        private static readonly float cos5_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 5.0 / 32.0)));
+        private static readonly float cos7_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 7.0 / 32.0)));
+        private static readonly float cos9_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 9.0 / 32.0)));
+        private static readonly float cos11_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 11.0 / 32.0)));
+        private static readonly float cos13_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 13.0 / 32.0)));
+        private static readonly float cos15_32 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 15.0 / 32.0)));
+        private static readonly float cos1_16 = (float) (1.0 / (2.0 * Math.Cos(MY_PI / 16.0)));
+        private static readonly float cos3_16 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 3.0 / 16.0)));
+        private static readonly float cos5_16 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 5.0 / 16.0)));
+        private static readonly float cos7_16 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 7.0 / 16.0)));
+        private static readonly float cos1_8 = (float) (1.0 / (2.0 * Math.Cos(MY_PI / 8.0)));
+        private static readonly float cos3_8 = (float) (1.0 / (2.0 * Math.Cos(MY_PI * 3.0 / 8.0)));
+        private static readonly float cos1_4 = (float) (1.0 / (2.0 * Math.Cos(MY_PI / 4.0)));
 
         private static float[] d;
 
@@ -211,6 +211,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public SynthesisFilter(int channelnumber, float factor, float[] eq0)
         {
             InitBlock();
+
             if (d == null)
             {
                 d = d_data; // load_d();
@@ -236,13 +237,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 if (eq == null)
                 {
                     eq = new float[32];
+
                     for (int i = 0; i < 32; i++)
                         eq[i] = 1.0f;
                 }
-                if (eq.Length < 32)
-                {
-                    throw new ArgumentException("eq0");
-                }
+
+                if (eq.Length < 32) throw new ArgumentException("eq0");
             }
         }
 
@@ -273,15 +273,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public void input_sample(float sample, int subbandnumber)
         {
-            samples[subbandnumber] = eq[subbandnumber]*sample;
+            samples[subbandnumber] = eq[subbandnumber] * sample;
         }
 
         public void input_samples(float[] s)
         {
-            for (int i = 31; i >= 0; i--)
-            {
-                samples[i] = s[i]*eq[i];
-            }
+            for (int i = 31; i >= 0; i--) samples[i] = s[i] * eq[i];
         }
 
         /// <summary>
@@ -354,65 +351,65 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             float pp5 = p5 + p10;
             float pp6 = p6 + p9;
             float pp7 = p7 + p8;
-            float pp8 = (p0 - p15)*cos1_32;
-            float pp9 = (p1 - p14)*cos3_32;
-            float pp10 = (p2 - p13)*cos5_32;
-            float pp11 = (p3 - p12)*cos7_32;
-            float pp12 = (p4 - p11)*cos9_32;
-            float pp13 = (p5 - p10)*cos11_32;
-            float pp14 = (p6 - p9)*cos13_32;
-            float pp15 = (p7 - p8)*cos15_32;
+            float pp8 = (p0 - p15) * cos1_32;
+            float pp9 = (p1 - p14) * cos3_32;
+            float pp10 = (p2 - p13) * cos5_32;
+            float pp11 = (p3 - p12) * cos7_32;
+            float pp12 = (p4 - p11) * cos9_32;
+            float pp13 = (p5 - p10) * cos11_32;
+            float pp14 = (p6 - p9) * cos13_32;
+            float pp15 = (p7 - p8) * cos15_32;
 
             p0 = pp0 + pp7;
             p1 = pp1 + pp6;
             p2 = pp2 + pp5;
             p3 = pp3 + pp4;
-            p4 = (pp0 - pp7)*cos1_16;
-            p5 = (pp1 - pp6)*cos3_16;
-            p6 = (pp2 - pp5)*cos5_16;
-            p7 = (pp3 - pp4)*cos7_16;
+            p4 = (pp0 - pp7) * cos1_16;
+            p5 = (pp1 - pp6) * cos3_16;
+            p6 = (pp2 - pp5) * cos5_16;
+            p7 = (pp3 - pp4) * cos7_16;
             p8 = pp8 + pp15;
             p9 = pp9 + pp14;
             p10 = pp10 + pp13;
             p11 = pp11 + pp12;
-            p12 = (pp8 - pp15)*cos1_16;
-            p13 = (pp9 - pp14)*cos3_16;
-            p14 = (pp10 - pp13)*cos5_16;
-            p15 = (pp11 - pp12)*cos7_16;
+            p12 = (pp8 - pp15) * cos1_16;
+            p13 = (pp9 - pp14) * cos3_16;
+            p14 = (pp10 - pp13) * cos5_16;
+            p15 = (pp11 - pp12) * cos7_16;
 
             pp0 = p0 + p3;
             pp1 = p1 + p2;
-            pp2 = (p0 - p3)*cos1_8;
-            pp3 = (p1 - p2)*cos3_8;
+            pp2 = (p0 - p3) * cos1_8;
+            pp3 = (p1 - p2) * cos3_8;
             pp4 = p4 + p7;
             pp5 = p5 + p6;
-            pp6 = (p4 - p7)*cos1_8;
-            pp7 = (p5 - p6)*cos3_8;
+            pp6 = (p4 - p7) * cos1_8;
+            pp7 = (p5 - p6) * cos3_8;
             pp8 = p8 + p11;
             pp9 = p9 + p10;
-            pp10 = (p8 - p11)*cos1_8;
-            pp11 = (p9 - p10)*cos3_8;
+            pp10 = (p8 - p11) * cos1_8;
+            pp11 = (p9 - p10) * cos3_8;
             pp12 = p12 + p15;
             pp13 = p13 + p14;
-            pp14 = (p12 - p15)*cos1_8;
-            pp15 = (p13 - p14)*cos3_8;
+            pp14 = (p12 - p15) * cos1_8;
+            pp15 = (p13 - p14) * cos3_8;
 
             p0 = pp0 + pp1;
-            p1 = (pp0 - pp1)*cos1_4;
+            p1 = (pp0 - pp1) * cos1_4;
             p2 = pp2 + pp3;
-            p3 = (pp2 - pp3)*cos1_4;
+            p3 = (pp2 - pp3) * cos1_4;
             p4 = pp4 + pp5;
-            p5 = (pp4 - pp5)*cos1_4;
+            p5 = (pp4 - pp5) * cos1_4;
             p6 = pp6 + pp7;
-            p7 = (pp6 - pp7)*cos1_4;
+            p7 = (pp6 - pp7) * cos1_4;
             p8 = pp8 + pp9;
-            p9 = (pp8 - pp9)*cos1_4;
+            p9 = (pp8 - pp9) * cos1_4;
             p10 = pp10 + pp11;
-            p11 = (pp10 - pp11)*cos1_4;
+            p11 = (pp10 - pp11) * cos1_4;
             p12 = pp12 + pp13;
-            p13 = (pp12 - pp13)*cos1_4;
+            p13 = (pp12 - pp13) * cos1_4;
             p14 = pp14 + pp15;
-            p15 = (pp14 - pp15)*cos1_4;
+            p15 = (pp14 - pp15) * cos1_4;
 
             // this is pretty insane coding
             float tmp1;
@@ -427,22 +424,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new_v0 = p1;
             new_v23 = -(new_v8 = p3) - p2;
 
-            p0 = (s0 - s31)*cos1_64;
-            p1 = (s1 - s30)*cos3_64;
-            p2 = (s2 - s29)*cos5_64;
-            p3 = (s3 - s28)*cos7_64;
-            p4 = (s4 - s27)*cos9_64;
-            p5 = (s5 - s26)*cos11_64;
-            p6 = (s6 - s25)*cos13_64;
-            p7 = (s7 - s24)*cos15_64;
-            p8 = (s8 - s23)*cos17_64;
-            p9 = (s9 - s22)*cos19_64;
-            p10 = (s10 - s21)*cos21_64;
-            p11 = (s11 - s20)*cos23_64;
-            p12 = (s12 - s19)*cos25_64;
-            p13 = (s13 - s18)*cos27_64;
-            p14 = (s14 - s17)*cos29_64;
-            p15 = (s15 - s16)*cos31_64;
+            p0 = (s0 - s31) * cos1_64;
+            p1 = (s1 - s30) * cos3_64;
+            p2 = (s2 - s29) * cos5_64;
+            p3 = (s3 - s28) * cos7_64;
+            p4 = (s4 - s27) * cos9_64;
+            p5 = (s5 - s26) * cos11_64;
+            p6 = (s6 - s25) * cos13_64;
+            p7 = (s7 - s24) * cos15_64;
+            p8 = (s8 - s23) * cos17_64;
+            p9 = (s9 - s22) * cos19_64;
+            p10 = (s10 - s21) * cos21_64;
+            p11 = (s11 - s20) * cos23_64;
+            p12 = (s12 - s19) * cos25_64;
+            p13 = (s13 - s18) * cos27_64;
+            p14 = (s14 - s17) * cos29_64;
+            p15 = (s15 - s16) * cos31_64;
 
             pp0 = p0 + p15;
             pp1 = p1 + p14;
@@ -452,65 +449,65 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             pp5 = p5 + p10;
             pp6 = p6 + p9;
             pp7 = p7 + p8;
-            pp8 = (p0 - p15)*cos1_32;
-            pp9 = (p1 - p14)*cos3_32;
-            pp10 = (p2 - p13)*cos5_32;
-            pp11 = (p3 - p12)*cos7_32;
-            pp12 = (p4 - p11)*cos9_32;
-            pp13 = (p5 - p10)*cos11_32;
-            pp14 = (p6 - p9)*cos13_32;
-            pp15 = (p7 - p8)*cos15_32;
+            pp8 = (p0 - p15) * cos1_32;
+            pp9 = (p1 - p14) * cos3_32;
+            pp10 = (p2 - p13) * cos5_32;
+            pp11 = (p3 - p12) * cos7_32;
+            pp12 = (p4 - p11) * cos9_32;
+            pp13 = (p5 - p10) * cos11_32;
+            pp14 = (p6 - p9) * cos13_32;
+            pp15 = (p7 - p8) * cos15_32;
 
             p0 = pp0 + pp7;
             p1 = pp1 + pp6;
             p2 = pp2 + pp5;
             p3 = pp3 + pp4;
-            p4 = (pp0 - pp7)*cos1_16;
-            p5 = (pp1 - pp6)*cos3_16;
-            p6 = (pp2 - pp5)*cos5_16;
-            p7 = (pp3 - pp4)*cos7_16;
+            p4 = (pp0 - pp7) * cos1_16;
+            p5 = (pp1 - pp6) * cos3_16;
+            p6 = (pp2 - pp5) * cos5_16;
+            p7 = (pp3 - pp4) * cos7_16;
             p8 = pp8 + pp15;
             p9 = pp9 + pp14;
             p10 = pp10 + pp13;
             p11 = pp11 + pp12;
-            p12 = (pp8 - pp15)*cos1_16;
-            p13 = (pp9 - pp14)*cos3_16;
-            p14 = (pp10 - pp13)*cos5_16;
-            p15 = (pp11 - pp12)*cos7_16;
+            p12 = (pp8 - pp15) * cos1_16;
+            p13 = (pp9 - pp14) * cos3_16;
+            p14 = (pp10 - pp13) * cos5_16;
+            p15 = (pp11 - pp12) * cos7_16;
 
             pp0 = p0 + p3;
             pp1 = p1 + p2;
-            pp2 = (p0 - p3)*cos1_8;
-            pp3 = (p1 - p2)*cos3_8;
+            pp2 = (p0 - p3) * cos1_8;
+            pp3 = (p1 - p2) * cos3_8;
             pp4 = p4 + p7;
             pp5 = p5 + p6;
-            pp6 = (p4 - p7)*cos1_8;
-            pp7 = (p5 - p6)*cos3_8;
+            pp6 = (p4 - p7) * cos1_8;
+            pp7 = (p5 - p6) * cos3_8;
             pp8 = p8 + p11;
             pp9 = p9 + p10;
-            pp10 = (p8 - p11)*cos1_8;
-            pp11 = (p9 - p10)*cos3_8;
+            pp10 = (p8 - p11) * cos1_8;
+            pp11 = (p9 - p10) * cos3_8;
             pp12 = p12 + p15;
             pp13 = p13 + p14;
-            pp14 = (p12 - p15)*cos1_8;
-            pp15 = (p13 - p14)*cos3_8;
+            pp14 = (p12 - p15) * cos1_8;
+            pp15 = (p13 - p14) * cos3_8;
 
             p0 = pp0 + pp1;
-            p1 = (pp0 - pp1)*cos1_4;
+            p1 = (pp0 - pp1) * cos1_4;
             p2 = pp2 + pp3;
-            p3 = (pp2 - pp3)*cos1_4;
+            p3 = (pp2 - pp3) * cos1_4;
             p4 = pp4 + pp5;
-            p5 = (pp4 - pp5)*cos1_4;
+            p5 = (pp4 - pp5) * cos1_4;
             p6 = pp6 + pp7;
-            p7 = (pp6 - pp7)*cos1_4;
+            p7 = (pp6 - pp7) * cos1_4;
             p8 = pp8 + pp9;
-            p9 = (pp8 - pp9)*cos1_4;
+            p9 = (pp8 - pp9) * cos1_4;
             p10 = pp10 + pp11;
-            p11 = (pp10 - pp11)*cos1_4;
+            p11 = (pp10 - pp11) * cos1_4;
             p12 = pp12 + pp13;
-            p13 = (pp12 - pp13)*cos1_4;
+            p13 = (pp12 - pp13) * cos1_4;
             p14 = pp14 + pp15;
-            p15 = (pp14 - pp15)*cos1_4;
+            p15 = (pp14 - pp15) * cos1_4;
 
             // manually doing something that a compiler should handle sucks
             // coding like this is hard to read
@@ -571,7 +568,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             dest[496 + pos] = -new_v1;
 
             // insert V[32] (== -new_v[0]) into other v:
-            dest = (actual_v == v1) ? v2 : v1;
+            dest = actual_v == v1 ? v2 : v1;
 
             dest[0 + pos] = -new_v0;
             // insert V[33-48] (== new_v[16-31]) into other v:
@@ -626,10 +623,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             float[] p = new float[16];
             float[] pp = new float[16];
 
-            for (int i = 31; i >= 0; i--)
-            {
-                new_v[i] = 0.0f;
-            }
+            for (int i = 31; i >= 0; i--) new_v[i] = 0.0f;
 
             // float[] new_v = new float[32]; // new V[0-15] and V[33-48] of Figure 3-A.2 in ISO DIS 11172-3
             // float[] p = new float[16];
@@ -662,65 +656,65 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             pp[5] = p[5] + p[10];
             pp[6] = p[6] + p[9];
             pp[7] = p[7] + p[8];
-            pp[8] = (p[0] - p[15])*cos1_32;
-            pp[9] = (p[1] - p[14])*cos3_32;
-            pp[10] = (p[2] - p[13])*cos5_32;
-            pp[11] = (p[3] - p[12])*cos7_32;
-            pp[12] = (p[4] - p[11])*cos9_32;
-            pp[13] = (p[5] - p[10])*cos11_32;
-            pp[14] = (p[6] - p[9])*cos13_32;
-            pp[15] = (p[7] - p[8])*cos15_32;
+            pp[8] = (p[0] - p[15]) * cos1_32;
+            pp[9] = (p[1] - p[14]) * cos3_32;
+            pp[10] = (p[2] - p[13]) * cos5_32;
+            pp[11] = (p[3] - p[12]) * cos7_32;
+            pp[12] = (p[4] - p[11]) * cos9_32;
+            pp[13] = (p[5] - p[10]) * cos11_32;
+            pp[14] = (p[6] - p[9]) * cos13_32;
+            pp[15] = (p[7] - p[8]) * cos15_32;
 
             p[0] = pp[0] + pp[7];
             p[1] = pp[1] + pp[6];
             p[2] = pp[2] + pp[5];
             p[3] = pp[3] + pp[4];
-            p[4] = (pp[0] - pp[7])*cos1_16;
-            p[5] = (pp[1] - pp[6])*cos3_16;
-            p[6] = (pp[2] - pp[5])*cos5_16;
-            p[7] = (pp[3] - pp[4])*cos7_16;
+            p[4] = (pp[0] - pp[7]) * cos1_16;
+            p[5] = (pp[1] - pp[6]) * cos3_16;
+            p[6] = (pp[2] - pp[5]) * cos5_16;
+            p[7] = (pp[3] - pp[4]) * cos7_16;
             p[8] = pp[8] + pp[15];
             p[9] = pp[9] + pp[14];
             p[10] = pp[10] + pp[13];
             p[11] = pp[11] + pp[12];
-            p[12] = (pp[8] - pp[15])*cos1_16;
-            p[13] = (pp[9] - pp[14])*cos3_16;
-            p[14] = (pp[10] - pp[13])*cos5_16;
-            p[15] = (pp[11] - pp[12])*cos7_16;
+            p[12] = (pp[8] - pp[15]) * cos1_16;
+            p[13] = (pp[9] - pp[14]) * cos3_16;
+            p[14] = (pp[10] - pp[13]) * cos5_16;
+            p[15] = (pp[11] - pp[12]) * cos7_16;
 
             pp[0] = p[0] + p[3];
             pp[1] = p[1] + p[2];
-            pp[2] = (p[0] - p[3])*cos1_8;
-            pp[3] = (p[1] - p[2])*cos3_8;
+            pp[2] = (p[0] - p[3]) * cos1_8;
+            pp[3] = (p[1] - p[2]) * cos3_8;
             pp[4] = p[4] + p[7];
             pp[5] = p[5] + p[6];
-            pp[6] = (p[4] - p[7])*cos1_8;
-            pp[7] = (p[5] - p[6])*cos3_8;
+            pp[6] = (p[4] - p[7]) * cos1_8;
+            pp[7] = (p[5] - p[6]) * cos3_8;
             pp[8] = p[8] + p[11];
             pp[9] = p[9] + p[10];
-            pp[10] = (p[8] - p[11])*cos1_8;
-            pp[11] = (p[9] - p[10])*cos3_8;
+            pp[10] = (p[8] - p[11]) * cos1_8;
+            pp[11] = (p[9] - p[10]) * cos3_8;
             pp[12] = p[12] + p[15];
             pp[13] = p[13] + p[14];
-            pp[14] = (p[12] - p[15])*cos1_8;
-            pp[15] = (p[13] - p[14])*cos3_8;
+            pp[14] = (p[12] - p[15]) * cos1_8;
+            pp[15] = (p[13] - p[14]) * cos3_8;
 
             p[0] = pp[0] + pp[1];
-            p[1] = (pp[0] - pp[1])*cos1_4;
+            p[1] = (pp[0] - pp[1]) * cos1_4;
             p[2] = pp[2] + pp[3];
-            p[3] = (pp[2] - pp[3])*cos1_4;
+            p[3] = (pp[2] - pp[3]) * cos1_4;
             p[4] = pp[4] + pp[5];
-            p[5] = (pp[4] - pp[5])*cos1_4;
+            p[5] = (pp[4] - pp[5]) * cos1_4;
             p[6] = pp[6] + pp[7];
-            p[7] = (pp[6] - pp[7])*cos1_4;
+            p[7] = (pp[6] - pp[7]) * cos1_4;
             p[8] = pp[8] + pp[9];
-            p[9] = (pp[8] - pp[9])*cos1_4;
+            p[9] = (pp[8] - pp[9]) * cos1_4;
             p[10] = pp[10] + pp[11];
-            p[11] = (pp[10] - pp[11])*cos1_4;
+            p[11] = (pp[10] - pp[11]) * cos1_4;
             p[12] = pp[12] + pp[13];
-            p[13] = (pp[12] - pp[13])*cos1_4;
+            p[13] = (pp[12] - pp[13]) * cos1_4;
             p[14] = pp[14] + pp[15];
-            p[15] = (pp[14] - pp[15])*cos1_4;
+            p[15] = (pp[14] - pp[15]) * cos1_4;
 
             // this is pretty insane coding
             float tmp1;
@@ -735,22 +729,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new_v[0] = p[1];
             new_v[40 - 17] = -(new_v[8] = p[3]) - p[2];
 
-            p[0] = (x1[0] - x1[31])*cos1_64;
-            p[1] = (x1[1] - x1[30])*cos3_64;
-            p[2] = (x1[2] - x1[29])*cos5_64;
-            p[3] = (x1[3] - x1[28])*cos7_64;
-            p[4] = (x1[4] - x1[27])*cos9_64;
-            p[5] = (x1[5] - x1[26])*cos11_64;
-            p[6] = (x1[6] - x1[25])*cos13_64;
-            p[7] = (x1[7] - x1[24])*cos15_64;
-            p[8] = (x1[8] - x1[23])*cos17_64;
-            p[9] = (x1[9] - x1[22])*cos19_64;
-            p[10] = (x1[10] - x1[21])*cos21_64;
-            p[11] = (x1[11] - x1[20])*cos23_64;
-            p[12] = (x1[12] - x1[19])*cos25_64;
-            p[13] = (x1[13] - x1[18])*cos27_64;
-            p[14] = (x1[14] - x1[17])*cos29_64;
-            p[15] = (x1[15] - x1[16])*cos31_64;
+            p[0] = (x1[0] - x1[31]) * cos1_64;
+            p[1] = (x1[1] - x1[30]) * cos3_64;
+            p[2] = (x1[2] - x1[29]) * cos5_64;
+            p[3] = (x1[3] - x1[28]) * cos7_64;
+            p[4] = (x1[4] - x1[27]) * cos9_64;
+            p[5] = (x1[5] - x1[26]) * cos11_64;
+            p[6] = (x1[6] - x1[25]) * cos13_64;
+            p[7] = (x1[7] - x1[24]) * cos15_64;
+            p[8] = (x1[8] - x1[23]) * cos17_64;
+            p[9] = (x1[9] - x1[22]) * cos19_64;
+            p[10] = (x1[10] - x1[21]) * cos21_64;
+            p[11] = (x1[11] - x1[20]) * cos23_64;
+            p[12] = (x1[12] - x1[19]) * cos25_64;
+            p[13] = (x1[13] - x1[18]) * cos27_64;
+            p[14] = (x1[14] - x1[17]) * cos29_64;
+            p[15] = (x1[15] - x1[16]) * cos31_64;
 
             pp[0] = p[0] + p[15];
             pp[1] = p[1] + p[14];
@@ -760,65 +754,65 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             pp[5] = p[5] + p[10];
             pp[6] = p[6] + p[9];
             pp[7] = p[7] + p[8];
-            pp[8] = (p[0] - p[15])*cos1_32;
-            pp[9] = (p[1] - p[14])*cos3_32;
-            pp[10] = (p[2] - p[13])*cos5_32;
-            pp[11] = (p[3] - p[12])*cos7_32;
-            pp[12] = (p[4] - p[11])*cos9_32;
-            pp[13] = (p[5] - p[10])*cos11_32;
-            pp[14] = (p[6] - p[9])*cos13_32;
-            pp[15] = (p[7] - p[8])*cos15_32;
+            pp[8] = (p[0] - p[15]) * cos1_32;
+            pp[9] = (p[1] - p[14]) * cos3_32;
+            pp[10] = (p[2] - p[13]) * cos5_32;
+            pp[11] = (p[3] - p[12]) * cos7_32;
+            pp[12] = (p[4] - p[11]) * cos9_32;
+            pp[13] = (p[5] - p[10]) * cos11_32;
+            pp[14] = (p[6] - p[9]) * cos13_32;
+            pp[15] = (p[7] - p[8]) * cos15_32;
 
             p[0] = pp[0] + pp[7];
             p[1] = pp[1] + pp[6];
             p[2] = pp[2] + pp[5];
             p[3] = pp[3] + pp[4];
-            p[4] = (pp[0] - pp[7])*cos1_16;
-            p[5] = (pp[1] - pp[6])*cos3_16;
-            p[6] = (pp[2] - pp[5])*cos5_16;
-            p[7] = (pp[3] - pp[4])*cos7_16;
+            p[4] = (pp[0] - pp[7]) * cos1_16;
+            p[5] = (pp[1] - pp[6]) * cos3_16;
+            p[6] = (pp[2] - pp[5]) * cos5_16;
+            p[7] = (pp[3] - pp[4]) * cos7_16;
             p[8] = pp[8] + pp[15];
             p[9] = pp[9] + pp[14];
             p[10] = pp[10] + pp[13];
             p[11] = pp[11] + pp[12];
-            p[12] = (pp[8] - pp[15])*cos1_16;
-            p[13] = (pp[9] - pp[14])*cos3_16;
-            p[14] = (pp[10] - pp[13])*cos5_16;
-            p[15] = (pp[11] - pp[12])*cos7_16;
+            p[12] = (pp[8] - pp[15]) * cos1_16;
+            p[13] = (pp[9] - pp[14]) * cos3_16;
+            p[14] = (pp[10] - pp[13]) * cos5_16;
+            p[15] = (pp[11] - pp[12]) * cos7_16;
 
             pp[0] = p[0] + p[3];
             pp[1] = p[1] + p[2];
-            pp[2] = (p[0] - p[3])*cos1_8;
-            pp[3] = (p[1] - p[2])*cos3_8;
+            pp[2] = (p[0] - p[3]) * cos1_8;
+            pp[3] = (p[1] - p[2]) * cos3_8;
             pp[4] = p[4] + p[7];
             pp[5] = p[5] + p[6];
-            pp[6] = (p[4] - p[7])*cos1_8;
-            pp[7] = (p[5] - p[6])*cos3_8;
+            pp[6] = (p[4] - p[7]) * cos1_8;
+            pp[7] = (p[5] - p[6]) * cos3_8;
             pp[8] = p[8] + p[11];
             pp[9] = p[9] + p[10];
-            pp[10] = (p[8] - p[11])*cos1_8;
-            pp[11] = (p[9] - p[10])*cos3_8;
+            pp[10] = (p[8] - p[11]) * cos1_8;
+            pp[11] = (p[9] - p[10]) * cos3_8;
             pp[12] = p[12] + p[15];
             pp[13] = p[13] + p[14];
-            pp[14] = (p[12] - p[15])*cos1_8;
-            pp[15] = (p[13] - p[14])*cos3_8;
+            pp[14] = (p[12] - p[15]) * cos1_8;
+            pp[15] = (p[13] - p[14]) * cos3_8;
 
             p[0] = pp[0] + pp[1];
-            p[1] = (pp[0] - pp[1])*cos1_4;
+            p[1] = (pp[0] - pp[1]) * cos1_4;
             p[2] = pp[2] + pp[3];
-            p[3] = (pp[2] - pp[3])*cos1_4;
+            p[3] = (pp[2] - pp[3]) * cos1_4;
             p[4] = pp[4] + pp[5];
-            p[5] = (pp[4] - pp[5])*cos1_4;
+            p[5] = (pp[4] - pp[5]) * cos1_4;
             p[6] = pp[6] + pp[7];
-            p[7] = (pp[6] - pp[7])*cos1_4;
+            p[7] = (pp[6] - pp[7]) * cos1_4;
             p[8] = pp[8] + pp[9];
-            p[9] = (pp[8] - pp[9])*cos1_4;
+            p[9] = (pp[8] - pp[9]) * cos1_4;
             p[10] = pp[10] + pp[11];
-            p[11] = (pp[10] - pp[11])*cos1_4;
+            p[11] = (pp[10] - pp[11]) * cos1_4;
             p[12] = pp[12] + pp[13];
-            p[13] = (pp[12] - pp[13])*cos1_4;
+            p[13] = (pp[12] - pp[13]) * cos1_4;
             p[14] = pp[14] + pp[15];
-            p[15] = (pp[14] - pp[15])*cos1_4;
+            p[15] = (pp[14] - pp[15]) * cos1_4;
 
             // manually doing something that a compiler should handle sucks
             // coding like this is hard to read
@@ -892,17 +886,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 float pcm_sample;
                 float[] dp = d16[i];
+
                 pcm_sample =
-                    ((vp[0 + dvp]*dp[0]) + (vp[15 + dvp]*dp[1]) + (vp[14 + dvp]*dp[2]) + (vp[13 + dvp]*dp[3]) +
-                     (vp[12 + dvp]*dp[4]) + (vp[11 + dvp]*dp[5]) + (vp[10 + dvp]*dp[6]) + (vp[9 + dvp]*dp[7]) +
-                     (vp[8 + dvp]*dp[8]) + (vp[7 + dvp]*dp[9]) + (vp[6 + dvp]*dp[10]) + (vp[5 + dvp]*dp[11]) +
-                     (vp[4 + dvp]*dp[12]) + (vp[3 + dvp]*dp[13]) + (vp[2 + dvp]*dp[14]) + (vp[1 + dvp]*dp[15]))*
+                    (vp[0 + dvp] * dp[0] + vp[15 + dvp] * dp[1] + vp[14 + dvp] * dp[2] + vp[13 + dvp] * dp[3] +
+                     vp[12 + dvp] * dp[4] + vp[11 + dvp] * dp[5] + vp[10 + dvp] * dp[6] + vp[9 + dvp] * dp[7] +
+                     vp[8 + dvp] * dp[8] + vp[7 + dvp] * dp[9] + vp[6 + dvp] * dp[10] + vp[5 + dvp] * dp[11] +
+                     vp[4 + dvp] * dp[12] + vp[3 + dvp] * dp[13] + vp[2 + dvp] * dp[14] + vp[1 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -920,16 +916,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[1 + dvp]*dp[0]) + (vp[0 + dvp]*dp[1]) + (vp[15 + dvp]*dp[2]) + (vp[14 + dvp]*dp[3]) +
-                     (vp[13 + dvp]*dp[4]) + (vp[12 + dvp]*dp[5]) + (vp[11 + dvp]*dp[6]) + (vp[10 + dvp]*dp[7]) +
-                     (vp[9 + dvp]*dp[8]) + (vp[8 + dvp]*dp[9]) + (vp[7 + dvp]*dp[10]) + (vp[6 + dvp]*dp[11]) +
-                     (vp[5 + dvp]*dp[12]) + (vp[4 + dvp]*dp[13]) + (vp[3 + dvp]*dp[14]) + (vp[2 + dvp]*dp[15]))*
+                    (vp[1 + dvp] * dp[0] + vp[0 + dvp] * dp[1] + vp[15 + dvp] * dp[2] + vp[14 + dvp] * dp[3] +
+                     vp[13 + dvp] * dp[4] + vp[12 + dvp] * dp[5] + vp[11 + dvp] * dp[6] + vp[10 + dvp] * dp[7] +
+                     vp[9 + dvp] * dp[8] + vp[8 + dvp] * dp[9] + vp[7 + dvp] * dp[10] + vp[6 + dvp] * dp[11] +
+                     vp[5 + dvp] * dp[12] + vp[4 + dvp] * dp[13] + vp[3 + dvp] * dp[14] + vp[2 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -948,16 +945,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[2 + dvp]*dp[0]) + (vp[1 + dvp]*dp[1]) + (vp[0 + dvp]*dp[2]) + (vp[15 + dvp]*dp[3]) +
-                     (vp[14 + dvp]*dp[4]) + (vp[13 + dvp]*dp[5]) + (vp[12 + dvp]*dp[6]) + (vp[11 + dvp]*dp[7]) +
-                     (vp[10 + dvp]*dp[8]) + (vp[9 + dvp]*dp[9]) + (vp[8 + dvp]*dp[10]) + (vp[7 + dvp]*dp[11]) +
-                     (vp[6 + dvp]*dp[12]) + (vp[5 + dvp]*dp[13]) + (vp[4 + dvp]*dp[14]) + (vp[3 + dvp]*dp[15]))*
+                    (vp[2 + dvp] * dp[0] + vp[1 + dvp] * dp[1] + vp[0 + dvp] * dp[2] + vp[15 + dvp] * dp[3] +
+                     vp[14 + dvp] * dp[4] + vp[13 + dvp] * dp[5] + vp[12 + dvp] * dp[6] + vp[11 + dvp] * dp[7] +
+                     vp[10 + dvp] * dp[8] + vp[9 + dvp] * dp[9] + vp[8 + dvp] * dp[10] + vp[7 + dvp] * dp[11] +
+                     vp[6 + dvp] * dp[12] + vp[5 + dvp] * dp[13] + vp[4 + dvp] * dp[14] + vp[3 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -971,10 +969,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             for (int i = 0; i < 32; i++)
             {
                 float[] dp = d16[i];
-                float pcm_sample = ((vp[3 + dvp]*dp[0]) + (vp[2 + dvp]*dp[1]) + (vp[1 + dvp]*dp[2]) + (vp[0 + dvp]*dp[3]) +
-                                    (vp[15 + dvp]*dp[4]) + (vp[14 + dvp]*dp[5]) + (vp[13 + dvp]*dp[6]) + (vp[12 + dvp]*dp[7]) +
-                                    (vp[11 + dvp]*dp[8]) + (vp[10 + dvp]*dp[9]) + (vp[9 + dvp]*dp[10]) + (vp[8 + dvp]*dp[11]) +
-                                    (vp[7 + dvp]*dp[12]) + (vp[6 + dvp]*dp[13]) + (vp[5 + dvp]*dp[14]) + (vp[4 + dvp]*dp[15]))*
+
+                float pcm_sample = (vp[3 + dvp] * dp[0] + vp[2 + dvp] * dp[1] + vp[1 + dvp] * dp[2] + vp[0 + dvp] * dp[3] +
+                                    vp[15 + dvp] * dp[4] + vp[14 + dvp] * dp[5] + vp[13 + dvp] * dp[6] + vp[12 + dvp] * dp[7] +
+                                    vp[11 + dvp] * dp[8] + vp[10 + dvp] * dp[9] + vp[9 + dvp] * dp[10] + vp[8 + dvp] * dp[11] +
+                                    vp[7 + dvp] * dp[12] + vp[6 + dvp] * dp[13] + vp[5 + dvp] * dp[14] + vp[4 + dvp] * dp[15]) *
                                    scalefactor;
 
                 tmpOut[i] = pcm_sample;
@@ -993,16 +992,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             for (int i = 0; i < 32; i++)
             {
                 float[] dp = d16[i];
-                float pcm_sample = ((vp[4 + dvp]*dp[0]) + (vp[3 + dvp]*dp[1]) + (vp[2 + dvp]*dp[2]) + (vp[1 + dvp]*dp[3]) +
-                                    (vp[0 + dvp]*dp[4]) + (vp[15 + dvp]*dp[5]) + (vp[14 + dvp]*dp[6]) + (vp[13 + dvp]*dp[7]) +
-                                    (vp[12 + dvp]*dp[8]) + (vp[11 + dvp]*dp[9]) + (vp[10 + dvp]*dp[10]) + (vp[9 + dvp]*dp[11]) +
-                                    (vp[8 + dvp]*dp[12]) + (vp[7 + dvp]*dp[13]) + (vp[6 + dvp]*dp[14]) + (vp[5 + dvp]*dp[15]))*
+
+                float pcm_sample = (vp[4 + dvp] * dp[0] + vp[3 + dvp] * dp[1] + vp[2 + dvp] * dp[2] + vp[1 + dvp] * dp[3] +
+                                    vp[0 + dvp] * dp[4] + vp[15 + dvp] * dp[5] + vp[14 + dvp] * dp[6] + vp[13 + dvp] * dp[7] +
+                                    vp[12 + dvp] * dp[8] + vp[11 + dvp] * dp[9] + vp[10 + dvp] * dp[10] + vp[9 + dvp] * dp[11] +
+                                    vp[8 + dvp] * dp[12] + vp[7 + dvp] * dp[13] + vp[6 + dvp] * dp[14] + vp[5 + dvp] * dp[15]) *
                                    scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1016,16 +1017,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             for (int i = 0; i < 32; i++)
             {
                 float[] dp = d16[i];
-                float pcm_sample = ((vp[5 + dvp]*dp[0]) + (vp[4 + dvp]*dp[1]) + (vp[3 + dvp]*dp[2]) + (vp[2 + dvp]*dp[3]) +
-                                    (vp[1 + dvp]*dp[4]) + (vp[0 + dvp]*dp[5]) + (vp[15 + dvp]*dp[6]) + (vp[14 + dvp]*dp[7]) +
-                                    (vp[13 + dvp]*dp[8]) + (vp[12 + dvp]*dp[9]) + (vp[11 + dvp]*dp[10]) + (vp[10 + dvp]*dp[11]) +
-                                    (vp[9 + dvp]*dp[12]) + (vp[8 + dvp]*dp[13]) + (vp[7 + dvp]*dp[14]) + (vp[6 + dvp]*dp[15]))*
+
+                float pcm_sample = (vp[5 + dvp] * dp[0] + vp[4 + dvp] * dp[1] + vp[3 + dvp] * dp[2] + vp[2 + dvp] * dp[3] +
+                                    vp[1 + dvp] * dp[4] + vp[0 + dvp] * dp[5] + vp[15 + dvp] * dp[6] + vp[14 + dvp] * dp[7] +
+                                    vp[13 + dvp] * dp[8] + vp[12 + dvp] * dp[9] + vp[11 + dvp] * dp[10] + vp[10 + dvp] * dp[11] +
+                                    vp[9 + dvp] * dp[12] + vp[8 + dvp] * dp[13] + vp[7 + dvp] * dp[14] + vp[6 + dvp] * dp[15]) *
                                    scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1039,16 +1042,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             for (int i = 0; i < 32; i++)
             {
                 float[] dp = d16[i];
-                float pcm_sample = ((vp[6 + dvp]*dp[0]) + (vp[5 + dvp]*dp[1]) + (vp[4 + dvp]*dp[2]) + (vp[3 + dvp]*dp[3]) +
-                                    (vp[2 + dvp]*dp[4]) + (vp[1 + dvp]*dp[5]) + (vp[0 + dvp]*dp[6]) + (vp[15 + dvp]*dp[7]) +
-                                    (vp[14 + dvp]*dp[8]) + (vp[13 + dvp]*dp[9]) + (vp[12 + dvp]*dp[10]) + (vp[11 + dvp]*dp[11]) +
-                                    (vp[10 + dvp]*dp[12]) + (vp[9 + dvp]*dp[13]) + (vp[8 + dvp]*dp[14]) + (vp[7 + dvp]*dp[15]))*
+
+                float pcm_sample = (vp[6 + dvp] * dp[0] + vp[5 + dvp] * dp[1] + vp[4 + dvp] * dp[2] + vp[3 + dvp] * dp[3] +
+                                    vp[2 + dvp] * dp[4] + vp[1 + dvp] * dp[5] + vp[0 + dvp] * dp[6] + vp[15 + dvp] * dp[7] +
+                                    vp[14 + dvp] * dp[8] + vp[13 + dvp] * dp[9] + vp[12 + dvp] * dp[10] + vp[11 + dvp] * dp[11] +
+                                    vp[10 + dvp] * dp[12] + vp[9 + dvp] * dp[13] + vp[8 + dvp] * dp[14] + vp[7 + dvp] * dp[15]) *
                                    scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1067,16 +1072,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[7 + dvp]*dp[0]) + (vp[6 + dvp]*dp[1]) + (vp[5 + dvp]*dp[2]) + (vp[4 + dvp]*dp[3]) +
-                     (vp[3 + dvp]*dp[4]) + (vp[2 + dvp]*dp[5]) + (vp[1 + dvp]*dp[6]) + (vp[0 + dvp]*dp[7]) +
-                     (vp[15 + dvp]*dp[8]) + (vp[14 + dvp]*dp[9]) + (vp[13 + dvp]*dp[10]) + (vp[12 + dvp]*dp[11]) +
-                     (vp[11 + dvp]*dp[12]) + (vp[10 + dvp]*dp[13]) + (vp[9 + dvp]*dp[14]) + (vp[8 + dvp]*dp[15]))*
+                    (vp[7 + dvp] * dp[0] + vp[6 + dvp] * dp[1] + vp[5 + dvp] * dp[2] + vp[4 + dvp] * dp[3] +
+                     vp[3 + dvp] * dp[4] + vp[2 + dvp] * dp[5] + vp[1 + dvp] * dp[6] + vp[0 + dvp] * dp[7] +
+                     vp[15 + dvp] * dp[8] + vp[14 + dvp] * dp[9] + vp[13 + dvp] * dp[10] + vp[12 + dvp] * dp[11] +
+                     vp[11 + dvp] * dp[12] + vp[10 + dvp] * dp[13] + vp[9 + dvp] * dp[14] + vp[8 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1095,16 +1101,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[8 + dvp]*dp[0]) + (vp[7 + dvp]*dp[1]) + (vp[6 + dvp]*dp[2]) + (vp[5 + dvp]*dp[3]) +
-                     (vp[4 + dvp]*dp[4]) + (vp[3 + dvp]*dp[5]) + (vp[2 + dvp]*dp[6]) + (vp[1 + dvp]*dp[7]) +
-                     (vp[0 + dvp]*dp[8]) + (vp[15 + dvp]*dp[9]) + (vp[14 + dvp]*dp[10]) + (vp[13 + dvp]*dp[11]) +
-                     (vp[12 + dvp]*dp[12]) + (vp[11 + dvp]*dp[13]) + (vp[10 + dvp]*dp[14]) + (vp[9 + dvp]*dp[15]))*
+                    (vp[8 + dvp] * dp[0] + vp[7 + dvp] * dp[1] + vp[6 + dvp] * dp[2] + vp[5 + dvp] * dp[3] +
+                     vp[4 + dvp] * dp[4] + vp[3 + dvp] * dp[5] + vp[2 + dvp] * dp[6] + vp[1 + dvp] * dp[7] +
+                     vp[0 + dvp] * dp[8] + vp[15 + dvp] * dp[9] + vp[14 + dvp] * dp[10] + vp[13 + dvp] * dp[11] +
+                     vp[12 + dvp] * dp[12] + vp[11 + dvp] * dp[13] + vp[10 + dvp] * dp[14] + vp[9 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1123,16 +1130,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[9 + dvp]*dp[0]) + (vp[8 + dvp]*dp[1]) + (vp[7 + dvp]*dp[2]) + (vp[6 + dvp]*dp[3]) +
-                     (vp[5 + dvp]*dp[4]) + (vp[4 + dvp]*dp[5]) + (vp[3 + dvp]*dp[6]) + (vp[2 + dvp]*dp[7]) +
-                     (vp[1 + dvp]*dp[8]) + (vp[0 + dvp]*dp[9]) + (vp[15 + dvp]*dp[10]) + (vp[14 + dvp]*dp[11]) +
-                     (vp[13 + dvp]*dp[12]) + (vp[12 + dvp]*dp[13]) + (vp[11 + dvp]*dp[14]) + (vp[10 + dvp]*dp[15]))*
+                    (vp[9 + dvp] * dp[0] + vp[8 + dvp] * dp[1] + vp[7 + dvp] * dp[2] + vp[6 + dvp] * dp[3] +
+                     vp[5 + dvp] * dp[4] + vp[4 + dvp] * dp[5] + vp[3 + dvp] * dp[6] + vp[2 + dvp] * dp[7] +
+                     vp[1 + dvp] * dp[8] + vp[0 + dvp] * dp[9] + vp[15 + dvp] * dp[10] + vp[14 + dvp] * dp[11] +
+                     vp[13 + dvp] * dp[12] + vp[12 + dvp] * dp[13] + vp[11 + dvp] * dp[14] + vp[10 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1150,16 +1158,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[10 + dvp]*dp[0]) + (vp[9 + dvp]*dp[1]) + (vp[8 + dvp]*dp[2]) + (vp[7 + dvp]*dp[3]) +
-                     (vp[6 + dvp]*dp[4]) + (vp[5 + dvp]*dp[5]) + (vp[4 + dvp]*dp[6]) + (vp[3 + dvp]*dp[7]) +
-                     (vp[2 + dvp]*dp[8]) + (vp[1 + dvp]*dp[9]) + (vp[0 + dvp]*dp[10]) + (vp[15 + dvp]*dp[11]) +
-                     (vp[14 + dvp]*dp[12]) + (vp[13 + dvp]*dp[13]) + (vp[12 + dvp]*dp[14]) + (vp[11 + dvp]*dp[15]))*
+                    (vp[10 + dvp] * dp[0] + vp[9 + dvp] * dp[1] + vp[8 + dvp] * dp[2] + vp[7 + dvp] * dp[3] +
+                     vp[6 + dvp] * dp[4] + vp[5 + dvp] * dp[5] + vp[4 + dvp] * dp[6] + vp[3 + dvp] * dp[7] +
+                     vp[2 + dvp] * dp[8] + vp[1 + dvp] * dp[9] + vp[0 + dvp] * dp[10] + vp[15 + dvp] * dp[11] +
+                     vp[14 + dvp] * dp[12] + vp[13 + dvp] * dp[13] + vp[12 + dvp] * dp[14] + vp[11 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1178,16 +1187,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[11 + dvp]*dp[0]) + (vp[10 + dvp]*dp[1]) + (vp[9 + dvp]*dp[2]) + (vp[8 + dvp]*dp[3]) +
-                     (vp[7 + dvp]*dp[4]) + (vp[6 + dvp]*dp[5]) + (vp[5 + dvp]*dp[6]) + (vp[4 + dvp]*dp[7]) +
-                     (vp[3 + dvp]*dp[8]) + (vp[2 + dvp]*dp[9]) + (vp[1 + dvp]*dp[10]) + (vp[0 + dvp]*dp[11]) +
-                     (vp[15 + dvp]*dp[12]) + (vp[14 + dvp]*dp[13]) + (vp[13 + dvp]*dp[14]) + (vp[12 + dvp]*dp[15]))*
+                    (vp[11 + dvp] * dp[0] + vp[10 + dvp] * dp[1] + vp[9 + dvp] * dp[2] + vp[8 + dvp] * dp[3] +
+                     vp[7 + dvp] * dp[4] + vp[6 + dvp] * dp[5] + vp[5 + dvp] * dp[6] + vp[4 + dvp] * dp[7] +
+                     vp[3 + dvp] * dp[8] + vp[2 + dvp] * dp[9] + vp[1 + dvp] * dp[10] + vp[0 + dvp] * dp[11] +
+                     vp[15 + dvp] * dp[12] + vp[14 + dvp] * dp[13] + vp[13 + dvp] * dp[14] + vp[12 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1205,16 +1215,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[12 + dvp]*dp[0]) + (vp[11 + dvp]*dp[1]) + (vp[10 + dvp]*dp[2]) + (vp[9 + dvp]*dp[3]) +
-                     (vp[8 + dvp]*dp[4]) + (vp[7 + dvp]*dp[5]) + (vp[6 + dvp]*dp[6]) + (vp[5 + dvp]*dp[7]) +
-                     (vp[4 + dvp]*dp[8]) + (vp[3 + dvp]*dp[9]) + (vp[2 + dvp]*dp[10]) + (vp[1 + dvp]*dp[11]) +
-                     (vp[0 + dvp]*dp[12]) + (vp[15 + dvp]*dp[13]) + (vp[14 + dvp]*dp[14]) + (vp[13 + dvp]*dp[15]))*
+                    (vp[12 + dvp] * dp[0] + vp[11 + dvp] * dp[1] + vp[10 + dvp] * dp[2] + vp[9 + dvp] * dp[3] +
+                     vp[8 + dvp] * dp[4] + vp[7 + dvp] * dp[5] + vp[6 + dvp] * dp[6] + vp[5 + dvp] * dp[7] +
+                     vp[4 + dvp] * dp[8] + vp[3 + dvp] * dp[9] + vp[2 + dvp] * dp[10] + vp[1 + dvp] * dp[11] +
+                     vp[0 + dvp] * dp[12] + vp[15 + dvp] * dp[13] + vp[14 + dvp] * dp[14] + vp[13 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1233,16 +1244,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[13 + dvp]*dp[0]) + (vp[12 + dvp]*dp[1]) + (vp[11 + dvp]*dp[2]) + (vp[10 + dvp]*dp[3]) +
-                     (vp[9 + dvp]*dp[4]) + (vp[8 + dvp]*dp[5]) + (vp[7 + dvp]*dp[6]) + (vp[6 + dvp]*dp[7]) +
-                     (vp[5 + dvp]*dp[8]) + (vp[4 + dvp]*dp[9]) + (vp[3 + dvp]*dp[10]) + (vp[2 + dvp]*dp[11]) +
-                     (vp[1 + dvp]*dp[12]) + (vp[0 + dvp]*dp[13]) + (vp[15 + dvp]*dp[14]) + (vp[14 + dvp]*dp[15]))*
+                    (vp[13 + dvp] * dp[0] + vp[12 + dvp] * dp[1] + vp[11 + dvp] * dp[2] + vp[10 + dvp] * dp[3] +
+                     vp[9 + dvp] * dp[4] + vp[8 + dvp] * dp[5] + vp[7 + dvp] * dp[6] + vp[6 + dvp] * dp[7] +
+                     vp[5 + dvp] * dp[8] + vp[4 + dvp] * dp[9] + vp[3 + dvp] * dp[10] + vp[2 + dvp] * dp[11] +
+                     vp[1 + dvp] * dp[12] + vp[0 + dvp] * dp[13] + vp[15 + dvp] * dp[14] + vp[14 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1261,16 +1273,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 float pcm_sample;
 
                 pcm_sample =
-                    ((vp[14 + dvp]*dp[0]) + (vp[13 + dvp]*dp[1]) + (vp[12 + dvp]*dp[2]) + (vp[11 + dvp]*dp[3]) +
-                     (vp[10 + dvp]*dp[4]) + (vp[9 + dvp]*dp[5]) + (vp[8 + dvp]*dp[6]) + (vp[7 + dvp]*dp[7]) +
-                     (vp[6 + dvp]*dp[8]) + (vp[5 + dvp]*dp[9]) + (vp[4 + dvp]*dp[10]) + (vp[3 + dvp]*dp[11]) +
-                     (vp[2 + dvp]*dp[12]) + (vp[1 + dvp]*dp[13]) + (vp[0 + dvp]*dp[14]) + (vp[15 + dvp]*dp[15]))*
+                    (vp[14 + dvp] * dp[0] + vp[13 + dvp] * dp[1] + vp[12 + dvp] * dp[2] + vp[11 + dvp] * dp[3] +
+                     vp[10 + dvp] * dp[4] + vp[9 + dvp] * dp[5] + vp[8 + dvp] * dp[6] + vp[7 + dvp] * dp[7] +
+                     vp[6 + dvp] * dp[8] + vp[5 + dvp] * dp[9] + vp[4 + dvp] * dp[10] + vp[3 + dvp] * dp[11] +
+                     vp[2 + dvp] * dp[12] + vp[1 + dvp] * dp[13] + vp[0 + dvp] * dp[14] + vp[15 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
 
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1287,16 +1300,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 float pcm_sample;
                 float[] dp = d16[i];
+
                 pcm_sample =
-                    ((vp[15 + dvp]*dp[0]) + (vp[14 + dvp]*dp[1]) + (vp[13 + dvp]*dp[2]) + (vp[12 + dvp]*dp[3]) +
-                     (vp[11 + dvp]*dp[4]) + (vp[10 + dvp]*dp[5]) + (vp[9 + dvp]*dp[6]) + (vp[8 + dvp]*dp[7]) +
-                     (vp[7 + dvp]*dp[8]) + (vp[6 + dvp]*dp[9]) + (vp[5 + dvp]*dp[10]) + (vp[4 + dvp]*dp[11]) +
-                     (vp[3 + dvp]*dp[12]) + (vp[2 + dvp]*dp[13]) + (vp[1 + dvp]*dp[14]) + (vp[0 + dvp]*dp[15]))*
+                    (vp[15 + dvp] * dp[0] + vp[14 + dvp] * dp[1] + vp[13 + dvp] * dp[2] + vp[12 + dvp] * dp[3] +
+                     vp[11 + dvp] * dp[4] + vp[10 + dvp] * dp[5] + vp[9 + dvp] * dp[6] + vp[8 + dvp] * dp[7] +
+                     vp[7 + dvp] * dp[8] + vp[6 + dvp] * dp[9] + vp[5 + dvp] * dp[10] + vp[4 + dvp] * dp[11] +
+                     vp[3 + dvp] * dp[12] + vp[2 + dvp] * dp[13] + vp[1 + dvp] * dp[14] + vp[0 + dvp] * dp[15]) *
                     scalefactor;
 
                 tmpOut[i] = pcm_sample;
                 dvp += 16;
             }
+
             // for
         }
 
@@ -1306,73 +1321,86 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 case 0:
                     compute_pcm_samples0(buffer);
+
                     break;
 
                 case 1:
                     compute_pcm_samples1(buffer);
+
                     break;
 
                 case 2:
                     compute_pcm_samples2(buffer);
+
                     break;
 
                 case 3:
                     compute_pcm_samples3(buffer);
+
                     break;
 
                 case 4:
                     compute_pcm_samples4(buffer);
+
                     break;
 
                 case 5:
                     compute_pcm_samples5(buffer);
+
                     break;
 
                 case 6:
                     compute_pcm_samples6(buffer);
+
                     break;
 
                 case 7:
                     compute_pcm_samples7(buffer);
+
                     break;
 
                 case 8:
                     compute_pcm_samples8(buffer);
+
                     break;
 
                 case 9:
                     compute_pcm_samples9(buffer);
+
                     break;
 
                 case 10:
                     compute_pcm_samples10(buffer);
+
                     break;
 
                 case 11:
                     compute_pcm_samples11(buffer);
+
                     break;
 
                 case 12:
                     compute_pcm_samples12(buffer);
+
                     break;
 
                 case 13:
                     compute_pcm_samples13(buffer);
+
                     break;
 
                 case 14:
                     compute_pcm_samples14(buffer);
+
                     break;
 
                 case 15:
                     compute_pcm_samples15(buffer);
+
                     break;
             }
 
-            if (buffer != null)
-            {
-                buffer.AppendSamples(channel, _tmpOut);
-            }
+            if (buffer != null) buffer.AppendSamples(channel, _tmpOut);
         }
 
         /// <summary>
@@ -1384,7 +1412,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             compute_pcm_samples(buffer);
 
             actual_write_pos = (actual_write_pos + 1) & 0xf;
-            actual_v = (actual_v == v1) ? v2 : v1;
+            actual_v = actual_v == v1 ? v2 : v1;
 
             // initialize samples[]:
             //for (register float *floatp = samples + 32; floatp > samples; )
@@ -1428,30 +1456,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </returns>
         private static float[][] splitArray(float[] array, int blockSize)
         {
-            int size = array.Length/blockSize;
+            int size = array.Length / blockSize;
             float[][] split = new float[size][];
-            for (int i = 0; i < size; i++)
-            {
-                split[i] = subArray(array, i*blockSize, blockSize);
-            }
+            for (int i = 0; i < size; i++) split[i] = subArray(array, i * blockSize, blockSize);
+
             return split;
         }
 
         private static float[] subArray(float[] array, int offs, int len)
         {
-            if (offs + len > array.Length)
-            {
-                len = array.Length - offs;
-            }
+            if (offs + len > array.Length) len = array.Length - offs;
 
             if (len < 0)
                 len = 0;
 
             float[] subarray = new float[len];
-            for (int i = 0; i < len; i++)
-            {
-                subarray[i] = array[offs + i];
-            }
+            for (int i = 0; i < len; i++) subarray[i] = array[offs + i];
 
             return subarray;
         }

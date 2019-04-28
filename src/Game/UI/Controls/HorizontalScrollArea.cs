@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Game.UI.Controls
+﻿namespace ClassicUO.Game.UI.Controls
 {
     //class HorizontalScrollArea : Control
     //{

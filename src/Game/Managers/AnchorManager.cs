@@ -1,12 +1,12 @@
-﻿using ClassicUO.Game.UI.Controls;
-using ClassicUO.Game.UI.Gumps;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -14,40 +14,62 @@ namespace ClassicUO.Game.Managers
     {
         public enum AnchorDirection
         {
-            Left, Top, Right, Bottom
+            Left,
+            Top,
+            Right,
+            Bottom
         }
 
         private static readonly Vector2[][] _anchorTriangles =
         {
-             new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f) },
-             new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f) },
-             new Vector2[] { new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
-             new Vector2[] { new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) }
+            new[] {new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f)},
+            new[] {new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f)},
+            new[] {new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f)},
+            new[] {new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f)}
         };
-        
+
         private static readonly Point[] _anchorDirectionMatrix =
         {
-             new Point(-1, 0),
-             new Point(0, -1),
-             new Point(1, 0),
-             new Point(0, 1)
+            new Point(-1, 0),
+            new Point(0, -1),
+            new Point(1, 0),
+            new Point(0, 1)
         };
 
         private static readonly Point[] _anchorMultiplierMatrix =
         {
-             new Point(0, 0),
-             new Point(0, 0),
-             new Point(1, 0),
-             new Point(0, 1)
+            new Point(0, 0),
+            new Point(0, 0),
+            new Point(1, 0),
+            new Point(0, 1)
         };
 
         private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
+
+        public AnchorGroup this[AnchorableGump control]
+        {
+            get
+            {
+                reverseMap.TryGetValue(control, out AnchorGroup group);
+
+                return group;
+            }
+
+            private set
+            {
+                if (reverseMap.ContainsKey(control) && value == null)
+                    reverseMap.Remove(control);
+                else
+                    reverseMap.Add(control, value);
+            }
+        }
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
                 Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+
                 if (relativePosition.HasValue)
                 {
                     if (this[host] == null)
@@ -67,12 +89,16 @@ namespace ClassicUO.Game.Managers
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
                 Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+
                 if (relativePosition.HasValue)
+                {
                     if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
                         var offset = relativePosition.Value * new Point(host.GroupMatrixWidth, host.GroupMatrixHeight);
+
                         return new Point(host.X + offset.X, host.Y + offset.Y);
                     }
+                }
             }
 
             return draggedControl.Location;
@@ -81,9 +107,9 @@ namespace ClassicUO.Game.Managers
         public AnchorableGump GetAnchorableControlOver(Control draggedControl, int x, int y)
         {
             return Engine.UI.GetMouseOverControls(new Point(draggedControl.ScreenCoordinateX + x, draggedControl.ScreenCoordinateY + y))
-                                .Where(o => o != draggedControl)
-                                .OfType<AnchorableGump>()
-                                .FirstOrDefault();
+                         .Where(o => o != draggedControl)
+                         .OfType<AnchorableGump>()
+                         .FirstOrDefault();
         }
 
         public void DetachControl(AnchorableGump control)
@@ -91,6 +117,7 @@ namespace ClassicUO.Game.Managers
             if (this[control] != null)
             {
                 var group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
+
                 if (group.Count == 2) // if detach 1+1 - need destroy all group
                 {
                     foreach (var ctrl in group)
@@ -119,24 +146,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public AnchorGroup this[AnchorableGump control]
-        {
-            get
-            {
-                reverseMap.TryGetValue(control, out AnchorGroup @group);
-
-                return group;
-            }
-
-            private set
-            {
-                if (reverseMap.ContainsKey(control) && value == null)
-                    reverseMap.Remove(control);
-                else
-                    reverseMap.Add(control, value);
-            }
-        }
-
         public void Save(BinaryWriter writer)
         {
             const int VERSION = 1;
@@ -144,7 +153,8 @@ namespace ClassicUO.Game.Managers
 
             writer.Write(VERSION);
             writer.Write(groups.Count);
-            foreach(var group in groups)
+
+            foreach (var group in groups)
                 group.Save(writer);
         }
 
@@ -152,7 +162,8 @@ namespace ClassicUO.Game.Managers
         {
             var version = reader.ReadInt32();
             var count = reader.ReadInt32();
-            for(int i = 0; i < count; i++)
+
+            for (int i = 0; i < count; i++)
             {
                 var group = new AnchorGroup();
                 var groupGumps = group.Restore(reader, gumps);
@@ -169,50 +180,58 @@ namespace ClassicUO.Game.Managers
             {
                 for (int yMult = 0; yMult < host.HeightMultiplier; yMult++)
                 {
-                    var snapX = x - (host.GroupMatrixWidth * xMult);
-                    var snapY = y - (host.GroupMatrixHeight * yMult);
+                    var snapX = x - host.GroupMatrixWidth * xMult;
+                    var snapY = y - host.GroupMatrixHeight * yMult;
 
-                    var anchorPoint = new Vector2((float)snapX / host.GroupMatrixWidth, (float)snapY / host.GroupMatrixHeight);
+                    var anchorPoint = new Vector2((float) snapX / host.GroupMatrixWidth, (float) snapY / host.GroupMatrixHeight);
 
                     if (xMult == 0)
-                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Left], anchorPoint))
+                    {
+                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Left], anchorPoint))
                             return new Point(-draggedControl.WidthMultiplier, yMult);
+                    }
 
                     if (yMult == 0)
-                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Top], anchorPoint))
+                    {
+                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Top], anchorPoint))
                             return new Point(xMult, -draggedControl.HeightMultiplier);
+                    }
 
                     if (xMult == host.WidthMultiplier - 1)
-                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Right], anchorPoint))
+                    {
+                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Right], anchorPoint))
                             return new Point(1 + xMult, yMult);
+                    }
 
                     if (yMult == host.HeightMultiplier - 1)
-                        if (IsPointInPolygon(_anchorTriangles[(int)AnchorDirection.Bottom], anchorPoint))
+                    {
+                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Bottom], anchorPoint))
                             return new Point(xMult, 1 + yMult);
+                    }
                 }
             }
-            
+
             return null;
         }
 
         private bool IsPointInPolygon(Vector2[] polygon, Vector2 point)
         {
             bool isInside = false;
+
             for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
             {
-                if (((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y)) &&
-                (point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X))
-                {
+                if (polygon[i].Y > point.Y != polygon[j].Y > point.Y &&
+                    point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X)
                     isInside = !isInside;
-                }
             }
+
             return isInside;
         }
 
         public class AnchorGroup
         {
             private AnchorableGump[,] controlMatrix;
-            private int updateCount = 0;
+            private int updateCount;
 
             public AnchorGroup(AnchorableGump initial)
             {
@@ -220,20 +239,17 @@ namespace ClassicUO.Game.Managers
                 AddControlToMatrix(0, 0, initial);
             }
 
+            public AnchorGroup()
+            {
+                controlMatrix = new AnchorableGump[0, 0];
+            }
+
             private void AddControlToMatrix(int xinit, int yInit, AnchorableGump control)
             {
                 for (int x = 0; x < control.WidthMultiplier; x++)
                 {
-                    for (int y = 0; y < control.HeightMultiplier; y++)
-                    {
-                        controlMatrix[x + xinit, y + yInit] = control;
-                    }
+                    for (int y = 0; y < control.HeightMultiplier; y++) controlMatrix[x + xinit, y + yInit] = control;
                 }
-            }
-
-            public AnchorGroup()
-            {
-                controlMatrix = new AnchorableGump[0, 0];
             }
 
             public void Save(BinaryWriter writer)
@@ -258,12 +274,8 @@ namespace ClassicUO.Game.Managers
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
-                    {
                         if (controlMatrix[x, y] != null)
-                        {
                             Engine.UI.MakeTopMostGump(controlMatrix[x, y]);
-                        }
-                    }
                 }
             }
 
@@ -272,12 +284,8 @@ namespace ClassicUO.Game.Managers
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
-                    {
                         if (controlMatrix[x, y] == control)
-                        {
                             controlMatrix[x, y] = null;
-                        }
-                    }
                 }
             }
 
@@ -288,17 +296,18 @@ namespace ClassicUO.Game.Managers
                 uint xCount = reader.ReadUInt32();
                 uint yCount = reader.ReadUInt32();
 
-                ResizeMatrix((int)xCount, (int)yCount, 0, 0);
+                ResizeMatrix((int) xCount, (int) yCount, 0, 0);
 
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
-                        var serial = (Serial)reader.ReadUInt32();
+                        var serial = (Serial) reader.ReadUInt32();
+
                         if (serial != Serial.INVALID)
                         {
                             var gump = gumps.Where(o => o.LocalSerial == serial)
-                                .OfType<AnchorableGump>().SingleOrDefault();
+                                            .OfType<AnchorableGump>().SingleOrDefault();
 
                             if (gump != null)
                             {
@@ -343,6 +352,7 @@ namespace ClassicUO.Game.Managers
             public void AnchorControlAt(AnchorableGump control, AnchorableGump host, Point relativePosition)
             {
                 Point? hostPosition = GetControlCoordinates(host);
+
                 if (hostPosition.HasValue)
                 {
                     var targetX = hostPosition.Value.X + relativePosition.X;
@@ -386,12 +396,9 @@ namespace ClassicUO.Game.Managers
 
                     for (int xOffset = 0; xOffset < draggedControl.WidthMultiplier; xOffset++)
                     {
-                        for(int yOffset = 0; yOffset < draggedControl.HeightMultiplier; yOffset++)
-                        {
-                            isEmpty &= IsEmptyDirection(targetInitPosition.X + xOffset, targetInitPosition.Y + yOffset);
-                        }
+                        for (int yOffset = 0; yOffset < draggedControl.HeightMultiplier; yOffset++) isEmpty &= IsEmptyDirection(targetInitPosition.X + xOffset, targetInitPosition.Y + yOffset);
                     }
-                    
+
                     //// TODO: loop through
                     //var targetX = hostPosition.Value.X + relativePosition.X;
                     //var targetY = hostPosition.Value.Y + relativePosition.Y;
@@ -405,7 +412,7 @@ namespace ClassicUO.Game.Managers
             public bool IsEmptyDirection(int x, int y)
             {
                 if (x < 0 || x > controlMatrix.GetLength(0) - 1
-                    || y < 0 || y > controlMatrix.GetLength(1) - 1)
+                          || y < 0 || y > controlMatrix.GetLength(1) - 1)
                     return true;
 
                 return controlMatrix[x, y] == null;
@@ -413,30 +420,29 @@ namespace ClassicUO.Game.Managers
 
             private Point? GetControlCoordinates(AnchorableGump control)
             {
-                for(int x = 0; x < controlMatrix.GetLength(0); x++)
+                for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
-                    {
-                        if (controlMatrix[x,y] == control)
-                        {
+                        if (controlMatrix[x, y] == control)
                             return new Point(x, y);
-                        }
-                    }
                 }
 
                 return null;
             }
-            
+
             private void ResizeMatrix(int xCount, int yCount, int xInitial, int yInitial)
             {
                 AnchorableGump[,] newMatrix = new AnchorableGump[xCount, yCount];
+
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
+                {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                         newMatrix[x + xInitial, y + yInitial] = controlMatrix[x, y];
+                }
 
                 controlMatrix = newMatrix;
             }
-            
+
             private void printMatrix()
             {
                 Console.WriteLine();
@@ -445,7 +451,7 @@ namespace ClassicUO.Game.Managers
 
                 for (int y = 0; y < controlMatrix.GetLength(1); y++)
                 {
-                    for (int x = 0; x < controlMatrix.GetLength(0); x++) 
+                    for (int x = 0; x < controlMatrix.GetLength(0); x++)
                     {
                         if (controlMatrix[x, y] != null)
                             Console.Write(" " + controlMatrix[x, y].LocalSerial + " ");

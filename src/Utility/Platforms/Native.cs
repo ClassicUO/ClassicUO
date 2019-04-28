@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using Environment = System.Environment;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -16,13 +10,9 @@ namespace ClassicUO.Utility.Platforms
         static Native()
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
                 _loader = new UnixNativeLoader();
-            }
             else
-            {
                 _loader = new WinNativeLoader();
-            }
         }
 
         public static IntPtr LoadLibrary(string name)

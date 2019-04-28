@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -32,19 +32,16 @@ namespace ClassicUO.Game.UI
 {
     internal abstract class AbstractEntry
     {
+        private bool _isChanged;
+        private bool _isSelection;
+
+        private (int, int) _selectionArea;
+
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
             MaxCharCount = maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
-        }
-
-        public void Destroy()
-        {
-            RenderText?.Destroy();
-            RenderText = null;
-            RenderCaret?.Destroy();
-            RenderCaret = null;
         }
 
         public RenderedText RenderText { get; protected set; }
@@ -78,7 +75,6 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        private bool _isChanged;
         public bool IsChanged
         {
             get => _isChanged;
@@ -98,12 +94,22 @@ namespace ClassicUO.Game.UI
 
         public int Offset { get; set; }
 
+        public void Destroy()
+        {
+            RenderText?.Destroy();
+            RenderText = null;
+            RenderCaret?.Destroy();
+            RenderCaret = null;
+        }
+
         public bool RemoveChar(bool fromleft)
         {
             int start = -1, end = CaretIndex;
+
             if (_selectionArea != (0, 0))
             {
-                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
                 if (start != -1)
                 {
                     if (start > end)
@@ -112,6 +118,7 @@ namespace ClassicUO.Game.UI
                         start = end;
                         end = copy;
                     }
+
                     CaretIndex = start;
                 }
                 else
@@ -121,6 +128,7 @@ namespace ClassicUO.Game.UI
             {
                 if (CaretIndex < 1)
                     return false;
+
                 CaretIndex--;
             }
             else
@@ -128,15 +136,14 @@ namespace ClassicUO.Game.UI
                 if (CaretIndex >= Text.Length)
                     return false;
             }
-            
-            if(start != -1)
-            {
+
+            if (start != -1)
                 Text = Text.Remove(start, end - start);
-            }
             else if (CaretIndex < Text.Length)
                 Text = Text.Remove(CaretIndex, 1);
             else if (CaretIndex > Text.Length)
                 Text = Text.Remove(Text.Length - 1);
+
             return true;
         }
 
@@ -169,9 +176,9 @@ namespace ClassicUO.Game.UI
             int x, y;
 
             if (RenderText.IsUnicode)
-                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             CaretPosition = new Point(x, y);
 
             if (Offset > 0)
@@ -199,28 +206,29 @@ namespace ClassicUO.Game.UI
 
                 batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1 + x, _selectionArea.Item2 + y, Mouse.Position.X - (_selectionArea.Item1 + x), Mouse.Position.Y - (_selectionArea.Item2 + y), hue);
             }
-            else if(_selectionArea != (0,0))
+            else if (_selectionArea != (0, 0))
             {
                 int start = -1, end = CaretIndex;
-                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
                 if (start != -1)
                 {
-                    if(start > end)
+                    if (start > end)
                     {
                         int copy = start;
                         start = end;
                         end = copy;
                     }
 
-                    for(int i = start; i <= end; i++)
+                    for (int i = start; i <= end; i++)
                     {
                         int rx;
                         int ry;
 
                         if (RenderText.IsUnicode)
-                            (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                            (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
                         else
-                            (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                            (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
                         RenderCaret.Draw(batcher, x + rx, y + ry);
                     }
                 }
@@ -231,10 +239,11 @@ namespace ClassicUO.Game.UI
         {
             int oldPos = CaretIndex;
 
-            CaretIndex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            CaretIndex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
+
             if (mouseclick)
             {
                 _selectionArea = (x, y);
@@ -242,17 +251,18 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        private (int, int) _selectionArea;
-        private bool _isSelection = false;
         internal void OnSelectionEnd(int x, int y)
         {
-            int endindex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            int endindex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             _isSelection = false;
+
             if (endindex == CaretIndex)
             {
                 _selectionArea = (0, 0);
+
                 return;
             }
+
             CaretIndex = endindex;
             UpdateCaretPosition();
         }
@@ -260,9 +270,11 @@ namespace ClassicUO.Game.UI
         internal (int, int) GetSelectionArea()
         {
             int start = -1, end = CaretIndex;
+
             if (_selectionArea != (0, 0))
             {
-                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
                 if (start != -1)
                 {
                     if (start > end)
@@ -271,9 +283,11 @@ namespace ClassicUO.Game.UI
                         start = end;
                         end = copy;
                     }
+
                     CaretIndex = start;
                 }
             }
+
             return (start, end);
         }
 
@@ -281,25 +295,28 @@ namespace ClassicUO.Game.UI
         {
             if (_selectionArea == (0, 0))
                 return string.Empty;
+
             int endidx = CaretIndex;
-            int startidx = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-            if(startidx > CaretIndex)
+            int startidx = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
+            if (startidx > CaretIndex)
             {
                 int copy = startidx;
                 startidx = endidx;
                 endidx = copy;
             }
-            else if(startidx == endidx || endidx == 0)
-            {
-                return string.Empty;
-            }
+            else if (startidx == endidx || endidx == 0) return string.Empty;
+
             string str = Text.Substring(startidx, endidx - startidx);
+
             if (remove)
             {
                 Text = Text.Remove(startidx, endidx - startidx);
-                if(CaretIndex > startidx)
+
+                if (CaretIndex > startidx)
                     CaretIndex -= endidx - startidx;
             }
+
             return str;
         }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -35,6 +37,9 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class PartyGumpAdvanced : Gump
     {
+        private const int WIDTH = 320;
+        private const int HEIGHT = 400;
+        private readonly AlphaBlendControl _alphaBlendControl;
         private readonly Button _createAddButton;
         private readonly Label _createAddLabel;
         private readonly Button _leaveButton;
@@ -46,10 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _messagePartyLabel;
         private readonly List<PartyListEntry> _partyListEntries;
         private readonly ScrollArea _scrollArea;
-        private readonly AlphaBlendControl _alphaBlendControl;
-
-        private const int WIDTH = 320;
-        private const int HEIGHT = 400;
+        private Texture2D _edge;
 
         public PartyGumpAdvanced() : base(0, 0)
         {
@@ -174,7 +176,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollArea.Add(p);
             }
         }
-        private Texture2D _edge;
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
@@ -185,14 +186,14 @@ namespace ClassicUO.Game.UI.Gumps
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f);
 
             batcher.Draw2D(_line, x + 30, y + 50, 260, 1, hue);
-            batcher.Draw2D(_line, x + 95, y+ 50, 1, 200, hue);
+            batcher.Draw2D(_line, x + 95, y + 50, 1, 200, hue);
             batcher.Draw2D(_line, x + 245, y + 50, 1, 200, hue);
             batcher.Draw2D(_line, x + 30, y + 250, 260, 1, hue);
 
             if (_edge == null)
             {
                 _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new Color[] { Color.Gray });
+                _edge.SetData(new[] {Color.Gray});
             }
 
             batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
@@ -262,20 +263,20 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private enum Buttons
-        {
-            Add = 1,
-            Leave,
-            Loot,
-            Message
-        }
-
         public override void Dispose()
         {
             _edge?.Dispose();
 
             base.Dispose();
             _line.Dispose();
+        }
+
+        private enum Buttons
+        {
+            Add = 1,
+            Leave,
+            Loot,
+            Message
         }
     }
 
@@ -335,10 +336,12 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (Member.Mobile != null && Member.Mobile.IsDead)
+            {
                 if (Status.Hue != 0)
                     Status.Hue = 0;
-            else if (Status.Hue != 0x43)
-                Status.Hue = 0x43;
+                else if (Status.Hue != 0x43)
+                    Status.Hue = 0x43;
+            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -358,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                         StatusGumpBase.GetStatusGump()?.Dispose();
 
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(new HealthBarGump(Member.Mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.Add(new HealthBarGump(Member.Mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
 
                     break;
             }

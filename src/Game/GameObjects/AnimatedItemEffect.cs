@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.Game.GameObjects
@@ -56,20 +58,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Mobile mob = (Mobile) source;
 
-                    if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
-                    {
-                        mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
-                    }
+                    if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0)) mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
                     SetSource(mob);
                 }
                 else if (sourceSerial.IsItem)
                 {
                     Item item = (Item) source;
 
-                    if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
-                    {
-                        item.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
-                    }
+                    if (sourceX != 0 || sourceY != 0 || sourceZ != 0) item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(item);
                 }
@@ -96,8 +92,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
-                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);                    
-                    AddToTile();                  
+                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                    AddToTile();
                 }
             }
         }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,30 +18,24 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Map;
-using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Land
     {
         private readonly Vector3[] _normals = new Vector3[4];
+        private Vector3 _storedHue;
         private SpriteVertex[] _vertex = new SpriteVertex[4]
         {
             new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
         };
-        private Vector3 _storedHue;
         private Point _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
@@ -50,6 +45,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             Engine.DebugInfo.LandsRendered++;
+
             if (Texture == null || Texture.IsDisposed)
             {
                 if (IsStretched)
@@ -61,7 +57,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
@@ -77,21 +72,14 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = Hue;
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                {
-                    hue = 0x0023;
-                }
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected) hue = 0x0023;
 
                 HueVector.X = hue;
 
                 if (hue != 0)
-                {
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
-                }
                 else
-                {
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
-                }
             }
 
             //if (IsStretched)
@@ -123,6 +111,7 @@ namespace ClassicUO.Game.GameObjects
             if (ok)
             {
                 Select(posX, posY);
+
                 return true;
             }
 
@@ -178,18 +167,12 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsStretched)
             {
-                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
-                {
-                    SelectedObject.Object = this;
-                }
+                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4)) SelectedObject.Object = this;
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y))
-                {
-                    SelectedObject.Object = this;
-                }
-            }         
+                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
+            }
         }
 
         //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
@@ -237,7 +220,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             for (int k = 0; k < 4; k++)
                             {
-                                ref var v = ref vec[ curI, curJ, k];
+                                ref var v = ref vec[curI, curJ, k];
                                 v.X = 0;
                                 v.Y = 0;
                                 v.Z = 1;

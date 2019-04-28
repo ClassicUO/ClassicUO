@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -66,10 +67,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
-                    {
-                        mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                    }
+                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0) mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else if (source is Item)
                 {
@@ -120,6 +118,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_lastMoveTime > totalMS)
                 return;
+
             _lastMoveTime = (uint) (totalMS + MovingDelay);
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();

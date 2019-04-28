@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
@@ -20,15 +14,15 @@ namespace ClassicUO.Renderer
             CurrentTechnique = Techniques["HueTechnique"];
         }
 
+        protected IsometricEffect(Effect cloneSource) : base(cloneSource)
+        {
+        }
+
         public EffectParameter CanDrawLight { get; }
         public EffectParameter ProjectionMatrix { get; }
         public EffectParameter WorldMatrix { get; }
         public EffectParameter Viewport { get; }
         public EffectPass Pass => CurrentTechnique.Passes[0];
-
-        protected IsometricEffect(Effect cloneSource) : base(cloneSource)
-        {
-        }
     }
 
     internal class LightEffect : Effect

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
@@ -43,7 +40,6 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-
         }
 
         public string GetString(int number)

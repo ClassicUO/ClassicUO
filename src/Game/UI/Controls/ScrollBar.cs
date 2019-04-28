@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -37,13 +39,13 @@ namespace ClassicUO.Game.UI.Controls
         private Point _clickPosition;
         private int _max;
         private int _min;
+        private Rectangle _rectDownButton, _rectUpButton, _rectSlider;
         private float _sliderPosition, _value;
         private SpriteTexture _textureSlider;
         private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private float _timeUntilNextClick;
-        private Rectangle _rectDownButton, _rectUpButton, _rectSlider;
 
-        public ScrollBar(int x, int y, int height) : base()
+        public ScrollBar(int x, int y, int height)
         {
             Height = height;
             Location = new Point(x, y);
@@ -118,7 +120,6 @@ namespace ClassicUO.Game.UI.Controls
             Width = _textureBackground[0].Width;
 
 
-
             _rectDownButton = new Rectangle(0, Height - _textureDownButton[0].Height, _textureDownButton[0].Width, _textureDownButton[0].Height);
             _rectUpButton = new Rectangle(0, 0, _textureUpButton[0].Width, _textureUpButton[0].Height);
             _rectSlider = new Rectangle((_textureBackground[0].Width - _textureSlider.Width) >> 1, _textureUpButton[0].Height + (int) _sliderPosition, _textureSlider.Width, _textureSlider.Height);
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.UI.Controls
             if (MaxValue <= MinValue || MinValue >= MaxValue)
                 Value = MaxValue = MinValue;
             _sliderPosition = GetSliderYPosition();
-            _rectSlider.Y = _textureUpButton[0].Height + (int)_sliderPosition;
+            _rectSlider.Y = _textureUpButton[0].Height + (int) _sliderPosition;
 
             if (_btUpClicked || _btDownClicked)
             {
@@ -145,11 +146,12 @@ namespace ClassicUO.Game.UI.Controls
                     if (_btDownClicked)
                         Value += ScrollStep + _StepChanger;
                     _StepsDone++;
+
                     if (_StepsDone % 4 == 0)
                         _StepChanger++;
                 }
 
-                _timeUntilNextClick -= (float)frameMS;
+                _timeUntilNextClick -= (float) frameMS;
             }
 
             for (int i = 0; i < 3; i++)

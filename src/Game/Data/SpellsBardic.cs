@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
@@ -27,21 +30,6 @@ namespace ClassicUO.Game.Data
     internal static class SpellsBardic
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
-        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
-        internal static int MaxSpellCount => _spellsDict.Count;
-        internal static string GetUsedSkillName(int spellid)
-        {
-            int div = (MaxSpellCount * 3) >> 3;
-            if (div <= 0)
-                div = 1;
-            int group = spellid / div;
-
-            if (group == 0)
-                return "Provocation";
-            else if (group == 1)
-                return "Peacemaking";
-            return "Discordance";
-        }
 
         static SpellsBardic()
         {
@@ -58,15 +46,35 @@ namespace ClassicUO.Game.Data
                     3, new SpellDefinition("Resilience", 703, 0x947, 0x947, "Kal Mani Tym", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    4, new SpellDefinition("Perseverance", 704, 0x948,0x948, "Uus Jux Sanct", 30, 90, 8, TargetType.Beneficial, Reagents.None)
+                    4, new SpellDefinition("Perseverance", 704, 0x948, 0x948, "Uus Jux Sanct", 30, 90, 8, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    5, new SpellDefinition("Tribulation", 705, 0x949,0x949, "In Jux Hur Rel", 30, 90, 16, TargetType.Harmful, Reagents.None)
+                    5, new SpellDefinition("Tribulation", 705, 0x949, 0x949, "In Jux Hur Rel", 30, 90, 16, TargetType.Harmful, Reagents.None)
                 },
                 {
-                    6, new SpellDefinition("Despair", 706, 0x94A,0x94A, "Kal Des Mani Tym", 30, 90, 18, TargetType.Harmful, Reagents.None)
+                    6, new SpellDefinition("Despair", 706, 0x94A, 0x94A, "Kal Des Mani Tym", 30, 90, 18, TargetType.Harmful, Reagents.None)
                 }
             };
+        }
+
+        public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
+        internal static int MaxSpellCount => _spellsDict.Count;
+
+        internal static string GetUsedSkillName(int spellid)
+        {
+            int div = (MaxSpellCount * 3) >> 3;
+
+            if (div <= 0)
+                div = 1;
+            int group = spellid / div;
+
+            if (group == 0)
+                return "Provocation";
+
+            if (group == 1)
+                return "Peacemaking";
+
+            return "Discordance";
         }
 
         public static SpellDefinition GetSpell(int spellIndex)

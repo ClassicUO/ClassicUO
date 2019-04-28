@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -32,9 +34,9 @@ namespace ClassicUO.Game.UI.Gumps
         private const int SLIDER_MAX = 4;
         private readonly ColorPickerBox _box;
         private readonly StaticPic _dyeTybeImage;
-        private readonly Action<ushort> _okClicked;
 
         private readonly Graphic _graphic;
+        private readonly Action<ushort> _okClicked;
 
         public ColorPickerGump(Serial serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(serial, 0)
         {
@@ -68,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0:
                     ushort hue = (ushort) (_box.SelectedHue + 1);
+
                     if (LocalSerial != 0)
                         NetClient.Socket.Send(new PDyeDataResponse(LocalSerial, _graphic, hue));
                     _okClicked?.Invoke(hue);

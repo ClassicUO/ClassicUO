@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -40,11 +43,13 @@ namespace ClassicUO.Renderer
 
                 if (maxX - minX < 1)
                     return false;
+
                 int minY = Math.Max(parent.Y, scissor.Y);
                 int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
 
                 if (maxY - minY < 1)
                     return false;
+
                 scissor.X = minX;
                 scissor.Y = minY;
                 scissor.Width = maxX - minX;

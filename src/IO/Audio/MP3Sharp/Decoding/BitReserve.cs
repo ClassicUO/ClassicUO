@@ -18,7 +18,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         ///     Must be a power of 2. And x8, as each bit is stored as a single
         ///     entry.
         /// </summary>
-        private const int BUFSIZE = 4096*8;
+        private const int BUFSIZE = 4096 * 8;
 
         /// <summary>
         ///     Mask that can be used to quickly implement the
@@ -48,7 +48,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public int hsstell()
         {
-            return (totbit);
+            return totbit;
         }
 
         /// <summary>
@@ -61,12 +61,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             int val = 0;
 
             int pos = buf_byte_idx;
+
             if (pos + N < BUFSIZE)
             {
                 while (N-- > 0)
                 {
                     val <<= 1;
-                    val |= ((buf[pos++] != 0) ? 1 : 0);
+                    val |= buf[pos++] != 0 ? 1 : 0;
                 }
             }
             else
@@ -74,11 +75,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 while (N-- > 0)
                 {
                     val <<= 1;
-                    val |= ((buf[pos] != 0) ? 1 : 0);
+                    val |= buf[pos] != 0 ? 1 : 0;
                     pos = (pos + 1) & BUFSIZE_MASK;
                 }
             }
+
             buf_byte_idx = pos;
+
             return val;
         }
 
@@ -90,6 +93,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             totbit++;
             int val = buf[buf_byte_idx];
             buf_byte_idx = (buf_byte_idx + 1) & BUFSIZE_MASK;
+
             return val;
         }
 
@@ -118,6 +122,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             totbit -= bitCount;
             buf_byte_idx -= bitCount;
+
             if (buf_byte_idx < 0)
                 buf_byte_idx += BUFSIZE;
         }
@@ -127,9 +132,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public void RewindStreamBytes(int byteCount)
         {
-            int bits = (byteCount << 3);
+            int bits = byteCount << 3;
             totbit -= bits;
             buf_byte_idx -= bits;
+
             if (buf_byte_idx < 0)
                 buf_byte_idx += BUFSIZE;
         }

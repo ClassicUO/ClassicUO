@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,22 +18,23 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace ClassicUO.IO
 {
     /// <summary>
-    /// A fast Little Endian data reader.
+    ///     A fast Little Endian data reader.
     /// </summary>
     internal unsafe class DataReader
     {
         private byte* _data;
+
+        private GCHandle _handle;
 
         internal long Position { get; set; }
 
@@ -41,8 +43,6 @@ namespace ClassicUO.IO
         internal IntPtr StartAddress => (IntPtr) _data;
 
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
-
-        private GCHandle _handle;
 
 
         public void ReleaseData()
@@ -66,7 +66,7 @@ namespace ClassicUO.IO
             //    SetData(d, length);
             ReleaseData();
             _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            _data = (byte*)_handle.AddrOfPinnedObject();
+            _data = (byte*) _handle.AddrOfPinnedObject();
             Length = length;
             Position = 0;
         }
@@ -121,7 +121,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            short v = *(short*)(_data + Position);
+            short v = *(short*) (_data + Position);
             Position += 2;
 
             return v;
@@ -131,7 +131,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            ushort v = *(ushort*)(_data + Position);
+            ushort v = *(ushort*) (_data + Position);
             Position += 2;
 
             return v;
@@ -152,7 +152,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            uint v = *(uint*)(_data + Position);
+            uint v = *(uint*) (_data + Position);
 
             Position += 4;
 
@@ -174,7 +174,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(8);
 
-            ulong v = *(ulong*)(_data + Position);
+            ulong v = *(ulong*) (_data + Position);
 
             Position += 8;
 

@@ -1,19 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
-using ClassicUO.IO;
 
 namespace ClassicUO.Utility
 {
     internal class TextFileParser
     {
         private readonly char[] _delimiters, _comments, _quotes;
-        private string _string;
-        private int _Size;
-        private bool _trim;
-        private int _pos = 0;
         private int _eol;
+        private int _pos;
+        private int _Size;
+        private string _string;
+        private bool _trim;
+
+        private string RawLine;
 
         public TextFileParser(string str, char[] delimiters, char[] comments, char[] quotes)
         {
@@ -35,6 +34,7 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < _delimiters.Length && !result; i++)
                 result = _string[_pos] == _delimiters[i];
+
             return result;
         }
 
@@ -45,11 +45,12 @@ namespace ClassicUO.Utility
 
         private void GetEOL()
         {
-            for(int i = _pos; i < _Size; i++)
+            for (int i = _pos; i < _Size; i++)
             {
                 if (_string[i] == '\n' || i + 1 >= _Size)
                 {
                     _eol = i;
+
                     break;
                 }
             }
@@ -85,9 +86,10 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < _quotes.Length && !result; i += 2)
             {
-                if (_string[_pos] == _quotes[i] || (i + 1 < _quotes.Length && _string[_pos] == _quotes[i + 1]))
+                if (_string[_pos] == _quotes[i] || i + 1 < _quotes.Length && _string[_pos] == _quotes[i + 1])
                 {
                     result = true;
+
                     break;
                 }
             }
@@ -104,6 +106,7 @@ namespace ClassicUO.Utility
                 if (_string[_pos] == _quotes[i + 1])
                 {
                     result = true;
+
                     break;
                 }
             }
@@ -120,13 +123,14 @@ namespace ClassicUO.Utility
                 if (IsDelimiter())
                     break;
 
-                else if (IsComment())
+                if (IsComment())
                 {
                     _pos = _eol;
+
                     break;
                 }
 
-                if (_string[_pos] != '\r' && (!_trim || (_string[_pos] != ' ' && _string[_pos] != '\t')))
+                if (_string[_pos] != '\r' && (!_trim || _string[_pos] != ' ' && _string[_pos] != '\t'))
                     result.Append(_string[_pos]);
 
                 _pos++;
@@ -173,8 +177,6 @@ namespace ClassicUO.Utility
 
             return result;
         }
-
-        private string RawLine;
 
         private void SaveRawLine()
         {

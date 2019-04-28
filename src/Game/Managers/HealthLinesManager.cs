@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.GameObjects;
-using ClassicUO.IO;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using MathHelper = ClassicUO.Utility.MathHelper;
-
 namespace ClassicUO.Game.Managers
 {
-    class HealthLinesManager
+    internal class HealthLinesManager
     {
         public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP && Engine.Profile.Current.MobileHPType >= 1;
 
@@ -52,16 +43,17 @@ namespace ClassicUO.Game.Managers
                 x -= BAR_WIDTH / 2;
                 y -= BAR_HEIGHT / 2;
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
-                x -= (int)(screenX / scale);
-                y -= (int)(screenY / scale);
+                x = (int) (x / scale);
+                y = (int) (y / scale);
+                x -= (int) (screenX / scale);
+                y -= (int) (screenY / scale);
                 x += screenX;
                 y += screenY;
 
 
                 if (x < screenX || x > screenX + screenW - BAR_WIDTH)
                     continue;
+
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
@@ -71,13 +63,13 @@ namespace ClassicUO.Game.Managers
 
                 if (max > 0)
                 {
-                    max = (current * 100) / max;
+                    max = current * 100 / max;
 
                     if (max > 100)
                         max = 100;
 
                     if (max > 1)
-                        max = (BAR_WIDTH * max) / 100;
+                        max = BAR_WIDTH * max / 100;
                 }
 
 
@@ -85,7 +77,7 @@ namespace ClassicUO.Game.Managers
                 batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, Vector3.Zero);
 
                 Color color;
-                
+
                 if (mobile.IsParalyzed)
                     color = Color.AliceBlue;
                 else if (mobile.IsYellowHits)
@@ -93,12 +85,9 @@ namespace ClassicUO.Game.Managers
                 else if (mobile.IsPoisoned)
                     color = Color.LimeGreen;
                 else
-                {
                     color = Color.CornflowerBlue;
-                }
 
                 batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, Vector3.Zero);
-
             }
         }
     }

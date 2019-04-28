@@ -33,6 +33,7 @@
             {
                 scfsi = stream.GetBitsFromBuffer(2);
                 channel2_scfsi = stream.GetBitsFromBuffer(2);
+
                 if (crc != null)
                 {
                     crc.add_bits(scfsi, 2);
@@ -49,27 +50,33 @@
             if (allocation != 0)
             {
                 base.read_scalefactor(stream, header);
+
                 switch (channel2_scfsi)
                 {
                     case 0:
                         channel2_scalefactor1 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor2 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 1:
                         channel2_scalefactor1 = channel2_scalefactor2 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 2:
+
                         channel2_scalefactor1 =
                             channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 3:
                         channel2_scalefactor1 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
                 }
             }
@@ -94,9 +101,11 @@
 
                 if (groupingtable[0] == null)
                     sample = (sample + d[0]) * c[0];
+
                 if (channels == OutputChannels.BOTH_CHANNELS)
                 {
                     float sample2 = sample;
+
                     if (groupnumber <= 4)
                     {
                         sample *= scalefactor1;
@@ -112,6 +121,7 @@
                         sample *= scalefactor3;
                         sample2 *= channel2_scalefactor3;
                     }
+
                     filter1.input_sample(sample, subbandnumber);
                     filter2.input_sample(sample2, subbandnumber);
                 }
@@ -139,6 +149,7 @@
 
             if (++samplenumber == 3)
                 return true;
+
             return false;
         }
     }

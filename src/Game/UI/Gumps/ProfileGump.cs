@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class ProfileGump : Gump
     {
-        private ExpandableScroll _background;
         private readonly ScrollFlag _scrollBar;
         private readonly MultiLineBox _textBox;
+        private ExpandableScroll _background;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
         {
@@ -26,13 +17,14 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = true;
 
             Add(_background = new ExpandableScroll(0, 0, 300));
-            _scrollBar = new ScrollFlag( 0, 0, Height, true);
+            _scrollBar = new ScrollFlag(0, 0, Height, true);
             Add(_scrollBar);
             AddHorizontalBar(92, 40, 40, 220);
+
             Add(new Label(header, true, 0, font: 1, maxwidth: 140)
             {
                 X = 90,
-                Y = 32,
+                Y = 32
             });
 
             Add(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
@@ -86,21 +78,19 @@ namespace ClassicUO.Game.UI.Gumps
         private void AddHorizontalBar(Graphic start, int x, int y, int width)
         {
             var startBounds = FileManager.Gumps.GetTexture(start);
-            var middleBounds = FileManager.Gumps.GetTexture((Graphic)(start + 1));
-            var endBounds = FileManager.Gumps.GetTexture((Graphic)(start + 2));
+            var middleBounds = FileManager.Gumps.GetTexture((Graphic) (start + 1));
+            var endBounds = FileManager.Gumps.GetTexture((Graphic) (start + 2));
 
             Add(new GumpPic(x, y, start, 0));
-            Add(new GumpPicWithWidth(x + startBounds.Width, y, (Graphic)(start + 1), 0,
-                width - startBounds.Width - endBounds.Width));
-            Add(new GumpPic(x + width - endBounds.Width, y, (Graphic)(start + 2), 0));
+
+            Add(new GumpPicWithWidth(x + startBounds.Width, y, (Graphic) (start + 1), 0,
+                                     width - startBounds.Width - endBounds.Width));
+            Add(new GumpPic(x + width - endBounds.Width, y, (Graphic) (start + 2), 0));
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
-            {
-                _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
-            }
+            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text)) _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
         }
     }
 }

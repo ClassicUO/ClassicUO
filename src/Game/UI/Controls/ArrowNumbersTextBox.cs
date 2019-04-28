@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 
-using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
 
 using SDL2;
 
@@ -33,14 +32,14 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ArrowNumbersTextBox : AbstractTextBox
     {
-        private float _timeUntilNextClick;
         private const int TIME_BETWEEN_CLICKS = 250;
-        private readonly Button _up, _down;
         private readonly int _Min, _Max;
+        private readonly Button _up, _down;
+        private float _timeUntilNextClick;
 
         public ArrowNumbersTextBox(Control c, int x, int y, int width, int page, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            TxEntry = new TextEntry(font, maxcharlength, width, width, isunicode, style, hue) { NumericOnly = true };
+            TxEntry = new TextEntry(font, maxcharlength, width, width, isunicode, style, hue) {NumericOnly = true};
             int height = TxEntry.Height;
             IsEditable = true;
             base.AcceptKeyboardInput = true;
@@ -51,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             _Min = minvalue;
             _Max = maxvalue;
-            
+
             c.Add(new ResizePic(0x0BB8)
             {
                 X = x,
@@ -66,6 +65,7 @@ namespace ClassicUO.Game.UI.Controls
                 Y = y - 1,
                 ButtonAction = ButtonAction.Activate
             };
+
             _up.MouseDown += (sender, e) =>
             {
                 if (_up.IsClicked)
@@ -75,12 +75,14 @@ namespace ClassicUO.Game.UI.Controls
                 }
             };
             c.Add(_up, page);
+
             _down = new Button(-raiseamount, 0x985, 0x986)
             {
                 X = x + width - 12,
                 Y = y + 12,
                 ButtonAction = ButtonAction.Activate
             };
+
             _down.MouseDown += (sender, e) =>
             {
                 if (_down.IsClicked)
@@ -91,8 +93,6 @@ namespace ClassicUO.Game.UI.Controls
             };
             c.Add(_down, page);
         }
-
-        public event EventHandler TextChanged;
 
         public TextEntry TxEntry { get; private set; }
 
@@ -106,11 +106,20 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
-        public string Text { get => TxEntry.Text; set => SetText(value); }
+        public string Text
+        {
+            get => TxEntry.Text;
+            set => SetText(value);
+        }
+
+        public override AbstractEntry EntryValue => TxEntry;
+
+        public event EventHandler TextChanged;
 
         private void UpdateValue()
         {
             int.TryParse(Text, out int i);
+
             if (_up.IsClicked)
                 i += _up.ButtonID;
             else
@@ -122,6 +131,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return;
+
             int.TryParse(Text, out int i);
             ValidateValue(i);
         }
@@ -145,12 +155,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_up.IsClicked || _down.IsClicked)
             {
-                if(_timeUntilNextClick <= 0f)
+                if (_timeUntilNextClick <= 0f)
                 {
                     _timeUntilNextClick += TIME_BETWEEN_CLICKS;
                     UpdateValue();
                 }
-                _timeUntilNextClick -= (float)frameMS;
+
+                _timeUntilNextClick -= (float) frameMS;
             }
 
             if (Height != TxEntry.Height)
@@ -161,6 +172,7 @@ namespace ClassicUO.Game.UI.Controls
                 TxEntry.UpdateCaretPosition();
                 TextChanged.Raise(this);
             }
+
             base.Update(totalMS, frameMS);
         }
 
@@ -184,6 +196,7 @@ namespace ClassicUO.Game.UI.Controls
                 TxEntry.Clear();
                 ReplaceDefaultTextOnFirstKeyPress = false;
             }
+
             TxEntry.InsertString(c);
         }
 
@@ -191,52 +204,64 @@ namespace ClassicUO.Game.UI.Controls
         {
             string s;
 
-            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
             {
                 if (SDL.SDL_HasClipboardText() == SDL.SDL_bool.SDL_FALSE)
                     return;
 
                 s = SDL.SDL_GetClipboardText();
+
                 if (!string.IsNullOrEmpty(s))
                 {
                     TxEntry.InsertString(s.Replace("\r", string.Empty).Replace("\n", string.Empty));
+
                     return;
                 }
             }
-            else switch (key)
+            else
+            {
+                switch (key)
                 {
                     case SDL.SDL_Keycode.SDLK_KP_ENTER:
                     case SDL.SDL_Keycode.SDLK_RETURN:
                         s = TxEntry.Text;
                         Parent?.OnKeyboardReturn(0, s);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
+
                         if (!ReplaceDefaultTextOnFirstKeyPress)
-                        {
                             TxEntry.RemoveChar(true);
-                        }
                         else
                             ReplaceDefaultTextOnFirstKeyPress = false;
+
                         break;
                     case SDL.SDL_Keycode.SDLK_LEFT:
                         TxEntry.SeekCaretPosition(-1);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_RIGHT:
                         TxEntry.SeekCaretPosition(1);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_DELETE:
                         TxEntry.RemoveChar(false);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_HOME:
                         TxEntry.SetCaretPosition(0);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_END:
                         TxEntry.SetCaretPosition(Text.Length - 1);
+
                         break;
                     case SDL.SDL_Keycode.SDLK_TAB:
                         Parent.KeyboardTabToNextFocus(this);
+
                         break;
                 }
+            }
 
 
             base.OnKeyDown(key, mod);
@@ -248,7 +273,5 @@ namespace ClassicUO.Game.UI.Controls
             TxEntry = null;
             base.Dispose();
         }
-
-        public override AbstractEntry EntryValue => TxEntry;
     }
 }

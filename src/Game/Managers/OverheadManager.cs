@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,37 +18,49 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
     internal class OverheadManager : IUpdateable
     {
-        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
-        private readonly List< Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
+        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
         private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
+        private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
+        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
 
         private OverheadMessage _firstNode;
 
-        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
+
+        public void Update(double totalMS, double frameMS)
+        {
+            for (int i = 0; i < _staticToUpdate.Count; i++)
+            {
+                var st = _staticToUpdate[i];
+                st.Update(totalMS, frameMS);
+
+                if (st.IsDestroyed)
+                    _staticToUpdate.RemoveAt(i--);
+            }
+
+            UpdateDamageOverhead(totalMS, frameMS);
+
+            if (_toRemoveDamages.Count > 0)
+            {
+                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
+                _toRemoveDamages.Clear();
+            }
+        }
 
 
 
@@ -55,7 +68,6 @@ namespace ClassicUO.Game.Managers
         {
             if (_firstNode != null)
             {
-
                 var first = _firstNode;
 
                 int mouseX = Mouse.Position.X;
@@ -83,9 +95,7 @@ namespace ClassicUO.Game.Managers
                 _staticToUpdate.Add(overhead.Parent);
 
             if (_firstNode == null)
-            {
                 _firstNode = overhead;
-            }
             else
             {
                 var last = _firstNode;
@@ -95,30 +105,6 @@ namespace ClassicUO.Game.Managers
 
                 last.Right = overhead;
                 overhead.Right = null;
-            }
-        }
-        
-
-        public void Update(double totalMS, double frameMS)
-        {
-            for (int i = 0; i < _staticToUpdate.Count; i++)
-            {
-                var st = _staticToUpdate[i];
-                st.Update(totalMS, frameMS);
-
-                if (st.IsDestroyed)
-                    _staticToUpdate.RemoveAt(i--);
-            }
-
-            UpdateDamageOverhead(totalMS, frameMS);
-
-            if(_toRemoveDamages.Count > 0)
-            {
-                _toRemoveDamages.ForEach(s =>
-                {
-                    _damages.Remove(s);
-                });
-                _toRemoveDamages.Clear();
             }
         }
 
@@ -151,9 +137,7 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     else
-                    {
                         continue;
-                    }
                 }
 
                 overheadDamage.Value.Draw(batcher, x, y, scale);
@@ -165,7 +149,6 @@ namespace ClassicUO.Game.Managers
 
         private void UpdateDamageOverhead(double totalMS, double frameMS)
         {
-
             if (_subst.Count != 0)
             {
                 foreach (Tuple<Serial, Serial> tuple in _subst)
@@ -184,10 +167,7 @@ namespace ClassicUO.Game.Managers
             {
                 overheadDamage.Value.Update();
 
-                if (overheadDamage.Value.IsEmpty)
-                {
-                    _toRemoveDamages.Add(overheadDamage.Key);
-                }
+                if (overheadDamage.Value.IsEmpty) _toRemoveDamages.Add(overheadDamage.Key);
             }
         }
 
@@ -201,17 +181,13 @@ namespace ClassicUO.Game.Managers
             }
 
             dm.Add(dmg);
-
         }
 
         public void Clear()
         {
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s =>
-                {
-                    _damages.Remove(s);
-                });
+                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
                 _toRemoveDamages.Clear();
             }
 
@@ -233,7 +209,7 @@ namespace ClassicUO.Game.Managers
 
             _firstNode = null;
 
-            _staticToUpdate.ForEach( s=> s.Destroy());
+            _staticToUpdate.ForEach(s => s.Destroy());
             _staticToUpdate.Clear();
         }
     }

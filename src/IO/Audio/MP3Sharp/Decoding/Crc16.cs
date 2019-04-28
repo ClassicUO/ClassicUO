@@ -29,14 +29,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public void add_bits(int bitstring, int length)
         {
             int bitmask = 1 << (length - 1);
+
             do
+            {
                 if (((m_Crc & 0x8000) == 0) ^ ((bitstring & bitmask) == 0))
                 {
                     m_Crc <<= 1;
                     m_Crc ^= Polynomial;
                 }
                 else
-                    m_Crc <<= 1; while ((bitmask = SupportClass.URShift(bitmask, 1)) != 0);
+                    m_Crc <<= 1;
+            } while ((bitmask = SupportClass.URShift(bitmask, 1)) != 0);
         }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             short sum = m_Crc;
             m_Crc = (short) SupportClass.Identity(0xFFFF);
+
             return sum;
         }
     }

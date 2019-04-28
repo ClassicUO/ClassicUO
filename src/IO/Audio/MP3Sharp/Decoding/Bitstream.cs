@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 using ClassicUO.Utility.Logging;
 
@@ -48,14 +48,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private Crc16[] m_CRC;
 
         /// <summary>
-        ///     The bytes read from the stream.
-        /// </summary>
-        private sbyte[] m_FrameBytes;
-
-        /// <summary>
         ///     The frame buffer that holds the data for the current frame.
         /// </summary>
         private int[] m_FrameBuffer;
+
+        /// <summary>
+        ///     The bytes read from the stream.
+        /// </summary>
+        private sbyte[] m_FrameBytes;
 
         /// <summary>
         ///     Number of valid bytes in the frame buffer.
@@ -63,8 +63,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private int m_FrameSize;
 
         private Header m_Header;
-
-        private bool single_ch_mode;
 
         private sbyte[] m_SyncBuffer;
 
@@ -78,12 +76,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         private int m_WordPointer;
 
+        private bool single_ch_mode;
+
         /// <summary>
         ///     Construct a IBitstream that reads data from a given InputStream.
         /// </summary>
         internal Bitstream(PushbackStream stream)
         {
             InitBlock();
+
             if (stream == null)
                 throw new NullReferenceException("in stream is null");
 
@@ -96,7 +97,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             m_CRC = new Crc16[1];
             m_SyncBuffer = new sbyte[4];
-            m_FrameBytes = new sbyte[BUFFER_INT_SIZE*4];
+            m_FrameBytes = new sbyte[BUFFER_INT_SIZE * 4];
             m_FrameBuffer = new int[BUFFER_INT_SIZE];
             m_Header = new Header();
         }
@@ -123,6 +124,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         internal Header readFrame()
         {
             Header result = null;
+
             try
             {
                 result = readNextFrame();
@@ -135,6 +137,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     throw newBitstreamException(ex.ErrorCode, ex);
                 }
             }
+
             return result;
         }
 
@@ -156,7 +159,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public void unreadFrame()
         {
-            if (m_WordPointer == -1 && m_BitIndex == -1 && (m_FrameSize > 0))
+            if (m_WordPointer == -1 && m_BitIndex == -1 && m_FrameSize > 0)
             {
                 try
                 {
@@ -182,6 +185,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public bool IsSyncCurrentPosition(int syncmode)
         {
             int read = readBytes(m_SyncBuffer, 0, 4);
+
             int headerstring = ((m_SyncBuffer[0] << 24) & (int) SupportClass.Identity(0xFF000000)) |
                                ((m_SyncBuffer[1] << 16) & 0x00FF0000) | ((m_SyncBuffer[2] << 8) & 0x0000FF00) |
                                ((m_SyncBuffer[3] << 0) & 0x000000FF);
@@ -192,20 +196,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             }
             catch
             {
-
             }
 
             bool sync = false;
+
             switch (read)
             {
                 case 0:
-                    
-                    Log.Message(LogTypes.Trace,"Bitstream: 0 bytes read == sync?");
+
+                    Log.Message(LogTypes.Trace, "Bitstream: 0 bytes read == sync?");
                     sync = true;
+
                     break;
 
                 case 4:
                     sync = isSyncMark(headerstring, syncmode, m_SyncWord);
+
                     break;
             }
 
@@ -266,7 +272,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
                 //_baos.write(syncbuf, 3, 1); // E.B
 
-                headerstring |= (m_SyncBuffer[3] & 0x000000FF);
+                headerstring |= m_SyncBuffer[3] & 0x000000FF;
 
                 sync = isSyncMark(headerstring, syncmode, m_SyncWord);
             } while (!sync);
@@ -284,32 +290,34 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (syncmode == INITIAL_SYNC)
             {
                 //sync =  ((headerstring & 0xFFF00000) == 0xFFF00000);
-                sync = ((headerstring & 0xFFE00000) == 0xFFE00000); // SZD: MPEG 2.5
+                sync = (headerstring & 0xFFE00000) == 0xFFE00000; // SZD: MPEG 2.5
             }
             else
             {
                 //sync = ((headerstring & 0xFFF80C00) == word) 
-                sync = ((headerstring & 0xFFE00000) == 0xFFE00000) // ROB -- THIS IS PROBABLY WRONG. A WEAKER CHECK.
-                       && (((headerstring & 0x000000C0) == 0x000000C0) == single_ch_mode);
+                sync = (headerstring & 0xFFE00000) == 0xFFE00000 // ROB -- THIS IS PROBABLY WRONG. A WEAKER CHECK.
+                       && (headerstring & 0x000000C0) == 0x000000C0 == single_ch_mode;
             }
 
             // filter out invalid sample rate
             if (sync)
             {
-                sync = (((SupportClass.URShift(headerstring, 10)) & 3) != 3);
-                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID SAMPLE RATE DETECTED");
+                sync = (SupportClass.URShift(headerstring, 10) & 3) != 3;
+                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID SAMPLE RATE DETECTED");
             }
+
             // filter out invalid layer
             if (sync)
             {
-                sync = (((SupportClass.URShift(headerstring, 17)) & 3) != 0);
-                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID LAYER DETECTED");
+                sync = (SupportClass.URShift(headerstring, 17) & 3) != 0;
+                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID LAYER DETECTED");
             }
+
             // filter out invalid version
             if (sync)
             {
-                sync = (((SupportClass.URShift(headerstring, 19)) & 3) != 1);
-                if (!sync) Log.Message(LogTypes.Trace,"Bitstream: INVALID VERSION DETECTED");
+                sync = (SupportClass.URShift(headerstring, 19) & 3) != 1;
+                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID VERSION DETECTED");
             }
 
             return sync;
@@ -344,14 +352,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 sbyte b2 = 0;
                 sbyte b3 = 0;
                 b0 = byteread[k];
+
                 if (k + 1 < bytesize)
                     b1 = byteread[k + 1];
+
                 if (k + 2 < bytesize)
                     b2 = byteread[k + 2];
+
                 if (k + 3 < bytesize)
                     b3 = byteread[k + 3];
+
                 m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) | ((b1 << 16) & 0x00FF0000) |
-                                   ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
+                                     ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
             }
 
             m_WordPointer = 0;
@@ -377,13 +389,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (sum <= 32)
             {
                 // all bits contained in *wordpointer
-                returnvalue = (SupportClass.URShift(m_FrameBuffer[m_WordPointer], (32 - sum))) & bitmask[countBits];
+                returnvalue = SupportClass.URShift(m_FrameBuffer[m_WordPointer], 32 - sum) & bitmask[countBits];
+
                 // returnvalue = (wordpointer[0] >> (32 - sum)) & bitmask[number_of_bits];
                 if ((m_BitIndex += countBits) == 32)
                 {
                     m_BitIndex = 0;
                     m_WordPointer++; // added by me!
                 }
+
                 return returnvalue;
             }
 
@@ -391,16 +405,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             //((short[])&returnvalue)[0] = ((short[])wordpointer + 1)[0];
             //wordpointer++; // Added by me!
             //((short[])&returnvalue + 1)[0] = ((short[])wordpointer)[0];
-            int Right = (m_FrameBuffer[m_WordPointer] & 0x0000FFFF);
+            int Right = m_FrameBuffer[m_WordPointer] & 0x0000FFFF;
             m_WordPointer++;
-            int Left = (m_FrameBuffer[m_WordPointer] & (int) SupportClass.Identity(0xFFFF0000));
+            int Left = m_FrameBuffer[m_WordPointer] & (int) SupportClass.Identity(0xFFFF0000);
+
             returnvalue = ((Right << 16) & (int) SupportClass.Identity(0xFFFF0000)) |
-                          ((SupportClass.URShift(Left, 16)) & 0x0000FFFF);
+                          (SupportClass.URShift(Left, 16) & 0x0000FFFF);
 
             returnvalue = SupportClass.URShift(returnvalue, 48 - sum);
             // returnvalue >>= 16 - (number_of_bits - (32 - bitindex))
             returnvalue &= bitmask[countBits];
             m_BitIndex = sum - 32;
+
             return returnvalue;
         }
 
@@ -411,11 +427,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         internal void SetSyncWord(int syncword0)
         {
             m_SyncWord = syncword0 & unchecked((int) 0xFFFFFF3F);
-            single_ch_mode = ((syncword0 & 0x000000C0) == 0x000000C0);
+            single_ch_mode = (syncword0 & 0x000000C0) == 0x000000C0;
         }
 
         /// <summary>
-        /// Reads the exact number of bytes from the source input stream into a byte array.
+        ///     Reads the exact number of bytes from the source input stream into a byte array.
         /// </summary>
         private void readFully(sbyte[] b, int offs, int len)
         {
@@ -424,16 +440,16 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 while (len > 0)
                 {
                     int bytesread = m_SourceStream.Read(b, offs, len);
+
                     if (bytesread == -1 || bytesread == 0) // t/DD -- .NET returns 0 at end-of-stream!
                     {
                         // t/DD: this really SHOULD throw an exception here...
-                        Log.Message(LogTypes.Trace,"Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
-                            );
-                        while (len-- > 0)
-                        {
-                            b[offs++] = 0;
-                        }
+                        Log.Message(LogTypes.Trace, "Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
+                                   );
+                        while (len-- > 0) b[offs++] = 0;
+
                         break;
+
                         //throw newBitstreamException(UNEXPECTED_EOF, new EOFException());
                     }
 
@@ -448,21 +464,21 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         }
 
         /// <summary>
-        /// Simlar to readFully, but doesn't throw exception when EOF is reached.
+        ///     Simlar to readFully, but doesn't throw exception when EOF is reached.
         /// </summary>
         private int readBytes(sbyte[] b, int offs, int len)
         {
             int totalBytesRead = 0;
+
             try
             {
                 while (len > 0)
                 {
                     int bytesread = m_SourceStream.Read(b, offs, len);
+
                     // for (int i = 0; i < len; i++) b[i] = (sbyte)Temp[i];
-                    if (bytesread == -1 || bytesread == 0)
-                    {
-                        break;
-                    }
+                    if (bytesread == -1 || bytesread == 0) break;
+
                     totalBytesRead += bytesread;
                     offs += bytesread;
                     len -= bytesread;
@@ -472,6 +488,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 throw newBitstreamException(BitstreamErrors.STREAM_ERROR, ex);
             }
+
             return totalBytesRead;
         }
     }

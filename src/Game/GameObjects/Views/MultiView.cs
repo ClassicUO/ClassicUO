@@ -1,27 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
+﻿using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Multi
     {
         private readonly int _canBeTransparent;
+        private readonly bool _isFoliage;
+
+        public bool CharacterIsBehindFoliage { get; set; }
 
         public override bool TransparentTest(int z)
         {
@@ -34,9 +24,6 @@ namespace ClassicUO.Game.GameObjects
 
             return r;
         }
-
-        public bool CharacterIsBehindFoliage { get; set; }
-        private readonly bool _isFoliage;
 
         public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
@@ -84,10 +71,7 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 ushort hue = Hue;
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                {
-                    hue = 0x0023;
-                }
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected) hue = 0x0023;
 
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue);
             }
@@ -102,15 +86,13 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
+
             return true;
         }
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
-            {
-                SelectedObject.Object = this;
-            }
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y)) SelectedObject.Object = this;
         }
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
-using ClassicUO.Configuration;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
-using ClassicUO.Interfaces;
-using ClassicUO.IO.Resources;
+#endregion
+
+using System;
+
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -41,77 +35,6 @@ namespace ClassicUO.Game.GameObjects
     internal abstract partial class GameObject : IDrawable
     {
         protected static float PI = (float) Math.PI;
-        public Rectangle Bounds;
-        public Rectangle FrameInfo;
-
-
-        protected bool IsFlipped { get; set; }
-
-        protected float Rotation { get; set; }
-
-        public bool IsSelected { get; set; }
-
-        public Vector3 HueVector;
-
-        public bool AllowedToDraw { get; set; } = true;
-
-        public bool UseObjectHandles { get; set; }
-
-        public bool ClosedObjectHandles { get; set; }
-
-        public bool ObjectHandlesOpened { get; set; }
-
-        public SpriteTexture Texture { get; set; }
-
-        public Rectangle GetOnScreenRectangle()
-        {
-            Rectangle prect = Rectangle.Empty;
-
-            prect.X = (int) (RealScreenPosition.X - FrameInfo.X + 22 + Offset.X);
-            prect.Y = (int) (RealScreenPosition.Y - FrameInfo.Y + 22 + (Offset.Y - Offset.Z));
-            prect.Width = FrameInfo.Width;
-            prect.Height = FrameInfo.Height;
-
-            return prect;
-        }
-
-        public virtual bool TransparentTest(int z)
-        {
-            return false;
-        }
-
-        public byte AlphaHue { get; set; }
-
-        public bool ProcessAlpha(int max)
-        {
-            bool result = false;
-
-            int alpha = AlphaHue;
-
-            if (alpha > max)
-            {
-                alpha -= 25;
-
-                if (alpha < max)
-                    alpha = max;
-
-                result = true;
-            }
-            else if (alpha < max)
-            {
-                alpha += 25;
-
-                if (alpha > max)
-                    alpha = max;
-
-                result = true;
-            }
-
-            AlphaHue = (byte) alpha;
-            return result;
-        }
-
-        public bool DrawTransparent { get; set; }
 
         private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
         {
@@ -122,6 +45,29 @@ namespace ClassicUO.Game.GameObjects
 
             return state;
         });
+        public Rectangle Bounds;
+        public Rectangle FrameInfo;
+
+        public Vector3 HueVector;
+
+
+        protected bool IsFlipped { get; set; }
+
+        protected float Rotation { get; set; }
+
+        public bool UseObjectHandles { get; set; }
+
+        public bool ClosedObjectHandles { get; set; }
+
+        public bool ObjectHandlesOpened { get; set; }
+
+        public byte AlphaHue { get; set; }
+
+        public bool DrawTransparent { get; set; }
+
+        public bool AllowedToDraw { get; set; } = true;
+
+        public SpriteTexture Texture { get; set; }
 
 
 
@@ -144,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                 float siny = (float) Math.Sin(Rotation) * h;
                 float cosy = (float) Math.Cos(Rotation) * h;
 
-                vertex = SpriteVertex.PolyBufferFlipped;            
+                vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
                 vertex[0].Position.X += cosx - -siny;
                 vertex[0].Position.Y -= sinx + -cosy;
@@ -156,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
                 vertex[2].Position.Y += sinx + cosy;
                 vertex[3].Position = center;
                 vertex[3].Position.X += -cosx - siny;
-                vertex[3].Position.Y += sinx + -cosy;                
+                vertex[3].Position.Y += sinx + -cosy;
             }
             else if (IsFlipped)
             {
@@ -172,7 +118,7 @@ namespace ClassicUO.Game.GameObjects
                 vertex[2].Position.X -= Bounds.Width;
                 vertex[2].TextureCoordinate.Y = 0;
                 vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.X -= Bounds.Width;              
+                vertex[3].Position.X -= Bounds.Width;
             }
             else
             {
@@ -188,10 +134,11 @@ namespace ClassicUO.Game.GameObjects
                 vertex[2].Position = vertex[0].Position;
                 vertex[2].Position.Y += Bounds.Height;
                 vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += Bounds.Height;               
+                vertex[3].Position.Y += Bounds.Height;
             }
 
             bool isTransparent = false;
+
             if (DrawTransparent)
             {
                 int dist = Distance;
@@ -200,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                 if (dist <= maxDist)
                 {
                     isTransparent = dist <= 3;
-                    HueVector.Z = Microsoft.Xna.Framework.MathHelper.Lerp(1f, 1f - (dist / (float)maxDist), 0.5f);
+                    HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float) maxDist, 0.5f);
                     //HueVector.Z = 1f - (dist / (float)maxDist);
                 }
                 else
@@ -211,7 +158,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             //if (vertex[0].Hue != HueVector)
-                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
+            vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
 
             //if (DrawTransparent)
@@ -242,13 +189,62 @@ namespace ClassicUO.Game.GameObjects
             Select(posX, posY);
 
             Texture.Ticks = Engine.Ticks;
+
             return true;
+        }
+
+        public bool IsSelected { get; set; }
+
+        public Rectangle GetOnScreenRectangle()
+        {
+            Rectangle prect = Rectangle.Empty;
+
+            prect.X = (int) (RealScreenPosition.X - FrameInfo.X + 22 + Offset.X);
+            prect.Y = (int) (RealScreenPosition.Y - FrameInfo.Y + 22 + (Offset.Y - Offset.Z));
+            prect.Width = FrameInfo.Width;
+            prect.Height = FrameInfo.Height;
+
+            return prect;
+        }
+
+        public virtual bool TransparentTest(int z)
+        {
+            return false;
+        }
+
+        public bool ProcessAlpha(int max)
+        {
+            bool result = false;
+
+            int alpha = AlphaHue;
+
+            if (alpha > max)
+            {
+                alpha -= 25;
+
+                if (alpha < max)
+                    alpha = max;
+
+                result = true;
+            }
+            else if (alpha < max)
+            {
+                alpha += 25;
+
+                if (alpha > max)
+                    alpha = max;
+
+                result = true;
+            }
+
+            AlphaHue = (byte) alpha;
+
+            return result;
         }
 
 
         public virtual void Select(int x, int y)
         {
-
         }
     }
 }

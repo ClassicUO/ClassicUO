@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -81,6 +84,7 @@ namespace ClassicUO.Utility
         {
             if (Count == 0)
                 return;
+
             Count = 0;
 
             // non-primitive types are cleared so the garbage collector can release them
@@ -143,6 +147,7 @@ namespace ClassicUO.Utility
         {
             if (capacity < _items.Length)
                 return;
+
             int newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
             T[] oldElements = _items;
             _items = new T[newCapacity];

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.IO.Audio.MP3Sharp;
 
@@ -12,13 +8,11 @@ namespace ClassicUO.IO.Audio
 {
     internal class UOMusic : Sound
     {
-        private MP3Stream m_Stream;
         private const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
-        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
         private readonly bool m_Repeat;
+        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
         private bool m_Playing;
-
-        private string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
+        private MP3Stream m_Stream;
 
         public UOMusic(int index, string name, bool loop)
             : base(name, index)
@@ -27,6 +21,8 @@ namespace ClassicUO.IO.Audio
             m_Playing = false;
             Channels = AudioChannels.Stereo;
         }
+
+        private string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
 
         public void Update()
         {
@@ -39,6 +35,7 @@ namespace ClassicUO.IO.Audio
             if (m_Playing)
             {
                 int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
+
                 if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
                 {
                     if (m_Repeat)
@@ -48,15 +45,15 @@ namespace ClassicUO.IO.Audio
                     }
                     else
                     {
-                        if (bytesReturned == 0)
-                        {
-                            Stop();
-                        }
+                        if (bytesReturned == 0) Stop();
                     }
                 }
+
                 return m_WaveBuffer;
             }
+
             Stop();
+
             return null;
         }
 
@@ -67,8 +64,10 @@ namespace ClassicUO.IO.Audio
                 while (m_ThisInstance.PendingBufferCount < 3)
                 {
                     byte[] buffer = GetBuffer();
+
                     if (m_ThisInstance.IsDisposed)
                         return;
+
                     m_ThisInstance.SubmitBuffer(buffer);
                 }
             }
@@ -76,10 +75,7 @@ namespace ClassicUO.IO.Audio
 
         protected override void BeforePlay()
         {
-            if (m_Playing)
-            {
-                Stop();
-            }
+            if (m_Playing) Stop();
 
             try
             {

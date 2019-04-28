@@ -1,15 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game
 {
     internal static class Constants
     {
+        [Flags]
+        public enum RULES : uint
+        {
+            NUMERIC = 0x00000001,
+            SYMBOL = 0x00000002,
+            LETTER = 0x00000004,
+            SPACE = 0x00000008,
+            UNUMERIC = 0x00000010 // unsigned
+        }
+
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
@@ -92,15 +96,5 @@ namespace ClassicUO.Game
         public const int NEUTRAL_LABEL_COLOR = 0x3B1;
         public const int HARMFUL_LABEL_COLOR = 0x020;
         public const int BENEFIC_LABEL_COLOR = 0x059;
-
-        [Flags]
-        public enum RULES : uint
-        {
-            NUMERIC = 0x00000001,
-            SYMBOL = 0x00000002,
-            LETTER = 0x00000004,
-            SPACE = 0x00000008,
-            UNUMERIC = 0x00000010, // unsigned
-        }
     }
 }

@@ -23,7 +23,10 @@ namespace ClassicUO.Game.Managers
             EntryAdded.Raise(entry);
         }
 
-        public void Clear() => _entries.Clear();
+        public void Clear()
+        {
+            _entries.Clear();
+        }
     }
 
     internal readonly struct JournalEntry
