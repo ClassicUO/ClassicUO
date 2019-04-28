@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
@@ -93,6 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -105,30 +106,48 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
+                ushort hue = Hue;
+                bool isPartial = _isPartialHue;
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                {
+                    hue = 0x0023;
+                    isPartial = false;
+                }
+
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, 0);
             }
 
             Engine.DebugInfo.StaticsRendered++;
-            base.Draw(batcher, position, objectList);
+            base.Draw(batcher, posX, posY);
 
             //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
 
             if (ItemData.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
+                      .AddLight(this, this, posX + 22, posY + 22);
             }
-
             return true;
         }
 
 
-        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        public override void Select(int x, int y)
         {
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            if (!istransparent && Texture.Contains(x, y))
-                list.Add(this, vertex[0].Position);
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+            {
+                SelectedObject.Object = this;
+            }
         }
+
+        //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        //{
+
+           
+
+        //    //int x = list.MousePosition.X - (int) vertex[0].Position.X;
+        //    //int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
+        //    //if (!istransparent && Texture.Contains(x, y))
+        //    //    list.Add(this, vertex[0].Position);
+        //}
     }
 }

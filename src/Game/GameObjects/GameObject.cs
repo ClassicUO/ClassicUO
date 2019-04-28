@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.INVALID;
         public Vector3 Offset;
         private Tile _tile;
-        private Vector3 _screenPosition;
+        private Point _screenPosition;
 
 
         protected GameObject()
@@ -52,9 +52,9 @@ namespace ClassicUO.Game.GameObjects
         protected virtual bool CanCreateOverheads => true;
         public OverheadMessage OverheadMessageContainer { get; private set; }
 
-        public Vector3 ScreenPosition => _screenPosition;
+        public Point ScreenPosition => _screenPosition;
 
-        public Vector3 RealScreenPosition;
+        public Point RealScreenPosition;
 
         public bool IsPositionChanged { get; protected set; }
 

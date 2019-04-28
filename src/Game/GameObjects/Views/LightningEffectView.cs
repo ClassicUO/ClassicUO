@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _displayed = Graphic.INVALID;
 
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Engine.DebugInfo.EffectsRendered++;
-            return base.Draw(batcher, position, list);
+            return base.Draw(batcher, posX, posY);
         }
     }
 }

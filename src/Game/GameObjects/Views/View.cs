@@ -41,12 +41,9 @@ namespace ClassicUO.Game.GameObjects
     internal abstract partial class GameObject : IDrawable
     {
         protected static float PI = (float) Math.PI;
-        private Vector3 _storedHue;
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
-
-        protected bool HasShadow { get; set; }
 
         protected bool IsFlipped { get; set; }
 
@@ -128,20 +125,18 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-        public virtual bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
+        public virtual bool Draw(Batcher2D batcher, int posX, int posY)
         {
             SpriteVertex[] vertex;
 
-            bool hasShadow = HasShadow && position.Z >= 1000;
-
-            if (hasShadow)
-                position.Z -= 1000;
 
             if (Rotation != 0.0f)
             {
                 float w = Bounds.Width / 2f;
                 float h = Bounds.Height / 2f;
-                Vector3 center = position;
+                Vector3 center = Vector3.Zero;
+                center.X = posX;
+                center.Y = posY;
                 center.X -= Bounds.X - 44 + w;
                 center.Y -= Bounds.Y + h;
                 float sinx = (float) Math.Sin(Rotation) * w;
@@ -166,7 +161,8 @@ namespace ClassicUO.Game.GameObjects
             else if (IsFlipped)
             {
                 vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position = position;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
                 vertex[0].Position.X += Bounds.X + 44f;
                 vertex[0].Position.Y -= Bounds.Y;
                 vertex[0].TextureCoordinate.Y = 0;
@@ -181,7 +177,8 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position = position;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
                 vertex[0].Position.X -= Bounds.X;
                 vertex[0].Position.Y -= Bounds.Y;
                 vertex[0].TextureCoordinate.Y = 0;
@@ -212,42 +209,10 @@ namespace ClassicUO.Game.GameObjects
             else
                 HueVector.Z = 1f - AlphaHue / 255f;
 
-            if (Engine.Profile.Current.HighlightGameObjects)
-            {
-                if (IsSelected)
-                {
-                    if (_storedHue == Vector3.Zero)
-                        _storedHue = HueVector;
-                    HueVector = ShaderHuesTraslator.SelectedHue;
-                }
-                else if (_storedHue != Vector3.Zero)
-                {
-                    HueVector = _storedHue;
-                    _storedHue = Vector3.Zero;
-                }
-            }
 
-            if (vertex[0].Hue != HueVector)
+            //if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-
-            if (hasShadow)
-            {
-                SpriteVertex[] vertexS =
-                {
-                    vertex[0],
-                    vertex[1],
-                    vertex[2],
-                    vertex[3]
-                };
-
-                Vector3 hue = Vector3.Zero;
-                hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
-
-                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
-
-                batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + Offset.Y - Offset.Z + 22), IsFlipped, 0);
-            }
 
             //if (DrawTransparent)
             //{
@@ -274,20 +239,16 @@ namespace ClassicUO.Game.GameObjects
             //    batcher.Stencil.StencilEnable = false;
             //}
 
-
-
-
-            MousePick(list, vertex, isTransparent);
+            Select(posX, posY);
 
             Texture.Ticks = Engine.Ticks;
             return true;
         }
 
-       
 
-
-        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        public virtual void Select(int x, int y)
         {
+
         }
     }
 }

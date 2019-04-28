@@ -99,8 +99,8 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            _dragginObject = _mousePicker.MouseOverObject as GameObject;
-            _dragOffset = _mousePicker.MouseOverObjectPoint;
+            _dragginObject = Game.SelectedObject.Object as GameObject;
+            _dragOffset = Mouse.LDropPosition;
         }
         private void OnLeftMouseUp(object sender, EventArgs e)
         {
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Scenes
             {
                 SelectedObject = null;
 
-                if (_mousePicker.MouseOverObject is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
                     if (obj is AnimatedItemEffect eff && eff.Source is Item it)
                         obj = it;
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = _mousePicker.MouseOverObject as GameObject;
+                GameObject obj = Game.SelectedObject.Object as GameObject;
 
                 switch (obj)
                 {
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            IGameEntity obj = _mousePicker.MouseOverObject;
+            IGameEntity obj = Game.SelectedObject.Object;
 
             switch (obj)
             {
@@ -293,9 +293,9 @@ namespace ClassicUO.Game.Scenes
 
             if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
-                if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject as GameObject, out var itemdata) && itemdata.IsSurface))
+                if (Game.SelectedObject.Object is Land || (GameObjectHelper.TryGetStaticData(Game.SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface))
                 {
-                    if (_mousePicker.MouseOverObject is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                    if (Game.SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
                         World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
                         e.Result = true;

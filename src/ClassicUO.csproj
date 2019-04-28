@@ -141,6 +141,7 @@
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
+    <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
@@ -427,9 +428,6 @@
     <Compile Include="Input\KeyboardEvent.cs" />
     <Compile Include="Input\MouseButtons.cs" />
     <Compile Include="Input\MouseEvent.cs" />
-    <Compile Include="Input\MouseOverList.cs" />
-    <Compile Include="Input\MousePicker.cs" />
-    <Compile Include="Input\PickerType.cs" />
     <Compile Include="Game\UI\TextEntry.cs" />
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />

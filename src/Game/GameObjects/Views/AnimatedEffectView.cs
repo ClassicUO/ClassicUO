@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
             return state;
         });
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
             if (AnimationGraphic == Graphic.INVALID)
                 return false;
 
-            Hue hue = Hue;
+            ushort hue = Hue;
             if (Source is Item i)
             {
                 if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(AnimationGraphic))
@@ -172,38 +172,45 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
+            {
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                {
+                    hue = 0x0023;
+                }
+
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0);
+            }
 
             switch (Blend)
             {
                 case GraphicEffectBlendMode.Multiply:
                     batcher.SetBlendState(_multiplyBlendState.Value);
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
                     break;
                 default:
-                    base.Draw(batcher, position, objectList);
+                    base.Draw(batcher, posX, posY);
                     break;
             }
 
@@ -213,18 +220,18 @@ namespace ClassicUO.Game.GameObjects
             if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(Source, Source, (int)position.X + 22, (int)position.Y + 22);
+                      .AddLight(Source, Source, posX + 22, posY + 22);
             }
-
             return true;
         }
 
-        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        public override void Select(int x, int y)
         {
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            if (Texture.Contains(x, y))
-                list.Add(this, vertex[0].Position);
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+            {
+                SelectedObject.Object = this;
+            }
         }
+
     }
 }

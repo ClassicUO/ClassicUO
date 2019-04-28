@@ -50,15 +50,14 @@ namespace ClassicUO.Game.Scenes
     {
         private RenderTarget2D _renderTarget, _darkness;
         private long _timePing;
-        private MousePicker _mousePicker;
-        private MouseOverList _mouseOverList;
+        //private MousePicker _mousePicker;
+        //private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
         private JournalManager _journalManager;
         private OverheadManager _overheadManager;
         private HotkeysManager _hotkeysManager;
         private MacroManager _macroManager;
         private HealthLinesManager _healthLinesManager;
-        private IGameEntity _selectedObject;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _alphaChanged;
         private long _alphaTimer;
@@ -111,6 +110,8 @@ namespace ClassicUO.Game.Scenes
 
         public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
+
+        private IGameEntity _selectedObject;
         public IGameEntity SelectedObject
         {
             get => _selectedObject;
@@ -119,20 +120,13 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (value == null)
-                {
+                if (_selectedObject != null && _selectedObject.IsSelected)
                     _selectedObject.IsSelected = false;
-                    _selectedObject = null;
-                }
-                else
-                {
-                    if (_selectedObject != null && _selectedObject.IsSelected)
-                        _selectedObject.IsSelected = false;
-                    _selectedObject = value;
 
-                    
+                _selectedObject = value;
+
+                if (_selectedObject != null)
                     _selectedObject.IsSelected = true;
-                }
             }
         }
 
@@ -175,8 +169,6 @@ namespace ClassicUO.Game.Scenes
             _overheadManager = new OverheadManager();
             _hotkeysManager = new HotkeysManager();
             _macroManager = new MacroManager(Engine.Profile.Current.Macros);
-            _mousePicker = new MousePicker();
-            _mouseOverList = new MouseOverList(_mousePicker);
             _healthLinesManager = new HealthLinesManager();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
@@ -541,6 +533,7 @@ namespace ClassicUO.Game.Scenes
                 _renderIndex = 1;
             _updateDrawPosition = false;
 
+
             //if (_renderList.Length - _renderListCount != 0)
             //{
             //    if (_renderList[_renderListCount] != null)
@@ -568,7 +561,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Pathfinder.ProcessAutoWalk();
-            SelectedObject = _mousePicker.MouseOverObject;
+
 
             if (_inqueue)
             {
@@ -588,15 +581,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (Engine.UI.IsMouseOverWorld)
-            {
-                _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
-                _mousePicker.PickOnly = PickerType.PickEverything;
-            }
-            else if (SelectedObject != null) SelectedObject = null;
-
-            _mouseOverList?.Clear();
-
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
 
@@ -610,8 +594,13 @@ namespace ClassicUO.Game.Scenes
             }
 
             _useItemQueue.Update(totalMS, frameMS);
+
+
+            if (!IsMouseOverViewport)
+                SelectedObject = null;
+
         }
-        
+
         public override bool Draw(Batcher2D batcher)
         {
             if (!World.InGame)
@@ -674,8 +663,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                        if (obj.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
-                        {
+                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                        {             
                             RenderedObjectsCount++;
                         }
                     }
@@ -696,7 +685,7 @@ namespace ClassicUO.Game.Scenes
                         multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
                         multiTarget.CheckGraphicChange();
                     }
-                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition, _mouseOverList);
+                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
                 }
 
             }
@@ -762,10 +751,12 @@ namespace ClassicUO.Game.Scenes
             _healthLinesManager.Draw(batcher, Scale);
 
             //batcher.SetBlendState(_blendText);
-            _overheadManager.Draw(batcher, _mouseOverList, x, y);
-           // batcher.SetBlendState(null);
+            _overheadManager.Draw(batcher, x, y);
+
+            SelectedObject = Game.SelectedObject.Object;
+            // batcher.SetBlendState(null);
             // workaround to set overheads clickable
-            _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+            //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
         }
 
 

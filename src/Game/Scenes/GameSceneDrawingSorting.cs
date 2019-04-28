@@ -179,8 +179,8 @@ namespace ClassicUO.Game.Scenes
 
                 //obj.UseInRender = 0xFF;
 
-                float drawX = obj.RealScreenPosition.X;
-                float drawY = obj.RealScreenPosition.Y;
+                int drawX = obj.RealScreenPosition.X;
+                int drawY = obj.RealScreenPosition.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
@@ -551,27 +551,6 @@ namespace ClassicUO.Game.Scenes
 
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
-        }
-    }
-
-
-    internal class ArrayWeak<T> where T : class
-    {
-        private T[] _array;
-
-        public ArrayWeak(int size)
-        {
-            _array = new T[size];
-        }
-
-        public ref T this[int index] => ref _array[index];
-
-        public int Length => _array.Length;
-
-
-        public void Resize(int newSize)
-        {
-            Array.Resize(ref _array, newSize);
         }
     }
 }

@@ -1166,16 +1166,16 @@ namespace ClassicUO.IO.Resources
                 animDirection.FrameCount = (byte) (pixelDataOffsets.Length / 5);
                 int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
-                if (animDirection.FramesHashes != null && animDirection.FramesHashes.Length != 0)
+                if (animDirection.Frames != null && animDirection.Frames.Length != 0)
                 {
                     Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
                 }
 
-                animDirection.FramesHashes = new AnimationFrameTexture[animDirection.FrameCount];
+                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
                 for (int i = 0; i < animDirection.FrameCount; i++)
                 {
-                    if (animDirection.FramesHashes[i] != null)
+                    if (animDirection.Frames[i] != null)
                         continue;
 
                     UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
@@ -1232,7 +1232,7 @@ namespace ClassicUO.IO.Resources
                     };
 
                     f.SetDataHitMap16(data);
-                    animDirection.FramesHashes[i] = f; //uniqueAnimationIndex;
+                    animDirection.Frames[i] = f; //uniqueAnimationIndex;
                     //ResourceDictionary.Add(uniqueAnimationIndex, f);
                 }
 
@@ -1258,16 +1258,16 @@ namespace ClassicUO.IO.Resources
             animDir.FrameCount = (byte)frameCount;
             uint* frameOffset = (uint*)reader.PositionAddress;
 
-            if (animDir.FramesHashes != null && animDir.FramesHashes.Length > 0)
+            if (animDir.Frames != null && animDir.Frames.Length > 0)
             {
                 Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
             }
 
-            animDir.FramesHashes = new AnimationFrameTexture[frameCount];
+            animDir.Frames = new AnimationFrameTexture[frameCount];
 
             for (int i = 0; i < frameCount; i++)
             {
-                if (animDir.FramesHashes[i] != null)
+                if (animDir.Frames[i] != null)
                     continue;
 
                 reader.Seek(dataStart + frameOffset[i]);
@@ -1316,7 +1316,7 @@ namespace ClassicUO.IO.Resources
 
                 f.SetDataHitMap16(data);
 
-                animDir.FramesHashes[i] = f;
+                animDir.Frames[i] = f;
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);
             }
 
@@ -1348,9 +1348,9 @@ namespace ClassicUO.IO.Resources
                     {
                         if (frameIndex >= fc) frameIndex = 0;
 
-                        if (direction.FramesHashes != null)
+                        if (direction.Frames != null)
                         {
-                            AnimationFrameTexture animationFrameTexture = direction.FramesHashes[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
+                            AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
                             x = animationFrameTexture.CenterX;
                             y = animationFrameTexture.CenterY;
                             w = animationFrameTexture.Width;
@@ -1492,7 +1492,7 @@ namespace ClassicUO.IO.Resources
                     {
                         for (int j = 0; j < dir.FrameCount; j++)
                         {
-                            ref var hash = ref dir.FramesHashes[j];
+                            ref var hash = ref dir.Frames[j];
 
                             if (hash != null)
                             {
@@ -1509,7 +1509,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         dir.FrameCount = 0;
-                        dir.FramesHashes = null;
+                        dir.Frames = null;
                         dir.LastAccessTime = 0;
                         _usedTextures.RemoveAt(i--);
 
@@ -1567,7 +1567,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = 0; j < dir.FrameCount; j++)
                 {
-                    ref var hash = ref dir.FramesHashes[j];
+                    ref var hash = ref dir.Frames[j];
 
                     if (hash != null)
                     {
@@ -1584,7 +1584,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 dir.FrameCount = 0;
-                dir.FramesHashes = null;
+                dir.Frames = null;
                 dir.LastAccessTime = 0;
                 _usedTextures.RemoveAt(i--);
 
@@ -1914,7 +1914,7 @@ namespace ClassicUO.IO.Resources
         public bool IsUOP;
         public bool IsVerdata;
         public long LastAccessTime;
-        public AnimationFrameTexture[] FramesHashes;
+        public AnimationFrameTexture[] Frames;
     }
 
     internal readonly struct EquipConvData

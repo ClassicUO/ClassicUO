@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Mobile
     {
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
@@ -53,7 +53,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (Graphic == 0)
                 return false;
-
 
             /*if (_frames[0].IsSitting)
             {
@@ -98,11 +97,11 @@ namespace ClassicUO.Game.GameObjects
 
             bool drawShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
-            DrawBody(batcher, position, objectList, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
+            DrawBody(batcher, posX, posY, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
 
             if (IsHuman)
             {
-                DrawEquipment(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
+                DrawEquipment(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
             }
 
             FrameInfo.X = Math.Abs(rect.X);
@@ -114,10 +113,12 @@ namespace ClassicUO.Game.GameObjects
             //batcher.DrawRectangle(Textures.GetTexture(Color.Red), r.X, r.Y, r.Width, r.Height , Vector3.Zero);
 
             Engine.DebugInfo.MobilesRendered++;
+  
+
             return true;
         }
 
-        private void DrawBody(Batcher2D batcher, Vector3 position, MouseOverList objecList, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
+        private void DrawBody(Batcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
         {
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = Mobile.GetGroupForAnimation(this, graphic, true);
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
       
-            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Engine.Ticks;
@@ -141,14 +142,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture hash = direction.FramesHashes[animIndex];
+                AnimationFrameTexture frame = direction.Frames[animIndex];
 
-                if (hash == null)
-                    return;
-
-                AnimationFrameTexture frame = direction.FramesHashes[animIndex];
-
-                if (frame.IsDisposed)
+                if (frame == null || frame.IsDisposed)
                     return;
 
                 drawCenterY = frame.CenterY;
@@ -159,8 +155,6 @@ namespace ClassicUO.Game.GameObjects
                     drawX = -22 + (int)Offset.X;
                 else
                     drawX = -22 - (int)Offset.X;
-
-                const int DELTA_SHADOW = 1000;
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
@@ -194,20 +188,17 @@ namespace ClassicUO.Game.GameObjects
                  
                 if (Engine.AuraManager.IsEnabled)
                     Engine.AuraManager.Draw(batcher,
-                                            IsFlipped ? (int)position.X + drawX + 44 : (int)position.X - drawX,
-                                            (int)position.Y - yOff, Notoriety.GetHue(NotorietyFlag));
+                                            IsFlipped ? posX + drawX + 44 : posX - drawX,
+                                            posY - yOff, Notoriety.GetHue(NotorietyFlag));
 
 
                 if (IsHuman && Equipment[(int) Layer.Mount] != null)
                 {
                     if (shadow)
                     {
-                        position.Z += DELTA_SHADOW;
-                        base.Draw(batcher, position, objecList);
+                        DrawInternal(batcher, posX, posY, true);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
 
-                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
-
-                        position.Z -= DELTA_SHADOW;
                         Texture = frame;
                         Bounds.X = x;
                         Bounds.Y = -y;
@@ -216,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        DrawLayer(batcher, position, objecList, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
                         Texture = frame;
                         Bounds.X = x;
                         Bounds.Y = -y;
@@ -226,12 +217,10 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (shadow)
                 {
-                    position.Z += DELTA_SHADOW;
-                    base.Draw(batcher, position, objecList);
-                    position.Z -= DELTA_SHADOW;
+                    DrawInternal(batcher, posX, posY, true);
                 }
+    
 
-               
                 if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                 {
                     HueVector.X = Constants.DEAD_RANGE_COLOR;
@@ -254,28 +243,35 @@ namespace ClassicUO.Game.GameObjects
 
 
                     if (hue == 0)
-                        hue = Hue;                     
+                        hue = Hue;
+
+                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                    {
+                        hue = 0x0023;
+                        isPartial = false;
+                    }
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
 
-                base.Draw(batcher, position, objecList);
-                Pick(frame, Bounds, position, objecList);
+                base.Draw(batcher, posX, posY);
+
+                Select(mirror ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
             }
         }
 
 
-        private void DrawEquipment(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
+        private void DrawEquipment(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
         {
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                DrawLayer(batcher, position, objectList, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue);
+                DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue);
             }
         }
 
-        private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue)
+        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue)
         {
             Item item = Equipment[(int)layer];
 
@@ -325,7 +321,7 @@ namespace ClassicUO.Game.GameObjects
 
            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, false).Direction[dir];
 
-            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             if (hue == 0)
@@ -338,7 +334,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                var hash = direction.FramesHashes[animIndex];
+                var hash = direction.Frames[animIndex];
 
                 if (hash == null)
                     return;
@@ -354,7 +350,7 @@ namespace ClassicUO.Game.GameObjects
                         hue = convertedItem.Value.Color;
                 }
 
-                AnimationFrameTexture frame = direction.FramesHashes[animIndex];
+                AnimationFrameTexture frame = direction.Frames[animIndex];
 
                 if (frame.IsDisposed)
                     return;
@@ -398,6 +394,8 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
+                
+
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -409,32 +407,111 @@ namespace ClassicUO.Game.GameObjects
                     HueVector.Y = 1;
                 }
                 else
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, IsHidden ? 0x038E : hue, partial, 0);
+                {
+                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                    {
+                        hue = 0x0023;
+                        partial = false;
+                    }
+                    else if (IsHidden)
+                        hue = 0x038E;
 
-                base.Draw(batcher, position, objectList);
-                Pick(frame, Bounds, position, objectList);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
+                }
+ 
+                base.Draw(batcher, posX, posY);
 
+                Select(mirror ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
 
                 if (item.ItemData.IsLight)
                 {
                     Engine.SceneManager.GetScene<GameScene>()
-                          .AddLight(this, item, (IsFlipped ? (int)position.X + Bounds.X + 44 : (int)position.X - Bounds.X ), (int)position.Y + y + 22);
+                          .AddLight(this, item, (IsFlipped ? posX + Bounds.X + 44 : posX - Bounds.X ), posY + y + 22);
                 }
             }
 
         }
 
-        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
-        {
-            int x;
 
-            if (IsFlipped)
-                x = (int) drawPosition.X + area.X + 44 - list.MousePosition.X;
+        private void DrawInternal(Batcher2D batcher, int posX, int posY, bool hasShadow)
+        {
+            SpriteVertex[] vertex;
+
+            if(IsFlipped)
+            {
+                vertex = SpriteVertex.PolyBufferFlipped;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
+                vertex[0].Position.X += Bounds.X + 44f;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.Y += Bounds.Height;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.X -= Bounds.Width;
+                vertex[2].TextureCoordinate.Y = 0;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.X -= Bounds.Width;
+            }
             else
-                x = list.MousePosition.X - (int) drawPosition.X + area.X;
-            int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (texture.Contains(x, y)) list.Add(this, drawPosition);
+            {
+                vertex = SpriteVertex.PolyBuffer;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
+                vertex[0].Position.X -= Bounds.X;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.X += Bounds.Width;
+                vertex[1].TextureCoordinate.Y = 0;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.Y += Bounds.Height;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.Y += Bounds.Height;
+            }
+
+
+            if (vertex[0].Hue != HueVector)
+                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
+
+
+            if (hasShadow)
+            {
+                SpriteVertex[] vertexS =
+                {
+                    vertex[0],
+                    vertex[1],
+                    vertex[2],
+                    vertex[3]
+                };
+
+                Vector3 hue = Vector3.Zero;
+                hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
+
+                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
+
+                batcher.DrawShadow(Texture, vertexS, new Vector2(posX + 22, posY + Offset.Y - Offset.Z + 22), IsFlipped, 0);
+            }
+
+
+            batcher.DrawSprite(Texture, ref vertex);
+            Texture.Ticks = Engine.Ticks;
         }
+
+
+        public override void Select(int x, int y)
+        {
+            if (SelectedObject.Object != this && Texture.Contains(x, y))
+            {
+                SelectedObject.Object = this;
+            }
+
+            //if (SelectedObject.IsPointInMobile(this, x, y))
+            //{
+            //    SelectedObject.Object = this;
+            //}
+        }
+
 
         internal static bool IsCovered(Mobile mobile, Layer layer)
         {

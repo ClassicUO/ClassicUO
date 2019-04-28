@@ -40,8 +40,8 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                int x = screenX + (int)mobile.RealScreenPosition.X;
-                int y = screenY + (int)mobile.RealScreenPosition.Y;
+                int x = screenX + mobile.RealScreenPosition.X;
+                int y = screenY + mobile.RealScreenPosition.Y;
 
 
                 x += (int) mobile.Offset.X + 22;

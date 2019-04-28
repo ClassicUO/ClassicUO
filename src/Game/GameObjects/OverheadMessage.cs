@@ -227,8 +227,8 @@ namespace ClassicUO.Game.GameObjects
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
 
-            x += (int) Parent.RealScreenPosition.X;
-            y += (int) Parent.RealScreenPosition.Y;
+            x += Parent.RealScreenPosition.X;
+            y += Parent.RealScreenPosition.Y;
 
             int offY = 0;
 
@@ -322,7 +322,7 @@ namespace ClassicUO.Game.GameObjects
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        public bool Contains(int x, int y, MouseOverList list)
+        public bool Contains(int x, int y)
         {
             if (IsDestroyed)
                 return false;
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (item.RenderedText.Texture.Contains(x - item.X, y - item.Y))
                 {
-                    list.Add(item, Vector3.Zero);
+                    SelectedObject.Object = item;
                     return true;
                 }
             }
@@ -447,11 +447,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (Parent != null)
             {
-                x += (int)Parent.RealScreenPosition.X;
-                y += (int)Parent.RealScreenPosition.Y;
+                x += Parent.RealScreenPosition.X;
+                y += Parent.RealScreenPosition.Y;
 
-                _rectangle.X = (int) Parent.RealScreenPosition.X;
-                _rectangle.Y = (int) Parent.RealScreenPosition.Y;
+                _rectangle.X = Parent.RealScreenPosition.X;
+                _rectangle.Y = Parent.RealScreenPosition.Y;
             
                 if (Parent is Mobile m)
                 {

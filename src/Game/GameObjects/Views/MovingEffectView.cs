@@ -34,7 +34,7 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _displayedGraphic = Graphic.INVALID;
 
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
@@ -66,14 +66,14 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Engine.DebugInfo.EffectsRendered++;
-            base.Draw(batcher, position, list);
+            base.Draw(batcher, posX, posY);
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
             if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(Source, Source, (int)position.X + 22, (int)position.Y + 22);
+                      .AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

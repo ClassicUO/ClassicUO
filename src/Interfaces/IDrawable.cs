@@ -31,7 +31,7 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList);
+        bool Draw(Batcher2D batcher, int posX, int posY);
     }
 
     internal interface IDrawableUI

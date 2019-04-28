@@ -542,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
             {
-                Mobile.IsSelected = true;
+                SelectedObject.Object = Mobile;
             }
         }
 
@@ -550,7 +550,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Mobile != null && Mobile.IsSelected)
             {
-                Mobile.IsSelected = false;
+                SelectedObject.Object = null;
             }
         }
     }

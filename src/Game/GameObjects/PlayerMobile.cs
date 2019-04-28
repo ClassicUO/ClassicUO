@@ -1677,7 +1677,7 @@ namespace ClassicUO.Game.GameObjects
                 if (enemy != null)
                 {
                     Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
-                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point( (int) enemy.RealScreenPosition.X, (int)enemy.RealScreenPosition.Y));
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point( enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
 
                     if (Direction != direction)
                         Walk(direction, false);

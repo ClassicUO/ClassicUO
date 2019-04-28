@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _originalGraphic;
 
        
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
             Engine.DebugInfo.ItemsRendered++;
 
             if (IsCorpse)
-                return DrawCorpse(batcher, position, objectList);
+                return DrawCorpse(batcher, posX, posY);
 
             if (_originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
@@ -70,6 +70,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -82,31 +83,49 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ShaderHuesTraslator.GetHueVector(ref HueVector, IsSelected && !IsLocked ? 0x0035 : IsHidden ? 0x038E : Hue, ItemData.IsPartialHue, ItemData.IsTranslucent ? .5f : 0);
+                ushort hue = Hue;
+                bool isPartial = ItemData.IsPartialHue;
+
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                {
+                    hue = 0x0023;
+                    isPartial = false;
+                }
+                else if (IsSelected && !IsLocked)
+                    hue = 0x0035;
+                else if (IsHidden)
+                    hue = 0x038E;
+
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
             {
                 Vector3 offsetDrawPosition = Vector3.Zero;
-                offsetDrawPosition.X = position.X - 5;
-                offsetDrawPosition.Y = position.Y - 5;
+                offsetDrawPosition.X = posX - 5;
+                offsetDrawPosition.Y = posY - 5;
                 //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
-                base.Draw(batcher, offsetDrawPosition, objectList);
+                base.Draw(batcher, posX, posY);
             }
 
             if (ItemData.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
+                      .AddLight(this, this, posX + 22, posY + 22);
             }
 
            // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
            // return true;
 
-            return base.Draw(batcher, position, objectList);
+           if (base.Draw(batcher, posX, posY))
+           {
+               return true;
+           }
+
+           return false;
         }
 
-        private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        private bool DrawCorpse(Batcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
                 return false;
@@ -118,18 +137,17 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.Direction = dir;
             byte animIndex = (byte) AnimIndex;
 
-            DrawLayer(batcher, position, objectList, Layer.Invalid, animIndex);
+            DrawLayer(batcher, posX, posY, Layer.Invalid, animIndex);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
-                DrawLayer(batcher, position, objectList, layer, animIndex);
+                DrawLayer(batcher, posX, posY, layer, animIndex);
             }
-
             return true;
         }
 
-        private void DrawLayer(Batcher2D batcher, Vector3 position, MouseOverList objectList, Layer layer, byte animIndex)
+        private void DrawLayer(Batcher2D batcher, int posX, int posY, Layer layer, byte animIndex)
         {
             ushort graphic;
             ushort color = 0;
@@ -176,7 +194,7 @@ namespace ClassicUO.Game.GameObjects
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
 
-            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
@@ -185,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = direction.FramesHashes[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
+                AnimationFrameTexture frame = direction.Frames[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
 
                 if (frame == null || frame.IsDisposed)
                     return;
@@ -197,8 +215,12 @@ namespace ClassicUO.Game.GameObjects
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                 Texture = frame;
-                Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+                Bounds.X = x;
+                Bounds.Y = -y;
+                Bounds.Width = frame.Width;
+                Bounds.Height = frame.Height;
 
+               
                 if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -211,41 +233,41 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
+                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                    {
+                        color = 0x0023;
+                    }
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color);
                 }
 
-                base.Draw(batcher, position, objectList);
-                Pick(frame, Bounds, position, objectList);
+                base.Draw(batcher, posX, posY);
+                Select(IsFlipped ? posX + x + 44 - Mouse.Position.X : Mouse.Position.X - posX + x, Mouse.Position.Y - posY - y);
+
+                
             }
         }
 
-        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        public override void Select(int x, int y)
         {
-            int x;
-
-            if (IsFlipped)
-                x = (int) drawPosition.X + area.X + 44 - list.MousePosition.X;
+            if (IsCorpse)
+            {
+                if (!IsSelected && Texture.Contains(x, y))
+                {
+                    SelectedObject.Object = this;
+                }
+                //if (SelectedObject.IsPointInCorpse(this, x - Bounds.X, y - Bounds.Y))
+                //{
+                //    SelectedObject.Object = this;
+                //}
+            }
             else
-                x = list.MousePosition.X - (int) drawPosition.X + area.X;
-            int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            //if (FileManager.Animations.Contains(id, x, y))
-            if (texture.Contains(x, y))
-                list.Add(this, drawPosition);
+            {
+                if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+                {
+                    SelectedObject.Object = this;
+                }
+            }       
         }
 
-        protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex, bool istransparent)
-        {
-            int x = objectList.MousePosition.X - (int) vertex[0].Position.X;
-            int y = objectList.MousePosition.Y - (int) vertex[0].Position.Y;
-
-            //if (Texture.Contains(x, y))
-            //{
-            //    objectList.AddOrUpdateText(GameObject, vertex[0].Position);
-            //}
-
-            //if (FileManager.Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
-            if (Texture.Contains(x, y))
-                objectList.Add(this, vertex[0].Position);
-        }
     }
 }

@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list, int startX, int startY, float scale)
+        private void DrawTextOverheads(Batcher2D batcher, int startX, int startY, float scale)
         {
             if (_firstNode != null)
             {
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Managers
                     float alpha = first.IsOverlap(first.Right);
                     first.Draw(batcher, startX, startY, scale);
                     first.SetAlpha(alpha);
-                    first.Contains(mouseX, mouseY, list);
+                    first.Contains(mouseX, mouseY);
 
                     var temp = first.Right;
                     first.Right = null;
@@ -123,11 +123,11 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public bool Draw(Batcher2D batcher, MouseOverList list, int startX, int startY)
+        public bool Draw(Batcher2D batcher, int startX, int startY)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            DrawTextOverheads(batcher, list, startX, startY, scale);
+            DrawTextOverheads(batcher, startX, startY, scale);
 
             foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
             {
