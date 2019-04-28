@@ -45,12 +45,6 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
     {
-        private readonly BlendState _blendText = new BlendState
-        {
-            ColorSourceBlend = Blend.SourceAlpha,
-            ColorDestinationBlend = Blend.InverseSourceAlpha,
-            ColorBlendFunction = BlendFunction.Add
-        };
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
         private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
         private bool _alphaChanged;
@@ -349,7 +343,6 @@ namespace ClassicUO.Game.Scenes
             Hotkeys = null;
             Macros = null;
             Chat.MessageReceived -= ChatOnMessageReceived;
-            _blendText?.Dispose();
 
             base.Unload();
         }
