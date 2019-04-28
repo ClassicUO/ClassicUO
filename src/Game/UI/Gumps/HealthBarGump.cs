@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (IsDisposed)
                 return;
-
+            
             bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
 
             Hue textColor = 0x0386;
@@ -307,12 +307,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldStam = stam;
                 }
             }
+
+            _textBox.Height = 15;
         }
 
         public override void Dispose()
         {
             if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null) NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
-
             base.Dispose();
         }
 
@@ -445,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 16,
                         Y = 14,
                         Width = 120,
-                        Height = 30,
+                        Height = 15,
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
