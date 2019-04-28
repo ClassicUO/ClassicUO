@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
 
-            if (mouseclick)
+            if (mouseclick && (World.InGame && Engine.Profile.Current.EnableSelectionArea))
             {
                 _selectionArea = (x, y);
                 _isSelection = true;

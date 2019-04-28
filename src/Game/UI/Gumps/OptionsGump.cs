@@ -54,6 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
 
+        //experimental
+        private Checkbox _enableSelectionArea;
+
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
@@ -129,8 +132,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") {ButtonParameter = 8});
-            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
-
+            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
+            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
 
@@ -171,6 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCombat();
             BuildTooltip();
             BuildCounters();
+            BuildExperimental();
 
             ChangePage(1);
         }
@@ -863,6 +867,15 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildExperimental()
+        {
+            const int PAGE = 10;
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+
+            Add(rightArea, PAGE);
+        }
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -1032,6 +1045,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _columns.Text = "1";
                     _rows.Text = "1";
                     _cellSize.Value = 40;
+
+                    break;
+
+                case 10:
+                    _enableSelectionArea.IsChecked = false;
 
                     break;
             }
@@ -1306,6 +1324,8 @@ namespace ClassicUO.Game.UI.Gumps
                     counterGump.IsEnabled = counterGump.IsVisible = Engine.Profile.Current.CounterBarEnabled;
             }
 
+            // experimental
+            Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
