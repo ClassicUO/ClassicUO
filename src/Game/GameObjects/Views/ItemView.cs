@@ -245,6 +245,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (SelectedObject.Object == this)
+                return;
+
             if (IsCorpse)
             {
                 if (Texture.Contains( x, y))

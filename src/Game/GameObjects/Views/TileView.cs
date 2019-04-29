@@ -125,6 +125,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (SelectedObject.Object == this)
+                return;
+
             if (IsStretched)
             {
                 if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
