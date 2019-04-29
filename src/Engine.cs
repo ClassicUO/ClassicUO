@@ -270,7 +270,7 @@ namespace ClassicUO
 
                 if (value)
                 {
-                    SetPreferredBackBufferSize(_window.ClientBounds.Width, _window.ClientBounds.Height);
+                    //SetPreferredBackBufferSize(_window.ClientBounds.Width, _window.ClientBounds.Height);
                     SDL.SDL_MaximizeWindow(wnd);
                 }
                 else
