@@ -492,7 +492,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object != this && Texture.Contains(x, y)) SelectedObject.Object = this;
+            if (SelectedObject.Object != this && Texture.Contains(x, y))
+                SelectedObject.Object = this;
 
             //if (SelectedObject.IsPointInMobile(this, x, y))
             //{

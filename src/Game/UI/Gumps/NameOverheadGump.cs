@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item.Properties.Any())
                     {
-                        Property prop = item.Properties.FirstOrDefault();
+                        Property prop = item.Properties.Values.FirstOrDefault();
                         t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
                     }
                     else

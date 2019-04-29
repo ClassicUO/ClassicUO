@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public IReadOnlyList<Skill> Skills => _sklls;
+        public Skill[] Skills => _sklls;
 
         public override bool InWarMode { get; set; }
 
@@ -1670,7 +1670,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            const int TIME_TURN_TO_LASTTARGET = 2000;
+            /*const int TIME_TURN_TO_LASTTARGET = 2000;
 
             if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Engine.Ticks)
             {
@@ -1684,7 +1684,7 @@ namespace ClassicUO.Game.GameObjects
                     if (Direction != direction)
                         Walk(direction, false);
                 }
-            }
+            }*/ 
         }
 
         public bool Walk(Direction direction, bool run)

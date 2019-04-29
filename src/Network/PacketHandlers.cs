@@ -2973,7 +2973,7 @@ namespace ClassicUO.Network
 
                 if (serial.IsItem && entity.Properties.Any())
                 {
-                    Property property = entity.Properties.FirstOrDefault();
+                    Property property = entity.Properties.Values.FirstOrDefault();
                     entity.Name = FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true);
                 }
             }
@@ -2984,7 +2984,7 @@ namespace ClassicUO.Network
 
                 if (gump != null)
                 {
-                    Property property = it.Properties.FirstOrDefault();
+                    Property property = it.Properties.Values.FirstOrDefault();
 
                     gump.SetNameTo(it, FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
                 }

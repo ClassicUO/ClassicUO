@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MiniMapGump : Gump
     {
         private bool _draw;
-        private bool _forceUpdate;
+        //private bool _forceUpdate;
         private SpriteTexture _gumpTexture, _mapTexture;
         private int _lastMap = -1;
         private Texture2D _playerIndicator, _mobilesIndicator;
@@ -66,20 +66,31 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
             _useLargeMap = reader.ReadBoolean();
-            _forceUpdate = true;
+            CreateMap();
+        }
+
+        private void CreateMap()
+        {
+            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort)5011 : (ushort)5010);
+            Width = _gumpTexture.Width;
+            Height = _gumpTexture.Height;
+            CreateMiniMapTexture(true);
         }
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_gumpTexture == null || _gumpTexture.IsDisposed || _forceUpdate)
-            {
-                _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
-                Width = _gumpTexture.Width;
-                Height = _gumpTexture.Height;
-                CreateMiniMapTexture();
+            if (!World.InGame)
+                return;
 
-                if (_forceUpdate)
-                    _forceUpdate = false;
+            if (_gumpTexture == null || _gumpTexture.IsDisposed)
+            {
+                CreateMap();
+            }
+
+            if (_lastMap != World.MapIndex)
+            {
+                CreateMap();
+                _lastMap = World.MapIndex;
             }
 
             if (_gumpTexture != null)
@@ -149,8 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButton.Left)
             {
                 _useLargeMap = !_useLargeMap;
-                _forceUpdate = true;
-
+                CreateMap();
                 return true;
             }
 
@@ -159,10 +169,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ForceUpdate()
         {
-            _forceUpdate = true;
+            CreateMap();
         }
 
-        private void CreateMiniMapTexture()
+        private void CreateMiniMapTexture(bool force = false)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return;
@@ -170,18 +180,13 @@ namespace ClassicUO.Game.UI.Gumps
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 
-            if (_lastMap != World.MapIndex)
-            {
-                _forceUpdate = true;
-                _lastMap = World.MapIndex;
-            }
-
+            
             if (_x != lastX || _y != lastY)
             {
                 _x = lastX;
                 _y = lastY;
             }
-            else if (!_forceUpdate)
+            else if(!force)
                 return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)

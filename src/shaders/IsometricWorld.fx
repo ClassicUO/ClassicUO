@@ -59,9 +59,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		if (color.a != 0.0f && IN.Hue.x != 0.0f)
 		{
 			if (IN.Hue.x < HuesPerTexture)
-				color.rgb *= tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
+				color.rgb *= tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0000f)).rgb;
 			else
-				color.rgb *= tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
+				color.rgb *= tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0000f) / 3000.0000f)).rgb;
 		}
 		return color;
 	}
@@ -75,9 +75,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b ))
 	{
 		if (IN.Hue.x < HuesPerTexture)
-			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
+			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0000f)).rgb;
 		else
-			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
+			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0000f) / 3000.0000f)).rgb;
 	}
 	else if (mode == LAND)
 	{
@@ -90,9 +90,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	else if (mode == LAND_COLOR)
 	{
 		if (IN.Hue.x < HuesPerTexture)
-			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
+			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0000f)).rgb;
 		else
-			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
+			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0000f) / 3000.0000f)).rgb;
 
 		float3 light = normalize(lightDirection);
 		float3 normal = normalize(IN.Normal);
