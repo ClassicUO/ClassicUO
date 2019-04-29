@@ -36,15 +36,15 @@ namespace ClassicUO.Game.GameObjects
     {
         protected static float PI = (float) Math.PI;
 
-        private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
-            {
-                ColorSourceBlend = Blend.SourceAlpha, ColorDestinationBlend = Blend.InverseSourceAlpha
-            };
+        //private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
+        //{
+        //    BlendState state = new BlendState
+        //    {
+        //        ColorSourceBlend = Blend.SourceAlpha, ColorDestinationBlend = Blend.InverseSourceAlpha
+        //    };
 
-            return state;
-        });
+        //    return state;
+        //});
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-            bool isTransparent = false;
+            //bool isTransparent = false;
 
             if (DrawTransparent)
             {
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (dist <= maxDist)
                 {
-                    isTransparent = dist <= 3;
+                    //isTransparent = dist <= 3;
                     HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float) maxDist, 0.5f);
                     //HueVector.Z = 1f - (dist / (float)maxDist);
                 }

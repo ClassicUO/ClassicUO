@@ -8,11 +8,11 @@ namespace ClassicUO.Game.Managers
 {
     internal class AuraManager
     {
-        private readonly BlendState _blend = new BlendState
+        /*private readonly BlendState _blend = new BlendState
         {
             ColorSourceBlend = Blend.SourceAlpha,
             ColorDestinationBlend = Blend.InverseSourceAlpha
-        };
+        };*/
         private Vector3 _auraHueVector = new Vector3(0, 13, 0);
 
         public bool IsEnabled

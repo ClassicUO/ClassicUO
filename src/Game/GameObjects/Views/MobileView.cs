@@ -212,8 +212,12 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (shadow) DrawInternal(batcher, posX, posY, true);
 
-
-                if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                {
+                    HueVector.X = 0x0023;
+                    HueVector.Y = 1;
+                }
+                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
                 {
                     HueVector.X = Constants.DEAD_RANGE_COLOR;
                     HueVector.Y = 1;
@@ -233,15 +237,8 @@ namespace ClassicUO.Game.GameObjects
                         isPartial = false;
                     }
 
-
                     if (hue == 0)
                         hue = Hue;
-
-                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                    {
-                        hue = 0x0023;
-                        isPartial = false;
-                    }
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
@@ -387,8 +384,12 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
-
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                {
+                    HueVector.X = 0x0023;
+                    HueVector.Y = 1;
+                }
+                else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
                     HueVector.Y = 1;
@@ -399,13 +400,8 @@ namespace ClassicUO.Game.GameObjects
                     HueVector.Y = 1;
                 }
                 else
-                {
-                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                    {
-                        hue = 0x0023;
-                        partial = false;
-                    }
-                    else if (IsHidden)
+                {                
+                    if (IsHidden)
                         hue = 0x038E;
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
