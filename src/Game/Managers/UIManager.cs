@@ -832,7 +832,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_needSort)
             {
-                var gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default);
+                var gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToArray();
 
                 int over = 0;
                 int under = _gumps.Count - 1;
