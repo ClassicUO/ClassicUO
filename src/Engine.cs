@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -176,6 +177,9 @@ namespace ClassicUO
                     height *= 2;
                 }
 
+                if (World.InGame)
+                    Engine.Profile.Current.WindowClientBounds = new Point(width, height);
+
                 _graphicDeviceManager.PreferredBackBufferWidth = width;
                 _graphicDeviceManager.PreferredBackBufferHeight = height;
                 _graphicDeviceManager.ApplyChanges();
@@ -189,10 +193,18 @@ namespace ClassicUO
                     gump.Y = -5;
                 }
             };
+
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
 
             Window.Title = $"ClassicUO - {Version}";
+        }
+
+        public static void SetPreferredBackBufferSize(int width, int height)
+        {
+            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
+            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
+            _engine._graphicDeviceManager.ApplyChanges();
         }
 
         public bool IsQuitted { get; private set; }
