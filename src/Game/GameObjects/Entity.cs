@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Serial Serial { get; set; }
 
-        public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
+        public ConcurrentDictionary<int, Property> Properties => _properties;
 
         public override Graphic Graphic
         {

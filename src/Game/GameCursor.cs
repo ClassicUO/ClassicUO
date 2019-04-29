@@ -296,7 +296,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
+                    if (gs.IsMouseOverViewport && gs.SelectedObject is Entity item && item.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);

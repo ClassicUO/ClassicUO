@@ -222,7 +222,7 @@ namespace ClassicUO.Game.Managers
 
         public AnchorManager AnchorManager { get; }
 
-        public IReadOnlyList<Control> Gumps => _gumps;
+        public List<Control> Gumps => _gumps;
 
         public Control MouseOverControl { get; private set; }
 
