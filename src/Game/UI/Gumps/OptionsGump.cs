@@ -54,6 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
 
+        //experimental
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled;
+
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
@@ -129,8 +132,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") {ButtonParameter = 8});
-            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
-
+            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
+            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
 
@@ -171,6 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCombat();
             BuildTooltip();
             BuildCounters();
+            BuildExperimental();
 
             ChangePage(1);
         }
@@ -863,6 +867,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildExperimental()
+        {
+            const int PAGE = 10;
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
+
+            Add(rightArea, PAGE);
+        }
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -875,38 +889,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Cancel:
                     Dispose();
-
                     break;
+
                 case Buttons.Apply:
                     Apply();
-
                     break;
+
                 case Buttons.Default:
                     SetDefault();
-
                     break;
+
                 case Buttons.Ok:
                     Apply();
                     Dispose();
-
                     break;
+
                 case Buttons.NewMacro:
-
                     break;
+
                 case Buttons.DeleteMacro:
-
                     break;
-
-                //case Buttons.SpeechColor: break;
-                //case Buttons.EmoteColor: break;
-                //case Buttons.PartyMessageColor: break;
-                //case Buttons.GuildMessageColor: break;
-                //case Buttons.AllyMessageColor: break;
-                //case Buttons.InnocentColor: break;
-                //case Buttons.FriendColor: break;
-                //case Buttons.CriminalColor: break;
-                //case Buttons.EnemyColor: break;
-                //case Buttons.MurdererColor: break;
             }
         }
 
@@ -1003,11 +1005,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _chatAfterEnter.IsChecked = false;
 
-                    WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-                    SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
-
-                    if (systemchat != null)
-                        systemchat.IsActive = !_chatAfterEnter.IsChecked;
+                    Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
 
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
@@ -1032,6 +1030,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _columns.Text = "1";
                     _rows.Text = "1";
                     _cellSize.Value = 40;
+
+                    break;
+
+                case 10:
+                    _enableSelectionArea.IsChecked = false;
+                    _debugGumpIsDisabled.IsChecked = false;
 
                     break;
             }
@@ -1112,11 +1116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Engine.Profile.Current.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
-                SystemChatControl systemchat = vp?.FindControls<SystemChatControl>().SingleOrDefault();
-
-                if (systemchat != null)
-                    systemchat.IsActive = !_chatAfterEnter.IsChecked;
-
+                Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
@@ -1235,10 +1235,8 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Personal = World.Light.RealPersonal;
             }
 
-
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
-
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();
@@ -1246,23 +1244,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;
-
                 WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
-
-                if (viewport != null)
-                {
-                    SystemChatControl systemchat = viewport.FindControls<SystemChatControl>().SingleOrDefault();
-
-                    if (systemchat != null)
-                    {
-                        viewport.ReloadChatControl(new SystemChatControl(
-                                                                         5,
-                                                                         5,
-                                                                         Engine.Profile.Current.GameWindowSize.X,
-                                                                         Engine.Profile.Current.GameWindowSize.Y
-                                                                        ));
-                    }
-                }
+                viewport?.ReloadChatControl(new SystemChatControl(5, 5, Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y));
             }
 
             // combat
@@ -1277,7 +1260,6 @@ namespace ClassicUO.Game.UI.Gumps
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
 
-
             // counters
 
             bool before = Engine.Profile.Current.CounterBarEnabled;
@@ -1286,7 +1268,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
             Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
-
 
             CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
 
@@ -1306,6 +1287,38 @@ namespace ClassicUO.Game.UI.Gumps
                     counterGump.IsEnabled = counterGump.IsVisible = Engine.Profile.Current.CounterBarEnabled;
             }
 
+            // experimental
+            Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
+
+            if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
+            {
+                DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
+
+                if (_debugGumpIsDisabled.IsChecked)
+                {
+                    if (debugGump != null)
+                        debugGump.IsVisible = false;
+                }
+                else
+                {
+                    if (debugGump == null)
+                    {
+                        debugGump = new DebugGump
+                        {
+                            X = Engine.Profile.Current.DebugGumpPosition.X,
+                            Y = Engine.Profile.Current.DebugGumpPosition.Y
+                        };
+                        Engine.UI.Add(debugGump);
+                    }
+                    else
+                    {
+                        debugGump.IsVisible = true;
+                        debugGump.SetInScreen();
+                    }
+                }
+
+                Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
+            }
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }

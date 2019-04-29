@@ -134,9 +134,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
-        [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(0, 0);
-        [JsonProperty] public bool DebugGumpIsMinimized { get; set; }
-        [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
@@ -147,6 +144,13 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
+
+        // Experimental
+        [JsonProperty] public bool EnableSelectionArea { get; set; } = false;
+        [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
+        [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
+
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

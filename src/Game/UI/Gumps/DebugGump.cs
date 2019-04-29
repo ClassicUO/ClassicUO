@@ -32,8 +32,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _fullDisplayMode = !Engine.Profile.Current.DebugGumpIsMinimized;
 
-            Engine.Profile.Current.DebugGumpIsDisabled = false;
-
             Width = 500;
             Height = 275;
 
@@ -138,12 +136,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return string.Empty;
-        }
-
-        protected override void CloseWithRightClick()
-        {
-            Engine.Profile.Current.DebugGumpIsDisabled = true;
-            base.CloseWithRightClick();
         }
 
         protected override void OnDragEnd(int x, int y)

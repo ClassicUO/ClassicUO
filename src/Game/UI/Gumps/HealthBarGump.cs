@@ -22,7 +22,6 @@
 #endregion
 
 using System.IO;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -63,6 +62,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Serial _partyMemeberSerial;
         private Label _partyNameLabel;
         private TextBox _textBox;
+
+        private bool _targetBroke = false;
 
         public HealthBarGump(Mobile mob) : this()
         {
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (IsDisposed)
                 return;
-
+            
             bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
 
             Hue textColor = 0x0386;
@@ -180,7 +181,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_isDead && Mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
                     Dispose();
-
                     return;
                 }
 
@@ -307,12 +307,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldStam = stam;
                 }
             }
+
+            _textBox.Height = 15;
         }
 
         public override void Dispose()
         {
             if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null) NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
-
             base.Dispose();
         }
 
@@ -445,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 16,
                         Y = 14,
                         Width = 120,
-                        Height = 30,
+                        Height = 15,
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
@@ -457,17 +458,6 @@ namespace ClassicUO.Game.UI.Gumps
                         _textBox.MouseClick += TextBoxOnMouseClick;
                 }
             }
-        }
-
-        private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
-        {
-            if (TargetManager.IsTargeting)
-            {
-                TargetManager.TargetGameObject(Mobile);
-                Mouse.LastLeftButtonClickTime = 0;
-            }
-            else if (_canChangeName)
-                _textBox.IsEditable = true;
         }
 
         private static int CalculatePercents(int max, int current, int maxValue)
@@ -486,15 +476,35 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
             if (TargetManager.IsTargeting)
             {
                 TargetManager.TargetGameObject(Mobile);
                 Mouse.LastLeftButtonClickTime = 0;
             }
+            else if (_canChangeName && !_targetBroke)
+            {
+                _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
+            }
+
+            _targetBroke = false;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (TargetManager.IsTargeting)
+            {
+                _targetBroke = true;
+                TargetManager.TargetGameObject(Mobile);
+                Mouse.LastLeftButtonClickTime = 0;
+            }
             else if (_canChangeName)
+            {
                 _textBox.IsEditable = false;
+                Engine.UI.SystemChat.SetFocus();
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -513,8 +523,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
                 }
             }
-
-
             return true;
         }
 
@@ -526,18 +534,21 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(Mobile, _textBox.Text);
+                Engine.UI.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
         }
 
         protected override void OnMouseEnter(int x, int y)
         {
-            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null) SelectedObject.Object = Mobile;
+            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+                SelectedObject.Object = Mobile;
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile != null && Mobile.IsSelected) SelectedObject.Object = null;
+            if (Mobile != null && Mobile.IsSelected)
+                SelectedObject.Object = null;
         }
 
         private enum ButtonParty
