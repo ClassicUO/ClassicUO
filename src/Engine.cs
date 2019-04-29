@@ -177,12 +177,9 @@ namespace ClassicUO
                     height *= 2;
                 }
 
-                if (World.InGame)
-                    Engine.Profile.Current.WindowClientBounds = new Point(width, height);
-
-                _graphicDeviceManager.PreferredBackBufferWidth = width;
-                _graphicDeviceManager.PreferredBackBufferHeight = height;
-                _graphicDeviceManager.ApplyChanges();
+                _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
+                _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
+                _engine._graphicDeviceManager.ApplyChanges();
 
                 WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
 
@@ -272,7 +269,10 @@ namespace ClassicUO
                 IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
 
                 if (value)
+                {
+                    SetPreferredBackBufferSize(_window.ClientBounds.Width, _window.ClientBounds.Height);
                     SDL.SDL_MaximizeWindow(wnd);
+                }
                 else
                     SDL.SDL_RestoreWindow(wnd);
             }
