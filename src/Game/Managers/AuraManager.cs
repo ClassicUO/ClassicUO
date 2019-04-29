@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Managers
             ColorSourceBlend = Blend.SourceAlpha,
             ColorDestinationBlend = Blend.InverseSourceAlpha
         };
-        private Vector3 _auraHueVector = new Vector3(0, 1, 0);
+        private Vector3 _auraHueVector = new Vector3(0, 13, 0);
 
         public bool IsEnabled
         {
@@ -70,9 +70,9 @@ namespace ClassicUO.Game.Managers
 
             _auraHueVector.X = hue;
 
-            batcher.SetBlendState(_blend);
+            //batcher.SetBlendState(_blend);
             batcher.Draw2D(AuraTexture, x, y, _auraHueVector);
-            batcher.SetBlendState(null);
+            //batcher.SetBlendState(null);
         }
     }
 }
