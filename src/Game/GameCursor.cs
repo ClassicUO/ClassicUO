@@ -34,6 +34,7 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using SDL2;
 
@@ -64,8 +65,32 @@ namespace ClassicUO.Game
         private Point _offset;
         private Rectangle _rect;
 
+        private readonly Texture2D _aura;
+        private Vector3 _auraVector = new Vector3(0, 13, 0);
+
         public GameCursor()
         {
+            short ww = 0;
+            short hh = 0;
+            uint[] data = CircleOfTransparency.CreateTexture(25, ref ww, ref hh);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                ref uint pixel = ref data[i];
+
+                if (pixel != 0)
+                {
+                    ushort value = (ushort)(pixel << 3);
+
+                    if (value > 0xFF)
+                        value = 0xFF;
+
+                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                }
+            }
+            _aura = new Texture2D(Engine.Batcher.GraphicsDevice, ww, hh);
+            _aura.SetData(data);
+
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 2; i++)
@@ -264,6 +289,34 @@ namespace ClassicUO.Game
 
         public void Draw(Batcher2D sb)
         {
+            if (TargetManager.IsTargeting)
+            {
+                ushort id = Graphic;
+
+                if (id < 0x206A)
+                    id -= 0x2053;
+                else
+                    id -= 0x206A;
+
+                int hotX = _cursorOffset[0, id];
+                int hotY = _cursorOffset[1, id];
+
+                switch (TargetManager.TargeringType)
+                {
+                    case TargetType.Neutral:
+                        _auraVector.X = 0x03B2;
+                        break;
+                    case TargetType.Harmful:
+                        _auraVector.X = 0x0023;
+                        break;
+                    case TargetType.Beneficial:
+                        _auraVector.X = 0x005A;
+                        break;
+                }
+
+                sb.Draw2D(_aura, Mouse.Position.X + hotX - 25 / 2 , Mouse.Position.Y + hotY - 25 / 2, _auraVector);
+            }
+
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
                 int x = Mouse.Position.X - _offset.X;
