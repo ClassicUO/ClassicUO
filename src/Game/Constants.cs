@@ -92,9 +92,5 @@ namespace ClassicUO.Game
         public const int DEATH_SCREEN_TIMER = 1500;
 
         public const float SOUND_DELTA = 1000f;
-
-        public const int NEUTRAL_LABEL_COLOR = 0x3B1;
-        public const int HARMFUL_LABEL_COLOR = 0x020;
-        public const int BENEFIC_LABEL_COLOR = 0x059;
     }
 }
