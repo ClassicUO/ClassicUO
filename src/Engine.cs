@@ -95,6 +95,7 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
 
+
         private Engine(string[] args)
         {
             Instance = this;
@@ -146,6 +147,7 @@ namespace ClassicUO
 
                 return;
             }
+
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
