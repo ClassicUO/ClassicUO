@@ -161,7 +161,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isPressed = false;
                 _clickTiming = 0;
-                GameActions.DoubleClick(Entity);
+
+                if (World.Player.InWarMode && Entity is Mobile)
+                    GameActions.Attack(Entity);
+                else
+                    GameActions.DoubleClick(Entity);
+
             }
 
             return true;
