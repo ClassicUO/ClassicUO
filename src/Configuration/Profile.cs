@@ -25,7 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

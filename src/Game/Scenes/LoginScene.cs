@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Scenes
 
         public byte ServerIndex { get; private set; }
 
-        public string Account { get; private set; }
+        public static string Account { get; private set; }
 
         public string Password { get; private set; }
 

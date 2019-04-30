@@ -577,9 +577,7 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            LoginScene scene = Engine.SceneManager.GetScene<LoginScene>();
-
-            Engine.Profile.Load(World.ServerName, scene.Account, Engine.GlobalSettings.LastCharacterName);
+            Engine.Profile.Load(World.ServerName, LoginScene.Account, Engine.GlobalSettings.LastCharacterName);
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
