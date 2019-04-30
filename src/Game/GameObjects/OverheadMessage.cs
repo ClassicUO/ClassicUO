@@ -116,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
                 IsHealthMessage = ishealthmessage
             };
 
-            int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && (ef.Source is Static || ef.Source is Item) ? 0 : 5;
+            int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 5;
 
             for (int i = 0, limit3 = 0; i < _messages.Count; i++)
             {

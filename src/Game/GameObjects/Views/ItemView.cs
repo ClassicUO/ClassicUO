@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Item
     {
         private Graphic _originalGraphic;
-
+        private bool _force;
 
         public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
@@ -51,11 +51,52 @@ namespace ClassicUO.Game.GameObjects
             if (IsCorpse)
                 return DrawCorpse(batcher, posX, posY);
 
-            if (_originalGraphic != DisplayedGraphic || Texture == null || Texture.IsDisposed)
+
+            ushort hue = Hue;
+
+            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(_originalGraphic))
             {
                 _originalGraphic = DisplayedGraphic;
+                _force = false;
+            }
+            else if (Engine.Profile.Current.FieldsType == 2)
+            {
+                if (StaticFilters.IsFireField(Graphic))
+                {
+                    _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    hue = 0x0020;
+                }
+                else if (StaticFilters.IsParalyzeField(Graphic))
+                {
+                    _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    hue = 0x0058;
+                }
+                else if (StaticFilters.IsEnergyField(Graphic))
+                {
+                    _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    hue = 0x0070;
+                }
+                else if (StaticFilters.IsPoisonField(Graphic))
+                {
+                    _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    hue = 0x0044;
+                }
+                else if (StaticFilters.IsWallOfStone(Graphic))
+                {
+                    _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+                    hue = 0x038A;
+                }
+            }
+
+
+
+            if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
+            {
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                Bounds.X = (Texture.Width >> 1) - 22;
+                Bounds.Y = Texture.Height - 44;
+                Bounds.Width = Texture.Width;
+                Bounds.Height = Texture.Height;
             }
 
             if (ItemData.IsFoliage)
@@ -89,7 +130,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ushort hue = Hue;
                 bool isPartial = ItemData.IsPartialHue;
 
                 if (IsSelected && !IsLocked)
@@ -115,9 +155,7 @@ namespace ClassicUO.Game.GameObjects
             // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
             // return true;
 
-            if (base.Draw(batcher, posX, posY)) return true;
-
-            return false;
+            return base.Draw(batcher, posX, posY);
         }
 
         private bool DrawCorpse(Batcher2D batcher, int posX, int posY)

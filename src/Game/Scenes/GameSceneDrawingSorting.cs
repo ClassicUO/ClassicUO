@@ -321,44 +321,22 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
-                if (obj is AnimatedItemEffect effect && effect.Source is Item it2)
-                {
-                    if (useObjectHandles)
-                    {
-                        it2.UseObjectHandles = /*!it2.IsLocked && */!it2.IsMulti && !it2.ClosedObjectHandles;
 
-                        _objectHandlesCount++;
-                    }
-                    else if (it2.ClosedObjectHandles)
-                    {
-                        it2.ClosedObjectHandles = false;
-                        it2.ObjectHandlesOpened = false;
-                    }
-                    else if (it2.UseObjectHandles)
-                    {
-                        it2.ObjectHandlesOpened = false;
-                        it2.UseObjectHandles = false;
-                    }
-                }
-                else
+                if (useObjectHandles)
                 {
-                    if (useObjectHandles)
-                    {
-                        obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it /*&& !it.IsLocked */&& !it.IsMulti) && !obj.ClosedObjectHandles;
-                        _objectHandlesCount++;
-                    }
-                    else if (obj.ClosedObjectHandles)
-                    {
-                        obj.ClosedObjectHandles = false;
-                        obj.ObjectHandlesOpened = false;
-                    }
-                    else if (obj.UseObjectHandles)
-                    {
-                        obj.ObjectHandlesOpened = false;
-                        obj.UseObjectHandles = false;
-                    }
+                    obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it /*&& !it.IsLocked */&& !it.IsMulti) && !obj.ClosedObjectHandles;
+                    _objectHandlesCount++;
                 }
-
+                else if (obj.ClosedObjectHandles)
+                {
+                    obj.ClosedObjectHandles = false;
+                    obj.ObjectHandlesOpened = false;
+                }
+                else if (obj.UseObjectHandles)
+                {
+                    obj.ObjectHandlesOpened = false;
+                    obj.UseObjectHandles = false;
+                }
 
                 //ref var weak = ref _renderList[_renderListCount];
 

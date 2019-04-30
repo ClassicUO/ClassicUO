@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected int TargetZ { get; set; }
 
-        protected AnimDataFrame AnimDataFrame { get; set; }
+        protected AnimDataFrame AnimDataFrame;
 
         public int Speed { get; set; }
 

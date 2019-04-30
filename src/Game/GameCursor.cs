@@ -388,15 +388,6 @@ namespace ClassicUO.Game
                             return;
                         }
                     }
-
-                    if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
-                    {
-                        if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
-                            _tooltip.SetGameObject(dynItem);
-                        _tooltip.Draw(batcher, position.X, position.Y + 24);
-
-                        return;
-                    }
                 }
             }
 

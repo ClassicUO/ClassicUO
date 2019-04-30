@@ -154,9 +154,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
-                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                        obj = it;
-
                     switch (obj)
                     {
                         case Mobile mobile:
@@ -276,11 +273,6 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
-                case GameEffect effect when effect.Source is Item item:
-                    e.Result = true;
-                    GameActions.DoubleClick(item);
-
-                    break;
                 case MessageInfo msg when msg.Parent.Parent is Entity entity:
                     e.Result = true;
                     GameActions.DoubleClick(entity);
@@ -343,16 +335,6 @@ namespace ClassicUO.Game.Scenes
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     GameObject obj = _dragginObject;
-
-                    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-                    {
-                        if (PickupItemBegin(it, _dragOffset.X, _dragOffset.Y))
-                        {
-                            obj.Destroy();
-
-                            return;
-                        }
-                    }
 
                     switch (obj)
                     {

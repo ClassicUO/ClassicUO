@@ -120,9 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return $"Multi ({multi.Graphic})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
                     case GameEffect effect:
 
-                        if (effect.Source is Item i)
-                            return $"Item ({i.Serial})  graphic: {i.Graphic}  flags: {i.Flags}  amount: {i.Amount}";
-                        else if (effect.Source is Static s)
+                        if (effect.Source is Static s)
                             return $"Static ({s.Graphic})  height: {s.ItemData.Height}  flags: {s.ItemData.Flags}";
 
                         return "GameEffect";

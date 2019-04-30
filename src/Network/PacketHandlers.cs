@@ -564,12 +564,12 @@ namespace ClassicUO.Network
 
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (item.ItemData.IsAnimated)
-            {
-                item.AllowedToDraw = false;
+            //if (item.ItemData.IsAnimated)
+            //{
+            //    item.AllowedToDraw = false;
 
-                World.AddEffect(new AnimatedItemEffect(item.Serial, x, y, z, item.Graphic, item.Hue, -1));
-            }
+            //    World.AddEffect(new AnimatedItemEffect(item.Serial, x, y, z, item.Graphic, item.Hue, -1));
+            //}
 
             if (item.OnGround)
                 item.AddToTile();
@@ -3347,11 +3347,11 @@ namespace ClassicUO.Network
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
 
-            if (item.ItemData.IsAnimated)
-            {
-                item.AllowedToDraw = false;
-                World.AddEffect(new AnimatedItemEffect(item.Serial, position.X, position.Y, position.Z, item.Graphic, item.Hue, -1));
-            }
+            //if (item.ItemData.IsAnimated)
+            //{
+            //    item.AllowedToDraw = false;
+            //    World.AddEffect(new AnimatedItemEffect(item.Serial, position.X, position.Y, position.Z, item.Graphic, item.Hue, -1));
+            //}
 
             if (item.OnGround)
                 item.AddToTile();

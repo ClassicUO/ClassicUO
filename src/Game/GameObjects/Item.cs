@@ -49,6 +49,12 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+
+        // TODO: FIXME! temp workaround
+        public AnimatedItemEffect Animation { get; set; }
+
+
+
         public uint Price
         {
             get => _price;
@@ -400,6 +406,10 @@ namespace ClassicUO.Game.GameObjects
             //}
         }
 
+        private AnimDataFrame? _animDataFrame;
+        private int _animSpeed;
+
+
         public void CheckGraphicChange()
         {
             if (!IsMulti)
@@ -407,10 +417,15 @@ namespace ClassicUO.Game.GameObjects
                 if (!IsCorpse)
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-                    //if (IsMulti)
-                    //    AllowedToDraw = MultiGraphic != 0;
-                    //else
-                    //    AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+
+                    if (ItemData.IsAnimated)
+                    {
+                        _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
+                        AnimIndex = 0;
+                        _animSpeed = _animDataFrame.Value.FrameInterval != 0 ? _animDataFrame.Value.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                        LastAnimationChangeTime = Engine.Ticks + _animSpeed;
+                    }
+                    _originalGraphic = DisplayedGraphic;
                 }
                 else
                 {
@@ -446,8 +461,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (IsCorpse)
-                ProcessAnimation();
+            ProcessAnimation();
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -880,6 +894,17 @@ namespace ClassicUO.Game.GameObjects
 
                     LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
+            }
+            else if (_animDataFrame.HasValue && _animDataFrame.Value.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            {
+                _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.Value.FrameData[AnimIndex++]);
+
+                if (AnimIndex >= _animDataFrame.Value.FrameCount)
+                    AnimIndex = 0;
+
+                _force = _originalGraphic == DisplayedGraphic;
+
+                LastAnimationChangeTime = Engine.Ticks + _animSpeed;
             }
         }
     }
