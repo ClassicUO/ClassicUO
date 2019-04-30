@@ -289,7 +289,7 @@ namespace ClassicUO.Game
 
         public void Draw(Batcher2D sb)
         {
-            if (TargetManager.IsTargeting)
+            if (TargetManager.IsTargeting && Engine.Profile.Current != null && Engine.Profile.Current.AuraOnMouse)
             {
                 ushort id = Graphic;
 

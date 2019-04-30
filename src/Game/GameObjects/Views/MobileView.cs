@@ -308,13 +308,16 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
 
-            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, false).Direction[dir];
+            ushort hue2 = hue;
+            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue2, false).Direction[dir];
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             if (hue == 0)
-                hue = item.Hue;
+            {
+                hue = hue2 != hue ? hue2 : (ushort)item.Hue;
+            }
 
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
