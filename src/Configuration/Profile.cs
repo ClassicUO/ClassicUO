@@ -223,8 +223,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
-
-
+        [JsonProperty] public bool AuraOnMouse { get; set; } = true;
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
