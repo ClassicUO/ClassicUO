@@ -56,9 +56,9 @@ namespace ClassicUO.Game.UI.Controls
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
             LocalSerial = Serial.Parse(parts[6]);
-            SetText(lines[int.Parse(parts[7])]);
-
             TxEntry.SetHeight(Height);
+
+            SetText(lines[int.Parse(parts[7])]);
         }
 
         public TextEntry TxEntry { get; private set; }
@@ -133,8 +133,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            if (Height != TxEntry.Height)
-                Height = TxEntry.Height;
+            int h = Math.Max(Height, TxEntry.Height);
+
+            if (Height != h)
+                Height = h;
 
             if (TxEntry.IsChanged)
             {

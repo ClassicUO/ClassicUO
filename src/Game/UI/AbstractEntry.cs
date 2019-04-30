@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI
         public int Width { get; }
 
         private int? _height;
-        public int Height => _height.HasValue && _height.Value > RenderText.Height ? _height.Value : RenderText.Height;
+        public int Height => _height.HasValue && _height.Value > RenderText.Height ? _height.Value : RenderText.Height < 15 ? 15 : RenderText.Height;
 
         public void SetHeight(int h) => _height = h;
 
