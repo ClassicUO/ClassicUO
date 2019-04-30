@@ -1022,7 +1022,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetReplacedObjectAnimation(Graphic graphic, ushort index)
         {
-            ushort getReplacedGroup(IReadOnlyList<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
+            ushort getReplacedGroup(List<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
             {
                 foreach (Tuple<ushort, byte> item in list)
                 {

@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public float Alpha { get; set; }
 
-        public IReadOnlyList<Control> Children => _children;
+        public List<Control> Children => _children;
 
         public object Tag { get; set; }
 

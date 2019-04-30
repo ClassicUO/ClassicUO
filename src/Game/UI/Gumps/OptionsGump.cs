@@ -75,12 +75,13 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
 
-        // combat
-        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
-        private HSliderBar _lightBar;
+        // combat & spells
+        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
+        private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
+        private TextBox _spellFormatBox;
 
+        private HSliderBar _lightBar;
         private MacroControl _macroControl;
-        private Checkbox _queryBeforAttackCheckbox;
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
         private TextBox _rows, _columns;
 
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") {ButtonParameter = 5});
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat") {ButtonParameter = 8});
+            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
 
@@ -803,6 +804,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
+            _spellFormatCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Format", Engine.Profile.Current.EnabledSpellFormat, 0, 40);
+            _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", Engine.Profile.Current.EnabledSpellHue, 0, 10);
+            _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 10, Engine.Profile.Current.BeneficHue, "Benefic Spell Hue", 20, 10);
+            _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
+            _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
+            ScrollAreaItem it = new ScrollAreaItem();
+            _spellFormatBox = CreateInputField(it, new TextBox(FONT, 30, 200, 200)
+            {
+                Text = Engine.Profile.Current.SpellDisplayFormat,
+                X = 10,
+                Y = 40,
+                Width = 200,
+                Height = 30
+            }, "Spell Overhead format: ({power} for powerword - {spell} for spell name");
+            rightArea.Add(it);
+
             Add(rightArea, PAGE);
         }
 
@@ -1023,6 +1040,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
 
+                    _beneficColorPickerBox.SetColor(0x0059, FileManager.Hues.GetPolygoneColor(12, 0x0059));
+                    _harmfulColorPickerBox.SetColor(0x0020, FileManager.Hues.GetPolygoneColor(12, 0x0020));
+                    _neutralColorPickerBox.SetColor(0x03B1, FileManager.Hues.GetPolygoneColor(12, 0x03B1));
+                    _spellFormatBox.SetText("{power} [{spell}]");
+                    _spellColoringCheckbox.IsChecked = false;
+                    _spellFormatCheckbox.IsChecked = false;
                     break;
                 case 9:
                     _enableCounters.IsChecked = false;
@@ -1257,6 +1280,13 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
             Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
 
+            Engine.Profile.Current.BeneficHue = _beneficColorPickerBox.Hue;
+            Engine.Profile.Current.HarmfulHue = _harmfulColorPickerBox.Hue;
+            Engine.Profile.Current.NeutralHue = _neutralColorPickerBox.Hue;
+            Engine.Profile.Current.EnabledSpellHue = _spellColoringCheckbox.IsChecked;
+            Engine.Profile.Current.EnabledSpellFormat = _spellFormatCheckbox.IsChecked;
+            Engine.Profile.Current.SpellDisplayFormat = _spellFormatBox.Text;
+
             // macros
             Engine.Profile.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
 
@@ -1343,8 +1373,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             area.Add(new ResizePic(0x0BB8)
             {
-                X = elem.X - 10,
-                Y = elem.Y - 5,
+                X = elem.X - 5,
+                Y = elem.Y - 2,
                 Width = elem.Width + 10,
                 Height = elem.Height - 7
             });

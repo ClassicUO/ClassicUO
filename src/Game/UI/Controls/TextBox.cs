@@ -57,6 +57,8 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
             LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
+
+            TxEntry.SetHeight(Height);
         }
 
         public TextEntry TxEntry { get; private set; }

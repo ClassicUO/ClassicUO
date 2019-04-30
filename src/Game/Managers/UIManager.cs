@@ -222,7 +222,7 @@ namespace ClassicUO.Game.Managers
 
         public AnchorManager AnchorManager { get; }
 
-        public IReadOnlyList<Control> Gumps => _gumps;
+        public List<Control> Gumps => _gumps;
 
         public Control MouseOverControl { get; private set; }
 
@@ -651,7 +651,7 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(Batcher2D batcher)
         {
-            //SortControlsByInfo();
+            SortControlsByInfo();
 
             batcher.GraphicsDevice.Clear(Color.Transparent);
             batcher.Begin();
@@ -832,7 +832,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_needSort)
             {
-                List<Control> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+                var gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToArray();
 
                 int over = 0;
                 int under = _gumps.Count - 1;

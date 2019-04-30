@@ -47,6 +47,20 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
     return OUT;
 }
 
+float3 get_rgb(float red, float hue)
+{
+	if (hue < HuesPerTexture)
+		return tex2D(HueSampler0, float2(red, hue / 3000.0000f)).rgb;
+	return tex2D(HueSampler1, float2(red, (hue - 3000.0000f) / 3000.0000f)).rgb;
+}
+
+float3 get_light(float3 norm)
+{
+	float3 light = normalize(lightDirection);
+	float3 normal = normalize(norm);
+	return max((dot(normal, light) + 0.5f), 0.0f);
+}
+
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	// Get the initial pixel and discard it if the alpha == 0
@@ -58,10 +72,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		if (color.a != 0.0f && IN.Hue.x != 0.0f)
 		{
-			if (IN.Hue.x < HuesPerTexture)
-				color.rgb *= tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
-			else
-				color.rgb *= tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
+			color.rgb *= get_rgb(color.r, IN.Hue.x);
 		}
 		return color;
 	}
@@ -72,33 +83,17 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	float alpha = 1 - IN.Hue.z;
 
-	if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b ))
+	if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
 	{
-		if (IN.Hue.x < HuesPerTexture)
-			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
-		else
-			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
+		color.rgb = get_rgb(color.r, IN.Hue.x);
 	}
 	else if (mode == LAND)
 	{
-		float3 light = normalize(lightDirection);
-		float3 normal = normalize(IN.Normal);
-		float3 nDotL = max((dot(normal, light) + 0.5f), 0.0f);
-
-		color.rgb = (color.rgb * nDotL);
+		color.rgb *= get_light(IN.Normal);
 	}
 	else if (mode == LAND_COLOR)
 	{
-		if (IN.Hue.x < HuesPerTexture)
-			color.rgb = tex2D(HueSampler0, float2(color.r, IN.Hue.x / 3000.0f)).rgb;
-		else
-			color.rgb = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - 3000.0f) / 3000.0f)).rgb;
-
-		float3 light = normalize(lightDirection);
-		float3 normal = normalize(IN.Normal);
-		float3 nDotL = max((dot(normal, light) + 0.5f), 0.0f);
-
-		color.rgb = (color.rgb * nDotL);
+		color.rgb = get_rgb(color.r, IN.Hue.x) * get_light(IN.Normal);
 	}
 	else if (mode == SPECTRAL)
 	{
@@ -111,9 +106,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		color.rgb = float3(0, 0, 0);
 	}
 
-	color *= alpha;
-
-	return color;
+	return color * alpha;
 }
 
 

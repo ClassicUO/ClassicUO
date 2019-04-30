@@ -57,8 +57,12 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            {
+                HueVector.X = 0x0023;
+                HueVector.Y = 1;
+            }
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -70,28 +74,20 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ushort hue = Hue;
+                HueVector.X = Hue;
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected) hue = 0x0023;
-
-                HueVector.X = hue;
-
-                if (hue != 0)
+                if (Hue != 0)
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
                 else
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
             }
 
 
-            bool ok = IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY);
-
-            if (ok)
+            if (IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY))
             {
                 Select(posX, posY);
-
                 return true;
             }
-
             return false;
         }
 

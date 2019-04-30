@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
             _children = new List<GameEffect>();
         }
 
-        public IReadOnlyList<GameEffect> Children => _children;
+        public List<GameEffect> Children => _children;
 
         public GameObject Source { get; set; }
 

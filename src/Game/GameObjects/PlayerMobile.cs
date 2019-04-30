@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public IReadOnlyList<Skill> Skills => _sklls;
+        public Skill[] Skills => _sklls;
 
         public override bool InWarMode { get; set; }
 

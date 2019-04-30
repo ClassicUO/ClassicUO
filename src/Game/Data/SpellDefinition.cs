@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Data
     internal readonly struct SpellDefinition : IEquatable<SpellDefinition>
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
-        internal static Dictionary<string, TargetType> WordToTargettype = new Dictionary<string, TargetType>();
+        internal static Dictionary<string, SpellDefinition> WordToTargettype = new Dictionary<string, SpellDefinition>();
 
         public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minskill, int tithingcost, TargetType target, params Reagents[] regs)
         {
@@ -46,7 +46,8 @@ namespace ClassicUO.Game.Data
             MinSkill = minskill;
             PowerWords = powerwords;
             TithingCost = tithingcost;
-            AddToWatchedSpell(powerwords, name, target);
+            TargetType = target;
+            AddToWatchedSpell();
         }
 
         public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minskill, TargetType target, params Reagents[] regs)
@@ -60,7 +61,8 @@ namespace ClassicUO.Game.Data
             MinSkill = minskill;
             PowerWords = powerwords;
             TithingCost = 0;
-            AddToWatchedSpell(powerwords, name, target);
+            TargetType = target;
+            AddToWatchedSpell();
         }
 
         public SpellDefinition(string name, int index, int gumpIconID, string powerwords, TargetType target, params Reagents[] regs)
@@ -74,18 +76,16 @@ namespace ClassicUO.Game.Data
             MinSkill = 0;
             TithingCost = 0;
             PowerWords = powerwords;
-            AddToWatchedSpell(powerwords, name, target);
+            TargetType = target;
+            AddToWatchedSpell();
         }
 
-        private static void AddToWatchedSpell(string power, string name, TargetType target)
+        private void AddToWatchedSpell()
         {
-            if (target != TargetType.Neutral)
-            {
-                if (!string.IsNullOrEmpty(power))
-                    WordToTargettype[power] = target;
-                else if (!string.IsNullOrEmpty(name))
-                    WordToTargettype[name] = target;
-            }
+            if (!string.IsNullOrEmpty(PowerWords))
+                WordToTargettype[PowerWords] = this;
+            else if (!string.IsNullOrEmpty(Name))
+                WordToTargettype[Name] = this;
         }
 
         public readonly string Name;
@@ -97,6 +97,7 @@ namespace ClassicUO.Game.Data
         public readonly int ManaCost;
         public readonly int MinSkill;
         public readonly int TithingCost;
+        public readonly TargetType TargetType;
 
         public string CreateReagentListString(string separator)
         {
