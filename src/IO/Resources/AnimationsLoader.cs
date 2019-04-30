@@ -85,7 +85,6 @@ namespace ClassicUO.IO.Resources
             UOFile idxfile5 = _files[4]?.IdxFile;
             long? maxAddress5 = (long?) idxfile5?.StartAddress + idxfile5?.Length;
 
-
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
                 string[] typeNames = new string[5]
@@ -146,7 +145,6 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
 
             for (ushort i = 0; i < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
@@ -213,7 +211,7 @@ namespace ClassicUO.IO.Resources
                 DataIndex[i].IsValidMUL = isValid;
             }
 
-
+            if (File.Exists(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
             {
                 while (defReader.Next())
@@ -224,6 +222,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+            if (File.Exists(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))
             using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))
             {
                 while (defReader.Next())
@@ -233,7 +232,6 @@ namespace ClassicUO.IO.Resources
                     GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte) replace));
                 }
             }
-
 
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
                 return;
