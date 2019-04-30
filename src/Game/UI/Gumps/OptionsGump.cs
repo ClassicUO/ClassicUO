@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
-        private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox;
+        private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private TextBox _spellFormatBox;
 
         private HSliderBar _lightBar;
@@ -804,7 +804,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 30);
 
-            _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", Engine.Profile.Current.EnabledSpellHue, 0, 40);
+            _spellFormatCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Format", Engine.Profile.Current.EnabledSpellFormat, 0, 40);
+            _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", Engine.Profile.Current.EnabledSpellHue, 0, 10);
             _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 10, Engine.Profile.Current.BeneficHue, "Benefic Spell Hue", 20, 10);
             _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
             _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
@@ -1044,6 +1045,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _neutralColorPickerBox.SetColor(0x03B1, FileManager.Hues.GetPolygoneColor(12, 0x03B1));
                     _spellFormatBox.SetText("{power} [{spell}]");
                     _spellColoringCheckbox.IsChecked = false;
+                    _spellFormatCheckbox.IsChecked = false;
                     break;
                 case 9:
                     _enableCounters.IsChecked = false;
@@ -1282,6 +1284,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HarmfulHue = _harmfulColorPickerBox.Hue;
             Engine.Profile.Current.NeutralHue = _neutralColorPickerBox.Hue;
             Engine.Profile.Current.EnabledSpellHue = _spellColoringCheckbox.IsChecked;
+            Engine.Profile.Current.EnabledSpellFormat = _spellFormatCheckbox.IsChecked;
             Engine.Profile.Current.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros

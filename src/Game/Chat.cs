@@ -98,7 +98,7 @@ namespace ClassicUO.Game
                     //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
-                        if (!string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        if (Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
                         {
                             StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
