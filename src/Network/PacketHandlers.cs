@@ -2573,7 +2573,11 @@ namespace ClassicUO.Network
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
-                        item.AddOverhead(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
+                       // item.AddOverhead(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
+
+
+                       Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, MessageFont.Normal, true);
+
                     }
 
                     str = string.Empty;
