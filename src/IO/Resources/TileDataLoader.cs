@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class TileDataLoader : ResourceLoader
+    internal class TileDataLoader : ResourceLoader
     {
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
@@ -25,9 +22,10 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
+
             UOFileMul tiledata = new UOFileMul(path, true);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-            int staticscount = !isold ? (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
@@ -44,6 +42,7 @@ namespace ClassicUO.IO.Resources
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
                         goto END;
+
                     int idx = i * 32 + j;
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     ushort textId = tiledata.ReadUShort();
@@ -53,18 +52,20 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-        END:
+            END:
 
             for (int i = 0; i < staticscount; i++)
             {
                 if (tiledata.Position >= tiledata.Length)
                     break;
+
                 tiledata.Skip(4);
 
                 for (int j = 0; j < 32; j++)
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
                         goto END_2;
+
                     int idx = i * 32 + j;
 
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
@@ -81,8 +82,6 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
                 }
             }
-
-      
 
 
             //path = Path.Combine(FileManager.UoFolderPath, "tileart.uop");
@@ -202,7 +201,6 @@ namespace ClassicUO.IO.Resources
             //        }
 
 
-
             //        if (StaticData[tileID].AnimID == 0)
             //        {
             //            //StaticData[tileID] = new StaticTiles(flags, 0, 0, 0, );
@@ -264,7 +262,6 @@ namespace ClassicUO.IO.Resources
 
             END_2:
             tiledata.Dispose();
-
         }
 
         protected override void CleanResources()
@@ -277,7 +274,7 @@ namespace ClassicUO.IO.Resources
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
-            Flags = (TileFlag)flags;
+            Flags = (TileFlag) flags;
             TexID = textId;
             Name = name;
         }
@@ -289,7 +286,6 @@ namespace ClassicUO.IO.Resources
         public bool IsWet => (Flags & TileFlag.Wet) != 0;
         public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
         public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
-
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -304,7 +300,7 @@ namespace ClassicUO.IO.Resources
     {
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
-            Flags = (TileFlag)flags;
+            Flags = (TileFlag) flags;
             Weight = weight;
             Layer = layer;
             Count = count;
@@ -580,5 +576,4 @@ namespace ClassicUO.IO.Resources
         /// Movable multi? Cool ships and vehicles etc?
         MultiMovable = 0x10000000000
     }
-
 }

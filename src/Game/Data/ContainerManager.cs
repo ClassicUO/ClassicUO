@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.IO;
@@ -165,7 +168,7 @@ namespace ClassicUO.Game.Data
             return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
         }
 
-     
+
         public static void CalculateContainerPosition(Graphic g)
         {
             SpriteTexture texture = FileManager.Gumps.GetTexture(g);
@@ -179,18 +182,14 @@ namespace ClassicUO.Game.Data
                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                     if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowHeight)
-                    {
                         Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    }
                     else
                         Y += Constants.CONTAINER_RECT_LINESTEP;
                 }
                 else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Engine.WindowHeight)
                 {
                     if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowWidth)
-                    {
                         X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    }
                     else
                         X += Constants.CONTAINER_RECT_LINESTEP;
 
@@ -216,8 +215,8 @@ namespace ClassicUO.Game.Data
         {
             if (X == DefaultX || Y == DefaultY)
 
-            X = ContainerManager.X;
-            Y = ContainerManager.Y;
+                X = X;
+            Y = Y;
         }
     }
 

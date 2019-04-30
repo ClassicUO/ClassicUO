@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 namespace ClassicUO.Network
@@ -37,9 +40,7 @@ namespace ClassicUO.Network
             set
             {
                 if (index == 0)
-                {
                     SetPacketId(value);
-                }
                 else
                     _data[index] = value;
             }
@@ -78,7 +79,7 @@ namespace ClassicUO.Network
         protected override bool EnsureSize(int length)
         {
             if (length < 0)
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             if (IsDynamic)
             {

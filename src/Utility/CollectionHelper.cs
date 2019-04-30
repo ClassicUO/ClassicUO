@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Utility
 {
@@ -15,12 +12,17 @@ namespace ClassicUO.Utility
                 throw new ArgumentNullException(nameof(source));
 
             var result = source as IReadOnlyCollection<T>;
+
             if (result != null)
                 return result;
+
             var collection = source as ICollection<T>;
+
             if (collection != null)
                 return new CollectionWrapper<T>(collection);
+
             var nongenericCollection = source as ICollection;
+
             if (nongenericCollection != null)
                 return new NongenericCollectionWrapper<T>(nongenericCollection);
 
@@ -35,16 +37,11 @@ namespace ClassicUO.Utility
             {
                 if (collection == null)
                     throw new ArgumentNullException(nameof(collection));
+
                 _collection = collection;
             }
 
-            public int Count
-            {
-                get
-                {
-                    return _collection.Count;
-                }
-            }
+            public int Count => _collection.Count;
 
             public IEnumerator<T> GetEnumerator()
             {
@@ -66,16 +63,11 @@ namespace ClassicUO.Utility
             {
                 if (collection == null)
                     throw new ArgumentNullException(nameof(collection));
+
                 _collection = collection;
             }
 
-            public int Count
-            {
-                get
-                {
-                    return _collection.Count;
-                }
-            }
+            public int Count => _collection.Count;
 
             public IEnumerator<T> GetEnumerator()
             {

@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.IO.Audio;
-
-using Microsoft.Xna.Framework.Media;
 
 namespace ClassicUO.IO.Resources
 {
     internal class SoundsLoader : ResourceLoader
     {
-        private UOFile _file;
-        private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
-        private static readonly char[] _mConfigFileDelimiters = { ' ', ',', '\t' };
+        private static readonly char[] _mConfigFileDelimiters = {' ', ',', '\t'};
         private static readonly Dictionary<int, Tuple<string, bool>> _mMusicData = new Dictionary<int, Tuple<string, bool>>();
+        private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
+        private UOFile _file;
 
 
         public override void Load()
@@ -25,22 +21,16 @@ namespace ClassicUO.IO.Resources
             string path = Path.Combine(FileManager.UoFolderPath, "soundLegacyMUL.uop");
 
             if (File.Exists(path))
-            {
                 _file = new UOFileUop(path, ".dat", Constants.MAX_SOUND_DATA_INDEX_COUNT);
-            }
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "sound.mul");
                 string idxpath = Path.Combine(FileManager.UoFolderPath, "soundidx.mul");
 
                 if (File.Exists(path) && File.Exists(idxpath))
-                {
                     _file = new UOFileMul(path, idxpath, Constants.MAX_SOUND_DATA_INDEX_COUNT);
-                }
                 else
-                {
                     throw new FileNotFoundException("no sounds found");
-                }
             }
 
             string def = Path.Combine(FileManager.UoFolderPath, "Sound.def");
@@ -57,6 +47,7 @@ namespace ClassicUO.IO.Resources
                             continue;
 
                         int[] group = reader.ReadGroup();
+
                         if (group == null)
                             continue;
 
@@ -70,9 +61,7 @@ namespace ClassicUO.IO.Resources
                             ref UOFileIndex3D ind = ref _file.Entries[index];
 
                             if (checkIndex == -1)
-                            {
                                 ind = default;
-                            }
                             else
                             {
                                 ref readonly UOFileIndex3D outInd = ref _file.Entries[checkIndex];
@@ -94,15 +83,12 @@ namespace ClassicUO.IO.Resources
                 using (StreamReader reader = new StreamReader(path))
                 {
                     string line;
+
                     while ((line = reader.ReadLine()) != null)
                     {
-                        if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
-                        {
-                            _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
-                        }
+                        if (TryParseConfigLine(line, out Tuple<int, string, bool> songData)) _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
                     }
                 }
-
             }
         }
 
@@ -118,10 +104,7 @@ namespace ClassicUO.IO.Resources
 
             long offset = _file.Position;
 
-            if (offset < 0 || length <= 0)
-            {
-                return false;
-            }
+            if (offset < 0 || length <= 0) return false;
 
             _file.Seek(offset);
 
@@ -136,7 +119,7 @@ namespace ClassicUO.IO.Resources
         }
 
         /// <summary>
-        /// Attempts to parse a line from UO's music Config.txt.
+        ///     Attempts to parse a line from UO's music Config.txt.
         /// </summary>
         /// <param name="line">A line from the file.</param>
         /// <param name="?">If successful, contains a tuple with these fields: int songIndex, string songName, bool doesLoop</param>
@@ -146,16 +129,15 @@ namespace ClassicUO.IO.Resources
             songData = null;
 
             string[] splits = line.Split(_mConfigFileDelimiters);
-            if (splits.Length < 2 || splits.Length > 3)
-            {
-                return false;
-            }
+
+            if (splits.Length < 2 || splits.Length > 3) return false;
 
             int index = int.Parse(splits[0]);
             string name = splits[1].Trim();
             bool doesLoop = splits.Length == 3 && splits[2] == "loop";
 
             songData = new Tuple<int, string, bool>(index, name, doesLoop);
+
             return true;
         }
 
@@ -168,6 +150,7 @@ namespace ClassicUO.IO.Resources
             {
                 name = _mMusicData[index].Item1;
                 doesLoop = _mMusicData[index].Item2;
+
                 return true;
             }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Input;
-using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
@@ -33,7 +34,6 @@ namespace ClassicUO.Game.UI.Controls
         private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
         private readonly bool _isResizable = true;
-        private int _expandableScrollHeight;
         private Button _gumpExpander;
         private GumpPic _gumplingTitle;
         private int _gumplingTitleGumpID;
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = x;
             Y = y;
-            _expandableScrollHeight = height;
+            SpecialHeight = height;
             _isResizable = isResizable;
             CanMove = true;
             AcceptMouseInput = true;
@@ -55,13 +55,13 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _gumplingMidY => _gumpTop.Height;
 
-        private int _gumplingMidHeight => _expandableScrollHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander != null ? _gumpExpander.Height : 0);
+        private int _gumplingMidHeight => SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
-        private int _gumplingBottomY => _expandableScrollHeight - _gumpBottom.Height - (_gumpExpander != null ? _gumpExpander.Height : 0);
+        private int _gumplingBottomY => SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
-        private int _gumplingExpanderX => (Width - (_gumpExpander != null ? _gumpExpander.Width : 0)) >> 1;
+        private int _gumplingExpanderX => (Width - (_gumpExpander?.Width ?? 0)) >> 1;
 
-        private int _gumplingExpanderY => _expandableScrollHeight - (_gumpExpander != null ? _gumpExpander.Height : 0) - c_GumplingExpanderY_Offset;
+        private int _gumplingExpanderY => SpecialHeight - (_gumpExpander?.Height ?? 0) - c_GumplingExpanderY_Offset;
 
         public int TitleGumpID
         {
@@ -72,11 +72,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int SpecialHeight
-        {
-            get => _expandableScrollHeight;
-            set => _expandableScrollHeight = value;
-        }
+        public int SpecialHeight { get; set; }
 
         protected override void OnInitialize()
         {
@@ -133,18 +129,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_expandableScrollHeight < c_ExpandableScrollHeight_Min)
-                _expandableScrollHeight = c_ExpandableScrollHeight_Min;
+            if (SpecialHeight < c_ExpandableScrollHeight_Min)
+                SpecialHeight = c_ExpandableScrollHeight_Min;
 
-            if (_expandableScrollHeight > c_ExpandableScrollHeight_Max)
-                _expandableScrollHeight = c_ExpandableScrollHeight_Max;
+            if (SpecialHeight > c_ExpandableScrollHeight_Max)
+                SpecialHeight = c_ExpandableScrollHeight_Max;
 
             if (_gumplingTitleGumpIDDelta)
             {
                 _gumplingTitleGumpIDDelta = false;
 
-                if (_gumplingTitle != null)
-                    _gumplingTitle.Dispose();
+                _gumplingTitle?.Dispose();
                 Add(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
             }
 
@@ -200,7 +195,7 @@ namespace ClassicUO.Game.UI.Controls
             if (args.Button == MouseButton.Left)
             {
                 _isExpanding = true;
-                _isExpanding_InitialHeight = _expandableScrollHeight;
+                _isExpanding_InitialHeight = SpecialHeight;
                 _isExpanding_InitialX = x;
                 _isExpanding_InitialY = y;
             }
@@ -214,7 +209,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_isExpanding)
             {
                 _isExpanding = false;
-                _expandableScrollHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
+                SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
             }
         }
 
@@ -222,7 +217,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             int y = args.Y;
             y += _gumpExpander.Y + ScreenCoordinateY - Y;
-            if (_isExpanding && y != _isExpanding_InitialY) _expandableScrollHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
+            if (_isExpanding && y != _isExpanding_InitialY) SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
         }
     }
 }

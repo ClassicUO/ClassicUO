@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using SDL2;
 
 namespace ClassicUO.Game.Managers
 {
-    class HotKeyCombination
+    internal class HotKeyCombination
     {
-        public SDL2.SDL.SDL_Keycode Key { get; set; }
-        public SDL2.SDL.SDL_Keymod Mod { get; set; }
+        public SDL.SDL_Keycode Key { get; set; }
+        public SDL.SDL_Keymod Mod { get; set; }
         public HotkeyAction KeyAction { get; set; }
     }
 
-    class HotkeysManager
+    internal class HotkeysManager
     {
         private readonly Dictionary<HotkeyAction, Action> _actions = new Dictionary<HotkeyAction, Action>();
 
@@ -23,7 +20,6 @@ namespace ClassicUO.Game.Managers
 
         public HotkeysManager()
         {
-
             Add(HotkeyAction.CastClumsy, () => GameActions.CastSpell(1));
             Add(HotkeyAction.CastCreateFood, () => GameActions.CastSpell(2));
             Add(HotkeyAction.CastFeeblemind, () => GameActions.CastSpell(3));
@@ -172,24 +168,17 @@ namespace ClassicUO.Game.Managers
             Add(HotkeyAction.CastHailStorm, () => GameActions.CastSpell(691));
             Add(HotkeyAction.CastNetherCyclone, () => GameActions.CastSpell(692));
             Add(HotkeyAction.CastRisingColossus, () => GameActions.CastSpell(693));
-
         }
 
 
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-
-            for (int i = 0; i < _hotkeys.Count; i++)
+            foreach (HotKeyCombination h in _hotkeys)
             {
-                var h = _hotkeys[i];
-
-                if (h.Key == key && h.Mod == mod)
-                {
-                    return false;
-                }
+                if (h.Key == key && h.Mod == mod) return false;
             }
 
-            _hotkeys.Add(new HotKeyCombination()
+            _hotkeys.Add(new HotKeyCombination
             {
                 Key = key,
                 Mod = mod,
@@ -208,6 +197,7 @@ namespace ClassicUO.Game.Managers
                 if (h.KeyAction == action)
                 {
                     _hotkeys.RemoveAt(i);
+
                     break;
                 }
             }
@@ -215,7 +205,6 @@ namespace ClassicUO.Game.Managers
 
         public bool TryExecuteIfBinded(SDL.SDL_Keycode key, SDL.SDL_Keymod mod, out Action action)
         {
-
             for (int i = 0; i < _hotkeys.Count; i++)
             {
                 var h = _hotkeys[i];
@@ -225,11 +214,12 @@ namespace ClassicUO.Game.Managers
                     if (_actions.TryGetValue(h.KeyAction, out action))
                         return true;
 
-                   break;
+                    break;
                 }
             }
 
             action = null;
+
             return false;
         }
 
@@ -242,7 +232,6 @@ namespace ClassicUO.Game.Managers
         {
             _actions.Add(action, handler);
         }
-
     }
 
     internal enum HotkeyAction
@@ -559,6 +548,5 @@ namespace ClassicUO.Game.Managers
         EquipLastWeapon,
 
         #endregion
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -38,6 +40,12 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom { get; set; }
 
+
+        public bool Equals(Serial other)
+        {
+            return Serial == other;
+        }
+
         public void Generate(bool recalculate = false)
         {
             Item item = World.Items.Get(Serial);
@@ -50,12 +58,10 @@ namespace ClassicUO.Game.GameObjects
             });
         }
 
-
-        public bool Equals(Serial other) => Serial == other;
-
         public void ClearComponents()
         {
             Item item = World.Items.Get(Serial);
+
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 

@@ -83,8 +83,7 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="cuoapi, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="cuoapi, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
     <Reference Include="FNA, Version=18.12.0.0, Culture=neutral, processorArchitecture=AMD64">
@@ -114,6 +113,7 @@
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\HealthPercentageHues.cs" />
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
@@ -123,6 +123,7 @@
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
+    <Compile Include="Game\Data\SpellsBardic.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -131,12 +132,16 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\GameObjects\OverheadMessage.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
+    <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
+    <Compile Include="Game\Managers\HealthLinesManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
+    <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
@@ -149,8 +154,10 @@
     <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
     <Compile Include="Game\UI\Controls\MacroControl.cs" />
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
+    <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
@@ -253,6 +260,7 @@
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
     <Compile Include="Renderer\Effects.cs" />
+    <Compile Include="Renderer\SpriteRenderer.cs" />
     <Compile Include="Renderer\UI\Label.cs" />
     <Compile Include="Renderer\UI\UpdaterMenu.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
@@ -348,7 +356,6 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\Graphic.cs" />
     <Compile Include="Game\UI\Controls\Button.cs" />
     <Compile Include="Game\UI\Controls\Checkbox.cs" />
@@ -360,7 +367,6 @@
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
     <Compile Include="Game\UI\Controls\GumpPic.cs" />
-    <Compile Include="Game\UI\Controls\GumpPicBackpack.cs" />
     <Compile Include="Game\UI\Controls\GumpPicContainer.cs" />
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
@@ -411,7 +417,6 @@
     <Compile Include="Game\Data\LayerOrder.cs" />
     <Compile Include="Game\GameObjects\Views\MobileView.cs" />
     <Compile Include="Game\GameObjects\Views\StaticView.cs" />
-    <Compile Include="Game\GameObjects\Views\TextOverHeadView.cs" />
     <Compile Include="Game\GameObjects\Views\TileView.cs" />
     <Compile Include="Game\GameObjects\Views\View.cs" />
     <Compile Include="Game\World.cs" />
@@ -423,9 +428,6 @@
     <Compile Include="Input\KeyboardEvent.cs" />
     <Compile Include="Input\MouseButtons.cs" />
     <Compile Include="Input\MouseEvent.cs" />
-    <Compile Include="Input\MouseOverList.cs" />
-    <Compile Include="Input\MousePicker.cs" />
-    <Compile Include="Input\PickerType.cs" />
     <Compile Include="Game\UI\TextEntry.cs" />
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
@@ -499,21 +501,6 @@
     <None Include="libs\lib64\libtheorafile.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="libs\lib\libFAudio.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\lib\libmojoshader.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\lib\libSDL2-2.0.so.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\lib\libSDL2_image-2.0.so.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\lib\libtheorafile.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="libs\osx\libFAudio.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -570,23 +557,9 @@
     <Content Include="libs\x64\zlib.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\x86\FAudio.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libs\x86\libtheorafile.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libs\x86\MojoShader.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libs\x86\SDL2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libs\x86\SDL2_image.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Analyzer Include="..\packages\ErrorProne.NET.CoreAnalyzers.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.CoreAnalyzers.dll" />
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.NET.Core.dll" />
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.StructAnalyzers.dll" />
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\RuntimeContracts.dll" />

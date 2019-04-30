@@ -1,36 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Network;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class MapLoader : ResourceLoader
+    internal class MapLoader : ResourceLoader
     {
         internal const int MAPS_COUNT = 6;
+        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
-        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
-
-        private readonly UOFileMul[] _mapDifl = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _mapDif = new UOFileMul[MAPS_COUNT];
 
-        private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
+        private readonly UOFileMul[] _mapDifl = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDif = new UOFileMul[MAPS_COUNT];
+        private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
 
-        protected static UOFile GetMapFile(int map)
-        {
-            if (map < FileManager.Map._filesMap.Length)
-                return FileManager.Map._filesMap[map];
-            return null;
-        }
+        private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
 
         public IndexMap[][] BlockData { get; private protected set; } = new IndexMap[MAPS_COUNT][];
 
@@ -57,6 +46,19 @@ namespace ClassicUO.IO.Resources
                 1280, 4096
             }
         };
+
+        public int PatchesCount { get; private set; }
+
+        public int[] MapPatchCount { get; } = new int[6];
+        public int[] StaticPatchCount { get; } = new int[6];
+
+        protected static UOFile GetMapFile(int map)
+        {
+            if (map < FileManager.Map._filesMap.Length)
+                return FileManager.Map._filesMap[map];
+
+            return null;
+        }
 
         public override void Load()
         {
@@ -102,6 +104,7 @@ namespace ClassicUO.IO.Resources
 
             if (!foundedOneMap)
                 throw new FileNotFoundException("No maps founded.");
+
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
 
             if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
@@ -148,12 +151,12 @@ namespace ClassicUO.IO.Resources
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
-            ulong staticidxaddress = (ulong)fileidx.StartAddress;
-            ulong endstaticidxaddress = staticidxaddress + (ulong)fileidx.Length;
-            ulong staticaddress = (ulong)staticfile.StartAddress;
-            ulong endstaticaddress = staticaddress + (ulong)staticfile.Length;
-            ulong mapddress = (ulong)file.StartAddress;
-            ulong endmapaddress = mapddress + (ulong)file.Length;
+            ulong staticidxaddress = (ulong) fileidx.StartAddress;
+            ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
+            ulong staticaddress = (ulong) staticfile.StartAddress;
+            ulong endstaticaddress = staticaddress + (ulong) staticfile.Length;
+            ulong mapddress = (ulong) file.StartAddress;
+            ulong endmapaddress = mapddress + (ulong) file.Length;
             ulong uopoffset = 0;
             int fileNumber = -1;
             bool isuop = file is UOFileUop;
@@ -174,16 +177,16 @@ namespace ClassicUO.IO.Resources
                         fileNumber = shifted;
 
                         if (shifted < file.Entries.Length)
-                            uopoffset = (ulong)file.Entries[shifted].Offset;
+                            uopoffset = (ulong) file.Entries[shifted].Offset;
                     }
                 }
 
-                ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
+                ulong address = mapddress + uopoffset + (ulong) (blocknum * mapblocksize);
 
                 if (address < endmapaddress)
                     realmapaddress = address;
-                ulong stidxaddress = staticidxaddress + (ulong)(block * staticidxblocksize);
-                StaidxBlock* bb = (StaidxBlock*)stidxaddress;
+                ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
+                StaidxBlock* bb = (StaidxBlock*) stidxaddress;
 
                 if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
                 {
@@ -192,14 +195,20 @@ namespace ClassicUO.IO.Resources
                     if (address1 < endstaticaddress)
                     {
                         realstaticaddress = address1;
-                        realstaticcount = (uint)(bb->Size / staticblocksize);
+                        realstaticcount = (uint) (bb->Size / staticblocksize);
 
                         if (realstaticcount > 1024)
                             realstaticcount = 1024;
                     }
                 }
 
-                BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
+                ref var data = ref BlockData[i][block];
+                data.MapAddress = realmapaddress;
+                data.StaticAddress = realstaticaddress;
+                data.StaticCount = realstaticcount;
+                data.OriginalMapAddress = realmapaddress;
+                data.OriginalStaticAddress = realstaticaddress;
+                data.OriginalStaticCount = realstaticcount;
             }
         }
 
@@ -208,10 +217,7 @@ namespace ClassicUO.IO.Resources
             if (Engine.GlobalSettings.PreloadMaps)
                 return;
 
-            if (BlockData[i] != null)
-            {
-                BlockData[i] = null;
-            }
+            if (BlockData[i] != null) BlockData[i] = null;
         }
 
         public void PatchMapBlock(ulong block, ulong address)
@@ -227,11 +233,6 @@ namespace ClassicUO.IO.Resources
             BlockData[0][block].OriginalMapAddress = address;
             BlockData[0][block].MapAddress = address;
         }
-
-        public int PatchesCount { get; private set; }
-
-        public int[] MapPatchCount { get; } = new int[6];
-        public int[] StaticPatchCount { get; } = new int[6];
 
         public unsafe bool ApplyPatches(Packet reader)
         {
@@ -255,6 +256,7 @@ namespace ClassicUO.IO.Resources
                 if (_filesMap[i] == null || _filesMap[i].StartAddress == IntPtr.Zero)
                 {
                     reader.Skip(8);
+
                     continue;
                 }
 
@@ -273,7 +275,7 @@ namespace ClassicUO.IO.Resources
                     var difl = _mapDifl[i];
                     var dif = _mapDif[i];
 
-                    if (difl == null || dif == null || difl.Length == 0 ||  dif.Length == 0)
+                    if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
 
                     mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
@@ -315,7 +317,7 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
                         uint blockIndex = difl.ReadUInt();
-                        StaidxBlock* sidx = (StaidxBlock*)difi.PositionAddress;
+                        StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
 
                         difi.Skip(sizeof(StaidxBlock));
 
@@ -353,6 +355,7 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < MAPS_COUNT; i++)
             {
                 var list = BlockData[i];
+
                 if (list == null)
                     continue;
 
@@ -380,7 +383,6 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
-
             }
         }
 
@@ -390,8 +392,9 @@ namespace ClassicUO.IO.Resources
 
             if (indexMap.MapAddress == 0)
                 return null;
-            MapBlock* mp = (MapBlock*)indexMap.MapAddress;
-            MapCells* cells = (MapCells*)&mp->Cells;
+
+            MapBlock* mp = (MapBlock*) indexMap.MapAddress;
+            MapCells* cells = (MapCells*) &mp->Cells;
 
             RadarMapBlock mb = new RadarMapBlock
             {
@@ -410,11 +413,11 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+            StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
             if (sb != null)
             {
-                int count = (int)indexMap.StaticCount;
+                int count = (int) indexMap.StaticCount;
 
                 for (int c = 0; c < count; c++)
                 {
@@ -437,11 +440,11 @@ namespace ClassicUO.IO.Resources
             return mb;
         }
 
-        public IndexMap GetIndex(int map, int x, int y)
+        public ref IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;
 
-            return BlockData[map][block];
+            return ref BlockData[map][block];
         }
     }
 
@@ -509,16 +512,6 @@ namespace ClassicUO.IO.Resources
 
     internal struct IndexMap
     {
-        public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
-        {
-            MapAddress = mapAddress;
-            StaticAddress = staticAddress;
-            StaticCount = staticCount;
-            OriginalMapAddress = originalMapAddress;
-            OriginalStaticAddress = originalStaticAddress;
-            OriginalStaticCount = originalStaticCount;
-        }
-
         public ulong MapAddress;
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -46,8 +49,8 @@ namespace ClassicUO.Renderer
 
     internal sealed class RenderedText
     {
-        private string _text;
         private byte _font;
+        private string _text;
 
         public RenderedText()
         {
@@ -65,11 +68,12 @@ namespace ClassicUO.Renderer
                 if (_font != value)
                 {
                     if (value == 0xFF)
-                        value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                        value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
                     _font = value;
                 }
             }
         }
+
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }
@@ -131,19 +135,21 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(Batcher2D batcher, int x, int y)
+        public bool Draw(Batcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
-            return Draw(batcher, x, y, Width, Height, 0, 0);
+            return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
-        public bool Draw(Batcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY)
+        public bool Draw(Batcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
+
             Rectangle src = Rectangle.Empty;
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
+
             src.X = offsetX;
             src.Y = offsetY;
             int maxX = src.X + dwidth;
@@ -169,7 +175,14 @@ namespace ClassicUO.Renderer
             if (Texture == null)
                 return false;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, Vector3.Zero);
+            Vector3 huev = Vector3.Zero;
+            huev.X = hue;
+
+            if (hue != 0)
+                huev.Y = 1;
+            huev.Z = alpha;
+
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, huev);
         }
 
         public void CreateTexture()
@@ -209,6 +222,7 @@ namespace ClassicUO.Renderer
         {
             if (IsDestroyed)
                 return;
+
             IsDestroyed = true;
 
             if (Texture != null && !Texture.IsDisposed)

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
-    class SpeechesLoader : ResourceLoader
+    internal class SpeechesLoader : ResourceLoader
     {
         private SpeechEntry[] _speech;
 
@@ -17,6 +15,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
+
             UOFileMul file = new UOFileMul(path, false);
             List<SpeechEntry> entries = new List<SpeechEntry>();
 
@@ -27,7 +26,7 @@ namespace ClassicUO.IO.Resources
 
                 if (length > 0)
                 {
-                    entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*)file.PositionAddress, length))));
+                    entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
                     file.Skip(length);
                 }
             }
@@ -49,7 +48,6 @@ namespace ClassicUO.IO.Resources
             {
                 if (split[i].Length > 0 && split[i].Length <= input.Length)
                 {
-
                     if (!entry.CheckStart)
                     {
                         if (input.IndexOf(split[i], 0) < 0)
@@ -66,15 +64,18 @@ namespace ClassicUO.IO.Resources
                         return true;
                 }
             }
+
             return false;
         }
 
         public SpeechEntry[] GetKeywords(string text)
         {
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
+            {
                 return new SpeechEntry[0]
                 {
                 };
+            }
 
             text = text.ToLower();
             List<SpeechEntry> list = new List<SpeechEntry>();
@@ -97,7 +98,7 @@ namespace ClassicUO.IO.Resources
     {
         public SpeechEntry(int id, string keyword)
         {
-            KeywordID = (short)id;
+            KeywordID = (short) id;
 
             Keywords = keyword.Split(new[]
             {
@@ -124,5 +125,4 @@ namespace ClassicUO.IO.Resources
             return KeywordID > obj.KeywordID ? 1 : 0;
         }
     }
-
 }

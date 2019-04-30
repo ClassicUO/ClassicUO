@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Diagnostics;
 using System.IO;
 
-using ClassicUO.Configuration;
-using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
@@ -66,7 +67,7 @@ namespace ClassicUO.IO
         public static MapLoader Map { get; private set; }
         public static ClilocLoader Cliloc { get; private set; }
         public static GumpsLoader Gumps { get; private set; }
-        public static FontsLoader Fonts { get; private set; }    
+        public static FontsLoader Fonts { get; private set; }
         public static HuesLoader Hues { get; private set; }
         public static TileDataLoader TileData { get; private set; }
         public static MultiLoader Multi { get; private set; }

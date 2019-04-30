@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,17 +32,16 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TradingGump : Gump
+    internal class TradingGump : Gump
     {
-        private Checkbox _myCheckbox;
+        private readonly Entity _entity1, _entity2;
+        private readonly string _name;
         private GumpPic _hisPic;
 
         private bool _imAccepting, _heIsAccepting;
 
-        private readonly Entity _entity1, _entity2;
-
         private DataBox _myBox, _hisBox;
-        private readonly string _name;
+        private Checkbox _myCheckbox;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Serial ID1 { get; }
         public Serial ID2 { get; }
-      
+
         public bool ImAccepting
         {
             get => _imAccepting;
@@ -94,13 +95,18 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
-                    HighlightOnMouseOver = true,
+                    HighlightOnMouseOver = true
                 };
 
                 int x = g.X;
@@ -126,13 +132,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (Item item in e)
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+
+                if (item == null)
+                    continue;
+
                 ItemGump g = new ItemGump(item)
                 {
-                    HighlightOnMouseOver = true,
+                    HighlightOnMouseOver = true
                 };
 
                 int x = g.X;
@@ -196,14 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
 
-            if (HeIsAccepting)
-            {
-                _hisPic = new GumpPic(266, 160, 0x0869, 0);
-            }
-            else
-            {
-                _hisPic = new GumpPic(266, 160, 0x0867, 0);
-            }
+            _hisPic = HeIsAccepting ? new GumpPic(266, 160, 0x0869, 0) : new GumpPic(266, 160, 0x0867, 0);
 
             Add(_hisPic);
         }
@@ -221,33 +225,28 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 1)
-                            { X = 84, Y = 40 });
+                    {X = 84, Y = 40});
 
             int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
 
             Add(new Label(_name, false, 0x0386, font: 1)
-                            { X = fontWidth, Y = 170 });
+                    {X = fontWidth, Y = 170});
 
             Add(_myBox = new DataBox(45, 70, 110, 80)
             {
-                WantUpdateSize = false,
+                WantUpdateSize = false
             });
+
             Add(_hisBox = new DataBox(192, 70, 110, 80)
             {
-                WantUpdateSize = false,
+                WantUpdateSize = false
             });
 
             SetCheckboxes();
 
-            foreach (Item item in _entity1.Items)
-            {
-                _myBox.Add(new ItemGump(item));
-            }
+            foreach (Item item in _entity1.Items) _myBox.Add(new ItemGump(item));
 
-            foreach (Item item in _entity2.Items)
-            {
-                _hisBox.Add(new ItemGump(item));
-            }
+            foreach (Item item in _entity2.Items) _hisBox.Add(new ItemGump(item));
 
             _myBox.MouseUp += (sender, e) =>
             {
@@ -265,7 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (texture != null)
                     {
-                        x -= (texture.Width >> 1);
+                        x -= texture.Width >> 1;
                         y -= texture.Height >> 1;
 
                         if (x + texture.Width > 110)

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class Gump : Control           
+    internal class Gump : Control
     {
         public Gump(Serial local, Serial server)
         {
@@ -82,14 +84,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void Restore(BinaryReader reader)
         {
-
         }
 
         protected override void OnDragEnd(int x, int y)
         {
             Point position = Location;
-            int halfWidth = Width >> 1;
-            int halfHeight = Height >> 1;
+            int halfWidth = Width / 2;
+            int halfHeight = Height / 2;
 
             if (X < -halfWidth)
                 position.X = -halfWidth;
@@ -121,10 +122,12 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (control)
                     {
-                        case Checkbox checkbox when checkbox.IsChecked: switches.Add(control.LocalSerial);
+                        case Checkbox checkbox when checkbox.IsChecked:
+                            switches.Add(control.LocalSerial);
 
                             break;
-                        case TextBox textBox: entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+                        case TextBox textBox:
+                            entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
                             break;
                     }

@@ -11,7 +11,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     At -1.0, the input signal is attenuated by 6dB, at +1.0 the signal is
     ///     amplified by 6dB.
     /// </summary>
-    class Equalizer
+    internal class Equalizer
     {
         private const int BANDS = 32;
 
@@ -54,12 +54,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             set
             {
                 reset();
-                int max = (value.Length > BANDS) ? BANDS : value.Length;
+                int max = value.Length > BANDS ? BANDS : value.Length;
 
-                for (int i = 0; i < max; i++)
-                {
-                    settings[i] = limit(value[i]);
-                }
+                for (int i = 0; i < max; i++) settings[i] = limit(value[i]);
             }
         }
 
@@ -72,10 +69,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             set
             {
-                if (value != this)
-                {
-                    FromFloatArray = value.settings;
-                }
+                if (value != this) FromFloatArray = value.settings;
             }
         }
 
@@ -87,20 +81,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 reset();
                 int max = BANDS;
 
-                for (int i = 0; i < max; i++)
-                {
-                    settings[i] = limit(value.getBand(i));
-                }
+                for (int i = 0; i < max; i++) settings[i] = limit(value.getBand(i));
             }
         }
 
         /// <summary>
         ///     Retrieves the number of bands present in this equalizer.
         /// </summary>
-        public virtual int BandCount
-        {
-            get { return settings.Length; }
-        }
+        public virtual int BandCount => settings.Length;
 
         /// <summary>
         ///     Retrieves an array of floats whose values represent a
@@ -117,10 +105,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             get
             {
                 float[] factors = new float[BANDS];
-                for (int i = 0, maxCount = BANDS; i < maxCount; i++)
-                {
-                    factors[i] = getBandFactor(settings[i]);
-                }
+                for (int i = 0, maxCount = BANDS; i < maxCount; i++) factors[i] = getBandFactor(settings[i]);
 
                 return factors;
             }
@@ -136,17 +121,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public void reset()
         {
-            for (int i = 0; i < BANDS; i++)
-            {
-                settings[i] = 0.0f;
-            }
+            for (int i = 0; i < BANDS; i++) settings[i] = 0.0f;
         }
 
         public float setBand(int band, float neweq)
         {
             float eq = 0.0f;
 
-            if ((band >= 0) && (band < BANDS))
+            if (band >= 0 && band < BANDS)
             {
                 eq = settings[band];
                 settings[band] = limit(neweq);
@@ -162,10 +144,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             float eq = 0.0f;
 
-            if ((band >= 0) && (band < BANDS))
-            {
-                eq = settings[band];
-            }
+            if (band >= 0 && band < BANDS) eq = settings[band];
 
             return eq;
         }
@@ -174,8 +153,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             if (eq == BAND_NOT_PRESENT)
                 return eq;
+
             if (eq > 1.0f)
                 return 1.0f;
+
             if (eq < -1.0f)
                 return -1.0f;
 
@@ -193,20 +174,21 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 return 0.0f;
 
             float f = (float) Math.Pow(2.0, eq);
+
             return f;
         }
 
         internal abstract class EQFunction
         {
             /// <summary>
-            /// Returns the setting of a band in the equalizer.
+            ///     Returns the setting of a band in the equalizer.
             /// </summary>
             /// <param name="band">
-            /// The index of the band to retrieve the setting for.
+            ///     The index of the band to retrieve the setting for.
             /// </param>
             /// <returns>
-            /// the setting of the specified band. This is a value between
-            /// -1 and +1.
+            ///     the setting of the specified band. This is a value between
+            ///     -1 and +1.
             /// </returns>
             public virtual float getBand(int band)
             {

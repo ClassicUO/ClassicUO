@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game
 {
-    class ItemHold
+    internal class ItemHold
     {
         public bool OnGround { get; private set; }
         public Position Position { get; private set; }

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
-    class SkillsLoader : ResourceLoader
+    internal class SkillsLoader : ResourceLoader
     {
-        private UOFileMul _file;
         private readonly Dictionary<int, SkillEntry> _skills = new Dictionary<int, SkillEntry>();
+        private UOFileMul _file;
 
         public int SkillsCount => _skills.Count;
 
@@ -20,11 +19,13 @@ namespace ClassicUO.IO.Resources
         {
             if (SkillsCount > 0)
                 return;
+
             string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
+
             _file = new UOFileMul(path, pathidx, 56, 16);
             int i = 0;
             while (_file.Position < _file.Length) GetSkill(i++);
@@ -46,13 +47,20 @@ namespace ClassicUO.IO.Resources
                 if (length == 0)
                     return default;
 
-	            var hasAction = _file.ReadBool();
-	            var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)).TrimEnd('\0');
+                var hasAction = _file.ReadBool();
+                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)).TrimEnd('\0');
 
-				_skills[index] = new SkillEntry(index, name, hasAction); 
+                _skills[index] = new SkillEntry(index, name, hasAction);
             }
 
             return value;
+        }
+
+        internal void SetAllSkills(List<SkillEntry> arr)
+        {
+            _skills.Clear();
+            for (int i = 0; i < arr.Count; i++) _skills[i] = arr[i];
+            SkillNames = _skills.Select(o => o.Value.Name).ToArray();
         }
     }
 

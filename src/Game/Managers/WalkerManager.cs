@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.Managers
 {
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
-    struct StepInfo
+    internal struct StepInfo
     {
         public byte Direction;
         public byte OldDirection;
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
         public sbyte Z;
     }
 
-    class FastWalkStack
+    internal class FastWalkStack
     {
         private readonly uint[] _keys = new uint[Constants.MAX_FAST_WALK_STACK_SIZE];
 
@@ -59,8 +59,9 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class WalkerManager
+    internal class WalkerManager
     {
+        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
         public long LastStepRequestTime { get; set; }
         public int UnacceptedPacketsCount { get; set; }
         public int StepsCount { get; set; }
@@ -71,8 +72,6 @@ namespace ClassicUO.Game.Managers
         public bool WalkingFailed { get; set; }
         public ushort CurrentPlayerZ { get; set; }
         public ushort NewPlayerZ { get; set; }
-
-        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
 
         public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 
@@ -86,7 +85,10 @@ namespace ClassicUO.Game.Managers
 
             if (x != -1)
             {
-                World.Player.Position = new Position((ushort) x , (ushort)y, z);
+                World.Player.Position = new Position((ushort) x, (ushort) y, z);
+
+                World.RangeSize.X = x;
+                World.RangeSize.Y = y;
 
                 World.Player.AddToTile();
                 World.Player.ProcessDelta();
@@ -115,9 +117,14 @@ namespace ClassicUO.Game.Managers
                 if (stepIndex >= CurrentWalkSequence)
                 {
                     StepInfos[stepIndex].Accepted = true;
+                    World.RangeSize.X = StepInfos[stepIndex].X;
+                    World.RangeSize.Y = StepInfos[stepIndex].Y;
                 }
                 else if (stepIndex == 0)
                 {
+                    World.RangeSize.X = StepInfos[0].X;
+                    World.RangeSize.Y = StepInfos[0].Y;
+
                     for (int i = 1; i < StepsCount; i++)
                         StepInfos[i - 1] = StepInfos[i];
 
@@ -139,9 +146,6 @@ namespace ClassicUO.Game.Managers
                 WalkingFailed = true;
                 StepsCount = 0;
                 CurrentWalkSequence = 0;
-            }
-            else
-            {
             }
         }
 

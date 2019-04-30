@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -257,9 +260,9 @@ namespace ClassicUO.Network
             WriteUInt(container);
         }
 
-        public PDropRequestOld(Serial serial, Position position, Serial container) : this (serial, position.X, position.Y, position.Z, container)
+        public PDropRequestOld(Serial serial, Position position, Serial container) : this(serial, position.X, position.Y, position.Z, container)
         {
-        } 
+        }
     }
 
     internal sealed class PDropRequestNew : PacketWriter
@@ -508,21 +511,20 @@ namespace ClassicUO.Network
             WriteUInt(server);
             WriteUInt((uint) buttonID);
 
-            WriteUInt((uint)switches.Length);
+            WriteUInt((uint) switches.Length);
 
             for (int i = switches.Length - 1; i >= 0; i--)
                 WriteUInt(switches[i]);
 
-            WriteUInt((uint)entries.Length);
+            WriteUInt((uint) entries.Length);
 
             for (int i = entries.Length - 1; i >= 0; i--)
             {
                 int length = Math.Min(239, entries[i].Item2.Length);
                 WriteUShort(entries[i].Item1);
-                WriteUShort((ushort)length);
+                WriteUShort((ushort) length);
                 WriteUnicode(entries[i].Item2, length);
             }
-
         }
     }
 
@@ -546,7 +548,7 @@ namespace ClassicUO.Network
                 WriteUShort((ushort) code);
 
                 WriteUShort(itemGraphic);
-                WriteUShort(itemHue);            
+                WriteUShort(itemHue);
             }
         }
     }
@@ -574,7 +576,7 @@ namespace ClassicUO.Network
             {
                 WriteByte(0x02);
                 WriteUInt(serial);
-                WriteUInt( (uint) (state ? 1 : 0));
+                WriteUInt((uint) (state ? 1 : 0));
             }
         }
     }
@@ -588,7 +590,7 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteBool(code);
 
-            WriteUShort((ushort)(text.Length + 1));
+            WriteUShort((ushort) (text.Length + 1));
             WriteASCII(text, text.Length + 1);
         }
     }
@@ -681,7 +683,7 @@ namespace ClassicUO.Network
         public PUnicodePromptResponse(string text, string lang, bool cancel) : base(0xC2)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
-            WriteUInt((uint)(cancel ? 0 : 1));
+            WriteUInt((uint) (cancel ? 0 : 1));
             WriteASCII(lang, 3);
             WriteUnicode(text);
         }
@@ -718,16 +720,16 @@ namespace ClassicUO.Network
         }
     }
 
-	internal sealed class PClickQuestArrow : PacketWriter
-	{
-		public PClickQuestArrow(bool rightClick) : base(0xBF)
-		{
-			WriteUShort(0x07);
-			WriteBool(rightClick);
-		}
-	}
+    internal sealed class PClickQuestArrow : PacketWriter
+    {
+        public PClickQuestArrow(bool rightClick) : base(0xBF)
+        {
+            WriteUShort(0x07);
+            WriteBool(rightClick);
+        }
+    }
 
-	internal sealed class PCloseStatusBarGump : PacketWriter
+    internal sealed class PCloseStatusBarGump : PacketWriter
     {
         public PCloseStatusBarGump(Serial serial) : base(0xBF)
         {
@@ -883,7 +885,7 @@ namespace ClassicUO.Network
             {
                 '.'
             }, StringSplitOptions.RemoveEmptyEntries);
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
+            WriteASCII($"{clientversion[0]}.{clientversion[1]}.{clientversion[2]}.{clientversion[3]}");
         }
     }
 
@@ -1089,7 +1091,7 @@ namespace ClassicUO.Network
         public PSellRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x9F)
         {
             WriteUInt(vendorSerial);
-            WriteUShort((ushort)items.Length);
+            WriteUShort((ushort) items.Length);
 
             for (int i = 0; i < items.Length; i++)
             {

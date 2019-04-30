@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio
 {
-    enum VolumeState
+    internal enum VolumeState
     {
         Stationary,
         Increasing,

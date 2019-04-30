@@ -3,9 +3,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     /// <summary>
     ///     Base Class for audio output.
     /// </summary>
-    abstract class ABuffer
+    internal abstract class ABuffer
     {
-        public const int OBUFFERSIZE = 2*1152; // max. 2 * 1152 samples per frame
+        public const int OBUFFERSIZE = 2 * 1152; // max. 2 * 1152 samples per frame
         public const int MAXCHANNELS = 2; // max. number of channels
 
         /// <summary>
@@ -18,10 +18,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public virtual void AppendSamples(int channel, float[] f)
         {
-            for (int i = 0; i < 32; i++)
-            {
-                Append(channel, Clip((f[i])));
-            }
+            for (int i = 0; i < 32; i++) Append(channel, Clip(f[i]));
         }
 
         /// <summary>
@@ -29,7 +26,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         private static short Clip(float sample)
         {
-            return ((sample > 32767.0f) ? (short) 32767 : ((sample < -32768.0f) ? (short) -32768 : (short) sample));
+            return sample > 32767.0f ? (short) 32767 : sample < -32768.0f ? (short) -32768 : (short) sample;
         }
 
         /// <summary>

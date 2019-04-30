@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +29,6 @@ using System.Net.Sockets;
 
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 
 namespace ClassicUO.Network
 {
@@ -86,7 +88,6 @@ namespace ClassicUO.Network
 
         public static void EnqueuePacketFromPlugin(Packet p)
         {
-
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
                 lock (Socket._sync)
@@ -104,10 +105,7 @@ namespace ClassicUO.Network
                 }
             }
             else
-            {
                 Log.Message(LogTypes.Error, "Attempt to write into a dead socket");
-            }
-            
         }
 
         public bool Connect(string ip, ushort port)
@@ -170,17 +168,19 @@ namespace ClassicUO.Network
 
         public void Disconnect()
         {
-           Disconnect(SocketError.SocketError);
+            Disconnect(SocketError.SocketError);
         }
 
         private void Disconnect(SocketError error)
         {
             if (IsDisposed)
                 return;
+
             IsDisposed = true;
 
             if (_socket == null)
                 return;
+
             Flush();
 
             try
@@ -272,6 +272,7 @@ namespace ClassicUO.Network
 
                     if (length < packetlength)
                         break;
+
                     byte[] data = new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
@@ -332,6 +333,7 @@ namespace ClassicUO.Network
                     ProcessSend(e);
 
                     if (IsDisposed) return;
+
                     SendQueue.Gram gram;
 
                     lock (_sendQueue)
@@ -346,8 +348,10 @@ namespace ClassicUO.Network
                         StartSend();
                     }
                     else
+                    {
                         lock (_sendLock)
                             _sending = false;
+                    }
 
                     break;
                 default:
@@ -449,11 +453,13 @@ namespace ClassicUO.Network
             lock (_sendLock)
             {
                 if (_sending) return;
+
                 SendQueue.Gram gram;
 
                 lock (_sendQueue)
                 {
                     if (!_sendQueue.IsFlushReady) return;
+
                     gram = _sendQueue.CheckFlushReady();
                 }
 

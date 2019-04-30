@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class ClilocLoader : ResourceLoader
+    internal class ClilocLoader : ResourceLoader
     {
         private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
 
@@ -43,7 +40,6 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-
         }
 
         public string GetString(int number)
@@ -107,8 +103,10 @@ namespace ClassicUO.IO.Resources
 
                 if (a.Length > 1 && a[0] == '#')
                 {
-                    int id1 = int.Parse(a.Substring(1));
-                    arguments[i] = GetString(id1) ?? string.Empty;
+                    if (int.TryParse(a.Substring(1), out int id1))
+                        arguments[i] = GetString(id1) ?? string.Empty;
+                    else
+                        arguments[i] = a;
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);

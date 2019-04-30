@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO;
@@ -38,10 +40,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _frame.Length; i++)
+            foreach (SpriteTexture t in _frame)
             {
-                if (_frame[i] != null)
-                    _frame[i].Ticks = (long) totalMS;
+                if (t != null)
+                    t.Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);

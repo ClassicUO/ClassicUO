@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
@@ -26,7 +28,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -36,62 +37,63 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ContainerGump : Gump
     {
-        private GumpPic _eyeGumpPic;
-        private bool _isCorspeContainer;
-        private readonly Graphic _gumpID;
         private readonly Item _item;
         private long _corpseEyeTicks;
-        private int _eyeCorspeOffset;
         private ContainerData _data;
+        private int _eyeCorspeOffset;
+        private GumpPic _eyeGumpPic;
+        private bool _isCorspeContainer;
 
         public ContainerGump() : base(0, 0)
         {
-           
         }
 
         public ContainerGump(Item item, Graphic gumpid) : this()
         {
             _item = item;
-            _gumpID = gumpid;
+            Graphic = gumpid;
 
             BuildGump();
 
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
-            {
-                CheckItemPosition(i);
+            foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int) Layer.Beard && s.ItemData.Layer != (int) Layer.Face))
+                //FIXME: this should be disabled. Server sends the right position
+                //CheckItemPosition(i);
                 Add(new ItemGump(i));
-            }
         }
 
-        public Graphic Graphic => _gumpID;
+        public Graphic Graphic { get; }
 
         private void BuildGump()
         {
             CanMove = true;
             CanBeSaved = true;
             LocalSerial = _item.Serial;
-            _isCorspeContainer = _gumpID == 0x0009;
+            WantUpdateSize = false;
+            _isCorspeContainer = Graphic == 0x0009;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
 
-            _data = ContainerManager.Get(_gumpID);
+            _data = ContainerManager.Get(Graphic);
             Graphic g = _data.Graphic;
 
-            Add(new GumpPicContainer(0, 0, g, 0, _item));
+            GumpPicContainer container;
+            Add(container = new GumpPicContainer(0, 0, g, 0, _item));
+
             if (_isCorspeContainer)
                 Add(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+
+            Width = container.Width;
+            Height = container.Height;
 
             ContainerGump gg = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
 
             if (gg == null)
             {
                 if (Engine.UI.GetGumpCachePosition(LocalSerial, out Point location) && _item.Serial == World.Player.Equipment[(int) Layer.Backpack])
-                {
                     Location = location;
-                }
                 else
                 {
                     ContainerManager.CalculateContainerPosition(g);
@@ -104,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = gg.X;
                 Y = gg.Y;
             }
-       
+
 
             if (_data.OpenSound != 0)
                 Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.OpenSound);
@@ -114,17 +116,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_item == null || (_item.OnGround && _item.Distance > 3))
+            if (_item == null || _item.OnGround && _item.Distance > 3)
                 Dispose();
 
-            if (IsDisposed)
-            {
-                return;
-            }
+            if (IsDisposed) return;
 
             if (_item != null && _item.IsDestroyed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.Write(_item.Serial.Value);
-            writer.Write(_gumpID);
+            writer.Write(Graphic);
         }
 
         public override void Restore(BinaryReader reader)
@@ -156,19 +156,24 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
-                v.Dispose();  
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => s.Item != null && e.Contains(s.Item)))
+                v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)))
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => s.Item != null && e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e.Where(s => s.ItemData.Layer != (int)Layer.Hair && s.ItemData.Layer != (int)Layer.Beard && s.ItemData.Layer != (int)Layer.Face))
+            foreach (Serial s in e)
             {
+                var item = World.Items.Get(s);
+
+                if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
+                    continue;
+
                 CheckItemPosition(item);
                 Add(new ItemGump(item));
             }
@@ -201,11 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
                 y = _data.Bounds.Y;
             }
 
-            if (x != item.X || y != item.Y)
-            {
-                item.Position = new Position((ushort)x, (ushort)y);
-            }
-
+            if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
         }
 
         public override void Dispose()
@@ -215,10 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
 
-                if (_item != null && World.Player != null && _item.Serial == World.Player.Equipment[(int) Layer.Backpack])
-                {
-                    Engine.UI.SavePosition(_item, Location);
-                }
+                if (World.Player != null && _item == World.Player.Equipment[(int) Layer.Backpack]) Engine.UI.SavePosition(_item, Location);
 
                 foreach (Item child in _item.Items)
                 {

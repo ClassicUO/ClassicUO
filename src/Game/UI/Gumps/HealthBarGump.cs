@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -34,7 +35,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class HealthBarGump : AnchorableGump
+    internal class HealthBarGump : AnchorableGump
     {
         private const ushort BACKGROUND_NORMAL = 0x0803;
         private const ushort BACKGROUND_WAR = 0x0807;
@@ -48,23 +49,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly GumpPicWithWidth[] _bars = new GumpPicWithWidth[3];
         private GumpPic _background, _hpLineRed, _manaLineRed, _stamLineRed;
-        private TextBox _textBox;
 
         private Button _buttonHeal1, _buttonHeal2;
-        private Label _partyNameLabel;
-
-        private Serial _partyMemeberSerial;
+        private bool _canChangeName;
+        private bool _isDead;
+        private string _name;
+        private int _oldHits, _oldStam, _oldMana;
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
-        private int _oldHits, _oldStam, _oldMana;
-        private bool _canChangeName;
         private bool _outOfRange;
-        private string _name;
-        private bool _isDead;
 
-        public override int GroupMatrixWidth { get => Width; protected set { } }
-        public override int GroupMatrixHeight { get => Height; protected set { } }
-        
+        private Serial _partyMemeberSerial;
+        private Label _partyNameLabel;
+        private TextBox _textBox;
+
+        private bool _targetBroke = false;
+
         public HealthBarGump(Mobile mob) : this()
         {
             Mobile = mob;
@@ -82,15 +82,21 @@ namespace ClassicUO.Game.UI.Gumps
             AnchorGroupName = "healthbar";
         }
 
-        public Mobile Mobile { get; private set; }
-
-        private enum ButtonParty
+        public override int GroupMatrixWidth
         {
-            Heal1,
-            Heal2
+            get => Width;
+            protected set { }
         }
 
-        private Hue _barColor { get => (Mobile == null || Mobile == World.Player || (Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray)) ? (Hue)0 : (Hue)Notoriety.GetHue(Mobile.NotorietyFlag); }
+        public override int GroupMatrixHeight
+        {
+            get => Height;
+            protected set { }
+        }
+
+        public Mobile Mobile { get; private set; }
+
+        private Hue _barColor => Mobile == null || Mobile == World.Player || Mobile.NotorietyFlag == NotorietyFlag.Criminal || Mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue) 0 : Notoriety.GetHue(Mobile.NotorietyFlag);
 
         public void Update()
         {
@@ -105,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (IsDisposed)
                 return;
-
+            
             bool inparty = World.Party.GetPartyMember(_partyMemeberSerial) != null;
 
             Hue textColor = 0x0386;
@@ -115,9 +121,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mobile == null || Mobile.IsDestroyed)
             {
-                if (Engine.Profile.Current.CloseHealthBarType == 1)
+                if (Engine.Profile.Current.CloseHealthBarType == 1 ||
+                    Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000))
                 {
                     Dispose();
+
                     return;
                 }
 
@@ -153,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.MouseClick -= TextBoxOnMouseClick;
                     }
 
-                    if (_background.Hue != _barColor)
-                        _background.Hue = _barColor;
+                    if (_background.Hue != 0)
+                        _background.Hue = 0;
 
                     if (_hpLineRed.Hue != hitsColor)
                     {
@@ -176,10 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                if (!Mobile.IsDead && _isDead)
-                {
-                    _isDead = false;
-                }
+                if (!Mobile.IsDead && _isDead) _isDead = false;
 
                 if (_outOfRange)
                 {
@@ -194,9 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hitsColor = 0;
 
                     if (inparty)
-                    {
                         textColor = _barColor;
-                    }
                     else
                     {
                         _canChangeName = Mobile.IsRenamable;
@@ -308,27 +311,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
-            {
-                NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
-            }
-
+            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null) NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
             base.Dispose();
         }
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((ButtonParty)buttonID)
+            switch ((ButtonParty) buttonID)
             {
                 case ButtonParty.Heal1:
                     GameActions.CastSpell(29);
                     World.Party.PartyHealTimer = Engine.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
+
                     break;
                 case ButtonParty.Heal2:
                     GameActions.CastSpell(11);
                     World.Party.PartyHealTimer = Engine.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
+
                     break;
             }
 
@@ -354,9 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 BuildGump();
             }
             else
-            {
                 Dispose();
-            }
         }
 
         private void BuildGump()
@@ -372,15 +371,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0)
                 {
                     IsTransparent = true,
-                    Alpha = 1,
+                    Alpha = 1
                 });
                 Width = 115;
                 Height = 55;
 
                 if (CanBeSaved)
-                {
-                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) { X = 0, Y = -2 });
-                }
+                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
                 else
                 {
                     Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 150, 3, FontStyle.Fixed)
@@ -390,8 +387,8 @@ namespace ClassicUO.Game.UI.Gumps
                     });
                 }
 
-                Add(_buttonHeal1 = new Button((int)ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 0, Y = 20 });
-                Add(_buttonHeal2 = new Button((int)ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) { ButtonAction = ButtonAction.Activate, X = 0, Y = 33 });
+                Add(_buttonHeal1 = new Button((int) ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) {ButtonAction = ButtonAction.Activate, X = 0, Y = 20});
+                Add(_buttonHeal2 = new Button((int) ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) {ButtonAction = ButtonAction.Activate, X = 0, Y = 33});
 
                 Add(_hpLineRed = new GumpPic(18, 20, LINE_RED_PARTY, 0));
                 Add(_manaLineRed = new GumpPic(18, 33, LINE_RED_PARTY, 0));
@@ -447,18 +444,34 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 16,
                         Y = 14,
                         Width = 120,
-                        Height = 30,
+                        Height = 15,
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
                         SafeCharactersOnly = true,
+                        WantUpdateSize = false,
                         Text = _name
                     });
-
                     if (_canChangeName)
                         _textBox.MouseClick += TextBoxOnMouseClick;
                 }
             }
+        }
+
+        private static int CalculatePercents(int max, int current, int maxValue)
+        {
+            if (max > 0)
+            {
+                max = current * 100 / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = maxValue * max / 100;
+            }
+
+            return max;
         }
 
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
@@ -468,35 +481,28 @@ namespace ClassicUO.Game.UI.Gumps
                 TargetManager.TargetGameObject(Mobile);
                 Mouse.LastLeftButtonClickTime = 0;
             }
-            else if (_canChangeName)
-                _textBox.IsEditable = true;
-        }
-
-        private static int CalculatePercents(int max, int current, int maxValue)
-        {
-            if (max > 0)
+            else if (_canChangeName && !_targetBroke)
             {
-                max = (current * 100) / max;
-
-                if (max > 100)
-                    max = 100;
-
-                if (max > 1)
-                    max = (maxValue * max) / 100;
+                _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
             }
 
-            return max;
+            _targetBroke = false;
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (TargetManager.IsTargeting)
             {
+                _targetBroke = true;
                 TargetManager.TargetGameObject(Mobile);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)
+            {
                 _textBox.IsEditable = false;
+                Engine.UI.SystemChat.SetFocus();
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -506,22 +512,15 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Mobile != World.Player)
                 {
                     if (World.Player.InWarMode && World.Player != Mobile)
-                    {
                         GameActions.Attack(Mobile);
-                    }
-                    else if (button == MouseButton.Left)
-                    {
-                        GameActions.DoubleClick(Mobile);
-                    }
+                    else if (button == MouseButton.Left) GameActions.DoubleClick(Mobile);
                 }
                 else
                 {
-                     StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
-                     Dispose();
+                    StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
+                    Dispose();
                 }
             }
-
-
             return true;
         }
 
@@ -533,6 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(Mobile, _textBox.Text);
+                Engine.UI.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
         }
@@ -540,17 +540,19 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseEnter(int x, int y)
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
-            {
-                Mobile.IsSelected = true;
-            }
+                SelectedObject.Object = Mobile;
         }
 
         protected override void OnMouseExit(int x, int y)
         {
             if (Mobile != null && Mobile.IsSelected)
-            {
-                Mobile.IsSelected = false;
-            }
+                SelectedObject.Object = null;
+        }
+
+        private enum ButtonParty
+        {
+            Heal1,
+            Heal2
         }
     }
 }

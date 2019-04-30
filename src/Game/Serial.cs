@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -50,6 +53,7 @@ namespace ClassicUO.Game
         {
             return serial.Value;
         }
+
         public static bool operator ==(Serial s1, Serial s2)
         {
             return s1.Value == s2.Value;

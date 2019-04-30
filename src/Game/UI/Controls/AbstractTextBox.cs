@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,17 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
-using System.Collections.Generic;
+#endregion
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal abstract class AbstractTextBox : Control
     {
         public abstract AbstractEntry EntryValue { get; }
-
-        public AbstractTextBox()
-        {
-        }
 
         public int MaxCharCount { get; set; }
 
@@ -46,21 +39,18 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 SetKeyboardFocus();
-                EntryValue.OnMouseClick(x, y);
+                EntryValue?.OnMouseClick(x, y);
             }
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                EntryValue.OnSelectionEnd(x, y);
-            }
+            if (button == MouseButton.Left) EntryValue?.OnSelectionEnd(x, y);
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            EntryValue.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
+            EntryValue?.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
 
             return base.Draw(batcher, x, y);
         }

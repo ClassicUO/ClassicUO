@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,49 +18,23 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
-using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Static
+    internal sealed partial class Static
     {
-        private readonly bool _isFoliage, _isPartialHue;
         private readonly int _canBeTransparent;
+        private readonly bool _isFoliage, _isPartialHue;
 
         private Graphic _oldGraphic;
-
-        private bool _border = false;
-        private static Texture2D _borderTexture;
-        private Color _borderColor = Color.Black;
-
-        public void SetBorder(bool status, byte width = 3, Color color = default)
-        {
-            _borderColor = color == default ? Color.Black : color;
-
-            _border = status;
-        }
-
-        public bool IsBordered()
-        {
-            return _border;
-        }
 
         public bool CharacterIsBehindFoliage { get; set; }
 
@@ -75,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
@@ -98,9 +73,9 @@ namespace ClassicUO.Game.GameObjects
             if (_isFoliage)
             {
                 if (CharacterIsBehindFoliage)
-                {      
+                {
                     if (AlphaHue != 76)
-                        ProcessAlpha(76);                    
+                        ProcessAlpha(76);
                 }
                 else
                 {
@@ -109,41 +84,59 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            {
+                HueVector.X = 0x0023;
+                HueVector.Y = 1;
+            }
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = ShaderHuesTraslator.GetHueVector(Hue, _isPartialHue, 0, false);
+            {
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
+            }
 
             Engine.DebugInfo.StaticsRendered++;
-            base.Draw(batcher, position, objectList);
+            base.Draw(batcher, posX, posY);
+
+            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
 
             if (ItemData.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(this, this, (int)position.X + 22, (int)position.Y + 22);
-            }
-
-            if (_border)
-            {
-                if (_borderTexture == null)
-                {
-                    _borderTexture = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                    _borderTexture.SetData(new Color[] { _borderColor });
-                }
-                batcher.DrawBorder(_borderTexture, new Rectangle((int)position.X - FrameInfo.X, (int)position.Y - FrameInfo.Y, FrameInfo.Width, FrameInfo.Height));
+                      .AddLight(this, this, posX + 22, posY + 22);
             }
 
             return true;
         }
 
-        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+
+        public override void Select(int x, int y)
         {
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            if (!istransparent && Texture.Contains(x, y))
-                list.Add(this, vertex[0].Position);
+            if (SelectedObject.Object == this)
+                return;
+
+            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+                SelectedObject.Object = this;
         }
+
+        //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        //{
+
+
+
+        //    //int x = list.MousePosition.X - (int) vertex[0].Position.X;
+        //    //int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
+        //    //if (!istransparent && Texture.Contains(x, y))
+        //    //    list.Add(this, vertex[0].Position);
+        //}
     }
 }

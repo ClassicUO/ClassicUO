@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -29,9 +32,9 @@ namespace ClassicUO.Game
         {
             return _value == other._value;
         }
- 
+
         public const ushort INVALID = 0xFFFF;
-       
+
         private readonly ushort _value;
 
         public Hue(ushort hue)

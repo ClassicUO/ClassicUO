@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -31,7 +31,6 @@ using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -53,15 +52,45 @@ namespace ClassicUO.Game
             }
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
+
+        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
         private readonly Tooltip _tooltip;
+
+        private IntPtr _cursor, _surface;
         private SpriteTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
+
+        private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
         private Point _offset;
         private Rectangle _rect;
 
+        private readonly Texture2D _aura;
+        private Vector3 _auraVector = new Vector3(0, 13, 0);
+
         public GameCursor()
         {
+            short ww = 0;
+            short hh = 0;
+            uint[] data = CircleOfTransparency.CreateTexture(25, ref ww, ref hh);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                ref uint pixel = ref data[i];
+
+                if (pixel != 0)
+                {
+                    ushort value = (ushort)(pixel << 3);
+
+                    if (value > 0xFF)
+                        value = 0xFF;
+
+                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                }
+            }
+            _aura = new Texture2D(Engine.Batcher.GraphicsDevice, ww, hh);
+            _aura.SetData(data);
+
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 2; i++)
@@ -185,15 +214,9 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (pixels != null && pixels.Length > 0)
+                    if (pixels != null && pixels.Length != 0)
                     {
-                        _cursorPixels[i, j] = new CursorInfo()
-                        {
-                            Width = w,
-                            Height = h,
-                            Pixels = pixels
-                        }; 
-
+                        _cursorPixels[i, j] = new CursorInfo(pixels, w, h);
                     }
                 }
             }
@@ -212,26 +235,19 @@ namespace ClassicUO.Game
             }
         }
 
-        private ItemHold _itemHold;
+        public bool IsLoading { get; set; }
 
         public void SetDraggedItem(ItemHold hold)
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
-            _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
+            _offset.X = _draggedItemTexture.Width / 2;
+            _offset.Y = _draggedItemTexture.Height / 2;
+
+            _rect.Width = _draggedItemTexture.Width;
+            _rect.Height = _draggedItemTexture.Height;
         }
 
-        private IntPtr  _cursor, _surface;
-
-        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
-
-        private struct CursorInfo
-        {
-            public ushort[] Pixels;
-            public int Width, Height;
-        }
-        
         public unsafe void Update(double totalMS, double frameMS)
         {
             Graphic = AssignGraphicByState();
@@ -254,7 +270,7 @@ namespace ClassicUO.Game
                 ref readonly CursorInfo info = ref _cursorPixels[war, id];
 
                 fixed (ushort* ptr = info.Pixels)
-                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom( (IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
+                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
 
                 if (_surface != IntPtr.Zero)
                 {
@@ -273,12 +289,42 @@ namespace ClassicUO.Game
 
         public void Draw(Batcher2D sb)
         {
+            if (TargetManager.IsTargeting && Engine.Profile.Current != null && Engine.Profile.Current.AuraOnMouse)
+            {
+                ushort id = Graphic;
+
+                if (id < 0x206A)
+                    id -= 0x2053;
+                else
+                    id -= 0x206A;
+
+                int hotX = _cursorOffset[0, id];
+                int hotY = _cursorOffset[1, id];
+
+                switch (TargetManager.TargeringType)
+                {
+                    case TargetType.Neutral:
+                        _auraVector.X = 0x03B2;
+                        break;
+                    case TargetType.Harmful:
+                        _auraVector.X = 0x0023;
+                        break;
+                    case TargetType.Beneficial:
+                        _auraVector.X = 0x005A;
+                        break;
+                }
+
+                sb.Draw2D(_aura, Mouse.Position.X + hotX - 25 / 2 , Mouse.Position.Y + hotY - 25 / 2, _auraVector);
+            }
+
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
                 int x = Mouse.Position.X - _offset.X;
                 int y = Mouse.Position.Y - _offset.Y;
 
-                Vector3 hue = ShaderHuesTraslator.GetHueVector(_itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0, false);
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
+
                 sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
@@ -288,6 +334,7 @@ namespace ClassicUO.Game
                     sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, hue);
                 }
             }
+
             DrawToolTip(sb, Mouse.Position);
         }
 
@@ -302,7 +349,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
+                    if (gs.IsMouseOverViewport && gs.SelectedObject is Entity item && item.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
@@ -314,6 +361,7 @@ namespace ClassicUO.Game
                     if (Engine.UI.IsMouseOverAControl)
                     {
                         Item it = null;
+
                         switch (Engine.UI.MouseOverControl)
                         {
                             case EquipmentSlot equipmentSlot:
@@ -325,12 +373,13 @@ namespace ClassicUO.Game
 
                                 break;
 
-							case Control control when control.Tooltip is Item i:
-								it = i;
-								break;
+                            case Control control when control.Tooltip is Item i:
+                                it = i;
+
+                                break;
                         }
 
-                        if (it != null && it.Properties.Count > 0)
+                        if (it != null && it.Properties.Count != 0)
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
@@ -339,48 +388,33 @@ namespace ClassicUO.Game
                             return;
                         }
                     }
-                  
-                    if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
-                    {
-                        if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
-                            _tooltip.SetGameObject(dynItem);
-                        _tooltip.Draw(batcher, position.X, position.Y + 24);
-
-                        return;
-                    }
                 }
             }
 
             if (Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-	            if (Engine.UI.MouseOverControl.Tooltip is string text)
-	            {
-		            if (_tooltip.Text != text)
-			            _tooltip.Clear();
+                if (Engine.UI.MouseOverControl.Tooltip is string text)
+                {
+                    if (_tooltip.Text != text)
+                        _tooltip.Clear();
 
-		            if (_tooltip.IsEmpty)
-			            _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
+                    if (_tooltip.IsEmpty)
+                        _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
 
-		            _tooltip.Draw(batcher, position.X, position.Y + 24);
-	            }
+                    _tooltip.Draw(batcher, position.X, position.Y + 24);
+                }
             }
-            else if (!_tooltip.IsEmpty)
-            {
-                _tooltip.Clear();
-            }
+            else if (!_tooltip.IsEmpty) _tooltip.Clear();
         }
-
-        public bool IsLoading { get; set; }
 
         private ushort AssignGraphicByState()
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-
             if (TargetManager.IsTargeting)
             {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
                 if (gs != null && !gs.IsHoldingItem)
                     return _cursorData[war, 12];
             }
@@ -435,36 +469,52 @@ namespace ClassicUO.Game
             switch (hashf)
             {
                 case 111:
+
                     return (int) Direction.West; // W
                 case 112:
+
                     return (int) Direction.Up; // NW
                 case 113:
+
                     return (int) Direction.North; // N
                 case 120:
+
                     return (int) Direction.West; // W
                 case 131:
+
                     return (int) Direction.West; // W
                 case 132:
+
                     return (int) Direction.Left; // SW
                 case 133:
+
                     return (int) Direction.South; // S
                 case 210:
+
                     return (int) Direction.North; // N
                 case 230:
+
                     return (int) Direction.South; // S
                 case 311:
+
                     return (int) Direction.East; // E
                 case 312:
+
                     return (int) Direction.Right; // NE
                 case 313:
+
                     return (int) Direction.North; // N
                 case 320:
+
                     return (int) Direction.East; // E
                 case 331:
+
                     return (int) Direction.East; // E
                 case 332:
+
                     return (int) Direction.Down; // SE
                 case 333:
+
                     return (int) Direction.South; // S
             }
 
@@ -477,6 +527,19 @@ namespace ClassicUO.Game
             int b = val < 0 ? 1 : 0;
 
             return a - b;
+        }
+
+        private readonly struct CursorInfo
+        {
+            public CursorInfo(ushort[] pixels, int w, int h)
+            {
+                Pixels = pixels;
+                Width = w;
+                Height = h;
+            }
+
+            public readonly ushort[] Pixels;
+            public readonly int Width, Height;
         }
     }
 }

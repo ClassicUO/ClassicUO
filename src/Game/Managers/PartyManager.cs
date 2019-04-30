@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -89,6 +88,7 @@ namespace ClassicUO.Game.Managers
                         p.Skip(4);
 
                     serials = new Serial[count];
+
                     for (int i = 0; i < serials.Length; i++)
                         serials[i] = p.ReadUInt();
                     World.Party.ReceiveRemovePartyMember(serials);
@@ -98,10 +98,7 @@ namespace ClassicUO.Game.Managers
                 case CommandPublicMessage:
                     PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
 
-                    if (partyMember != null)
-                    {
-                        Chat.OnMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
-                    }
+                    if (partyMember != null) Chat.HandleMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
 
                     break;
                 case CommandInvitation:
@@ -111,10 +108,7 @@ namespace ClassicUO.Game.Managers
                     Serial serial = p.ReadUInt();
                     Mobile partyLeaderEntity = World.Mobiles.Get(serial);
 
-                    if (partyLeaderEntity != null)
-                    {
-                        Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
-                    }
+                    if (partyLeaderEntity != null) Chat.HandleMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
 
                     World.Party.SetPartyLeader(serial);
 
@@ -123,7 +117,9 @@ namespace ClassicUO.Game.Managers
         }
 
         private void SetPartyLeader(Serial s)
-            => Leader = s;
+        {
+            Leader = s;
+        }
 
         public void ReceivePartyMemberList(Serial[] mobileSerials)
         {
@@ -137,6 +133,7 @@ namespace ClassicUO.Game.Managers
             var list = new List<PartyMember>(Members);
             Members.Clear();
             list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
+
             foreach (Serial serial in mobileSerials)
                 AddPartyMember(serial);
             PartyMemberChanged.Raise();

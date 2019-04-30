@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -30,6 +33,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Land : GameObject
     {
+        private LandTiles? _tileData;
         public Rectangle Rectangle;
 
         public Land(Graphic graphic)
@@ -39,12 +43,8 @@ namespace ClassicUO.Game.GameObjects
 
             AllowedToDraw = Graphic > 2;
 
-            AlphaHue = 255;    
+            AlphaHue = 255;
         }
-
-        protected override bool CanCreateOverheads => false;
-
-        private LandTiles? _tileData;
 
 
         public LandTiles TileData
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Calculate(int x, int y, sbyte z)
         {
-            UpdateStreched(x, y ,z);
+            UpdateStreched(x, y, z);
         }
 
         public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)

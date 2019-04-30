@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Audio
 {
-    class UOSound : Sound
+    internal class UOSound : Sound
     {
         private readonly byte[] m_WaveBuffer;
 
@@ -25,5 +21,5 @@ namespace ClassicUO.IO.Audio
         {
             return m_WaveBuffer;
         }
-    };
+    }
 }

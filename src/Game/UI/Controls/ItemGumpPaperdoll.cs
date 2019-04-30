@@ -21,8 +21,6 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -40,11 +38,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump
     {
-        private readonly bool _isPartialHue;
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
-
-        private Point _clickedPoint;
+        private readonly bool _isPartialHue;
 
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
@@ -73,16 +69,17 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
+            Texture = FileManager.Gumps.GetTexture((ushort) (id + offset));
 
             if (owner.IsFemale && Texture == null)
-                Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
+                Texture = FileManager.Gumps.GetTexture((ushort) (id + MALE_OFFSET));
 
             if (Texture == null)
             {
                 if (item.Layer != Layer.Face)
                     Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
+
                 return;
             }
 
@@ -100,6 +97,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Update(totalMS, frameMS);
 
+            if (Mobile == null || Mobile.IsDestroyed)
+                Dispose();
+
             if (IsDisposed)
                 return;
 
@@ -111,53 +111,18 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, x, y, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, Item.Hue & 0x3FFF, _isPartialHue, Alpha);
+
+            return batcher.Draw2D(Texture, x, y, hue);
         }
 
-        protected override void UpdateLabel()
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count > 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                container.X = ScreenCoordinateX + _clickedPoint.X - (container.Width >> 1);
-                container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
-
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-        }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            base.OnMouseClick(x, y, button);
-
-            if (button != MouseButton.Left)
-                return;
-
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-            if (gs == null || gs.IsHoldingItem)
-                return;
-
-            if (!_clickedCanDrag)
-            {
-                _clickedPoint = new Point(x, y);
-            }
-        }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
@@ -171,12 +136,10 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
                     {
-                        if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
-                        {
-                            return;
-                        }
+                        if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
                         gs.WearHeldItem(Mobile);
+
                         return;
                     }
 
@@ -204,21 +167,20 @@ namespace ClassicUO.Game.UI.Controls
                                 Mouse.LastLeftButtonClickTime = 0;
                                 Engine.UI.Add(new InfoGump(Item));
                             }
+
                             break;
                     }
                 }
                 else
                 {
-                    if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
-                    {
-                        return;
-                    }
+                    if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                    gs.WearHeldItem(Mobile);
-
+                    if (Item == Mobile.Equipment[(int) Layer.Backpack])
+                        gs.DropHeldItemToContainer(Item);
+                    else
+                        gs.WearHeldItem(Mobile);
                 }
             }
-
         }
     }
 }

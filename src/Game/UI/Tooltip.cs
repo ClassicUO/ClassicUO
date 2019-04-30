@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game.Data;
@@ -35,16 +35,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    internal class Tooltip 
+    internal class Tooltip
     {
-        private Entity _gameObject;
-        private uint _hash;
-        private RenderedText _renderedText;
-        private string _textHTML;
-        private float _lastHoverTime;
+        private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
+        private Entity _gameObject;
+        private uint _hash;
+        private float _lastHoverTime;
         private int _maxWidth;
+        private RenderedText _renderedText;
+        private string _textHTML;
 
         public string Text { get; protected set; }
 
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.UI
                     IsHTML = true,
                     RecalculateWidthByInfo = true,
                     Cell = 5,
-                    FontStyle = FontStyle.BlackBorder,
+                    FontStyle = FontStyle.BlackBorder
                 };
             }
             else if (_renderedText.Text != Text)
@@ -92,7 +93,7 @@ namespace ClassicUO.Game.UI
                         width = 600;
 
                     width = FileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
-                   
+
                     if (width > 600)
                         width = 600;
 
@@ -116,7 +117,11 @@ namespace ClassicUO.Game.UI
                 y = 0;
             else if (y > Engine.WindowHeight - (_renderedText.Height + 8))
                 y = Engine.WindowHeight - (_renderedText.Height + 8);
-            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f);
+
+            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, hue);
 
             return _renderedText.Draw(batcher, x, y);
         }
@@ -141,7 +146,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-       
+
         private string ReadProperties(Entity obj, out string htmltext)
         {
             _sb.Clear();
@@ -173,6 +178,7 @@ namespace ClassicUO.Game.UI
                 string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
 
                 if (string.IsNullOrEmpty(text)) continue;
+
                 _sb.Append(text);
                 _sbHTML.Append(text);
 
@@ -195,30 +201,28 @@ namespace ClassicUO.Game.UI
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-		private static readonly char[] _titleFormatChars = new[] { ' ', '-', '\n', '[' };
+        public unsafe string FormatTitle(string text)
+        {
+            if (text != null)
+            {
+                int index = 0;
 
-		public unsafe string FormatTitle(string text)
-		{
-			if (text != null)
-			{
-				int index = 0;
+                fixed (char* value = text)
+                {
+                    while (index < text.Length)
+                    {
+                        if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
+                            value[index] = char.ToUpper(value[index]);
 
-				fixed (char* value = text)
-				{
-					while (index < text.Length)
-					{
-						if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-							value[index] = char.ToUpper(value[index]);
+                        index++;
+                    }
 
-						index++;
-					}
+                    return new string(value);
+                }
+            }
 
-					return new string(value);
-				}
-			}
-
-			return text;
-		}
+            return text;
+        }
 
         public void SetText(string text, int maxWidth = 0)
         {

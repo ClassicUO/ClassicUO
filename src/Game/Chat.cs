@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,20 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
+using System.Linq;
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
 {
@@ -43,7 +51,7 @@ namespace ClassicUO.Game
         Alliance = 14,
         Command = 15,
         Encoded = 0xC0,
-        Party = 0xFF, // This is a CUO assigned type, value is unimportant
+        Party = 0xFF // This is a CUO assigned type, value is unimportant
     }
 
     public enum MessageFont : ushort
@@ -69,67 +77,161 @@ namespace ClassicUO.Game
         None = 0xFF
     }
 
-   
+
 
     internal static class Chat
     {
-        private const ushort defaultHue = 946;
-        private static readonly Mobile _system = new Mobile(Serial.INVALID)
-        {
-            Graphic = Graphic.INVARIANT, Name = "System"
-        };
-
         public static PromptData PromptData { get; set; }
 
-        public static event EventHandler<UOMessageEventArgs> Message;
+        public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
-        public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
+        public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => Print(_system, message, hue, type, font, unicode);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
 
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
-    
-        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
-			switch (type)
-			{
-			    case MessageType.Focus:
-			    case MessageType.Whisper:
-			    case MessageType.Yell:
+            switch (type)
+            {
                 case MessageType.Spell:
-				case MessageType.Regular:
-			    case MessageType.Label:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
-					break;
-				case MessageType.Emote:
-				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);
-					break;
+
+                {
+                    //server hue color per default
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
+                    {
+                        if (Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        {
+                            StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
+                            sb.Replace("{power}", spell.PowerWords);
+                            sb.Replace("{spell}", spell.Name);
+                            text = sb.ToString().Trim();
+                        }
+                        //server hue color per default if not enabled
+                        if (Engine.Profile.Current.EnabledSpellHue)
+                        {
+                            if (spell.TargetType == TargetType.Beneficial)
+                                hue = Engine.Profile.Current.BeneficHue;
+                            else if (spell.TargetType == TargetType.Harmful)
+                                hue = Engine.Profile.Current.HarmfulHue;
+                            else
+                                hue = Engine.Profile.Current.NeutralHue;
+                        }
+                    }
+
+                    goto case MessageType.Label;
+                }
+                case MessageType.Focus:
+                case MessageType.Whisper:
+                case MessageType.Yell:
+                case MessageType.Regular:
+                case MessageType.Label:
+
+                    if (parent == null)
+                        break;
+
+                    if (parent is Item it && !it.OnGround)
+                    {
+                        Gump gump = Engine.UI.GetByLocalSerial<Gump>(it.Container);
+
+                        if (gump is PaperDollGump paperDoll)
+                        {
+                            var inter = paperDoll
+                                       .FindControls<PaperDollInteractable>()
+                                       .FirstOrDefault();
+
+                            var f = inter?.FindControls<ItemGump>()
+                                          .SingleOrDefault(s => s.Item == it);
+
+                            if (f != null)
+                                f.AddLabel(text, hue, (byte) font, unicode);
+                            else
+                            {
+                                paperDoll.FindControls<EquipmentSlot>()?
+                                         .SelectMany(s => s.Children)
+                                         .OfType<ItemGump>()
+                                         .SingleOrDefault(s => s.Item == it)?
+                                         .AddLabel(text, hue, (byte) font, unicode);
+                            }
+                        }
+                        else if (gump is ContainerGump container)
+                        {
+                            container
+                               .FindControls<ItemGump>()?
+                               .SingleOrDefault(s => s.Item == it)?
+                               .AddLabel(text, hue, (byte) font, unicode);
+                        }
+                        else
+                        {
+                            Entity ent = World.Get(it.RootContainer);
+
+                            if (ent == null || ent.IsDestroyed)
+                                break;
+
+                            gump = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+
+                            if (gump != null)
+                            {
+                                gump.FindControls<DataBox>()?
+                                    .SelectMany(s => s.Children)
+                                    .OfType<ItemGump>()
+                                    .SingleOrDefault(s => s.Item == it)?
+                                    .AddLabel(text, hue, (byte) font, unicode);
+                            }
+                            else
+                            {
+                                Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
+
+                                if (item == null)
+                                    break;
+
+                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
+
+                                if (gump != null)
+                                {
+                                    gump.FindControls<DataBox>()?
+                                        .SelectMany(s => s.Children)
+                                        .OfType<ItemGump>()
+                                        .SingleOrDefault(s => s.Item == it)?
+                                        .AddLabel(text, hue, (byte) font, unicode);
+                                }
+                                else
+                                    Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                            }
+                        }
+                    }
+                    else
+                        parent.AddOverhead(type, text, (byte) font, hue, unicode);
+
+                    break;
+                case MessageType.Emote:
+                    parent?.AddOverhead(type, $"*{text}*", (byte) font, hue, unicode);
+
+                    break;
 
                 case MessageType.Command:
 
-				case MessageType.Encoded:
+                case MessageType.Encoded:
                 case MessageType.System:
-				case MessageType.Party:
-				case MessageType.Guild:
+                case MessageType.Party:
+                case MessageType.Guild:
                 case MessageType.Alliance:
+
                     break;
                 default:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+                    parent?.AddOverhead(type, text, (byte) font, hue, unicode);
+
                     break;
-			}
+            }
 
-			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
-		}
-
-		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
-        {
-            LocalizedMessage.Raise(args, entity ?? _system);
+            MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent);
         }
 
-	}
+        public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
+        {
+            LocalizedMessageReceived.Raise(args, entity);
+        }
+    }
 
-	internal class UOMessageEventArgs : EventArgs
+    internal class UOMessageEventArgs : EventArgs
     {
         public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {

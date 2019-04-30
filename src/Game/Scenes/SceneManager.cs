@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
 
-using ClassicUO.Game.UI.Gumps;
-using Microsoft.Xna.Framework;
+#endregion
 
 namespace ClassicUO.Game.Scenes
 {
@@ -33,9 +31,8 @@ namespace ClassicUO.Game.Scenes
 
     internal sealed class SceneManager
     {
-        public Scene CurrentScene { get; private set; }
-
         private ScenesType _nextScene, _currentScene;
+        public Scene CurrentScene { get; private set; }
 
         public void ChangeScene(ScenesType type)
         {
@@ -48,13 +45,11 @@ namespace ClassicUO.Game.Scenes
 
             CurrentScene?.Destroy();
             CurrentScene = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             switch (type)
             {
                 case ScenesType.Login:
-                    Engine.IsFullScreen = false;
+                    Engine.IsMaximized = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     Engine.AllowWindowResizing = false;
@@ -63,14 +58,13 @@ namespace ClassicUO.Game.Scenes
 
                 case ScenesType.Game:
                     Engine.AllowWindowResizing = true;
-                    Engine.IsFullScreen = true;
+                    Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
+                    Engine.IsMaximized = true;
                     CurrentScene = new GameScene();
                     break;
             }
 
-            CurrentScene.Load();
-
-
+            CurrentScene?.Load();
         }
 
         public void Switch()

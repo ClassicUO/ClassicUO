@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -117,13 +119,9 @@ namespace ClassicUO.Utility
             if (inrect)
             {
                 if (rect.Y < r.Y)
-                {
                     inrect = r.Y < rect.Bottom;
-                }
                 else
-                {
                     inrect = rect.Y < r.Bottom;
-                }
             }
 
             return inrect;
@@ -132,9 +130,10 @@ namespace ClassicUO.Utility
         public static string MakeSafe(this string s)
         {
             StringBuilder sb = new StringBuilder();
+
             for (int i = 0; i < s.Length; i++)
             {
-                if (Utility.StringHelper.IsSafeChar(s[i]))
+                if (StringHelper.IsSafeChar(s[i]))
                     sb.Append(s[i]);
             }
 
@@ -151,7 +150,7 @@ namespace ClassicUO.Utility
 
         public static void WriteUTF8String(this BinaryWriter writer, string str)
         {
-            writer.Write( Encoding.UTF8.GetBytes(str));
+            writer.Write(Encoding.UTF8.GetBytes(str));
         }
     }
 }

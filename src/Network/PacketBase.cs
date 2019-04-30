@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Network
 {
@@ -56,10 +58,11 @@ namespace ClassicUO.Network
             this[Position++] = v;
         }
 
-        public void WriteBytes( byte[] buffer, int v, int length )
+        public void WriteBytes(byte[] buffer, int v, int length)
         {
             EnsureSize(length);
-            for ( int i = v; i < length; i++ )
+
+            for (int i = v; i < length; i++)
                 this[Position++] = buffer[i];
         }
 
@@ -156,7 +159,7 @@ namespace ClassicUO.Network
 
                 while (*buff != 0 && pos < length)
                 {
-                    WriteUShort((ushort)*buff++);
+                    WriteUShort((ushort) *buff++);
                     pos++;
                 }
             }

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers
 {
@@ -34,6 +30,7 @@ namespace ClassicUO.Game.Managers
 
                 return true;
             }
+
             return false;
         }
 
@@ -76,16 +73,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Exists(Serial serial) => _houses.ContainsKey(serial);
+        public bool Exists(Serial serial)
+        {
+            return _houses.ContainsKey(serial);
+        }
 
         public void Clear()
         {
-            foreach (KeyValuePair<Serial, House> house in _houses)
-            {
-                house.Value.ClearComponents();
-            }
+            foreach (KeyValuePair<Serial, House> house in _houses) house.Value.ClearComponents();
             _houses.Clear();
         }
     }
-
 }

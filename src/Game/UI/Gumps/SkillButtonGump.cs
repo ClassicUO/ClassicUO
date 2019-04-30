@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
@@ -31,9 +33,9 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SkillButtonGump : AnchorableGump
     {
-        private HoveredLabel _label;
         private ResizePic _buttonBackgroundNormal;
         private ResizePic _buttonBackgroundOver;
+        private HoveredLabel _label;
         private Skill _skill;
 
         public SkillButtonGump(Skill skill, int x, int y) : this()
@@ -43,10 +45,10 @@ namespace ClassicUO.Game.UI.Gumps
             _skill = skill;
 
             BuildGump();
-            LocalSerial = (uint)(World.Player.Serial + _skill.Index + 1);
+            LocalSerial = (uint) (World.Player.Serial + _skill.Index + 1);
         }
 
-        public SkillButtonGump() : base(0 ,0)
+        public SkillButtonGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -76,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = Width,
                 Height = Height
             });
-        
+
             Add(_label = new HoveredLabel(_skill.Name, true, 0, 1151, Width - 10, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 5,
@@ -85,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true,
                 CanMove = true
             });
-            _label.Y = (Height / 2) - (_label.Height / 2);
+            _label.Y = Height / 2 - _label.Height / 2;
         }
 
         protected override void OnMouseEnter(int x, int y)
@@ -105,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButton.Left && !Input.Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }
-        
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);

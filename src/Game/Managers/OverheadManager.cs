@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,163 +18,29 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.IO;
-using ClassicUO.IO.Resources;
+using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
     internal class OverheadManager : IUpdateable
     {
-        private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
-        private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
+        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
         private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
+        private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
+        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
 
-        private TextOverhead _firstNode;
+        private OverheadMessage _firstNode;
 
-        private void DrawTextOverheads(Batcher2D batcher, MouseOverList list, int startX, int startY)
-        {
-            if (_firstNode != null)
-            {
-                int skip = 0;
-
-                for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
-                {
-                    GameObject owner = overhead.Parent;
-
-                    if (owner == null || overhead.IsDestroyed || owner.IsDestroyed)
-                    {
-                        continue;
-                    }
-
-                    Vector3 position = owner.RealScreenPosition;
-
-                    if (owner is Mobile m)
-                    {
-                        GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
-
-                        position.X += m.Offset.X;
-                        position.X += 22;
-                        position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
-                    }
-                    else if (owner.Texture != null)
-                    {
-                        position.X += 22;
-                        position.Y -= owner.Texture.Height / 2;
-                    }
-
-                    Rectangle current = new Rectangle((int) position.X - overhead.Bounds.X, (int) position.Y - overhead.Bounds.Y, overhead.Bounds.Width, overhead.Bounds.Height);
-
-                    if (skip == 0)
-                    {
-                        for (TextOverhead ov = (TextOverhead)overhead.Right; ov != null; ov = (TextOverhead)ov.Right)
-                        {
-                            Vector3 pos2 = ov.Parent.RealScreenPosition;
-
-                            if (ov.Parent is Mobile mm)
-                            {
-                                GetAnimationDimensions(mm, 0, out int centerX, out int centerY, out int width, out int height);
-
-                                pos2.X += mm.Offset.X;
-                                pos2.X += 22;
-                                pos2.Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8);
-                            }
-                            else if (ov.Parent.Texture != null)
-                            {
-                                pos2.X += 22;
-                                pos2.Y -= ov.Parent.Texture.Height / 2;
-                            }
-
-
-                            Rectangle next = new Rectangle((int)pos2.X - ov.Bounds.X, (int)pos2.Y - ov.Bounds.Y, ov.Bounds.Width, ov.Bounds.Height);
-
-                            overhead.IsOverlapped = current.Intersects(next) && ov.AlphaHue != 0;
-
-                            if (overhead.IsOverlapped)
-                            {
-                                bool startSkip = false;
-                                foreach (TextOverhead parentOverhead in owner.Overheads)
-                                {
-                                    parentOverhead.IsOverlapped = true;
-
-                                    if (parentOverhead == overhead)
-                                    {
-                                        startSkip = true;
-                                    }
-                                    else if (startSkip)
-                                        skip++;
-                                }
-
-                                break;
-                            }
-                        }
-                    }
-                    else
-                        skip--;
-
-
-                    overhead.Draw(batcher, position, list);
-                }
-
-
-                GameObject last = _firstNode;
-
-                while (last != null)
-                {
-                    GameObject temp = last.Right;
-
-                    last.Left = null;
-                    last.Right = null;
-
-                    last = temp;
-                }
-
-                _firstNode.Left = _firstNode.Right = null;
-                _firstNode = null;
-
-            }
-        }
-
-        public void AddOverhead(TextOverhead overhead)
-        {
-            if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
-                _staticToUpdate.Add(overhead.Parent);
-
-            overhead.Left = overhead.Right = null;
-
-            if (_firstNode == null)
-            {
-                _firstNode = overhead;
-            }
-            else
-            {
-                GameObject last = _firstNode;
-
-                while (last.Right != null)
-                    last = last.Right;
-
-                last.Right = overhead;
-                overhead.Right = null;
-            }
-        }
-
-        
 
         public void Update(double totalMS, double frameMS)
         {
@@ -190,140 +57,147 @@ namespace ClassicUO.Game.Managers
 
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s =>
-                {
-                    _damageOverheads.Remove(s);
-                });
+                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
                 _toRemoveDamages.Clear();
             }
         }
 
 
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
+
+        private void DrawTextOverheads(Batcher2D batcher, int startX, int startY, float scale)
         {
-            byte dir = 0 & 0x7F;
-            byte animGroup = 0;
-            bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-            if (frameIndex == 0xFF)
-                frameIndex = (byte)mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
-            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
-        }
-
-        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset, int startX, int startY)
-        {
-            DrawTextOverheads(batcher, list, startX, startY);
-
-            Vector3 position = Vector3.Zero;
-
-            foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
+            if (_firstNode != null)
             {
-                Mobile parent = (Mobile)pair.Key;
-                Deque<DamageOverhead> deque = pair.Value;
+                var first = _firstNode;
 
-       
-                position.X = parent.ScreenPosition.X - offset.X - 22;
-                position.Y = parent.ScreenPosition.Y - offset.Y - 22;
+                int mouseX = Mouse.Position.X;
+                int mouseY = Mouse.Position.Y;
 
-                if (parent is Mobile m)
+                while (first != null)
                 {
-                    GetAnimationDimensions(m, 0xFF, out int centerX, out int centerY, out int width, out int height);
+                    float alpha = first.IsOverlap(first.Right);
+                    first.Draw(batcher, startX, startY, scale);
+                    first.SetAlpha(alpha);
+                    first.Contains(mouseX, mouseY);
 
-                    position.X = position.X + m.Offset.X;
-                    position.Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8);
+                    var temp = first.Right;
+                    first.Right = null;
+                    first = temp;
                 }
 
-                foreach (DamageOverhead damageOverhead in deque)                  
-                    damageOverhead.Draw(batcher, position, list);              
+                _firstNode = null;
             }
+        }
+
+        public void AddOverhead(OverheadMessage overhead)
+        {
+            if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
+                _staticToUpdate.Add(overhead.Parent);
+
+            if (_firstNode == null)
+                _firstNode = overhead;
+            else
+            {
+                var last = _firstNode;
+
+                while (last.Right != null)
+                    last = last.Right;
+
+                last.Right = overhead;
+                overhead.Right = null;
+            }
+        }
+
+
+        public bool Draw(Batcher2D batcher, int startX, int startY)
+        {
+            float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+
+            DrawTextOverheads(batcher, startX, startY, scale);
+
+            foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
+            {
+                int x = startX;
+                int y = startY;
+
+                Entity mob = World.Get(overheadDamage.Key);
+
+                if (mob == null || mob.IsDestroyed)
+                {
+                    uint ser = overheadDamage.Key | 0x8000_0000;
+
+                    if (World.CorpseManager.Exists(0, ser))
+                    {
+                        Item item = World.CorpseManager.GetCorpseObject(ser);
+
+                        if (item != null && item != overheadDamage.Value.Parent)
+                        {
+                            _subst.Add(Tuple.Create(overheadDamage.Key, item.Serial));
+                            overheadDamage.Value.SetParent(item);
+                        }
+                    }
+                    else
+                        continue;
+                }
+
+                overheadDamage.Value.Draw(batcher, x, y, scale);
+            }
+
 
             return true;
         }
 
         private void UpdateDamageOverhead(double totalMS, double frameMS)
         {
-            foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
+            if (_subst.Count != 0)
             {
-                Mobile parent = (Mobile) pair.Key;
-                var deque = pair.Value;
-
-                int offY = parent.IsMounted ? 0 : -22;
-
-                for (int i = 0; i < deque.Count; i++)
+                foreach (Tuple<Serial, Serial> tuple in _subst)
                 {
-                    DamageOverhead obj = deque[i];
-                    obj.Update(totalMS, frameMS);
-
-                    if (obj.IsDestroyed)
-                    {                       
-                        deque.RemoveAt(i--);
-                    }
-                    else
+                    if (_damages.TryGetValue(tuple.Item1, out var dmg))
                     {
-                        obj.Bounds.X = (obj.Texture.Width >> 1) - 22;
-                        obj.Bounds.Y = offY + obj.Texture.Height - obj.OffsetY;
-                        obj.Bounds.Width = obj.Texture.Width;
-                        obj.Bounds.Height = obj.Texture.Height;
-
-                        offY += obj.Texture.Height;
+                        _damages.Remove(tuple.Item1);
+                        _damages.Add(tuple.Item2, dmg);
                     }
                 }
 
-                if (deque.Count == 0)
-                    _toRemoveDamages.Add(parent);
+                _subst.Clear();
+            }
+
+            foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
+            {
+                overheadDamage.Value.Update();
+
+                if (overheadDamage.Value.IsEmpty) _toRemoveDamages.Add(overheadDamage.Key);
             }
         }
 
 
-        internal void AddDamage(GameObject obj, DamageOverhead text)
+        internal void AddDamage(Serial obj, int dmg)
         {
-            if (!_damageOverheads.TryGetValue(obj, out Deque<DamageOverhead> deque) || deque == null)
+            if (!_damages.TryGetValue(obj, out var dm) || dm == null)
             {
-                deque = new Deque<DamageOverhead>();
-                _damageOverheads[obj] = deque;
+                dm = new OverheadDamage(World.Get(obj));
+                _damages[obj] = dm;
             }
 
-            deque.AddToFront(text);
-
-            if (deque.Count > 10)
-                deque.RemoveFromBack();
+            dm.Add(dmg);
         }
 
         public void Clear()
         {
-            foreach (var deque in _damageOverheads.Values)
-            {
-                foreach (DamageOverhead damageOverhead in deque)
-                {
-                    damageOverhead.Destroy();
-                }
-            }
-
-
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s =>
-                {
-                    _damageOverheads.Remove(s);
-                });
+                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
                 _toRemoveDamages.Clear();
             }
 
+            _subst.Clear();
 
-            //foreach (Tuple<TextOverhead, Vector3> tuple in _allOverheads)
-            //{
-            //    tuple.Item1.Dispose();
-            //}
-
-            //_allOverheads.Clear();
-
-            GameObject last = _firstNode;
+            var last = _firstNode;
 
             while (last != null)
             {
-                GameObject temp = last.Right;
+                var temp = last.Right;
 
                 last.Destroy();
 
@@ -335,7 +209,7 @@ namespace ClassicUO.Game.Managers
 
             _firstNode = null;
 
-            _staticToUpdate.ForEach( s=> s.Destroy());
+            _staticToUpdate.ForEach(s => s.Destroy());
             _staticToUpdate.Clear();
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
@@ -28,8 +30,6 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private const ushort SELECTED_COLOR = 0x0021;
         private const ushort NORMAL_COLOR = 0x034F;
 
-        public ServerSelectionGump() : base(0,0)
+        public ServerSelectionGump() : base(0, 0)
         {
             //AddChildren(new LoginBackground(true));
 
@@ -176,12 +176,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     case Buttons.Next:
                     case Buttons.Earth:
+
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer((byte) loginScene.Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
+                            loginScene.SelectServer((byte) loginScene.Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
+
                         break;
 
                     case Buttons.Prev:
                         loginScene.StepBack();
+
                         break;
                 }
             }
@@ -192,8 +195,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte)loginScene.Servers[(Engine.GlobalSettings.LastServerNum - 1)].Index);
+                    loginScene.SelectServer((byte) loginScene.Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
             }
         }
 
@@ -254,9 +258,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 if (IsDisposed)
                     return false;
+
                 _labelName.Draw(batcher, x + 74, y);
                 _labelPing.Draw(batcher, x + 250, y);
-                _labelPacketLoss.Draw(batcher, x + 310 , y);
+                _labelPacketLoss.Draw(batcher, x + 310, y);
 
                 return base.Draw(batcher, x, y);
             }

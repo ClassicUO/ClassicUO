@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 
 using Microsoft.Xna.Framework;
@@ -12,19 +6,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.UI
 {
-    class Button : Control
+    internal class Button : Control
     {
-        private enum StateType
-        {
-            Normal,
-            Over,
-            Pressed
-        }
+        private bool _adaptSizeToText;
 
         private StateType _state;
-        private Vector2 _textSize;
         private string _text;
-        private bool _adaptSizeToText;
+        private Vector2 _textSize;
 
         public Button(int x, int y, int w, int h, string text) : this(text)
         {
@@ -67,8 +55,8 @@ namespace ClassicUO.Renderer.UI
 
                 if (AdaptSizeToText)
                 {
-                    Width = (int)(_textSize.X + 4);
-                    Height = (int)(_textSize.Y + 4);
+                    Width = (int) (_textSize.X + 4);
+                    Height = (int) (_textSize.Y + 4);
                 }
             }
         }
@@ -101,30 +89,41 @@ namespace ClassicUO.Renderer.UI
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
-        {          
+        {
             Texture2D texture;
+
             switch (_state)
             {
                 default:
                 case StateType.Normal:
                     Color color = new Color(49, 49, 49);
                     texture = Textures.GetTexture(color);
+
                     break;
                 case StateType.Over:
                     color = new Color(104, 44, 44);
                     texture = Textures.GetTexture(color);
+
                     break;
                 case StateType.Pressed:
                     color = new Color(89, 59, 59);
                     texture = Textures.GetTexture(color);
+
                     break;
             }
 
             batcher.Draw2D(texture, x, y, Width, Height, Vector3.Zero);
 
-            batcher.DrawString(Fonts.Regular, Text, x - ((int)_textSize.X - Width) / 2, y - ((int)_textSize.Y - Height) / 2, Vector3.Zero);
+            batcher.DrawString(Fonts.Regular, Text, x - ((int) _textSize.X - Width) / 2, y - ((int) _textSize.Y - Height) / 2, Vector3.Zero);
 
             return true; // base.Draw(batcher, position, hue);
+        }
+
+        private enum StateType
+        {
+            Normal,
+            Over,
+            Pressed
         }
     }
 }

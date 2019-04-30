@@ -5,10 +5,9 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class ColorBox : Control
+    internal class ColorBox : Control
     {
         private Color _colorRGBA;
-        private ushort _hue;
 
         public ColorBox(int width, int height, ushort hue, uint pol)
         {
@@ -22,11 +21,11 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public ushort Hue => _hue;
+        public ushort Hue { get; private set; }
 
         public void SetColor(ushort hue, uint pol)
         {
-            _hue = hue;
+            Hue = hue;
 
             (byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(HuesHelper.RgbaToArgb(pol));
 
@@ -37,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Texture == null || Texture.IsDisposed)
                 Texture = new SpriteTexture(1, 1);
-            Texture.SetData(new Color[1] { _colorRGBA });
+            Texture.SetData(new Color[1] {_colorRGBA});
         }
 
         public override void Update(double totalMS, double frameMS)

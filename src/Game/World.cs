@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,17 +18,20 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System.Collections.Concurrent;
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Threading;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -38,6 +42,8 @@ namespace ClassicUO.Game
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<Entity> _toRemove = new List<Entity>();
+
+        public static Point RangeSize;
 
 
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
@@ -73,15 +79,13 @@ namespace ClassicUO.Game
                     {
                         Map.Destroy();
                         Map = null;
+
                         return;
                     }
 
                     if (Map != null)
                     {
-                        if (MapIndex >= 0)
-                        {
-                            Map.Destroy();                       
-                        }
+                        if (MapIndex >= 0) Map.Destroy();
 
                         Position position = Player.Position;
                         Map = null;
@@ -96,11 +100,12 @@ namespace ClassicUO.Game
                         Player.AddToTile();
 
                         Player.ClearSteps();
-                        Player.ProcessDelta();                  
+                        Player.ProcessDelta();
                     }
                     else
                     {
-                        Map = new Map.Map(value);                       
+                        Map = new Map.Map(value);
+
                         if (Player != null)
                             Map.Center = new Point(Player.X, Player.Y);
                         Map.Initialize();
@@ -115,7 +120,7 @@ namespace ClassicUO.Game
 
         public static IsometricLight Light { get; } = new IsometricLight
         {
-            Overall = 0, Personal = 0, RealOverall = 0, RealPersonal = 0,
+            Overall = 0, Personal = 0, RealOverall = 0, RealPersonal = 0
         };
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
@@ -224,28 +229,73 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            if (Thread.CurrentThread.Name != "CUO_MAIN_THREAD")
+            int step = 0;
+            Item item = null;
+            StackTrace trace = new StackTrace();
+
+            // TODO: try to figure out the weird issue :)
+            try
             {
-                Log.Message(LogTypes.Panic, "WRONG THREAD ACCESS. MAYBE IT WILL THROW AN EXCEPTION: " + Thread.CurrentThread.Name);
+                item = Items.Get(serial);
+
+                step = 1;
+
+                if (item == null)
+                    return false;
+
+                step = 2;
+
+                if (item.Layer != Layer.Invalid)
+                {
+                    step = 3;
+
+                    Entity e = Get(item.RootContainer);
+
+                    step = 4;
+
+                    if (e != null && e.HasEquipment)
+                    {
+                        step = 5;
+                        int index = (int) item.Layer;
+
+                        if (index < e.Equipment.Length) e.Equipment[(int) item.Layer] = null;
+                        step = 6;
+                    }
+                }
+
+                step = 7;
+                foreach (Item i in item.Items) RemoveItem(i);
+                step = 8;
+
+                item.Items.Clear();
+                step = 9;
+
+                item.Destroy();
+                step = 10;
             }
-
-            Item item = Items.Get(serial);
-
-            if (item == null)
-                return false;
-
-            if (item.Layer != Layer.Invalid)
+            catch (Exception e)
             {
-                Entity e = Get(item.RootContainer);
-                if (e != null && e.HasEquipment)
-                    e.Equipment[(int) item.Layer] = null;
+                string path = Path.Combine(Engine.ExePath, "Logs");
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("ClassicUO [dev] - v" + Engine.Version);
+                sb.AppendLine($"Thread: {Thread.CurrentThread.Name} - {Thread.CurrentThread.ManagedThreadId} - Engine ThreadID {Engine.ThreadID}");
+                sb.AppendLine($"Serial that causes crash: {serial} - {(item == null ? "NULL" : item.ToString())}");
+                sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
+                sb.AppendLine("Step: " + step);
+                sb.AppendLine("App trace:\n: " + trace);
+                sb.AppendLine("Exception Message:\n" + e);
+                sb.AppendLine("Exception StackTrace:\n" + e.StackTrace);
+
+
+                File.WriteAllText(Path.Combine(path, "log_Error_World_RemoveItem.txt"), sb.ToString());
+
+                Chat.HandleMessage(Player, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
+                Chat.HandleMessage(null, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
             }
-
-            foreach (Item i in item.Items)
-                RemoveItem(i);
-
-            item.Items.Clear();
-            item.Destroy();
 
             return true;
         }
@@ -316,6 +366,7 @@ namespace ClassicUO.Game
                     if (item.RootContainer == Player)
                         continue;
                 }
+
                 RemoveItem(item);
             }
 
@@ -326,6 +377,7 @@ namespace ClassicUO.Game
                     if (mob == Player)
                         continue;
                 }
+
                 RemoveMobile(mob);
             }
         }

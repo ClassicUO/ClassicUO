@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
@@ -39,13 +41,14 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300;
             CanMove = true;
             CanBeSaved = true;
+
             Add(_background = new ExpandableScroll(0, 0, Height)
             {
                 TitleGumpID = 0x82A
             });
 
             _scrollBar = new ScrollFlag(-25, 0, Height, true);
-            
+
             Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
 
             Add(_scrollBar);
@@ -89,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
             //TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, (byte)entry.Font, entry.Hue, entry.IsUnicode);
+            _journalEntries.AddEntry(text, (byte) entry.Font, entry.Hue, entry.IsUnicode);
         }
 
         //private void TransformFont(ref byte font, ref bool asUnicode)

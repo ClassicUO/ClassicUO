@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,47 +18,40 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
+using System.Runtime.CompilerServices;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
-using ClassicUO.IO;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class TextOverheadContainer
+    internal interface IGameEntity
     {
-
+        bool IsSelected { get; set; }
     }
 
-    internal abstract partial class GameObject : IUpdateable, INode<GameObject>
+    internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
-        public Vector3 Offset;
-        private Deque<TextOverhead> _overHeads;
+        private Point _screenPosition;
         private Tile _tile;
-        private Vector3 _screenPosition;
 
-        protected GameObject()
-        {
 
-        }
 
-        public GameObject Left { get; set; }
-        public GameObject Right { get; set; }
+        public Vector3 Offset;
+        public Point RealScreenPosition;
 
-        protected virtual bool CanCreateOverheads => true;
+        public OverheadMessage OverheadMessageContainer { get; private set; }
 
-        public Vector3 ScreenPosition => _screenPosition;
-
-        public Vector3 RealScreenPosition;
+        public Point ScreenPosition => _screenPosition;
 
         public bool IsPositionChanged { get; protected set; }
 
@@ -107,9 +101,6 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        public bool HasOverheads => _overHeads != null;
-
-        public IReadOnlyList<TextOverhead> Overheads => CanCreateOverheads ? _overHeads ?? (_overHeads = new Deque<TextOverhead>()) : null;
 
         //public Tile Tile
         //{
@@ -140,6 +131,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (World.Player == null)
                     return ushort.MaxValue;
+
                 if (this == World.Player)
                     return 0;
 
@@ -157,38 +149,19 @@ namespace ClassicUO.Game.GameObjects
                     y = Y;
                 }
 
-                int fx, fy;
-
-                if (World.Player.IsMoving)
-                {
-                    Mobile.Step step = World.Player.Steps.Back();
-
-                    fx = step.X;
-                    fy = step.Y;
-                }
-                else
-                {
-                    fx = World.Player.X;
-                    fy = World.Player.Y;
-                }
+                int fx = World.RangeSize.X;
+                int fy = World.RangeSize.Y;
 
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
 
+        public GameObject Left { get; set; }
+        public GameObject Right { get; set; }
+
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (_overHeads != null)
-            {
-                for (int i = 0; i < _overHeads.Count; i++)
-                {
-                    var overhead = _overHeads[i];
-                    overhead.Update(totalMS, frameMS);
-
-                    if (overhead.IsDestroyed)
-                        _overHeads.RemoveAt(i--);
-                }
-            }
+            OverheadMessageContainer?.Update();
         }
 
         public void AddToTile(int x, int y)
@@ -203,7 +176,10 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddToTile() => AddToTile(X, Y);
+        public void AddToTile()
+        {
+            AddToTile(X, Y);
+        }
 
         public void AddToTile(Tile tile)
         {
@@ -227,8 +203,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public event EventHandler Disposed, OverheadAdded;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
         {
@@ -237,88 +211,30 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
         }
 
-        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
-
-        public TextOverhead AddOverhead(MessageType type, string message)
+        public int DistanceTo(GameObject entity)
         {
-            return AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+            return Position.DistanceTo(entity.Position);
         }
 
-        public TextOverhead AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
+        public void AddOverhead(MessageType type, string message)
+        {
+            AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+        }
+
+        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f, bool ishealthmessage = false)
         {
             if (string.IsNullOrEmpty(text))
-                return null;
+                return;
 
-            TextOverhead overhead;
+            if (OverheadMessageContainer == null)
+                OverheadMessageContainer = new OverheadMessage(this);
 
-            for (int i = 0; i < Overheads.Count; i++)
-            {
-                overhead = _overHeads[i];
-
-                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDestroyed)
-                {
-                    overhead.Hue = hue;
-                    _overHeads.RemoveAt(i);
-                    InsertGameText(overhead);
-
-                    return overhead;
-                }
-            }
-
-            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
-
-            if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
-            else
-                width = 0;
-            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive)
-            {
-                MessageType = type
-            };
-
-            InsertGameText(overhead);
-            int limit3text = 0;
-            for (int i = 0; i < _overHeads.Count; i++)
-            {
-                if (i <= 5)
-                {
-                    if (_overHeads[i].MessageType == MessageType.Limit3Spell)
-                    {
-                        limit3text++;
-                        if (limit3text > 3)
-                        {
-                            _overHeads[i].Destroy();
-                            _overHeads.RemoveAt(i);
-                            i--;
-                        }
-                    }
-                }
-                else
-                {
-                    _overHeads[i].Destroy();
-                    _overHeads.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            OverheadAdded?.Raise(overhead);
-
-            return overhead;
+            OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
         }
 
-        private void InsertGameText(TextOverhead gameText)
-        {
-            if (_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label)
-                _overHeads.AddToFront(gameText);
-            else
-                _overHeads.Insert(1, gameText);
-
-            //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
-        }
 
         protected virtual void OnPositionChanged()
         {
-
         }
 
 
@@ -328,27 +244,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             IsDestroyed = true;
-            Disposed.Raise();
 
             _tile?.RemoveGameObject(this);
             _tile = null;
 
-            if (_overHeads != null)
-            {
-                while (_overHeads.Count != 0)
-                    _overHeads.RemoveFromBack().Destroy();
-                _overHeads = null;
-            }
-
-            if (Left != null)
-            {
-                Left = null;
-            }
-
-            if (Right != null)
-            {
-                Right = null;
-            }
+            OverheadMessageContainer?.Destroy();
 
             Texture = null;
         }

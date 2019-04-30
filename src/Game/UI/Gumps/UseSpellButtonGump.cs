@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
@@ -32,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private SpellDefinition _spell;
 
-        public UseSpellButtonGump() : base(0 ,0)
+        public UseSpellButtonGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -48,9 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            LocalSerial = (uint)_spell.ID;
+            LocalSerial = (uint) _spell.ID;
 
-            Add(new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
+            Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
@@ -66,51 +68,42 @@ namespace ClassicUO.Game.UI.Gumps
 
             return true;
         }
-        
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
-          
-            // spell data
-            writer.Write(_spell.Name.Length); // 4
-            writer.WriteUTF8String(_spell.Name); // variable
+            writer.Write(0); //version - 4
             writer.Write(_spell.ID); // 4
-            writer.Write(_spell.GumpIconID); // 4
-            writer.Write(_spell.GumpIconSmallID); // 4
-            writer.Write(_spell.Regs.Length); // 4
-
-            for (int i = 0; i < _spell.Regs.Length; i++)
-                writer.Write((int)_spell.Regs[i]); // 4
-
-            writer.Write(_spell.ManaCost); // 4
-            writer.Write(_spell.MinSkill); // 4
-            writer.Write(_spell.PowerWords.Length); // 4
-            writer.WriteUTF8String(_spell.PowerWords); // variable
-            writer.Write(_spell.TithingCost); // 4
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-         
-            string name = reader.ReadUTF8String(reader.ReadInt32());
-            int id = reader.ReadInt32();
-            int gumpID = reader.ReadInt32();
-            int smallGumpID = reader.ReadInt32();
-            int reagsCount = reader.ReadInt32();
-            
-            Reagents[] reagents = new Reagents[reagsCount];
+            int version = reader.ReadInt32();
+            int id;
 
-            for (int i = 0; i < reagsCount; i++)
-                reagents[i] = (Reagents) reader.ReadInt32();
+            if (version > 0)
+            {
+                string name = reader.ReadUTF8String(version);
+                id = reader.ReadInt32();
+                int gumpID = reader.ReadInt32();
+                int smallGumpID = reader.ReadInt32();
+                int reagsCount = reader.ReadInt32();
 
-            int manaCost = reader.ReadInt32();
-            int minSkill = reader.ReadInt32();
-            string powerWord = reader.ReadUTF8String(reader.ReadInt32());
-            int tithingCost = reader.ReadInt32();
+                Reagents[] reagents = new Reagents[reagsCount];
 
-            _spell = new SpellDefinition(name, id, gumpID, smallGumpID, powerWord, manaCost, minSkill, tithingCost, reagents);
+                for (int i = 0; i < reagsCount; i++)
+                    reagents[i] = (Reagents) reader.ReadInt32();
 
+                int manaCost = reader.ReadInt32();
+                int minSkill = reader.ReadInt32();
+                string powerWord = reader.ReadUTF8String(reader.ReadInt32());
+                int tithingCost = reader.ReadInt32();
+            }
+            else
+                id = reader.ReadInt32();
+
+            _spell = SpellDefinition.FullIndexGetSpell(id);
             BuildGump();
         }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,8 +28,6 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -47,12 +47,12 @@ namespace ClassicUO.Game.UI.Controls
             if (_textures[0] == null || _textures[1] == null)
             {
                 Dispose();
+
                 return;
             }
 
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
-            //Height = t.Height;
 
             _text = new RenderedText
             {
@@ -60,9 +60,8 @@ namespace ClassicUO.Game.UI.Controls
             };
             Width += _text.Width;
 
-            
             Height = Math.Max(t.Width, _text.Height);
-            CanMove = false;
+            CanMove = true;
             AcceptMouseInput = true;
         }
 
@@ -93,10 +92,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _textures.Length; i++)
+            foreach (SpriteTexture t in _textures)
             {
-                if (_textures[i] != null)
-                    _textures[i].Ticks = (long) totalMS;
+                if (t != null)
+                    t.Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);
@@ -106,6 +105,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return false;
+
             bool ok = base.Draw(batcher, x, y);
             batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, HueVector);
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
@@ -120,10 +120,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                IsChecked = !IsChecked;
-            }
+            if (button == MouseButton.Left) IsChecked = !IsChecked;
         }
 
         public override void Dispose()

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,39 +18,33 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Map;
-using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Land
     {
         private readonly Vector3[] _normals = new Vector3[4];
-        private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
+        private SpriteVertex[] _vertex = new SpriteVertex[4]
         {
             new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
         };
-        private Vector3 _storedHue;
-        private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
+        private Point _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
             Engine.DebugInfo.LandsRendered++;
+
             if (Texture == null || Texture.IsDisposed)
             {
                 if (IsStretched)
@@ -57,57 +52,61 @@ namespace ClassicUO.Game.GameObjects
                 else
                 {
                     Texture = FileManager.Art.GetLandTexture(Graphic);
-                    Bounds = new Rectangle(0, 0, 44, 44);
+                    Bounds.Width = 44;
+                    Bounds.Height = 44;
                 }
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
-                HueVector = new Vector3(Constants.OUT_RANGE_COLOR, 1, HueVector.Z);
+            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            {
+                HueVector.X = 0x0023;
+                HueVector.Y = 1;
+            }
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            {
+                HueVector.X = Constants.OUT_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
-                HueVector = new Vector3(Constants.DEAD_RANGE_COLOR, 1, HueVector.Z);
+            {
+                HueVector.X = Constants.DEAD_RANGE_COLOR;
+                HueVector.Y = 1;
+            }
             else
-                HueVector = GetHueVector(Hue, IsStretched);
+            {
+                HueVector.X = Hue;
 
-            return IsStretched ? Draw3DStretched(batcher, position, objectList) : base.Draw(batcher, position, objectList);
+                if (Hue != 0)
+                    HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
+                else
+                    HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
+            }
+
+
+            if (IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY))
+            {
+                Select(posX, posY);
+                return true;
+            }
+            return false;
         }
 
-        private static Vector3 GetHueVector(int hue, bool stretched)
-        {
-            return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
-        }
 
-        private bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
+        private bool Draw3DStretched(Batcher2D batcher, int posX, int posY)
         {
             Texture.Ticks = Engine.Ticks;
 
+            _vertex[0].Position.X = posX + _vertex0_yOffset.X;
+            _vertex[1].Position.X = posX + _vertex1_yOffset.X;
+            _vertex[2].Position.X = posX + _vertex2_yOffset.X;
+            _vertex[3].Position.X = posX + _vertex3_yOffset.X;
+
             int z = Z * 4;
+            _vertex[0].Position.Y = posY + _vertex0_yOffset.Y + z;
+            _vertex[1].Position.Y = posY + _vertex1_yOffset.Y + z;
+            _vertex[2].Position.Y = posY + _vertex2_yOffset.Y + z;
+            _vertex[3].Position.Y = posY + _vertex3_yOffset.Y + z;
 
-            if (Engine.Profile.Current.HighlightGameObjects)
-            {
-                if (IsSelected)
-                {
-                    if (_storedHue == Vector3.Zero)
-                        _storedHue = HueVector;
-                    HueVector = ShaderHuesTraslator.SelectedHue;
-                }
-                else if (_storedHue != Vector3.Zero)
-                {
-                    HueVector = _storedHue;
-                    _storedHue = Vector3.Zero;
-                }
-            }
-
-            Vector3.Add(ref position, ref _vertex0_yOffset, out _vertex[0].Position);
-            Vector3.Add(ref position, ref _vertex1_yOffset, out _vertex[1].Position);
-            Vector3.Add(ref position, ref _vertex2_yOffset, out _vertex[2].Position);
-            Vector3.Add(ref position, ref _vertex3_yOffset, out _vertex[3].Position);
-
-            _vertex[0].Position.Y += z;
-            _vertex[1].Position.Y += z;
-            _vertex[2].Position.Y += z;
-            _vertex[3].Position.Y += z;
-
-            //HueVector.Z = 1f - (AlphaHue / 255f);
 
             if (HueVector != _vertex[0].Hue)
             {
@@ -115,24 +114,26 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[1].Hue = HueVector;
                 _vertex[2].Hue = HueVector;
                 _vertex[3].Hue = HueVector;
-            }     
+            }
 
-            if (!batcher.DrawSprite(Texture, _vertex))
-                return false;
-
-            if (objectList.IsMouseInObjectIsometric(_vertex))
-                objectList.Add(this, _vertex[0].Position);
-
-            return true;
+            return batcher.DrawSprite(Texture, ref _vertex);
         }
 
-        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
+        public override void Select(int x, int y)
         {
-            int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+            if (SelectedObject.Object == this)
+                return;
 
-            if (Texture.Contains(x, y))
-                list.Add(this, vertex[0].Position);
+            if (IsStretched)
+            {
+                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
+                    SelectedObject.Object = this;
+            }
+            else
+            {
+                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y))
+                    SelectedObject.Object = this;
+            }
         }
 
         private void UpdateStreched(int x, int y, sbyte z)
@@ -170,20 +171,41 @@ namespace ClassicUO.Game.GameObjects
                         if (currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ)
                         {
                             for (int k = 0; k < 4; k++)
-                                vec[curI, curJ, k] = new Vector3(0, 0, 1);
+                            {
+                                ref var v = ref vec[curI, curJ, k];
+                                v.X = 0;
+                                v.Y = 0;
+                                v.Z = 1;
+                            }
                         }
                         else
                         {
-                            vec[curI, curJ, 0] = new Vector3(-22.0f, 22.0f, (currentZ - rightZ) * 4);
+                            ref var v0 = ref vec[curI, curJ, 0];
+                            v0.X = -22;
+                            v0.Y = 22;
+                            v0.Z = (currentZ - rightZ) * 4;
                             Merge(ref vec[curI, curJ, 0], -22.0f, -22.0f, (leftZ - currentZ) * 4);
                             vec[curI, curJ, 0].Normalize();
-                            vec[curI, curJ, 1] = new Vector3(22.0f, 22.0f, (rightZ - bottomZ) * 4);
+
+
+                            ref var v1 = ref vec[curI, curJ, 1];
+                            v1.X = 22;
+                            v1.Y = 22;
+                            v1.Z = (rightZ - bottomZ) * 4;
                             Merge(ref vec[curI, curJ, 1], -22.0f, 22.0f, (currentZ - rightZ) * 4);
                             vec[curI, curJ, 1].Normalize();
-                            vec[curI, curJ, 2] = new Vector3(22.0f, -22.0f, (bottomZ - leftZ) * 4);
+
+                            ref var v2 = ref vec[curI, curJ, 2];
+                            v2.X = 22;
+                            v2.Y = -22;
+                            v2.Z = (bottomZ - leftZ) * 4;
                             Merge(ref vec[curI, curJ, 2], 22.0f, 22.0f, (rightZ - bottomZ) * 4);
                             vec[curI, curJ, 2].Normalize();
-                            vec[curI, curJ, 3] = new Vector3(-22.0f, -22.0f, (leftZ - currentZ) * 4);
+
+                            ref var v3 = ref vec[curI, curJ, 3];
+                            v3.X = -22;
+                            v3.Y = -22;
+                            v3.Z = (leftZ - currentZ) * 4;
                             Merge(ref vec[curI, curJ, 3], 22.0f, -22.0f, (bottomZ - leftZ) * 4);
                             vec[curI, curJ, 3].Normalize();
                         }
@@ -205,16 +227,19 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[3].Normal = _normals[2];
                 _vertex[2].Normal = _normals[3];
 
-                _vertex0_yOffset = new Vector3(22, -Rectangle.Left, 0);
-                _vertex1_yOffset = new Vector3(44, 22 - Rectangle.Bottom, 0);
-                _vertex2_yOffset = new Vector3(0, 22 - Rectangle.Top, 0);
-                _vertex3_yOffset = new Vector3(22, 44 - Rectangle.Right, 0);
+
+                _vertex0_yOffset.X = 22;
+                _vertex0_yOffset.Y = -Rectangle.Left;
+
+                _vertex1_yOffset.X = 44;
+                _vertex1_yOffset.Y = 22 - Rectangle.Bottom;
+
+                _vertex2_yOffset.X = 0;
+                _vertex2_yOffset.Y = 22 - Rectangle.Top;
+
+                _vertex3_yOffset.X = 22;
+                _vertex3_yOffset.Y = 44 - Rectangle.Right;
             }
-
-            Vector3 hue = ShaderHuesTraslator.GetHueVector(Hue);
-
-            if (_vertex[0].Hue != hue)
-                _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;
         }
 
         private static bool TestStretched(int x, int y, sbyte z, bool recurse)

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Runtime.CompilerServices;
 
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Static : GameObject
+    internal sealed partial class Static : GameObject
     {
         private StaticTiles? _itemData;
 
@@ -42,10 +43,10 @@ namespace ClassicUO.Game.GameObjects
             _isPartialHue = ItemData.IsPartialHue;
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-       
+
             if (ItemData.Height > 5)
                 _canBeTransparent = 1;
-            else if (ItemData.IsRoof || (ItemData.IsSurface && ItemData.IsBackground) || ItemData.IsWall)
+            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
                 _canBeTransparent = 1;
             else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
                 _canBeTransparent = 1;
@@ -66,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!_itemData.HasValue)
                     _itemData = FileManager.TileData.StaticData[Graphic];
+
                 return _itemData.Value;
             }
         }

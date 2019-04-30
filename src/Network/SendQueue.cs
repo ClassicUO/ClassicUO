@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Utility;
+
 using System;
 using System.Collections.Generic;
 
@@ -94,9 +96,11 @@ namespace ClassicUO.Network
 
             if (buffer.Length - offset < length)
                 throw new ArgumentException("Offset and length do not point to a valid segment within the buffer.");
+
             int existingBytes = _pending.Count * _CoalesceBufferSize + (_buffered?.Length ?? 0);
 
             if (existingBytes + length > PendingCap) throw new CapacityExceededException();
+
             Gram gram = null;
 
             while (length > 0)

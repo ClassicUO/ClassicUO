@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Network;
-using ClassicUO.Utility.Logging;
-
 
 using Microsoft.Xna.Framework;
 
-
 namespace ClassicUO.Renderer.UI
 {
-    class UpdaterMenu : Control
+    internal class UpdaterMenu : Control
     {
+        private static int _isUpdating;
+
         public UpdaterMenu()
         {
             CanCloseWithRightClick = false;
@@ -40,7 +31,7 @@ namespace ClassicUO.Renderer.UI
             Add(new Label("New update available!", 5, 5));
 
             Button button;
-            Add(button = new Button( (Width - 80) / 2, (Height - 30) ,80, 20, "Update"));
+            Add(button = new Button((Width - 80) / 2, Height - 30, 80, 20, "Update"));
 
             button.MouseClick += (s, e) =>
             {
@@ -48,8 +39,6 @@ namespace ClassicUO.Renderer.UI
                     Task.Run(DoUpdate);
             };
         }
-
-        private static int _isUpdating;
 
         private static async void DoUpdate()
         {

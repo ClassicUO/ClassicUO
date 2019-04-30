@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,7 +33,6 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -39,7 +40,10 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
+        private readonly List<FadeOutLabel> _labels = new List<FadeOutLabel>();
         protected bool _clickedCanDrag;
+
+        private Point _lastClickPosition;
         private float _picUpTime;
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
@@ -59,35 +63,9 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Item.Serial;
 
             WantUpdateSize = false;
-            ShowLabel = true;
-
-            if (!World.ClientFlags.TooltipsEnabled)
-            {
-                Item.OverheadAdded -= ItemOnOverheadAdded;
-                Item.OverheadAdded += ItemOnOverheadAdded;
-            }
         }
 
 
-
-        private static void ItemOnOverheadAdded(object sender, EventArgs e)
-        {
-            TextOverhead overhead = (TextOverhead)sender;
-            Item parent = overhead.Parent as Item;
-
-            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(parent);
-
-            if (container == null)
-            {
-                container = new LabelContainer(parent);
-                Engine.UI.Add(container);
-            }
-
-            overhead.TimeToLive = 4000;
-
-            FadeOutLabel label = new FadeOutLabel(overhead.Text, overhead.IsUnicode, overhead.Hue, (float) overhead.TimeToLive, overhead.MaxWidth, overhead.Font, overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
-            container.Add(label);
-        }
 
         public Item Item { get; }
 
@@ -95,7 +73,23 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool CanPickUp { get; set; }
 
-        public bool ShowLabel { get; set; }
+        public void AddLabel(string text, Hue hue, byte font, bool isunicode)
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
+
+            if (container == null || container.From != this)
+            {
+                container = new LabelContainer(Item, this);
+                Engine.UI.Add(container);
+            }
+
+            container.SetOffsetCoordinates(_lastClickPosition);
+            container.Add(new FadeOutLabel(text, isunicode, hue, 4000, 0, font, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
+        }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -115,23 +109,24 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                if (!World.ClientFlags.TooltipsEnabled)
-                    GameActions.SingleClick(Item);
+                if (!World.ClientFlags.TooltipsEnabled) GameActions.SingleClick(Item);
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }
 
-            if (ShowLabel)
-                UpdateLabel();
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
-            batcher.Draw2D(Texture, x, y, huev);
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
+
+            batcher.Draw2D(Texture, x, y, hue);
+
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, huev);
+                batcher.Draw2D(Texture, x + 5, y + 5, hue);
+
             return base.Draw(batcher, x, y);
         }
 
@@ -169,17 +164,14 @@ namespace ClassicUO.Game.UI.Controls
             _clickedCanDrag = false;
 
             if (button == MouseButton.Left)
-            {              
+            {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                 if (TargetManager.IsTargeting)
                 {
                     if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
                     {
-                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                        {
-                            return;
-                        }
+                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
                         gs.SelectedObject = Item;
 
@@ -192,6 +184,7 @@ namespace ClassicUO.Game.UI.Controls
                             if (Item.Container.IsItem)
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
                         }
+
                         return;
                     }
 
@@ -219,16 +212,13 @@ namespace ClassicUO.Game.UI.Controls
                                 Mouse.LastLeftButtonClickTime = 0;
                                 Engine.UI.Add(new InfoGump(Item));
                             }
+
                             break;
                     }
                 }
                 else
                 {
-
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                    {
-                        return;
-                    }
+                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
                     gs.SelectedObject = Item;
 
@@ -260,7 +250,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
-        {      
+        {
             if (button != MouseButton.Left)
                 return;
 
@@ -285,6 +275,8 @@ namespace ClassicUO.Game.UI.Controls
                     _sendClickIfNotDClick = true;
                     float totalMS = Engine.Ticks;
                     _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                    _lastClickPosition.X = x;
+                    _lastClickPosition.Y = y;
                 }
             }
         }
@@ -293,6 +285,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
+            _lastClickPosition = Point.Zero;
 
             return true;
         }
@@ -300,8 +293,6 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
-            if (!World.ClientFlags.TooltipsEnabled)
-                Item.OverheadAdded -= ItemOnOverheadAdded;
             base.Dispose();
         }
 
@@ -319,46 +310,40 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-       
 
-        protected virtual void UpdateLabel()
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
 
-            if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count != 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                container.X = ScreenCoordinateX + (Width >> 1) - (container.Width >> 1);
-                container.Y = ScreenCoordinateY /*- (Height >> 1) */- (container.Height);
-                
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-        }
-
-       
         protected class LabelContainer : Gump
         {
-            public LabelContainer(Item item) : base(item, 0)
+            private Point _offset;
+
+            public LabelContainer(Item item, Control from) : base(item, 0)
             {
+                From = from;
                 AcceptMouseInput = false;
                 CanMove = true;
                 WantUpdateSize = false;
             }
 
+            public Control From { get; }
+
             public override void Update(double totalMS, double frameMS)
             {
-                if (Children.Count == 0)
+                if (Children.Count == 0 || From == null || From.IsDisposed)
                     Dispose();
 
+                if (IsDisposed)
+                    return;
+
+                X = From.ScreenCoordinateX + _offset.X - Width / 2;
+                Y = From.ScreenCoordinateY + _offset.Y;
+
+                Engine.UI.MakeTopMostGumpOverAnother(this, From);
                 base.Update(totalMS, frameMS);
+            }
+
+            public void SetOffsetCoordinates(Point offset)
+            {
+                _offset = offset;
             }
 
             public override void Add(Control c, int page = 0)
@@ -367,10 +352,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Children.Count > 0)
                 {
-                    for (int i = 0; i < Children.Count; i++)
-                    {
-                        Children[i].X = Width / 2 - (Children[i].Width >> 1);
-                    }
+                    foreach (Control t in Children) t.X = Width / 2 - (t.Width >> 1);
 
                     var a = Children[Children.Count - 1];
                     c.Y = a.Y + a.Height;
@@ -393,6 +375,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int newWidth = 0;
                     int newHeight = 0;
+
                     foreach (Control control in Children)
                     {
                         if (newWidth < control.Width)
@@ -403,9 +386,7 @@ namespace ClassicUO.Game.UI.Controls
                     Width = newWidth;
                     Height = newHeight;
                 }
-
             }
         }
-
     }
 }

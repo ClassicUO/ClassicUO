@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -26,7 +28,6 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -70,8 +71,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-                _gumpTexture[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _gumpTexture)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
@@ -88,6 +90,7 @@ namespace ClassicUO.Game.UI.Controls
                 switch (i)
                 {
                     case 0:
+
                         if (t.Contains(x, y))
                             return true;
 
@@ -120,6 +123,7 @@ namespace ClassicUO.Game.UI.Controls
                         break;
                     case 2:
                         drawX += Width - drawWidth;
+
                         if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
                             return true;
 
@@ -147,6 +151,7 @@ namespace ClassicUO.Game.UI.Controls
                                     break;
                             }
                         }
+
                         break;
                     case 4:
                         drawX += Width - drawWidth /*- offsetRight*/;
@@ -173,11 +178,14 @@ namespace ClassicUO.Game.UI.Controls
                                     break;
                             }
                         }
+
                         break;
                     case 5:
                         drawY += Height - drawHeight;
+
                         if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
                             return true;
+
                         break;
                     case 6:
                         drawX += _gumpTexture[5].Width;
@@ -204,12 +212,15 @@ namespace ClassicUO.Game.UI.Controls
                                     break;
                             }
                         }
+
                         break;
                     case 7:
                         drawX += Width - drawWidth;
                         drawY += Height - drawHeight;
+
                         if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
                             return true;
+
                         break;
                     case 8:
                         drawX += _gumpTexture[0].Width;
@@ -221,7 +232,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
                         while (drawX < maxW)
-                        {                     
+                        {
                             if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
                                 return true;
 
@@ -235,8 +246,6 @@ namespace ClassicUO.Game.UI.Controls
                                 if (drawY > maxH)
                                     break;
                             }
-
-
                         }
 
                         break;
@@ -250,8 +259,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(Batcher2D batcher, int x, int y)
         {
-            Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-            DrawInternal(batcher, x, y, color);
+            Vector3 hue = Vector3.Zero;
+
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
+            DrawInternal(batcher, x, y, hue);
+
             return base.Draw(batcher, x, y);
         }
 

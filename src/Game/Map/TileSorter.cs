@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.IO.Resources;
-
-using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Map
 {
@@ -32,7 +30,9 @@ namespace ClassicUO.Game.Map
         // https://www.geeksforgeeks.org/merge-sort-for-doubly-linked-list/
 
         public static GameObject Sort(GameObject first)
-            => MergeSort(first);
+        {
+            return MergeSort(first);
+        }
 
         private static GameObject Merge(GameObject first, GameObject second)
         {

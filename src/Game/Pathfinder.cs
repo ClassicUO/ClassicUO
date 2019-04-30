@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -70,10 +72,11 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-             Tile tile =  World.Map.GetTile(x, y, false);
+            Tile tile = World.Map.GetTile(x, y, false);
 
             if (tile == null)
                 return false;
+
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
@@ -134,9 +137,9 @@ namespace ClassicUO.Game
                             }
                             case Item item2:
 
-                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || (isGM && !item2.IsLocked)))
+                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                     dropFlags = true;
-                                else 
+                                else
                                     dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
 
                                 break;
@@ -218,9 +221,8 @@ namespace ClassicUO.Game
             if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
                 return 0;
 
-            for (int i = 0; i < list.Count; i++)
+            foreach (PathObject obj in list)
             {
-                PathObject obj = list[i];
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
@@ -626,6 +628,7 @@ namespace ClassicUO.Game
                 {
                     if (direction != oldDirection)
                         continue;
+
                     int diagonal = i % 2;
 
                     if (diagonal != 0)
@@ -788,10 +791,10 @@ namespace ClassicUO.Game
 
                     World.Player.GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
 
-                    if (dir == (Direction)p.Direction)
+                    if (dir == (Direction) p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction)p.Direction, Engine.Profile.Current.AlwaysRun))
+                    if (!World.Player.Walk((Direction) p.Direction, Engine.Profile.Current.AlwaysRun))
                         StopAutoWalk();
                 }
                 else

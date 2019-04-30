@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
@@ -12,20 +13,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp
     {
         // Used to interface with JavaZoom code.
         private readonly Bitstream m_BitStream;
-        private readonly Decoder m_Decoder = new Decoder(Decoder.DefaultParams);
         // local variables.
         private readonly Buffer16BitStereo m_Buffer;
+        private readonly Decoder m_Decoder = new Decoder(Decoder.DefaultParams);
         private readonly Stream m_SourceStream;
-        private readonly int m_BackStreamByteCountRep;
-        private short m_ChannelCountRep = -1;
         protected SoundFormat FormatRep;
-        private int m_FrequencyRep = -1;
-
-        public bool IsEOF
-        {
-            get; 
-            protected set;
-        }
 
         /// <summary>
         ///     Creates a new stream instance using the provided filename, and the default chunk size of 4096 bytes.
@@ -54,7 +46,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <summary>
         ///     Creates a new stream instance using the provided stream as a source.
         ///     Will also read the first frame of the MP3 into the internal buffer.
-        ///     TODO: allow selecting stereo or mono in the constructor (note that this also requires "implementing" the stereo format).
+        ///     TODO: allow selecting stereo or mono in the constructor (note that this also requires "implementing" the stereo
+        ///     format).
         /// </summary>
         public MP3Stream(Stream sourceStream, int chunkSize)
         {
@@ -64,50 +57,38 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             m_BitStream = new Bitstream(new PushbackStream(m_SourceStream, chunkSize));
             m_Buffer = new Buffer16BitStereo();
             m_Decoder.OutputBuffer = m_Buffer;
+
             // read the first frame. This will fill the initial buffer with data, and get our frequency!
             if (!ReadFrame())
                 IsEOF = true;
         }
-        
+
+        public bool IsEOF { get; protected set; }
+
         /// <summary>
         ///     Gets the chunk size.
         /// </summary>
-        public int ChunkSize
-        {
-            get { return m_BackStreamByteCountRep; }
-        }
+        public int ChunkSize { get; }
 
         /// <summary>
         ///     Gets a value indicating whether the current stream supports reading.
         /// </summary>
-        public override bool CanRead
-        {
-            get { return m_SourceStream.CanRead; }
-        }
+        public override bool CanRead => m_SourceStream.CanRead;
 
         /// <summary>
         ///     Gets a value indicating whether the current stream supports seeking.
         /// </summary>
-        public override bool CanSeek
-        {
-            get { return m_SourceStream.CanSeek; }
-        }
+        public override bool CanSeek => m_SourceStream.CanSeek;
 
         /// <summary>
         ///     Gets a value indicating whether the current stream supports writing.
         /// </summary>
-        public override bool CanWrite
-        {
-            get { return m_SourceStream.CanWrite; }
-        }
+        public override bool CanWrite => m_SourceStream.CanWrite;
 
         /// <summary>
         ///     Gets the length in bytes of the stream.
         /// </summary>
-        public override long Length
-        {
-            get { return m_SourceStream.Length; }
-        }
+        public override long Length => m_SourceStream.Length;
 
         /// <summary>
         ///     Gets or sets the position of the source stream.  This is relative to the number of bytes in the MP3 file, rather
@@ -115,15 +96,16 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// </summary>
         public override long Position
         {
-            get { return m_SourceStream.Position; }
+            get => m_SourceStream.Position;
             set
             {
                 if (value < 0)
                     value = 0;
+
                 if (value > m_SourceStream.Length)
                     value = m_SourceStream.Length;
                 m_SourceStream.Position = value;
-                IsEOF = (m_SourceStream.Position >= m_SourceStream.Length);
+                IsEOF = m_SourceStream.Position >= m_SourceStream.Length;
             }
         }
 
@@ -131,35 +113,21 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         ///     Gets the frequency of the audio being decoded. Updated every call to Read() or DecodeFrames(),
         ///     to reflect the most recent header information from the MP3 Stream.
         /// </summary>
-        public int Frequency
-        {
-            get { return m_FrequencyRep; }
-        }
+        public int Frequency { get; private set; } = -1;
 
         /// <summary>
         ///     Gets the number of channels available in the audio being decoded. Updated every call to Read() or DecodeFrames(),
         ///     to reflect the most recent header information from the MP3 Stream.
         /// </summary>
-        public short ChannelCount
-        {
-            get { return m_ChannelCountRep; }
-        }
+        public short ChannelCount { get; private set; } = -1;
 
         /// <summary>
         ///     Gets the PCM output format of this stream.
         /// </summary>
-        public SoundFormat Format
-        {
-            get { return FormatRep; }
-
-            // Note: the buffers are stored in an optimized format--changing
-            // the Format involves flushing the buffers and so on, so 
-            // let's just not, OK?
-            // set { FormatRep = value; } 
-        }
+        public SoundFormat Format => FormatRep;
 
         /// <summary>
-        /// Clears all buffers for this stream and causes any buffered data to be written to the underlying device.
+        ///     Clears all buffers for this stream and causes any buffered data to be written to the underlying device.
         /// </summary>
         public override void Flush()
         {
@@ -199,11 +167,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         {
             int framesDecoded = 0;
             bool aFrameWasRead = true;
+
             while (framesDecoded < frameCount && aFrameWasRead)
             {
                 aFrameWasRead = ReadFrame();
                 if (aFrameWasRead) framesDecoded++;
             }
+
             return framesDecoded;
         }
 
@@ -219,6 +189,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 return 0;
 
             int bytesRead = 0;
+
             while (true)
             {
                 if (m_Buffer.BytesLeft <= 0)
@@ -226,18 +197,20 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                     if (!ReadFrame()) // out of frames or end of stream?
                     {
                         IsEOF = true;
+
                         break;
                     }
                 }
 
                 // Copy as much as we can from the current buffer:
                 bytesRead += m_Buffer.Read(buffer,
-                    offset + bytesRead,
-                    count - bytesRead);
+                                           offset + bytesRead,
+                                           count - bytesRead);
 
                 if (bytesRead >= count)
                     break;
             }
+
             return bytesRead;
         }
 
@@ -258,6 +231,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         {
             // Read a frame from the bitstream.
             Header header = m_BitStream.readFrame();
+
             if (header == null)
                 return false;
 
@@ -265,11 +239,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             {
                 // Set the channel count and frequency values for the stream.
                 if (header.mode() == Header.SINGLE_CHANNEL)
-                    m_ChannelCountRep = 1;
+                    ChannelCount = 1;
                 else
-                    m_ChannelCountRep = 2;
+                    ChannelCount = 2;
 
-                m_FrequencyRep = header.frequency();
+                Frequency = header.frequency();
 
                 // Decode the frame.
                 ABuffer decoderOutput = m_Decoder.DecodeFrame(header, m_BitStream);
@@ -287,6 +261,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 // No resource leaks please!
                 m_BitStream.CloseFrame();
             }
+
             return true;
         }
     }

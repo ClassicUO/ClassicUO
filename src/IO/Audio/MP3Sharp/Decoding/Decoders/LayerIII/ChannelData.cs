@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class ChannelData
+    internal class ChannelData
     {
         public GranuleInfo[] Granules;
         public int[] ScaleFactorBits;

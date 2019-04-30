@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.Scenes;
 
 using SDL2;
 
@@ -76,6 +76,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     X = 264, Y = 304, ButtonAction = ButtonAction.Activate
                 });
+
                 Add(new Button((int) Buttons.Cancel, 0x047E, 0x0480, 0x047F)
                 {
                     X = 348, Y = 304, ButtonAction = ButtonAction.Activate
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER || e.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
-                OnButtonClick((int)Buttons.OK);
+                OnButtonClick((int) Buttons.OK);
         }
 
         public override void Dispose()

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Interfaces
+﻿namespace ClassicUO.Interfaces
 {
-    interface IPoolable
+    internal interface IPoolable
     {
         void OnPickup();
         void OnReturn();

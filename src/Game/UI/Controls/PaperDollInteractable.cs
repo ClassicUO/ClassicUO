@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -36,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
             Layer.Hair, Layer.Robe, Layer.Earrings, Layer.Beard, Layer.Helmet, Layer.Waist, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
-        private GumpPicBackpack _backpackGump;
+        private ItemGumpPaperdoll _backpackGump;
         private Item _fakeItem;
         private Mobile _mobile;
 
@@ -48,9 +50,8 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
             mobile.Items.Added += ItemsOnAdded;
             mobile.Items.Removed += ItemsOnRemoved;
-            mobile.Disposed += MobileOnDisposed;
         }
-        
+
         public Mobile Mobile
         {
             get => _mobile;
@@ -64,41 +65,44 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_mobile == null || _mobile.IsDestroyed)
+                Dispose();
+        }
+
 
         public override void Dispose()
         {
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
-            Mobile.Disposed -= MobileOnDisposed;
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             UpdateEntity();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
             if (_fakeItem != null)
             {
-                foreach (Item item in e)
+                foreach (Serial item in e)
                 {
-                    if (item.Serial == _fakeItem.Serial)
+                    if (item == _fakeItem.Serial)
                     {
                         _fakeItem = null;
+
                         break;
                     }
                 }
             }
 
             UpdateEntity();
-        }
-
-        private void MobileOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
         }
 
         public void Update()
@@ -123,6 +127,13 @@ namespace ClassicUO.Game.UI.Controls
 
         private void UpdateEntity()
         {
+            if (Mobile == null || Mobile.IsDestroyed)
+            {
+                Dispose();
+
+                return;
+            }
+
             Clear();
 
             // Add the base gump - the semi-naked paper doll.
@@ -131,62 +142,22 @@ namespace ClassicUO.Game.UI.Controls
             bool isGM = false;
 
             if (Mobile.Graphic == 0x0191 || Mobile.Graphic == 0x0193)
-            {
                 body = 0x000D;
-            }
             else if (Mobile.Graphic == 0x025D)
-            {
                 body = 0x000E;
-            }
             else if (Mobile.Graphic == 0x025E)
-            {
                 body = 0x000F;
-            }
             else if (Mobile.Graphic == 0x029A)
-            {
                 body = 0x029A;
-            }
             else if (Mobile.Graphic == 0x029B)
-            {
                 body = 0x299;
-            }
             else if (Mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
                 isGM = true;
             }
             else
-            {
                 body = 0x000C;
-            }
-
-            //if (_mobile == World.Player)
-            //{
-            //    switch (_mobile.Race)
-            //    {
-            //        default:
-            //        case RaceType.HUMAN:
-            //            body = (Graphic) (0xC + (_mobile.IsFemale ? 1 : 0));
-
-            //            break;
-            //        case RaceType.ELF:
-            //            body = (Graphic) (0xE + (_mobile.IsFemale ? 1 : 0));
-
-            //            break;
-            //        case RaceType.GARGOYLE:
-            //            body = (Graphic) (0x29A + (_mobile.IsFemale ? 1 : 0));
-
-            //            break;
-            //    }
-            //}
-            //else
-            //    body = (Graphic) (12 + (_mobile.IsFemale ? 1 : 0));
-
-            
-
-            // Loop through the items on the mobile and create the gump pics.
-
-            //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (isGM)
             {
@@ -196,6 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                     IsPaperdoll = true,
                     IsPartialHue = true
                 });
+
                 Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
@@ -211,105 +183,109 @@ namespace ClassicUO.Game.UI.Controls
                     IsPaperdoll = true,
                     IsPartialHue = true
                 });
-                for (int i = 0; i < _layerOrder.Length; i++)
+
+                if (Mobile.HasEquipment)
                 {
-                    int layerIndex = (int) _layerOrder[i];
-                    Item item = _mobile.Equipment[layerIndex];
-                    bool isfake = false;
-                    bool canPickUp = World.InGame;
-
-                    if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                    for (int i = 0; i < _layerOrder.Length; i++)
                     {
-                        item = _fakeItem;
-                        isfake = true;
-                        canPickUp = false;
-                    }
-                    else if (item == null || item.IsDestroyed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
-                        continue;
+                        int layerIndex = (int) _layerOrder[i];
+                        Item item = _mobile.Equipment[layerIndex];
+                        bool isfake = false;
+                        bool canPickUp = World.InGame;
 
-                    switch (_layerOrder[i])
-                    {
-                        case Layer.Beard:
-                        case Layer.Hair:
+                        if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                        {
+                            item = _fakeItem;
+                            isfake = true;
                             canPickUp = false;
+                        }
+                        else if (item == null || item.IsDestroyed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
+                            continue;
 
-                            break;
+                        switch (_layerOrder[i])
+                        {
+                            case Layer.Beard:
+                            case Layer.Hair:
+                                canPickUp = false;
 
-                        case Layer.Arms:
-                        case Layer.Torso:
-                            var robe = _mobile.Equipment[(int)Layer.Robe];
+                                break;
 
-                            if (robe != null)
-                            {
-                                continue;
-                            }
+                            case Layer.Arms:
+                            case Layer.Torso:
+                                var robe = _mobile.Equipment[(int) Layer.Robe];
 
-                            break;
-                        
+                                if (robe != null) continue;
 
-                        case Layer.Helmet:
-                            robe = _mobile.Equipment[(int) Layer.Robe];
+                                break;
 
-                            if (robe != null)
-                            {
-                                if (robe.Graphic > 0x3173)
+
+                            case Layer.Helmet:
+                                robe = _mobile.Equipment[(int) Layer.Robe];
+
+                                if (robe != null)
                                 {
-                                    if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
-                                        continue;
-                                }
-                                else
-                                {
-                                    if (robe.Graphic <= 0x2687)
+                                    if (robe.Graphic > 0x3173)
                                     {
-                                        if (robe.Graphic < 0x2683)
-                                        {
-                                            if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
-                                            {
-                                                break;
-                                            }   
-                                        }
-                                        continue;
+                                        if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
+                                            continue;
                                     }
+                                    else
+                                    {
+                                        if (robe.Graphic <= 0x2687)
+                                        {
+                                            if (robe.Graphic < 0x2683)
+                                            {
+                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F) break;
+                                            }
 
-                                    if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
-                                        continue;
+                                            continue;
+                                        }
+
+                                        if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
+                                            continue;
+                                    }
                                 }
-                            }
 
-                            break;
+                                break;
+                        }
+
+                        Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                        {
+                            SlotIndex = i, CanPickUp = canPickUp
+                        });
                     }
-
-                    Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
-                    {
-                        SlotIndex = i, CanPickUp = canPickUp
-                    });
                 }
             }
 
-            // If this object has a backpack, add it last.
-            if (_mobile.Equipment[(int) Layer.Backpack] != null)
+            if (_mobile.HasEquipment)
             {
-                Item backpack = _mobile.Equipment[(int)Layer.Backpack];
+                Item backpack = _mobile.Equipment[(int) Layer.Backpack];
 
-                Add(_backpackGump = new GumpPicBackpack(0, 0, backpack)
+                if (backpack != null)
                 {
-                    AcceptMouseInput = true
-                });
-                _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
+                    Add(_backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                    {
+                        AcceptMouseInput = true,
+                        CanPickUp = false
+                    });
+                    _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
+                }
             }
         }
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
         {
-            Item backpack = _mobile.Equipment[(int)Layer.Backpack];
+            if (_mobile != null && !_mobile.IsDestroyed && _mobile.HasEquipment)
+            {
+                Item backpack = _mobile.Equipment[(int) Layer.Backpack];
 
-            ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+                ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
 
-            if (backpackGump == null)
-                GameActions.DoubleClick(backpack);
-            else 
-                backpackGump.BringOnTop();
+                if (backpackGump == null)
+                    GameActions.DoubleClick(backpack);
+                else
+                    backpackGump.BringOnTop();
+            }
         }
-
     }
 }

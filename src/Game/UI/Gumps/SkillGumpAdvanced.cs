@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -38,14 +41,24 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 500;
         private const int HEIGHT = 360;
 
+        private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>
+        {
+            {Buttons.SortName, "Name"},
+            {Buttons.SortReal, "Base"},
+            {Buttons.SortBase, "Value"},
+            {Buttons.SortCap, "Cap"}
+        };
+
         private readonly ScrollArea _scrollArea;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
-        private double _totalReal, _totalValue;
-        private bool _updateSkillsNeeded;
+        private readonly GumpPic _sortOrderIndicator;
+
+        private Texture2D _edge;
 
         private bool _sortAsc;
         private string _sortField;
-        private readonly GumpPic _sortOrderIndicator;
+        private double _totalReal, _totalValue;
+        private bool _updateSkillsNeeded;
 
         public SkillGumpAdvanced() : base(0, 0)
         {
@@ -75,38 +88,38 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
             {
-                ButtonParameter = (int)Buttons.SortName,
+                ButtonParameter = (int) Buttons.SortName,
                 IsSelected = true,
                 X = 40,
-                Y = 25,
+                Y = 25
             });
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Real")
             {
-                ButtonParameter = (int)Buttons.SortReal,
+                ButtonParameter = (int) Buttons.SortReal,
                 X = 220,
-                Y = 25,
+                Y = 25
             });
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Base")
             {
-                ButtonParameter = (int)Buttons.SortBase,
+                ButtonParameter = (int) Buttons.SortBase,
                 X = 300,
-                Y = 25,
+                Y = 25
             });
 
             Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Cap")
             {
-                ButtonParameter = (int)Buttons.SortCap,
+                ButtonParameter = (int) Buttons.SortCap,
                 X = 380,
-                Y = 25,
+                Y = 25
             });
-            
+
             Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
             Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
 
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
-            OnButtonClick((int)Buttons.SortName);
+            OnButtonClick((int) Buttons.SortName);
 
             World.Player.SkillsChanged += OnSkillChanged;
         }
@@ -124,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
-                Graphic g = (Graphic)(_sortAsc ? 0x985 : 0x983);
+                Graphic g = (Graphic) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
                 _sortOrderIndicator.Texture = FileManager.Gumps.GetTexture(g);
@@ -168,11 +181,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
             }
 
-            for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.Add(_skillListEntries[i]);
+            foreach (SkillListEntry t in _skillListEntries)
+                _scrollArea.Add(t);
 
-            Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
-            Add(new Label(_totalReal.ToString(), true, 1153) { X = 220, Y = 320 });
-            Add(new Label(_totalValue.ToString(), true, 1153) { X = 300, Y = 320 });
+            Add(new Label("Total: ", true, 1153) {X = 40, Y = 320});
+            Add(new Label(_totalReal.ToString(), true, 1153) {X = 220, Y = 320});
+            Add(new Label(_totalValue.ToString(), true, 1153) {X = 300, Y = 320});
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -195,14 +209,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (_edge == null)
             {
                 _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new Color[] { Color.Gray });
+                _edge.SetData(new[] {Color.Gray});
             }
 
             batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
+
             return base.Draw(batcher, x, y);
         }
-
-        private Texture2D _edge;
 
 
         public override void Dispose()
@@ -217,20 +230,12 @@ namespace ClassicUO.Game.UI.Gumps
             _updateSkillsNeeded = true;
         }
 
-        private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>()
-        {
-            { Buttons.SortName, "Name" },
-            { Buttons.SortReal, "Base" },
-            { Buttons.SortBase, "Value" },
-            { Buttons.SortCap,  "Cap" },
-        };
-
         private enum Buttons
         {
             SortName = 1,
             SortReal = 2,
             SortBase = 3,
-            SortCap  = 4
+            SortCap = 4
         }
     }
 
@@ -271,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
             Add(loc);
-            
+
             loc.MouseClick += (sender, e) =>
             {
                 switch (_skill.Lock)
@@ -281,6 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
                         loc.Graphic = 0x985;
                         loc.Texture = FileManager.Gumps.GetTexture(0x985);
+
                         break;
 
                     case Lock.Down:
@@ -288,6 +294,7 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
                         loc.Texture = FileManager.Gumps.GetTexture(0x82C);
+
                         break;
 
                     case Lock.Locked:
@@ -295,6 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
                         loc.Graphic = 0x983;
                         loc.Texture = FileManager.Gumps.GetTexture(0x983);
+
                         break;
                 }
             };
@@ -322,6 +330,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.ActiveSkillUse:
                     GameActions.UseSkill(_skill.Index);
+
                     break;
             }
         }

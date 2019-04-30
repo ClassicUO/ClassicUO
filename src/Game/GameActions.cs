@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -36,14 +38,14 @@ namespace ClassicUO.Game
 {
     internal static class GameActions
     {
-        private static Action<Item, int, int, int?> _pickUpAction;
+        private static Func<Item, int, int, int?, bool> _pickUpAction;
 
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
-        
+
         public static Serial LastObject { get; set; } = Serial.INVALID;
 
-        internal static void Initialize(Action<Item, int, int, int?> onPickUpAction)
+        internal static void Initialize(Func<Item, int, int, int?, bool> onPickUpAction)
         {
             _pickUpAction = onPickUpAction;
         }
@@ -54,12 +56,14 @@ namespace ClassicUO.Game
         }
 
         public static void SetWarMode(bool state)
-	    {
-		    Socket.Send(new PChangeWarMode(state));
-	    }
+        {
+            Socket.Send(new PChangeWarMode(state));
+        }
 
-		public static void OpenPaperdoll(Serial serial)
-            => DoubleClick(serial | 0x80000000);
+        public static void OpenPaperdoll(Serial serial)
+        {
+            DoubleClick(serial | 0x80000000);
+        }
 
         public static void Attack(Serial serial)
         {
@@ -69,22 +73,22 @@ namespace ClassicUO.Game
 
                 if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
-
                     QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                   s =>
-                                                                   {
-                                                                       if (s)
-                                                                           Socket.Send(new PAttackRequest(serial));
-                                                                   });
+                                                               s =>
+                                                               {
+                                                                   if (s)
+                                                                       Socket.Send(new PAttackRequest(serial));
+                                                               });
 
                     Engine.UI.Add(messageBox);
+
                     return;
                 }
             }
 
             World.LastAttack = serial;
             Socket.Send(new PAttackRequest(serial));
-        } 
+        }
 
         public static void DoubleClick(Serial serial)
         {
@@ -104,13 +108,20 @@ namespace ClassicUO.Game
                 hue = Engine.Profile.Current.SpeechHue;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-            {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
-            }
             else
-            {
                 Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
-            }
+        }
+
+
+        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+        {
+            Print(null, message, hue, type, font, unicode);
+        }
+
+        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+        {
+            Chat.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, unicode, "ENU");
         }
 
         public static void SayParty(string message)
@@ -160,15 +171,10 @@ namespace ClassicUO.Game
 
         public static void DropItem(Serial serial, int x, int y, int z, Serial container)
         {
-
             if (FileManager.ClientVersion >= ClientVersions.CV_6017)
-            {
-                Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
-            }
+                Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
             else
-            {
-                Socket.Send(new PDropRequestOld(serial, (ushort)x, (ushort)y, (sbyte)z, container));
-            }
+                Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
         }
 
         public static void DropItem(Serial serial, Position position, Serial container)
@@ -196,10 +202,10 @@ namespace ClassicUO.Game
             Socket.Send(new PQuestMenuRequest());
         }
 
-	    public static void RequestProfile(Serial serial)
-	    {
-		    Socket.Send(new PProfileRequest(serial));
-	    }
+        public static void RequestProfile(Serial serial)
+        {
+            Socket.Send(new PProfileRequest(serial));
+        }
 
         public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
         {
@@ -209,44 +215,6 @@ namespace ClassicUO.Game
         public static void RequestMobileStatus(Serial serial)
         {
             Socket.Send(new PStatusRequest(serial));
-        }
-
-        public static void TargetCancel(CursorTarget type, Serial cursorID, byte cursorType)
-        {
-            Socket.Send(new PTargetCancel(type, cursorID, cursorType));
-        }
-
-        public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
-        {
-            Entity e = World.Get(entity);
-            if (e == null)
-                return;
-
-            if (Engine.Profile.Current.EnabledCriminalActionQuery && TargetManager.TargeringType == TargetType.Harmful)
-            {
-                Mobile m = World.Mobiles.Get(entity);
-
-                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
-                {
-
-                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                               s =>
-                                                               {
-                                                                   if (s)
-                                                                       Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
-                                                               });
-
-                    Engine.UI.Add(messageBox);
-                    return;
-                }
-            }
-
-            Socket.Send(new PTargetObject(entity, e.Graphic, e.X, e.Y, e.Z, cursorID, cursorType));
-        }
-
-        public static void TargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType)
-        {
-            Socket.Send(new PTargetXYZ(x, y, z, modelNumber, cursorID, targetType));
         }
 
         public static void CastSpellFromBook(int index, Serial bookSerial)
@@ -301,48 +269,49 @@ namespace ClassicUO.Game
             Socket.Send(new PPopupMenuSelection(serial, index));
         }
 
-        public static void SystemMessage(string message) => Chat.Print(message);
+        public static void MessageOverhead(string message, Serial entity)
+        {
+            Print(World.Get(entity), message);
+        }
 
-        public static void SystemMessage(string message, ushort hue) => Chat.Print(message, hue);
-
-        public static void MessageOverhead(string message, Serial entity) => World.Get(entity)?.Print(message);
-
-        public static void MessageOverhead(string message, ushort hue, Serial entity) => World.Get(entity)?.Print(message, hue);
+        public static void MessageOverhead(string message, ushort hue, Serial entity)
+        {
+            Print(World.Get(entity), message, hue);
+        }
 
         public static void AcceptTrade(Serial serial, bool accepted)
-            => Socket.Send(new PTradeResponse(serial, 2, accepted));
+        {
+            Socket.Send(new PTradeResponse(serial, 2, accepted));
+        }
 
         public static void CancelTrade(Serial serial)
-            => Socket.Send(new PTradeResponse(serial, 1, false));
+        {
+            Socket.Send(new PTradeResponse(serial, 1, false));
+        }
 
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (mobile != World.Player)
-                {
-                    Socket.Send(new PClickRequest(mobile));
-                }
+                if (mobile != World.Player) Socket.Send(new PClickRequest(mobile));
             }
 
-            foreach (Item item in World.Items.Where(s => s.IsCorpse))
-            {
-                Socket.Send(new PClickRequest(item));
-            }
+            foreach (Item item in World.Items.Where(s => s.IsCorpse)) Socket.Send(new PClickRequest(item));
         }
 
         public static void OpenDoor()
-            => Socket.Send(new POpenDoor());
+        {
+            Socket.Send(new POpenDoor());
+        }
 
         public static void EmoteAction(string action)
-            => Socket.Send(new PEmoteAction(action));
+        {
+            Socket.Send(new PEmoteAction(action));
+        }
 
         public static void OpenAbilitiesBook()
         {
-            if (Engine.UI.GetByLocalSerial<CombatBookGump>() == null)
-            {
-                Engine.UI.Add(new CombatBookGump(100, 100));
-            }
+            if (Engine.UI.GetByLocalSerial<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
         }
 
         public static void UsePrimaryAbility()
@@ -358,25 +327,28 @@ namespace ClassicUO.Game
             else
                 Socket.Send(new PUseCombatAbility(0));
 
-            ability ^= (Ability)0x80;
+            ability ^= (Ability) 0x80;
         }
 
         public static void UseSecondaryAbility()
         {
             ref Ability ability = ref World.Player.Abilities[1];
 
-            if (((byte)ability & 0x80) == 0)
+            if (((byte) ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
-                    World.Player.Abilities[i] &= (Ability)0x7F;
-                Socket.Send(new PUseCombatAbility((byte)ability));
+                    World.Player.Abilities[i] &= (Ability) 0x7F;
+                Socket.Send(new PUseCombatAbility((byte) ability));
             }
             else
                 Socket.Send(new PUseCombatAbility(0));
 
-            ability ^= (Ability)0x80;
+            ability ^= (Ability) 0x80;
         }
 
-	    public static void QuestArrow(bool rightClick) => Socket.Send(new PClickQuestArrow(rightClick));
+        public static void QuestArrow(bool rightClick)
+        {
+            Socket.Send(new PClickQuestArrow(rightClick));
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -87,8 +85,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
-                        HighlightOnMouseOver = false,
-                        ShowLabel = true,
+                        HighlightOnMouseOver = false
                     });
 
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
@@ -132,19 +129,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Item != null)
             {
-            //    if (_canDrag && totalMS >= _pickupTime)
-            //    {
-            //        _canDrag = false;
-            //        AttempPickUp();
-            //    }
+                //    if (_canDrag && totalMS >= _pickupTime)
+                //    {
+                //        _canDrag = false;
+                //        AttempPickUp();
+                //    }
 
-            //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
-            //    {
-            //        if (!World.ClientFlags.TooltipsEnabled)
-            //            GameActions.SingleClick(Item);
-            //        GameActions.OpenPopupMenu(Item);
-            //        _sendClickIfNotDClick = false;
-            //    }
+                //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+                //    {
+                //        if (!World.ClientFlags.TooltipsEnabled)
+                //            GameActions.SingleClick(Item);
+                //        GameActions.OpenPopupMenu(Item);
+                //        _sendClickIfNotDClick = false;
+                //    }
 
                 //if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
                 //{
@@ -158,10 +155,10 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-      
-        class ItemGumpFixed : ItemGump
+        private class ItemGumpFixed : ItemGump
         {
-            private Point _originalSize, _point;
+            private readonly Point _originalSize;
+            private readonly Point _point;
 
             public ItemGumpFixed(Item item, int w, int h) : base(item)
             {
@@ -180,39 +177,16 @@ namespace ClassicUO.Game.UI.Controls
 
             public override bool Draw(Batcher2D batcher, int x, int y)
             {
-                Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, huev);
+                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, hue);
             }
 
             protected override bool Contains(int x, int y)
             {
                 return true;
             }
-
-
-            protected override void UpdateLabel()
-            {
-                if (World.ClientFlags.TooltipsEnabled)
-                    return;
-
-                if (!Item.IsDestroyed && Item.HasOverheads && Item.Overheads.Count > 0)
-                {
-                    LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                    if (container == null)
-                    {
-                        container = new LabelContainer(Item);
-                        Engine.UI.Add(container);
-                    }
-
-                    container.X = ScreenCoordinateX;
-                    container.Y = ScreenCoordinateY;
-
-                    Engine.UI.MakeTopMostGumpOverAnother(container, this);
-                }
-            }
-
         }
     }
 }

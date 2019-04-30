@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class CombatBookGump : Gump
+    internal class CombatBookGump : Gump
     {
-        private int _abilityCount = Constants.MAX_ABILITIES_COUNT;
-        private int _dictionaryPagesCount = 3;
+        private readonly int _abilityCount = Constants.MAX_ABILITIES_COUNT;
+        private readonly int _dictionaryPagesCount = 3;
         private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
 
-        public CombatBookGump(int x, int y) : base(0 ,0)
+        public CombatBookGump(int x, int y) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -83,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         text = new HoveredLabel(AbilityData.Abilities[offs].Name, false, 0x0288, 0x33, font: 9)
                         {
-                            X = dataX, Y = 42 + y, AcceptMouseInput = true,
+                            X = dataX, Y = 42 + y, AcceptMouseInput = true
                         };
 
                         Add(text, page);
@@ -94,14 +88,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (spellsOnPage == 4)
                     {
-                        _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + ( (byte)World.Player.PrimaryAbility & 0x7F ) - 1), 0);
-                        text = new Label("Primary Ability Icon", false, 0x0288, 80, 6){ X=  265, Y = 105};
+                        _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + ((byte) World.Player.PrimaryAbility & 0x7F) - 1), 0);
+                        text = new Label("Primary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 105};
                         Add(_primAbility);
                         Add(text, page);
 
                         _primAbility.DragBegin += (sender, e) =>
                         {
-                            AbilityDefinition def = AbilityData.Abilities[((byte)World.Player.PrimaryAbility & 0x7F) - 1];
+                            AbilityDefinition def = AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
                             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, true)
                             {
@@ -111,14 +105,14 @@ namespace ClassicUO.Game.UI.Gumps
                             Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
                         };
 
-                        _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + ((byte)World.Player.SecondaryAbility & 0x7F) - 1), 0);
-                        text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) { X = 265, Y = 150 };
+                        _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + ((byte) World.Player.SecondaryAbility & 0x7F) - 1), 0);
+                        text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 150};
                         Add(_secAbility);
                         Add(text, page);
 
                         _secAbility.DragBegin += (sender, e) =>
                         {
-                            AbilityDefinition def = AbilityData.Abilities[((byte)World.Player.SecondaryAbility & 0x7F) - 1];
+                            AbilityDefinition def = AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
 
                             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, false)
                             {
@@ -142,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < 2; i++)
             {
-                int index = ((byte)  (i == 0 ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1;
+                int index = ((byte) (i == 0 ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1;
 
                 AbilityDefinition def = AbilityData.Abilities[index];
 
@@ -161,10 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is Control ctrl)
-            {
-                SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
-            }
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)

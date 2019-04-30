@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
@@ -10,24 +6,20 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class BulletinBoardGump : Gump
+    internal class BulletinBoardGump : Gump
     {
         //private HtmlControl _htmlControl;
-        private ScrollArea _area;
-        private Item _item;
+        private readonly ScrollArea _area;
+        private readonly Item _item;
 
         public BulletinBoardGump(Item item, int x, int y, string name) : base(item, 0)
         {
             _item = item;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
-            _item.Disposed += ItemOnDisposed;
 
             X = x;
             Y = y;
@@ -41,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 159, Y = 36
             };
-            
+
             Add(label);
 
             HitBox hitbox = new HitBox(15, 170, 80, 80)
@@ -49,6 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsTransparent = true,
                 Alpha = 1
             };
+
             hitbox.MouseClick += (sender, e) =>
             {
                 Engine.UI.GetByLocalSerial<BulletinBoardItem>(LocalSerial)?.Dispose();
@@ -61,26 +54,26 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_area);
         }
 
-        private void ItemOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
-        }
-
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Item item in e)
-            {
-                NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
-            }
+            foreach (Serial item in e) NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_item == null || _item.IsDestroyed)
+                Dispose();
         }
 
 
@@ -91,12 +84,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-
             if (_item != null)
             {
                 _item.Items.Added -= ItemsOnAdded;
                 _item.Items.Removed -= ItemsOnRemoved;
-                _item.Disposed -= ItemOnDisposed;
             }
 
             base.Dispose();
@@ -104,14 +95,16 @@ namespace ClassicUO.Game.UI.Gumps
     }
 
 
-    class BulletinBoardItem : Gump
+    internal class BulletinBoardItem : Gump
     {
-        private ScrollFlag _scrollBar;
-        private MultiLineBox _textBox;
-        private TextBox _subjectTextbox;
-        private Button _buttonPost, _buttonReply, _buttonRemove;
+        private readonly Button _buttonPost;
+        private readonly Button _buttonRemove;
+        private readonly Button _buttonReply;
 
-        private Serial _msgSerial;
+        private readonly Serial _msgSerial;
+        private readonly ScrollFlag _scrollBar;
+        private readonly TextBox _subjectTextbox;
+        private readonly MultiLineBox _textBox;
 
         public BulletinBoardItem(Serial serial, Serial msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
         {
@@ -122,9 +115,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new ExpandableScroll(0, 0, 250)
             {
-                TitleGumpID = 0x0820,
+                TitleGumpID = 0x0820
             });
-            _scrollBar = new ScrollFlag( 0, 0, Height, true);
+            _scrollBar = new ScrollFlag(0, 0, Height, true);
             Add(_scrollBar);
             bool useUnicode = FileManager.ClientVersion >= ClientVersions.CV_305D;
             byte unicodeFontIndex = 1;
@@ -138,29 +131,28 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label("Author:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            Label text = new Label("Author:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 40
             };
             Add(text);
 
-            text = new Label(poster, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)9)
+            text = new Label(poster, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
             {
                 X = 30 + text.Width, Y = 46 + unicodeFontHeightOffset
             };
             Add(text);
 
 
-
-            text = new Label("Time:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            text = new Label("Time:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 56
             };
             Add(text);
 
-            text = new Label(datatime, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)9)
+            text = new Label(datatime, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
             {
                 X = 30 + text.Width,
                 Y = 62 + unicodeFontHeightOffset
@@ -168,14 +160,14 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
 
-            text = new Label("Subject:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            text = new Label("Subject:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 72
             };
             Add(text);
 
-          
+
             ushort subjectColor = textColor;
 
             if (variant == 0)
@@ -189,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
             //AddChildren(hitBox);
 
 
-            Add(_subjectTextbox = new TextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150, isunicode: useUnicode, hue: subjectColor)
+            Add(_subjectTextbox = new TextBox(useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, width: 150, isunicode: useUnicode, hue: subjectColor)
             {
                 X = 30 + text.Width,
                 Y = 78 + unicodeFontHeightOffset,
@@ -197,10 +189,10 @@ namespace ClassicUO.Game.UI.Gumps
             });
             _subjectTextbox.SetText(subject);
 
-            
-            Add(new GumpPicTiled(30 ,100, 204, 4, 0x0835));
 
-            Add(_textBox = new MultiLineBox(new MultiLineEntry(useUnicode ? unicodeFontIndex : (byte)9, width: 220, maxWidth: 220, hue: textColor, unicode: useUnicode), true)
+            Add(new GumpPicTiled(30, 100, 204, 4, 0x0835));
+
+            Add(_textBox = new MultiLineBox(new MultiLineEntry(useUnicode ? unicodeFontIndex : (byte) 9, width: 220, maxWidth: 220, hue: textColor, unicode: useUnicode), true)
             {
                 X = 40,
                 Y = 120,
@@ -213,40 +205,38 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0:
                     Add(new GumpPic(97, 12, 0x0883, 0));
-                    Add(_buttonPost = new Button((int)ButtonType.Post, 0x0886, 0x0886)
+
+                    Add(_buttonPost = new Button((int) ButtonType.Post, 0x0886, 0x0886)
                     {
                         X = 37, Y = Height - 50,
                         ButtonAction = ButtonAction.Activate,
-                        ContainsByBounds = true,
+                        ContainsByBounds = true
                     });
+
                     break;
                 case 1:
-                    Add(_buttonReply = new Button((int)ButtonType.Reply, 0x0884, 0x0884)
+
+                    Add(_buttonReply = new Button((int) ButtonType.Reply, 0x0884, 0x0884)
                     {
                         X = 37,
                         Y = Height - 50,
                         ButtonAction = ButtonAction.Activate,
-                        ContainsByBounds = true,
+                        ContainsByBounds = true
                     });
+
                     break;
                 case 2:
-                    Add(_buttonRemove = new Button((int)ButtonType.Remove, 0x0885, 0x0885)
+
+                    Add(_buttonRemove = new Button((int) ButtonType.Remove, 0x0885, 0x0885)
                     {
                         X = 235,
                         Y = Height - 50,
                         ButtonAction = ButtonAction.Activate,
-                        ContainsByBounds = true,
+                        ContainsByBounds = true
                     });
+
                     break;
             }
-        }
-
-
-        enum ButtonType
-        {
-            Post,
-            Remove,
-            Reply
         }
 
 
@@ -261,14 +251,17 @@ namespace ClassicUO.Game.UI.Gumps
                 case ButtonType.Post:
                     NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, 0, _subjectTextbox.Text, _textBox.Text));
                     Dispose();
+
                     break;
                 case ButtonType.Remove:
                     Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, "RE: " + _subjectTextbox.Text, "Date/Time", string.Empty, 0));
                     Dispose();
+
                     break;
                 case ButtonType.Reply:
                     NetClient.Socket.Send(new PBulletinBoardRemoveMessage(LocalSerial, _msgSerial));
                     Dispose();
+
                     break;
             }
         }
@@ -290,10 +283,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
-            {
-                _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
-            }
+            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text)) _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -303,16 +293,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_buttonPost != null)
                 _buttonPost.Y = Height - 50;
+
             if (_buttonReply != null)
                 _buttonReply.Y = Height - 50;
+
             if (_buttonRemove != null)
                 _buttonRemove.Y = Height - 50;
 
             base.Update(totalMS, frameMS);
         }
+
+
+        private enum ButtonType
+        {
+            Post,
+            Remove,
+            Reply
+        }
     }
 
-    class BulletinBoardObject : ScrollAreaItem
+    internal class BulletinBoardObject : ScrollAreaItem
     {
         public BulletinBoardObject(Serial parent, Item serial, string text)
         {
@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool unicode = FileManager.ClientVersion >= ClientVersions.CV_305D;
 
             Add(new GumpPic(0, 0, 0x1523, 0));
-            Add(new Label(text, unicode, (ushort)(unicode ? 0 : 0x0386), font: (byte)(unicode ? 1 : 9)) { X = Children[Children.Count - 1].Texture.Width + 2 });
+            Add(new Label(text, unicode, (ushort) (unicode ? 0 : 0x0386), font: (byte) (unicode ? 1 : 9)) {X = Children[Children.Count - 1].Texture.Width + 2});
         }
 
         public Item Item { get; }

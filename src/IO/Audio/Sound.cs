@@ -9,38 +9,18 @@ using static System.String;
 
 namespace ClassicUO.IO.Audio
 {
-    abstract class Sound : IComparable<Sound>, IDisposable
+    internal abstract class Sound : IComparable<Sound>, IDisposable
     {
-        string m_Name;
-        public string Name
-        {
-            get { return m_Name; }
-            private set
-            {
-                if (!IsNullOrEmpty(value))
-                {
-                    m_Name = value.Replace(".mp3", "");
-                }
-                else
-                {
-                    m_Name = Empty;
-                }
-            }
-        }
-        public DateTime LastPlayed = DateTime.MinValue;
         public static TimeSpan MinimumDelay = TimeSpan.FromSeconds(1d);
 
-        abstract protected byte[] GetBuffer();
-        abstract protected void OnBufferNeeded(object sender, EventArgs e);
-        virtual protected void AfterStop() { }
-        virtual protected void BeforePlay() { }
-
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
-        protected DynamicSoundEffectInstance m_ThisInstance;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
+        protected AudioChannels Channels = AudioChannels.Mono;
 
         protected int Frequency = 22050;
-        protected AudioChannels Channels = AudioChannels.Mono;
+        public DateTime LastPlayed = DateTime.MinValue;
+        private string m_Name;
+        protected DynamicSoundEffectInstance m_ThisInstance;
 
         static Sound()
         {
@@ -54,69 +34,19 @@ namespace ClassicUO.IO.Audio
             Index = index;
         }
 
+        public string Name
+        {
+            get => m_Name;
+            private set
+            {
+                if (!IsNullOrEmpty(value))
+                    m_Name = value.Replace(".mp3", "");
+                else
+                    m_Name = Empty;
+            }
+        }
+
         public int Index { get; }
-
-        public void Dispose()
-        {
-            if (m_ThisInstance != null)
-            {
-                m_ThisInstance.BufferNeeded -= OnBufferNeeded;
-                if (!m_ThisInstance.IsDisposed)
-                {
-                    m_ThisInstance.Stop();
-                    m_ThisInstance.Dispose();
-                }
-                m_ThisInstance = null;
-            }
-        }
-
-        /// <summary>
-        /// Plays the effect.
-        /// </summary>
-        /// <param name="asEffect">Set to false for music, true for sound effects.</param>
-        public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, bool spamCheck = false)
-        {
-            double now = Engine.Ticks;
-            CullExpiredEffects(now);
-
-            if (spamCheck && (LastPlayed + MinimumDelay > DateTime.Now))
-                return;
-
-            BeforePlay();
-            m_ThisInstance = GetNewInstance(asEffect);
-            if (m_ThisInstance == null)
-            {
-                Dispose();
-                return;
-            }
-
-            switch (effect)
-            {
-                case AudioEffects.PitchVariation:
-                    float pitch = RandomHelper.GetValue(-5, 5) * .025f;
-                    m_ThisInstance.Pitch = pitch;
-                    break;
-            }
-            
-            LastPlayed = DateTime.Now;
-
-            byte[] buffer = GetBuffer();
-            if (buffer != null && buffer.Length > 0)
-            {
-                m_ThisInstance.BufferNeeded += OnBufferNeeded;
-                m_ThisInstance.SubmitBuffer(buffer);
-                m_ThisInstance.Volume = volume;
-                m_ThisInstance.Play();
-                List<Tuple<DynamicSoundEffectInstance, double>> list = (asEffect) ? m_EffectInstances : m_MusicInstances;
-                double ms = m_ThisInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
-                list.Add(new Tuple<DynamicSoundEffectInstance, double>(m_ThisInstance, now + ms));
-            }
-        }
-
-        public void Stop()
-        {
-            AfterStop();
-        }
 
         public float Volume
         {
@@ -130,6 +60,90 @@ namespace ClassicUO.IO.Audio
 
                 m_ThisInstance.Volume = value;
             }
+        }
+
+        public int CompareTo(Sound other)
+        {
+            return other == null ? -1 : Index.CompareTo(other.Index);
+        }
+
+        public void Dispose()
+        {
+            if (m_ThisInstance != null)
+            {
+                m_ThisInstance.BufferNeeded -= OnBufferNeeded;
+
+                if (!m_ThisInstance.IsDisposed)
+                {
+                    m_ThisInstance.Stop();
+                    m_ThisInstance.Dispose();
+                }
+
+                m_ThisInstance = null;
+            }
+        }
+
+        protected abstract byte[] GetBuffer();
+        protected abstract void OnBufferNeeded(object sender, EventArgs e);
+
+        protected virtual void AfterStop()
+        {
+        }
+
+        protected virtual void BeforePlay()
+        {
+        }
+
+        /// <summary>
+        ///     Plays the effect.
+        /// </summary>
+        /// <param name="asEffect">Set to false for music, true for sound effects.</param>
+        public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, bool spamCheck = false)
+        {
+            double now = Engine.Ticks;
+            CullExpiredEffects(now);
+
+            if (spamCheck && LastPlayed + MinimumDelay > DateTime.Now)
+                return;
+
+            BeforePlay();
+            m_ThisInstance = GetNewInstance(asEffect);
+
+            if (m_ThisInstance == null)
+            {
+                Dispose();
+
+                return;
+            }
+
+            switch (effect)
+            {
+                case AudioEffects.PitchVariation:
+                    float pitch = RandomHelper.GetValue(-5, 5) * .025f;
+                    m_ThisInstance.Pitch = pitch;
+
+                    break;
+            }
+
+            LastPlayed = DateTime.Now;
+
+            byte[] buffer = GetBuffer();
+
+            if (buffer != null && buffer.Length > 0)
+            {
+                m_ThisInstance.BufferNeeded += OnBufferNeeded;
+                m_ThisInstance.SubmitBuffer(buffer);
+                m_ThisInstance.Volume = volume;
+                m_ThisInstance.Play();
+                List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
+                double ms = m_ThisInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
+                list.Add(new Tuple<DynamicSoundEffectInstance, double>(m_ThisInstance, now + ms));
+            }
+        }
+
+        public void Stop()
+        {
+            AfterStop();
         }
 
         private void CullExpiredEffects(double now)
@@ -159,14 +173,10 @@ namespace ClassicUO.IO.Audio
 
         private DynamicSoundEffectInstance GetNewInstance(bool asEffect)
         {
-            List<Tuple<DynamicSoundEffectInstance, double>> list = (asEffect) ? m_EffectInstances : m_MusicInstances;
-            int maxInstances = (asEffect) ? 32 : 2;
-            return list.Count >= maxInstances ? null : new DynamicSoundEffectInstance(Frequency, Channels);
-        }
+            List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
+            int maxInstances = asEffect ? 32 : 2;
 
-        public int CompareTo(Sound other)
-        {
-            return other == null ? -1 : Index.CompareTo(other.Index);
+            return list.Count >= maxInstances ? null : new DynamicSoundEffectInstance(Frequency, Channels);
         }
     }
 }

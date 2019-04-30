@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -49,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
-        private static SpriteTexture _debugTexture;
+        private static SpriteTexture _debugTexture, _debugFocusTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
@@ -118,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public float Alpha { get; set; }
 
-        public IReadOnlyList<Control> Children => _children;
+        public List<Control> Children => _children;
 
         public object Tag { get; set; }
 
@@ -213,6 +216,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Parent == null)
                     return null;
+
                 Control p = Parent;
 
                 while (p.Parent != null)
@@ -248,16 +252,11 @@ namespace ClassicUO.Game.UI.Controls
             set => _handlesKeyboardFocus = value;
         }
 
-        public virtual void OnPageChanged()
-        {
-
-        }
-
         public int ActivePage
         {
             get => _activePage;
             set
-            {              
+            {
                 _activePage = value;
 
                 OnPageChanged();
@@ -290,9 +289,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool WantUpdateSize { get; set; } = true;
 
-        public Vector3 HueVector { get; set; }
-
         public bool AllowedToDraw { get; set; }
+
+        public int TooltipMaxLength { get; private set; }
+
+        public Vector3 HueVector { get; set; }
 
         public SpriteTexture Texture { get; set; }
 
@@ -321,37 +322,6 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        private void DrawDebug(Batcher2D batcher, int x, int y)
-        {
-            if (IsVisible && Engine.GlobalSettings.Debug)
-            {
-                if (_debugTexture == null)
-                {
-                    _debugTexture = new SpriteTexture(1, 1);
-
-                    _debugTexture.SetData(new Color[1]
-                    {
-                        Color.Green
-                    });
-                }
-
-                //int w, h;
-
-                //if (Texture == null)
-                //{
-                //    w = Width;
-                //    h = Height;
-                //}
-                //else
-                //{
-                //    w = Texture.Width;
-                //    h = Texture.Height;
-                //}
-
-                batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
-            }
-        }
-
         public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed || !IsInitialized) return;
@@ -369,7 +339,8 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         OnChildRemoved();
                         _children.RemoveAt(i--);
-                        continue;  
+
+                        continue;
                     }
 
                     c.Update(totalMS, frameMS);
@@ -385,7 +356,6 @@ namespace ClassicUO.Game.UI.Controls
                                 h = c.Bounds.Bottom;
                         }
                     }
-                    
                 }
 
                 if (WantUpdateSize)
@@ -400,31 +370,68 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public virtual void OnPageChanged()
+        {
+        }
+
+        private void DrawDebug(Batcher2D batcher, int x, int y)
+        {
+            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
+            {
+                if (Engine.DebugFocus && HasKeyboardFocus)
+                {
+                    if (_debugFocusTexture == null)
+                    {
+                        _debugFocusTexture = new SpriteTexture(1, 1);
+
+                        _debugFocusTexture.SetData(new Color[1]
+                        {
+                            Color.Red
+                        });
+                    }
+
+                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
+                }
+                else if (Engine.GlobalSettings.Debug)
+                {
+                    if (_debugTexture == null)
+                    {
+                        _debugTexture = new SpriteTexture(1, 1);
+
+                        _debugTexture.SetData(new Color[1]
+                        {
+                            Color.Green
+                        });
+                    }
+
+                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                }
+            }
+        }
+
         public void BringOnTop()
         {
             Engine.UI.MakeTopMostGump(this);
         }
-      
+
         public void SetTooltip(string text, int maxWidth = 0)
         {
-	        ClearTooltip();
+            ClearTooltip();
 
-			if (!String.IsNullOrEmpty(text))
+            if (!string.IsNullOrEmpty(text))
             {
                 Tooltip = text;
                 TooltipMaxLength = maxWidth;
             }
         }
 
-	    public void SetTooltip(Entity entity)
-	    {
-		    ClearTooltip();
+        public void SetTooltip(Entity entity)
+        {
+            ClearTooltip();
 
-		    if (entity != null & !entity.IsDestroyed)
-			    Tooltip = entity;
-	    }
-
-		public int TooltipMaxLength { get; private set; }
+            if (entity != null && !entity.IsDestroyed)
+                Tooltip = entity;
+        }
 
         public void ClearTooltip()
         {
@@ -433,10 +440,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus)
-            {
-                Engine.UI.KeyboardFocusControl = this;
-            }
+            if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
         }
 
         public event EventHandler Disposed;
@@ -451,10 +455,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Initialize()
         {
-            if (IsDisposed)
-            {
-                return;
-            }
+            if (IsDisposed) return;
 
             IsDisposed = false;
             IsEnabled = true;
@@ -467,10 +468,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool initializedKeyboardFocusedControl = false;
 
-            for (int i = 0; i < _children.Count; i++)
+            foreach (Control c in _children)
             {
-                Control c = _children[i];
-
                 if (!c.IsInitialized && !IsDisposed)
                 {
                     c.Initialize();
@@ -484,25 +483,23 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-     
+
         public Control[] HitTest(Point position)
         {
-            List<Control> results = new List<Control>();
-            //Stack<Control> results = new Stack<Control>();
+            if (!IsVisible)
+                return null;
+
+            Stack<Control> results = new Stack<Control>();
 
             if (Bounds.Contains(position.X - ParentX, position.Y - ParentY))
             {
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Insert(0, this);
-                    //results.Add(this);
-                    //results.Insert(0, this);  //results.Push(this);
+                        results.Push(this);
 
-                    for (int i = 0; i < Children.Count; i++)
+                    foreach (Control c in Children)
                     {
-                        Control c = Children[i];
-
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
                             var cl = c.HitTest(position);
@@ -510,8 +507,7 @@ namespace ClassicUO.Game.UI.Controls
                             if (cl != null)
                             {
                                 for (int j = cl.Length - 1; j >= 0; j--)
-                                    results.Insert(0, cl[j]);
-                                //results.AddRange(cl);
+                                    results.Push(cl[j]);
                             }
                         }
                     }
@@ -520,14 +516,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (results.Count != 0)
             {
-                results.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+                var res = results.ToArray();
+                Array.Sort(res, (a, b) => a.Priority.CompareTo(b.Priority));
 
-                return results.ToArray();
+                return res;
             }
 
             return null;
-
-            //return results.Count == 0 ? null : results/*.OrderBy(s => s.Priority)*/;
         }
 
         public Control GetFirstControlAcceptKeyboardInput()
@@ -560,6 +555,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (c == null)
                 return;
+
             c.Parent = null;
             _children.Remove(c);
             OnChildRemoved();
@@ -580,6 +576,7 @@ namespace ClassicUO.Game.UI.Controls
             return Children.OfType<T>().Where(s => !s.IsDisposed);
         }
 
+
         public void InvokeMouseDown(Point position, MouseButton button)
         {
             _lastClickPosition = position;
@@ -595,7 +592,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);   
+            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
         }
 
         public void InvokeMouseCloseGumpWithRClick()
@@ -723,6 +720,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_mouseIsDown && !_attempToDrag)
             {
                 Point offset = Mouse.LDroppedOffset;
+
                 if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
                     || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
 
@@ -735,7 +733,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseEnter(int x, int y)
         {
-
         }
 
         protected virtual void OnMouseExit(int x, int y)
@@ -777,7 +774,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected virtual bool Contains(int x, int y)
-        {           
+        {
             return !IsDisposed;
         }
 
@@ -813,19 +810,19 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (!CanCloseWithRightClick)
                 return;
+
             Control parent = Parent;
 
             while (parent != null)
             {
                 if (!parent.CanCloseWithRightClick)
                     return;
+
                 parent = parent.Parent;
             }
 
             if (Parent == null)
-            {
                 Dispose();
-            }
             else
                 Parent.CloseWithRightClick();
         }
@@ -833,19 +830,23 @@ namespace ClassicUO.Game.UI.Controls
         public void KeyboardTabToNextFocus(Control c)
         {
             int startIndex = _children.IndexOf(c);
+
             for (int i = startIndex + 1; i < _children.Count; i++)
             {
                 if (_children[i].AcceptKeyboardInput)
                 {
                     _children[i].SetKeyboardFocus();
+
                     return;
                 }
             }
+
             for (int i = 0; i < startIndex; i++)
             {
                 if (_children[i].AcceptKeyboardInput)
                 {
                     _children[i].SetKeyboardFocus();
+
                     return;
                 }
             }

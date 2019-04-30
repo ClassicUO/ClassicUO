@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 using ClassicUO.Network;
 using ClassicUO.Utility;
-
-using SDL2;
 
 using static SDL2.SDL;
 
@@ -31,8 +32,10 @@ namespace ClassicUO.Input
 {
     internal sealed class InputManager : IDisposable
     {
-        private bool _dragStarted;
         private readonly SDL_EventFilter _hookDel;
+        private bool _dragStarted;
+
+        private bool _ignoreNextTextInput;
 
         public InputManager()
         {
@@ -49,7 +52,7 @@ namespace ClassicUO.Input
                 return;
 
             IsDisposed = true;
-           
+
             SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
@@ -66,8 +69,6 @@ namespace ClassicUO.Input
 
         public event EventHandler<string> TextInput;
 
-        private bool _ignoreNextTextInput;
-
         private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
         {
             SDL_Event* e = (SDL_Event*) ev;
@@ -76,6 +77,7 @@ namespace ClassicUO.Input
             {
                 case SDL_EventType.SDL_AUDIODEVICEADDED:
                     Console.WriteLine("AUDIO ADDED: {0}", e->adevice.which);
+
                     break;
                 case SDL_EventType.SDL_AUDIODEVICEREMOVED:
                     Console.WriteLine("AUDIO REMOVED: {0}", e->adevice.which);
@@ -97,6 +99,7 @@ namespace ClassicUO.Input
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
+
                             // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
                             //Log.Message(LogTypes.Debug, "FOCUS");
                             break;
@@ -113,8 +116,6 @@ namespace ClassicUO.Input
                         case SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
-
-                        
                     }
 
                     break;
@@ -134,7 +135,7 @@ namespace ClassicUO.Input
                     break;
                 case SDL_EventType.SDL_KEYUP:
                     //if (Plugin.ProcessHotkeys((int)e->key.keysym.sym, (int)e->key.keysym.mod, false))
-                        KeyUp.Raise(e->key);
+                    KeyUp.Raise(e->key);
 
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
@@ -151,7 +152,9 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
                     MouseMoving.Raise();
-                    if (Mouse.IsDragging) MouseDragging.Raise();
+
+                    if (Mouse.IsDragging)
+                        MouseDragging.Raise();
 
                     if (Mouse.IsDragging && !_dragStarted)
                     {
@@ -184,6 +187,7 @@ namespace ClassicUO.Input
                     switch ((uint) mouse.button)
                     {
                         case SDL_BUTTON_LEFT:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -221,6 +225,7 @@ namespace ClassicUO.Input
 
                             break;
                         case SDL_BUTTON_MIDDLE:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -230,7 +235,7 @@ namespace ClassicUO.Input
                                 uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {                                  
+                                {
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
 
                                     MidMouseDoubleClick.Raise(arg);
@@ -256,6 +261,7 @@ namespace ClassicUO.Input
 
                             break;
                         case SDL_BUTTON_RIGHT:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -293,17 +299,22 @@ namespace ClassicUO.Input
 
                             break;
                         case SDL_BUTTON_X1:
+
                             if (isDown)
                                 Plugin.ProcessMouse(e->button.button, 0);
+
                             break;
                         case SDL_BUTTON_X2:
+
                             if (isDown)
                                 Plugin.ProcessMouse(e->button.button, 0);
+
                             break;
                     }
 
                     break;
-            }      
+            }
+
             return 1;
         }
     }

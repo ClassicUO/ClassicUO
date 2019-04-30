@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Net.Security;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
@@ -18,32 +13,29 @@ using Newtonsoft.Json.Linq;
 
 namespace ClassicUO.Network
 {
-    class Updater
+    internal class Updater
     {
         private const string REPO_USER = "andreakarasho";
         private const string REPO_NAME = "ClassicUO";
         private const string API_RELEASES_LINK = "https://api.github.com/repos/{0}/{1}/releases";
 
         private readonly WebClient _client;
-        private int _countDownload;
-        private double _progress;
-        private string _currentText = string.Empty;
         private int _animIndex;
+        private int _countDownload;
+        private string _currentText = string.Empty;
+        private double _progress;
 
         static Updater()
         {
-            ServicePointManager.ServerCertificateValidationCallback = delegate
-            {
-                return true;
-            };
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
 
         public Updater()
         {
-            _client = new WebClient()
+            _client = new WebClient
             {
-                Proxy = null,
+                Proxy = null
             };
             _client.Headers.Add("User-Agent: Other");
 
@@ -52,10 +44,12 @@ namespace ClassicUO.Network
                 if (IsDownloading)
                 {
                     Console.WriteLine();
-                    Log.Message(LogTypes.Trace, $"Download finished!");
+                    Log.Message(LogTypes.Trace, "Download finished!");
                 }
-            };          
+            };
         }
+
+        public bool IsDownloading => _countDownload != 0;
 
         private void ClientOnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -66,12 +60,13 @@ namespace ClassicUO.Network
                 const int BLOCK_COUNT = 20;
                 const string ANIMATION = @"|/-\";
 
-                int progressBlockCount = (int)(_progress * BLOCK_COUNT);
+                int progressBlockCount = (int) (_progress * BLOCK_COUNT);
 
                 string text = $"{new string('#', progressBlockCount)}{new string('-', BLOCK_COUNT - progressBlockCount)} - {e.ProgressPercentage}% {ANIMATION[_animIndex++ % ANIMATION.Length]}";
 
                 int commonPrefixLength = 0;
                 int commonLength = Math.Min(_currentText.Length, text.Length);
+
                 while (commonPrefixLength < commonLength && text[commonPrefixLength] == _currentText[commonPrefixLength])
                     commonPrefixLength++;
 
@@ -79,6 +74,7 @@ namespace ClassicUO.Network
                 outputBuilder.Append('\b', _currentText.Length - commonPrefixLength);
                 outputBuilder.Append(text.Substring(commonPrefixLength));
                 int overlapCount = _currentText.Length - text.Length;
+
                 if (overlapCount > 0)
                 {
                     outputBuilder.Append(' ', overlapCount);
@@ -90,11 +86,9 @@ namespace ClassicUO.Network
             }
         }
 
-        public bool IsDownloading => _countDownload != 0;
-
 
         public void Check()
-        {          
+        {
             try
             {
                 Download();
@@ -140,6 +134,7 @@ namespace ClassicUO.Network
                     if (!asset.HasValues)
                     {
                         Log.Message(LogTypes.Error, "No zip found for: " + name);
+
                         continue;
                     }
 
@@ -189,7 +184,6 @@ namespace ClassicUO.Network
             _progress = 0;
             _currentText = string.Empty;
             _animIndex = 0;
-
         }
     }
 }

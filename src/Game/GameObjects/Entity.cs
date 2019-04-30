@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Interfaces;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
@@ -34,10 +36,10 @@ namespace ClassicUO.Game.GameObjects
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
+        private Item[] _equipment;
         private Flags _flags;
         private Hue _hue;
         private string _name;
-        private Item[] _equipment;
 
         protected Entity(Serial serial)
         {
@@ -57,9 +59,9 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial { get; internal set; }
+        public Serial Serial { get; set; }
 
-        public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
+        public ConcurrentDictionary<int, Property> Properties => _properties;
 
         public override Graphic Graphic
         {

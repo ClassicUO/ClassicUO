@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class Layer3SideInfo
+    internal class Layer3SideInfo
     {
         public ChannelData[] Channels;
         public int MainDataBegin;

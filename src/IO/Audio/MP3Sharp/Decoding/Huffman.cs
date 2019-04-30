@@ -3,9 +3,9 @@ using ClassicUO.IO.Audio.MP3Sharp.Support;
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 {
     /// <summary>
-    /// Implements a Huffman decoder.
+    ///     Implements a Huffman decoder.
     /// </summary>
-    sealed class Huffman
+    internal sealed class Huffman
     {
         private const int MXOFF = 250;
         private const int HTN = 34;
@@ -271,8 +271,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {0, 139}, new[] {2, 1}, new[] {0, 77}, new[] {0, 199}, new[] {4, 1},
             new[] {2, 1}, new[] {0, 124}, new[] {0, 213}, new[] {2, 1}, new[] {0, 93},
             new[] {0, 224}, new[] {10, 1}, new[] {4, 1}, new[] {2, 1}, new[] {0, 225},
-            new[] {0, 30}, new[] {4, 1}
-            , new[] {2, 1}, new[] {0, 14}, new[] {0, 46}, new[] {0, 226}, new[] {8, 1},
+            new[] {0, 30}, new[] {4, 1}, new[] {2, 1}, new[] {0, 14}, new[] {0, 46}, new[] {0, 226}, new[] {8, 1},
             new[] {4, 1}, new[] {2, 1}, new[] {0, 227}, new[] {0, 109}, new[] {2, 1},
             new[] {0, 140}, new[] {0, 228}, new[] {4, 1}, new[] {2, 1}, new[] {0, 229},
             new[] {0, 186}, new[] {0, 240}, new[] {38, 1}, new[] {16, 1}, new[] {4, 1},
@@ -294,8 +293,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {4, 1}, new[] {2, 1}, new[] {0, 188}, new[] {0, 173}, new[] {0, 218},
             new[] {8, 1}, new[] {2, 1}, new[] {0, 247}, new[] {4, 1}, new[] {2, 1},
             new[] {0, 126}, new[] {0, 127}, new[] {0, 142}, new[] {6, 1}, new[] {4, 1},
-            new[] {2, 1}, new[] {0, 158}, new[] {0, 174}
-            , new[] {0, 204}, new[] {2, 1}, new[] {0, 248}, new[] {0, 143}, new[] {18, 1},
+            new[] {2, 1}, new[] {0, 158}, new[] {0, 174}, new[] {0, 204}, new[] {2, 1}, new[] {0, 248}, new[] {0, 143}, new[] {18, 1},
             new[] {8, 1}, new[] {4, 1}, new[] {2, 1}, new[] {0, 219}, new[] {0, 189},
             new[] {2, 1}, new[] {0, 234}, new[] {0, 249}, new[] {4, 1}, new[] {2, 1},
             new[] {0, 159}, new[] {0, 235}, new[] {2, 1}, new[] {0, 190}, new[] {2, 1},
@@ -334,8 +332,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {0, 113}, new[] {0, 85}, new[] {4, 1}, new[] {2, 1}, new[] {0, 23},
             new[] {0, 100}, new[] {2, 1}, new[] {0, 114}, new[] {0, 39}, new[] {24, 1},
             new[] {16, 1}, new[] {8, 1}, new[] {4, 1}, new[] {2, 1}, new[] {0, 70},
-            new[] {0, 115}, new[] {2, 1}, new[] {0, 55}, new[] {0, 101}, new[] {4, 1}
-            , new[] {2, 1}, new[] {0, 86}, new[] {0, 128}, new[] {2, 1}, new[] {0, 8},
+            new[] {0, 115}, new[] {2, 1}, new[] {0, 55}, new[] {0, 101}, new[] {4, 1}, new[] {2, 1}, new[] {0, 86}, new[] {0, 128}, new[] {2, 1}, new[] {0, 8},
             new[] {0, 116}, new[] {4, 1}, new[] {2, 1}, new[] {0, 129}, new[] {0, 24},
             new[] {2, 1}, new[] {0, 130}, new[] {0, 40}, new[] {16, 1}, new[] {8, 1},
             new[] {4, 1}, new[] {2, 1}, new[] {0, 71}, new[] {0, 102}, new[] {2, 1},
@@ -412,8 +409,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {4, 1}, new[] {2, 1}, new[] {0, 173}, new[] {0, 247}, new[] {2, 1},
             new[] {0, 127}, new[] {0, 233}, new[]
             {
-                8
-                , 1
+                8, 1
             },
             new[] {4, 1}, new[] {2, 1}, new[] {0, 158}, new[] {0, 204}, new[] {2, 1},
             new[] {0, 248}, new[] {0, 143}, new[] {4, 1}, new[] {2, 1}, new[] {0, 219},
@@ -452,8 +448,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {2, 1}, new[] {0, 7}, new[] {2, 1}, new[] {0, 85}, new[] {0, 100},
             new[] {4, 1}, new[] {2, 1}, new[] {0, 114}, new[] {0, 39}, new[] {4, 1},
             new[] {2, 1}, new[] {0, 70}, new[] {0, 101}, new[] {0, 115}, new[] {10, 1},
-            new[] {6, 1}, new[] {2, 1}, new[] {0, 55}
-            , new[] {2, 1}, new[] {0, 86}, new[] {0, 8}, new[] {2, 1}, new[] {0, 128},
+            new[] {6, 1}, new[] {2, 1}, new[] {0, 55}, new[] {2, 1}, new[] {0, 86}, new[] {0, 8}, new[] {2, 1}, new[] {0, 128},
             new[] {0, 129}, new[] {6, 1}, new[] {2, 1}, new[] {0, 24}, new[] {2, 1},
             new[] {0, 116}, new[] {0, 71}, new[] {2, 1}, new[] {0, 130}, new[] {2, 1},
             new[] {0, 40}, new[] {0, 102}, new[] {24, 1}, new[] {14, 1}, new[] {8, 1},
@@ -476,7 +471,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {0, 176}, new[] {0, 11}, new[] {0, 177}, new[] {10, 1}, new[] {4, 1},
             new[] {2, 1}, new[] {0, 27}, new[] {0, 178}, new[] {2, 1}, new[] {0, 43},
             new[] {2, 1}, new[] {0, 165}, new[] {0, 90}, new[]
-            {6, 1},
+                {6, 1},
             new[] {2, 1}, new[] {0, 179}, new[] {2, 1}, new[] {0, 166}, new[] {0, 106},
             new[] {4, 1}, new[] {2, 1}, new[] {0, 180}, new[] {0, 75}, new[] {2, 1},
             new[] {0, 12}, new[] {0, 193}, new[] {30, 1}, new[] {14, 1}, new[] {6, 1},
@@ -588,7 +583,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {0, 136}, new[] {0, 179}, new[] {16, 1}, new[] {10, 1}, new[] {6, 1},
             new[] {2, 1}, new[] {0, 144}, new[] {2, 1}, new[] {0, 9}, new[] {0, 160},
             new[] {2, 1}, new[] {0, 151}, new[] {0, 121}, new[]
-            {4, 1},
+                {4, 1},
             new[] {2, 1}, new[] {0, 166}, new[] {0, 106}, new[] {0, 180}, new[] {12, 1},
             new[] {6, 1}, new[] {2, 1}, new[] {0, 26}, new[] {2, 1}, new[] {0, 10},
             new[] {0, 176}, new[] {2, 1}, new[] {0, 59}, new[] {2, 1}, new[] {0, 11},
@@ -638,7 +633,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {4, 1}, new[] {2, 1}, new[] {0, 235}, new[] {0, 190}, new[] {2, 1},
             new[] {0, 221}, new[] {0, 236}, new[] {8, 1}, new[] {4, 1}, new[] {2, 1},
             new[] {0, 206}, new[] {0, 237}, new[]
-            {2, 1},
+                {2, 1},
             new[] {0, 222}, new[] {0, 238}, new[] {0, 15}, new[] {4, 1}, new[] {2, 1},
             new[] {0, 240}, new[] {0, 31}, new[] {0, 241}, new[] {4, 1}, new[] {2, 1},
             new[] {0, 242}, new[] {0, 47}, new[] {2, 1}, new[] {0, 243}, new[] {0, 63},
@@ -689,14 +684,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
         static Huffman()
         {
-
         }
 
         /// <summary>
         ///     Big Constructor : Computes all Huffman Tables.
         /// </summary>
         private Huffman(string S, int XLEN, int YLEN, int LINBITS, int LINMAX, int REF, int[] TABLE, int[] HLEN,
-            int[][] VAL, int TREELEN)
+                        int[][] VAL, int TREELEN)
         {
             tablename0 = S[0];
             tablename1 = S[1];
@@ -722,7 +716,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             // 0..31 Huffman code table 0..31
             // 32,33 count1-tables
 
-            int dmask = 1 << ((4*8) - 1);
+            int dmask = 1 << (4 * 8 - 1);
             int point = 0;
             int error = 1;
             int level = dmask;
@@ -734,6 +728,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (h.treelen == 0)
             {
                 x[0] = y[0] = 0;
+
                 return 0;
             }
 
@@ -751,6 +746,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     x[0] = SupportClass.URShift(h.val[point][1], 4);
                     y[0] = h.val[point][1] & 0xf;
                     error = 0;
+
                     break;
                 }
 
@@ -776,9 +772,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                         point += h.val[point][0];
                     point += h.val[point][0];
                 }
+
                 level = SupportClass.URShift(level, 1);
                 // MDM: ht[0] is always 0;
-            } while ((level != 0) || (point < 0));
+            } while (level != 0 || point < 0);
 
             // put back any bits not consumed
             /*    
@@ -799,17 +796,28 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 switch them around to make test bistream work. */
 
                 if (v[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         v[0] = -v[0];
+                }
+
                 if (w[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         w[0] = -w[0];
+                }
+
                 if (x[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         x[0] = -x[0];
+                }
+
                 if (y[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         y[0] = -y[0];
+                }
             }
             else
             {
@@ -818,18 +826,30 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 // Reverse x and y here to make test bitstream work.
 
                 if (h.linbits != 0)
-                    if ((h.xlen - 1) == x[0])
+                {
+                    if (h.xlen - 1 == x[0])
                         x[0] += br.ReadBits(h.linbits);
+                }
+
                 if (x[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         x[0] = -x[0];
+                }
+
                 if (h.linbits != 0)
-                    if ((h.ylen - 1) == y[0])
+                {
+                    if (h.ylen - 1 == y[0])
                         y[0] += br.ReadBits(h.linbits);
+                }
+
                 if (y[0] != 0)
+                {
                     if (br.ReadOneBit() != 0)
                         y[0] = -y[0];
+                }
             }
+
             return error;
         }
 

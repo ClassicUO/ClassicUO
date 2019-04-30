@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.Linq;
+#endregion
 
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -33,14 +33,14 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class WorldViewport : Control
     {
-        private readonly GameScene _scene;
-        private readonly BlendState _blend = new BlendState()
+        private readonly BlendState _blend = new BlendState
         {
             ColorSourceBlend = Blend.Zero,
             ColorDestinationBlend = Blend.SourceColor,
 
             ColorBlendFunction = BlendFunction.Add
         };
+        private readonly GameScene _scene;
 
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
@@ -58,9 +58,12 @@ namespace ClassicUO.Game.UI.Controls
             batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
 
             // draw lights
-            batcher.SetBlendState(_blend);
-            batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
-            batcher.SetBlendState(null);
+            if (_scene.UseLights)
+            {
+                batcher.SetBlendState(_blend);
+                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
+                batcher.SetBlendState(null);
+            }
 
             // draw overheads
             _scene.DrawOverheads(batcher, x, y);
@@ -72,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             _blend?.Dispose();
-            base.Dispose(); 
+            base.Dispose();
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
