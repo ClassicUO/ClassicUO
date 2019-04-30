@@ -88,7 +88,11 @@ namespace ClassicUO.Game.UI
         public int MaxCharCount { get; }
 
         public int Width { get; }
-        public int Height => /*RenderText.Height < 15 ? 15 :*/ RenderText.Height;
+
+        private int? _height;
+        public int Height => _height.HasValue && _height.Value > RenderText.Height ? _height.Value : RenderText.Height;
+
+        public void SetHeight(int h) => _height = h;
 
         public int MaxWidth { get; }
 
