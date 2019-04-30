@@ -2573,11 +2573,8 @@ namespace ClassicUO.Network
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
-                       // item.AddOverhead(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
-
 
                        Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, MessageFont.Normal, true);
-
                     }
 
                     str = string.Empty;
@@ -2636,7 +2633,10 @@ namespace ClassicUO.Network
                         strBuffer.Append(']');
 
                     if (strBuffer.Length != 0)
-                        item.AddOverhead(MessageType.Regular, strBuffer.ToString(), 3, 0x03B2, true);
+                    {
+                        Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, MessageFont.Normal, true);
+                    }
+
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
                     break;
