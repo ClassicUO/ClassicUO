@@ -9,7 +9,7 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Deque<JournalEntry> _entries = new Deque<JournalEntry>();
 
-        public IReadOnlyList<JournalEntry> Entries => _entries;
+        public Deque<JournalEntry> Entries => _entries;
 
         public event EventHandler<JournalEntry> EntryAdded;
 

@@ -72,8 +72,12 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            {
+                HueVector.X = 0x0023;
+                HueVector.Y = 1;
+            }
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -88,12 +92,7 @@ namespace ClassicUO.Game.GameObjects
                 ushort hue = Hue;
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                {
-                    hue = 0x0023;
-                    isPartial = false;
-                }
-                else if (IsSelected && !IsLocked)
+                if (IsSelected && !IsLocked)
                     hue = 0x0035;
                 else if (IsHidden)
                     hue = 0x038E;
@@ -245,6 +244,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (SelectedObject.Object == this)
+                return;
+
             if (IsCorpse)
             {
                 if (Texture.Contains( x, y))

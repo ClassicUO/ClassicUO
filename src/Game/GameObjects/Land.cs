@@ -46,8 +46,6 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
-        protected override bool CanCreateOverheads => false;
-
 
         public LandTiles TileData
         {

@@ -1450,82 +1450,37 @@ namespace ClassicUO.IO.Resources
         {
             int count = 0;
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            ushort hue = 0;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {
                 ToRemoveInfo info = _usedTextures[i];
-                byte gro = (byte) info.Group;
 
-                for (int g = 0; g < 3; g++)
+                ushort graphic = (ushort) info.AnimID;
+                byte grp = (byte) info.Group;
+
+                ref var dir = ref GetBodyAnimationGroup(ref graphic, ref grp, ref hue).Direction[info.Direction];
+
+                if (dir.LastAccessTime < ticks)
                 {
-                    ref var dataIndex = ref DataIndex[info.AnimID];
-                    AnimationGroup group;
-
-                    switch (g)
+                    for (int j = 0; j < dir.FrameCount; j++)
                     {
-                        case 0:
+                        ref var hash = ref dir.Frames[j];
 
-                            if (dataIndex.Groups == null)
-                                continue;
-
-                            group = dataIndex.Groups[info.Group];
-
-                            break;
-                        case 1:
-
-                            if (dataIndex.BodyConvGroups == null)
-                                continue;
-
-                            group = dataIndex.BodyConvGroups[info.Group];
-
-                            break;
-                        case 2:
-
-                            if (dataIndex.UopGroups == null)
-                                continue;
-
-                            group = dataIndex.UopGroups[info.Group];
-
-                            break;
-
-                        default:
-
-                            continue;
-                    }
-
-                    if (group == null)
-                        continue;
-
-                    ref var dir = ref group.Direction[info.Direction];
-
-                    if (dir.LastAccessTime < ticks)
-                    {
-                        for (int j = 0; j < dir.FrameCount; j++)
+                        if (hash != null)
                         {
-                            ref var hash = ref dir.Frames[j];
-
-                            if (hash != null)
-                            {
-                                hash.Dispose();
-                                hash = null;
-                            }
-
-                            //if (ResourceDictionary.TryGetValue(hash, out var texture))
-                            //{
-                            //    texture?.Dispose();
-                            //    ResourceDictionary.Remove(hash);
-                            //    hash = 0;
-                            //}
+                            hash.Dispose();
+                            hash = null;
                         }
-
-                        dir.FrameCount = 0;
-                        dir.Frames = null;
-                        dir.LastAccessTime = 0;
-                        _usedTextures.RemoveAt(i--);
-
-                        if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                            break;
                     }
+
+                    dir.FrameCount = 0;
+                    dir.Frames = null;
+                    dir.LastAccessTime = 0;
+                    _usedTextures.RemoveAt(i--);
+
+                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+                        break;
                 }
             }
 

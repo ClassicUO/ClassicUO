@@ -118,11 +118,11 @@ namespace ClassicUO.Game.GameObjects
 
     internal class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
     {
-        private readonly IReadOnlyList<T> _data;
+        private readonly List<T> _data;
 
         public CollectionChangedEventArgs(IEnumerable<T> list)
         {
-            _data = list.ToArray();
+            _data = list.ToList();
         }
 
         public int Count => _data.Count;

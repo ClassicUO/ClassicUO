@@ -43,12 +43,12 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.INVALID;
         private Point _screenPosition;
         private Tile _tile;
-        public Vector3 Offset;
 
+
+
+        public Vector3 Offset;
         public Point RealScreenPosition;
 
-
-        protected virtual bool CanCreateOverheads => true;
         public OverheadMessage OverheadMessageContainer { get; private set; }
 
         public Point ScreenPosition => _screenPosition;
@@ -226,13 +226,10 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-
             if (OverheadMessageContainer == null)
                 OverheadMessageContainer = new OverheadMessage(this);
 
             OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
-
-            //OverheadAdded?.Raise(this);
         }
 
 

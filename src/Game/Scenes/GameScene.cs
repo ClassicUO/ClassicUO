@@ -627,6 +627,8 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawWorld(Batcher2D batcher)
         {
+            Game.SelectedObject.Object = null;
+
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 

@@ -84,8 +84,12 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            {
+                HueVector.X = 0x0023;
+                HueVector.Y = 1;
+            }
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -97,16 +101,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ushort hue = Hue;
-                bool isPartial = _isPartialHue;
-
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
-                {
-                    hue = 0x0023;
-                    isPartial = false;
-                }
-
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
             }
 
             Engine.DebugInfo.StaticsRendered++;
@@ -126,6 +121,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (SelectedObject.Object == this)
+                return;
+
             if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }

@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -86,7 +87,6 @@ namespace ClassicUO
         private double _currentFpsTime;
         private DebugInfo _debugInfo;
         private InputManager _inputManager;
-        private bool _isMaximized;
         private bool _isRunningSlowly;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
@@ -176,9 +176,10 @@ namespace ClassicUO
                     height *= 2;
                 }
 
-                _graphicDeviceManager.PreferredBackBufferWidth = width;
-                _graphicDeviceManager.PreferredBackBufferHeight = height;
-                _graphicDeviceManager.ApplyChanges();
+                if (! IsMaximized)
+                    _engine._profileManager.Current.WindowClientBounds = new Point(width, height);
+
+                SetPreferredBackBufferSize(width, height);
 
                 WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
 
@@ -189,6 +190,7 @@ namespace ClassicUO
                     gump.Y = -5;
                 }
             };
+
             Window.AllowUserResizing = true;
             IsMouseVisible = true;
 
@@ -247,15 +249,19 @@ namespace ClassicUO
 
         public static uint[] FrameDelay { get; } = new uint[2];
 
-        public static bool IsFullScreen
+        public static bool IsMaximized
         {
-            get => _engine._isMaximized;
+            get
+            {
+                IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
+                uint flags = SDL.SDL_GetWindowFlags(wnd);
+
+                return ((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0);
+            }
             set
             {
-                if (_engine._isMaximized == value)
+                if (IsMaximized == value)
                     return;
-
-                _engine._isMaximized = value;
 
                 IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
 
@@ -288,6 +294,13 @@ namespace ClassicUO
                 _engine._graphicDeviceManager.PreferredBackBufferHeight = value;
                 _engine._graphicDeviceManager.ApplyChanges();
             }
+        }
+
+        public static void SetPreferredBackBufferSize(int width, int height)
+        {
+            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
+            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
+            _engine._graphicDeviceManager.ApplyChanges();
         }
 
         public static UIManager UI => _engine._uiManager;

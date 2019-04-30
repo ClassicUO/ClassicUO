@@ -307,8 +307,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldStam = stam;
                 }
             }
-
-            _textBox.Height = 15;
         }
 
         public override void Dispose()
@@ -451,9 +449,9 @@ namespace ClassicUO.Game.UI.Gumps
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
                         SafeCharactersOnly = true,
+                        WantUpdateSize = false,
                         Text = _name
                     });
-
                     if (_canChangeName)
                         _textBox.MouseClick += TextBoxOnMouseClick;
                 }
