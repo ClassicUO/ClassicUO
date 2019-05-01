@@ -308,15 +308,18 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimGroup = animGroup;
             FileManager.Animations.Direction = dir;
 
-            ushort hue2 = hue;
-            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue2, false).Direction[dir];
+            ushort hueFromFile = hue;
+            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hueFromFile, false).Direction[dir];
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             if (hue == 0)
             {
-                hue = hue2 != hue ? hue2 : (ushort)item.Hue;
+                hue = item.Hue;
+
+                if (hue == 0)
+                    hue = hueFromFile;
             }
 
             direction.LastAccessTime = Engine.Ticks;
@@ -332,15 +335,11 @@ namespace ClassicUO.Game.GameObjects
                 if (hash == null)
                     return;
 
-
                 bool partial = hue == 0 && !IsHidden && item.ItemData.IsPartialHue;
 
-                if (hue == 0)
+                if (hue == 0 && convertedItem.HasValue)
                 {
-                    //if (direction.Address != direction.PatchedAddress)
-                    //    hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
-                    if (hue == 0 && convertedItem.HasValue)
-                        hue = convertedItem.Value.Color;
+                    hue = convertedItem.Value.Color;
                 }
 
                 AnimationFrameTexture frame = direction.Frames[animIndex];
