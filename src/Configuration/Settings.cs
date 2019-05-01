@@ -45,7 +45,7 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
 
         [JsonProperty(PropertyName = "ultimaonlinedirectory")]
-        public string UltimaOnlineDirectory { get; set; } = "Remember\\Double\\Backslashes\\";
+        public string UltimaOnlineDirectory { get; set; } = "path/to/uo/";
 
         [JsonProperty(PropertyName = "clientversion")]
         public string ClientVersion { get; set; } = "0.0.0.0";
