@@ -480,18 +480,18 @@ namespace ClassicUO.Game.Scenes
             if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
             {
                 if (!Engine.Profile.Current.ActivateChatStatus)
-                    World.Player.Walk(dWalk, false);
+                    World.Player.Walk(dWalk, true);
                 else
                 {
                     if (Engine.UI.SystemChat?.textBox.Text.Length == 0)
-                        World.Player.Walk(dWalk, false);
+                        World.Player.Walk(dWalk, true);
                 }
             }
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                    World.Player.Walk(dWalkN, false);
+                    World.Player.Walk(dWalkN, true);
             }
 
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
