@@ -624,6 +624,16 @@ namespace ClassicUO.Game.Scenes
         }
 
 
+        //DepthStencilState s2 = new DepthStencilState
+        //{
+        //    StencilEnable = true,
+        //    StencilFunction = CompareFunction.NotEqual,
+        //    StencilPass = StencilOperation.Keep,
+        //    StencilFail = StencilOperation.Keep,
+        //    StencilDepthBufferFail = StencilOperation.Keep,
+        //    ReferenceStencil = 0,
+        //    DepthBufferEnable = false,
+        //};
 
         private void DrawWorld(Batcher2D batcher)
         {
@@ -632,8 +642,17 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
+            //if (CircleOfTransparency.Circle == null)
+            //    CircleOfTransparency.Create(200);
+            //CircleOfTransparency.Circle.Draw(batcher, Engine.WindowWidth >> 1, Engine.WindowHeight >> 1);
+
+            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
+
+
             batcher.Begin();
             batcher.SetLightDirection(World.Light.IsometricDirection);
+
+            //batcher.SetStencil(s2);
 
             if (!_deathScreenActive)
             {
@@ -677,6 +696,8 @@ namespace ClassicUO.Game.Scenes
                     multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
                 }
             }
+
+            //batcher.SetStencil(null);
 
             batcher.End();
 

@@ -192,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
                     if (shadow)
                     {
                         DrawInternal(batcher, posX, posY, true);
-                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, true);
 
                         Texture = frame;
                         Bounds.X = x;
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, false);
                         Texture = frame;
                         Bounds.X = x;
                         Bounds.Y = -y;
@@ -256,11 +256,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue);
+                DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue, false);
             }
         }
 
-        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue)
+        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
         {
             Item item = Equipment[(int) layer];
 
@@ -410,7 +410,9 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
                 }
 
-                base.Draw(batcher, posX, posY);
+                //base.Draw(batcher, posX, posY);
+
+                DrawInternal(batcher, posX, posY, shadow);
 
                 Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
 

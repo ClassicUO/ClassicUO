@@ -823,7 +823,8 @@ namespace ClassicUO.Game.Managers
                     _gumps.Insert(index - 1, cm);
                     _needSort = true;
                 }
-                else if (_gumps[i] == c1) index = i;
+                else if (_gumps[i] == c1)
+                    index = i;
             }
         }
 

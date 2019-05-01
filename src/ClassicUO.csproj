@@ -238,7 +238,6 @@
     <Compile Include="IO\DefReader.cs" />
     <Compile Include="IO\ResourceLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
-    <Compile Include="IO\Resources\AnimationsLoader2.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />
     <Compile Include="IO\Resources\ArtLoader.cs" />
     <Compile Include="IO\Resources\ClilocLoader.cs" />
@@ -459,7 +458,6 @@
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />
-    <Compile Include="Renderer\Techniques.cs" />
     <Compile Include="Utility\Bag.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
@@ -483,12 +481,15 @@
     <None Include="libs\FNA\FNA.dll.config" />
     <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
+    <None Include="libs\lib64\libFAudio.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libFAudio.0.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
-    <None Include="libs\lib64\libFAudio.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="libs\lib64\libmojoshader.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -499,9 +500,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\lib64\libtheorafile.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\osx\libFAudio.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\osx\libmojoshader.dylib">
