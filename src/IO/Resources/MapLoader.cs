@@ -115,7 +115,7 @@ namespace ClassicUO.IO.Resources
                 MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                 MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
-                if (Engine.GlobalSettings.PreloadMaps)
+                //if (Engine.GlobalSettings.PreloadMaps)
                     LoadMap(i);
             }
         }
@@ -130,15 +130,14 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            //throw new NotImplementedException();
-            for (int i = 0; i < MAPS_COUNT; i++)
-                UnloadMap(i);
+            //for (int i = 0; i < MAPS_COUNT; i++)
+            //    UnloadMap(i);
         }
 
 
         public unsafe void LoadMap(int i)
         {
-            if (Engine.GlobalSettings.PreloadMaps && BlockData[i] != null)
+            if (/*Engine.GlobalSettings.PreloadMaps &&*/ BlockData[i] != null || _filesMap[i] == null)
                 return;
 
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
@@ -246,8 +245,8 @@ namespace ClassicUO.IO.Resources
             if (PatchesCount > MAPS_COUNT)
                 PatchesCount = MAPS_COUNT;
 
-            MapPatchCount.ForEach(s => s = 0);
-            StaticPatchCount.ForEach(s => s = 0);
+            Array.Clear(MapPatchCount, 0, MapPatchCount.Length);
+            Array.Clear(StaticPatchCount, 0, StaticPatchCount.Length);
 
             bool result = false;
 
@@ -318,10 +317,6 @@ namespace ClassicUO.IO.Resources
                     {
                         uint blockIndex = difl.ReadUInt();
 
-                        if (blockIndex == 356514)
-                        {
-
-                        }
                         StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
 
                         difi.Skip(sizeof(StaidxBlock));

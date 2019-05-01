@@ -563,6 +563,16 @@ namespace ClassicUO.Game.Scenes
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
 
+            if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
+            {
+                Mobile follow = World.Mobiles.Get(_followingTarget);
+
+                if (follow != null && follow.Distance > 1)
+                {
+                    Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                }
+            }
+
             World.Update(totalMS, frameMS);
             Overheads.Update(totalMS, frameMS);
 

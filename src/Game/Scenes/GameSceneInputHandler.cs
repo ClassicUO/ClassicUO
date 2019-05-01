@@ -97,7 +97,11 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (_rightMousePressed) _continueRunning = true;
+            if (_rightMousePressed)
+            {
+                _continueRunning = true; 
+            }
+
 
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
@@ -226,13 +230,18 @@ namespace ClassicUO.Game.Scenes
 
                         break;
 
-                    case AnimatedItemEffect effect when effect.Source is Entity:
-                    case Entity _:
+                    case Entity ent:
 
-                        if (!_inqueue)
+                        if (Keyboard.Alt)
+                        {
+                            World.Player.AddOverhead(MessageType.Regular, "Now following!", 3, 0, false);
+                            _followingMode = true;
+                            _followingTarget = ent;
+                        }
+                        else if (!_inqueue)
                         {
                             _inqueue = true;
-                            _queuedObject = obj is AnimatedItemEffect ef ? (Entity) ef.Source : (Entity) obj;
+                            _queuedObject = ent;
                             _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                             _queuedAction = () =>
@@ -247,6 +256,9 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
+
+        private bool _followingMode;
+        private Serial _followingTarget;
 
         private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
@@ -294,6 +306,14 @@ namespace ClassicUO.Game.Scenes
             {
                 _rightMousePressed = true;
                 _continueRunning = false;
+
+                if (_followingMode)
+                {
+                    _followingMode = false;
+                    _followingTarget = Serial.INVALID;
+
+                    World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
+                }
             }
         }
 

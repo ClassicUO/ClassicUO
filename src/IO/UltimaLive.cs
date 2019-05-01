@@ -658,7 +658,7 @@ namespace ClassicUO.IO
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
-                    if (Engine.GlobalSettings.PreloadMaps)
+                    //if (Engine.GlobalSettings.PreloadMaps)
                         LoadMap(i);
                 }
             }
