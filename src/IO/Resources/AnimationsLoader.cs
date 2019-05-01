@@ -32,7 +32,6 @@ namespace ClassicUO.IO.Resources
         public ushort Color { get; set; }
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
-
         public ushort AnimID { get; set; }
         //public int SittingValue { get; set; }
 
@@ -161,12 +160,6 @@ namespace ClassicUO.IO.Resources
 
                 if (offsetToData >= idxfile0.Length)
                 {
-                    //DataIndex[i].Groups = new AnimationGroup[100];
-
-                    //for (int j = 0; j < 100; j++)
-                    //{
-                    //    DataIndex[i].Groups[j].Direction = new AnimationDirection[5];
-                    //}
                     continue;
                 }
 
