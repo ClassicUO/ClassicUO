@@ -352,7 +352,8 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Children.Count > 0)
                 {
-                    foreach (Control t in Children) t.X = Width / 2 - (t.Width >> 1);
+                    foreach (Control t in Children)
+                        t.X = Width / 2 - (t.Width >> 1);
 
                     var a = Children[Children.Count - 1];
                     c.Y = a.Y + a.Height;
