@@ -2680,12 +2680,12 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x18: // enable map patches
-
+                   
                     if (FileManager.Map.ApplyPatches(p))
                     {
-                        int indx = World.MapIndex;
-                        World.MapIndex = -1;
-                        World.MapIndex = indx;
+                        //int indx = World.MapIndex;
+                        //World.MapIndex = -1;
+                        //World.MapIndex = indx;
                     }
 
                     break;

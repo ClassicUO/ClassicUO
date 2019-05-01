@@ -217,7 +217,7 @@ namespace ClassicUO.IO.Resources
             if (Engine.GlobalSettings.PreloadMaps)
                 return;
 
-            if (BlockData[i] != null) BlockData[i] = null;
+            //if (BlockData[i] != null) BlockData[i] = null;
         }
 
         public void PatchMapBlock(ulong block, ulong address)
@@ -317,6 +317,11 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
                         uint blockIndex = difl.ReadUInt();
+
+                        if (blockIndex == 356514)
+                        {
+
+                        }
                         StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
 
                         difi.Skip(sizeof(StaidxBlock));

@@ -210,7 +210,7 @@ namespace ClassicUO.Game.Map
                 _usedIndices.RemoveAt(i--);
             }
 
-            FileManager.Map.UnloadMap(Index);
+            //FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }
 
