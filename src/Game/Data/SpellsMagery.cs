@@ -31,6 +31,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsMagery
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Magery.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         private static string[] _spRegsChars;

@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsBardic
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Bardic.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsBardic()

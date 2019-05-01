@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsNecromancy
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Necromancy.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsNecromancy()
