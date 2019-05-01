@@ -147,6 +147,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (c is ScrollArea area)
                 {
+                    _arrow.IsVisible = true;
                     _nestedBoxes.Add(box);
                     box.Width = Width - box.X;
                     area.Add(box);
@@ -169,6 +170,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_opened)
                 GenerateButtons();
+            _arrow.IsVisible = items.Length > 0 || _nestedBoxes.Count > 0;
         }
 
         internal void SetItemsValue(Dictionary<int, string> items)
@@ -178,6 +180,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_opened)
                 GenerateButtons();
+            _arrow.IsVisible = items.Count > 0 || _nestedBoxes.Count > 0;
         }
 
         private void GenerateButtons()
@@ -269,6 +272,12 @@ namespace ClassicUO.Game.UI.Controls
         public override void OnPageChanged()
         {
             Parent?.OnPageChanged();
+        }
+
+        public void SetIndexText(string text)
+        {
+            if (!string.IsNullOrEmpty(text))
+                _label.Text = text;
         }
     }
 }

@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsNinjitsu
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Ninjitsu.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsNinjitsu()
