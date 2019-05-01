@@ -85,7 +85,7 @@ namespace ClassicUO.Game
 
                     int pos = posX + y;
 
-                    pixels[pos] = HuesHelper.RgbaToArgb(pic);
+                    pixels[pos] = pic;
                 }
             }
 
