@@ -481,12 +481,15 @@
     <None Include="libs\FNA\FNA.dll.config" />
     <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
+    <None Include="libs\lib64\libFAudio.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libFAudio.0.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
-    <None Include="libs\lib64\libFAudio.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="libs\lib64\libmojoshader.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -497,9 +500,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\lib64\libtheorafile.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="libs\osx\libFAudio.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\osx\libmojoshader.dylib">
