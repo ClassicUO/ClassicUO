@@ -311,7 +311,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     _followingMode = false;
                     _followingTarget = Serial.INVALID;
-
+                    Pathfinder.StopAutoWalk();
                     World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
                 }
             }
@@ -522,6 +522,10 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     GameActions.ToggleWarMode();
+            }
+            else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Pathfinder.AutoWalking)
+            {
+                Pathfinder.StopAutoWalk();
             }
         }
     }
