@@ -69,13 +69,11 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
-        private bool _isUpDown;
-        private bool _isDownDown;
-        private bool _isLeftDown;
-        private bool _isRightDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed, _continueRunning, _useObjectHandles, _movementKeyPressed;
+        private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
+        public Direction _numPadDirection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -95,12 +93,18 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void MoveCharacterByKeyboardInput()
+        private void MoveCharacterByKeyboardInput(bool numPadMovement)
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
-
-                Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+                if (numPadMovement)
+                {
+                    Direction direction = _numPadDirection;
+                }
+                else
+                {
+                    Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+                }
 
                 if (_isShiftDown)
                 {
@@ -477,7 +481,7 @@ namespace ClassicUO.Game.Scenes
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
                 if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
-                    _movementKeyPressed = true;
+                    _arrowKeyPressed = true;
             }
 
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
@@ -497,21 +501,12 @@ namespace ClassicUO.Game.Scenes
                     GameActions.SetWarMode(true);
             }
 
-            /*if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
-            {
-                if (!Engine.Profile.Current.ActivateChatStatus)
-                    World.Player.Walk(dWalk, true);
-                else
-                {
-                    if (Engine.UI.SystemChat?.textBox.Text.Length == 0)
-                        World.Player.Walk(dWalk, true);
-                }
-            }*/
-
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
-                if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                    World.Player.Walk(dWalkN, true);
+                _numPadKeyPressed = true;
+                _keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction _numPadDirection);
+                //if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                //    World.Player.Walk(dWalkN, true);
             }
 
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
@@ -563,7 +558,12 @@ namespace ClassicUO.Game.Scenes
 
             if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown))
             {
-                _movementKeyPressed = false;
+                _arrowKeyPressed = false;
+            }
+
+            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
+            {
+                _numPadKeyPressed = false;
             }
 
             _useObjectHandles = isctrl && isshift;
