@@ -325,7 +325,7 @@ namespace ClassicUO.Utility
             var collectionCount = collection.Count;
 
             // Make room in the existing list
-            if (index < (Count >> 2))
+            if (index < (Count >> 1))
             {
                 // Inserting into the first half of the list
 
