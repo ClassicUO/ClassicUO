@@ -384,18 +384,18 @@ namespace ClassicUO.Network
 
     internal sealed class PASCIISpeechRequest : PacketWriter
     {
-        public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
+        public PASCIISpeechRequest(string text, MessageType type, byte font, Hue hue) : base(0x03)
         {
             WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort(font);
             WriteASCII(text);
         }
     }
 
     internal sealed class PUnicodeSpeechRequest : PacketWriter
     {
-        public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
+        public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
             SpeechEntry[] entries = FileManager.Speeches.GetKeywords(text);
 
@@ -403,7 +403,7 @@ namespace ClassicUO.Network
                 type |= MessageType.Encoded;
             WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort(font);
             WriteASCII(lang, 4);
 
             if (entries.Length > 0)

@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -117,6 +118,11 @@ namespace ClassicUO.Game.Scenes
 
             if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                 return;
+
+            for (byte b = 0; b < 255; b++)
+            FileManager.Fonts.GenerateUnicode(b, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
+
+            //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
             if (TargetManager.IsTargeting)
             {

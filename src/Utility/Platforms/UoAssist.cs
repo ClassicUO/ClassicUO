@@ -304,7 +304,7 @@ namespace ClassicUO.Utility.Platforms
                                 return 0;
 
                             if ((wParam & 0x00010000) != 0)
-                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, MessageFont.Normal, true);
+                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
                             else
                                 World.Player.AddOverhead(MessageType.Regular, sb.ToString(), 3, hue, true);
 

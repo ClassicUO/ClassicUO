@@ -98,7 +98,8 @@ namespace ClassicUO.Game.Managers
                 case CommandPublicMessage:
                     PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
 
-                    if (partyMember != null) Chat.HandleMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
+                    if (partyMember != null)
+                        Chat.HandleMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
 
                     break;
                 case CommandInvitation:
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.Managers
                     Serial serial = p.ReadUInt();
                     Mobile partyLeaderEntity = World.Mobiles.Get(serial);
 
-                    if (partyLeaderEntity != null) Chat.HandleMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
+                    if (partyLeaderEntity != null) Chat.HandleMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, 3, true);
 
                     World.Party.SetPartyLeader(serial);
 

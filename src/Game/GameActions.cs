@@ -102,7 +102,7 @@ namespace ClassicUO.Game
             Socket.Send(new PClickRequest(serial));
         }
 
-        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
                 hue = Engine.Profile.Current.SpeechHue;
@@ -114,12 +114,12 @@ namespace ClassicUO.Game
         }
 
 
-        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
             Print(null, message, hue, type, font, unicode);
         }
 
-        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true)
+        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
             Chat.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, unicode, "ENU");
         }

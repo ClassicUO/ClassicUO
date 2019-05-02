@@ -54,20 +54,20 @@ namespace ClassicUO.Game
         Party = 0xFF // This is a CUO assigned type, value is unimportant
     }
 
-    public enum MessageFont : ushort
-    {
-        INVALID = 0xFFFF,
-        Bold = 0,
-        Shadow = 1,
-        BoldShadow = 2,
-        Normal = 3,
-        Gothic = 4,
-        Italic = 5,
-        SmallDark = 6,
-        Colorful = 7,
-        Rune = 8,
-        SmallLight = 9
-    }
+    //public enum MessageFont : byte
+    //{
+    //    INVALID = 0xFF,
+    //    Bold = 0,
+    //    Shadow = 1,
+    //    BoldShadow = 2,
+    //    Normal = 3,
+    //    Gothic = 4,
+    //    Italic = 5,
+    //    SmallDark = 6,
+    //    Colorful = 7,
+    //    Rune = 8,
+    //    SmallLight = 9
+    //}
 
     public enum AffixType : byte
     {
@@ -88,7 +88,7 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             switch (type)
             {
@@ -233,7 +233,7 @@ namespace ClassicUO.Game
 
     internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
@@ -246,7 +246,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Parent = parent;
             Text = text;
@@ -269,7 +269,7 @@ namespace ClassicUO.Game
 
         public MessageType Type { get; }
 
-        public MessageFont Font { get; }
+        public byte Font { get; }
 
         public string Language { get; }
 

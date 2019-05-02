@@ -341,13 +341,13 @@ namespace ClassicUO.Network
                         int deltaInt = intell - currentInt;
 
                         if (deltaStr != 0)
-                            GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
 
                         if (deltaDex != 0)
-                            GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
 
                         if (deltaInt != 0)
-                            GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, MessageFont.Normal, false);
+                            GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
                     }
 
                     World.Player.Strength = str;
@@ -623,11 +623,11 @@ namespace ClassicUO.Network
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont) p.ReadUShort();
+            ushort font = p.ReadUShort();
             string name = p.ReadASCII(30);
             string text = p.ReadASCII();
 
-            if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == MessageFont.INVALID && hue == 0xFFFF && name.StartsWith("SYSTEM"))
+            if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
                 NetClient.Socket.Send(new PACKTalk());
 
@@ -641,7 +641,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, font);
+            Chat.HandleMessage(entity, text, name, hue, type, (byte) font);
         }
 
         private static void DeleteObject(Packet p)
@@ -1029,7 +1029,7 @@ namespace ClassicUO.Network
 
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, MessageFont.Normal);
+            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -2332,7 +2332,7 @@ namespace ClassicUO.Network
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont) p.ReadUShort();
+            ushort font = p.ReadUShort();
             string lang = p.ReadASCII(4);
             string name = p.ReadASCII(30);
             string text = p.ReadUnicode();
@@ -2340,11 +2340,12 @@ namespace ClassicUO.Network
             if (entity != null)
             {
                 //entity.Graphic = graphic;
-                entity.Name = name;
+                if (string.IsNullOrEmpty(entity.Name))
+                    entity.Name = name;
                 entity.ProcessDelta();
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, (MessageFont) Engine.Profile.Current.ChatFont, true, lang);
+            Chat.HandleMessage(entity, text, name, hue, type, Engine.Profile.Current.ChatFont, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -2572,7 +2573,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                       Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, MessageFont.Normal, true);
+                       Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
                     }
 
                     str = string.Empty;
@@ -2632,7 +2633,7 @@ namespace ClassicUO.Network
 
                     if (strBuffer.Length != 0)
                     {
-                        Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, MessageFont.Normal, true);
+                        Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
                     }
 
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
@@ -2862,7 +2863,7 @@ namespace ClassicUO.Network
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont) p.ReadUShort();
+            ushort font = p.ReadUShort();
             uint cliloc = p.ReadUInt();
             AffixType flags = p.ID == 0xCC ? (AffixType) p.ReadByte() : 0x00;
             string name = p.ReadASCII(30);
@@ -2890,7 +2891,7 @@ namespace ClassicUO.Network
                 type = MessageType.System;
 
             if (!FileManager.Fonts.UnicodeFontExists((byte) font))
-                font = MessageFont.Bold;
+                font = 0;
 
             if (entity != null)
             {
@@ -2899,7 +2900,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, font, true);
+            Chat.HandleMessage(entity, text, name, hue, type, (byte) font, true);
         }
 
         private static void UnicodePrompt(Packet p)
