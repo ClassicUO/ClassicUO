@@ -114,9 +114,9 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVirtue)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
-                return true;
+                return false;
             }
-            return false;
+            return base.OnMouseDoubleClick(x, y, button);
         }
 
         protected override bool Contains(int x, int y)

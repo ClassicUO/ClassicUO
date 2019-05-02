@@ -286,7 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                if (inparty)
+                if (inparty || CanBeSaved)
                 {
                     int mana = CalculatePercents(Mobile.ManaMax, Mobile.Mana, barW);
                     int stam = CalculatePercents(Mobile.StaminaMax, Mobile.Stamina, barW);

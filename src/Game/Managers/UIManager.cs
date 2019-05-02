@@ -131,7 +131,8 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp) e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
+                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp)
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
