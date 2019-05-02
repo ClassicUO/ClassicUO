@@ -277,7 +277,7 @@ namespace ClassicUO.IO.Resources
                     if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
 
-                    mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
+                    mapPatchesCount = Math.Min(mapPatchesCount, ((int)difl.Length >> 2));
 
                     difl.Seek(0);
                     dif.Seek(0);
@@ -306,7 +306,7 @@ namespace ClassicUO.IO.Resources
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
-                    staticPatchesCount = Math.Min(staticPatchesCount, (int) (difl.Length / 4));
+                    staticPatchesCount = Math.Min(staticPatchesCount, ((int)difl.Length >> 2));
 
                     difl.Seek(0);
                     difi.Seek(0);

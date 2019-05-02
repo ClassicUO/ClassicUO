@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
 
                 drawCenterY = frame.CenterY;
-                int yOff = (int) (Offset.Z / 4) - 22 - (int) (Offset.Y - Offset.Z - 3);
+                int yOff = ((int)Offset.Z >> 2) - 22 - (int) (Offset.Y - Offset.Z - 3);
                 drawY = drawCenterY + yOff;
 
                 if (IsFlipped)
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.GameObjects
                 if (drawX == 0 && drawY == 0 && drawCenterY == 0)
                 {
                     drawCenterY = frame.CenterY;
-                    drawY = mountHeight + drawCenterY + (int) (Offset.Z / 4) - 22 - (int) (Offset.Y - Offset.Z - 3);
+                    drawY = mountHeight + drawCenterY + ((int)Offset.Z >> 2) - 22 - (int) (Offset.Y - Offset.Z - 3);
 
                     if (IsFlipped)
                         drawX = -22 + (int) Offset.X;
