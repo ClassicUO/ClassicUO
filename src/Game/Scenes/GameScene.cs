@@ -562,6 +562,8 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByInputs();
+            else if (_movementKeyPressed)
+                MoveCharacterByKeyboardInputs();
 
             World.Update(totalMS, frameMS);
             Overheads.Update(totalMS, frameMS);

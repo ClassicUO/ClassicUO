@@ -69,9 +69,13 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
+        private bool _isUpDown;
+        private bool _isDownDown;
+        private bool _isLeftDown;
+        private bool _isRightDown;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed, _continueRunning, _useObjectHandles;
+        private bool _rightMousePressed, _continueRunning, _useObjectHandles, _movementKeyPressed;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -88,6 +92,25 @@ namespace ClassicUO.Game.Scenes
                 bool run = distanceFromCenter >= 150.0f;
 
                 World.Player.Walk(direction, run);
+            }
+        }
+
+        private void MoveCharacterByKeyboardInputs()
+        {
+            if (World.InGame && !Pathfinder.AutoWalking)
+            {
+
+                Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+
+                if (_isShiftDown)
+                {
+                    World.Player.Walk(direction, false);
+                }
+                else
+                {
+                    World.Player.Walk(direction, true);
+                }
+
             }
         }
 
@@ -446,6 +469,15 @@ namespace ClassicUO.Game.Scenes
         {
             _isShiftDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
             _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
+            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP;
+            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN;
+            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT;
+            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT;
+
+            if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
+            {
+                _movementKeyPressed = true;
+            }
 
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
@@ -464,7 +496,7 @@ namespace ClassicUO.Game.Scenes
                     GameActions.SetWarMode(true);
             }
 
-            if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
+            /*if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
             {
                 if (!Engine.Profile.Current.ActivateChatStatus)
                     World.Player.Walk(dWalk, true);
@@ -473,7 +505,7 @@ namespace ClassicUO.Game.Scenes
                     if (Engine.UI.SystemChat?.textBox.Text.Length == 0)
                         World.Player.Walk(dWalk, true);
                 }
-            }
+            }*/
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
@@ -508,6 +540,30 @@ namespace ClassicUO.Game.Scenes
 
             _isShiftDown = isshift;
             _isCtrlDown = isctrl;
+
+            switch (e.keysym.sym)
+            {
+                case SDL.SDL_Keycode.SDLK_UP:
+                    _isUpDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_DOWN:
+                    _isDownDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_LEFT:
+                    _isLeftDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_RIGHT:
+                    _isRightDown = false;
+                    break;
+            }
+
+            if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown))
+            {
+                _movementKeyPressed = false;
+            }
 
             _useObjectHandles = isctrl && isshift;
 
