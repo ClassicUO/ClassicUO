@@ -561,9 +561,9 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (_rightMousePressed || _continueRunning)
-                MoveCharacterByInputs();
+                MoveCharacterByMouseInput();
             else if (_movementKeyPressed)
-                MoveCharacterByKeyboardInputs();
+                MoveCharacterByKeyboardInput();
 
             if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
             {
