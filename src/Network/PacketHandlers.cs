@@ -1527,8 +1527,8 @@ namespace ClassicUO.Network
                         BulletinBoardGump bulletinBoard = Engine.UI.GetByLocalSerial<BulletinBoardGump>(serial);
                         bulletinBoard?.Dispose();
 
-                        int x = Engine.WindowWidth / 2 - 245;
-                        int y = Engine.WindowHeight / 2 - 205;
+                        int x = (Engine.WindowWidth >> 1) - 245;
+                        int y = (Engine.WindowHeight >> 1) - 205;
 
                         bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
                         Engine.UI.Add(bulletinBoard);

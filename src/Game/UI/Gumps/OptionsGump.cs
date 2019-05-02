@@ -112,8 +112,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             TextureControl tc = new TextureControl
             {
-                X = 150 + (WIDTH - 150 - 350) / 2,
-                Y = (HEIGHT - 365) / 2,
+                X = 150 + ((WIDTH - 150 - 350) >> 1),
+                Y = (HEIGHT - 365) >> 1,
                 Width = w,
                 Height = h,
                 Alpha = 0.95f,

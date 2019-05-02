@@ -114,7 +114,7 @@ namespace ClassicUO.Renderer.UI
 
             batcher.Draw2D(texture, x, y, Width, Height, Vector3.Zero);
 
-            batcher.DrawString(Fonts.Regular, Text, x - ((int) _textSize.X - Width) / 2, y - ((int) _textSize.Y - Height) / 2, Vector3.Zero);
+            batcher.DrawString(Fonts.Regular, Text, x - (((int) _textSize.X - Width) >> 1), y - (((int) _textSize.Y - Height) >> 1), Vector3.Zero);
 
             return true; // base.Draw(batcher, position, hue);
         }

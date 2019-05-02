@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-            x = (int) ((Mobile.RealScreenPosition.X + Mobile.Offset.X - Width / 2 + 22) / scale);
+            x = (int) ((Mobile.RealScreenPosition.X + Mobile.Offset.X - (Width >> 1) + 22) / scale);
             y = (int) ((Mobile.RealScreenPosition.Y + Mobile.Offset.Y - Mobile.Offset.Z + 22) / scale);
 
             x += gx + 6;

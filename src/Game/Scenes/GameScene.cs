@@ -617,10 +617,10 @@ namespace ClassicUO.Game.Scenes
                     {
                         Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
-                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
-                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
-                            X = Engine.WindowWidth / 2 - 50,
-                            Y = Engine.WindowHeight / 2 - 50
+                            //X = ((Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) >> 1) - 50,
+                            //Y = ((Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) >> 1) - 50,
+                            X = (Engine.WindowWidth >> 1) - 50,
+                            Y = (Engine.WindowHeight >> 1) - 50
                         });
                         _deathScreenActive = true;
                     }
@@ -745,8 +745,8 @@ namespace ClassicUO.Game.Scenes
                 SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
                 SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = l.DrawX - texture.Width / 2;
-                vertex[0].Position.Y = l.DrawY - texture.Height / 2;
+                vertex[0].Position.X = l.DrawX - (texture.Width >> 1);
+                vertex[0].Position.Y = l.DrawY - (texture.Height >> 1);
                 vertex[0].TextureCoordinate.Y = 0;
                 vertex[1].Position = vertex[0].Position;
                 vertex[1].Position.X += texture.Width;

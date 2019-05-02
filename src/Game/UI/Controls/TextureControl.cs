@@ -41,13 +41,13 @@ namespace ClassicUO.Game.UI.Controls
                     if (artTexture.ImageRectangle.Width < Width)
                     {
                         w = artTexture.ImageRectangle.Width;
-                        x += Width / 2 - w / 2;
+                        x += (Width >> 1) - (w >> 1);
                     }
 
                     if (artTexture.ImageRectangle.Height < Height)
                     {
                         h = artTexture.ImageRectangle.Height;
-                        y += Height / 2 - h / 2;
+                        y += (Height >> 1) - (h >> 1);
                     }
 
 

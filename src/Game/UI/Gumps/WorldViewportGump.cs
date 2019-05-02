@@ -165,8 +165,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _border.Width = Width;
             _border.Height = Height;
-            _button.X = Width - _button.Width / 2;
-            _button.Y = Height - _button.Height / 2;
+            _button.X = Width - (_button.Width >> 1);
+            _button.Y = Height - (_button.Height >> 1);
             _worldWidth = Width - BORDER_WIDTH * 2;
             _worldHeight = Height - BORDER_WIDTH * 2;
             _viewport.Width = _worldWidth;

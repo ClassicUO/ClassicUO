@@ -245,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
                     offY = -44;
 
                 x += 22;
-                y -= Parent.Texture.Height / 2;
+                y -= Parent.Texture.Height >> 1;
             }
 
             x = (int) (x / scale);
@@ -258,10 +258,10 @@ namespace ClassicUO.Game.GameObjects
             y += screenY;
 
 
-            if (x - _rectangle.Width / 2 + 6 < screenX)
-                x = screenX + _rectangle.Width / 2 + 6;
-            else if (x > screenX + screenW - (_rectangle.Width / 2 - 3))
-                x = screenX + screenW - (_rectangle.Width / 2 - 3);
+            if (x - (_rectangle.Width >> 1) + 6 < screenX)
+                x = screenX + (_rectangle.Width >> 1) + 6;
+            else if (x > screenX + screenW - ((_rectangle.Width >> 1) - 3))
+                x = screenX + screenW - ((_rectangle.Width >> 1) - 3);
 
             if (y < screenY + _rectangle.Height + offY)
                 y = screenY + _rectangle.Height + offY;
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.GameObjects
                 y = screenY + screenH + offY;
 
 
-            _rectangle.X = x - _rectangle.Width / 2;
+            _rectangle.X = x - (_rectangle.Width >> 1);
             _rectangle.Y = y - offY - _rectangle.Height;
 
 
@@ -282,14 +282,14 @@ namespace ClassicUO.Game.GameObjects
                     if (item.IsSelected)
                         hue = 23;
 
-                item.X = x - item.RenderedText.Width / 2;
+                item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height;
                 item.RenderedText.Draw(batcher, item.X, item.Y, _alpha != 0.0f ? _alpha : item.Alpha, hue);
                 offY += item.RenderedText.Height;
             }
 
             /* batcher.DrawRectangle(Textures.GetTexture(Color.Green),
-                                  x - _rectangle.Width / 2,
+                                  x - (_rectangle.Width >> 1),
                                   y - startY - _rectangle.Height, 
                                   _rectangle.Width, 
                                   _rectangle.Height,
@@ -456,7 +456,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (Parent.Texture != null)
                 {
                     x += 22;
-                    int yValue = Parent.Texture.Height / 2;
+                    int yValue = Parent.Texture.Height >> 1;
 
                     if (Parent is Item it)
                     {
@@ -467,7 +467,7 @@ namespace ClassicUO.Game.GameObjects
                             Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
 
                             if (texture != null)
-                                yValue = texture.Height / 2;
+                                yValue = texture.Height >> 1;
                         }
                     }
                     else if (Parent is Static || Parent is Multi)
@@ -496,7 +496,7 @@ namespace ClassicUO.Game.GameObjects
                     if (item.IsSelected)
                         hue = 23;
 
-                item.X = x - item.RenderedText.Width / 2;
+                item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height - item.OffsetY;
 
                 item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha, hue);

@@ -350,8 +350,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Engine.UI.Add(new OptionsGump
                         {
-                            X = Engine.WindowWidth / 2 - 300,
-                            Y = Engine.WindowHeight / 2 - 250
+                            X = (Engine.WindowWidth >> 1) - 300,
+                            Y = (Engine.WindowHeight >> 1) - 250
                         });
                     }
                     else
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         Engine.UI.Add(new HealthBarGump(Mobile)
                         {
-                            X = Mouse.Position.X - bounds.Width / 2,
+                            X = Mouse.Position.X - (bounds.Width >> 1),
                             Y = Mouse.Position.Y - 5
                         });
                     }

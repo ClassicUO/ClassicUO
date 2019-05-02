@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (int i = 0; i < professions.Count; i++)
             {
                 int cx = i % 2;
-                int cy = i / 2;
+                int cy = i >> 1;
 
                 Add(new ProfessionInfoGump(professions[i])
                 {

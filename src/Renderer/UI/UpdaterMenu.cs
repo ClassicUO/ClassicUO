@@ -31,7 +31,7 @@ namespace ClassicUO.Renderer.UI
             Add(new Label("New update available!", 5, 5));
 
             Button button;
-            Add(button = new Button((Width - 80) / 2, Height - 30, 80, 20, "Update"));
+            Add(button = new Button((Width - 80) >> 1, Height - 30, 80, 20, "Update"));
 
             button.MouseClick += (s, e) =>
             {

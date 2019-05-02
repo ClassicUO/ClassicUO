@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetSummaryBookInfo(ref abilityOnPage, ref iconStartGraphic);
 
-            _pagesCount = _dictionaryPagesCount + _abilityCount / 2;
+            _pagesCount = _dictionaryPagesCount + (_abilityCount >> 1);
             //_pagesCount >>= 1;
 
             int offs = 0;

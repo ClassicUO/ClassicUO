@@ -59,7 +59,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 return;
             }
 
-            var mapCenterX = 393 / 2 + 57;
+            //why we make calculations on program if it could be done outside?
+            var mapCenterX = 253;//393 / 2 + 57;
 
             Add(new Button((int) Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
             {
@@ -190,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add(_mapName = new Label(name, false, 1153, font: 3)
                 {
-                    X = 57 + (393 - nameWidth) / 2,
+                    X = 57 + ((393 - nameWidth) >> 1),
                     Y = 440
                 });
 
