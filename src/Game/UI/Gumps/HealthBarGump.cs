@@ -275,11 +275,31 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 int hits = CalculatePercents(Mobile.HitsMax, Mobile.Hits, inparty ? 96 : 109);
+             
 
                 if (hits != _oldHits)
                 {
                     _bars[0].Percent = hits;
                     _oldHits = hits;
+                }
+
+
+                if (inparty)
+                {
+                    int mana = CalculatePercents(Mobile.ManaMax, Mobile.Mana, inparty ? 96 : 109);
+                    int stam = CalculatePercents(Mobile.StaminaMax, Mobile.Stamina, inparty ? 96 : 109);
+
+                    if (mana != _oldMana)
+                    {
+                        _bars[1].Percent = mana;
+                        _oldMana = mana;
+                    }
+
+                    if (stam != _oldStam)
+                    {
+                        _bars[2].Percent = stam;
+                        _oldStam = stam;
+                    }
                 }
             }
 
@@ -292,20 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
                 }
 
-                int mana = CalculatePercents(World.Player.ManaMax, World.Player.Mana, inparty ? 96 : 109);
-                int stam = CalculatePercents(World.Player.StaminaMax, World.Player.Stamina, inparty ? 96 : 109);
-
-                if (mana != _oldMana)
-                {
-                    _bars[1].Percent = mana;
-                    _oldMana = mana;
-                }
-
-                if (stam != _oldStam)
-                {
-                    _bars[2].Percent = stam;
-                    _oldStam = stam;
-                }
+              
             }
         }
 
