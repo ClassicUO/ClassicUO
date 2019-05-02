@@ -313,13 +313,18 @@ namespace ClassicUO.Game.Scenes
                 _rightMousePressed = true;
                 _continueRunning = false;
 
-                if (_followingMode)
-                {
-                    _followingMode = false;
-                    _followingTarget = Serial.INVALID;
-                    Pathfinder.StopAutoWalk();
-                    World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
-                }
+                StopFollowing();
+            }
+        }
+
+        private void StopFollowing()
+        {
+            if (_followingMode)
+            {
+                _followingMode = false;
+                _followingTarget = Serial.INVALID;
+                Pathfinder.StopAutoWalk();
+                World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
             }
         }
 

@@ -21,9 +21,13 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -98,9 +102,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
+            
         }
 
         public bool IsPartialHue { get; set; }
+        public bool ContainsByBounds { get; set; }
+        public bool IsVirtue { get; set; }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (IsVirtue)
+            {
+                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
+                return true;
+            }
+            return false;
+        }
+
+        protected override bool Contains(int x, int y)
+        {
+            return ContainsByBounds || base.Contains(x, y);
+        }
 
         private static ushort TransformHue(ushort hue)
         {

@@ -426,7 +426,16 @@ namespace ClassicUO.Game.Managers
 
                         break;
                     case "gumppic":
-                        gump.Add(new GumpPic(gparams), page);
+
+                        GumpPic pic = new GumpPic(gparams);
+
+                        if (gparams.Count >= 6 && gparams[5].ToLower().Contains("virtuegumpitem"))
+                        {
+                            pic.ContainsByBounds = true;
+                            pic.IsVirtue = true;
+                        }
+
+                        gump.Add(pic, page);
 
                         break;
                     case "gumppictiled":

@@ -566,10 +566,15 @@ namespace ClassicUO.Game.Scenes
             if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
             {
                 Mobile follow = World.Mobiles.Get(_followingTarget);
-
-                if (follow != null && follow.Distance > 1)
+                
+                if (follow != null)
                 {
-                    Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                    int distance = follow.Distance;
+
+                    if (distance > World.ViewRange)
+                        StopFollowing();
+                    else if (distance > 1)
+                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
                 }
             }
 

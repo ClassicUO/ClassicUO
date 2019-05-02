@@ -42,6 +42,8 @@ namespace ClassicUO.Game
             _value = graphic;
         }
 
+        public ushort Value => _value;
+
         public static implicit operator Graphic(ushort value)
         {
             return new Graphic(value);

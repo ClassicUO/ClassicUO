@@ -23,12 +23,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+
+using SDL2;
 
 namespace ClassicUO.Network
 {
@@ -278,6 +283,10 @@ namespace ClassicUO.Network
 
                     lock (_sync)
                     {
+#if !DEBUG
+                        LogPacket(data, false);
+#endif
+
                         Packet packet = new Packet(data, packetlength);
                         _workingQueue.Enqueue(packet);
                         Statistics.TotalPacketsReceived++;
@@ -288,20 +297,142 @@ namespace ClassicUO.Network
             }
         }
 
+
+#if !DEBUG
+        private static readonly LogFile _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+
+        private static void LogPacket(byte[] buffer, bool toServer)
+        {
+            int length = buffer.Length;
+            int pos = 0;
+
+            StringBuilder output = new StringBuilder();
+            output.AppendFormat("{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
+
+            if (buffer[0] == 0x80 || buffer[0] == 0x91)
+            {
+                output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
+            }
+            else
+            {
+                output.AppendLine("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
+                output.AppendLine("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
+
+                int byteIndex = 0;
+
+                int whole = length >> 4;
+                int rem = length & 0xF;
+
+                for (int i = 0; i < whole; ++i, byteIndex += 16)
+                {
+                    StringBuilder bytes = new StringBuilder(49);
+                    StringBuilder chars = new StringBuilder(16);
+
+                    for (int j = 0; j < 16; ++j)
+                    {
+                        int c = buffer[pos++];
+
+                        bytes.Append(c.ToString("X2"));
+
+                        if (j != 7)
+                        {
+                            bytes.Append(' ');
+                        }
+                        else
+                        {
+                            bytes.Append("  ");
+                        }
+
+                        if (c >= 0x20 && c < 0x80)
+                        {
+                            chars.Append((char)c);
+                        }
+                        else
+                        {
+                            chars.Append('.');
+                        }
+                    }
+
+                    output.Append(byteIndex.ToString("X4"));
+                    output.Append("   ");
+                    output.Append(bytes);
+                    output.Append("  ");
+                    output.AppendLine(chars.ToString());
+                }
+
+                if (rem != 0)
+                {
+                    StringBuilder bytes = new StringBuilder(49);
+                    StringBuilder chars = new StringBuilder(rem);
+
+                    for (int j = 0; j < 16; ++j)
+                    {
+                        if (j < rem)
+                        {
+                            int c = buffer[pos++];
+
+                            bytes.Append(c.ToString("X2"));
+
+                            if (j != 7)
+                            {
+                                bytes.Append(' ');
+                            }
+                            else
+                            {
+                                bytes.Append("  ");
+                            }
+
+                            if (c >= 0x20 && c < 0x80)
+                            {
+                                chars.Append((char)c);
+                            }
+                            else
+                            {
+                                chars.Append('.');
+                            }
+                        }
+                        else
+                        {
+                            bytes.Append("   ");
+                        }
+                    }
+
+                    output.Append(byteIndex.ToString("X4"));
+                    output.Append("   ");
+                    output.Append(bytes);
+                    output.Append("  ");
+                    output.AppendLine(chars.ToString());
+                }
+            }
+
+
+            output.AppendLine();
+            output.AppendLine();
+
+            _logFile.Write(output.ToString());
+        }
+#endif
+
         public void Send(byte[] data)
         {
-            if (_socket == null) return;
+            if (_socket == null)
+                return;
 
             if (data != null)
             {
-                if (data.Length <= 0) return;
-
+                if (data.Length <= 0)
+                    return;
                 try
                 {
+#if !DEBUG
+                    LogPacket(data, true);
+#endif
+
                     lock (_sendLock)
                     {
                         SendQueue.Gram gram;
-                        lock (_sendQueue) gram = _sendQueue.Enqueue(data, 0, data.Length);
+                        lock (_sendQueue)
+                            gram = _sendQueue.Enqueue(data, 0, data.Length);
 
                         if (gram != null && !_sending)
                         {

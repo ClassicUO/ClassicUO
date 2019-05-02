@@ -261,7 +261,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButton.Left)
             {
-                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
+                GameActions.ReplyGump(World.Player,
+                                      0x000001CD,
+                                      0x00000001,
+                                      new[]
                 {
                     Mobile.Serial
                 }, new Tuple<ushort, string>[0]);

@@ -530,9 +530,11 @@ namespace ClassicUO.Network
 
     internal sealed class PVirtueGumpReponse : PacketWriter
     {
-        public PVirtueGumpReponse() : base(0xB1)
+        public PVirtueGumpReponse(Serial serial, Serial code) : base(0xB1)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUInt(0x000001CD);
+            WriteUInt(code);
         }
     }
 
@@ -991,18 +993,6 @@ namespace ClassicUO.Network
         }
     }
 
-    internal sealed class PVirtueRequest : PacketWriter
-    {
-        public PVirtueRequest(uint buttonID) : base(0xB1)
-        {
-            WriteUInt(World.Player);
-            WriteUInt(0x000001CD);
-            WriteUInt(buttonID);
-            WriteUInt(0x00000001);
-            WriteUInt(World.Player);
-        }
-    }
-
     internal sealed class PInvokeVirtueRequest : PacketWriter
     {
         public PInvokeVirtueRequest(byte id) : base(0x12)
@@ -1374,4 +1364,5 @@ namespace ClassicUO.Network
             WriteByte(range);
         }
     }
+
 }
