@@ -94,9 +94,10 @@ namespace ClassicUO.Game.GameObjects
 
             bool drawShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
-            DrawBody(batcher, posX, posY, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow);
+            DrawBody(batcher, posX, posY, dir, out int drawX, out int drawY, out int drawCenterY, ref rect, ref mirror, hue, drawShadow, isUnderMouse);
 
-            if (IsHuman) DrawEquipment(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue);
+            if (IsHuman)
+                DrawEquipment(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, ref rect, ref mirror, hue, isUnderMouse);
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
@@ -112,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private void DrawBody(Batcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
+        private void DrawBody(Batcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
         {
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -192,7 +193,7 @@ namespace ClassicUO.Game.GameObjects
                     if (shadow)
                     {
                         DrawInternal(batcher, posX, posY, true);
-                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, true);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, true, isUnderMouse);
 
                         Texture = frame;
                         Bounds.X = x;
@@ -202,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, false);
+                        DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, Layer.Mount, ref rect, ref mirror, hue, false, isUnderMouse);
                         Texture = frame;
                         Bounds.X = x;
                         Bounds.Y = -y;
@@ -212,7 +213,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (shadow) DrawInternal(batcher, posX, posY, true);
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected && !isUnderMouse)
                 {
                     HueVector.X = 0x0023;
                     HueVector.Y = 1;
@@ -250,17 +251,17 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private void DrawEquipment(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue)
+        private void DrawEquipment(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool isUnderMouse)
         {
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue, false);
+                DrawLayer(batcher, posX, posY, dir, ref drawX, ref drawY, ref drawCenterY, layer, ref rect, ref mirror, hue, false, isUnderMouse);
             }
         }
 
-        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow)
+        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
         {
             Item item = Equipment[(int) layer];
 
@@ -386,7 +387,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+                if (Engine.Profile.Current.HighlightGameObjects && IsSelected && !isUnderMouse)
                 {
                     HueVector.X = 0x0023;
                     HueVector.Y = 1;

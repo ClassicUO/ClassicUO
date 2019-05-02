@@ -540,13 +540,17 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseEnter(int x, int y)
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
-                SelectedObject.Object = Mobile;
+            {
+                Mobile.IsSelected = true;
+            }
         }
 
         protected override void OnMouseExit(int x, int y)
         {
             if (Mobile != null && Mobile.IsSelected)
-                SelectedObject.Object = null;
+            {
+                Mobile.IsSelected = false;
+            }
         }
 
         private enum ButtonParty
