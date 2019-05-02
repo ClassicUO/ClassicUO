@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Scenes
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
-        private void MoveCharacterByInputs()
+        private void MoveCharacterByMouseInput()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void MoveCharacterByKeyboardInputs()
+        private void MoveCharacterByKeyboardInput()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
