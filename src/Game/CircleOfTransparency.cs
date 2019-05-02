@@ -96,8 +96,8 @@ namespace ClassicUO.Game
         {
             if (_texture != null)
             {
-                X = x - Width >> 1;
-                Y = y - Height >> 1;
+                X = x - (Width >> 1);
+                Y = y - (Height >> 1);
 
                 batcher.Begin();
                 batcher.SetStencil(_stencil.Value);
