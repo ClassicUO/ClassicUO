@@ -563,7 +563,7 @@ namespace ClassicUO.Game.Scenes
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
             else if (_arrowKeyPressed)
-                MoveCharacterByKeyboardInput(false)
+                MoveCharacterByKeyboardInput(false);
             else if (_numPadKeyPressed)
                 MoveCharacterByKeyboardInput(true);
 

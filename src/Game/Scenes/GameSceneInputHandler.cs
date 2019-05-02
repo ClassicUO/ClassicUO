@@ -98,13 +98,12 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
+
+                Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+
                 if (numPadMovement)
                 {
-                    Direction direction = _numPadDirection;
-                }
-                else
-                {
-                    Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+                    direction = _numPadDirection;
                 }
 
                 if (_isShiftDown)
@@ -516,8 +515,12 @@ namespace ClassicUO.Game.Scenes
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
-                _numPadKeyPressed = true;
-                _keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction _numPadDirection);
+                
+                if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                {
+                    _numPadKeyPressed = true;
+                    _numPadDirection = dWalkN;
+                }
                 //if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                 //    World.Player.Walk(dWalkN, true);
             }
