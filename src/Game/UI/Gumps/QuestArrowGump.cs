@@ -57,8 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
             int gox = _mx - World.Player.X;
             int goy = _my - World.Player.Y;
 
-            int x = Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X / 2 + ((gox - goy) * 22 - _arrow.Width / 1);
-            int y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y / 2 + (gox + goy) * 22 + _arrow.Height * 2;
+            int x = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1) + ((gox - goy) * 22 - _arrow.Width);
+            int y = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1) + (gox + goy) * 22 + _arrow.Height * 2;
 
             if (x < Engine.Profile.Current.GameWindowPosition.X)
                 x = Engine.Profile.Current.GameWindowPosition.X;

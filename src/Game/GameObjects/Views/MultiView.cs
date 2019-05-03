@@ -95,6 +95,16 @@ namespace ClassicUO.Game.GameObjects
         {
             if (SelectedObject.Object == this)
                 return;
+
+            if (DrawTransparent)
+            {
+                int d = Distance;
+                int maxD = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+
+                if (d <= maxD && d <= 3)
+                    return;
+            }
+
             if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }

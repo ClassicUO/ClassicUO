@@ -384,18 +384,18 @@ namespace ClassicUO.Network
 
     internal sealed class PASCIISpeechRequest : PacketWriter
     {
-        public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
+        public PASCIISpeechRequest(string text, MessageType type, byte font, Hue hue) : base(0x03)
         {
             WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort(font);
             WriteASCII(text);
         }
     }
 
     internal sealed class PUnicodeSpeechRequest : PacketWriter
     {
-        public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
+        public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
             SpeechEntry[] entries = FileManager.Speeches.GetKeywords(text);
 
@@ -403,7 +403,7 @@ namespace ClassicUO.Network
                 type |= MessageType.Encoded;
             WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort(font);
             WriteASCII(lang, 4);
 
             if (entries.Length > 0)
@@ -530,9 +530,11 @@ namespace ClassicUO.Network
 
     internal sealed class PVirtueGumpReponse : PacketWriter
     {
-        public PVirtueGumpReponse() : base(0xB1)
+        public PVirtueGumpReponse(Serial serial, Serial code) : base(0xB1)
         {
-            throw new NotImplementedException();
+            WriteUInt(serial);
+            WriteUInt(0x000001CD);
+            WriteUInt(code);
         }
     }
 
@@ -991,18 +993,6 @@ namespace ClassicUO.Network
         }
     }
 
-    internal sealed class PVirtueRequest : PacketWriter
-    {
-        public PVirtueRequest(uint buttonID) : base(0xB1)
-        {
-            WriteUInt(World.Player);
-            WriteUInt(0x000001CD);
-            WriteUInt(buttonID);
-            WriteUInt(0x00000001);
-            WriteUInt(World.Player);
-        }
-    }
-
     internal sealed class PInvokeVirtueRequest : PacketWriter
     {
         public PInvokeVirtueRequest(byte id) : base(0x12)
@@ -1374,4 +1364,5 @@ namespace ClassicUO.Network
             WriteByte(range);
         }
     }
+
 }

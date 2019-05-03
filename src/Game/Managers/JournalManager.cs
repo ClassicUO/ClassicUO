@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
             if (_entries.Count >= 100)
                 _entries.RemoveFromFront();
 
-            JournalEntry entry = new JournalEntry(text, isunicode ? MessageFont.Bold : MessageFont.SmallLight, hue, name, isunicode);
+            JournalEntry entry = new JournalEntry(text, (byte) (isunicode ? 0 : 9), hue, name, isunicode);
             _entries.AddToBack(entry);
             EntryAdded.Raise(entry);
         }
@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Managers
 
     internal readonly struct JournalEntry
     {
-        public JournalEntry(string text, MessageFont font, Hue hue, string name, bool isunicode)
+        public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode)
         {
             IsUnicode = isunicode;
             Font = font;
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
         }
 
         public readonly bool IsUnicode;
-        public readonly MessageFont Font;
+        public readonly byte Font;
         public readonly Hue Hue;
         public readonly string Name;
         public readonly string Text;

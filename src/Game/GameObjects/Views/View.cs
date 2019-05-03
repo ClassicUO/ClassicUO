@@ -137,7 +137,6 @@ namespace ClassicUO.Game.GameObjects
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-            //bool isTransparent = false;
 
             if (DrawTransparent)
             {
@@ -146,7 +145,6 @@ namespace ClassicUO.Game.GameObjects
 
                 if (dist <= maxDist)
                 {
-                    //isTransparent = dist <= 3;
                     HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float) maxDist, 0.5f);
                     //HueVector.Z = 1f - (dist / (float)maxDist);
                 }
@@ -157,7 +155,6 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 1f - AlphaHue / 255f;
 
 
-            //if (vertex[0].Hue != HueVector)
             vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
 

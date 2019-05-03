@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true,
                 CanMove = true
             });
-            _label.Y = Height / 2 - _label.Height / 2;
+            _label.Y = (Height >> 1) - (_label.Height >> 1);
         }
 
         protected override void OnMouseEnter(int x, int y)

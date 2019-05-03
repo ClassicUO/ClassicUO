@@ -97,6 +97,7 @@ namespace ClassicUO.Game.UI.Controls
             set => _bounds = value;
         }
 
+
         public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; } = true;

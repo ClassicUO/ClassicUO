@@ -561,7 +561,26 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (_rightMousePressed || _continueRunning)
-                MoveCharacterByInputs();
+                MoveCharacterByMouseInput();
+            else if (_arrowKeyPressed)
+                MoveCharacterByKeyboardInput(false);
+            else if (_numPadKeyPressed)
+                MoveCharacterByKeyboardInput(true);
+
+            if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
+            {
+                Mobile follow = World.Mobiles.Get(_followingTarget);
+                
+                if (follow != null)
+                {
+                    int distance = follow.Distance;
+
+                    if (distance > World.ViewRange)
+                        StopFollowing();
+                    else if (distance > 1)
+                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                }
+            }
 
             World.Update(totalMS, frameMS);
             Overheads.Update(totalMS, frameMS);
@@ -602,10 +621,10 @@ namespace ClassicUO.Game.Scenes
                     {
                         Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
-                            //X = (Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) / 2 - 50,
-                            //Y = (Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) / 2 - 50,
-                            X = Engine.WindowWidth / 2 - 50,
-                            Y = Engine.WindowHeight / 2 - 50
+                            //X = ((Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) >> 1) - 50,
+                            //Y = ((Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) >> 1) - 50,
+                            X = (Engine.WindowWidth >> 1) - 50,
+                            Y = (Engine.WindowHeight >> 1) - 50
                         });
                         _deathScreenActive = true;
                     }
@@ -624,6 +643,16 @@ namespace ClassicUO.Game.Scenes
         }
 
 
+        //DepthStencilState s2 = new DepthStencilState
+        //{
+        //    StencilEnable = true,
+        //    StencilFunction = CompareFunction.NotEqual,
+        //    StencilPass = StencilOperation.Keep,
+        //    StencilFail = StencilOperation.Keep,
+        //    StencilDepthBufferFail = StencilOperation.Keep,
+        //    ReferenceStencil = 0,
+        //    DepthBufferEnable = false,
+        //};
 
         private void DrawWorld(Batcher2D batcher)
         {
@@ -632,8 +661,17 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
+            //if (CircleOfTransparency.Circle == null)
+            //    CircleOfTransparency.Create(200);
+            //CircleOfTransparency.Circle.Draw(batcher, Engine.WindowWidth >> 1, Engine.WindowHeight >> 1);
+
+            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
+
+
             batcher.Begin();
             batcher.SetLightDirection(World.Light.IsometricDirection);
+
+            //batcher.SetStencil(s2);
 
             if (!_deathScreenActive)
             {
@@ -678,6 +716,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+            //batcher.SetStencil(null);
+
             batcher.End();
 
             DrawLights(batcher);
@@ -709,8 +749,8 @@ namespace ClassicUO.Game.Scenes
                 SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
                 SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = l.DrawX - texture.Width / 2;
-                vertex[0].Position.Y = l.DrawY - texture.Height / 2;
+                vertex[0].Position.X = l.DrawX - (texture.Width >> 1);
+                vertex[0].Position.Y = l.DrawY - (texture.Height >> 1);
                 vertex[0].TextureCoordinate.Y = 0;
                 vertex[1].Position = vertex[0].Position;
                 vertex[1].Position.X += texture.Width;

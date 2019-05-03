@@ -1,6 +1,7 @@
 ﻿using System;
 
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,8 +17,7 @@ namespace ClassicUO.Game
                 DepthBufferEnable = false,
                 StencilEnable = true,
                 StencilFunction = CompareFunction.Always,
-                ReferenceStencil = 1,
-                StencilMask = 1,
+                ReferenceStencil = 0,
                 StencilFail = StencilOperation.Keep,
                 StencilDepthBufferFail = StencilOperation.Keep,
                 StencilPass = StencilOperation.Replace
@@ -26,6 +26,15 @@ namespace ClassicUO.Game
 
             return state;
         });
+
+        DepthStencilState s1 = new DepthStencilState
+        {
+            StencilEnable = true,
+            StencilFunction = CompareFunction.Always,
+            StencilPass = StencilOperation.Replace,
+            ReferenceStencil = 0,
+            DepthBufferEnable = true,
+        };
 
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
@@ -87,17 +96,17 @@ namespace ClassicUO.Game
         {
             if (_texture != null)
             {
-                X = x - Width / 2;
-                Y = y - Height / 2;
-                //batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
+                X = x - (Width >> 1);
+                Y = y - (Height >> 1);
 
                 batcher.Begin();
                 batcher.SetStencil(_stencil.Value);
                 //batcher.SetBlendState(_checkerBlend.Value);
 
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
-                batcher.Draw2D(_texture, X, Y, Vector3.Zero);
+                batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
+
 
                 //batcher.SetBlendState(null);
                 batcher.SetStencil(null);
@@ -118,9 +127,25 @@ namespace ClassicUO.Game
 
             uint[] pixels = CreateTexture(radius, ref Circle._width, ref Circle._height);
 
+            //for (int i = 0; i < pixels.Length; i++)
+            //{
+            //    ref uint pixel = ref pixels[i];
+
+            //    if (pixel != 0)
+            //    {
+            //        ushort value = (ushort)(pixel << 3);
+
+            //        if (value > 0xFF)
+            //            value = 0xFF;
+
+            //        pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+            //    }
+            //}
+
+
             Circle.Radius = radius;
 
-            Circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, Circle._width, Circle.Height, false, SurfaceFormat.Color);
+            Circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, Circle._width, Circle.Height);
             Circle._texture.SetData(pixels);
 
             return Circle;

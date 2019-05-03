@@ -229,74 +229,29 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            int step = 0;
-            Item item = null;
-            StackTrace trace = new StackTrace();
+            Item item = Items.Get(serial);
 
-            // TODO: try to figure out the weird issue :)
-            try
+            if (item == null)
+                return false;
+
+            if (item.Layer != Layer.Invalid)
             {
-                item = Items.Get(serial);
+                Entity e = Get(item.RootContainer);
 
-                step = 1;
-
-                if (item == null)
-                    return false;
-
-                step = 2;
-
-                if (item.Layer != Layer.Invalid)
+                if (e != null && e.HasEquipment)
                 {
-                    step = 3;
+                    int index = (int)item.Layer;
 
-                    Entity e = Get(item.RootContainer);
-
-                    step = 4;
-
-                    if (e != null && e.HasEquipment)
-                    {
-                        step = 5;
-                        int index = (int) item.Layer;
-
-                        if (index < e.Equipment.Length) e.Equipment[(int) item.Layer] = null;
-                        step = 6;
-                    }
+                    if (index >= 0 && index < e.Equipment.Length)
+                        e.Equipment[index] = null;
                 }
-
-                step = 7;
-                foreach (Item i in item.Items) RemoveItem(i);
-                step = 8;
-
-                item.Items.Clear();
-                step = 9;
-
-                item.Destroy();
-                step = 10;
-            }
-            catch (Exception e)
-            {
-                string path = Path.Combine(Engine.ExePath, "Logs");
-
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("ClassicUO [dev] - v" + Engine.Version);
-                sb.AppendLine($"Thread: {Thread.CurrentThread.Name} - {Thread.CurrentThread.ManagedThreadId} - Engine ThreadID {Engine.ThreadID}");
-                sb.AppendLine($"Serial that causes crash: {serial} - {(item == null ? "NULL" : item.ToString())}");
-                sb.AppendLine("Scene: " + (Engine.SceneManager.CurrentScene == null ? "NULL" : Engine.SceneManager.CurrentScene is LoginScene ? "LoginScene" : "GameScene"));
-                sb.AppendLine("Step: " + step);
-                sb.AppendLine("App trace:\n: " + trace);
-                sb.AppendLine("Exception Message:\n" + e);
-                sb.AppendLine("Exception StackTrace:\n" + e.StackTrace);
-
-
-                File.WriteAllText(Path.Combine(path, "log_Error_World_RemoveItem.txt"), sb.ToString());
-
-                Chat.HandleMessage(Player, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
-                Chat.HandleMessage(null, "An error is occurred, check /Logs folder. Send it to KaRaShO'!", "ClassicUO", 0x38, MessageType.Regular, MessageFont.Normal, true);
             }
 
+            foreach (Item i in item.Items)
+                RemoveItem(i);
+
+            item.Items.Clear();
+            item.Destroy();
             return true;
         }
 

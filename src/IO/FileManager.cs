@@ -24,7 +24,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
 
+using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
@@ -135,6 +137,55 @@ namespace ClassicUO.IO
 
             Profession = new ProfessionLoader();
             Profession.Load();
+
+
+            var verdata = Verdata.File;
+
+            if (verdata != null && Verdata.Patches.Length != 0)
+            {
+                for (int i = 0; i < Verdata.Patches.Length; i++)
+                {
+                    UOFileIndex5D vh = Verdata.Patches[i];
+
+                    if (vh.FileID == 0)
+                    {
+                        Map.PatchMapBlock(vh.BlockID, vh.Position);
+                    }
+                    else if (vh.FileID == 4)
+                    {
+                        if (vh.BlockID >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                        {
+                            ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+                    else if (vh.FileID == 12)
+                    {
+
+                    }
+                    else if (vh.FileID == 14 && vh.BlockID < Multi.Count)
+                    {
+
+                    }
+                    else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
+                    {
+
+                    }
+                    else if (vh.FileID == 30)
+                    {
+
+                    }
+                    else if (vh.FileID == 32)
+                    {
+
+                    }
+                }
+            }
+
+
 
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();

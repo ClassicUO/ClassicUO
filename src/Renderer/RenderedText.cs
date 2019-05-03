@@ -65,12 +65,9 @@ namespace ClassicUO.Renderer
             get => _font;
             set
             {
-                if (_font != value)
-                {
-                    if (value == 0xFF)
-                        value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
-                    _font = value;
-                }
+                if (value == 0xFF)
+                    value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                _font = value;
             }
         }
 

@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsChivalry
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Chivalry.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsChivalry()

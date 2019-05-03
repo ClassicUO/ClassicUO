@@ -612,7 +612,18 @@ namespace ClassicUO
                     Directory.CreateDirectory(path);
 
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                {
                     crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+
+                    //SDL.SDL_ShowSimpleMessageBox(
+                    //                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                    //                             "An error occurred",
+                    //                             $"{crashfile}\ncreated in /Logs.",
+                    //                             SDL.SDL_GL_GetCurrentWindow()
+                    //                            );
+                }
+
+             
             };
 #endif
 

@@ -89,8 +89,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             Point position = Location;
-            int halfWidth = Width / 2;
-            int halfHeight = Height / 2;
+            int halfWidth = Width >> 1;
+            int halfHeight = Height >> 1;
 
             if (X < -halfWidth)
                 position.X = -halfWidth;

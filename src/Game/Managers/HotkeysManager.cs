@@ -168,6 +168,14 @@ namespace ClassicUO.Game.Managers
             Add(HotkeyAction.CastHailStorm, () => GameActions.CastSpell(691));
             Add(HotkeyAction.CastNetherCyclone, () => GameActions.CastSpell(692));
             Add(HotkeyAction.CastRisingColossus, () => GameActions.CastSpell(693));
+
+
+            Add(HotkeyAction.CastInspire, () => GameActions.CastSpell(701));
+            Add(HotkeyAction.CastInvigorate, () => GameActions.CastSpell(702));
+            Add(HotkeyAction.CastResilience, () => GameActions.CastSpell(703));
+            Add(HotkeyAction.CastPerseverance, () => GameActions.CastSpell(704));
+            Add(HotkeyAction.CastTribulation, () => GameActions.CastSpell(705));
+            Add(HotkeyAction.CastDespair, () => GameActions.CastSpell(706));
         }
 
 
@@ -407,6 +415,17 @@ namespace ClassicUO.Game.Managers
         CastHailStorm,
         CastNetherCyclone,
         CastRisingColossus,
+
+        #endregion
+
+        #region Bardic
+
+        CastInspire,
+        CastInvigorate,
+        CastResilience,
+        CastPerseverance,
+        CastTribulation,
+        CastDespair,
 
         #endregion
 

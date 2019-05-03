@@ -34,7 +34,7 @@ namespace ClassicUO.Utility
 
             if (source.Length > 2 && source[0] == '1' && source[1] == '+')
             {
-                buff = new byte[(source.Length - 2) / 2];
+                buff = new byte[(source.Length - 2) >> 1];
                 string key = CalculateKey();
 
                 if (key == string.Empty)
@@ -55,7 +55,7 @@ namespace ClassicUO.Utility
                         continue;
                     }
 
-                    buff[(i - 2) / 2] = (byte) (c ^ (byte) key[kidx++]);
+                    buff[(i - 2) >> 1] = (byte) (c ^ (byte) key[kidx++]);
 
                     if (kidx >= key.Length)
                         kidx = 0;
@@ -63,7 +63,7 @@ namespace ClassicUO.Utility
             }
             else
             {
-                byte key = (byte) (source.Length / 2);
+                byte key = (byte) (source.Length >> 1);
                 buff = new byte[key];
 
                 for (int i = 0; i < source.Length; i += 2)
@@ -79,7 +79,7 @@ namespace ClassicUO.Utility
                         continue;
                     }
 
-                    buff[i / 2] = (byte) (c ^ key++);
+                    buff[i >> 1] = (byte) (c ^ key++);
                 }
             }
 

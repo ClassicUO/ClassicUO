@@ -274,12 +274,34 @@ namespace ClassicUO.Game.UI.Gumps
                     _normalHits = true;
                 }
 
-                int hits = CalculatePercents(Mobile.HitsMax, Mobile.Hits, inparty ? 96 : 109);
+                int barW = inparty ? 96 : 109;
+
+                int hits = CalculatePercents(Mobile.HitsMax, Mobile.Hits, barW);
+             
 
                 if (hits != _oldHits)
                 {
                     _bars[0].Percent = hits;
                     _oldHits = hits;
+                }
+
+
+                if (inparty || CanBeSaved)
+                {
+                    int mana = CalculatePercents(Mobile.ManaMax, Mobile.Mana, barW);
+                    int stam = CalculatePercents(Mobile.StaminaMax, Mobile.Stamina, barW);
+
+                    if (mana != _oldMana)
+                    {
+                        _bars[1].Percent = mana;
+                        _oldMana = mana;
+                    }
+
+                    if (stam != _oldStam)
+                    {
+                        _bars[2].Percent = stam;
+                        _oldStam = stam;
+                    }
                 }
             }
 
@@ -290,21 +312,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldWarMode = !_oldWarMode;
 
                     _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
-                }
-
-                int mana = CalculatePercents(World.Player.ManaMax, World.Player.Mana, inparty ? 96 : 109);
-                int stam = CalculatePercents(World.Player.StaminaMax, World.Player.Stamina, inparty ? 96 : 109);
-
-                if (mana != _oldMana)
-                {
-                    _bars[1].Percent = mana;
-                    _oldMana = mana;
-                }
-
-                if (stam != _oldStam)
-                {
-                    _bars[2].Percent = stam;
-                    _oldStam = stam;
                 }
             }
         }
@@ -540,13 +547,17 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseEnter(int x, int y)
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
-                SelectedObject.Object = Mobile;
+            {
+                Mobile.IsSelected = true;
+            }
         }
 
         protected override void OnMouseExit(int x, int y)
         {
             if (Mobile != null && Mobile.IsSelected)
-                SelectedObject.Object = null;
+            {
+                Mobile.IsSelected = false;
+            }
         }
 
         private enum ButtonParty

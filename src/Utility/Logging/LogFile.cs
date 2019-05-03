@@ -48,5 +48,17 @@ namespace ClassicUO.Utility.Logging
             await logStream.WriteAsync(logBytes, 0, logBytes.Length);
             await logStream.FlushAsync();
         }
+
+        public void Write(string message)
+        {
+            byte[] logBytes = Encoding.UTF8.GetBytes($"{message}\n");
+            logStream.Write(logBytes, 0, logBytes.Length);
+            logStream.Flush();
+        }
+
+        public override string ToString()
+        {
+            return logStream.Name;
+        }
     }
 }

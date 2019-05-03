@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsBushido
     {
+        public static string SpellBookName { get; set; } = SpellBookType.Bushido.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsBushido()

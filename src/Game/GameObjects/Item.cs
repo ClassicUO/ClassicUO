@@ -425,7 +425,9 @@ namespace ClassicUO.Game.GameObjects
                         _animSpeed = _animDataFrame.Value.FrameInterval != 0 ? _animDataFrame.Value.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks + _animSpeed;
                     }
+                    
                     _originalGraphic = DisplayedGraphic;
+                    _force = true;                    
                 }
                 else
                 {

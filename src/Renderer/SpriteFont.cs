@@ -244,8 +244,8 @@ namespace ClassicUO.Renderer
 
             using (BinaryReader imageReader = new BinaryReader(imageStream))
             {
-                int blockCountX = (width + 3) / 4;
-                int blockCountY = (height + 3) / 4;
+                int blockCountX = (width + 3) >> 2;
+                int blockCountY = (height + 3) >> 2;
 
                 for (int y = 0; y < blockCountY; y++)
                 {

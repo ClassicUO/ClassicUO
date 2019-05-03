@@ -241,8 +241,8 @@ namespace ClassicUO.Game
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            _offset.X = _draggedItemTexture.Width / 2;
-            _offset.Y = _draggedItemTexture.Height / 2;
+            _offset.X = _draggedItemTexture.Width >> 1;
+            _offset.Y = _draggedItemTexture.Height >> 1;
 
             _rect.Width = _draggedItemTexture.Width;
             _rect.Height = _draggedItemTexture.Height;
@@ -314,7 +314,7 @@ namespace ClassicUO.Game
                         break;
                 }
 
-                sb.Draw2D(_aura, Mouse.Position.X + hotX - 25 / 2 , Mouse.Position.Y + hotY - 25 / 2, _auraVector);
+                sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), _auraVector);
             }
 
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)

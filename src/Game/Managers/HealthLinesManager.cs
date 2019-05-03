@@ -40,8 +40,8 @@ namespace ClassicUO.Game.Managers
 
                 x += 5;
 
-                x -= BAR_WIDTH / 2;
-                y -= BAR_HEIGHT / 2;
+                x -= BAR_WIDTH >> 1;
+                y -= BAR_HEIGHT >> 1;
 
                 x = (int) (x / scale);
                 y = (int) (y / scale);

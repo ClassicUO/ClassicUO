@@ -90,7 +90,7 @@ namespace ClassicUO.Game
                     int drawX;
 
                     int drawCenterY = frame.CenterY;
-                    int yOff = (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+                    int yOff = ((int)mobile.Offset.Z >> 2) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
                     int drawY = drawCenterY + yOff;
 
                     if (mirror)

@@ -97,6 +97,8 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Y = Texture.Height - 44;
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
+
+                _force = false;
             }
 
             if (ItemData.IsFoliage)

@@ -131,7 +131,8 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp) e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
+                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp)
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
@@ -426,7 +427,16 @@ namespace ClassicUO.Game.Managers
 
                         break;
                     case "gumppic":
-                        gump.Add(new GumpPic(gparams), page);
+
+                        GumpPic pic = new GumpPic(gparams);
+
+                        if (gparams.Count >= 6 && gparams[5].ToLower().Contains("virtuegumpitem"))
+                        {
+                            pic.ContainsByBounds = true;
+                            pic.IsVirtue = true;
+                        }
+
+                        gump.Add(pic, page);
 
                         break;
                     case "gumppictiled":
@@ -823,7 +833,8 @@ namespace ClassicUO.Game.Managers
                     _gumps.Insert(index - 1, cm);
                     _needSort = true;
                 }
-                else if (_gumps[i] == c1) index = i;
+                else if (_gumps[i] == c1)
+                    index = i;
             }
         }
 

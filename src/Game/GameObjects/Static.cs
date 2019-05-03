@@ -39,9 +39,6 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             Index = index;
 
-            _isFoliage = ItemData.IsFoliage;
-            _isPartialHue = ItemData.IsPartialHue;
-
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
             if (ItemData.Height > 5)

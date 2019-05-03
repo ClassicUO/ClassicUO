@@ -59,18 +59,18 @@ namespace ClassicUO.IO
                 for (int i = 0; i < count; i++)
                     Entries[i] = new UOFileIndex3D(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
 
-                UOFileIndex5D[] patches = Verdata.Patches;
+                //UOFileIndex5D[] patches = Verdata.Patches;
 
-                for (int i = 0; i < patches.Length; i++)
-                {
-                    UOFileIndex5D patch = patches[i];
+                //for (int i = 0; i < patches.Length; i++)
+                //{
+                //    UOFileIndex5D patch = patches[i];
 
-                    if (patch.FileID == _patch && patch.BlockID >= 0 && patch.BlockID < Entries.Length)
-                    {
-                        ref UOFileIndex3D entry = ref Entries[patch.BlockID];
-                        entry = new UOFileIndex3D(patch.Position, patch.Length | (1 << 31), 0, patch.GumpData);
-                    }
-                }
+                //    if (patch.FileID == _patch && patch.BlockID >= 0 && patch.BlockID < Entries.Length)
+                //    {
+                //        ref UOFileIndex3D entry = ref Entries[patch.BlockID];
+                //        entry = new UOFileIndex3D(patch.Position, patch.Length | (1 << 31), 0, patch.GumpData);
+                //    }
+                //}
             }
         }
 

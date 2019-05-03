@@ -56,13 +56,13 @@ namespace ClassicUO.Game.UI.Controls
                 X = x,
                 Y = y,
                 Width = width,
-                Height = height - 2
+                Height = height + 9
             }, page);
 
             _up = new Button(raiseamount, 0x983, 0x984)
             {
                 X = x + width - 12,
-                Y = y - 1,
+                Y = y,
                 ButtonAction = ButtonAction.Activate
             };
 
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Controls
             _down = new Button(-raiseamount, 0x985, 0x986)
             {
                 X = x + width - 12,
-                Y = y + 12,
+                Y = y + height - 3,
                 ButtonAction = ButtonAction.Activate
             };
 

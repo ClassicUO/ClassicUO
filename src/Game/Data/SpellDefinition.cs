@@ -236,9 +236,8 @@ namespace ClassicUO.Game.Data
                 if (minskill == 0)
                     minskill = sd.MinSkill;
 
-                if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words)
-                    WordToTargettype.Remove(sd.PowerWords);
-                else if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name) WordToTargettype.Remove(sd.Name);
+                if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words) WordToTargettype.Remove(sd.PowerWords);
+                if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name) WordToTargettype.Remove(sd.Name);
             }
 
             sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);

@@ -298,8 +298,8 @@ namespace ClassicUO.Game.UI.Gumps
                 dst.Height = sh;
             }
 
-            //src.X = World.Player.Position.X - src.Width / 2;
-            //src.Y = World.Player.Position.Y - src.Height / 2;
+            //src.X = World.Player.Position.X - (src.Width >> 1);
+            //src.Y = World.Player.Position.Y - (src.Height >> 1);
 
             //var rotDest = RotateVector2(new Vector2(dst.X, dst.Y), 45, new Vector2(dst.Width / 2, dst.Height / 2));
 

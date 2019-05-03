@@ -115,7 +115,7 @@ namespace ClassicUO.IO.Resources
                 MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                 MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
-                if (Engine.GlobalSettings.PreloadMaps)
+                //if (Engine.GlobalSettings.PreloadMaps)
                     LoadMap(i);
             }
         }
@@ -130,15 +130,14 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            //throw new NotImplementedException();
-            for (int i = 0; i < MAPS_COUNT; i++)
-                UnloadMap(i);
+            //for (int i = 0; i < MAPS_COUNT; i++)
+            //    UnloadMap(i);
         }
 
 
         public unsafe void LoadMap(int i)
         {
-            if (Engine.GlobalSettings.PreloadMaps && BlockData[i] != null)
+            if (/*Engine.GlobalSettings.PreloadMaps &&*/ BlockData[i] != null || _filesMap[i] == null)
                 return;
 
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
@@ -217,7 +216,7 @@ namespace ClassicUO.IO.Resources
             if (Engine.GlobalSettings.PreloadMaps)
                 return;
 
-            if (BlockData[i] != null) BlockData[i] = null;
+            //if (BlockData[i] != null) BlockData[i] = null;
         }
 
         public void PatchMapBlock(ulong block, ulong address)
@@ -246,8 +245,8 @@ namespace ClassicUO.IO.Resources
             if (PatchesCount > MAPS_COUNT)
                 PatchesCount = MAPS_COUNT;
 
-            MapPatchCount.ForEach(s => s = 0);
-            StaticPatchCount.ForEach(s => s = 0);
+            Array.Clear(MapPatchCount, 0, MapPatchCount.Length);
+            Array.Clear(StaticPatchCount, 0, StaticPatchCount.Length);
 
             bool result = false;
 
@@ -278,7 +277,7 @@ namespace ClassicUO.IO.Resources
                     if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
 
-                    mapPatchesCount = Math.Min(mapPatchesCount, (int) (difl.Length / 4));
+                    mapPatchesCount = Math.Min(mapPatchesCount, ((int)difl.Length >> 2));
 
                     difl.Seek(0);
                     dif.Seek(0);
@@ -307,7 +306,7 @@ namespace ClassicUO.IO.Resources
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
-                    staticPatchesCount = Math.Min(staticPatchesCount, (int) (difl.Length / 4));
+                    staticPatchesCount = Math.Min(staticPatchesCount, ((int)difl.Length >> 2));
 
                     difl.Seek(0);
                     difi.Seek(0);
@@ -317,6 +316,7 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
                         uint blockIndex = difl.ReadUInt();
+
                         StaidxBlock* sidx = (StaidxBlock*) difi.PositionAddress;
 
                         difi.Skip(sizeof(StaidxBlock));

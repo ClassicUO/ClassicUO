@@ -32,8 +32,6 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Static
     {
         private readonly int _canBeTransparent;
-        private readonly bool _isFoliage, _isPartialHue;
-
         private Graphic _oldGraphic;
 
         public bool CharacterIsBehindFoliage { get; set; }
@@ -61,7 +59,10 @@ namespace ClassicUO.Game.GameObjects
 
                 ArtTexture texture = FileManager.Art.GetTexture(Graphic);
                 Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                Bounds.X = (Texture.Width >> 1) - 22;
+                Bounds.Y = Texture.Height - 44;
+                Bounds.Width = Texture.Width;
+                Bounds.Height = texture.Height;
 
                 FrameInfo.Width = texture.ImageRectangle.Width;
                 FrameInfo.Height = texture.ImageRectangle.Height;
@@ -70,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
                 FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
             }
 
-            if (_isFoliage)
+            if (ItemData.IsFoliage)
             {
                 if (CharacterIsBehindFoliage)
                 {
@@ -101,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, _isPartialHue, 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
             }
 
             Engine.DebugInfo.StaticsRendered++;
@@ -124,19 +125,17 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this)
                 return;
 
+            if (DrawTransparent)
+            {
+                int d = Distance;
+                int maxD = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+
+                if (d <= maxD && d <= 3)
+                    return;
+            }
+            
             if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
-
-        //public override void MousePick(MouseOverList list, SpriteVertex[] vertex, bool istransparent)
-        //{
-
-
-
-        //    //int x = list.MousePosition.X - (int) vertex[0].Position.X;
-        //    //int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-        //    //if (!istransparent && Texture.Contains(x, y))
-        //    //    list.Add(this, vertex[0].Position);
-        //}
     }
 }

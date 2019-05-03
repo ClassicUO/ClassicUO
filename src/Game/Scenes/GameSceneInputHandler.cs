@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -69,14 +70,16 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown;
         private Action _queuedAction;
         private Entity _queuedObject;
-        private bool _rightMousePressed, _continueRunning, _useObjectHandles;
+        private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
+        public Direction _numPadDirection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
-        private void MoveCharacterByInputs()
+        private void MoveCharacterByMouseInput()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
@@ -91,13 +94,41 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private void MoveCharacterByKeyboardInput(bool numPadMovement)
+        {
+            if (World.InGame && !Pathfinder.AutoWalking)
+            {
+
+                Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+
+                if (numPadMovement)
+                {
+                    direction = _numPadDirection;
+                }
+
+                if (_isShiftDown)
+                {
+                    World.Player.Walk(direction, false);
+                }
+                else
+                {
+                    World.Player.Walk(direction, true);
+                }
+
+            }
+        }
+
         // LEFT
         private void OnLeftMouseDown(object sender, EventArgs e)
         {
             if (!IsMouseOverViewport)
                 return;
 
-            if (_rightMousePressed) _continueRunning = true;
+            if (_rightMousePressed)
+            {
+                _continueRunning = true; 
+            }
+
 
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
@@ -113,6 +144,11 @@ namespace ClassicUO.Game.Scenes
 
             if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                 return;
+
+            //for (byte b = 0; b < 255; b++)
+            //FileManager.Fonts.GenerateUnicode(0xFF, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
+
+            //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
             if (TargetManager.IsTargeting)
             {
@@ -226,13 +262,18 @@ namespace ClassicUO.Game.Scenes
 
                         break;
 
-                    case AnimatedItemEffect effect when effect.Source is Entity:
-                    case Entity _:
+                    case Entity ent:
 
-                        if (!_inqueue)
+                        if (Keyboard.Alt)
+                        {
+                            World.Player.AddOverhead(MessageType.Regular, "Now following!", 3, 0, false);
+                            _followingMode = true;
+                            _followingTarget = ent;
+                        }
+                        else if (!_inqueue)
                         {
                             _inqueue = true;
-                            _queuedObject = obj is AnimatedItemEffect ef ? (Entity) ef.Source : (Entity) obj;
+                            _queuedObject = ent;
                             _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                             _queuedAction = () =>
@@ -247,6 +288,9 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
+
+        private bool _followingMode;
+        private Serial _followingTarget;
 
         private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
@@ -294,6 +338,19 @@ namespace ClassicUO.Game.Scenes
             {
                 _rightMousePressed = true;
                 _continueRunning = false;
+
+                StopFollowing();
+            }
+        }
+
+        private void StopFollowing()
+        {
+            if (_followingMode)
+            {
+                _followingMode = false;
+                _followingTarget = Serial.INVALID;
+                Pathfinder.StopAutoWalk();
+                World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
             }
         }
 
@@ -428,6 +485,16 @@ namespace ClassicUO.Game.Scenes
         {
             _isShiftDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
             _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
+            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP;
+            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN;
+            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT;
+            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT;
+
+            if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
+            {
+                if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                    _arrowKeyPressed = true;
+            }
 
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
@@ -446,21 +513,16 @@ namespace ClassicUO.Game.Scenes
                     GameActions.SetWarMode(true);
             }
 
-            if (_keycodeDirection.TryGetValue(e.keysym.sym, out Direction dWalk))
-            {
-                if (!Engine.Profile.Current.ActivateChatStatus)
-                    World.Player.Walk(dWalk, false);
-                else
-                {
-                    if (Engine.UI.SystemChat?.textBox.Text.Length == 0)
-                        World.Player.Walk(dWalk, false);
-                }
-            }
-
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
+                
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                    World.Player.Walk(dWalkN, false);
+                {
+                    _numPadKeyPressed = true;
+                    _numPadDirection = dWalkN;
+                }
+                //if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
+                //    World.Player.Walk(dWalkN, true);
             }
 
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
@@ -491,6 +553,35 @@ namespace ClassicUO.Game.Scenes
             _isShiftDown = isshift;
             _isCtrlDown = isctrl;
 
+            switch (e.keysym.sym)
+            {
+                case SDL.SDL_Keycode.SDLK_UP:
+                    _isUpDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_DOWN:
+                    _isDownDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_LEFT:
+                    _isLeftDown = false;
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_RIGHT:
+                    _isRightDown = false;
+                    break;
+            }
+
+            if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown))
+            {
+                _arrowKeyPressed = false;
+            }
+
+            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
+            {
+                _numPadKeyPressed = false;
+            }
+
             _useObjectHandles = isctrl && isshift;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
@@ -502,6 +593,10 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     GameActions.ToggleWarMode();
+            }
+            else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Pathfinder.AutoWalking)
+            {
+                Pathfinder.StopAutoWalk();
             }
         }
     }
