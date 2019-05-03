@@ -166,7 +166,6 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.Attack(Entity);
                 else
                     GameActions.DoubleClick(Entity);
-
             }
 
             return true;

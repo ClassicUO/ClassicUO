@@ -1621,7 +1621,9 @@ namespace ClassicUO.Network
 
         private static void Ping(Packet p)
         {
+            NetClient.Socket.Statistics.PingReceived();
         }
+
 
         private static void BuyList(Packet p)
         {

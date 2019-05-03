@@ -45,14 +45,15 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
         private ScrollAreaItem _activeChatArea;
-        //private Combobox _counterLayout;
-        private HSliderBar _cellSize;
 
         // video
         private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse;
+        private HSliderBar _lightBar;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
+        private TextBox _rows, _columns;
+        private HSliderBar _cellSize;
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled;
@@ -60,6 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
+        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -80,19 +82,21 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private TextBox _spellFormatBox;
 
-        private HSliderBar _lightBar;
+        // macro
         private MacroControl _macroControl;
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
-        private TextBox _rows, _columns;
 
         // speech
         private Checkbox _scaleSpeechDelay;
         private Combobox _shardType, _auraType;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
-        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
+        // network
+        private Checkbox _showNetStats;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
@@ -135,6 +139,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
+            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Network") { ButtonParameter = 11 });
+
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
 
@@ -176,6 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildTooltip();
             BuildCounters();
             BuildExperimental();
+            BuildNetwork();
 
             ChangePage(1);
         }
@@ -896,6 +903,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(rightArea, PAGE);
         }
+
+        private void BuildNetwork()
+        {
+            const int PAGE = 11;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _showNetStats = CreateCheckBox(rightArea, "Show network stats", Engine.Profile.Current.ShowNetworkStats, 0, 0);
+
+            Add(rightArea, PAGE);
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -1063,6 +1082,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
 
+                    break;
+                case 11:
+                    _showNetStats.IsChecked = false;
                     break;
             }
         }
@@ -1354,6 +1376,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
             }
+
+            // network
+            Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
+
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }

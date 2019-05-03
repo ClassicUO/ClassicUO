@@ -587,8 +587,11 @@ namespace ClassicUO.Game.Scenes
 
             if (totalMS > _timePing)
             {
-                NetClient.Socket.Send(new PPing());
-                _timePing = (long) totalMS + 10000;
+                //NetClient.Socket.Send(new PPing());
+
+                NetClient.Socket.Statistics.SendPing();
+
+                _timePing = (long) totalMS + 1000;
             }
 
             _useItemQueue.Update(totalMS, frameMS);

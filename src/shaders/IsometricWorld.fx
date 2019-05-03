@@ -63,7 +63,6 @@ float3 get_light(float3 norm)
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
-	// Get the initial pixel and discard it if the alpha == 0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
 	
 	int mode = int(IN.Hue.y);
@@ -77,7 +76,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		return color;
 	}
 
-	if (color.a <= 0)
+	if (color.a == 0.0f)
 		discard;
 
 
