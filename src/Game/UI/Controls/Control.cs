@@ -52,7 +52,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
-        private static SpriteTexture _debugTexture, _debugFocusTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
@@ -381,31 +380,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Engine.DebugFocus && HasKeyboardFocus)
                 {
-                    if (_debugFocusTexture == null)
-                    {
-                        _debugFocusTexture = new SpriteTexture(1, 1);
-
-                        _debugFocusTexture.SetData(new Color[1]
-                        {
-                            Color.Red
-                        });
-                    }
-
-                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, Vector3.Zero);
                 }
                 else if (Engine.GlobalSettings.Debug)
                 {
-                    if (_debugTexture == null)
-                    {
-                        _debugTexture = new SpriteTexture(1, 1);
-
-                        _debugTexture.SetData(new Color[1]
-                        {
-                            Color.Green
-                        });
-                    }
-
-                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, Vector3.Zero);
                 }
             }
         }

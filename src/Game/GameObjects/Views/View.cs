@@ -45,9 +45,9 @@ namespace ClassicUO.Game.GameObjects
 
         //    return state;
         //});
+
         public Rectangle Bounds;
         public Rectangle FrameInfo;
-
         public Vector3 HueVector;
 
 

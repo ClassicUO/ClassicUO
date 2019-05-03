@@ -482,7 +482,7 @@ namespace ClassicUO.Game.GameObjects
 
                 vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
 
-                batcher.DrawShadow(Texture, vertexS, new Vector2(posX + 22, posY + Offset.Y - Offset.Z + 22), IsFlipped, 0);
+                batcher.DrawShadow(Texture, ref vertexS, posX + 22, (int) (posY + Offset.Y - Offset.Z + 22), IsFlipped);
             }
 
 

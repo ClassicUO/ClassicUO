@@ -44,32 +44,22 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _createAddLabel;
         private readonly Button _leaveButton;
         private readonly Label _leaveLabel;
-        private readonly Texture2D _line;
         private readonly Button _lootMeButton;
         private readonly Label _lootMeLabel;
         private readonly Button _messagePartyButton;
         private readonly Label _messagePartyLabel;
         private readonly List<PartyListEntry> _partyListEntries;
         private readonly ScrollArea _scrollArea;
-        private Texture2D _edge;
+        private bool prevStatus;
 
         public PartyGumpAdvanced() : base(0, 0)
         {
             _partyListEntries = new List<PartyListEntry>();
-            _line = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
-
-            _line.SetData(new[]
-            {
-                Color.White
-            });
             X = 100;
             Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = false;
-
-            Width = WIDTH;
-            Height = HEIGHT;
 
             Add(_alphaBlendControl = new AlphaBlendControl(0.05f)
             {
@@ -150,11 +140,27 @@ namespace ClassicUO.Game.UI.Gumps
             });
             //======================================================
             World.Party.PartyMemberChanged += OnPartyMemberChanged;
+
+            Add(new Line(30, 50, 260, 1, Color.White.PackedValue));
+            Add(new Line(95, 50, 1, 200, Color.White.PackedValue));
+            Add(new Line(245, 50, 1, 200, Color.White.PackedValue));
+            Add(new Line(30, 250, 260, 1, Color.White.PackedValue));
+
+            UpdateGumpStatus();
+
+            Width = WIDTH;
+            Height = HEIGHT;
         }
 
         private void OnPartyMemberChanged(object sender, EventArgs e)
         {
             OnInitialize();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            World.Party.PartyMemberChanged -= OnPartyMemberChanged;
         }
 
         protected override void OnInitialize()
@@ -163,10 +169,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (PartyListEntry entry in _partyListEntries)
             {
-                entry.Clear();
                 entry.Dispose();
             }
-
             _partyListEntries.Clear();
 
             foreach (PartyMember member in World.Party.Members)
@@ -181,63 +185,63 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f);
 
-            batcher.Draw2D(_line, x + 30, y + 50, 260, 1, hue);
-            batcher.Draw2D(_line, x + 95, y + 50, 1, 200, hue);
-            batcher.Draw2D(_line, x + 245, y + 50, 1, 200, hue);
-            batcher.Draw2D(_line, x + 30, y + 250, 260, 1, hue);
 
-            if (_edge == null)
-            {
-                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new[] {Color.Gray});
-            }
-
-            batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
 
             return true;
         }
 
+        private void UpdateGumpStatus()
+        {
+            if (prevStatus != World.Party.IsInParty)
+            {
+                prevStatus = World.Party.IsInParty;
+
+                if (prevStatus)
+                {
+                    //Set gump size if player is in party
+                    Height = HEIGHT;
+                    _alphaBlendControl.Height = Height;
+                    //Set contents if player is in party
+                    _createAddButton.Y = 350;
+                    _createAddLabel.Y = _createAddButton.Y;
+                    _createAddLabel.Text = "Add a member";
+                    _leaveButton.IsVisible = true;
+                    _leaveLabel.IsVisible = true;
+                    _lootMeButton.IsVisible = true;
+                    _lootMeLabel.IsVisible = true;
+                    _lootMeLabel.Text = !World.Party.AllowPartyLoot ? "Party CANNOT loot me" : "Party ALLOWED looting me";
+                    _messagePartyButton.IsVisible = true;
+                    _messagePartyLabel.IsVisible = true;
+                }
+                else
+                {
+                    //Set gump size if player is NOT in party
+                    Height = 320;
+                    _alphaBlendControl.Height = Height;
+                    //Set contents if player is NOT in party
+                    _createAddButton.Y = 270;
+                    _createAddLabel.Y = _createAddButton.Y;
+                    _createAddLabel.Text = "Create a party";
+                    _leaveButton.IsVisible = false;
+                    _leaveLabel.IsVisible = false;
+                    _lootMeButton.IsVisible = false;
+                    _lootMeLabel.IsVisible = false;
+                    _messagePartyButton.IsVisible = false;
+                    _messagePartyLabel.IsVisible = false;
+                }
+            }
+        }
+
+
         public override void Update(double totalMS, double frameMS)
         {
-            if (!World.Party.IsInParty)
-            {
-                //Set gump size if player is NOT in party
-                Height = 320;
-                _alphaBlendControl.Height = Height;
-                //Set contents if player is NOT in party
-                _createAddButton.Y = 270;
-                _createAddLabel.Y = _createAddButton.Y;
-                _createAddLabel.Text = "Create a party";
-                _leaveButton.IsVisible = false;
-                _leaveLabel.IsVisible = false;
-                _lootMeButton.IsVisible = false;
-                _lootMeLabel.IsVisible = false;
-                _messagePartyButton.IsVisible = false;
-                _messagePartyLabel.IsVisible = false;
-            }
-            else
-            {
-                //Set gump size if player is in party
-                Height = HEIGHT;
-                _alphaBlendControl.Height = Height;
-                //Set contents if player is in party
-                _createAddButton.Y = 350;
-                _createAddLabel.Y = _createAddButton.Y;
-                _createAddLabel.Text = "Add a member";
-                _leaveButton.IsVisible = true;
-                _leaveLabel.IsVisible = true;
-                _lootMeButton.IsVisible = true;
-                _lootMeLabel.IsVisible = true;
-                _lootMeLabel.Text = !World.Party.AllowPartyLoot ? "Party CANNOT loot me" : "Party ALLOWED looting me";
-                _messagePartyButton.IsVisible = true;
-                _messagePartyLabel.IsVisible = true;
-            }
-
             base.Update(totalMS, frameMS);
+
+            UpdateGumpStatus();
         }
 
         public override void OnButtonClick(int buttonID)
@@ -263,13 +267,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Dispose()
-        {
-            _edge?.Dispose();
-
-            base.Dispose();
-            _line.Dispose();
-        }
 
         private enum Buttons
         {
@@ -282,11 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class PartyListEntry : Control
     {
-        public readonly Button KickButton;
-        public readonly PartyMember Member;
-        public readonly Label Name;
-        public readonly Button PMButton;
-        public readonly GumpPic Status;
+        private readonly GumpPic _status;
 
         public PartyListEntry(PartyMember member)
         {
@@ -298,38 +291,38 @@ namespace ClassicUO.Game.UI.Gumps
             //Name.X = 80;
             string name = string.IsNullOrEmpty(member.Name) ? "<Not seen>" : member.Name;
 
-            Name = World.Party.Leader == member.Serial
-                       ? new Label(name + "(L)", true, 1161, font: 3)
-                       {
-                           X = 80
-                       }
-                       : new Label(name, true, 1153, font: 3)
-                       {
-                           X = 80
-                       };
-            Add(Name);
+            Label name1 = World.Party.Leader == member.Serial
+                ? new Label(name + "(L)", true, 1161, font: 3)
+                {
+                    X = 80
+                }
+                : new Label(name, true, 1153, font: 3)
+                {
+                    X = 80
+                };
+            Add(name1);
 
             //======================================================
-            if (Member.Mobile != null && Member.Mobile.IsDead)
-                Status = new GumpPic(240, 0, 0x29F6, 0);
-            else
-                Status = new GumpPic(240, 0, 0x29F6, 0x43);
-            Add(Status);
+            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (Member.Mobile != null && Member.Mobile.IsDead ? 0 : 0x43)));
 
             //======================================================
-            PMButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+            Button pmButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
             {
                 X = 10, ButtonAction = ButtonAction.Activate
             };
-            Add(PMButton);
+            Add(pmButton);
 
             //======================================================
-            KickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
+            Button kickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
             {
                 X = 40, ButtonAction = ButtonAction.Activate
             };
-            Add(KickButton);
+            Add(kickButton);
         }
+
+
+        public PartyMember Member { get; }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -337,10 +330,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Member.Mobile != null && Member.Mobile.IsDead)
             {
-                if (Status.Hue != 0)
-                    Status.Hue = 0;
-                else if (Status.Hue != 0x43)
-                    Status.Hue = 0x43;
+                if (_status.Hue != 0)
+                    _status.Hue = 0;
+                else if (_status.Hue != 0x43)
+                    _status.Hue = 0x43;
             }
         }
 

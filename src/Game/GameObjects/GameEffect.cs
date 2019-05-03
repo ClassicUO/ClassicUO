@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
         public GraphicEffectBlendMode Blend { get; set; }
 
-        public bool IsItemEffect => Source is Item item && item.OnGround || Source is Static;
+        public bool IsItemEffect => Source is Static;
 
         public long Duration { get; set; } = -1;
 

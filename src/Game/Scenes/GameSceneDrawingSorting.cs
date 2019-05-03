@@ -303,7 +303,8 @@ namespace ClassicUO.Game.Scenes
                         st.CharacterIsBehindFoliage = check;
                     else if (obj is Multi m)
                         m.CharacterIsBehindFoliage = check;
-                    else if (obj is Item it) it.CharacterIsBehindFoliage = check;
+                    else if (obj is Item it)
+                        it.CharacterIsBehindFoliage = check;
                 }
 
                 if (_alphaChanged && !changinAlpha)

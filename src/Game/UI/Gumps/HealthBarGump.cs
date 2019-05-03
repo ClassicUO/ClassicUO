@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hitsColor = 0;
 
                     if (inparty)
-                        textColor = _barColor;
+                        textColor = Notoriety.GetHue(Mobile.NotorietyFlag); //  _barColor;
                     else
                     {
                         _canChangeName = Mobile.IsRenamable;
@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
                 else
                 {
-                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 150, 3, FontStyle.Fixed)
+                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 109, 3, FontStyle.Cropped)
                     {
                         X = 0,
                         Y = -2

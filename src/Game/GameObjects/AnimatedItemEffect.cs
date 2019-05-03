@@ -87,7 +87,6 @@ namespace ClassicUO.Game.GameObjects
                 if (Source != null)
                 {
                     Offset = Source.Offset;
-                    //Source.RealScreenPosition = RealScreenPosition;
                 }
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)

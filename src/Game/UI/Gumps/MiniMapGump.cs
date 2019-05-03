@@ -312,8 +312,6 @@ namespace ClassicUO.Game.UI.Gumps
         protected override bool Contains(int x, int y)
         {
             return _mapTexture.Contains(x, y);
-
-            //return FileManager.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
         }
 
         public override void Dispose()

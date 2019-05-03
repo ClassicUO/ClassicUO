@@ -28,9 +28,8 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Land
+    internal sealed partial class Land
     {
-        private readonly Vector3[] _normals = new Vector3[4];
         private SpriteVertex[] _vertex = new SpriteVertex[4]
         {
             new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
@@ -214,18 +213,18 @@ namespace ClassicUO.Game.GameObjects
 
                 i = 1;
                 j = 1;
-                _normals[0] = vec[i - 1, j - 1, 2] + vec[i - 1, j, 1] + vec[i, j - 1, 3] + vec[i, j, 0];
-                _normals[0].Normalize();
-                _normals[1] = vec[i, j - 1, 2] + vec[i, j, 1] + vec[i + 1, j - 1, 3] + vec[i + 1, j, 0];
-                _normals[1].Normalize();
-                _normals[2] = vec[i, j, 2] + vec[i, j + 1, 1] + vec[i + 1, j, 3] + vec[i + 1, j + 1, 0];
-                _normals[2].Normalize();
-                _normals[3] = vec[i - 1, j, 2] + vec[i - 1, j + 1, 1] + vec[i, j, 3] + vec[i, j + 1, 0];
-                _normals[3].Normalize();
-                _vertex[0].Normal = _normals[0];
-                _vertex[1].Normal = _normals[1];
-                _vertex[3].Normal = _normals[2];
-                _vertex[2].Normal = _normals[3];
+                Normals[0] = vec[i - 1, j - 1, 2] + vec[i - 1, j, 1] + vec[i, j - 1, 3] + vec[i, j, 0];
+                Normals[0].Normalize();
+                Normals[1] = vec[i, j - 1, 2] + vec[i, j, 1] + vec[i + 1, j - 1, 3] + vec[i + 1, j, 0];
+                Normals[1].Normalize();
+                Normals[2] = vec[i, j, 2] + vec[i, j + 1, 1] + vec[i + 1, j, 3] + vec[i + 1, j + 1, 0];
+                Normals[2].Normalize();
+                Normals[3] = vec[i - 1, j, 2] + vec[i - 1, j + 1, 1] + vec[i, j, 3] + vec[i, j + 1, 0];
+                Normals[3].Normalize();
+                _vertex[0].Normal = Normals[0];
+                _vertex[1].Normal = Normals[1];
+                _vertex[3].Normal = Normals[2];
+                _vertex[2].Normal = Normals[3];
 
 
                 _vertex0_yOffset.X = 22;

@@ -51,8 +51,6 @@ namespace ClassicUO.Game.GameObjects
 
         public OverheadMessage OverheadMessageContainer { get; private set; }
 
-        public Point ScreenPosition => _screenPosition;
-
         public bool IsPositionChanged { get; protected set; }
 
         public Position Position
@@ -206,8 +204,8 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
         {
-            RealScreenPosition.X = ScreenPosition.X - offset.X - 22;
-            RealScreenPosition.Y = ScreenPosition.Y - offset.Y - 22;
+            RealScreenPosition.X = _screenPosition.X - offset.X - 22;
+            RealScreenPosition.Y = _screenPosition.Y - offset.Y - 22;
             IsPositionChanged = false;
         }
 
