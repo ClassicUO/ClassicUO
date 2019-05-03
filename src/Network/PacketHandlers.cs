@@ -3346,7 +3346,7 @@ namespace ClassicUO.Network
             }
 
             item.Position = position;
-            item.CheckGraphicChange();
+            item.CheckGraphicChange(item.AnimIndex);
             item.ProcessDelta();
 
             if (World.Items.Add(item))

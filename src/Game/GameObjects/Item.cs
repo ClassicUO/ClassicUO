@@ -410,7 +410,7 @@ namespace ClassicUO.Game.GameObjects
         private int _animSpeed;
 
 
-        public void CheckGraphicChange()
+        public void CheckGraphicChange(sbyte animIndex = 0)
         {
             if (!IsMulti)
             {
@@ -421,9 +421,9 @@ namespace ClassicUO.Game.GameObjects
                     if (ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
-                        AnimIndex = 0;
+                        AnimIndex = animIndex;
                         _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                        LastAnimationChangeTime = Engine.Ticks + _animSpeed;
+                        LastAnimationChangeTime = Engine.Ticks;
                     }
                     
                     _originalGraphic = DisplayedGraphic;

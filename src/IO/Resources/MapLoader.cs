@@ -14,11 +14,9 @@ namespace ClassicUO.IO.Resources
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _mapDif = new UOFileMul[MAPS_COUNT];
-
         private readonly UOFileMul[] _mapDifl = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDif = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
-
         private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
 
         public IndexMap[][] BlockData { get; private protected set; } = new IndexMap[MAPS_COUNT][];
@@ -62,7 +60,7 @@ namespace ClassicUO.IO.Resources
 
         public override void Load()
         {
-            bool foundedOneMap = false;
+            bool foundOneMap = false;
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
@@ -71,7 +69,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(path))
                 {
                     _filesMap[i] = new UOFileUop(path, ".dat", loadentries: false);
-                    foundedOneMap = true;
+                    foundOneMap = true;
                 }
                 else
                 {
@@ -80,7 +78,7 @@ namespace ClassicUO.IO.Resources
                     if (File.Exists(path))
                     {
                         _filesMap[i] = new UOFileMul(path, false);
-                        foundedOneMap = true;
+                        foundOneMap = true;
                     }
 
                     path = Path.Combine(FileManager.UoFolderPath, $"mapdifl{i}.mul");
@@ -89,7 +87,6 @@ namespace ClassicUO.IO.Resources
                     {
                         _mapDifl[i] = new UOFileMul(path);
                         _mapDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"mapdif{i}.mul"));
-
                         _staDifl[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifl{i}.mul"));
                         _staDifi[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadifi{i}.mul"));
                         _staDif[i] = new UOFileMul(Path.Combine(FileManager.UoFolderPath, $"stadif{i}.mul"));
@@ -102,7 +99,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
             }
 
-            if (!foundedOneMap)
+            if (!foundOneMap)
                 throw new FileNotFoundException("No maps founded.");
 
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
@@ -388,7 +385,7 @@ namespace ClassicUO.IO.Resources
 
         public unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
-            IndexMap indexMap = GetIndex(map, blockX, blockY);
+            ref IndexMap indexMap = ref GetIndex(map, blockX, blockY);
 
             if (indexMap.MapAddress == 0)
                 return null;
