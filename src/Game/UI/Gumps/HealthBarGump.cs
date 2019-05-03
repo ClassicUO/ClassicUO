@@ -546,7 +546,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+            if ((Engine.Profile.Current.MobileHealthBarHighlight != 0 &&
+                 ((TargetManager.IsTargeting && Engine.Profile.Current.MobileHealthBarHighlight == 1) ||
+                  (World.Player.InWarMode && Engine.Profile.Current.MobileHealthBarHighlight == 2) ||
+                  (Engine.Profile.Current.MobileHealthBarHighlight == 3))) && Mobile != null)
             {
                 Mobile.IsSelected = true;
             }

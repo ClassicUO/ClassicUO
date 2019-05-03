@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
-        private Combobox _hpComboBox, _healtbarType;
+        private Combobox _hpComboBox, _healtbarType, _mobileHealthBarHighlight;
 
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
@@ -324,6 +324,29 @@ namespace ClassicUO.Game.UI.Gumps
                 IsChecked = Engine.Profile.Current.UseCircleOfTransparency
             };
             hpAreaItem.Add(_useCircleOfTransparency);
+
+            // HealthBar Highlight
+
+            mode = Engine.Profile.Current.MobileHealthBarHighlight;
+
+            if (mode < 0 || mode > 2)
+                mode = 3;
+
+            text = new Label("Highlight on health bar mouseover:", true, HUE_FONT, font: FONT)
+            {
+                Y = _useCircleOfTransparency.Bounds.Bottom + 10
+            };
+            hpAreaItem.Add(text);
+
+            _mobileHealthBarHighlight = new Combobox(text.Bounds.Right + 10,
+                _useCircleOfTransparency.Bounds.Bottom + 10, 130, new[]
+                {
+                    "Never", "Targeting", "Warmode", "Always"
+                }, mode);
+
+            hpAreaItem.Add(_mobileHealthBarHighlight);
+
+            // HealthBar Highlight End
 
             rightArea.Add(hpAreaItem);
             Add(rightArea, PAGE);
@@ -961,6 +984,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _preloadMaps.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
+                    _mobileHealthBarHighlight.SelectedIndex = 3;
 
                     break;
                 case 2: // sounds
@@ -1114,6 +1138,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             Engine.Profile.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+            Engine.Profile.Current.MobileHealthBarHighlight = _mobileHealthBarHighlight.SelectedIndex;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
