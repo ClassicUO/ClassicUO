@@ -19,7 +19,7 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            //
         }
 
         public AnimDataFrame2 CalculateCurrentGraphic(ushort graphic)

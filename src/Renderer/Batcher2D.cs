@@ -126,7 +126,7 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsInside(float value, float min, float max) 
             => value >= min && value <= max;
 
@@ -139,53 +139,38 @@ namespace ClassicUO.Renderer
 
             bool draw = false;
 
-            ref readonly Vector3 posTopLeft = ref vertices[0].Position;
-            ref readonly Vector3 posTopRight= ref vertices[1].Position;
-            ref readonly Vector3 posBottomLeft = ref vertices[2].Position;
-            ref readonly Vector3 posBottomRight = ref vertices[3].Position;
+            //ref readonly Vector3 posTopLeft = ref vertices[0].Position;
+            //ref readonly Vector3 posTopRight= ref vertices[1].Position;
+            //ref readonly Vector3 posBottomLeft = ref vertices[2].Position;
+            //ref readonly Vector3 posBottomRight = ref vertices[3].Position;
 
-            draw = IsInside(posTopLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
-                      IsInside(_drawingArea.Min.X, posTopLeft.X, posTopRight.X) ||
-                      IsInside(_drawingArea.Max.X, posTopLeft.X, posTopRight.X) ||
-                      IsInside(posTopLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
-                      IsInside(_drawingArea.Min.Y, posTopLeft.Y, posTopRight.Y) ||
-                      IsInside(_drawingArea.Max.X, posTopLeft.Y, posTopRight.Y) ||
-                      IsInside(posTopRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
-                      IsInside(posTopRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||               
-                      IsInside(posBottomLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
-                      IsInside(_drawingArea.Min.X, posBottomLeft.X, posTopRight.X) ||
-                      IsInside(_drawingArea.Max.X, posBottomLeft.X, posTopRight.X) ||                     
-                      IsInside(posBottomLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
-                      IsInside(_drawingArea.Min.Y, posBottomLeft.Y, posBottomRight.Y) ||
-                      IsInside(_drawingArea.Max.X, posBottomLeft.Y, posBottomRight.Y) ||                     
-                      IsInside(posBottomRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
-                      IsInside(posBottomRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y);
+            //draw =    IsInside(posTopLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(_drawingArea.Min.X, posTopLeft.X, posTopRight.X) ||
+            //          IsInside(_drawingArea.Max.X, posTopLeft.X, posTopRight.X) ||
+            //          IsInside(posTopLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(_drawingArea.Min.Y, posTopLeft.Y, posTopRight.Y) ||
+            //          IsInside(_drawingArea.Max.X, posTopLeft.Y, posTopRight.Y) ||
+            //          IsInside(posTopRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(posTopRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(posBottomLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(_drawingArea.Min.X, posBottomLeft.X, posTopRight.X) ||
+            //          IsInside(_drawingArea.Max.X, posBottomLeft.X, posTopRight.X) ||
+            //          IsInside(posBottomLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(_drawingArea.Min.Y, posBottomLeft.Y, posBottomRight.Y) ||
+            //          IsInside(_drawingArea.Max.X, posBottomLeft.Y, posBottomRight.Y) ||
+            //          IsInside(posBottomRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(posBottomRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y);
 
 
-            //for (byte i = 0; i < 4; i++)
-            //{
-            //    ref readonly Vector3 pos = ref vertices[i]
-            //        .Position;
+            for (byte i = 0; i < 4; i++)
+            {
+                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+                {
+                    draw = true;
 
-                
-
-            //    if ((pos.X >= _drawingArea.Min.X && pos.X <= _drawingArea.Max.X) || 
-            //        (_drawingArea.Min.X >= pos.X || _drawingArea.Max.X <= pos.X) ||
-
-            //        (pos.Y >= _drawingArea.Min.Y || pos.Y <= _drawingArea.Max.Y) ||
-            //        (_drawingArea.Min.Y >= pos.Y && _drawingArea.Max.Y <= pos.Y))
-            //    {
-            //        draw = true;
-            //        break;
-            //    }
-
-            //    //if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
-            //    //{
-            //    //    draw = true;
-
-            //    //    break;
-            //    //}
-            //}
+                    break;
+                }
+            }
 
             if (!draw)
                 return false;
