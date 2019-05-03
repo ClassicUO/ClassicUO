@@ -37,7 +37,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Button _nextArrow0;
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
-        private Checkbox _cryptPassword;
 
         private float _time;
 
@@ -51,7 +50,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Full background
                 Add(new GumpPic(0, 0, 0x2329, 0));
 
-
             //// Quit Button
             Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
             {
@@ -59,7 +57,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 4,
                 ButtonAction = ButtonAction.Activate
             });
-
 
             // Login Panel
             Add(new ResizePic(0x13BE)
@@ -99,7 +96,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 30
             });
 
-
             Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
             {
                 X = 200,
@@ -112,22 +108,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 417
             });
 
-            //Add(_cryptPassword = new Checkbox(0x00D2, 0x00D3, "Crypt password", 1, 0x0386, false)
-            //{
-            //    X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
-            //    Y = 417
-            //});
-
-
             _checkboxSaveAccount.IsChecked = Engine.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Engine.GlobalSettings.AutoLogin;
-            //_cryptPassword.IsChecked = true;
-
-            //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
-
-            //g_MainScreen.m_AutoLogin =
-            //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
-            //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
 
             Add(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
             {
@@ -160,17 +142,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
 
             // Text Inputs
-            Add(_textboxAccount = new TextBox(5, 32, 190, 190, false)
+            Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)
             {
                 X = 335,
                 Y = 343,
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                SafeCharactersOnly = true
+                SafeCharactersOnly = true,
             });
 
-            Add(_textboxPassword = new TextBox(5, 32, 190, 190, false)
+            Add(_textboxPassword = new TextBox(5, 16, 190, 190, false)
             {
                 X = 335,
                 Y = 385,
@@ -209,7 +191,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (_time < totalMS)
             {
                 _time = (float) totalMS + 1000;
-
                 _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
@@ -220,7 +201,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
             else if (_textboxPassword.Hue != 0x034F)
                 _textboxPassword.Hue = 0x034F;
-
 
             if (_textboxAccount.HasKeyboardFocus)
             {
