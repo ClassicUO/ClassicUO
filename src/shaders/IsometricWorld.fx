@@ -11,7 +11,6 @@ float4x4 ProjectionMatrix;
 float4x4 WorldMatrix;
 float2 Viewport;
 
-const int HuesPerTexture = 3000;
 const float HUES_DELTA = 3000.0f;
 float3 lightDirection;
 
@@ -50,7 +49,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 
 float3 get_rgb(float red, float hue)
 {
-	if (hue < HuesPerTexture)
+	if (hue < HUES_DELTA)
 		return tex2D(HueSampler0, float2(red, hue / HUES_DELTA)).rgb;
 	return tex2D(HueSampler1, float2(red, (hue - HUES_DELTA) / HUES_DELTA)).rgb;
 }
