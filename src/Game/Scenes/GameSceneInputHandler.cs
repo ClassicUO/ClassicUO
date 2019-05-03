@@ -266,7 +266,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt)
                         {
-                            World.Player.AddOverhead(MessageType.Regular, "Now following!", 3, 0, false);
+                            World.Player.AddOverhead(MessageType.Regular, "Now following.", 3, 0, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -350,7 +350,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
+                World.Player.AddOverhead(MessageType.Regular, "Stopped following.", 3, 0, false);
             }
         }
 

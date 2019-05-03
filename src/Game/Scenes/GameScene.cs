@@ -577,8 +577,12 @@ namespace ClassicUO.Game.Scenes
 
                     if (distance > World.ViewRange)
                         StopFollowing();
-                    else if (distance > 1)
+                    else if (distance > 3)
                         Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                }
+                else
+                {
+                    StopFollowing();
                 }
             }
 
