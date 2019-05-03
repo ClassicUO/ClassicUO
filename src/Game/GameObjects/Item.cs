@@ -406,7 +406,7 @@ namespace ClassicUO.Game.GameObjects
             //}
         }
 
-        private AnimDataFrame? _animDataFrame;
+        private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
 
 
@@ -422,7 +422,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
                         AnimIndex = 0;
-                        _animSpeed = _animDataFrame.Value.FrameInterval != 0 ? _animDataFrame.Value.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks + _animSpeed;
                     }
                     
@@ -897,11 +897,14 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (_animDataFrame.HasValue && _animDataFrame.Value.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            else if (_animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
-                _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.Value.FrameData[AnimIndex++]);
+                unsafe
+                {
+                    _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
+                }
 
-                if (AnimIndex >= _animDataFrame.Value.FrameCount)
+                if (AnimIndex >= _animDataFrame.FrameCount)
                     AnimIndex = 0;
 
                 _force = _originalGraphic == DisplayedGraphic;

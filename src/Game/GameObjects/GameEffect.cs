@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected int TargetZ { get; set; }
 
-        protected AnimDataFrame AnimDataFrame;
+        protected AnimDataFrame2 AnimDataFrame;
 
         public int Speed { get; set; }
 
@@ -105,7 +105,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AnimDataFrame.FrameCount != 0)
                     {
-                        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        unsafe
+                        {
+                            AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        }
                         AnimIndex++;
 
                         if (AnimIndex >= AnimDataFrame.FrameCount)

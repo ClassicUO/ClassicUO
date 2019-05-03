@@ -514,8 +514,8 @@ namespace ClassicUO
 
                             break;
 
-                        case "preload_maps":
-                            settings.PreloadMaps = bool.Parse(value);
+                        //case "preload_maps":
+                        //    settings.PreloadMaps = bool.Parse(value);
 
                             break;
 
