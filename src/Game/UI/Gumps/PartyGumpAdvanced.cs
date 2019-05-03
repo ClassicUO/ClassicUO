@@ -146,10 +146,21 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Line(245, 50, 1, 200, Color.White.PackedValue));
             Add(new Line(30, 250, 260, 1, Color.White.PackedValue));
 
-            UpdateGumpStatus();
-
             Width = WIDTH;
             Height = HEIGHT;
+
+            Height = 320;
+            _alphaBlendControl.Height = Height;
+            //Set contents if player is NOT in party
+            _createAddButton.Y = 270;
+            _createAddLabel.Y = _createAddButton.Y;
+            _createAddLabel.Text = "Create a party";
+            _leaveButton.IsVisible = false;
+            _leaveLabel.IsVisible = false;
+            _lootMeButton.IsVisible = false;
+            _lootMeLabel.IsVisible = false;
+            _messagePartyButton.IsVisible = false;
+            _messagePartyLabel.IsVisible = false;
         }
 
         private void OnPartyMemberChanged(object sender, EventArgs e)

@@ -663,7 +663,6 @@ namespace ClassicUO.Renderer
         {
             public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
-                Parameters["HuesPerTexture"].SetValue(3000.0f);
                 CanDrawLight = Parameters["DrawLighting"];
                 ProjectionMatrix = Parameters["ProjectionMatrix"];
                 WorldMatrix = Parameters["WorldMatrix"];
