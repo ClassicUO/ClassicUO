@@ -510,13 +510,15 @@ namespace ClassicUO.Game.UI.Controls
             if (_acceptKeyboardInput)
                 return this;
 
+            if (World.InGame && Engine.UI.SystemChat != null)
+                return Engine.UI.SystemChat.textBox;
+
             if (_children == null || _children.Count == 0)
                 return null;
 
             foreach (Control c in _children)
             {
                 Control a = c.GetFirstControlAcceptKeyboardInput();
-
                 if (a != null)
                     return a;
             }
