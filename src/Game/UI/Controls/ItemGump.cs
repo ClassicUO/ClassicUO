@@ -40,7 +40,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        private readonly List<FadeOutLabel> _labels = new List<FadeOutLabel>();
         protected bool _clickedCanDrag;
 
         private Point _lastClickPosition;
@@ -350,10 +349,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Width = Children.Count == 0 ? c.Width : Math.Max(c.Width, Children.Max(s => s.Width));
 
-                if (Children.Count > 0)
+                if (Children.Count != 0)
                 {
-                    foreach (Control t in Children)
+                    for (int i = 0; i < Children.Count; i++)
+                    {
+                        var t = Children[i];
                         t.X = (Width >> 1) - (t.Width >> 1);
+                    }
+
+                    c.X = (Width >> 1) - (c.Width >> 1);
 
                     var a = Children[Children.Count - 1];
                     c.Y = a.Y + a.Height;
