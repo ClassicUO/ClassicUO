@@ -2170,6 +2170,8 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
+            // TODO: shards uses item with HP... it's weird but can happen :D
+
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
             if (mobile == null) return;
