@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Diagnostics;
 using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -553,17 +554,17 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseEnter(int x, int y)
         {
             if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
-            {
                 Mobile.IsSelected = true;
-            }
+
+            Mobile.IsMouseOverGump = true;
         }
 
         protected override void OnMouseExit(int x, int y)
         {
             if (Mobile != null && Mobile.IsSelected)
-            {
                 Mobile.IsSelected = false;
-            }
+
+            Mobile.IsMouseOverGump = false;
         }
 
         private enum ButtonParty

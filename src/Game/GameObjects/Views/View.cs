@@ -191,6 +191,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsSelected { get; set; }
+        public bool IsMouseOverGump { get; set; } = false;
 
         public Rectangle GetOnScreenRectangle()
         {
