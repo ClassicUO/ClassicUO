@@ -64,14 +64,11 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
-
         public Mobile(Serial serial) : base(serial)
         {
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
         }
-
-
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 

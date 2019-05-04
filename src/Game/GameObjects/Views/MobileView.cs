@@ -120,7 +120,6 @@ namespace ClassicUO.Game.GameObjects
             sbyte animIndex = AnimIndex;
             drawX = drawY = drawCenterY = 0;
 
-
             ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
             FileManager.Animations.AnimID = graphic;
@@ -244,12 +243,17 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
 
+                if (IsMouseOverGump && !IsHidden)
+                {
+                    HueVector.X = Notoriety.GetHue(NotorietyFlag);
+                    HueVector.Y = 1;
+                }
+
                 base.Draw(batcher, posX, posY);
 
                 Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
             }
         }
-
 
         private void DrawEquipment(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool isUnderMouse)
         {
@@ -270,7 +274,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
                 return;
-
 
             if (IsCovered(this, layer))
                 return;
@@ -300,7 +303,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
                 return;
-
 
             byte animGroup = GetGroupForAnimation(this, graphic);
             sbyte animIndex = AnimIndex;
@@ -424,7 +426,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
         private void DrawInternal(Batcher2D batcher, int posX, int posY, bool hasShadow)
         {
             SpriteVertex[] vertex;
@@ -490,7 +491,6 @@ namespace ClassicUO.Game.GameObjects
             Texture.Ticks = Engine.Ticks;
         }
 
-
         public override void Select(int x, int y)
         {
             if (SelectedObject.Object != this && Texture.Contains(x, y))
@@ -501,7 +501,6 @@ namespace ClassicUO.Game.GameObjects
             //    SelectedObject.Object = this;
             //}
         }
-
 
         internal static bool IsCovered(Mobile mobile, Layer layer)
         {
