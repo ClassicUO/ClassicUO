@@ -379,8 +379,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AcceptMouseInput = true;
-            CanMove = true;
             LocalSerial = _partyMemeberSerial;
 
             CanBeSaved = _partyMemeberSerial == World.Player;
@@ -572,6 +570,7 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.HealthbarObject = Mobile;
                 SelectedObject.Object = Mobile;
             }
+            base.OnMouseOver(x, y);
         }
 
 
