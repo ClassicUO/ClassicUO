@@ -64,30 +64,11 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-
-
         public Item Item { get; }
 
         public bool HighlightOnMouseOver { get; set; }
 
         public bool CanPickUp { get; set; }
-
-        public void AddLabel(string text, Hue hue, byte font, bool isunicode)
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-            if (container == null || container.From != this)
-            {
-                container = new LabelContainer(Item, this);
-                Engine.UI.Add(container);
-            }
-
-            container.SetOffsetCoordinates(_lastClickPosition);
-            container.Add(new FadeOutLabel(text, isunicode, hue, 4000, 0, font, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
-        }
 
 
         public override void Update(double totalMS, double frameMS)
@@ -108,7 +89,10 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                if (!World.ClientFlags.TooltipsEnabled) GameActions.SingleClick(Item);
+                if (!World.ClientFlags.TooltipsEnabled)
+                {
+                    GameActions.SingleClick(Item);
+                }
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }
@@ -161,6 +145,7 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             _clickedCanDrag = false;
+            base.OnMouseUp(x, y, button);
 
             if (button == MouseButton.Left)
             {
@@ -250,6 +235,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            base.OnMouseClick(x, y, button);
             if (button != MouseButton.Left)
                 return;
 
@@ -274,8 +260,8 @@ namespace ClassicUO.Game.UI.Controls
                     _sendClickIfNotDClick = true;
                     float totalMS = Engine.Ticks;
                     _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                    _lastClickPosition.X = x;
-                    _lastClickPosition.Y = y;
+                    _lastClickPosition.X = Mouse.Position.X;
+                    _lastClickPosition.Y = Mouse.Position.Y;
                 }
             }
         }
@@ -289,11 +275,6 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        public override void Dispose()
-        {
-            Engine.UI.GetByLocalSerial<LabelContainer>(Item)?.Dispose();
-            base.Dispose();
-        }
 
         private void AttempPickUp()
         {
@@ -306,91 +287,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else
                     GameActions.PickUp(Item, Point.Zero);
-            }
-        }
-
-
-
-        protected class LabelContainer : Gump
-        {
-            private Point _offset;
-
-            public LabelContainer(Item item, Control from) : base(item, 0)
-            {
-                From = from;
-                AcceptMouseInput = false;
-                CanMove = true;
-                WantUpdateSize = false;
-            }
-
-            public Control From { get; }
-
-            public override void Update(double totalMS, double frameMS)
-            {
-                if (Children.Count == 0 || From == null || From.IsDisposed)
-                    Dispose();
-
-                if (IsDisposed)
-                    return;
-
-                X = From.ScreenCoordinateX + _offset.X - (Width >> 1);
-                Y = From.ScreenCoordinateY + _offset.Y;
-
-                Engine.UI.MakeTopMostGumpOverAnother(this, From);
-                base.Update(totalMS, frameMS);
-            }
-
-            public void SetOffsetCoordinates(Point offset)
-            {
-                _offset = offset;
-            }
-
-            public override void Add(Control c, int page = 0)
-            {
-                Width = Children.Count == 0 ? c.Width : Math.Max(c.Width, Children.Max(s => s.Width));
-
-                if (Children.Count != 0)
-                {
-                    for (int i = 0; i < Children.Count; i++)
-                    {
-                        var t = Children[i];
-                        t.X = (Width >> 1) - (t.Width >> 1);
-                    }
-
-                    c.X = (Width >> 1) - (c.Width >> 1);
-
-                    var a = Children[Children.Count - 1];
-                    c.Y = a.Y + a.Height;
-                }
-
-                Height += c.Height;
-
-                base.Add(c, page);
-            }
-
-
-            public override void Remove(Control c)
-            {
-                base.Remove(c);
-
-                if (IsDisposed)
-                    return;
-
-                if (Width == c.Width)
-                {
-                    int newWidth = 0;
-                    int newHeight = 0;
-
-                    foreach (Control control in Children)
-                    {
-                        if (newWidth < control.Width)
-                            newWidth = control.Width;
-                        newHeight += control.Height;
-                    }
-
-                    Width = newWidth;
-                    Height = newHeight;
-                }
             }
         }
     }

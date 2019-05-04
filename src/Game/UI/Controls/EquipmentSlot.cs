@@ -21,8 +21,11 @@
 
 #endregion
 
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -34,7 +37,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly Layer _layer;
         private readonly Mobile _mobile;
         private ItemGumpFixed _itemGump;
-
+        private Point _lastClickPosition;
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -60,6 +63,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public Item Item { get; private set; }
+
+
 
 
         public override void Update(double totalMS, double frameMS)
@@ -182,6 +187,18 @@ namespace ClassicUO.Game.UI.Controls
 
                 return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, hue);
             }
+
+            //protected override void OnMouseClick(int x, int y, MouseButton button)
+            //{
+            //    Point p = new Point()
+            //    {
+            //        X = Mouse.Position.X + ParentX,
+            //        Y = Mouse.Position.Y + ParentY
+            //    };
+            //    Parent.InvokeMouseClick(p, button);
+            //}
+
+
 
             protected override bool Contains(int x, int y)
             {

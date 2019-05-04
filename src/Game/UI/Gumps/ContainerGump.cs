@@ -28,6 +28,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
         private bool _isCorspeContainer;
+        private Point _lastClick;
 
         public ContainerGump() : base(0, 0)
         {
@@ -135,7 +137,34 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
                 _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
+
+            TextContainer.Update();
         }
+
+        public TextContainer TextContainer { get; } = new TextContainer();
+
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode)
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
+        }
+
+
+        public override bool Draw(Batcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+            TextContainer.Draw(batcher, x, y);
+            return true;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            _lastClick.X = x;
+            _lastClick.Y = y;
+        }
+
 
         public override void Save(BinaryWriter writer)
         {
@@ -211,6 +240,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            TextContainer.Clear();
+
             if (_item != null)
             {
                 _item.Items.Added -= ItemsOnAdded;

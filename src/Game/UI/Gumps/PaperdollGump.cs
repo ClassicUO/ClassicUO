@@ -23,15 +23,16 @@
 
 using System;
 using System.IO;
-
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -76,9 +77,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Mobile Mobile { get; set; }
 
+        public TextContainer TextContainer { get; } = new TextContainer();
+     
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode)
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
+        }
+
+        private Point _lastClick;
+
         public override void Dispose()
         {
             Engine.UI.SavePosition(LocalSerial, Location);
+
+            TextContainer.Clear();
 
             if (Mobile == World.Player)
             {
@@ -114,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             CanBeSaved = true;
             CanMove = true;
             LocalSerial = Mobile.Serial;
@@ -242,6 +257,12 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            _lastClick.X = x;
+            _lastClick.Y = y;
+        }
+
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
@@ -311,7 +332,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
+            TextContainer.Update();
+
             base.Update(totalMS, frameMS);
+        }
+
+        public override bool Draw(Batcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            TextContainer.Draw(batcher, x, y);
+
+            return true;
         }
 
 

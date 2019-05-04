@@ -668,7 +668,7 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
             _mouseIsDown = true;
-            Parent?.OnMouseDown(x, y, button);
+            Parent?.OnMouseDown(X + x, Y + y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
@@ -681,7 +681,7 @@ namespace ClassicUO.Game.UI.Controls
                 InvokeDragEnd(new Point(x, y));
             }
 
-            Parent?.OnMouseUp(x, y, button);
+            Parent?.OnMouseUp(X + x, Y + y, button);
         }
 
         protected virtual void OnMouseWheel(MouseEvent delta)
@@ -724,12 +724,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            Parent?.OnMouseClick(x, y, button);
+            Parent?.OnMouseClick(X + x, Y + y, button);
         }
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            return Parent?.OnMouseDoubleClick(x, y, button) ?? false;
+            return Parent?.OnMouseDoubleClick(X + x, Y + y, button) ?? false;
         }
 
         protected virtual void OnDragBegin(int x, int y)

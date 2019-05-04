@@ -29,6 +29,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -42,6 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
+        private Point _lastClick;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -94,6 +96,35 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public TextContainer TextContainer { get; } = new TextContainer();
+
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode)
+        {
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            TextContainer.Update();
+        }
+
+        public override bool Draw(Batcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+            TextContainer.Draw(batcher, x, y);
+            return true;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            _lastClick.X = x;
+            _lastClick.Y = y;
+        }
 
         private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
         {
