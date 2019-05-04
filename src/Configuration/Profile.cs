@@ -160,7 +160,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
-
+        [JsonProperty] public bool DisableRunning { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

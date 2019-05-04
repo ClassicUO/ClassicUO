@@ -1698,6 +1698,9 @@ namespace ClassicUO.Game.GameObjects
             else if (!run)
                 run = Engine.Profile.Current.AlwaysRun && !Keyboard.Shift;
 
+            if (Engine.Profile.Current.DisableRunning && Keyboard.Shift)
+                run = false;
+
             int x = X;
             int y = Y;
             sbyte z = Z;
