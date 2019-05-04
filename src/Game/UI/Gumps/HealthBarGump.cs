@@ -483,6 +483,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButton.Left)
+                return;
+
             if (TargetManager.IsTargeting)
             {
                 TargetManager.TargetGameObject(Mobile);
@@ -499,6 +502,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return;
+
             if (TargetManager.IsTargeting)
             {
                 _targetBroke = true;
