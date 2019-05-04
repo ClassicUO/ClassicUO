@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
@@ -28,6 +29,8 @@ namespace ClassicUO.Game.UI
                     FontStyle = FontStyle.BlackBorder,
                     Hue = hue,
                     IsUnicode = isunicode,
+                    MaxWidth = 200,
+                    Align = TEXT_ALIGN_TYPE.TS_CENTER,
                     Text = text,
                 },
                 Time = Engine.Ticks + 4000,
