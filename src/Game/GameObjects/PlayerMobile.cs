@@ -26,6 +26,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -1695,7 +1696,10 @@ namespace ClassicUO.Game.GameObjects
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
-                run = Engine.Profile.Current.AlwaysRun;
+                run = Engine.Profile.Current.AlwaysRun && !Keyboard.Shift;
+
+            if (Engine.Profile.Current.DisableRunning && Keyboard.Shift)
+                run = false;
 
             int x = X;
             int y = Y;
@@ -1715,7 +1719,6 @@ namespace ClassicUO.Game.GameObjects
 
             sbyte oldZ = z;
             ushort walkTime = Constants.TURN_DELAY;
-
 
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
