@@ -120,8 +120,8 @@ namespace ClassicUO.Game.GameObjects
             sbyte animIndex = AnimIndex;
             drawX = drawY = drawCenterY = 0;
 
-
-            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+            ushort hueFromFile = hue;
+            ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hueFromFile, true).Direction[dir];
 
             FileManager.Animations.AnimID = graphic;
             FileManager.Animations.AnimGroup = animGroup;
@@ -239,7 +239,11 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     if (hue == 0)
+                    {
                         hue = Hue;
+                        if (hue == 0)
+                            hue = hueFromFile;
+                    }
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
                 }
