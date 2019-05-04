@@ -134,6 +134,9 @@ namespace ClassicUO.IO.Resources
 
         public unsafe void LoadMap(int i)
         {
+            if (i < 0 || i >= 5 || _filesMap[i] == null)
+                i = 0;
+
             if (/*Engine.GlobalSettings.PreloadMaps &&*/ BlockData[i] != null || _filesMap[i] == null)
                 return;
 
