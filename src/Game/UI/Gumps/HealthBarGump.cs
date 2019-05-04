@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Diagnostics;
 using System.IO;
 using ClassicUO.Game.Data;
@@ -304,6 +305,15 @@ namespace ClassicUO.Game.UI.Gumps
                         _oldStam = stam;
                     }
                 }
+
+
+                if (!Mobile.IsSelected && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                {
+                    Mobile.IsSelected = true;
+                    SelectedObject.HealthbarObject = Mobile;
+                    SelectedObject.Object = Mobile;
+                }
+
             }
 
             if (CanBeSaved)
@@ -315,6 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
                 }
             }
+
         }
 
         public override void Dispose()
@@ -368,6 +379,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            AcceptMouseInput = true;
+            CanMove = true;
             LocalSerial = _partyMemeberSerial;
 
             CanBeSaved = _partyMemeberSerial == World.Player;
@@ -551,20 +564,25 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
-            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null)
+            {
                 Mobile.IsSelected = true;
-
-            Mobile.IsMouseOverGump = true;
+                SelectedObject.HealthbarObject = Mobile;
+                SelectedObject.Object = Mobile;
+            }
         }
+
 
         protected override void OnMouseExit(int x, int y)
         {
             if (Mobile != null && Mobile.IsSelected)
+            {
                 Mobile.IsSelected = false;
-
-            Mobile.IsMouseOverGump = false;
+                SelectedObject.HealthbarObject = null;
+                SelectedObject.Object = null;
+            }
         }
 
         private enum ButtonParty

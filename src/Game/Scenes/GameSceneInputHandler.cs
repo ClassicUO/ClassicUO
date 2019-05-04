@@ -407,7 +407,6 @@ namespace ClassicUO.Game.Scenes
                             HealthBarGump currentHealthBarGump;
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-
                             break;
 
                         case Item item /*when !item.IsCorpse*/:

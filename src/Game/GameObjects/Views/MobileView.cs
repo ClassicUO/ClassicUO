@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool isAttack = Serial == World.LastAttack;
-            bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode);
+            bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode || SelectedObject.HealthbarObject == this);
             //bool needHpLine = false;
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
@@ -246,12 +246,6 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, !IsHidden && isPartial, 0);
-                }
-
-                if (IsMouseOverGump && !IsHidden)
-                {
-                    HueVector.X = Notoriety.GetHue(NotorietyFlag);
-                    HueVector.Y = 1;
                 }
 
                 base.Draw(batcher, posX, posY);

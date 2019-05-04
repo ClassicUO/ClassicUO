@@ -18,6 +18,8 @@ namespace ClassicUO.Game
         public static IGameEntity Object { get; set; }
 
         public static Point TranslatedMousePositionByViewport;
+        
+        public static GameObject HealthbarObject { get; set; }
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
