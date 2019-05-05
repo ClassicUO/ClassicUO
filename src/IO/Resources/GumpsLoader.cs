@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -181,33 +182,35 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort val = gmul[i].Value;
 
-                    ushort a = (ushort) ((val != 0 ? 0x8000 : 0) | val);
+                    ushort hue = (ushort) ((val != 0 ? 0x8000 : 0) | val);
 
                     int count = gmul[i].Run;
 
+                    //byte a = (byte)(((val & 0x8000) >> 0) << 0);
+                    //byte r = (byte)(((val & 0x7C00) >> 0) << 0);
+                    //byte g = (byte)(((val & 0x3E0) >> 0) << 0);
+                    //byte b = (byte)(((val & 0x1F) >> 0) << 0);
+
+                    //byte r = (byte) (( (val >> 10) ) );
+                    //byte g = (byte) (( (val >> 5)  ) );
+                    //byte b = (byte) (( (val >> 0)  ) );
+                    //byte a = (byte) (( (val >> 15) ) );
+
+                   
+                    //if (b == 8)
+                    //{
+                    //    hue = (ushort)((
+                    //                       (a << 15) |
+                    //                       (r << 10) |
+                    //                       (g << 5)  |
+                    //                       b)
+                    //                   );
+                    //    hue |= 0x8000;
+                    //}
+
                     for (int j = 0; j < count; j++)
-                        pixels[pos++] = a;
+                        pixels[pos++] = hue;
                 }
-                //int x = 0;
-
-                //for (int i = 0; i < gsize; i++)
-                //{
-                //    ushort val = gmul[i].Value;
-                //    int count = gmul[i].Run;
-
-                //    if (val > 0)
-                //    {
-                //        for (int j = 0; j < count; j++)
-                //            pixels[pos + x++] = (ushort)(0x8000 | val);
-                //    }
-                //    else
-                //        x += count;
-
-                //    //ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
-                //    //int count = gmul[i].Run;
-                //    //for (int j = 0; j < count; j++)
-                //    //    pixels[pos++] = a;
-                //}
             }
 
             return pixels;
