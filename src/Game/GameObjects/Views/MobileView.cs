@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool isAttack = Serial == World.LastAttack;
-            bool isUnderMouse = SelectedObject.Object == this && (TargetManager.IsTargeting || World.Player.InWarMode || SelectedObject.HealthbarObject == this);
+            bool isUnderMouse = (SelectedObject.LastObject == this  && (TargetManager.IsTargeting || World.Player.InWarMode)) || SelectedObject.HealthbarObject == this;
             //bool needHpLine = false;
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))

@@ -307,11 +307,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                if (/*!Mobile.IsSelected &&*/ SelectedObject.HealthbarObject != Mobile && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                if (/*!Mobile.IsSelected &&*/  Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
                 {
                     //Mobile.IsSelected = true;
                     SelectedObject.HealthbarObject = Mobile;
                     SelectedObject.Object = Mobile;
+                    SelectedObject.LastObject = Mobile;
                 }
 
             }
@@ -330,7 +331,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null) NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
+            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
+                NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
+
+            if (SelectedObject.HealthbarObject == Mobile && Mobile != null)
+                SelectedObject.HealthbarObject = null;
             base.Dispose();
         }
 
@@ -564,7 +569,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null && SelectedObject.HealthbarObject != Mobile)
+            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null )
             {
                 //Mobile.IsSelected = true;
                 SelectedObject.HealthbarObject = Mobile;
@@ -572,7 +577,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
             base.OnMouseOver(x, y);
         }
-
 
         protected override void OnMouseExit(int x, int y)
         {
