@@ -38,21 +38,21 @@ namespace ClassicUO.Game.Managers
         {
             if (TryGetHouse(serial, out _))
             {
-                int currX;
-                int currY;
+                int currX = World.RangeSize.X;
+                int currY = World.RangeSize.Y;
 
-                if (World.Player.IsMoving)
-                {
-                    Mobile.Step step = World.Player.Steps.Back();
+                //if (World.Player.IsMoving)
+                //{
+                //    Mobile.Step step = World.Player.Steps.Back();
 
-                    currX = step.X;
-                    currY = step.Y;
-                }
-                else
-                {
-                    currX = World.Player.X;
-                    currY = World.Player.Y;
-                }
+                //    currX = step.X;
+                //    currY = step.Y;
+                //}
+                //else
+                //{
+                //    currX = World.Player.X;
+                //    currY = World.Player.Y;
+                //}
 
                 Item found = World.Items.Get(serial);
 
