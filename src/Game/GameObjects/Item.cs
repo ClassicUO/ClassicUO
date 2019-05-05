@@ -418,7 +418,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
-                    if (ItemData.IsAnimated)
+                    if (OnGround && ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
                         AnimIndex = animIndex;
@@ -897,7 +897,7 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (_animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
                 unsafe
                 {
