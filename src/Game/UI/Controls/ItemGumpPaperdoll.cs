@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
-                            gs.SelectedObject = Item;
+                            Game.SelectedObject.Object = Item;
 
 
                             if (Item != null)
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            gs.SelectedObject = Item;
+                            Game.SelectedObject.Object = Item;
 
                             if (Item != null)
                             {

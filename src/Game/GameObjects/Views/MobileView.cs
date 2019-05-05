@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool isAttack = Serial == World.LastAttack;
-            bool isUnderMouse = IsSelected && (TargetManager.IsTargeting || World.Player.InWarMode || SelectedObject.HealthbarObject == this);
+            bool isUnderMouse = SelectedObject.Object == this && (TargetManager.IsTargeting || World.Player.InWarMode || SelectedObject.HealthbarObject == this);
             //bool needHpLine = false;
 
             if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == Serial))
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (shadow) DrawInternal(batcher, posX, posY, true);
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected && !isUnderMouse)
+                if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this && !isUnderMouse)
                 {
                     HueVector.X = 0x0023;
                     HueVector.Y = 1;
@@ -249,8 +249,8 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 base.Draw(batcher, posX, posY);
-
                 Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
+
             }
         }
 
@@ -388,7 +388,8 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Width = frame.Width;
                 Bounds.Height = frame.Height;
 
-                if (Engine.Profile.Current.HighlightGameObjects && IsSelected && !isUnderMouse)
+
+                if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this && !isUnderMouse)
                 {
                     HueVector.X = 0x0023;
                     HueVector.Y = 1;
@@ -414,8 +415,8 @@ namespace ClassicUO.Game.GameObjects
                 //base.Draw(batcher, posX, posY);
 
                 DrawInternal(batcher, posX, posY, shadow);
-
                 Select(mirror ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
+
 
                 if (item.ItemData.IsLight)
                 {
@@ -493,7 +494,9 @@ namespace ClassicUO.Game.GameObjects
         public override void Select(int x, int y)
         {
             if (SelectedObject.Object != this && Texture.Contains(x, y))
+            {
                 SelectedObject.Object = this;
+            }
 
             //if (SelectedObject.IsPointInMobile(this, x, y))
             //{

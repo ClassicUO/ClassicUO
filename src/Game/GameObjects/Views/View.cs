@@ -190,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        public bool IsSelected { get; set; }
+        //public bool IsSelected { get; set; }
 
         public Rectangle GetOnScreenRectangle()
         {

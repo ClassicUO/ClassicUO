@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement:
-                        var obj = SelectedObject;
+                        var obj = Game.SelectedObject.Object;
 
                         if (obj != null)
                         {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.SetTargetClientSide:
 
-                        if (SelectedObject is GameObject obj2)
+                        if (Game.SelectedObject.Object is GameObject obj2)
                         {
                             TargetManager.TargetGameObject(obj2);
                             Mouse.LastLeftButtonClickTime = 0;
@@ -186,8 +186,6 @@ namespace ClassicUO.Game.Scenes
             }
             else if (IsHoldingItem)
             {
-                SelectedObject = null;
-
                 if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
                     switch (obj)
@@ -204,7 +202,7 @@ namespace ClassicUO.Game.Scenes
                                 MergeHeldItem(item);
                             else
                             {
-                                SelectedObject = item;
+                                Game.SelectedObject.Object = item;
 
                                 if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                     MergeHeldItem(item);

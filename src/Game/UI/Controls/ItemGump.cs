@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                        gs.SelectedObject = Item;
+                        Game.SelectedObject.Object = Item;
 
                         if (Item.ItemData.IsContainer)
                             gs.DropHeldItemToContainer(Item);
@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
-                            gs.SelectedObject = Item;
+                            Game.SelectedObject.Object = Item;
 
 
                             if (Item != null)
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            gs.SelectedObject = Item;
+                            Game.SelectedObject.Object = Item;
 
                             if (Item != null)
                             {
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                    gs.SelectedObject = Item;
+                    Game.SelectedObject.Object = Item;
 
                     if (Item.ItemData.IsContainer)
                         gs.DropHeldItemToContainer(Item);

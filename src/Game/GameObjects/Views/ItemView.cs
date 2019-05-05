@@ -115,7 +115,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+
+            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
@@ -134,7 +135,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (IsSelected && !IsLocked)
+                if (SelectedObject.Object == this && !IsLocked)
                     hue = 0x0035;
                 else if (IsHidden)
                     hue = 0x038E;
@@ -273,14 +274,63 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (Engine.Profile.Current.HighlightGameObjects && IsSelected) color = 0x0023;
+                    if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this) color = 0x0023;
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color);
                 }
 
-                base.Draw(batcher, posX, posY);
+                DrawInternal(batcher, posX, posY);
                 Select(IsFlipped ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
+
             }
         }
+
+        private void DrawInternal(Batcher2D batcher, int posX, int posY)
+        {
+            SpriteVertex[] vertex;
+
+            if (IsFlipped)
+            {
+                vertex = SpriteVertex.PolyBufferFlipped;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
+                vertex[0].Position.X += Bounds.X + 44f;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.Y += Bounds.Height;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.X -= Bounds.Width;
+                vertex[2].TextureCoordinate.Y = 0;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.X -= Bounds.Width;
+            }
+            else
+            {
+                vertex = SpriteVertex.PolyBuffer;
+                vertex[0].Position.X = posX;
+                vertex[0].Position.Y = posY;
+                vertex[0].Position.X -= Bounds.X;
+                vertex[0].Position.Y -= Bounds.Y;
+                vertex[0].TextureCoordinate.Y = 0;
+                vertex[1].Position = vertex[0].Position;
+                vertex[1].Position.X += Bounds.Width;
+                vertex[1].TextureCoordinate.Y = 0;
+                vertex[2].Position = vertex[0].Position;
+                vertex[2].Position.Y += Bounds.Height;
+                vertex[3].Position = vertex[1].Position;
+                vertex[3].Position.Y += Bounds.Height;
+            }
+
+
+            if (vertex[0].Hue != HueVector)
+                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
+
+
+
+            batcher.DrawSprite(Texture, ref vertex);
+            Texture.Ticks = Engine.Ticks;
+        }
+
 
         public override void Select(int x, int y)
         {

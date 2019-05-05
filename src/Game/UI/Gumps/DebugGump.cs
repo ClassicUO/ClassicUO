@@ -89,8 +89,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (scene?.SelectedObject as GameObject)?.Position ?? Position.INVALID);
-                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (Game.SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(Game.SelectedObject.Object));
             }
             else
                 _sb.AppendFormat(DEBUG_STRING_SMALL, Engine.CurrentFPS);

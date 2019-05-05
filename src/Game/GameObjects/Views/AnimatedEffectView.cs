@@ -118,7 +118,8 @@ namespace ClassicUO.Game.GameObjects
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
 
-            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+
+            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;

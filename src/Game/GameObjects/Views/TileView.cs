@@ -56,7 +56,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+
+            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
@@ -84,7 +85,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY))
             {
-                Select(posX, posY);
+                
+
                 return true;
             }
             return false;
@@ -115,7 +117,14 @@ namespace ClassicUO.Game.GameObjects
                 _vertex[3].Hue = HueVector;
             }
 
-            return batcher.DrawSprite(Texture, ref _vertex);
+            if (batcher.DrawSprite(Texture, ref _vertex))
+            {
+                Select(posX, posY);
+
+                return true;
+            }
+
+            return false;
         }
 
         public override void Select(int x, int y)

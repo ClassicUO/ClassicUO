@@ -35,7 +35,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal interface IGameEntity
     {
-        bool IsSelected { get; set; }
+        //bool IsSelected { get; set; }
     }
 
     internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>

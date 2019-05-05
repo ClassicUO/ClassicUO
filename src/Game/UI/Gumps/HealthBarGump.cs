@@ -307,9 +307,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                if (!Mobile.IsSelected && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                if (/*!Mobile.IsSelected &&*/ SelectedObject.HealthbarObject != Mobile && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
                 {
-                    Mobile.IsSelected = true;
+                    //Mobile.IsSelected = true;
                     SelectedObject.HealthbarObject = Mobile;
                     SelectedObject.Object = Mobile;
                 }
@@ -564,9 +564,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null)
+            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null && SelectedObject.HealthbarObject != Mobile)
             {
-                Mobile.IsSelected = true;
+                //Mobile.IsSelected = true;
                 SelectedObject.HealthbarObject = Mobile;
                 SelectedObject.Object = Mobile;
             }
@@ -576,9 +576,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile != null && Mobile.IsSelected)
+            if (Mobile != null && SelectedObject.Object == Mobile)
             {
-                Mobile.IsSelected = false;
+                //Mobile.IsSelected = false;
                 SelectedObject.HealthbarObject = null;
                 SelectedObject.Object = null;
             }
