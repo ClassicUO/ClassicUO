@@ -73,7 +73,10 @@ namespace ClassicUO.Game.Managers
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static Serial LastGameObject { get; set; }
+        public static Serial LastTarget { get; set; }
+
+        public static Serial LastAttack { get; set; }
+
 
         public static bool IsTargeting { get; private set; }
 
@@ -95,7 +98,7 @@ namespace ClassicUO.Game.Managers
             TargeringType = cursorType;
             IsTargeting = cursorType < TargetType.Cancel;
 
-            if (IsTargeting) Engine.UI.RemoveTargetLineGump(LastGameObject);
+            if (IsTargeting) Engine.UI.RemoveTargetLineGump(LastTarget);
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
@@ -145,9 +148,9 @@ namespace ClassicUO.Game.Managers
             {
                 if (selectedEntity != World.Player)
                 {
-                    Engine.UI.RemoveTargetLineGump(World.LastAttack);
-                    Engine.UI.RemoveTargetLineGump(LastGameObject);
-                    LastGameObject = entity.Serial;
+                    Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
+                    Engine.UI.RemoveTargetLineGump(LastTarget);
+                    LastTarget = entity.Serial;
                 }
 
                 if (_enqueuedAction != null)

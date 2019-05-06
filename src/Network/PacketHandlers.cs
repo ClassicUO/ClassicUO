@@ -2269,17 +2269,17 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            Engine.UI.RemoveTargetLineGump(TargetManager.LastGameObject);
-            Engine.UI.RemoveTargetLineGump(World.LastAttack);
+            Engine.UI.RemoveTargetLineGump(TargetManager.LastTarget);
+            Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
 
-            World.LastAttack = p.ReadUInt();
+            TargetManager.LastAttack = p.ReadUInt();
 
-            if (World.LastAttack != 0 && World.InGame)
+            if (TargetManager.LastAttack != 0 && World.InGame)
             {
-                Mobile mob = World.Mobiles.Get(World.LastAttack);
+                Mobile mob = World.Mobiles.Get(TargetManager.LastAttack);
 
                 if (mob != null && mob.HitsMax <= 0)
-                    NetClient.Socket.Send(new PStatusRequest(World.LastAttack));
+                    NetClient.Socket.Send(new PStatusRequest(TargetManager.LastAttack));
             }
         }
 

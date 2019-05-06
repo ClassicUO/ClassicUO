@@ -574,7 +574,7 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                        TargetManager.TargetGameObject(World.Get(TargetManager.LastGameObject));
+                        TargetManager.TargetGameObject(World.Get(TargetManager.LastTarget));
 
                         WaitForTargetTimer = 0;
                     }
@@ -652,9 +652,9 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    if (TargetManager.LastGameObject.IsMobile)
+                    if (TargetManager.LastTarget.IsMobile)
                     {
-                        Mobile mob = World.Mobiles.Get(TargetManager.LastGameObject);
+                        Mobile mob = World.Mobiles.Get(TargetManager.LastTarget);
 
                         if (mob == null)
                             break;
@@ -662,12 +662,12 @@ namespace ClassicUO.Game.Managers
                         if (mob.HitsMax == 0)
                             NetClient.Socket.Send(new PStatusRequest(mob));
 
-                        World.LastAttack = mob.Serial;
+                        TargetManager.LastAttack = mob.Serial;
                     }
 
                     break;
                 case MacroType.AttackLast:
-                    GameActions.Attack(World.LastAttack);
+                    GameActions.Attack(TargetManager.LastAttack);
 
                     break;
 
@@ -748,7 +748,7 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastGameObject));
+                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastTarget));
                             else
                                 result = 1;
 
