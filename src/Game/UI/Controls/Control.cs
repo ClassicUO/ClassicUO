@@ -422,11 +422,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler Disposed;
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
-
-        internal event EventHandler<KeyboardEventArgs> Keyboard;
 
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
