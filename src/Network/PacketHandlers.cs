@@ -553,14 +553,14 @@ namespace ClassicUO.Network
                 //if (item.IsMulti)
                 //    item.IsMulti = false;
 
-                if (item.IsMulti)
-                {
-                    if (World.HouseManager.TryGetHouse(item, out var house))
-                    {
-                        house.Generate(true);
-                    }
-                }
-
+                //if (item.IsMulti)
+                //{
+                //    if (World.HouseManager.TryGetHouse(item, out var house))
+                //    {
+                //        house.Generate(true);
+                //    }
+                //}
+                item.WantUpdateMulti = true;
                 item.IsMulti = true;
             }
 
@@ -3344,13 +3344,13 @@ namespace ClassicUO.Network
             {
                 //if (item.IsMulti)
                 //    item.IsMulti = false;
-                if (item.IsMulti)
-                {
-                    if (World.HouseManager.TryGetHouse(item, out var house))
-                    {
-                        house.Generate(true);
-                    }
-                }
+                //if (item.IsMulti)
+                //{
+                //    if (World.HouseManager.TryGetHouse(item, out var house))
+                //    {
+                //        house.Generate(true);
+                //    }
+                //}
 
                 item.IsMulti = true;
                 item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;

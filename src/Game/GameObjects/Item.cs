@@ -353,7 +353,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
 
-                    if (!World.HouseManager.TryGetHouse(Serial, out House house))
+                        if (!World.HouseManager.TryGetHouse(Serial, out House house))
                     {
                         house = new House(Serial, 0, false);
                         World.HouseManager.Add(Serial, house);
@@ -375,11 +375,14 @@ namespace ClassicUO.Game.GameObjects
                             house.Components.Add(new Multi(graphic)
                             {
                                 Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z)),
-                                MultiOffset = new Position((ushort) x, (ushort) y, (sbyte) z),
+                                MultiOffsetX = x,
+                                MultiOffsetY = y,
+                                MultiOffsetZ = z,
                                 AlphaHue = 0xFF
                             });
                         }
-                        else if (i == 0) MultiGraphic = graphic;
+                        else if (i == 0)
+                            MultiGraphic = graphic;
                     }
 
                     FileManager.Multi.ReleaseLastMultiDataRead();
@@ -452,7 +455,10 @@ namespace ClassicUO.Game.GameObjects
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
                 {
                     LoadMulti();
-                    AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+                    AllowedToDraw = MultiGraphic != 0;
+                    _originalGraphic = MultiGraphic;
+                    _force = true;
+                    //AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
                 }
             }
         }
