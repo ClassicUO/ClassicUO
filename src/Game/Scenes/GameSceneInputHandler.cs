@@ -528,6 +528,11 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isshift && isctrl;
 
+            if (_useObjectHandles)
+                NameOverHeadManager.Open();
+            else 
+                NameOverHeadManager.Close();
+
             Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
             if (macro != null)

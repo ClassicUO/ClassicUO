@@ -141,6 +141,7 @@
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
+    <Compile Include="Game\Managers\NameOverHeadManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\TextContainer.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
