@@ -553,6 +553,14 @@ namespace ClassicUO.Network
                 //if (item.IsMulti)
                 //    item.IsMulti = false;
 
+                //if (item.IsMulti)
+                //{
+                //    if (World.HouseManager.TryGetHouse(item, out var house))
+                //    {
+                //        house.Generate(true);
+                //    }
+                //}
+                item.WantUpdateMulti = true;
                 item.IsMulti = true;
             }
 
@@ -1621,7 +1629,9 @@ namespace ClassicUO.Network
 
         private static void Ping(Packet p)
         {
+            NetClient.Socket.Statistics.PingReceived();
         }
+
 
         private static void BuyList(Packet p)
         {
@@ -2168,6 +2178,8 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
+            // TODO: shards uses item with HP... it's weird but can happen :D
+
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
             if (mobile == null) return;
@@ -2257,17 +2269,17 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            Engine.UI.RemoveTargetLineGump(TargetManager.LastGameObject);
-            Engine.UI.RemoveTargetLineGump(World.LastAttack);
+            Engine.UI.RemoveTargetLineGump(TargetManager.LastTarget);
+            Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
 
-            World.LastAttack = p.ReadUInt();
+            TargetManager.LastAttack = p.ReadUInt();
 
-            if (World.LastAttack != 0 && World.InGame)
+            if (TargetManager.LastAttack != 0 && World.InGame)
             {
-                Mobile mob = World.Mobiles.Get(World.LastAttack);
+                Mobile mob = World.Mobiles.Get(TargetManager.LastAttack);
 
                 if (mob != null && mob.HitsMax <= 0)
-                    NetClient.Socket.Send(new PStatusRequest(World.LastAttack));
+                    NetClient.Socket.Send(new PStatusRequest(TargetManager.LastAttack));
             }
         }
 
@@ -3332,6 +3344,13 @@ namespace ClassicUO.Network
             {
                 //if (item.IsMulti)
                 //    item.IsMulti = false;
+                //if (item.IsMulti)
+                //{
+                //    if (World.HouseManager.TryGetHouse(item, out var house))
+                //    {
+                //        house.Generate(true);
+                //    }
+                //}
 
                 item.IsMulti = true;
                 item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
@@ -3344,7 +3363,7 @@ namespace ClassicUO.Network
             }
 
             item.Position = position;
-            item.CheckGraphicChange();
+            item.CheckGraphicChange(item.AnimIndex);
             item.ProcessDelta();
 
             if (World.Items.Add(item))

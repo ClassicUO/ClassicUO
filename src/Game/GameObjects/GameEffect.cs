@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected int TargetZ { get; set; }
 
-        protected AnimDataFrame AnimDataFrame;
+        protected AnimDataFrame2 AnimDataFrame;
 
         public int Speed { get; set; }
 
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
         public GraphicEffectBlendMode Blend { get; set; }
 
-        public bool IsItemEffect => Source is Item item && item.OnGround || Source is Static;
+        public bool IsItemEffect => Source is Static;
 
         public long Duration { get; set; } = -1;
 
@@ -105,7 +105,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AnimDataFrame.FrameCount != 0)
                     {
-                        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        unsafe
+                        {
+                            AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        }
                         AnimIndex++;
 
                         if (AnimIndex >= AnimDataFrame.FrameCount)

@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+using System.Diagnostics;
 using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -199,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hitsColor = 0;
 
                     if (inparty)
-                        textColor = _barColor;
+                        textColor = Notoriety.GetHue(Mobile.NotorietyFlag); //  _barColor;
                     else
                     {
                         _canChangeName = Mobile.IsRenamable;
@@ -303,6 +305,16 @@ namespace ClassicUO.Game.UI.Gumps
                         _oldStam = stam;
                     }
                 }
+
+
+                if (/*!Mobile.IsSelected &&*/  Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                {
+                    //Mobile.IsSelected = true;
+                    SelectedObject.HealthbarObject = Mobile;
+                    SelectedObject.Object = Mobile;
+                    SelectedObject.LastObject = Mobile;
+                }
+
             }
 
             if (CanBeSaved)
@@ -314,11 +326,16 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
                 }
             }
+
         }
 
         public override void Dispose()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null) NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
+            if (FileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && Mobile != null)
+                NetClient.Socket.Send(new PCloseStatusBarGump(Mobile));
+
+            if (SelectedObject.HealthbarObject == Mobile && Mobile != null)
+                SelectedObject.HealthbarObject = null;
             base.Dispose();
         }
 
@@ -387,7 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
                 else
                 {
-                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 150, 3, FontStyle.Fixed)
+                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(Mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 109, 3, FontStyle.Cropped)
                     {
                         X = 0,
                         Y = -2
@@ -483,6 +500,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButton.Left)
+                return;
+
             if (TargetManager.IsTargeting)
             {
                 TargetManager.TargetGameObject(Mobile);
@@ -499,6 +519,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return;
+
             if (TargetManager.IsTargeting)
             {
                 _targetBroke = true;
@@ -544,19 +567,24 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
-            if ((TargetManager.IsTargeting || World.Player.InWarMode) && Mobile != null)
+            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */Mobile != null )
             {
-                Mobile.IsSelected = true;
+                //Mobile.IsSelected = true;
+                SelectedObject.HealthbarObject = Mobile;
+                SelectedObject.Object = Mobile;
             }
+            base.OnMouseOver(x, y);
         }
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (Mobile != null && Mobile.IsSelected)
+            if (Mobile != null && SelectedObject.Object == Mobile)
             {
-                Mobile.IsSelected = false;
+                //Mobile.IsSelected = false;
+                SelectedObject.HealthbarObject = null;
+                SelectedObject.Object = null;
             }
         }
 

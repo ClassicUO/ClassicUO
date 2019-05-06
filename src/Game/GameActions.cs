@@ -26,6 +26,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -86,7 +87,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            World.LastAttack = serial;
+            TargetManager.LastAttack = serial;
             Socket.Send(new PAttackRequest(serial));
         }
 

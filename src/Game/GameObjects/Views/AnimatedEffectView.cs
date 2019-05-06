@@ -43,7 +43,6 @@ namespace ClassicUO.Game.GameObjects
                 ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
             };
 
-            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
@@ -54,7 +53,6 @@ namespace ClassicUO.Game.GameObjects
                 ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
             };
 
-            /* state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
@@ -65,7 +63,6 @@ namespace ClassicUO.Game.GameObjects
                 ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
             };
 
-            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
@@ -76,7 +73,6 @@ namespace ClassicUO.Game.GameObjects
                 ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
             };
 
-            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/
             return state;
         });
 
@@ -87,7 +83,6 @@ namespace ClassicUO.Game.GameObjects
                 ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
             };
 
-            /*state.AlphaSourceBlend =*/ /*state.AlphaDestinationBlend =*/ /*state.AlphaBlendFunction =*/
             return state;
         });
         private Graphic _displayedGraphic = Graphic.INVALID;
@@ -101,42 +96,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             ushort hue = Hue;
-
-            if (Source is Item i)
-            {
-                if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(AnimationGraphic))
-                    AnimIndex = 0;
-                else if (Engine.Profile.Current.FieldsType == 2)
-                {
-                    if (StaticFilters.IsFireField(Graphic))
-                    {
-                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0020;
-                    }
-                    else if (StaticFilters.IsParalyzeField(Graphic))
-                    {
-                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0058;
-                    }
-                    else if (StaticFilters.IsEnergyField(Graphic))
-                    {
-                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0070;
-                    }
-                    else if (StaticFilters.IsPoisonField(Graphic))
-                    {
-                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0044;
-                    }
-                    else if (StaticFilters.IsWallOfStone(Graphic))
-                    {
-                        AnimationGraphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x038A;
-                    }
-                }
-                else if (i.IsHidden)
-                    hue = 0x038E;
-            }
 
             if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)
             {
@@ -159,7 +118,8 @@ namespace ClassicUO.Game.GameObjects
             bool isPartial = data.IsPartialHue;
             bool isTransparent = data.IsTranslucent;
 
-            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+
+            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
@@ -221,7 +181,7 @@ namespace ClassicUO.Game.GameObjects
             Engine.DebugInfo.EffectsRendered++;
 
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && (Source is Static || Source is Multi))
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);

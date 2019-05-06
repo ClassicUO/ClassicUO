@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -92,23 +93,24 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D Darkness => _darkness;
 
-        public IGameEntity SelectedObject
-        {
-            get => _selectedObject;
-            set
-            {
-                if (_selectedObject == value)
-                    return;
+        //public IGameEntity SelectedObject
+        //{
+        //    get => _selectedObject;
+        //    set
+        //    {
+        //        _selectedObject = Game.SelectedObject.Object = value;
+        //        //if (_selectedObject == value)
+        //        //    return;
 
-                if (_selectedObject != null && _selectedObject.IsSelected)
-                    _selectedObject.IsSelected = false;
+        //        //if (_selectedObject != null && _selectedObject.IsSelected)
+        //        //    _selectedObject.IsSelected = false;
 
-                _selectedObject = value;
+        //        //_selectedObject = value;
 
-                if (_selectedObject != null)
-                    _selectedObject.IsSelected = true;
-            }
-        }
+        //        //if (_selectedObject != null)
+        //        //    _selectedObject.IsSelected = true;
+        //    }
+        //}
 
         public JournalManager Journal { get; private set; }
 
@@ -577,8 +579,12 @@ namespace ClassicUO.Game.Scenes
 
                     if (distance > World.ViewRange)
                         StopFollowing();
-                    else if (distance > 1)
+                    else if (distance > 3)
                         Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                }
+                else
+                {
+                    StopFollowing();
                 }
             }
 
@@ -587,15 +593,18 @@ namespace ClassicUO.Game.Scenes
 
             if (totalMS > _timePing)
             {
-                NetClient.Socket.Send(new PPing());
-                _timePing = (long) totalMS + 10000;
+                //NetClient.Socket.Send(new PPing());
+
+                NetClient.Socket.Statistics.SendPing();
+
+                _timePing = (long) totalMS + 1000;
             }
 
             _useItemQueue.Update(totalMS, frameMS);
 
 
             if (!IsMouseOverViewport)
-                SelectedObject = null;
+                Game.SelectedObject.Object = Game.SelectedObject.LastObject = null;
             else
             {
                 if (_viewPortGump != null)
@@ -638,6 +647,8 @@ namespace ClassicUO.Game.Scenes
 
             DrawWorld(batcher);
 
+
+            Game.SelectedObject.LastObject = Game.SelectedObject.Object;
 
             return base.Draw(batcher);
         }
@@ -692,7 +703,9 @@ namespace ClassicUO.Game.Scenes
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
                         if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                        {
                             RenderedObjectsCount++;
+                        }
                     }
 
                     //obj = null;
@@ -706,7 +719,7 @@ namespace ClassicUO.Game.Scenes
                         IsMulti = true
                     };
 
-                    if (SelectedObject != null && SelectedObject is GameObject gobj && (gobj is Land || gobj is Static))
+                    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj && (gobj is Land || gobj is Static))
                     {
                         multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
                         multiTarget.CheckGraphicChange();
@@ -784,7 +797,6 @@ namespace ClassicUO.Game.Scenes
             //batcher.SetBlendState(_blendText);
             Overheads.Draw(batcher, x, y);
 
-            SelectedObject = Game.SelectedObject.Object;
             // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);

@@ -31,10 +31,9 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class Land : GameObject
+    internal sealed partial class Land : GameObject
     {
         private LandTiles? _tileData;
-        public Rectangle Rectangle;
 
         public Land(Graphic graphic)
         {
@@ -65,6 +64,11 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
+        public readonly Vector3[] Normals = new Vector3[4];
+
+        public Rectangle Rectangle;
+
+
         public void Calculate(int x, int y, sbyte z)
         {
             UpdateStreched(x, y, z);
@@ -78,7 +82,11 @@ namespace ClassicUO.Game.GameObjects
                 int y = zTop * 4;
                 int w = zRight * 4 - x;
                 int h = zBottom * 4 + 1 - y;
-                Rectangle = new Rectangle(x, y, w, h);
+
+                Rectangle.X = x;
+                Rectangle.Y = y;
+                Rectangle.Width = w;
+                Rectangle.Height = h;
 
                 if (Math.Abs(currentZ - zRight) <= Math.Abs(zBottom - zTop))
                     AverageZ = (sbyte) ((currentZ + zRight) >> 1);
@@ -108,6 +116,7 @@ namespace ClassicUO.Game.GameObjects
             return (result + GetDirectionZ(direction >> 1)) >> 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetDirectionZ(int direction)
         {
             switch (direction)
@@ -115,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 case 1: return Rectangle.Bottom >> 2;
                 case 2: return Rectangle.Right >> 2;
                 case 3: return Rectangle.Top >> 2;
-                default: return Position.Z;
+                default: return Z;
             }
         }
     }

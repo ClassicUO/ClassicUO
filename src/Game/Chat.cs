@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
@@ -134,30 +135,11 @@ namespace ClassicUO.Game
 
                         if (gump is PaperDollGump paperDoll)
                         {
-                            var inter = paperDoll
-                                       .FindControls<PaperDollInteractable>()
-                                       .FirstOrDefault();
-
-                            var f = inter?.FindControls<ItemGump>()
-                                          .SingleOrDefault(s => s.Item == it);
-
-                            if (f != null)
-                                f.AddLabel(text, hue, (byte) font, unicode);
-                            else
-                            {
-                                paperDoll.FindControls<EquipmentSlot>()?
-                                         .SelectMany(s => s.Children)
-                                         .OfType<ItemGump>()
-                                         .SingleOrDefault(s => s.Item == it)?
-                                         .AddLabel(text, hue, (byte) font, unicode);
-                            }
+                            paperDoll.AddLabel(text, hue, font, unicode);
                         }
                         else if (gump is ContainerGump container)
                         {
-                            container
-                               .FindControls<ItemGump>()?
-                               .SingleOrDefault(s => s.Item == it)?
-                               .AddLabel(text, hue, (byte) font, unicode);
+                            container.AddLabel(text, hue, font, unicode);
                         }
                         else
                         {
@@ -166,44 +148,32 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            gump = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+                            var trade = Engine.UI.GetByLocalSerial<TradingGump>(ent);
 
-                            if (gump != null)
-                            {
-                                gump.FindControls<DataBox>()?
-                                    .SelectMany(s => s.Children)
-                                    .OfType<ItemGump>()
-                                    .SingleOrDefault(s => s.Item == it)?
-                                    .AddLabel(text, hue, (byte) font, unicode);
-                            }
-                            else
-                            {
+                            if (trade == null)
+                            { 
                                 Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
 
                                 if (item == null)
                                     break;
 
-                                gump = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
-
-                                if (gump != null)
-                                {
-                                    gump.FindControls<DataBox>()?
-                                        .SelectMany(s => s.Children)
-                                        .OfType<ItemGump>()
-                                        .SingleOrDefault(s => s.Item == it)?
-                                        .AddLabel(text, hue, (byte) font, unicode);
-                                }
-                                else
-                                    Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                                trade = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
                             }
+
+                            if (trade != null)
+                            {
+                                trade.AddLabel(text, hue, font, unicode);
+                            }
+                            else
+                                Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }
                     }
                     else
-                        parent.AddOverhead(type, text, (byte) font, hue, unicode);
+                        parent.AddOverhead(type, text, font, hue, unicode);
 
                     break;
                 case MessageType.Emote:
-                    parent?.AddOverhead(type, $"*{text}*", (byte) font, hue, unicode);
+                    parent?.AddOverhead(type, $"*{text}*", font, hue, unicode);
 
                     break;
 
@@ -217,7 +187,7 @@ namespace ClassicUO.Game
 
                     break;
                 default:
-                    parent?.AddOverhead(type, text, (byte) font, hue, unicode);
+                    parent?.AddOverhead(type, text, font, hue, unicode);
 
                     break;
             }

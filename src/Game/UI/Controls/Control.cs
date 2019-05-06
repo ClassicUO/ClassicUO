@@ -48,11 +48,10 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable, IColorable
+    internal abstract class Control : IDrawableUI, IUpdateable
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
-        private static SpriteTexture _debugTexture, _debugFocusTexture;
         private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
@@ -60,7 +59,6 @@ namespace ClassicUO.Game.UI.Controls
         private Rectangle _bounds;
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
-        private Point _lastClickPosition;
         private Control _parent;
 
         protected Control(Control parent = null)
@@ -294,8 +292,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public Vector3 HueVector { get; set; }
-
         public SpriteTexture Texture { get; set; }
 
         public virtual bool Draw(Batcher2D batcher, int x, int y)
@@ -381,31 +377,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (Engine.DebugFocus && HasKeyboardFocus)
                 {
-                    if (_debugFocusTexture == null)
-                    {
-                        _debugFocusTexture = new SpriteTexture(1, 1);
-
-                        _debugFocusTexture.SetData(new Color[1]
-                        {
-                            Color.Red
-                        });
-                    }
-
-                    batcher.DrawRectangle(_debugFocusTexture, x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, Vector3.Zero);
                 }
                 else if (Engine.GlobalSettings.Debug)
                 {
-                    if (_debugTexture == null)
-                    {
-                        _debugTexture = new SpriteTexture(1, 1);
-
-                        _debugTexture.SetData(new Color[1]
-                        {
-                            Color.Green
-                        });
-                    }
-
-                    batcher.DrawRectangle(_debugTexture, x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, Vector3.Zero);
                 }
             }
         }
@@ -531,13 +507,15 @@ namespace ClassicUO.Game.UI.Controls
             if (_acceptKeyboardInput)
                 return this;
 
+            if (World.InGame && Engine.UI.SystemChat != null)
+                return Engine.UI.SystemChat.textBox;
+
             if (_children == null || _children.Count == 0)
                 return null;
 
             foreach (Control c in _children)
             {
                 Control a = c.GetFirstControlAcceptKeyboardInput();
-
                 if (a != null)
                     return a;
             }
@@ -580,7 +558,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void InvokeMouseDown(Point position, MouseButton button)
         {
-            _lastClickPosition = position;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseDown(x, y, button);
@@ -589,7 +566,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void InvokeMouseUp(Point position, MouseButton button)
         {
-            _lastClickPosition = position;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
@@ -687,7 +663,7 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
             _mouseIsDown = true;
-            Parent?.OnMouseDown(x, y, button);
+            Parent?.OnMouseDown(X + x, Y + y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
@@ -700,7 +676,7 @@ namespace ClassicUO.Game.UI.Controls
                 InvokeDragEnd(new Point(x, y));
             }
 
-            Parent?.OnMouseUp(x, y, button);
+            Parent?.OnMouseUp(X + x, Y + y, button);
         }
 
         protected virtual void OnMouseWheel(MouseEvent delta)
@@ -743,12 +719,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            Parent?.OnMouseClick(x, y, button);
+            Parent?.OnMouseClick(X + x, Y + y, button);
         }
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            return Parent?.OnMouseDoubleClick(x, y, button) ?? false;
+            return Parent?.OnMouseDoubleClick(X + x, Y + y, button) ?? false;
         }
 
         protected virtual void OnDragBegin(int x, int y)

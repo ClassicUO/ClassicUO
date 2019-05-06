@@ -141,6 +141,7 @@
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
+    <Compile Include="Game\Managers\NameOverHeadManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
@@ -157,6 +158,9 @@
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\TextContainer.cs" />
+    <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
@@ -258,10 +262,10 @@
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
-    <Compile Include="Renderer\Effects.cs" />
     <Compile Include="Renderer\SpriteRenderer.cs" />
     <Compile Include="Renderer\UI\Label.cs" />
     <Compile Include="Renderer\UI\UpdaterMenu.cs" />
+    <Compile Include="Utility\Platforms\PlatformHelper.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
@@ -516,7 +520,6 @@
     </None>
     <None Include="packages.config" />
     <None Include="README.md" />
-    <EmbeddedResource Include="shaders\LightEffect.fxc" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -532,7 +535,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cuoicon.ico" />
-    <Content Include="shaders\LightEffect.fx" />
     <EmbeddedResource Include="cuologo.png" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -561,6 +563,9 @@
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.NET.Core.dll" />
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.StructAnalyzers.dll" />
     <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\RuntimeContracts.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Renderer\UI\Layouts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

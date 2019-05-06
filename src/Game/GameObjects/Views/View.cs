@@ -45,9 +45,9 @@ namespace ClassicUO.Game.GameObjects
 
         //    return state;
         //});
+
         public Rectangle Bounds;
         public Rectangle FrameInfo;
-
         public Vector3 HueVector;
 
 
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        public bool IsSelected { get; set; }
+        //public bool IsSelected { get; set; }
 
         public Rectangle GetOnScreenRectangle()
         {

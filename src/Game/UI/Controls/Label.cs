@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed) return false;
 
-            _gText.Draw(batcher, x, y);
+            _gText.Draw(batcher, x, y, Alpha);
 
             return base.Draw(batcher, x, y);
         }

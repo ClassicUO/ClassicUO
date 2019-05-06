@@ -57,9 +57,18 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case ScenesType.Game:
+
                     Engine.AllowWindowResizing = true;
                     Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
-                    Engine.IsMaximized = true;
+
+                    if (!Engine.Profile.Current.RestoreLastGameSize)
+                       Engine.IsMaximized = true;
+                    else
+                    {
+                        Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
+                        Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                    }
+
                     CurrentScene = new GameScene();
                     break;
             }

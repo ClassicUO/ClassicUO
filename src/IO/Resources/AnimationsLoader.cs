@@ -589,17 +589,17 @@ namespace ClassicUO.IO.Resources
 
         public static uint CalculatePeopleGroupOffset(ushort graphic)
         {
-            return (uint) (((graphic - 400) * 175 + 35000) * Marshal.SizeOf<AnimIdxBlock>());
+            return (uint) (((graphic - 400) * 175 + 35000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
         }
 
         public static uint CalculateHighGroupOffset(ushort graphic)
         {
-            return (uint) (graphic * 110 * Marshal.SizeOf<AnimIdxBlock>());
+            return (uint) (graphic * 110 * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
         }
 
         public static uint CalculateLowGroupOffset(ushort graphic)
         {
-            return (uint) (((graphic - 200) * 65 + 22000) * Marshal.SizeOf<AnimIdxBlock>());
+            return (uint) (((graphic - 200) * 65 + 22000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
         }
 
         private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)

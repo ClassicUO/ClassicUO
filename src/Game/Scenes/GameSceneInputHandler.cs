@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement:
-                        var obj = SelectedObject;
+                        var obj = Game.SelectedObject.Object;
 
                         if (obj != null)
                         {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.SetTargetClientSide:
 
-                        if (SelectedObject is GameObject obj2)
+                        if (Game.SelectedObject.Object is GameObject obj2)
                         {
                             TargetManager.TargetGameObject(obj2);
                             Mouse.LastLeftButtonClickTime = 0;
@@ -186,8 +186,6 @@ namespace ClassicUO.Game.Scenes
             }
             else if (IsHoldingItem)
             {
-                SelectedObject = null;
-
                 if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
                     switch (obj)
@@ -204,7 +202,7 @@ namespace ClassicUO.Game.Scenes
                                 MergeHeldItem(item);
                             else
                             {
-                                SelectedObject = item;
+                                Game.SelectedObject.Object = item;
 
                                 if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                     MergeHeldItem(item);
@@ -266,7 +264,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt)
                         {
-                            World.Player.AddOverhead(MessageType.Regular, "Now following!", 3, 0, false);
+                            World.Player.AddOverhead(MessageType.Regular, "Now following.", 3, 0, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -350,7 +348,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddOverhead(MessageType.Regular, "Stop following!", 3, 0, false);
+                World.Player.AddOverhead(MessageType.Regular, "Stopped following.", 3, 0, false);
             }
         }
 
@@ -407,7 +405,6 @@ namespace ClassicUO.Game.Scenes
                             HealthBarGump currentHealthBarGump;
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-
                             break;
 
                         case Item item /*when !item.IsCorpse*/:
@@ -530,6 +527,11 @@ namespace ClassicUO.Game.Scenes
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             _useObjectHandles = isshift && isctrl;
+
+            if (_useObjectHandles)
+                NameOverHeadManager.Open();
+            else 
+                NameOverHeadManager.Close();
 
             Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 

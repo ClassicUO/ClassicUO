@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
             Components.ForEach(s =>
             {
                 if (recalculate && item != null)
-                    s.Position = item.Position + s.MultiOffset;
+                    s.Position = new Position(  (ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY),  (sbyte) (item.Position.Z + s.MultiOffsetZ));
                 s.AddToTile();
             });
         }

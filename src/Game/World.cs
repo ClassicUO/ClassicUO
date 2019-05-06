@@ -62,8 +62,6 @@ namespace ClassicUO.Game
 
         public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
-        public static Serial LastAttack { get; set; }
-
         public static bool SkillsRequested { get; set; }
 
         public static int MapIndex
@@ -297,7 +295,7 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
-            LastAttack = 0;
+            TargetManager.LastAttack = 0;
             Chat.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();

@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -303,7 +304,8 @@ namespace ClassicUO.Game.Scenes
                         st.CharacterIsBehindFoliage = check;
                     else if (obj is Multi m)
                         m.CharacterIsBehindFoliage = check;
-                    else if (obj is Item it) it.CharacterIsBehindFoliage = check;
+                    else if (obj is Item it)
+                        it.CharacterIsBehindFoliage = check;
                 }
 
                 if (_alphaChanged && !changinAlpha)
@@ -322,7 +324,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
 
-                if (useObjectHandles)
+                if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
                     obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it /*&& !it.IsLocked */&& !it.IsMulti) && !obj.ClosedObjectHandles;
                     _objectHandlesCount++;

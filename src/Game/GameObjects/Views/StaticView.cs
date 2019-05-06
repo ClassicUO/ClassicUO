@@ -85,7 +85,9 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (Engine.Profile.Current.HighlightGameObjects && IsSelected)
+            
+
+            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
@@ -107,7 +109,6 @@ namespace ClassicUO.Game.GameObjects
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, posX, posY);
-
             //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
 
             if (ItemData.IsLight)

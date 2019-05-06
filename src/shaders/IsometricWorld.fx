@@ -11,7 +11,7 @@ float4x4 ProjectionMatrix;
 float4x4 WorldMatrix;
 float2 Viewport;
 
-float HuesPerTexture;
+const int HUES_DELTA = 3000;
 float3 lightDirection;
 
 sampler DrawSampler : register(s0);
@@ -49,9 +49,9 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 
 float3 get_rgb(float red, float hue)
 {
-	if (hue < HuesPerTexture)
-		return tex2D(HueSampler0, float2(red, hue / 3000.0000f)).rgb;
-	return tex2D(HueSampler1, float2(red, (hue - 3000.0000f) / 3000.0000f)).rgb;
+	if (hue < HUES_DELTA)
+		return tex2D(HueSampler0, float2(red, hue / 3000.0f)).rgb;
+	return tex2D(HueSampler1, float2(red, (hue - 3000.0f) / 3000.0f)).rgb;
 }
 
 float3 get_light(float3 norm)
@@ -63,7 +63,6 @@ float3 get_light(float3 norm)
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
-	// Get the initial pixel and discard it if the alpha == 0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
 	
 	int mode = int(IN.Hue.y);
@@ -77,7 +76,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		return color;
 	}
 
-	if (color.a <= 0)
+	if (color.a == 0.0f)
 		discard;
 
 

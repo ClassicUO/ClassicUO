@@ -514,8 +514,8 @@ namespace ClassicUO
 
                             break;
 
-                        case "preload_maps":
-                            settings.PreloadMaps = bool.Parse(value);
+                        //case "preload_maps":
+                        //    settings.PreloadMaps = bool.Parse(value);
 
                             break;
 
@@ -819,6 +819,19 @@ namespace ClassicUO
                 _sceneManager.CurrentScene.Draw(_batcher);
 
             _uiManager.Draw(_batcher);
+
+            if (_profileManager.Current != null && _profileManager.Current.ShowNetworkStats)
+            {
+                if (!NetClient.Socket.IsConnected)
+                {
+                    NetClient.LoginSocket.Statistics.Draw(_batcher, 10, 50);
+                }
+                else if (!NetClient.Socket.IsDisposed)
+                {
+                    NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
+                }
+            }
+
 
             //_batcher.DrawString(_font, gameTime.TotalGameTime.Milliseconds.ToString(), new Point(200, 200), new Vector3(22, 0, 0));
 

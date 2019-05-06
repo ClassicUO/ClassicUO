@@ -166,7 +166,6 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.Attack(Entity);
                 else
                     GameActions.DoubleClick(Entity);
-
             }
 
             return true;
@@ -183,6 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (TargetManager.TargetingState)
                     {
+                        case CursorTarget.Position:
                         case CursorTarget.Object:
                             TargetManager.TargetGameObject(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
@@ -199,6 +199,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (scene.IsHoldingItem)
+                    {
+                        if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                            scene.DropHeldItemToContainer(World.Items.Get(Entity));
+                        else 
+                            scene.Audio.PlaySound(0x0051);
+                        return;
+                    }
+
                     _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                     if (_clickTiming > 0)
@@ -231,6 +242,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _clickTiming = 0;
                     _isPressed = false;
+                    if (!World.ClientFlags.TooltipsEnabled)
+                        GameActions.SingleClick(Entity);
                     GameActions.OpenPopupMenu(Entity);
                 }
             }

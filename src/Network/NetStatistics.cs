@@ -22,6 +22,8 @@
 #endregion
 
 using System;
+using System.Diagnostics;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Network
 {
@@ -29,6 +31,8 @@ namespace ClassicUO.Network
     {
         private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
         private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;
+
+        private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
         public DateTime ConnectedFrom { get; set; }
 
@@ -39,6 +43,38 @@ namespace ClassicUO.Network
         public uint TotalPacketsSended { get; set; }
 
         public uint TotalPacketsReceived { get; set; }
+
+        public uint Ping { get; private set; }
+
+
+        public void PingReceived()
+        {
+            Ping = (uint) _pingStopwatch.ElapsedMilliseconds;
+            _pingStopwatch.Stop();
+        }
+
+        public void SendPing()
+        {
+            if (!NetClient.Socket.IsConnected || NetClient.Socket.IsDisposed)
+                return;
+
+            _pingStopwatch.Restart();
+            NetClient.Socket.Send(new PPing());
+        }
+
+        private readonly RenderedText _renderedText = new RenderedText()
+        {
+            Font = 0xFF,
+            FontStyle = FontStyle.BlackBorder,        
+            IsUnicode = true
+        };
+
+        public void Draw(Batcher2D batcher, int x, int y)
+        {
+            batcher.Begin();
+            _renderedText.Draw(batcher, x, y);
+            batcher.End();
+        }
 
         public void Reset()
         {
@@ -58,6 +94,28 @@ namespace ClassicUO.Network
             _lastTotalBytesSended = TotalBytesSended;
             _lastTotalPacketsReceived = TotalPacketsReceived;
             _lastTotalPacketsSended = TotalPacketsSended;
+
+            ushort hue;
+
+            if (Ping < 100)
+            {
+                hue = 0x44; // green
+            }
+            else if (Ping < 150)
+            {
+                hue = 0x034; // yellow
+            }
+            else if (Ping < 200)
+            {
+                hue = 0x0031; // orange
+            }
+            else
+            {
+                hue = 0x20; // red
+            }
+
+            _renderedText.Hue = hue;
+            _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";
         }
 
         public override string ToString()

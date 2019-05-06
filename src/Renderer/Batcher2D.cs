@@ -14,21 +14,11 @@ namespace ClassicUO.Renderer
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
-        //private readonly EffectParameter _viewportEffect;
-        //private readonly EffectParameter _worldMatrixEffect;
-        //private readonly EffectParameter _drawLightingEffect;
-        //private readonly EffectParameter _projectionMatrixEffect;
-        //private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
-        //private readonly Effect _effect;
 
-        //private readonly DepthStencilState _dss = new DepthStencilState
-        //{
-        //    DepthBufferEnable = true,
-        //    DepthBufferWriteEnable = true
-        //};
         private readonly IndexBuffer _indexBuffer;
         private readonly IsometricEffect _isometricEffect;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, -150);
+        private Vector2 _viewportVector;
         private readonly RasterizerState _rasterizerState;
         private readonly Texture2D[] _textureInfo;
         private readonly VertexBuffer _vertexBuffer;
@@ -105,11 +95,6 @@ namespace ClassicUO.Renderer
             _isometricEffect.Parameters["lightIntensity"].SetValue(inte);
         }
 
-        public void EnableLight(bool value)
-        {
-            _isometricEffect.CanDrawLight.SetValue(value);
-        }
-
         public void Begin()
         {
             Begin(null, Matrix.Identity);
@@ -141,6 +126,10 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsInside(float value, float min, float max) 
+            => value >= min && value <= max;
+
         public bool DrawSprite(Texture2D texture, ref SpriteVertex[] vertices)
         {
             EnsureStarted();
@@ -149,6 +138,29 @@ namespace ClassicUO.Renderer
                 return false;
 
             bool draw = false;
+
+            //ref readonly Vector3 posTopLeft = ref vertices[0].Position;
+            //ref readonly Vector3 posTopRight= ref vertices[1].Position;
+            //ref readonly Vector3 posBottomLeft = ref vertices[2].Position;
+            //ref readonly Vector3 posBottomRight = ref vertices[3].Position;
+
+            //draw =    IsInside(posTopLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(_drawingArea.Min.X, posTopLeft.X, posTopRight.X) ||
+            //          IsInside(_drawingArea.Max.X, posTopLeft.X, posTopRight.X) ||
+            //          IsInside(posTopLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(_drawingArea.Min.Y, posTopLeft.Y, posTopRight.Y) ||
+            //          IsInside(_drawingArea.Max.X, posTopLeft.Y, posTopRight.Y) ||
+            //          IsInside(posTopRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(posTopRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(posBottomLeft.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(_drawingArea.Min.X, posBottomLeft.X, posTopRight.X) ||
+            //          IsInside(_drawingArea.Max.X, posBottomLeft.X, posTopRight.X) ||
+            //          IsInside(posBottomLeft.Y, _drawingArea.Min.Y, _drawingArea.Max.Y) ||
+            //          IsInside(_drawingArea.Min.Y, posBottomLeft.Y, posBottomRight.Y) ||
+            //          IsInside(_drawingArea.Max.X, posBottomLeft.Y, posBottomRight.Y) ||
+            //          IsInside(posBottomRight.X, _drawingArea.Min.X, _drawingArea.Max.X) ||
+            //          IsInside(posBottomRight.Y, _drawingArea.Min.Y, _drawingArea.Max.Y);
+
 
             for (byte i = 0; i < 4; i++)
             {
@@ -178,7 +190,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
+        public void DrawShadow(Texture2D texture, ref SpriteVertex[] vertices, int x, int y, bool flip)
         {
             if (texture == null || texture.IsDisposed)
                 return;
@@ -186,14 +198,16 @@ namespace ClassicUO.Renderer
             if (_numSprites >= MAX_SPRITES)
                 Flush();
 
-            float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
-            float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
+            float skewHorizTop = (vertices[0].Position.Y - y) * .5f;
+            float skewHorizBottom = (vertices[3].Position.Y - y) * .5f;
             vertices[0].Position.X -= skewHorizTop;
             vertices[0].Position.Y -= skewHorizTop;
-            vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
-            vertices[flip ? 2 : 1].Position.Y -= skewHorizTop;
-            vertices[flip ? 1 : 2].Position.X -= skewHorizBottom;
-            vertices[flip ? 1 : 2].Position.Y -= skewHorizBottom;
+
+            int index = flip ? 2 : 1;
+            vertices[index].Position.X -= skewHorizTop;
+            vertices[index].Position.Y -= skewHorizTop;
+            vertices[index].Position.X -= skewHorizBottom;
+            vertices[index].Position.Y -= skewHorizBottom;
             vertices[3].Position.X -= skewHorizBottom;
             vertices[3].Position.Y -= skewHorizBottom;
             _textureInfo[_numSprites] = texture;
@@ -204,7 +218,6 @@ namespace ClassicUO.Renderer
                 _vertexInfo[idx + i] = vertices[i];
 
             _numSprites++;
-
 
             DrawSprite(texture, ref vertices);
         }
@@ -548,13 +561,10 @@ namespace ClassicUO.Renderer
             _isometricEffect.ProjectionMatrix.SetValue(_matrixTransformMatrix);
             _isometricEffect.WorldMatrix.SetValue(_transformMatrix);
 
-            Vector2 vec = new Vector2
-            {
-                X = GraphicsDevice.Viewport.Width,
-                Y = GraphicsDevice.Viewport.Height
-            };
 
-            _isometricEffect.Viewport.SetValue(vec);
+            _viewportVector.X = GraphicsDevice.Viewport.Width;
+            _viewportVector.Y = GraphicsDevice.Viewport.Height;
+            _isometricEffect.Viewport.SetValue(_viewportVector);
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
@@ -647,15 +657,36 @@ namespace ClassicUO.Renderer
 
             return result;
         }
+
+
+        private class IsometricEffect : Effect
+        {
+            public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
+            {
+                CanDrawLight = Parameters["DrawLighting"];
+                ProjectionMatrix = Parameters["ProjectionMatrix"];
+                WorldMatrix = Parameters["WorldMatrix"];
+                Viewport = Parameters["Viewport"];
+                CurrentTechnique = Techniques["HueTechnique"];
+            }
+
+            protected IsometricEffect(Effect cloneSource) : base(cloneSource)
+            {
+            }
+
+            public EffectParameter CanDrawLight { get; }
+            public EffectParameter ProjectionMatrix { get; }
+            public EffectParameter WorldMatrix { get; }
+            public EffectParameter Viewport { get; }
+            public EffectPass Pass => CurrentTechnique.Passes[0];
+        }
     }
 
     internal class Resources
     {
-        private static byte[] _isometricEffect, _spriteEffect;
-
+        private static byte[] _isometricEffect;
 
         public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
-        public static byte[] LightEffect => _spriteEffect ?? (_spriteEffect = GetResource("ClassicUO.shaders.LightEffect.fxc"));
 
         private static byte[] GetResource(string name)
         {

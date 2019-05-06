@@ -64,7 +64,6 @@ namespace ClassicUO.Game.GameObjects
                 else if (sourceSerial.IsItem)
                 {
                     Item item = (Item) source;
-                    item.Animation = this;
                     if (sourceX != 0 || sourceY != 0 || sourceZ != 0) item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(item);
@@ -87,7 +86,6 @@ namespace ClassicUO.Game.GameObjects
                 if (Source != null)
                 {
                     Offset = Source.Offset;
-                    //Source.RealScreenPosition = RealScreenPosition;
                 }
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)

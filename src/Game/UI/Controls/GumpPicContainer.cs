@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
-                    gs.SelectedObject = Item;
+                    Game.SelectedObject.Object = Item;
                     gs.DropHeldItemToContainer(Item, x, y);
                 }
                 else

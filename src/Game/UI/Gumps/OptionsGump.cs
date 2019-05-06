@@ -45,21 +45,23 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
         private ScrollAreaItem _activeChatArea;
-        //private Combobox _counterLayout;
-        private HSliderBar _cellSize;
 
         // video
         private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse;
+        private HSliderBar _lightBar;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse;
+        private TextBox _rows, _columns;
+        private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _disableRunning;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
         private RadioButton _fieldsToTile, _staticFields, _normalFields;
+        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -80,19 +82,21 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private TextBox _spellFormatBox;
 
-        private HSliderBar _lightBar;
+        // macro
         private MacroControl _macroControl;
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
-        private TextBox _rows, _columns;
 
         // speech
         private Checkbox _scaleSpeechDelay;
         private Combobox _shardType, _auraType;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
-        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
+        // network
+        private Checkbox _showNetStats;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
@@ -135,6 +139,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
+            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Network") { ButtonParameter = 11 });
+
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
 
@@ -176,6 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildTooltip();
             BuildCounters();
             BuildExperimental();
+            BuildNetwork();
 
             ChangePage(1);
         }
@@ -204,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
-            _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
+            _alwaysRun = CreateCheckBox(rightArea, "Always run (Hold shift to turns off)", Engine.Profile.Current.AlwaysRun, 0, 0);
             _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
@@ -893,9 +900,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
+            _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
+            _disableRunning = CreateCheckBox(rightArea, "Hold `shift` button for always walking (disable running)", Engine.Profile.Current.DisableRunning, 0, 0);
 
             Add(rightArea, PAGE);
         }
+
+        private void BuildNetwork()
+        {
+            const int PAGE = 11;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _showNetStats = CreateCheckBox(rightArea, "Show network stats", Engine.Profile.Current.ShowNetworkStats, 0, 0);
+
+            Add(rightArea, PAGE);
+        }
+
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -1062,7 +1083,12 @@ namespace ClassicUO.Game.UI.Gumps
                 case 10:
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
+                    _restoreLastGameSize.IsChecked = false;
+                    _disableRunning.IsChecked = false;
 
+                    break;
+                case 11:
+                    _showNetStats.IsChecked = false;
                     break;
             }
         }
@@ -1324,6 +1350,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             // experimental
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
+            Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
+            Engine.Profile.Current.DisableRunning = _disableRunning.IsChecked;
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
@@ -1354,6 +1382,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
             }
+
+            // network
+            Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
+
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }

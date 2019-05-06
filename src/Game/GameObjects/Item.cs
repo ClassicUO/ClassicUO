@@ -50,11 +50,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        // TODO: FIXME! temp workaround
-        public AnimatedItemEffect Animation { get; set; }
-
-
-
         public uint Price
         {
             get => _price;
@@ -111,7 +106,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        //public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
         {
@@ -142,81 +136,13 @@ namespace ClassicUO.Game.GameObjects
             get => _isMulti;
             set
             {
-                //if (_isMulti != value)
+                _isMulti = value;
+
+                if (!value)
                 {
-                    _isMulti = value;
-
-
-                    if (value)
-                    {
-                        ////if (MultiDistanceBonus == 0 || MultiInfo == null)
-                        //{
-                        //    short minX = 0;
-                        //    short minY = 0;
-                        //    short maxX = 0;
-                        //    short maxY = 0;
-
-                        //    int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
-
-                        //    if (!World.HouseManager.TryGetHouse(Serial, out House house))
-                        //    {
-                        //        house = new House(Serial, 0, false);
-                        //        World.HouseManager.Add(Serial, house);
-                        //    }
-                        //    else
-                        //    {
-                        //        house.ClearComponents();
-                        //    }
-
-                        //    for (int i = 0; i < count; i++)
-                        //    {
-                        //        FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
-
-                        //        if (x < minX) minX = x;
-                        //        if (x > maxX) maxX = x;
-                        //        if (y < minY) minY = y;
-                        //        if (y > maxY) maxY = y;
-
-                        //        if (add)
-                        //        {
-                        //            house.Components.Add(new Multi(graphic)
-                        //            {
-                        //                Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z)),
-                        //                MultiOffset = new Position((ushort)x, (ushort)y , (sbyte) z),
-                        //                AlphaHue = 0xFF
-                        //            });
-                        //        }
-                        //        else if (i == 0)
-                        //        {
-                        //            MultiGraphic = graphic;
-                        //        }
-                        //    }
-
-                        //    FileManager.Multi.ReleaseLastMultiDataRead();
-
-                        //    MultiInfo = new MultiInfo((short) X, (short) Y)
-                        //    {
-                        //        MinX = minX,
-                        //        MaxX = maxX,
-                        //        MinY = minY,
-                        //        MaxY = maxY
-                        //    };
-
-                        //    MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
-
-                        //    house.Generate();
-
-                        //    Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
-                        //}
-                    }
-                    else
-                    {
-                        MultiDistanceBonus = 0;
-                        MultiInfo = null;
-                    }
+                    MultiDistanceBonus = 0;
+                    MultiInfo = null;
                 }
-
-                //AllowedToDraw = MultiGraphic != 0;
             }
         }
 
@@ -266,9 +192,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     base.Graphic = value;
                     _itemData = FileManager.TileData.StaticData[value];
-                    //Name = ItemData.Name;
-
-                    //CheckGraphicChange();
                 }
             }
         }
@@ -340,77 +263,69 @@ namespace ClassicUO.Game.GameObjects
 
         private void LoadMulti()
         {
-            // if (IsMulti)
+            WantUpdateMulti = false;
+
+            short minX = 0;
+            short minY = 0;
+            short maxX = 0;
+            short maxY = 0;
+
+            int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
+
+            if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
-                //if (MultiDistanceBonus == 0 || MultiInfo == null)
-                {
-                    WantUpdateMulti = false;
-
-                    short minX = 0;
-                    short minY = 0;
-                    short maxX = 0;
-                    short maxY = 0;
-
-                    int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
-
-                    if (!World.HouseManager.TryGetHouse(Serial, out House house))
-                    {
-                        house = new House(Serial, 0, false);
-                        World.HouseManager.Add(Serial, house);
-                    }
-                    else
-                        house.ClearComponents();
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
-
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-
-                        if (add)
-                        {
-                            house.Components.Add(new Multi(graphic)
-                            {
-                                Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z)),
-                                MultiOffset = new Position((ushort) x, (ushort) y, (sbyte) z),
-                                AlphaHue = 0xFF
-                            });
-                        }
-                        else if (i == 0) MultiGraphic = graphic;
-                    }
-
-                    FileManager.Multi.ReleaseLastMultiDataRead();
-
-                    MultiInfo = new MultiInfo((short) X, (short) Y)
-                    {
-                        MinX = minX,
-                        MaxX = maxX,
-                        MinY = minY,
-                        MaxY = maxY
-                    };
-
-                    MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
-
-                    house.Generate();
-
-                    Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
-                }
+                house = new House(Serial, 0, false);
+                World.HouseManager.Add(Serial, house);
             }
-            //else
-            //{
-            //    MultiDistanceBonus = 0;
-            //    MultiInfo = null;
-            //}
+            else
+                house.ClearComponents();
+
+            for (int i = 0; i < count; i++)
+            {
+                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
+
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+
+                if (add)
+                {
+                    house.Components.Add(new Multi(graphic)
+                    {
+                        Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
+                        MultiOffsetX = x,
+                        MultiOffsetY = y,
+                        MultiOffsetZ = z,
+                        AlphaHue = 0xFF
+                    });
+                }
+                else if (i == 0)
+                    MultiGraphic = graphic;
+            }
+
+            FileManager.Multi.ReleaseLastMultiDataRead();
+
+            MultiInfo = new MultiInfo((short)X, (short)Y)
+            {
+                MinX = minX,
+                MaxX = maxX,
+                MinY = minY,
+                MaxY = maxY
+            };
+
+            MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
+
+            house.Generate();
+
+            Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
         }
 
-        private AnimDataFrame? _animDataFrame;
+        private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
 
 
-        public void CheckGraphicChange()
+        public void CheckGraphicChange(sbyte animIndex = 0)
         {
             if (!IsMulti)
             {
@@ -418,12 +333,16 @@ namespace ClassicUO.Game.GameObjects
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
-                    if (ItemData.IsAnimated)
+                    if (OnGround && ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
-                        AnimIndex = 0;
-                        _animSpeed = _animDataFrame.Value.FrameInterval != 0 ? _animDataFrame.Value.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                        LastAnimationChangeTime = Engine.Ticks + _animSpeed;
+                        AnimIndex = animIndex;
+                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                        LastAnimationChangeTime = Engine.Ticks;
+                    }
+                    else
+                    {
+                        _animDataFrame = default;
                     }
                     
                     _originalGraphic = DisplayedGraphic;
@@ -452,7 +371,9 @@ namespace ClassicUO.Game.GameObjects
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
                 {
                     LoadMulti();
-                    AllowedToDraw = Graphic >= 2 && DisplayedGraphic >= 2 && !GameObjectHelper.IsNoDrawable(Graphic);
+                    AllowedToDraw = MultiGraphic != 0;
+                    _originalGraphic = MultiGraphic;
+                    _force = true;
                 }
             }
         }
@@ -897,11 +818,14 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (_animDataFrame.HasValue && _animDataFrame.Value.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
-                _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.Value.FrameData[AnimIndex++]);
+                unsafe
+                {
+                    _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
+                }
 
-                if (AnimIndex >= _animDataFrame.Value.FrameCount)
+                if (AnimIndex >= _animDataFrame.FrameCount)
                     AnimIndex = 0;
 
                 _force = _originalGraphic == DisplayedGraphic;

@@ -51,7 +51,9 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public Position MultiOffset { get; set; }
+        public int MultiOffsetX { get; set; }
+        public int MultiOffsetY { get; set; }
+        public int MultiOffsetZ { get; set; }
 
         public StaticTiles ItemData
         {

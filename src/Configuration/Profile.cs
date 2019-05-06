@@ -159,7 +159,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
-
+        [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
+        [JsonProperty] public bool DisableRunning { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
@@ -233,6 +234,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
+        [JsonProperty] public bool ShowNetworkStats { get; set; }
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
