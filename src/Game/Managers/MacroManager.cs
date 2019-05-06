@@ -859,7 +859,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
-                case MacroType.ToggleBuiconWindow:
+                case MacroType.ToggleBuffIconGump:
                     BuffGump buff = Engine.UI.GetByLocalSerial<BuffGump>();
 
                     if (buff != null)
@@ -1177,7 +1177,7 @@ namespace ClassicUO.Game.Managers
         UseSelectedTarget,
         CurrentTarget,
         TargetSystemOnOff,
-        ToggleBuiconWindow,
+        ToggleBuffIconGump,
         BandageSelf,
         BandageTarget,
         ToggleGargoyleFly,
