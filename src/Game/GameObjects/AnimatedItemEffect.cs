@@ -64,7 +64,6 @@ namespace ClassicUO.Game.GameObjects
                 else if (sourceSerial.IsItem)
                 {
                     Item item = (Item) source;
-                    item.Animation = this;
                     if (sourceX != 0 || sourceY != 0 || sourceZ != 0) item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(item);
