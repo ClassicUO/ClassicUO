@@ -29,6 +29,8 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class Checkbox : Control
@@ -107,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             bool ok = base.Draw(batcher, x, y);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, HueVector);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, Vector3.Zero);
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
             return ok;

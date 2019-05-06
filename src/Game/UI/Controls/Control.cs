@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable, IColorable
+    internal abstract class Control : IDrawableUI, IUpdateable
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
@@ -59,7 +59,6 @@ namespace ClassicUO.Game.UI.Controls
         private Rectangle _bounds;
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
-        private Point _lastClickPosition;
         private Control _parent;
 
         protected Control(Control parent = null)
@@ -292,8 +291,6 @@ namespace ClassicUO.Game.UI.Controls
         public bool AllowedToDraw { get; set; }
 
         public int TooltipMaxLength { get; private set; }
-
-        public Vector3 HueVector { get; set; }
 
         public SpriteTexture Texture { get; set; }
 
@@ -561,7 +558,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void InvokeMouseDown(Point position, MouseButton button)
         {
-            _lastClickPosition = position;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseDown(x, y, button);
@@ -570,7 +566,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public void InvokeMouseUp(Point position, MouseButton button)
         {
-            _lastClickPosition = position;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
