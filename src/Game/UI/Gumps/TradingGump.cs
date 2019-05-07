@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class TradingGump : Gump
+    internal sealed class TradingGump : Gump
     {
         private readonly Entity _entity1, _entity2;
         private readonly string _name;
@@ -58,6 +58,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _entity1 = World.Get(id1);
             _entity2 = World.Get(id2);
+
+            if (_entity1 == null || _entity2 == null)
+            {
+                Dispose();
+                return;
+            }
 
             _entity1.Items.Added += ItemsOnAdded1;
             _entity2.Items.Added += ItemsOnAdded2;

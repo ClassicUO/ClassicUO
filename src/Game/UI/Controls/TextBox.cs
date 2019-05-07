@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            if (IsDisposed || TxEntry == null)
                 return;
 
             int h = Math.Max(Height, TxEntry.Height);
@@ -270,9 +270,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            base.Dispose();
             TxEntry?.Destroy();
             TxEntry = null;
-            base.Dispose();
         }
     }
 }
