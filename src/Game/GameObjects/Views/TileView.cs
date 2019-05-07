@@ -30,13 +30,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land
     {
-        private SpriteVertex[] _vertex = new SpriteVertex[4]
-        {
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
-        };
-        private Point _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
-
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
@@ -97,27 +90,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Texture.Ticks = Engine.Ticks;
 
-            _vertex[0].Position.X = posX + _vertex0_yOffset.X;
-            _vertex[1].Position.X = posX + _vertex1_yOffset.X;
-            _vertex[2].Position.X = posX + _vertex2_yOffset.X;
-            _vertex[3].Position.X = posX + _vertex3_yOffset.X;
-
-            int z = Z * 4;
-            _vertex[0].Position.Y = posY + _vertex0_yOffset.Y + z;
-            _vertex[1].Position.Y = posY + _vertex1_yOffset.Y + z;
-            _vertex[2].Position.Y = posY + _vertex2_yOffset.Y + z;
-            _vertex[3].Position.Y = posY + _vertex3_yOffset.Y + z;
-
-
-            if (HueVector != _vertex[0].Hue)
-            {
-                _vertex[0].Hue = HueVector;
-                _vertex[1].Hue = HueVector;
-                _vertex[2].Hue = HueVector;
-                _vertex[3].Hue = HueVector;
-            }
-
-            if (batcher.DrawSprite(Texture, ref _vertex))
+            if (batcher.DrawSpriteLand(Texture, posX, posY + Z * 4, Rectangle, Normals, HueVector))
             {
                 Select(posX, posY);
 
@@ -230,23 +203,6 @@ namespace ClassicUO.Game.GameObjects
                 Normals[2].Normalize();
                 Normals[3] = vec[i - 1, j, 2] + vec[i - 1, j + 1, 1] + vec[i, j, 3] + vec[i, j + 1, 0];
                 Normals[3].Normalize();
-                _vertex[0].Normal = Normals[0];
-                _vertex[1].Normal = Normals[1];
-                _vertex[3].Normal = Normals[2];
-                _vertex[2].Normal = Normals[3];
-
-
-                _vertex0_yOffset.X = 22;
-                _vertex0_yOffset.Y = -Rectangle.Left;
-
-                _vertex1_yOffset.X = 44;
-                _vertex1_yOffset.Y = 22 - Rectangle.Bottom;
-
-                _vertex2_yOffset.X = 0;
-                _vertex2_yOffset.Y = 22 - Rectangle.Top;
-
-                _vertex3_yOffset.X = 22;
-                _vertex3_yOffset.Y = 44 - Rectangle.Right;
             }
         }
 

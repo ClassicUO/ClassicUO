@@ -29,6 +29,28 @@ using Microsoft.Xna.Framework.Graphics;
 namespace ClassicUO.Renderer
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal struct VertexPositionColorTexture4 : IVertexType
+    {
+        public const int RealStride = 96;
+
+        VertexDeclaration IVertexType.VertexDeclaration => VertexPositionColorTexture.VertexDeclaration;
+
+        public Vector3 Position0;
+        public Color Color0;
+        public Vector2 TextureCoordinate0;
+        public Vector3 Position1;
+        public Color Color1;
+        public Vector2 TextureCoordinate1;
+        public Vector3 Position2;
+        public Color Color2;
+        public Vector2 TextureCoordinate2;
+        public Vector3 Position3;
+        public Color Color3;
+        public Vector2 TextureCoordinate3;
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct SpriteVertex : IVertexType
     {
         public SpriteVertex(Vector3 position, Vector3 normal, Vector3 textureCoordinate)
@@ -50,37 +72,7 @@ namespace ClassicUO.Renderer
                                                                                            new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
                                                                                            new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
                                                                                            new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
-                                                                                          );
-        public static readonly SpriteVertex[] PolyBuffer =
-        {
-            new SpriteVertex(new Vector3(),
-                new Vector3(0, 0, 1),
-                new Vector3(0, 0, 0)),
-            new SpriteVertex(new Vector3(),
-                new Vector3(0, 0, 1),
-                new Vector3(1, 0, 0)),
-            new SpriteVertex(new Vector3(), 
-                new Vector3(0, 0, 1), 
-                new Vector3(0, 1, 0)),
-            new SpriteVertex(new Vector3(),
-                new Vector3(0, 0, 1),
-                new Vector3(1, 1, 0))
-        };
-        public static readonly SpriteVertex[] PolyBufferFlipped =
-        {
-            new SpriteVertex(new Vector3(), 
-                new Vector3(0, 0, 1), 
-                new Vector3(0, 0, 0)),
-            new SpriteVertex(new Vector3(), 
-                new Vector3(0, 0, 1), 
-                new Vector3(0, 1, 0)),
-            new SpriteVertex(new Vector3(), 
-                new Vector3(0, 0, 1),
-                new Vector3(1, 0, 0)),
-            new SpriteVertex(new Vector3(),
-                new Vector3(0, 0, 1),
-                new Vector3(1, 1, 0))
-        };
+                                                                                         );
 
         public const int SizeInBytes = sizeof(float) * 12 * 4;
 

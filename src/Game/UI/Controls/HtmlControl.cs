@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {

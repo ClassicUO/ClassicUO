@@ -161,6 +161,7 @@
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\TextContainer.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
+    <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />

@@ -95,6 +95,7 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
 
+        private FNABatcher2D _fnaBatcher2D;
 
         private Engine(string[] args)
         {
@@ -195,6 +196,9 @@ namespace ClassicUO
             IsMouseVisible = true;
 
             Window.Title = $"ClassicUO - {Version}";
+
+
+            _fnaBatcher2D = new FNABatcher2D(GraphicsDevice);
         }
 
         public bool IsQuitted { get; private set; }
@@ -832,8 +836,9 @@ namespace ClassicUO
                 }
             }
 
-
-            //_batcher.DrawString(_font, gameTime.TotalGameTime.Milliseconds.ToString(), new Point(200, 200), new Vector3(22, 0, 0));
+            //_fnaBatcher2D.Begin();
+            //_fnaBatcher2D.Draw(Textures.GetTexture(Color.White), 100, 200, 100, 100, Color.CornflowerBlue);
+            //_fnaBatcher2D.End();
 
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");

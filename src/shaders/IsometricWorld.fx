@@ -7,7 +7,7 @@
 #define SHADOW 12
 #define LIGHTS 13
 
-float4x4 ProjectionMatrix;
+float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 
@@ -38,7 +38,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
 	
-	OUT.Position = mul(mul(IN.Position, WorldMatrix), ProjectionMatrix);
+	OUT.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
 	
 	OUT.TexCoord = IN.TexCoord; 
 	OUT.Normal = IN.Normal;

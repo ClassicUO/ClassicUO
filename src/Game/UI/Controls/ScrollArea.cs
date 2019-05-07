@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
             var scrollbar = Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width - 14, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width - 14, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {

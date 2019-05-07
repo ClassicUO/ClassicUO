@@ -432,7 +432,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (hasShadow)
             {
-                // TODO:
+                batcher.DrawSpriteShadow(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, 22, (int)(posY + (Offset.Y - Offset.Z) + 22), IsFlipped);
             }
 
             if (IsFlipped)
