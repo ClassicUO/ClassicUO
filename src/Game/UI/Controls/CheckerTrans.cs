@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);

@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         });
         private Graphic _displayedGraphic = Graphic.INVALID;
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;

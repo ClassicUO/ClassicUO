@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y, float scale)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, float scale)
         {
             if (IsDestroyed || _messages.Count == 0)
                 return;
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y, float scale)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, float scale)
         {
             if (IsDestroyed || _messages.Count == 0)
                 return;

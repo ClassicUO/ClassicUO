@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int Percent { get; set; }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, Hue);

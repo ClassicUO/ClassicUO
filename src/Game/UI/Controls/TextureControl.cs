@@ -26,7 +26,7 @@ namespace ClassicUO.Game.UI.Controls
                 Texture.Ticks = Engine.Ticks;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartial, Alpha);

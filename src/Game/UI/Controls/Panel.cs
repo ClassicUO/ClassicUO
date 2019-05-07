@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int centerWidth = Width - _frame[0].Width - _frame[2].Width;
             int centerHeight = Height - _frame[0].Height - _frame[6].Height;

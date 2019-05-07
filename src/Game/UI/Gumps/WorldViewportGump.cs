@@ -226,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             // sopra
             batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, Vector3.Zero);

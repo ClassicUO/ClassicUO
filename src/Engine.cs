@@ -83,7 +83,7 @@ namespace ClassicUO
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
         private AuraManager _auraManager;
-        private Batcher2D _batcher;
+        private UltimaBatcher2D _batcher;
         private double _currentFpsTime;
         private DebugInfo _debugInfo;
         private InputManager _inputManager;
@@ -201,7 +201,7 @@ namespace ClassicUO
 
         public bool DisableUpdateWindowCaption { get; set; }
 
-        public static Batcher2D Batcher => _engine._batcher;
+        public static UltimaBatcher2D Batcher => _engine._batcher;
 
         protected float IntervalFixedUpdate { get; private set; }
 
@@ -651,7 +651,7 @@ namespace ClassicUO
             Log.NewLine();
 
 
-            _batcher = new Batcher2D(GraphicsDevice);
+            _batcher = new UltimaBatcher2D(GraphicsDevice);
             _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();

@@ -132,12 +132,12 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(Batcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
             return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
-        public bool Draw(Batcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;

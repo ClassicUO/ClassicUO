@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-        public virtual bool Draw(Batcher2D batcher, int posX, int posY)
+        public virtual bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             SpriteVertex[] vertex;
 

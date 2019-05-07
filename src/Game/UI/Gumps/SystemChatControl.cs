@@ -343,7 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int yy = textBox.Y + y - 20;
 
@@ -599,7 +599,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            public bool Draw(Batcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 return _renderedText.Draw(batcher, x, y /*, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true)*/);
             }

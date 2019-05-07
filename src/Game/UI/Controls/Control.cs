@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(Batcher2D batcher, int x, int y)
+        public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
 
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.UI.Controls
         {
         }
 
-        private void DrawDebug(Batcher2D batcher, int x, int y)
+        private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {

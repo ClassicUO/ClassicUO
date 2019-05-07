@@ -12,7 +12,7 @@ float4x4 WorldMatrix;
 float2 Viewport;
 
 const int HUES_DELTA = 3000;
-float3 lightDirection;
+const float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
 
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
@@ -56,7 +56,7 @@ float3 get_rgb(float red, float hue)
 
 float3 get_light(float3 norm)
 {
-	float3 light = normalize(lightDirection);
+	float3 light = normalize(LIGHT_DIRECTION);
 	float3 normal = normalize(norm);
 	return max((dot(normal, light) + 0.5f), 0.0f);
 }

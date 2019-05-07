@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        public void Draw(Batcher2D batcher, float scale)
+        public void Draw(UltimaBatcher2D batcher, float scale)
         {
             if (!IsEnabled)
                 return;

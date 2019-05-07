@@ -69,7 +69,7 @@ namespace ClassicUO.Network
             IsUnicode = true
         };
 
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             batcher.Begin();
             _renderedText.Draw(batcher, x, y);

@@ -20,7 +20,7 @@ namespace ClassicUO.Renderer.Launcher
             //Add(new Button());
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             return base.Draw(batcher, x, y);
         }

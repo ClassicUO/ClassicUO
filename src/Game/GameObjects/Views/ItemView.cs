@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _originalGraphic;
         private bool _force;
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
             return base.Draw(batcher, posX, posY);
         }
 
-        private bool DrawCorpse(Batcher2D batcher, int posX, int posY)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
                 return false;
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private void DrawLayer(Batcher2D batcher, int posX, int posY, Layer layer, byte animIndex)
+        private void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Layer layer, byte animIndex)
         {
             ushort graphic;
             ushort color = 0;
@@ -284,50 +284,17 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private void DrawInternal(Batcher2D batcher, int posX, int posY)
+        private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY)
         {
-            SpriteVertex[] vertex;
-
             if (IsFlipped)
             {
-                vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X += Bounds.X + 44f;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.Y += Bounds.Height;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.X -= Bounds.Width;
-                vertex[2].TextureCoordinate.Y = 0;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.X -= Bounds.Width;
+                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
             }
             else
             {
-                vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X -= Bounds.X;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.X += Bounds.Width;
-                vertex[1].TextureCoordinate.Y = 0;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.Y += Bounds.Height;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += Bounds.Height;
+                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
             }
 
-
-            if (vertex[0].Hue != HueVector)
-                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
-
-
-
-            batcher.DrawSprite(Texture, ref vertex);
             Texture.Ticks = Engine.Ticks;
         }
 

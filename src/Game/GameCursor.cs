@@ -287,7 +287,7 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        public void Draw(Batcher2D sb)
+        public void Draw(UltimaBatcher2D sb)
         {
             if (TargetManager.IsTargeting && Engine.Profile.Current != null && Engine.Profile.Current.AuraOnMouse)
             {
@@ -338,7 +338,7 @@ namespace ClassicUO.Game
             DrawToolTip(sb, Mouse.Position);
         }
 
-        private void DrawToolTip(Batcher2D batcher, Point position)
+        private void DrawToolTip(UltimaBatcher2D batcher, Point position)
         {
             if (Engine.SceneManager.CurrentScene is GameScene gs)
             {

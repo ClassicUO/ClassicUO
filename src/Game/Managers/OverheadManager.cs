@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private void DrawTextOverheads(Batcher2D batcher, int startX, int startY, float scale)
+        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale)
         {
             if (_firstNode != null)
             {
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public bool Draw(Batcher2D batcher, int startX, int startY)
+        public bool Draw(UltimaBatcher2D batcher, int startX, int startY)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 

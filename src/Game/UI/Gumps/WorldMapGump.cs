@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             //batcher.Draw2D(_mapTexture, Bounds, position);
 
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
             return rotatedPoint;
         }
 
-        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY)
+        public bool Draw(UltimaBatcher2D batcher, Rectangle dst, int offsetX, int offsetY)
         {
             int sx = offsetX;
             int sy = offsetY;

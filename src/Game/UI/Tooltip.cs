@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI
 
         public GameObject Object => _gameObject;
 
-        public bool Draw(Batcher2D batcher, int x, int y)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {

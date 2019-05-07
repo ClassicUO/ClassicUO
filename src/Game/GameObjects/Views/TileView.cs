@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
         private Point _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private bool Draw3DStretched(Batcher2D batcher, int posX, int posY)
+        private bool Draw3DStretched(UltimaBatcher2D batcher, int posX, int posY)
         {
             Texture.Ticks = Engine.Ticks;
 

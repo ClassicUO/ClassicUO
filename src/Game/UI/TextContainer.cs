@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             for (int i = 0; i < _messages.Count; i++)
             {

@@ -659,7 +659,7 @@ namespace ClassicUO.Game.Managers
             HandleMouseInput();
         }
 
-        public void Draw(Batcher2D batcher)
+        public void Draw(UltimaBatcher2D batcher)
         {
             SortControlsByInfo();
 

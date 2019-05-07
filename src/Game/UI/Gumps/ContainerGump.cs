@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
             TextContainer.Draw(batcher, x, y);

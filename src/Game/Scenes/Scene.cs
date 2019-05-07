@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public virtual bool Draw(Batcher2D batcher)
+        public virtual bool Draw(UltimaBatcher2D batcher)
         {
             return true;
         }

@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.Value += _scrollBar.ScrollStep;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             var scrollbar = Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);

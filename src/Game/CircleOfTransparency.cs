@@ -92,7 +92,7 @@ namespace ClassicUO.Game
             return pixels;
         }
 
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
             {

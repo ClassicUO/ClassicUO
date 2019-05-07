@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Managers
             AuraTexture.SetData(data);
         }
 
-        public void Draw(Batcher2D batcher, int x, int y, Hue hue)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, Hue hue)
         {
             x -= AuraTexture.Width >> 1;
             y -= AuraTexture.Height >> 1;

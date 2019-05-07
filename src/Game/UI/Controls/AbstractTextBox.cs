@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left) EntryValue?.OnSelectionEnd(x, y);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             EntryValue?.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
 

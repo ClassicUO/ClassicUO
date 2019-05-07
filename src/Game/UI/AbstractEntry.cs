@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI
                 IsChanged = false;
         }
 
-        public void OnDraw(Batcher2D batcher, int x, int y)
+        public void OnDraw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_isSelection)
             {

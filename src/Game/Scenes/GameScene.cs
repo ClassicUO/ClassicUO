@@ -617,7 +617,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override bool Draw(Batcher2D batcher)
+        public override bool Draw(UltimaBatcher2D batcher)
         {
             if (!World.InGame)
                 return false;
@@ -665,7 +665,7 @@ namespace ClassicUO.Game.Scenes
         //    DepthBufferEnable = false,
         //};
 
-        private void DrawWorld(Batcher2D batcher)
+        private void DrawWorld(UltimaBatcher2D batcher)
         {
             Game.SelectedObject.Object = null;
 
@@ -680,7 +680,6 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin();
-            batcher.SetLightDirection(World.Light.IsometricDirection);
 
             //batcher.SetStencil(s2);
 
@@ -739,7 +738,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private void DrawLights(Batcher2D batcher)
+        private void DrawLights(UltimaBatcher2D batcher)
         {
             batcher.GraphicsDevice.SetRenderTarget(null);
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
@@ -761,27 +760,33 @@ namespace ClassicUO.Game.Scenes
 
                 SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
-                SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = l.DrawX - (texture.Width >> 1);
-                vertex[0].Position.Y = l.DrawY - (texture.Height >> 1);
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.X += texture.Width;
-                vertex[1].TextureCoordinate.Y = 0;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.Y += texture.Height;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += texture.Height;
+                //SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
+                //vertex[0].Position.X = l.DrawX - (texture.Width >> 1);
+                //vertex[0].Position.Y = l.DrawY - (texture.Height >> 1);
+                //vertex[0].TextureCoordinate.Y = 0;
+                //vertex[1].Position = vertex[0].Position;
+                //vertex[1].Position.X += texture.Width;
+                //vertex[1].TextureCoordinate.Y = 0;
+                //vertex[2].Position = vertex[0].Position;
+                //vertex[2].Position.Y += texture.Height;
+                //vertex[3].Position = vertex[1].Position;
+                //vertex[3].Position.Y += texture.Height;
 
-                for (int j = 0; j < 4; j++)
-                {
-                    ref SpriteVertex v = ref vertex[j];
-                    v.Hue.X = l.Color;
-                    v.Hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                    v.Hue.Z = 0f;
-                }
+                //for (int j = 0; j < 4; j++)
+                //{
+                //    ref SpriteVertex v = ref vertex[j];
+                //    v.Hue.X = l.Color;
+                //    v.Hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                //    v.Hue.Z = 0f;
+                //}
 
-                batcher.DrawSprite(texture, ref vertex);
+                Vector3 hue = Vector3.Zero;
+                hue.X = l.Color;
+                hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                hue.Z = 0;
+
+                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, 0, 0, hue);
+
             }
 
             _lightCount = 0;
@@ -790,7 +795,7 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
         }
 
-        public void DrawOverheads(Batcher2D batcher, int x, int y)
+        public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
             _healthLinesManager.Draw(batcher, Scale);
 

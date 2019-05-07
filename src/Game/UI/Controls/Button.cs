@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Controls
             _entered = false;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             SpriteTexture texture = GetTextureByState();
 

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Mobile
     {
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private void DrawBody(Batcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
+        private void DrawBody(UltimaBatcher2D batcher, int posX, int posY, byte dir, out int drawX, out int drawY, out int drawCenterY, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
         {
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private void DrawEquipment(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool isUnderMouse)
+        private void DrawEquipment(UltimaBatcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, ref Rectangle rect, ref bool mirror, Hue hue, bool isUnderMouse)
         {
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -264,7 +264,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private void DrawLayer(Batcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
+        private void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, byte dir, ref int drawX, ref int drawY, ref int drawCenterY, Layer layer, ref Rectangle rect, ref bool mirror, ushort hue, bool shadow, bool isUnderMouse)
         {
             Item item = Equipment[(int) layer];
 
@@ -426,69 +426,44 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private void DrawInternal(Batcher2D batcher, int posX, int posY, bool hasShadow)
+        private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY, bool hasShadow)
         {
-            SpriteVertex[] vertex;
-
-            if (IsFlipped)
-            {
-                vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X += Bounds.X + 44f;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.Y += Bounds.Height;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.X -= Bounds.Width;
-                vertex[2].TextureCoordinate.Y = 0;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.X -= Bounds.Width;
-            }
-            else
-            {
-                vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X -= Bounds.X;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.X += Bounds.Width;
-                vertex[1].TextureCoordinate.Y = 0;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.Y += Bounds.Height;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += Bounds.Height;
-            }
-
-
-            if (vertex[0].Hue != HueVector)
-                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
-
+            Texture.Ticks = Engine.Ticks;
 
             if (hasShadow)
             {
-                SpriteVertex[] vertexS =
-                {
-                    vertex[0],
-                    vertex[1],
-                    vertex[2],
-                    vertex[3]
-                };
-
-                Vector3 hue = Vector3.Zero;
-                hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
-
-                vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
-
-                batcher.DrawShadow(Texture, ref vertexS, posX + 22, (int) (posY + Offset.Y - Offset.Z + 22), IsFlipped);
+                // TODO:
             }
 
+            if (IsFlipped)
+            {
+                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
+            }
+            else
+            {
+                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
+            }
 
-            batcher.DrawSprite(Texture, ref vertex);
-            Texture.Ticks = Engine.Ticks;
+        
+            //if (hasShadow)
+            //{
+            //    SpriteVertex[] vertexS =
+            //    {
+            //        vertex[0],
+            //        vertex[1],
+            //        vertex[2],
+            //        vertex[3]
+            //    };
+
+            //    Vector3 hue = Vector3.Zero;
+            //    hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
+
+            //    vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
+
+            //    batcher.DrawShadow(Texture, ref vertexS, posX + 22, (int) (posY + Offset.Y - Offset.Z + 22), IsFlipped);
+            //}
+
+
         }
 
         public override void Select(int x, int y)

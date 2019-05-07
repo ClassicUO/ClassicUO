@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;

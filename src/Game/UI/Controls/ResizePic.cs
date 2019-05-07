@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
 
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        private void DrawInternal(Batcher2D batcher, int x, int y, Vector3 color)
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
         {
             for (int i = 0; i < 9; i++)
             {

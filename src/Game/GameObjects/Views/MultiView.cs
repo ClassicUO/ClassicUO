@@ -25,7 +25,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
