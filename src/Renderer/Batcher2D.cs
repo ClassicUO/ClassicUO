@@ -255,7 +255,7 @@ namespace ClassicUO.Renderer
 
             vertex0.Normal = normals[0];
             vertex1.Normal = normals[1];
-            vertex3.Normal = normals[2];
+            vertex3.Normal = normals[2]; // right order!
             vertex2.Normal = normals[3];
 
             vertex0.Position.X = x + 22;
@@ -263,15 +263,15 @@ namespace ClassicUO.Renderer
             vertex0.Position.Z = 0;
 
             vertex1.Position.X = x + 44;
-            vertex1.Position.Y = y + 22 - rect.Bottom;
+            vertex1.Position.Y = y + (22 - rect.Bottom);
             vertex1.Position.Z = 0;
 
             vertex2.Position.X = x;
-            vertex2.Position.Y = y + 22 - rect.Top;
+            vertex2.Position.Y = y + (22 - rect.Top);
             vertex2.Position.Z = 0;
 
             vertex3.Position.X = x + 22;
-            vertex3.Position.Y = y + 44 - rect.Right;
+            vertex3.Position.Y = y + (44 - rect.Right);
             vertex3.Position.Z = 0;
 
             vertex0.Hue =
