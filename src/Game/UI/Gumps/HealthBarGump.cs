@@ -517,7 +517,7 @@ namespace ClassicUO.Game.UI.Gumps
             _targetBroke = false;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button != MouseButton.Left)
                 return;
