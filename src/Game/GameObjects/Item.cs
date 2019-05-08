@@ -318,7 +318,7 @@ namespace ClassicUO.Game.GameObjects
 
             house.Generate();
 
-            Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+            Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
         }
 
         private AnimDataFrame2 _animDataFrame;

@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
             else
             {
-                CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+                CharCreationGump charCreationGump = Engine.UI.GetControl<CharCreationGump>();
 
                 charCreationGump?.SetProfession(info);
             }
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     else
                     {
                         Parent.Remove(this);
-                        CharCreationGump charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+                        CharCreationGump charCreationGump = Engine.UI.GetControl<CharCreationGump>();
                         charCreationGump?.StepBack();
                     }
 

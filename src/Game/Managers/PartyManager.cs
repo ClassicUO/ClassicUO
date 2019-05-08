@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Managers
         {
             var list = new List<PartyMember>(Members);
             Members.Clear();
-            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
+            list.ForEach(s => Engine.UI.GetControl<HealthBarGump>(s.Serial)?.Update());
 
             foreach (Serial serial in mobileSerials)
                 AddPartyMember(serial);
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Managers
                 Members.Add(new PartyMember(mobileSerial));
                 GameActions.RequestMobileStatus(mobileSerial);
 
-                Engine.UI.GetByLocalSerial<HealthBarGump>(mobileSerial)?.Update();
+                Engine.UI.GetControl<HealthBarGump>(mobileSerial)?.Update();
             }
         }
 
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.Managers
             GameActions.RequestPartyQuit();
             var list = new List<PartyMember>(Members);
             Members.Clear();
-            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
+            list.ForEach(s => Engine.UI.GetControl<HealthBarGump>(s.Serial)?.Update());
         }
 
         public void PartyMessage(string message)

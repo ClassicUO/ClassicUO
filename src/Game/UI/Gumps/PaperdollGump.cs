@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
-                            if (Engine.UI.GetByLocalSerial<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            if (Engine.UI.GetControl<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
                         };
                         profileX += SCROLLS_STEP;
                     }
@@ -301,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButton.Left)
             {
-                var party = Engine.UI.GetByLocalSerial<PartyGumpAdvanced>();
+                var party = Engine.UI.GetControl<PartyGumpAdvanced>();
 
                 if (party == null)
                     Engine.UI.Add(new PartyGumpAdvanced());
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case Buttons.Options:
 
-                    OptionsGump gump = Engine.UI.GetByLocalSerial<OptionsGump>();
+                    OptionsGump gump = Engine.UI.GetControl<OptionsGump>();
 
                     if (gump == null)
                     {
@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile)?.Dispose();
+                        Engine.UI.GetControl<HealthBarGump>(Mobile)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetByLocalSerial<HealthBarGump>(Mobile) != null)
+                        if (Engine.UI.GetControl<HealthBarGump>(Mobile) != null)
                             break;
 
                         GameActions.RequestMobileStatus(Mobile);

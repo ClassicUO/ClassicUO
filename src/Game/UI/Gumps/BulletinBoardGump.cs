@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             hitbox.MouseClick += (sender, e) =>
             {
-                Engine.UI.GetByLocalSerial<BulletinBoardItem>(LocalSerial)?.Dispose();
+                Engine.UI.GetControl<BulletinBoardItem>(LocalSerial)?.Dispose();
 
                 Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, "Date/Time", string.Empty, 0));
             };

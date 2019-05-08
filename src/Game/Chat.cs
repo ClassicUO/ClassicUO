@@ -131,7 +131,7 @@ namespace ClassicUO.Game
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        Gump gump = Engine.UI.GetByLocalSerial<Gump>(it.Container);
+                        Gump gump = Engine.UI.GetControl<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
                         {
@@ -148,7 +148,7 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            var trade = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+                            var trade = Engine.UI.GetControl<TradingGump>(ent);
 
                             if (trade == null)
                             { 

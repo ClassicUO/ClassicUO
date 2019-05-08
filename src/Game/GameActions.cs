@@ -312,7 +312,7 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook()
         {
-            if (Engine.UI.GetByLocalSerial<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
+            if (Engine.UI.GetControl<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
         }
 
         public static void UsePrimaryAbility()

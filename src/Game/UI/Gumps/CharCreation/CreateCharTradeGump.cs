@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -166,14 +166,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                    Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                 return false;
             }

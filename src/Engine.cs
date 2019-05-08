@@ -182,7 +182,7 @@ namespace ClassicUO
 
                 SetPreferredBackBufferSize(width, height);
 
-                WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
+                WorldViewportGump gump = _uiManager.GetControl<WorldViewportGump>();
 
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
                 {

@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case Buttons.GetBar:
 
-                    Engine.UI.GetByLocalSerial<HealthBarGump>(Member.Mobile)?.Dispose();
+                    Engine.UI.GetControl<HealthBarGump>(Member.Mobile)?.Dispose();
 
                     if (Member.Mobile == World.Player)
                         StatusGumpBase.GetStatusGump()?.Dispose();

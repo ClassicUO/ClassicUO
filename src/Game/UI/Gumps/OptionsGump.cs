@@ -1095,7 +1095,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
-            WorldViewportGump vp = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+            WorldViewportGump vp = Engine.UI.GetControl<WorldViewportGump>();
 
             // general
             Engine.GlobalSettings.PreloadMaps = _preloadMaps.IsChecked;
@@ -1121,7 +1121,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
-                    Engine.UI.GetByLocalSerial<TopBarGump>()?.Dispose();
+                    Engine.UI.GetControl<TopBarGump>()?.Dispose();
                 else
                     TopBarGump.Create();
 
@@ -1298,7 +1298,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;
-                WorldViewportGump viewport = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+                WorldViewportGump viewport = Engine.UI.GetControl<WorldViewportGump>();
                 viewport?.ReloadChatControl(new SystemChatControl(5, 5, Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y));
             }
 
@@ -1330,7 +1330,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
             Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
-            CounterBarGump counterGump = Engine.UI.GetByLocalSerial<CounterBarGump>();
+            CounterBarGump counterGump = Engine.UI.GetControl<CounterBarGump>();
 
             counterGump?.SetLayout(Engine.Profile.Current.CounterBarCellSize,
                                    Engine.Profile.Current.CounterBarRows,
@@ -1355,7 +1355,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
-                DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
+                DebugGump debugGump = Engine.UI.GetControl<DebugGump>();
 
                 if (_debugGumpIsDisabled.IsChecked)
                 {
@@ -1392,7 +1392,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            WorldViewportGump gump = Engine.UI.GetByLocalSerial<WorldViewportGump>();
+            WorldViewportGump gump = Engine.UI.GetControl<WorldViewportGump>();
             _gameWindowWidth.Text = gump.Width.ToString();
             _gameWindowHeight.Text = gump.Height.ToString();
             _gameWindowPositionX.Text = gump.X.ToString();

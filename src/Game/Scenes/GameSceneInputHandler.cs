@@ -396,7 +396,7 @@ namespace ClassicUO.Game.Scenes
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
 
-                            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
+                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();

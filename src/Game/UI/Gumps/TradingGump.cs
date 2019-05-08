@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -35,7 +36,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal sealed class TradingGump : Gump
     {
-        private readonly Entity _entity1, _entity2;
         private readonly string _name;
         private GumpPic _hisPic;
 
@@ -55,18 +55,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             ID1 = id1;
             ID2 = id2;
-
-            _entity1 = World.Get(id1);
-            _entity2 = World.Get(id2);
-
-            if (_entity1 == null || _entity2 == null)
-            {
-                Dispose();
-                return;
-            }
-
-            _entity1.Items.Added += ItemsOnAdded1;
-            _entity2.Items.Added += ItemsOnAdded2;
 
             BuildGump();
         }
@@ -132,15 +120,18 @@ namespace ClassicUO.Game.UI.Gumps
             _lastClick.Y = y;
         }
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
+        public void UpdateContent()
         {
-            foreach (Serial s in e)
+            Entity container = World.Get(ID1);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
             {
-                var item = World.Items.Get(s);
-
-                if (item == null)
-                    continue;
-
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true
@@ -167,17 +158,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _myBox.Add(g);
             }
-        }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Serial> e)
-        {
-            foreach (Serial s in e)
+
+            container = World.Get(ID2);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
             {
-                var item = World.Items.Get(s);
-
-                if (item == null)
-                    continue;
-
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true
@@ -206,13 +198,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+     
         public override void Dispose()
         {
             base.Dispose();
-
-            _entity1.Items.Added -= ItemsOnAdded1;
-            _entity2.Items.Added -= ItemsOnAdded2;
-
             GameActions.CancelTrade(ID1);
         }
 
@@ -281,9 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCheckboxes();
 
-            foreach (Item item in _entity1.Items) _myBox.Add(new ItemGump(item));
-
-            foreach (Item item in _entity2.Items) _hisBox.Add(new ItemGump(item));
+            UpdateContent();
 
             _myBox.MouseUp += (sender, e) =>
             {

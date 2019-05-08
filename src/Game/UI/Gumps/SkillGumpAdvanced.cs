@@ -314,7 +314,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 uint serial = (uint) (World.Player + _skill.Index + 1);
 
-                if (Engine.UI.GetByLocalSerial<SkillButtonGump>(serial) != null)
+                if (Engine.UI.GetControl<SkillButtonGump>(serial) != null)
                     Engine.UI.Remove<SkillButtonGump>(serial);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);

@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
@@ -267,6 +268,8 @@ namespace ClassicUO.Game.GameObjects
         public event EventHandler ManaChanged;
 
         public event EventHandler StaminaChanged;
+
+        public Item GetSecureTradeBox() => Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
 
         public void SetSAPoison(bool value)
         {

@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
+                if (Engine.UI.GetControl<SplitMenuGump>(item) != null)
                     return false;
 
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
-                ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
+                ContainerGump gump = Engine.UI.GetControl<ContainerGump>(container);
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {

@@ -27,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
         {
             _isPrimary = primary;
-            Engine.UI.GetByLocalSerial<UseAbilityButtonGump>((uint) def.Index)?.Dispose();
+            Engine.UI.GetControl<UseAbilityButtonGump>((uint) def.Index)?.Dispose();
             _definition = def;
             BuildGump();
         }
