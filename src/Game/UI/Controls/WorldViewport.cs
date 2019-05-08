@@ -101,8 +101,6 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.SetBlendState(null);
             }
 
-            batcher.DrawString(Fonts.Bold, "XBR: " + (XBR ? "ON" : "OFF"), 200, 200, Vector3.Zero);
-
             // draw overheads
             _scene.DrawOverheads(batcher, x, y);
 
