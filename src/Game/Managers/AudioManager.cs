@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            FileManager.Sounds.GetSound(index)?.Play(true, AudioEffects.PitchVariation, volume, spamCheck);
+            FileManager.Sounds.GetSound(index)?.Play(true, AudioEffects.None, volume, spamCheck);
         }
 
         public void PlayMusic(int music)
