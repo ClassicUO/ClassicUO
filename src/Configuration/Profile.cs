@@ -236,6 +236,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
 
+        [JsonProperty] public bool UseXBR { get; set; } = true;
+
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
 

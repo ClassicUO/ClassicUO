@@ -1036,7 +1036,14 @@ namespace ClassicUO.Renderer
             int offset = 0;
 
             if (_customEffect != null)
-                _customEffect.CurrentTechnique.Passes[0].Apply();
+            {
+                if (_customEffect is MatrixEffect eff)
+                    eff.ApplyStates();
+                else
+                    _customEffect.CurrentTechnique.Passes[0].Apply();
+            }
+
+
 
             for (int i = 1; i < NumSprites; i++)
             {
@@ -1112,9 +1119,11 @@ namespace ClassicUO.Renderer
 
     internal class Resources
     {
-        private static byte[] _isometricEffect;
+        private static byte[] _isometricEffect, _xBREffect;
 
         public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
+
+        public static byte[] xBREffect => _xBREffect ?? (_xBREffect = GetResource("ClassicUO.shaders.xBR.fxc"));
 
         public static byte[] StandardEffect
         {

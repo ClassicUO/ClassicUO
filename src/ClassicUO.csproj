@@ -162,6 +162,7 @@
     <Compile Include="Game\UI\TextContainer.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Renderer\UI\UIControl.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
@@ -521,6 +522,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="README.md" />
+    <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -536,6 +538,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cuoicon.ico" />
+    <None Include="shaders\xBR.fx" />
     <EmbeddedResource Include="cuologo.png" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

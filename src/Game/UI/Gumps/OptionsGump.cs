@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollAreaItem _activeChatArea;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR;
         private HSliderBar _lightBar;
 
         //counters
@@ -567,6 +567,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
 
+            _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
+
             Add(rightArea, PAGE);
         }
 
@@ -1020,6 +1022,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
                     _auraMouse.IsChecked = true;
+                    _xBR.IsChecked = true;
 
                     _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
@@ -1290,6 +1293,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
             Engine.Profile.Current.AuraOnMouse = _auraMouse.IsChecked;
+            Engine.Profile.Current.UseXBR = _xBR.IsChecked;
 
 
             // fonts

@@ -17,6 +17,7 @@ namespace ClassicUO.Input
         public static bool Shift { get; private set; }
         public static bool Ctrl { get; private set; }
 
+
         public static bool IsModPressed(SDL.SDL_Keymod mod, SDL.SDL_Keymod tocheck)
         {
             mod ^= mod & IgnoreKeyMod;
