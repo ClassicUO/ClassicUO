@@ -232,7 +232,7 @@ namespace ClassicUO.Network
             Skip(2);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientLockedFeatures.Flags; i++)
+            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
             {
                 clientFlag |= (uint) (1 << i);
             }
