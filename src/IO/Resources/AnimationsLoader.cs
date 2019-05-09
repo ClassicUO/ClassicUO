@@ -25,8 +25,9 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];
-        private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
+        //private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
 
+        private readonly List<AnimationFrameTexture> _usedTextures = new List<AnimationFrameTexture>();
 
 
         public ushort Color { get; set; }
@@ -1163,7 +1164,8 @@ namespace ClassicUO.IO.Resources
                 animDirection.FrameCount = (byte) (pixelDataOffsets.Length / 5);
                 int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
-                if (animDirection.Frames != null && animDirection.Frames.Length != 0) Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
+                if (animDirection.Frames != null && animDirection.Frames.Length != 0)
+                    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
 
                 animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
@@ -1231,7 +1233,7 @@ namespace ClassicUO.IO.Resources
                     //ResourceDictionary.Add(uniqueAnimationIndex, f);
                 }
 
-                _usedUopTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
+                //_usedUopTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
 
 
                 reader.ReleaseData();
@@ -1253,7 +1255,8 @@ namespace ClassicUO.IO.Resources
             animDir.FrameCount = (byte) frameCount;
             uint* frameOffset = (uint*) reader.PositionAddress;
 
-            if (animDir.Frames != null && animDir.Frames.Length > 0) Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+            if (animDir.Frames != null && animDir.Frames.Length != 0)
+                Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
 
             animDir.Frames = new AnimationFrameTexture[frameCount];
 
@@ -1312,7 +1315,7 @@ namespace ClassicUO.IO.Resources
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);
             }
 
-            _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
+            //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
 
         public unsafe void GetAnimationDimensions(byte frameIndex, ushort id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
@@ -1439,140 +1442,71 @@ namespace ClassicUO.IO.Resources
 
         public override void CleaUnusedResources()
         {
-            int count = 0;
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-            ushort hue = 0;
+            //int count = 0;
+            //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            //ushort hue = 0;
 
-            for (int i = 0; i < _usedTextures.Count; i++)
-            {
-                ToRemoveInfo info = _usedTextures[i];
-
-                ushort graphic = (ushort) info.AnimID;
-                byte grp = (byte) info.Group;
-
-                ref var dir = ref GetBodyAnimationGroup(ref graphic, ref grp, ref hue).Direction[info.Direction];
-
-                if (dir.LastAccessTime != 0 && dir.LastAccessTime < ticks)
-                {
-                    for (int j = 0; j < dir.FrameCount; j++)
-                    {
-                        ref var hash = ref dir.Frames[j];
-
-                        if (hash != null)
-                        {
-                            hash.Dispose();
-                            hash = null;
-                        }
-                    }
-
-                    dir.FrameCount = 0;
-                    dir.Frames = null;
-                    dir.LastAccessTime = 0;
-                    _usedTextures.RemoveAt(i--);
-
-                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                        break;
-                }
-            }
-
-
-            //for (int i = 0; i < _usedUopTextures.Count; i++)
+            //for (int i = 0; i < _usedTextures.Count; i++)
             //{
-            //    ToRemoveInfo info = _usedUopTextures[i];
-            //    ref AnimationDirection dir = ref UOPDataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
+            //    ToRemoveInfo info = _usedTextures[i];
 
-            //    if (dir.LastAccessTime < ticks)
+            //    ushort graphic = (ushort) info.AnimID;
+            //    byte grp = (byte) info.Group;
+
+            //    ref var dataIndex = ref DataIndex[graphic];
+
+
+
+            //    ref var dir = ref GetBodyAnimationGroup(ref graphic, ref grp, ref hue).Direction[info.Direction];
+
+            //    if (dir.LastAccessTime != 0 && dir.LastAccessTime < ticks)
             //    {
             //        for (int j = 0; j < dir.FrameCount; j++)
             //        {
-            //            ref var hash = ref dir.FramesHashes[j];
+            //            ref var hash = ref dir.Frames[j];
 
             //            if (hash != null)
             //            {
             //                hash.Dispose();
             //                hash = null;
             //            }
-
-            //            //if (ResourceDictionary.TryGetValue(hash, out var texture))
-            //            //{
-            //            //    texture?.Dispose();
-            //            //    ResourceDictionary.Remove(hash);
-            //            //    hash = 0;
-            //            //}
             //        }
 
             //        dir.FrameCount = 0;
-            //        dir.FramesHashes = null;
+            //        dir.Frames = null;
             //        dir.LastAccessTime = 0;
-            //        _usedUopTextures.RemoveAt(i--);
+            //        _usedTextures.RemoveAt(i--);
 
             //        if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
             //            break;
             //    }
             //}
+
         }
 
         public void Clear()
         {
-            for (int i = 0; i < _usedTextures.Count; i++)
-            {
-                ToRemoveInfo info = _usedTextures[i];
-                ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
-
-
-                for (int j = 0; j < dir.FrameCount; j++)
-                {
-                    ref var hash = ref dir.Frames[j];
-
-                    if (hash != null)
-                    {
-                        hash.Dispose();
-                        hash = null;
-                    }
-
-                    //if (ResourceDictionary.TryGetValue(hash, out var texture) && texture != null)
-                    //{
-                    //    texture.Dispose();
-                    //    ResourceDictionary.Remove(hash);
-                    //    hash = 0;
-                    //}
-                }
-
-                dir.FrameCount = 0;
-                dir.Frames = null;
-                dir.LastAccessTime = 0;
-                _usedTextures.RemoveAt(i--);
-            }
-
-            //for (int i = 0; i < _usedUopTextures.Count; i++)
+            //for (int i = 0; i < _usedTextures.Count; i++)
             //{
-            //    ToRemoveInfo info = _usedUopTextures[i];
-            //    ref AnimationDirection dir = ref UOPDataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
+            //    ToRemoveInfo info = _usedTextures[i];
+            //    ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
 
 
             //    for (int j = 0; j < dir.FrameCount; j++)
             //    {
-            //        ref var hash = ref dir.FramesHashes[j];
+            //        ref var hash = ref dir.Frames[j];
 
             //        if (hash != null)
             //        {
             //            hash.Dispose();
             //            hash = null;
             //        }
-
-            //        //if (ResourceDictionary.TryGetValue(hash, out var texture) && texture != null)
-            //        //{
-            //        //    texture.Dispose();
-            //        //    ResourceDictionary.Remove(hash);
-            //        //    hash = 0;
-            //        //}
             //    }
 
             //    dir.FrameCount = 0;
-            //    dir.FramesHashes = null;
+            //    dir.Frames = null;
             //    dir.LastAccessTime = 0;
-            //    _usedUopTextures.RemoveAt(i--);
-
+            //    _usedTextures.RemoveAt(i--);
             //}
         }
 
