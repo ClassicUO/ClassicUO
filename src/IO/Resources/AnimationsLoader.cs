@@ -1452,7 +1452,7 @@ namespace ClassicUO.IO.Resources
 
                 ref var dir = ref GetBodyAnimationGroup(ref graphic, ref grp, ref hue).Direction[info.Direction];
 
-                if (dir.LastAccessTime < ticks)
+                if (dir.LastAccessTime != 0 && dir.LastAccessTime < ticks)
                 {
                     for (int j = 0; j < dir.FrameCount; j++)
                     {

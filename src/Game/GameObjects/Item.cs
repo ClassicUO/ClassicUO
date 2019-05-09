@@ -371,7 +371,7 @@ namespace ClassicUO.Game.GameObjects
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
                 {
                     LoadMulti();
-                    AllowedToDraw = MultiGraphic != 0;
+                    AllowedToDraw = MultiGraphic > 2;
                     _originalGraphic = MultiGraphic;
                     _force = true;
                 }

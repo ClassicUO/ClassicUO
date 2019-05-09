@@ -43,7 +43,10 @@ namespace ClassicUO.Renderer
 
             MatrixTransform.SetValue(matrixTransform);
 
-            this[0].Apply();
+            foreach (EffectPass pa in CurrentTechnique.Passes)
+            {
+                pa.Apply();
+            }
         }
     }
 }

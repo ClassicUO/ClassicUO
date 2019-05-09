@@ -45,8 +45,6 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly GameScene _scene;
 
-        public bool XBR = true;
-
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
             X = x;
@@ -65,7 +63,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
             {
-                if (_xBR == null)
+                // draw regular world
+
+                if (_xBR == null || _xBR.IsDisposed)
                 {
                     _xBR = new MatrixEffect(batcher.GraphicsDevice, Resources.xBREffect);
                 }
@@ -80,7 +80,6 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.End();
 
                 batcher.Begin(_xBR);
-                // draw regular world
                 batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
                 batcher.End();
 
@@ -88,7 +87,6 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                // draw regular world
                 batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
             }
 
@@ -110,6 +108,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            _xBR?.Dispose();
             _blend?.Dispose();
             base.Dispose();
         }
