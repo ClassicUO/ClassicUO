@@ -230,10 +230,14 @@ namespace ClassicUO.Network
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
             Skip(2);
-            uint clientflag = 0x1f;
-            /* IFOR (i, 0, g_CharacterList.ClientFlag)
-            clientFlag |= (1 << i);*/
-            WriteUInt(clientflag);
+            uint clientFlag = 0;
+
+            for (int i = 0; i < (int) World.ClientLockedFeatures.Flags; i++)
+            {
+                clientFlag |= (uint) (1 << i);
+            }
+
+            WriteUInt(clientFlag);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
