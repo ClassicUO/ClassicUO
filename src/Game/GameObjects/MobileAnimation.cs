@@ -440,7 +440,7 @@ namespace ClassicUO.Game.GameObjects
 
             ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
 
-            if (mobile.AnimationFromServer)
+            if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {
                 ushort v13 = mobile.AnimationGroup;
 
