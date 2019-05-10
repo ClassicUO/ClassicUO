@@ -755,39 +755,19 @@ namespace ClassicUO.Game.Scenes
             batcher.Begin();
             batcher.SetBlendState(BlendState.Additive);
 
+            Vector3 hue = Vector3.Zero;
+
             for (int i = 0; i < _lightCount; i++)
             {
                 ref var l = ref _lights[i];
 
                 SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
-                //SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
-                //vertex[0].Position.X = l.DrawX - (texture.Width >> 1);
-                //vertex[0].Position.Y = l.DrawY - (texture.Height >> 1);
-                //vertex[0].TextureCoordinate.Y = 0;
-                //vertex[1].Position = vertex[0].Position;
-                //vertex[1].Position.X += texture.Width;
-                //vertex[1].TextureCoordinate.Y = 0;
-                //vertex[2].Position = vertex[0].Position;
-                //vertex[2].Position.Y += texture.Height;
-                //vertex[3].Position = vertex[1].Position;
-                //vertex[3].Position.Y += texture.Height;
-
-                //for (int j = 0; j < 4; j++)
-                //{
-                //    ref SpriteVertex v = ref vertex[j];
-                //    v.Hue.X = l.Color;
-                //    v.Hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                //    v.Hue.Z = 0f;
-                //}
-
-                Vector3 hue = Vector3.Zero;
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                 hue.Z = 0;
 
-                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, 0, 0, hue);
-
+                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, hue);
             }
 
             _lightCount = 0;
