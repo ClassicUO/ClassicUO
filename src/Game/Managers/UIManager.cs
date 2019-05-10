@@ -351,8 +351,6 @@ namespace ClassicUO.Game.Managers
                     case "checkertrans":
                         CheckerTrans t = new CheckerTrans(gparams);
 
-
-                        //for (int i = 0; i < gump.Children.Count; i++)
                         for (int i = gump.Children.Count - 1; i >= 0; i--)
                         {
                             Control c = gump.Children[i];
@@ -366,16 +364,8 @@ namespace ClassicUO.Game.Managers
 
                             if (t.Bounds.Intersects(c.Bounds))
                             {
-                                //if (t.Bounds.Contains(c.Bounds))
-                                //{
-                                //    c.IsEnabled = false;
-                                //}
-
-                                if (c is Button) c.Alpha = 1f;
-
-
-                                //else
-                                //    c.IsEnabled = false;
+                                if (c is Button)
+                                    c.Alpha = 1f;
                             }
                         }
 
