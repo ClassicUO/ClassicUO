@@ -2223,23 +2223,24 @@ namespace ClassicUO.Network
 
                 if (type == 0 || type == 2)
                 {
-                    int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
-
-                    if (oldPerc != newPerc)
+                    try
                     {
-                        Hue[] hues = HealthPercentageHues.Hues;
+                        int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
 
-                        try
+                        if (oldPerc != newPerc)
                         {
+                            Hue[] hues = HealthPercentageHues.Hues;
+
+
                             int index = (newPerc + 5) / 10 % hues.Length;
 
                             if (index >= 0 && index < hues.Length)
                                 mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
                         }
-                        catch
-                        {
+                    }
+                    catch
+                    {
 
-                        }
                     }
                 }
             }
@@ -2372,6 +2373,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+
             Serial serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
@@ -2379,12 +2381,29 @@ namespace ClassicUO.Network
             Hue hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string lang = p.ReadASCII(4);
-            string name = p.ReadASCII(30);
-            string text = p.ReadUnicode();
+            string name = p.ReadASCII();
 
+            if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.ToLower() == "system")
+            {
+                byte[] buffer = { 0x03, 0x00, 0x28, 0x20, 0x00, 0x34, 0x00, 0x03, 0xdb, 0x13,
+                    0x14, 0x3f, 0x45, 0x2c, 0x58, 0x0f, 0x5d, 0x44, 0x2e, 0x50,
+                    0x11, 0xdf, 0x75, 0x5c, 0xe0, 0x3e, 0x71, 0x4f, 0x31, 0x34,
+                    0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00 };
+
+                NetClient.Socket.Send(buffer);
+                return;
+            }
+
+            string text = string.Empty;
+
+            if (p.Length > 48)
+            {
+                p.Seek(48);
+                text = p.ReadUnicode();
+            }
+            
             if (entity != null)
             {
-                //entity.Graphic = graphic;
                 if (string.IsNullOrEmpty(entity.Name))
                     entity.Name = name;
                 entity.ProcessDelta();
