@@ -520,7 +520,7 @@ namespace ClassicUO.Network
                 Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;
                 if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
-                lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                lock (_circularBuffer) _circularBuffer?.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
             }
             else
