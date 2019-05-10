@@ -369,6 +369,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void OnPageChanged()
         {
+            //Update size as pages may vary in size.
+            WantUpdateSize = true;
         }
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
