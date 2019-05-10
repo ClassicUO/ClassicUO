@@ -51,16 +51,9 @@ namespace ClassicUO.Renderer
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct SpriteVertex : IVertexType
+    internal struct PositionNormalTextureColor : IVertexType
     {
-        public SpriteVertex(Vector3 position, Vector3 normal, Vector3 textureCoordinate)
-        {
-            Position = position;
-            Normal = normal;
-            TextureCoordinate = textureCoordinate;
-            Hue = Vector3.Zero;
-        }
-
+ 
         public Vector3 Position;
         public Vector3 Normal;
         public Vector3 TextureCoordinate;

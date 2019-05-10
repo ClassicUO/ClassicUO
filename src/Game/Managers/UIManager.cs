@@ -335,7 +335,6 @@ namespace ClassicUO.Game.Managers
 
                         gump.Add(new Button(gparams)
                         {
-                            //WantUpdateSize = false,
                             ContainsByBounds = true
                         }, page);
 

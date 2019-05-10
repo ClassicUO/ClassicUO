@@ -376,7 +376,10 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                     }
 
-                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[item.Graphic].Groups[group].Direction[1];
+                    ushort graphic = item.Graphic;
+                    ushort hue2 = item.Hue;
+
+                    ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
                     FileManager.Animations.AnimID = item.Graphic;
                     FileManager.Animations.AnimGroup = group;
                     FileManager.Animations.Direction = 1;
@@ -389,7 +392,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Texture = direction.Frames[0], //FileManager.Animations.GetTexture(direction.FramesHashes[0]),
                         X = 5, Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue,
+                        Hue = item.Hue == 0 ? (Hue) hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
@@ -503,7 +506,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 break;
                         }
 
-                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
+                        ushort graphic = Item.Graphic;
+                        ushort hue2 = Item.Hue;
+
+                        ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
                         direction.LastAccessTime = Engine.Ticks;
                     }
                 }

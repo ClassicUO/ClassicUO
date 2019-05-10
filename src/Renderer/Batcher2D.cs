@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class UltimaBatcher2D : Batcher2D<SpriteVertex>
+    internal class UltimaBatcher2D : Batcher2D<PositionNormalTextureColor>
     {
         public UltimaBatcher2D(GraphicsDevice device) : base(device, new IsometricEffect(device))
         {
@@ -1023,7 +1023,7 @@ namespace ClassicUO.Renderer
             _defaultEffect.ApplyStates();
         }
 
-        protected void Flush()
+        private void Flush()
         {
             ApplyStates();
 

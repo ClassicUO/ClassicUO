@@ -497,36 +497,69 @@ namespace ClassicUO.Game.UI.Gumps
                         switch (text)
                         {
                             case "add":
-                                World.Party.TriggerAddPartyMember();
-
+                                if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
+                                {
+                                    GameActions.RequestPartyInviteByTarget();
+                                }
+                                else
+                                {
+                                    Chat.HandleMessage(null, "You are not party leader.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                }
                                 break;
                             case "loot":
 
-                                if (World.Party.IsInParty)
-                                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
+                                if (World.Party.Leader != 0)
+                                    World.Party.CanLoot = !World.Party.CanLoot;
+                                else
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+
 
                                 break;
                             case "quit":
 
-                                if (World.Party.IsInParty)
-                                    World.Party.QuitParty();
+                                if (World.Party.Leader == 0)
+                                {
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                }
+                                else
+                                {
+                                    for (int i = 0; i < World.Party.Members.Length; i++)
+                                    {
+                                        if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                                            GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
+                                    }
+                                }
 
                                 break;
                             case "accept":
 
-                                if (!World.Party.IsInParty)
-                                    World.Party.AcceptPartyInvite();
+                                if (World.Party.Leader == 0 && World.Party.Inviter != 0)
+                                {
+                                    GameActions.RequestPartyAccept(World.Party.Inviter);
+                                    World.Party.Leader = World.Party.Inviter;
+                                    World.Party.Inviter = 0;
+                                }
+                                else
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
 
                                 break;
                             case "decline":
 
-                                if (!World.Party.IsInParty)
-                                    World.Party.DeclinePartyInvite();
+                                if (World.Party.Leader == 0 && World.Party.Inviter != 0)
+                                {
+                                    NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
+                                    World.Party.Leader = 0;
+                                    World.Party.Inviter = 0;
+                                }
+                                else
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+
 
                                 break;
                             default:
 
-                                if (World.Party.IsInParty) World.Party.PartyMessage(text);
+                                if (World.Party.Leader != 0)
+                                    GameActions.SayParty(text);
 
                                 break;
                         }

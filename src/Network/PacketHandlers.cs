@@ -296,7 +296,6 @@ namespace ClassicUO.Network
                       .AddDamage(entity,
                                  damage
                                 );
-                //new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
         }
 
@@ -574,13 +573,6 @@ namespace ClassicUO.Network
 
 
             if (World.Items.Add(item)) World.Items.ProcessDelta();
-
-            //if (item.ItemData.IsAnimated)
-            //{
-            //    item.AllowedToDraw = false;
-
-            //    World.AddEffect(new AnimatedItemEffect(item.Serial, x, y, z, item.Graphic, item.Hue, -1));
-            //}
 
             if (item.OnGround)
                 item.AddToTile();
@@ -1661,7 +1653,8 @@ namespace ClassicUO.Network
 
         private static void Ping(Packet p)
         {
-            NetClient.Socket.Statistics.PingReceived();
+            if (NetClient.Socket.IsConnected && !NetClient.Socket.IsDisposed)
+                NetClient.Socket.Statistics.PingReceived();
         }
 
 
@@ -2236,9 +2229,17 @@ namespace ClassicUO.Network
                     {
                         Hue[] hues = HealthPercentageHues.Hues;
 
-                        int index = (newPerc + 5) / 10 % hues.Length;
+                        try
+                        {
+                            int index = (newPerc + 5) / 10 % hues.Length;
 
-                        if (index >= 0 && index < hues.Length) mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+                            if (index >= 0 && index < hues.Length)
+                                mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+                        }
+                        catch
+                        {
+
+                        }
                     }
                 }
             }
@@ -2585,7 +2586,9 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    PartyManager.HandlePartyPacket(p);
+                    //PartyManager.HandlePartyPacket(p);
+
+                    World.Party.ParsePacket(p);
 
                     break;
                 //===========================================================================================

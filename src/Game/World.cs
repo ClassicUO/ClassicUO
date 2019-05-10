@@ -293,7 +293,7 @@ namespace ClassicUO.Game
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
-            Party.Members.Clear();
+            Party.Clear();
             ServerName = string.Empty;
             TargetManager.LastAttack = 0;
             Chat.PromptData = default;
