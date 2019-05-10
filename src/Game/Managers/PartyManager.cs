@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Managers
                 case 3:
                 case 4:
                     Serial ser = p.ReadUInt();
-                    string name = p.ReadASCII();
+                    string name = p.ReadUnicode();
 
                     for (int i = 0; i < Members.Length; i++)
                     {
