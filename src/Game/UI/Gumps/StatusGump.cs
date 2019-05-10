@@ -184,6 +184,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public void UpdateLocksAfterPacket()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Lock status = i == 0 ? World.Player.StrLock : i == 1 ? World.Player.DexLock : World.Player.IntLock;
+
+                ushort gumpID = 0x0984; //Up
+                if (status == Lock.Down)
+                    gumpID = 0x0986; //Down
+                else if (status == Lock.Locked)
+                    gumpID = 0x082C; //Lock
+                _lockers[i].Graphic = gumpID;
+            }
+        }
+
         protected enum ButtonType
         {
             BuffIcon,

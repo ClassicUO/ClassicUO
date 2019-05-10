@@ -2765,6 +2765,8 @@ namespace ClassicUO.Network
                                 World.Player.StrLock = (Lock) ((state >> 4) & 3);
                                 World.Player.DexLock = (Lock) ((state >> 2) & 3);
                                 World.Player.IntLock = (Lock) (state & 3);
+
+                                StatusGumpBase.GetStatusGump()?.UpdateLocksAfterPacket();
                             }
 
                             break;

@@ -515,12 +515,12 @@ namespace ClassicUO.Network
         {
             int bytesLen = e.BytesTransferred;
 
-            if (bytesLen > 0 && e.SocketError == SocketError.Success)
+            if (bytesLen > 0 && e.SocketError == SocketError.Success && _circularBuffer != null)
             {
                 Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;
                 if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
-                lock (_circularBuffer) _circularBuffer?.Enqueue(buffer, 0, bytesLen);
+                lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
             }
             else
