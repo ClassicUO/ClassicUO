@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Add(new ResizePic(0x2486)
                 {
-                    Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
+                    Width = this.Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
                 });
             }
 
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.UI.Controls
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
-                base.Draw(batcher, x, y); // TODO: set a scrollarea
+                base.Draw(batcher, x, y);
                 _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
