@@ -113,6 +113,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
+            WantUpdateSize = false;
         }
 
         public bool IsClicked { get; private set; }
@@ -194,11 +195,9 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hue = Vector3.Zero;
 
             if (IsTransparent)
-                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+                hue.Z = Alpha;
 
             batcher.Draw2D(texture, x, y, Width, Height, hue);
-
-            //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -279,7 +278,10 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
+            if (IsDisposed)
+                return false;
+
+            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
         public sealed override void Dispose()
