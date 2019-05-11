@@ -386,8 +386,18 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public void SanitizeMapIndex(ref int map)
+        {
+            if (map == 1 && ((_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero) ||
+                             (_filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero) ||
+                             (_filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero)))
+                map = 0;
+        }
+
         public unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
+            SanitizeMapIndex(ref map);
+
             ref IndexMap indexMap = ref GetIndex(map, blockX, blockY);
 
             if (indexMap.MapAddress == 0)

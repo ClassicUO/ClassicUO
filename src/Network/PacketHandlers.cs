@@ -2465,12 +2465,6 @@ namespace ClassicUO.Network
                 Buffer.BlockCopy(decData, index, text, 0, text.Length);
                 index += text.Length;
                 lines[i] = Encoding.BigEndianUnicode.GetString(text);
-                //ushort lineLen = p.ReadUShort();
-                ////byte[] text = new byte[lineLen * 2];
-                ////Buffer.BlockCopy();
-                //string text = p.ReadUnicode(lineLen);
-
-                //lines[i] = text;
             }
 
             Engine.UI.Create(sender, gumpID, x, y, cmd, lines);
@@ -2897,14 +2891,6 @@ namespace ClassicUO.Network
                         Engine.SceneManager.GetScene<GameScene>()
                               .Overheads
                               .AddDamage(en, damage);
-
-
-                        //new Mess(mobile,
-                        //         damage.ToString(), 
-                        //         hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), 
-                        //         font: 3, 
-                        //         isunicode: false, 
-                        //         timeToLive: 1500));
                     }
 
                     break;
@@ -3424,12 +3410,6 @@ namespace ClassicUO.Network
 
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
-
-            //if (item.ItemData.IsAnimated)
-            //{
-            //    item.AllowedToDraw = false;
-            //    World.AddEffect(new AnimatedItemEffect(item.Serial, position.X, position.Y, position.Z, item.Graphic, item.Hue, -1));
-            //}
 
             if (item.OnGround)
                 item.AddToTile();

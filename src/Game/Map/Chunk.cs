@@ -264,6 +264,8 @@ namespace ClassicUO.Game.Map
 
         private ref IndexMap GetIndex(int map)
         {
+            FileManager.Map.SanitizeMapIndex(ref map);
+
             return ref FileManager.Map.GetIndex(map, X, Y);
         }
 
