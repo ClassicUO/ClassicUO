@@ -6,6 +6,49 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.UI
 {
+    class Button2 : UIControl
+    {
+        private Rectangle _rect;
+
+        public Button2(string caption)
+        {
+            Text = caption;
+            Width = 100;
+            Height = 50;
+        }
+
+        public string Text { get; set; }
+
+
+        public override void Draw(SpriteBatch batcher, int x, int y)
+        {
+            _rect.X = x;
+            _rect.Y = y;
+            _rect.Width = Width;
+            _rect.Height = Height;
+
+            batcher.Draw(Texture, _rect, Color.Red);
+        }
+
+
+
+        public override void OnMouseEnter(int x, int y)
+        {
+        }
+
+        public override void OnMouseExit(int x, int y)
+        {
+        }
+
+        public override void OnMouseDown(int x, int y, MouseButton button)
+        {
+        }
+
+        public override void OnMouseUp(int x, int y, MouseButton button)
+        {
+        }
+    }
+
     internal class Button : Control
     {
         private bool _adaptSizeToText;

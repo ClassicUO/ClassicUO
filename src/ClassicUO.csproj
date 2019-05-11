@@ -148,7 +148,6 @@
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
-    <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
@@ -163,6 +162,7 @@
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Renderer\UI\UIControl.cs" />
+    <Compile Include="Renderer\UI\UISystemManager.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />

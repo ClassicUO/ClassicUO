@@ -466,9 +466,12 @@ namespace ClassicUO.Game.UI.Controls
 
             Stack<Control> results = new Stack<Control>();
 
-            if (Bounds.Contains(position.X - ParentX, position.Y - ParentY))
+            int parentX = ParentX;
+            int parentY = ParentY;
+
+            if (Bounds.Contains(position.X - parentX, position.Y - parentY))
             {
-                if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
+                if (Contains(position.X - X - parentX, position.Y - Y - parentY))
                 {
                     if (AcceptMouseInput)
                         results.Push(this);

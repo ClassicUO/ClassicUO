@@ -40,6 +40,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.UI;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -95,7 +96,7 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
 
-        private FNABatcher2D _fnaBatcher2D;
+        private UISystemManager _uiSystem;
 
         private Engine(string[] args)
         {
@@ -196,9 +197,6 @@ namespace ClassicUO
             IsMouseVisible = true;
 
             Window.Title = $"ClassicUO - {Version}";
-
-
-            _fnaBatcher2D = new FNABatcher2D(GraphicsDevice);
         }
 
         public bool IsQuitted { get; private set; }
@@ -673,6 +671,11 @@ namespace ClassicUO
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
+
+
+            _uiSystem = new UISystemManager(this);
+            Components.Add(_uiSystem);
+
 
             try
             {
