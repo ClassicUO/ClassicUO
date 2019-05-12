@@ -92,7 +92,8 @@ namespace ClassicUO.Configuration
         public bool FixedTimeStep { get; set; } = true;
 
         [JsonProperty(PropertyName = "plugins")]
-        public string[] Plugins { get; set; } = {@".\Assistant\Razor.dll"};
+        public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
+
 
         public void Save()
         {
