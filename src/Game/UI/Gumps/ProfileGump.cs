@@ -1,5 +1,6 @@
-﻿using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
+﻿using System;
+
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -24,15 +25,14 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _scrollArea.Add(c);
             AddHorizontalBar(_scrollArea, 92, 35, 220);
-            int rows = FileManager.Fonts.GetLinesCharsCountUnicode(1, body, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0, 140).Length;
-            _scrollArea.Add(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
+            _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), canEdit)
             {
-                Height = rows * 18,
+                Height = FileManager.Fonts.GetHeightUnicode(1, body, 220, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 X = 35,
                 Y = 0,
-                Width = 220,
                 Text = body
-            });
+            };
+            _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);
             _scrollArea.Add(new Label(footer, true, 0, font: 1, maxwidth: 220)
             {
@@ -71,14 +71,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _textBox.Height = Height - 150;*/
             if(!_textBox.IsDisposed && _textBox.IsChanged)
             {
-                int rows = FileManager.Fonts.GetLinesCharsCountUnicode(1, _textBox.TxEntry.Text, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0, 140).Length;
-                _textBox.Height = rows * 18;
+                _textBox.Height = Math.Max(FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
                 foreach(Control c in _scrollArea.Children)
                 {
                     if (c is ScrollAreaItem)
                         c.OnPageChanged();
                 }
-                _scrollArea.OnPageChanged();
             }
 
             base.Update(totalMS, frameMS);
