@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void OnPageChanged()
         {
-            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Height : 0) : 0;
+            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? (o.Y < 0 ? o.Height + o.Y : o.Height) : 0) : 0;
             IsVisible = maxheight > 0;
             Height = maxheight;
             Parent?.OnPageChanged();

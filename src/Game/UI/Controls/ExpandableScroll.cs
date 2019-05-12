@@ -179,6 +179,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 WantUpdateSize = true;
+                Parent?.OnPageChanged();
             }
 
             base.Update(totalMS, frameMS);

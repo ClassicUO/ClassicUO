@@ -6,46 +6,43 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ProfileGump : Gump
     {
-        private readonly ScrollFlag _scrollBar;
+        private readonly ScrollArea _scrollArea;
         private readonly MultiLineBox _textBox;
-        private ExpandableScroll _background;
+        private readonly ExpandableScroll _scrollExp;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
         {
+            Height = 300;
             CanMove = true;
-
             AcceptKeyboardInput = true;
-
-            Add(_background = new ExpandableScroll(0, 0, 300));
-            _scrollBar = new ScrollFlag(0, 0, Height, true);
-            Add(_scrollBar);
-            AddHorizontalBar(92, 40, 40, 220);
-
-            Add(new Label(header, true, 0, font: 1, maxwidth: 140)
+            Add(_scrollExp = new ExpandableScroll(0, 0, Height));
+            _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
+            Control c = new Label(header, true, 0, font: 1, maxwidth: 140)
             {
-                X = 90,
-                Y = 32
-            });
-
-            Add(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
+                X = 85,
+                Y = 0
+            };
+            _scrollArea.Add(c);
+            AddHorizontalBar(_scrollArea, 92, 35, 220);
+            int rows = FileManager.Fonts.GetLinesCharsCountUnicode(1, body, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0, 140).Length;
+            _scrollArea.Add(_textBox = new MultiLineBox(new MultiLineEntry(1, width: 220, maxWidth: 220, hue: 0), canEdit)
             {
-                X = 40,
-                Y = 82,
+                Height = rows * 18,
+                X = 35,
+                Y = 0,
                 Width = 220,
-                ScissorsEnabled = true,
                 Text = body
             });
-
-            /*
-			AddHorizontalBar(95, 40, _textBox.Y + _textBox.Height, 220);
-			AddChildren(new Label(footer, true, 0, font: 1, maxwidth: 220)
-			{
-				X = 40, Y = _textBox.Y + _textBox.Height + 20,
-			});
-			*/
+            AddHorizontalBar(_scrollArea, 95, 35, 220);
+            _scrollArea.Add(new Label(footer, true, 0, font: 1, maxwidth: 220)
+            {
+                X = 35,
+                Y = 0,
+            });
+            Add(_scrollArea);
         }
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        /*protected override void OnMouseWheel(MouseEvent delta)
         {
             switch (delta)
             {
@@ -58,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
-        }
+        }*/
 
 
         public override void OnButtonClick(int buttonID)
@@ -68,24 +65,47 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            WantUpdateSize = true;
+            /*WantUpdateSize = true;
 
-            _textBox.Height = Height - 150;
+            if(_textBox.Height > 0)
+                _textBox.Height = Height - 150;*/
+            if(!_textBox.IsDisposed && _textBox.IsChanged)
+            {
+                int rows = FileManager.Fonts.GetLinesCharsCountUnicode(1, _textBox.TxEntry.Text, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0, 140).Length;
+                _textBox.Height = rows * 18;
+                foreach(Control c in _scrollArea.Children)
+                {
+                    if (c is ScrollAreaItem)
+                        c.OnPageChanged();
+                }
+                _scrollArea.OnPageChanged();
+            }
 
             base.Update(totalMS, frameMS);
         }
 
-        private void AddHorizontalBar(Graphic start, int x, int y, int width)
+        private void AddHorizontalBar(ScrollArea area, Graphic start, int x, int width)
         {
             var startBounds = FileManager.Gumps.GetTexture(start);
-            var middleBounds = FileManager.Gumps.GetTexture((Graphic) (start + 1));
-            var endBounds = FileManager.Gumps.GetTexture((Graphic) (start + 2));
+            var middleBounds = FileManager.Gumps.GetTexture((Graphic)(start + 1));
+            var endBounds = FileManager.Gumps.GetTexture((Graphic)(start + 2));
+            int y = -startBounds.Height;
+            Control c;
+            c = new GumpPic(x, (y >> 1) - 6, (Graphic)start, 0);
+            c.Add(new GumpPicWithWidth(startBounds.Width, ((startBounds.Height - middleBounds.Height) >> 1), (Graphic)(start + 1), 0, width - startBounds.Width - endBounds.Width));
+            c.Add(new GumpPic(width - endBounds.Width, 0, (Graphic)(start + 2), 0));
+            area.Add(c);
+        }
 
-            Add(new GumpPic(x, y, start, 0));
-
-            Add(new GumpPicWithWidth(x + startBounds.Width, y, (Graphic) (start + 1), 0,
-                                     width - startBounds.Width - endBounds.Width));
-            Add(new GumpPic(x + width - endBounds.Width, y, (Graphic) (start + 2), 0));
+        public override void OnPageChanged()
+        {
+            Height = _scrollExp.SpecialHeight;
+            _scrollArea.Height = _scrollExp.SpecialHeight - 96;
+            foreach (Control c in _scrollArea.Children)
+            {
+                if (c is ScrollAreaItem)
+                    c.OnPageChanged();
+            }
         }
 
         public override void OnKeyboardReturn(int textID, string text)
