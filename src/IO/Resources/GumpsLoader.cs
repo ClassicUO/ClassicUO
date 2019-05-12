@@ -26,7 +26,8 @@ namespace ClassicUO.IO.Resources
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
-                if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+                if (File.Exists(path) && File.Exists(pathidx))
+                    _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
                 FileManager.UseUOPGumps = false;
             }
 
@@ -42,8 +43,9 @@ namespace ClassicUO.IO.Resources
                     int ingump = defReader.ReadInt();
 
 
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT
-                                   || _file.Entries[ingump].DecompressedLength != 0)
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || 
+                                      ingump >= _file.Entries.Length || 
+                                      _file.Entries[ingump].DecompressedLength != 0)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -52,7 +54,7 @@ namespace ClassicUO.IO.Resources
                     {
                         int checkIndex = group[i];
 
-                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
                             _file.Entries[checkIndex].DecompressedLength == 0)
                             continue;
 

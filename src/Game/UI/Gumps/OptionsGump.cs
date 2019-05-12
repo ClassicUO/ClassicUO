@@ -196,14 +196,14 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, HUE_FONT, font: FONT);
             fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(80, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPS = new HSliderBar(text.X + text.Width + 10, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             fpsItem.Add(_sliderFPS);
             rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
             text = new Label("- Login FPS:", true, HUE_FONT, font: FONT);
             fpsItem.Add(text);
-            _sliderFPSLogin = new HSliderBar(80, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPSLogin = new HSliderBar(text.X + text.Width + 10, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             hpAreaItem.Add(text);
 
-            _circleOfTranspRadius = new HSliderBar(160, 15, 100, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _circleOfTranspRadius = new HSliderBar(text.X + text.Width + 10, 15, 100, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             hpAreaItem.Add(_circleOfTranspRadius);
 
             _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT, true)
@@ -378,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
             Label text = new Label("- Login music volume:", true, HUE_FONT, 0, FONT);
-            _loginMusicVolume = new HSliderBar(150, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _loginMusicVolume = new HSliderBar(text.X + text.Width + 10, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(text);
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
@@ -828,7 +828,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 40,
                 Width = 200,
                 Height = 30
-            }, "Spell Overhead format: ({power} for powerword - {spell} for spell name");
+            }, "Spell Overhead format: ({power} for powerword - {spell} for spell name", rightArea.Width - 20);
             rightArea.Add(it);
 
             Add(rightArea, PAGE);
@@ -1407,8 +1407,20 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null)
+        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null, int maxWidth = 0)
         {
+            if (label != null)
+            {
+                Label text = new Label(label, true, HUE_FONT, maxWidth, FONT)
+                {
+                    X = elem.X - 10,
+                    Y = elem.Y
+                };
+
+                elem.Y += text.Height;
+                area.Add(text);
+            }
+
             area.Add(new ResizePic(0x0BB8)
             {
                 X = elem.X - 5,
@@ -1418,16 +1430,6 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
             area.Add(elem);
-
-            if (label != null)
-            {
-                Label text = new Label(label, true, HUE_FONT, 0, FONT)
-                {
-                    X = elem.X - 10,
-                    Y = elem.Y - 30
-                };
-                area.Add(text);
-            }
 
             return elem;
         }
