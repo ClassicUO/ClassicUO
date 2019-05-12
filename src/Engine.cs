@@ -673,8 +673,8 @@ namespace ClassicUO
             Log.PushIndent();
 
 
-            _uiSystem = new UISystemManager(this);
-            Components.Add(_uiSystem);
+            //_uiSystem = new UISystemManager(this);
+            //Components.Add(_uiSystem);
 
 
             try

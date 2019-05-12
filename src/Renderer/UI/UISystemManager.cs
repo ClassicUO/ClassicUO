@@ -23,14 +23,14 @@ namespace ClassicUO.Renderer.UI
             _spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
 
-            //Add(new Button2("I'm a button")
-            //{
-            //    X = 200,
-            //    Y = 200,
-            //    Width = 200,
-            //    Height = 200,
-            //    Texture = Textures.GetTexture(Color.Black)
-            //});
+            Add(new Button2("I'm a button")
+            {
+                X = 200,
+                Y = 200,
+                Width = 200,
+                Height = 200,
+                Texture = Textures.GetTexture(Color.White)
+            });
         }
 
 

@@ -27,6 +27,8 @@ namespace ClassicUO.Renderer.UI
             _rect.Width = Width;
             _rect.Height = Height;
 
+           //batcher.Draw(Texture, x, y, Width, Height, Color.Red);
+
             batcher.Draw(Texture, _rect, Color.Red);
         }
 
