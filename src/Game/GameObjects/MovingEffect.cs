@@ -111,7 +111,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Explode { get; set; }
 
-        public byte MovingDelay { get; set; } = 20;
+        public int MovingDelay { get; set; } = 20;
 
 
         public override void Update(double totalMS, double frameMS)
@@ -283,7 +283,10 @@ namespace ClassicUO.Game.GameObjects
                     wantUpdateInRenderList = true;
                 }
 
-                if (wantUpdateInRenderList) SetSource(sx, sy, sz);
+                if (wantUpdateInRenderList)
+                {
+                    SetSource(sx, sy, sz);
+                }
             }
         }
 

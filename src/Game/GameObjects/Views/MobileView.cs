@@ -443,27 +443,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
             }
-
-        
-            //if (hasShadow)
-            //{
-            //    SpriteVertex[] vertexS =
-            //    {
-            //        vertex[0],
-            //        vertex[1],
-            //        vertex[2],
-            //        vertex[3]
-            //    };
-
-            //    Vector3 hue = Vector3.Zero;
-            //    hue.Y = ShaderHuesTraslator.SHADER_SHADOW;
-
-            //    vertexS[0].Hue = vertexS[1].Hue = vertexS[2].Hue = vertexS[3].Hue = hue;
-
-            //    batcher.DrawShadow(Texture, ref vertexS, posX + 22, (int) (posY + Offset.Y - Offset.Z + 22), IsFlipped);
-            //}
-
-
         }
 
         public override void Select(int x, int y)

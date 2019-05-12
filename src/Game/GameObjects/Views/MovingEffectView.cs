@@ -44,7 +44,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-                Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
+                Bounds.X = 0;
+                Bounds.Y = 0;
+                Bounds.Width = Texture.Width;
+                Bounds.Height = Texture.Height;
             }
 
             Bounds.X = (int) -Offset.X;

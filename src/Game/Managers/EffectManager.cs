@@ -71,7 +71,8 @@ namespace ClassicUO.Game.Managers
 
                     effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue)
                     {
-                        Blend = blendmode, MovingDelay = speed
+                        Blend = blendmode,
+                        MovingDelay = 20 / speed
                     };
 
                     if (doesExplode)

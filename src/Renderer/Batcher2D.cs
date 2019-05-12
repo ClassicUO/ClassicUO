@@ -323,8 +323,8 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate = Vector3.Zero;
 
             vertex1.Position = center;
-            vertex1.Position.X += cosx - -siny;
-            vertex1.Position.Y -= sinx + -cosy;
+            vertex1.Position.X += cosx - siny;
+            vertex1.Position.Y += -sinx + -cosy;
             vertex1.Normal.X = 0;
             vertex1.Normal.Y = 0;
             vertex1.Normal.Z = 1;
@@ -333,8 +333,8 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.Z = 0;
 
             vertex2.Position = center;
-            vertex2.Position.X += cosx - -siny;
-            vertex2.Position.Y -= sinx + -cosy;
+            vertex2.Position.X += -cosx - -siny;
+            vertex2.Position.Y += sinx + cosy;
             vertex2.Normal.X = 0;
             vertex2.Normal.Y = 0;
             vertex2.Normal.Z = 1;
@@ -343,8 +343,8 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.Z = 0;
 
             vertex3.Position = center;
-            vertex3.Position.X += cosx - -siny;
-            vertex3.Position.Y -= sinx + -cosy;
+            vertex3.Position.X += -cosx - siny;
+            vertex3.Position.Y += sinx + -cosy;
             vertex3.Normal.X = 0;
             vertex3.Normal.Y = 0;
             vertex3.Normal.Z = 1;
