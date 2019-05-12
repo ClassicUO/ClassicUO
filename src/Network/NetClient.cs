@@ -299,10 +299,13 @@ namespace ClassicUO.Network
 
 
 #if !DEBUG
-        private static readonly LogFile _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+        private static LogFile _logFile;
 
         private static void LogPacket(byte[] buffer, bool toServer)
         {
+            if (_logFile == null)
+                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+
             int length = buffer.Length;
             int pos = 0;
 
