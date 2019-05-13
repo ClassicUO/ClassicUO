@@ -41,6 +41,7 @@ namespace ClassicUO.IO
 {
     internal class UltimaLive
     {
+        internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
@@ -651,15 +652,12 @@ namespace ClassicUO.IO
                 if (!foundedOneMap)
                     throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
 
-                int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
-
                 for (int i = 0; i < NumMaps; i++)
                 {
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-
-                    //if (Engine.GlobalSettings.PreloadMaps)
-                        LoadMap(i);
+                    //on ultimalive map always preload
+                    LoadMap(i);
                 }
             }
 
