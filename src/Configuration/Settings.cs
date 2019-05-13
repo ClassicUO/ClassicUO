@@ -63,10 +63,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "profiler")]
         public bool Profiler { get; set; } = true;
-
-        [JsonProperty(PropertyName = "preload_maps")]
-        public bool PreloadMaps { get; set; }
-
+        
         [JsonProperty(PropertyName = "saveaccount")]
         public bool SaveAccount { get; set; }
 

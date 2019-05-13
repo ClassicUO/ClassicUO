@@ -211,14 +211,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public void UnloadMap(int i)
-        {
-            if (Engine.GlobalSettings.PreloadMaps)
-                return;
-
-            //if (BlockData[i] != null) BlockData[i] = null;
-        }
-
+     
         public void PatchMapBlock(ulong block, ulong address)
         {
             int w = MapBlocksSize[0, 0];

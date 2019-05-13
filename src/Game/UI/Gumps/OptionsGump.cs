@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // GameWindowSize
         private TextBox _gameWindowWidth;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType;
 
         // combat & spells
@@ -212,9 +212,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
-            _preloadMaps = CreateCheckBox(rightArea, "Preload maps (it increases the RAM usage)", Engine.GlobalSettings.PreloadMaps, 0, 0);
-            //the preload selection is visible only if we aren't on ultimalive, when on UltimaLive maps are always preloaded for fast indexing.
-            _preloadMaps.IsVisible = !IO.UltimaLive.UltimaLiveActive;
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
@@ -983,7 +980,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _noColorOutOfRangeObjects.IsChecked = false;
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
-                    _preloadMaps.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
 
                     break;
@@ -1101,7 +1097,6 @@ namespace ClassicUO.Game.UI.Gumps
             WorldViewportGump vp = Engine.UI.GetControl<WorldViewportGump>();
 
             // general
-            Engine.GlobalSettings.PreloadMaps = _preloadMaps.IsChecked;
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Engine.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
