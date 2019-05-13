@@ -169,7 +169,9 @@ namespace ClassicUO.Game.Map
         public IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
-            ref IndexMap[] list = ref FileManager.Map.BlockData[Index];
+            int map = Index;
+            FileManager.Map.SanitizeMapIndex(ref map);
+            ref IndexMap[] list = ref FileManager.Map.BlockData[map];
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
