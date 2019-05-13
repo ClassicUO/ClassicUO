@@ -855,7 +855,9 @@ namespace ClassicUO.Game.GameObjects
                         if (!isWalking)
                             result = 2;
                         else if (isRun)
-                            result = 1;
+                        {
+                            result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
+                        }
                         else
                             result = 0;
                     }
