@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void CalculateHight(Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
+        private static void CalculateHight(ushort graphic, Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
         {
             if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
                 result = 0;
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                     result = 19;
                 else if (!iswalking)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && FileManager.Animations.AnimationExists(graphic, 8))
                         result = 8;
                     else
                         result = 1;
@@ -849,7 +849,7 @@ namespace ClassicUO.Game.GameObjects
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
                     if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
-                        CalculateHight(mobile, flags, isRun, isWalking, ref result);
+                        CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
                     else
                     {
                         if (!isWalking)
@@ -864,7 +864,7 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
                 case ANIMATION_GROUPS_TYPE.MONSTER:
-                    CalculateHight(mobile, flags, isRun, isWalking, ref result);
+                    CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
 
                     break;
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
