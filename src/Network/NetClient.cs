@@ -45,7 +45,7 @@ namespace ClassicUO.Network
         private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
-        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
+        private Queue<Tuple<byte[], int, bool>> _queue = new Queue<Tuple<byte[], int, bool>>(), _workingQueue = new Queue<Tuple<byte[], int, bool>>();
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
@@ -91,13 +91,13 @@ namespace ClassicUO.Network
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
-        public static void EnqueuePacketFromPlugin(Packet p)
+        public static void EnqueuePacketFromPlugin(ref byte[] data, ref int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
                 lock (Socket._sync)
                 {
-                    Socket._workingQueue.Enqueue(p);
+                    Socket._workingQueue.Enqueue(Tuple.Create(data, length, true));
                     Socket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -105,7 +105,7 @@ namespace ClassicUO.Network
             {
                 lock (LoginSocket._sync)
                 {
-                    LoginSocket._workingQueue.Enqueue(p);
+                    LoginSocket._workingQueue.Enqueue(Tuple.Create(data, length, true));
                     LoginSocket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -225,10 +225,11 @@ namespace ClassicUO.Network
         public void Send(PacketWriter p)
         {
             byte[] data = p.ToArray();
-            Packet packet = new Packet(data, p.Length);
+            int length = p.Length;
 
-            if (Plugin.ProcessSendPacket(data, packet.Length))
+            if (Plugin.ProcessSendPacket(ref data, ref length))
             {
+                Packet packet = new Packet(data, length);
                 PacketSended.Raise(packet);
                 Send(data);
             }
@@ -238,17 +239,23 @@ namespace ClassicUO.Network
         {
             lock (_sync)
             {
-                Queue<Packet> temp = _workingQueue;
+                var temp = _workingQueue;
                 _workingQueue = _queue;
                 _queue = temp;
             }
 
             while (_queue.Count != 0)
             {
-                Packet p = _queue.Dequeue();
+                var p = _queue.Dequeue();
 
-                if (Plugin.ProcessRecvPacket(p))
-                    PacketReceived.Raise(p);
+                byte[] data = p.Item1;
+                int length = p.Item2;
+
+                if (p.Item3 || Plugin.ProcessRecvPacket(ref data, ref length))
+                {
+                    Packet packet = new Packet(data, length);
+                    PacketReceived.Raise(packet);
+                }
             }
 
             Flush();
@@ -284,11 +291,11 @@ namespace ClassicUO.Network
                     lock (_sync)
                     {
 #if !DEBUG
-                        LogPacket(data, false);
+                        //LogPacket(data, false);
 #endif
 
-                        Packet packet = new Packet(data, packetlength);
-                        _workingQueue.Enqueue(packet);
+                        //Packet packet = new Packet(data, packetlength);
+                        _workingQueue.Enqueue(Tuple.Create(data, packetlength, false));
                         Statistics.TotalPacketsReceived++;
                     }
 
@@ -428,7 +435,7 @@ namespace ClassicUO.Network
                 try
                 {
 #if !DEBUG
-                    LogPacket(data, true);
+                    //LogPacket(data, true);
 #endif
 
                     lock (_sendLock)

@@ -38,7 +38,7 @@ namespace ClassicUO.Network
         public int Position { get; protected set; }
 
         protected abstract bool EnsureSize(int length);
-        public abstract byte[] ToArray();
+        public abstract ref byte[] ToArray();
 
         public void Skip(int lengh)
         {

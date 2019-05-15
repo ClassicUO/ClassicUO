@@ -34,7 +34,7 @@ namespace ClassicUO.Network
     internal sealed class Packet : PacketBase
     {
         private static readonly byte[] _emtpyBytes = { };
-        private readonly byte[] _data;
+        private byte[] _data;
         public bool IsAssistPacket = false;
 
         public Packet(byte[] data, int length)
@@ -69,9 +69,9 @@ namespace ClassicUO.Network
 
         public bool Filter { get; set; }
 
-        public override byte[] ToArray()
+        public override ref byte[] ToArray()
         {
-            return _data;
+            return ref _data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
