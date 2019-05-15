@@ -3411,8 +3411,8 @@ namespace ClassicUO.Network
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
 
-            if (item.OnGround)
-                item.AddToTile();
+            //if (item.OnGround)
+            item.AddToTile();
         }
 
         private static void BoatMoving(Packet p)
@@ -3436,7 +3436,8 @@ namespace ClassicUO.Network
             item.Position = new Position(x, y, (sbyte) z);
             item.AddToTile();
 
-            if (World.HouseManager.TryGetHouse(item, out House house)) house.Generate(true);
+            if (World.HouseManager.TryGetHouse(item, out House house))
+                house.Generate(true);
 
 
             int count = p.ReadUShort();
@@ -3452,6 +3453,12 @@ namespace ClassicUO.Network
 
                 if (entity != null)
                 {
+                    if (entity == World.Player)
+                    {
+                        World.RangeSize.X = cx;
+                        World.RangeSize.Y = cy;
+                    }
+
                     entity.Position = new Position(cx, cy, (sbyte) cz);
                     entity.AddToTile();
                 }
