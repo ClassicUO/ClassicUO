@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
-        private Checkbox _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
+        private Checkbox _castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private TextBox _spellFormatBox;
 
         // macro
@@ -826,6 +826,9 @@ namespace ClassicUO.Game.UI.Gumps
             _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 10, Engine.Profile.Current.BeneficHue, "Benefic Spell Hue", 20, 10);
             _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
             _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
+
+            _castSpellsByOneClick = CreateCheckBox(rightArea, "Cast spells by one click", Engine.Profile.Current.CastSpellsByOneClick, 0, 40);
+            
             ScrollAreaItem it = new ScrollAreaItem();
             _spellFormatBox = CreateInputField(it, new TextBox(FONT, 30, 200, 200)
             {
@@ -1071,6 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _murdererColorPickerBox.SetColor(0x0023, FileManager.Hues.GetPolygoneColor(12, 0x0023));
                     _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
+                    _castSpellsByOneClick.IsChecked = false;
 
                     _beneficColorPickerBox.SetColor(0x0059, FileManager.Hues.GetPolygoneColor(12, 0x0059));
                     _harmfulColorPickerBox.SetColor(0x0020, FileManager.Hues.GetPolygoneColor(12, 0x0020));
@@ -1318,6 +1322,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnemyHue = _enemyColorPickerBox.Hue;
             Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
             Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
+            Engine.Profile.Current.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
 
             Engine.Profile.Current.BeneficHue = _beneficColorPickerBox.Hue;
             Engine.Profile.Current.HarmfulHue = _harmfulColorPickerBox.Hue;
