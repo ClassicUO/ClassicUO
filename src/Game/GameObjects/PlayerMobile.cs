@@ -1696,7 +1696,7 @@ namespace ClassicUO.Game.GameObjects
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
-                run = Engine.Profile.Current.AlwaysRun && !Keyboard.Shift;
+                run = Engine.Profile.Current.AlwaysRun;
 
             int x = X;
             int y = Y;

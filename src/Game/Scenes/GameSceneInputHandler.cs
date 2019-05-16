@@ -106,15 +106,7 @@ namespace ClassicUO.Game.Scenes
                     direction = _numPadDirection;
                 }
 
-                if (_isShiftDown)
-                {
-                    World.Player.Walk(direction, false);
-                }
-                else
-                {
-                    World.Player.Walk(direction, true);
-                }
-
+                World.Player.Walk(direction, Engine.Profile.Current.AlwaysRun);
             }
         }
 
