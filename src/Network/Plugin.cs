@@ -10,6 +10,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -133,7 +134,7 @@ namespace ClassicUO.Network
 
             try
             {
-                IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
+                IntPtr assptr = Native.LoadLibrary(_path);
 
                 Log.Message(LogTypes.Trace, $"assembly: {assptr}");
 
@@ -141,7 +142,7 @@ namespace ClassicUO.Network
 
                 Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
 
-                IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
+                IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
 
                 Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
 
