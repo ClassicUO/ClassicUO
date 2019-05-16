@@ -60,7 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
-        private RadioButton _fieldsToTile, _staticFields, _normalFields;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
 
         // fonts
@@ -75,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
-        private Combobox _hpComboBox, _healtbarType;
+        private Combobox _hpComboBox, _healtbarType, _fieldsType;
 
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
@@ -192,22 +191,20 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 1;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            // FPS
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, HUE_FONT, font: FONT);
             fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + text.Width + 10, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             fpsItem.Add(_sliderFPS);
             rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
             text = new Label("- Login FPS:", true, HUE_FONT, font: FONT);
             fpsItem.Add(text);
-            _sliderFPSLogin = new HSliderBar(text.X + text.Width + 10, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
-            // Highlight    
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
@@ -215,20 +212,49 @@ namespace ClassicUO.Game.UI.Gumps
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
+            _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
+            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
+
+
+
+
+
+            ScrollAreaItem item = new ScrollAreaItem();
+            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.UseCircleOfTransparency
+            };
+            _useCircleOfTransparency.ValueChanged += (sender, e) => { _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
+            item.Add(_useCircleOfTransparency);
+            _circleOfTranspRadius = new HSliderBar(210, 5, 50, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            item.Add(_circleOfTranspRadius);
+            rightArea.Add(item);
+
+
+
+
+
+            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 15);
+            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
+            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
+            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
+
+
 
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
 
             _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT, true)
             {
-                X = 0, Y = 10, IsChecked = Engine.Profile.Current.ShowMobilesHP
+                X = 0, Y = 20, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
+
             hpAreaItem.Add(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 10, 150, new[]
+            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 20, 150, new[]
             {
                 "Percentage", "Line", "Both"
             }, mode);
@@ -241,98 +267,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             text = new Label("Close healthbar gump when:", true, HUE_FONT, font: FONT)
             {
-                Y = _hpComboBox.Bounds.Bottom + 20
+                Y = _hpComboBox.Bounds.Bottom + 10
             };
             hpAreaItem.Add(text);
 
-            _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 20, 150, new[]
+            _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 10, 150, new[]
             {
                 "None", "Mobile Out of Range", "Mobile is Dead"
             }, mode);
             hpAreaItem.Add(_healtbarType);
 
-            rightArea.Add(hpAreaItem);
-
-            // highlight character by flags
-
-            ScrollAreaItem highlightByFlagsItem = new ScrollAreaItem();
-
-            text = new Label("- Mobile Status", true, HUE_FONT, font: FONT)
+            text = new Label("Fields: ", true, HUE_FONT, font: FONT)
             {
-                Y = 10
-            };
-            highlightByFlagsItem.Add(text);
-
-            _highlightByState = new Checkbox(0x00D2, 0x00D3, "Highlight by state\n(poisoned, yellow hits, paralyzed)", FONT, HUE_FONT, true)
-            {
-                X = 25, Y = 30, IsChecked = Engine.Profile.Current.HighlightMobilesByFlags
-            };
-            highlightByFlagsItem.Add(_highlightByState);
-            rightArea.Add(highlightByFlagsItem);
-
-
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 20);
-            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
-            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
-            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
-
-            hpAreaItem = new ScrollAreaItem();
-
-            text = new Label("- Fields: ", true, HUE_FONT, font: FONT)
-            {
-                Y = 10
+                Y = _hpComboBox.Bounds.Bottom + 45
             };
             hpAreaItem.Add(text);
 
-            _normalFields = new RadioButton(0, 0x00D0, 0x00D1, "Normal fields", FONT, HUE_FONT, true)
-            {
-                X = 25,
-                Y = 30,
-                IsChecked = Engine.Profile.Current.FieldsType == 0
-            };
-            hpAreaItem.Add(_normalFields);
+            mode = Engine.Profile.Current.FieldsType;
+            if (mode < 0 || mode > 2)
+                mode = 0;
 
-            _staticFields = new RadioButton(0, 0x00D0, 0x00D1, "Static fields", FONT, HUE_FONT, true)
+            _fieldsType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 45, 150, new[]
             {
-                X = 25,
-                Y = 30 + _normalFields.Height,
-                IsChecked = Engine.Profile.Current.FieldsType == 1
-            };
-            hpAreaItem.Add(_staticFields);
+                "Normal fields", "Static fields", "Tile fields"
+            }, mode);
 
-            _fieldsToTile = new RadioButton(0, 0x00D0, 0x00D1, "Tile fields", FONT, HUE_FONT, true)
-            {
-                X = 25,
-                Y = 30 + _normalFields.Height * 2,
-                IsChecked = Engine.Profile.Current.FieldsType == 2
-            };
-            hpAreaItem.Add(_fieldsToTile);
+            hpAreaItem.Add(_fieldsType);
+
+
 
             rightArea.Add(hpAreaItem);
 
-            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
+            _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
-            hpAreaItem = new ScrollAreaItem();
-
-            text = new Label("- Circle of Transparency:", true, HUE_FONT, font: FONT)
-            {
-                Y = 10
-            };
-            hpAreaItem.Add(text);
-
-            _circleOfTranspRadius = new HSliderBar(text.X + text.Width + 10, 15, 100, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-            hpAreaItem.Add(_circleOfTranspRadius);
-
-            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT, true)
-            {
-                X = 25,
-                Y = 30,
-                IsChecked = Engine.Profile.Current.UseCircleOfTransparency
-            };
-            hpAreaItem.Add(_useCircleOfTransparency);
-
-            rightArea.Add(hpAreaItem);
             Add(rightArea, PAGE);
+
         }
 
         private void BuildSounds()
@@ -994,13 +963,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableCaveBorder.IsChecked = false;
                     _treeToStumps.IsChecked = false;
                     _hideVegetation.IsChecked = false;
-                    _normalFields.IsChecked = true;
-                    _staticFields.IsChecked = false;
-                    _fieldsToTile.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
                     _circleOfTranspRadius.Value = 5;
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
+                    _fieldsType.SelectedIndex = 0;
 
                     break;
                 case 2: // sounds
@@ -1155,7 +1122,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
-            Engine.Profile.Current.FieldsType = _normalFields.IsChecked ? 0 : _staticFields.IsChecked ? 1 : _fieldsToTile.IsChecked ? 2 : 0;
+            Engine.Profile.Current.FieldsType = _fieldsType.SelectedIndex;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             Engine.Profile.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
