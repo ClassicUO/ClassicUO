@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
 
         // speech
-        private Checkbox _scaleSpeechDelay;
+        private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Combobox _shardType, _auraType;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
 
@@ -798,6 +798,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
 
+            _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 30);
+            _saveJournalCheckBox.ValueChanged += (o, e) =>
+            {
+                Engine.SceneManager.GetScene<GameScene>().Journal?.CreateWriter(_saveJournalCheckBox.IsChecked);
+            };
+            _saveJournalCheckBox.IsChecked = Engine.Profile.Current.SaveJournalToFile;
+
             Add(rightArea, PAGE);
         }
 
@@ -1053,6 +1060,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
+                    _saveJournalCheckBox.IsChecked = false;
 
                     break;
                 case 8: // combat
@@ -1174,6 +1182,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
+            Engine.Profile.Current.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
 
             // video
             Engine.Profile.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;

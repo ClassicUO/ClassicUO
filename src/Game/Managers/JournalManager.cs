@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 using ClassicUO.Utility;
@@ -21,11 +22,34 @@ namespace ClassicUO.Game.Managers
             JournalEntry entry = new JournalEntry(text, (byte) (isunicode ? 0 : 9), hue, name, isunicode);
             _entries.AddToBack(entry);
             EntryAdded.Raise(entry);
+            _fileWriter?.WriteLineAsync($"{name}: {text}");
+            _fileWriter?.FlushAsync();
         }
 
+        public void CreateWriter(bool create)
+        {
+            if (create)
+            {
+                try
+                {
+                    FileInfo info = new FileInfo($"{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
+                    _fileWriter = info.CreateText();
+                }
+                catch { }
+            }
+            else
+            {
+                _fileWriter?.Flush();
+                _fileWriter?.Dispose();
+                _fileWriter = null;
+            }
+        }
+
+        private StreamWriter _fileWriter;
         public void Clear()
         {
             _entries.Clear();
+            CreateWriter(false);
         }
     }
 

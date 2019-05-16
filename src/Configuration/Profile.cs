@@ -69,6 +69,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public byte ChatFont { get; set; } = 1;
         [JsonProperty] public int SpeechDelay { get; set; } = 100;
         [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
+        [JsonProperty] public bool SaveJournalToFile { get; set; } = false;
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
