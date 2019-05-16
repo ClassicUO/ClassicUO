@@ -341,8 +341,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            ScrollAreaItem item = new ScrollAreaItem();
 
+
+            ScrollAreaItem item = new ScrollAreaItem();
             _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.EnableSound
@@ -350,38 +351,46 @@ namespace ClassicUO.Game.UI.Gumps
             _enableSounds.ValueChanged += (sender, e) => { _soundsVolume.IsVisible = _enableSounds.IsChecked; };
             item.Add(_enableSounds);
             _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-
             item.Add(_soundsVolume);
             rightArea.Add(item);
 
-            item = new ScrollAreaItem();
 
+            item = new ScrollAreaItem();
             _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.EnableMusic
             };
             _enableMusic.ValueChanged += (sender, e) => { _musicVolume.IsVisible = _enableMusic.IsChecked; };
             item.Add(_enableMusic);
-
             _musicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-
             item.Add(_musicVolume);
             rightArea.Add(item);
 
 
-            _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", Engine.Profile.Current.EnableFootstepsSound, 0, 30);
-            _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
-            _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
-
-            _loginMusic = CreateCheckBox(rightArea, "Login music", Engine.GlobalSettings.LoginMusic, 0, 40);
-
             item = new ScrollAreaItem();
-            Label text = new Label("- Login music volume:", true, HUE_FONT, 0, FONT);
-            _loginMusicVolume = new HSliderBar(text.X + text.Width + 10, 5, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-            item.Add(text);
+            _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.GlobalSettings.LoginMusic
+            };
+            _loginMusic.ValueChanged += (sender, e) => { _loginMusicVolume.IsVisible = _loginMusic.IsChecked; };
+            item.Add(_loginMusic);
+            _loginMusicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
 
+
+
+
+
+
+            _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", Engine.Profile.Current.EnableFootstepsSound, 0, 15);
+            _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
+            _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
+
+
+
+
+            _loginMusicVolume.IsVisible = _loginMusic.IsChecked;
             _soundsVolume.IsVisible = _enableSounds.IsChecked;
             _musicVolume.IsVisible = _enableMusic.IsChecked;
 
@@ -811,6 +820,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildCombat()
         {
             const int PAGE = 8;
+
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.InnocentHue, "Innocent Color", 20, 0);
             _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, "Friend Color", 20, 0);
