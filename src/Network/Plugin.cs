@@ -43,7 +43,6 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
 
-        public PluginHeader header;
 
 
         private Plugin(string path)
@@ -279,18 +278,15 @@ namespace ClassicUO.Network
         }
 
 
-        internal static bool ProcessRecvPacket(Packet p)
+        internal static bool ProcessRecvPacket(ref byte[] data, ref int length)
         {
             bool result = true;
-
-            if (p.IsAssistPacket)
-                return result;
 
             for (int i = 0; i < _plugins.Count; i++)
             {
                 Plugin plugin = _plugins[i];
 
-                if (plugin._onRecv != null && !plugin._onRecv(p.ToArray(), p.Length))
+                if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
                     result = false;
             }
 
@@ -329,7 +325,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onDisconnected?.Invoke();
         }
 
-        internal static bool ProcessSendPacket(byte[] data, int length)
+        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 
@@ -337,7 +333,7 @@ namespace ClassicUO.Network
             {
                 Plugin plugin = _plugins[i];
 
-                if (plugin._onSend != null && !plugin._onSend(data, length))
+                if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
                     result = false;
             }
 
@@ -397,19 +393,20 @@ namespace ClassicUO.Network
             }
         }
 
-        private static bool OnPluginRecv(byte[] data, int length)
+        private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            Packet p = new Packet(data, length) {IsAssistPacket = true};
-            NetClient.EnqueuePacketFromPlugin(p);
+            //Packet p = new Packet(data, length) {IsAssistPacket = true};
+            NetClient.EnqueuePacketFromPlugin(ref data, ref length);
 
             return true;
         }
 
-        private static bool OnPluginSend(byte[] data, int length)
+        private static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
                 NetClient.Socket.Send(data);
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected) NetClient.LoginSocket.Send(data);
+            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                NetClient.LoginSocket.Send(data);
 
             return true;
         }
