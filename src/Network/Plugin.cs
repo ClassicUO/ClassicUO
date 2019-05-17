@@ -10,6 +10,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -20,6 +21,7 @@ namespace ClassicUO.Network
     internal unsafe class Plugin
     {
         private static readonly List<Plugin> _plugins = new List<Plugin>();
+        private delegate void OnInstall(void* header);
 
 
         private readonly string _path;
@@ -82,6 +84,7 @@ namespace ClassicUO.Network
             return p;
         }
 
+
         public void Load()
         {
             _recv = OnPluginRecv;
@@ -93,17 +96,6 @@ namespace ClassicUO.Network
             _getUoFilePath = GetUOFilePath;
             _requestMove = RequestMove;
             _setTitle = SetWindowTitle;
-
-            //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
-            //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_recv));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_send));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPacketLength));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPlayerPosition));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_castSpell));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getStaticImage));
-            //Marshal.WriteIntPtr(headerPtr, SDL.SDL_GL_GetCurrentWindow());
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getUoFilePath));
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
@@ -133,7 +125,7 @@ namespace ClassicUO.Network
 
             try
             {
-                IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
+                IntPtr assptr = Native.LoadLibrary(_path);
 
                 Log.Message(LogTypes.Trace, $"assembly: {assptr}");
 
@@ -141,13 +133,15 @@ namespace ClassicUO.Network
 
                 Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
 
-                IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
+                IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
 
                 Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
 
                 if (installPtr == IntPtr.Zero) throw new Exception("Invalid Entry Point, Attempting managed load.");
 
-                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(func);
+
+                Console.WriteLine(">>> ADDRESS {0}", header.OnInitialize);
             }
             catch
             {
@@ -222,7 +216,6 @@ namespace ClassicUO.Network
                 _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
             IsValid = true;
 
-            //Marshal.FreeHGlobal(headerPtr);
 
             _onInitialize?.Invoke();
         }
@@ -412,6 +405,5 @@ namespace ClassicUO.Network
         }
 
 
-        private delegate void OnInstall(ref void* header);
     }
 }
