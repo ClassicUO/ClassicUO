@@ -227,7 +227,7 @@ namespace ClassicUO.Network
             byte[] data = p.ToArray();
             int length = p.Length;
 
-            if (Plugin.ProcessSendPacket(ref data, ref length))
+            if (Plugin.ProcessSendPacket(ref data, length))
             {
                 Packet packet = new Packet(data, length);
                 PacketSended.Raise(packet);
@@ -251,7 +251,7 @@ namespace ClassicUO.Network
                 byte[] data = p.Item1;
                 int length = p.Item2;
 
-                if (p.Item3 || Plugin.ProcessRecvPacket(ref data, ref length))
+                if (p.Item3 || Plugin.ProcessRecvPacket(ref data, length))
                 {
                     Packet packet = new Packet(data, length);
                     PacketReceived.Raise(packet);

@@ -40,13 +40,13 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnInitialize _onInitialize;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnMouse _onMouse;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnUpdatePlayerPosition _onUpdatePlayerPosition;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv _recv, _send, _onRecv, _onSend;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv _onRecv, _onSend;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPluginPacketSendRecv _recv, _send;
         [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
 
-
-
+      
         private Plugin(string path)
         {
             _path = path;
@@ -271,7 +271,7 @@ namespace ClassicUO.Network
         }
 
 
-        internal static bool ProcessRecvPacket(ref byte[] data, ref int length)
+        internal static bool ProcessRecvPacket(ref byte[] data, int length)
         {
             bool result = true;
 
@@ -279,8 +279,11 @@ namespace ClassicUO.Network
             {
                 Plugin plugin = _plugins[i];
 
-                if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
-                    result = false;
+                //IntPtr ptr = (IntPtr) UnsafeMemoryManager.AsPointer(ref data);
+
+                fixed(byte* ptr = data)
+                    if (plugin._onRecv != null && !plugin._onRecv((IntPtr) ptr, length))
+                        result = false;
             }
 
             return result;
@@ -318,7 +321,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onDisconnected?.Invoke();
         }
 
-        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
+        internal static bool ProcessSendPacket(ref byte[] data, int length)
         {
             bool result = true;
 
@@ -326,8 +329,9 @@ namespace ClassicUO.Network
             {
                 Plugin plugin = _plugins[i];
 
-                if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
-                    result = false;
+                fixed (byte* ptr = data)
+                    if (plugin._onSend != null && !plugin._onSend((IntPtr) ptr, length))
+                        result = false;
             }
 
             return result;
@@ -386,15 +390,13 @@ namespace ClassicUO.Network
             }
         }
 
-        private static bool OnPluginRecv(ref byte[] data, ref int length)
+        private static bool OnPluginRecv(byte[] data, int length)
         {
-            //Packet p = new Packet(data, length) {IsAssistPacket = true};
             NetClient.EnqueuePacketFromPlugin(ref data, ref length);
-
             return true;
         }
 
-        private static bool OnPluginSend(ref byte[] data, ref int length)
+        private static bool OnPluginSend(byte[] data, int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
                 NetClient.Socket.Send(data);
