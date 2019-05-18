@@ -700,17 +700,16 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 7;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", FONT, HUE_FONT, true)
+            ScrollAreaItem item = new ScrollAreaItem();
+            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay", FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
-            _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = !_sliderSpeechDelay.IsVisible; };
-            rightArea.Add(_scaleSpeechDelay);
-
-            _sliderSpeechDelay = new HSliderBar(0, 0, 300, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
-            rightArea.Add(_sliderSpeechDelay);
-
-
+            _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
+            item.Add(_scaleSpeechDelay);
+            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            item.Add(_sliderSpeechDelay);
+            rightArea.Add(item);
 
             _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
             _saveJournalCheckBox.ValueChanged += (o, e) =>
@@ -718,9 +717,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.SceneManager.GetScene<GameScene>().Journal?.CreateWriter(_saveJournalCheckBox.IsChecked);
             };
             _saveJournalCheckBox.IsChecked = Engine.Profile.Current.SaveJournalToFile;
-
-
-
 
             // [BLOCK] activate chat
             {
