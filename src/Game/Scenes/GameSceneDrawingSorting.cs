@@ -230,13 +230,15 @@ namespace ClassicUO.Game.Scenes
                         break;
                 }
 
-                if (maxObjectZ > maxZ) break;
+                if (maxObjectZ > maxZ)
+                    break;
 
                 obj.CurrentRenderIndex = _renderIndex;
 
                 bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
-                if (!ismobile && !iscorpse && itemData.IsInternal) continue;
+                if (!ismobile && !iscorpse && itemData.IsInternal)
+                    continue;
 
                 bool island = !ismobile && !iscorpse && obj is Land;
 
@@ -273,7 +275,8 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
 
-                if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty) Overheads.AddOverhead(obj.OverheadMessageContainer);
+                if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty)
+                    Overheads.AddOverhead(obj.OverheadMessageContainer);
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);

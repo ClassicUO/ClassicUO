@@ -116,12 +116,6 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (_rightMousePressed)
-            {
-                _continueRunning = true; 
-            }
-
-
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
         }
@@ -130,6 +124,11 @@ namespace ClassicUO.Game.Scenes
         {
             if (!IsMouseOverViewport)
                 return;
+
+            if (_rightMousePressed)
+            {
+                _continueRunning = true;
+            }
 
             if (_dragginObject != null)
                 _dragginObject = null;
