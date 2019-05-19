@@ -47,7 +47,7 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ToStruct<T>(IntPtr ptr, int size) 
+        public static T ToStruct<T>(IntPtr ptr, int size)
         {
             byte* str = (byte*)ptr;
 
@@ -56,27 +56,6 @@ namespace ClassicUO.Utility
             byte* resultPtr = (byte*)*((IntPtr*)&resultRef + (Platforms.PlatformHelper.IsMonoRuntime ? 1 : 0));
 
             int sizeOf = size;
-
-            for (int i = 0; i < sizeOf; i++)
-            {
-                resultPtr[i] = str[i];
-            }
-
-            return result;
-        }
-
-        public static T[] ToArrayOfStruct<T>(IntPtr ptr, int length)
-        {
-            byte* str = (byte*)ptr;
-
-            T[] result = new T[length];
-            //int size = SizeOf<T>();
-
-            TypedReference resultRef = __makeref(result);
-            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + (Platforms.PlatformHelper.IsMonoRuntime ? 1 : 0));
-
-
-            int sizeOf = length;
 
             for (int i = 0; i < sizeOf; i++)
             {
