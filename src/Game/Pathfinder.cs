@@ -496,7 +496,7 @@ namespace ClassicUO.Game
 
         private static int GetGoalDistCost(Point point, int cost)
         {
-            return (Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
+            return Math.Max(Math.Abs(_endPoint.X - point.X), Math.Abs(_endPoint.Y - point.Y));
         }
 
         private static bool DoesNotExistOnOpenList(int x, int y, int z)
@@ -648,7 +648,7 @@ namespace ClassicUO.Game
                             diagonal = -1;
                     }
 
-                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1 + diagonal) != -1)
+                    if (diagonal >= 0 && AddNodeToList(0, (int)direction, x, y, z, node, 1) != -1)
                         found = true;
                 }
             }
