@@ -811,7 +811,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        /* public int IsSitting
+        public int IsSitting
         {
             get
             {
@@ -951,7 +951,7 @@ namespace ClassicUO.Game.GameObjects
 
                 return result;
             }
-        } */
+        }
 
         public override void Destroy()
         {

@@ -707,7 +707,6 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
 
-                    //obj = null;
                 }
 
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
