@@ -329,7 +329,10 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
-                    obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it /*&& !it.IsLocked */&& !it.IsMulti) && !obj.ClosedObjectHandles;
+                    obj.UseObjectHandles = (ismobile || 
+                                            iscorpse || 
+                                            (obj is Item it /*&& !it.IsLocked */&& !it.IsMulti)) && 
+                                           !obj.ClosedObjectHandles && !itemData.IsBackground && !itemData.IsSurface;
                     _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)

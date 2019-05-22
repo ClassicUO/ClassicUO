@@ -24,7 +24,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RadioButton all, mobiles, items;
             AlphaBlendControl alpha;
-            Add(alpha = new AlphaBlendControl());
+            Add(alpha = new AlphaBlendControl(0.2f));
 
             Add(all = new RadioButton(0, 0x00D0, 0x00D1, "All", color: 0xFFFF)
             {

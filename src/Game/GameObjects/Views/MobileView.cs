@@ -549,12 +549,12 @@ namespace ClassicUO.Game.GameObjects
 
                 int mountHeightOffset = 0;
 
-                if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                    mountHeightOffset = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
+                //if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                //    mountHeightOffset = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
 
                 if (hasShadow)
                 {
-                    DrawInternal(batcher, this, null, drawX, drawY + 10 + mountHeightOffset, mirror, animIndex, true, graphic);
+                    DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
                     FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
                     DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
                 }
@@ -563,7 +563,7 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
                 }
 
-                DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                mountHeightOffset = DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
                 drawY += mountHeightOffset;
             }
             else
@@ -659,10 +659,10 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY = 0;
         private static int _characterFrameHeight;
 
-        private static void DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isParent = true)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isParent = true)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                return;
+                return 0;
 
             x += 22;
             y += 22;
@@ -674,7 +674,7 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimID = id;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
-                return;
+                return 0;
 
             direction.LastAccessTime = Engine.Ticks;
 
@@ -690,7 +690,7 @@ namespace ClassicUO.Game.GameObjects
                 ref var frame = ref direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
-                    return;
+                    return 0;
 
                 frame.Ticks = Engine.Ticks;
 
@@ -698,7 +698,7 @@ namespace ClassicUO.Game.GameObjects
                     x -= frame.Width - frame.CenterX;
                 else
                     x -= frame.CenterX;
-
+                
                 y -= frame.Height + frame.CenterY;
 
                 if (hasShadow)
@@ -846,7 +846,11 @@ namespace ClassicUO.Game.GameObjects
                         Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x , y);
                     }
                 }
+
+                return FileManager.Animations.DataIndex[id].MountedHeightOffset;
             }
+
+            return 0;
         }
 
         //private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY, bool hasShadow, int sitting, bool mirror)
