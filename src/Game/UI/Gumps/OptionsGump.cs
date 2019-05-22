@@ -303,7 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
             hpAreaItem = new ScrollAreaItem();
             Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT, font: FONT) { Y = 10 };
             hpAreaItem.Add(c);
-            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) { Text = Engine.Profile.Current.VendorGumpHeight.ToString() });
+            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) { Text = Engine.Profile.Current.VendorGumpHeight.ToString(), Tag = Engine.Profile.Current.VendorGumpHeight });
             rightArea.Add(hpAreaItem);
 
             Add(rightArea, PAGE);
