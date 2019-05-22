@@ -105,6 +105,19 @@ namespace ClassicUO.Game.UI.Controls
             
         }
 
+        public GumpPic(int x, int y, SpriteTexture texture, Hue hue)
+        {
+            X = x;
+            Y = y;
+            Graphic = Graphic.INVALID;
+
+            Hue = hue;
+
+            Texture = texture;
+            Width = Texture.Width;
+            Height = Texture.Height;
+        }
+
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
         public bool IsVirtue { get; set; }
