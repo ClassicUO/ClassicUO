@@ -51,8 +51,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _lightBar;
 
         //counters
-        private Checkbox _enableCounters, _highlightOnUse;
-        private TextBox _rows, _columns;
+        private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
+        private TextBox _rows, _columns, _highlightAmount;
         private HSliderBar _cellSize;
 
         //experimental
@@ -836,9 +836,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
             _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
-
+            _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", Engine.Profile.Current.CounterBarHighlightOnAmount, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
+
+            _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80, true)
+            {
+                X = _highlightOnAmount.X + 30,
+                Y = 10,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.CounterBarHighlightAmount.ToString()
+            });
+
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
 
             Label text = new Label("Counter Layout:", true, HUE_FONT, font: FONT)
             {
@@ -1074,6 +1088,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _columns.Text = "1";
                     _rows.Text = "1";
                     _cellSize.Value = 40;
+                    _highlightOnAmount.IsChecked = false;
+                    _highlightAmount.Text = "5";
 
                     break;
 
@@ -1329,6 +1345,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarRows = int.Parse(_rows.Text);
             Engine.Profile.Current.CounterBarColumns = int.Parse(_columns.Text);
             Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
+
+            Engine.Profile.Current.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
+            Engine.Profile.Current.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
 
             CounterBarGump counterGump = Engine.UI.GetControl<CounterBarGump>();
 

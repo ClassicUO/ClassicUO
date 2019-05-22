@@ -10,6 +10,7 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -337,7 +338,15 @@ namespace ClassicUO.Game.UI.Gumps
                         text = $"{text[0]}K+";
                 }
 
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
+                Texture2D color = Textures.GetTexture(Color.Gray);
+
+                if (Engine.Profile.Current.CounterBarHighlightOnAmount &&
+                    _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0)
+                {
+                    color = Textures.GetTexture(Color.Red);
+                }
+
+                batcher.DrawRectangle(color, x, y, Width, Height, Vector3.Zero);
 
                 if (_graphic != 0)
                 {
