@@ -811,24 +811,24 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public int IsSitting
+        public int IsSitting()
         {
-            get
+            //get
             {
                 int result = 0;
 
-                if (IsHuman && !IsMounted)
+                if (IsHuman && !IsMounted && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)) && Tile != null)
                 {
-                    GameObject start = World.Map.GetTile(X, Y).FirstNode;
+                    GameObject start = Tile.FirstNode;
 
-                    while (start != null && result == 0 && !TestStepNoChangeDirection(this, GetGroupForAnimation(this)))
+                    while (start != null && result == 0)
                     {
-                        if (GameObjectHelper.TryGetStaticData(start, out var itemdata) && Math.Abs(Z - start.Z) <= 1)
+                        if ( (start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
                         {
                             ushort graphic = start.Graphic;
 
-                            if (start is Multi)
-                                graphic = 0;
+                            //if (start is Multi || start is Mobile)
+                            //    graphic = 0;
 
                             switch (graphic)
                             {

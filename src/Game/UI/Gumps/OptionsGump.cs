@@ -707,7 +707,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
             item.Add(_scaleSpeechDelay);
-            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 

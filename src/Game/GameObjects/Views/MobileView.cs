@@ -568,7 +568,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if ((FileManager.Animations.SittingValue = IsSitting) != 0)
+                if ((FileManager.Animations.SittingValue = IsSitting()) != 0)
                 {
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
@@ -624,10 +624,21 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic);
+                        DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, false);
                     }
                     _equipConvData = null;
                 }
+
+                //if (FileManager.Animations.SittingValue != 0)
+                //{
+                //    ref var sittingData = ref FileManager.Animations.SittingInfos[FileManager.Animations.SittingValue - 1];
+
+                //    if (FileManager.Animations.Direction == 3 && sittingData.DrawBack &&
+                //        HasEquipment && Equipment[(int) Layer.Cloak] == null)
+                //    {
+
+                //    }
+                //}
             }
 
 
@@ -805,10 +816,7 @@ namespace ClassicUO.Game.GameObjects
                             batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, owner.HueVector);
                         else
                             batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, owner.HueVector);
-
-
-
-
+                        
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;
 
@@ -826,7 +834,6 @@ namespace ClassicUO.Game.GameObjects
 
                         if (owner.FrameInfo.Height < yy + frame.Height)
                             owner.FrameInfo.Height = yy + frame.Height;
-
                     }
 
                     owner.Texture = frame;
