@@ -450,7 +450,7 @@ namespace ClassicUO.Game.GameObjects
         {
             _equipConvData = null;
             _transform = false;
-
+            FileManager.Animations.SittingValue = 0;
             FrameInfo = Rectangle.Empty;
             
             int drawX = posX + (int) Offset.X;
@@ -573,6 +573,8 @@ namespace ClassicUO.Game.GameObjects
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
 
+                    ProcessAnimation(out dir);
+                    FileManager.Animations.Direction = dir;
                     FileManager.Animations.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 
                     if (FileManager.Animations.Direction == 3)

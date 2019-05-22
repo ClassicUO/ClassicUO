@@ -289,7 +289,7 @@ namespace ClassicUO.Game.GameObjects
             if (_lastAnimationIdleDelay < Engine.Ticks)
                 SetIdleAnimation();
 
-            ProcessAnimation();
+            ProcessAnimation(out _);
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -577,9 +577,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void ProcessAnimation()
+        public override void ProcessAnimation(out byte dir)
         {
-            byte dir = (byte) GetDirectionForAnimation();
+            dir = (byte) GetDirectionForAnimation();
 
             if (Steps.Count != 0)
             {
