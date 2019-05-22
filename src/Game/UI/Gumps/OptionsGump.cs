@@ -76,6 +76,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType;
 
+        //VendorGump Size Option
+        private ArrowNumbersTextBox _vendorGumpSize;
+
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private Checkbox _castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
@@ -293,15 +296,17 @@ namespace ClassicUO.Game.UI.Gumps
             }, mode);
 
             hpAreaItem.Add(_fieldsType);
-
-
-
             rightArea.Add(hpAreaItem);
 
             _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
-            Add(rightArea, PAGE);
+            hpAreaItem = new ScrollAreaItem();
+            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT, font: FONT) { Y = 10 };
+            hpAreaItem.Add(c);
+            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) { Text = Engine.Profile.Current.VendorGumpHeight.ToString() });
+            rightArea.Add(hpAreaItem);
 
+            Add(rightArea, PAGE);
         }
 
         private void BuildSounds()
@@ -817,7 +822,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 20,
                 Width = 200,
                 Height = 30
-            }, " Spell Overhead format: ({power} for powerword - {spell} for spell name", rightArea.Width - 20);
+            }, " Spell Overhead format: ({power} for powerword - {spell} for spell name)", rightArea.Width - 20);
 
             rightArea.Add(it);
 
@@ -970,6 +975,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
+                    _vendorGumpSize.Text = (60).ToString();
 
                     break;
                 case 2: // sounds
@@ -1129,6 +1135,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             Engine.Profile.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+
+            Engine.Profile.Current.VendorGumpHeight = (int)_vendorGumpSize.Tag;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

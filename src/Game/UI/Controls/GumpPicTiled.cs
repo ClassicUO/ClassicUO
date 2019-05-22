@@ -58,6 +58,18 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
+        internal GumpPicTiled(int x, int y, int width, int heigth, SpriteTexture texture)
+        {
+            CanMove = true;
+            AcceptMouseInput = true;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = heigth;
+            Graphic = _lastGraphic = Graphic.INVALID;
+            Texture = texture;
+        }
+
         public Graphic Graphic { get; set; }
 
         public override void Update(double totalMS, double frameMS)
