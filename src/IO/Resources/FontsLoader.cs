@@ -1528,7 +1528,9 @@ namespace ClassicUO.IO.Resources
 
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Fonts crash log\r\nParams:\r\ntext: {0}\r\nfont: {1}\r\ncolor: {2}\r\ncell: {3}\r\nwidth: {4}\r\nalign: {5}\r\nflags: {6}\r\nsavehitmap: {7}\r\nStackTrace: {8}", str, font, color, cell, width, align, flags, saveHitmap, ex);
-                File.WriteAllText(path, sb.ToString());
+
+                using (LogFile file = new LogFile(path, "font_crash.txt"))
+                    file.Write(sb.ToString());
 
                 Chat.HandleMessage(World.Player, "An issue has been reported in /Logs.\nPlease report to CUO devs", "CUO ERROR", 32, MessageType.Regular, 1, true);
 
