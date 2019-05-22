@@ -126,7 +126,9 @@ namespace ClassicUO.Renderer
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
             vertex0.Normal.Z = 1;
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
 
             vertex1.Position = vertex0.Position;
             vertex1.Position.X += w;
@@ -188,7 +190,9 @@ namespace ClassicUO.Renderer
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
             vertex0.Normal.Z = 1;
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
 
             vertex1.Position = vertex0.Position;
             vertex1.Position.Y += h;
@@ -244,7 +248,9 @@ namespace ClassicUO.Renderer
             ref var vertex3 = ref VertexInfo[idx + 3];
 
 
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
             vertex1.TextureCoordinate.X = 1;
             vertex1.TextureCoordinate.Y = vertex1.TextureCoordinate.Z = 0;
             vertex2.TextureCoordinate.X = vertex2.TextureCoordinate.Z = 0;
@@ -320,7 +326,9 @@ namespace ClassicUO.Renderer
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
             vertex0.Normal.Z = 1;
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
 
             vertex1.Position = center;
             vertex1.Position.X += cosx - siny;
@@ -387,7 +395,9 @@ namespace ClassicUO.Renderer
                 vertex0.Normal.X = 0;
                 vertex0.Normal.Y = 0;
                 vertex0.Normal.Z = 1;
-                vertex0.TextureCoordinate = Vector3.Zero;
+                vertex0.TextureCoordinate.X = 0;
+                vertex0.TextureCoordinate.Y = 0;
+                vertex0.TextureCoordinate.Z = 0;
 
                 vertex1.Position = vertex0.Position;
                 vertex1.Position.Y += h;
@@ -424,7 +434,9 @@ namespace ClassicUO.Renderer
                 vertex0.Normal.X = 0;
                 vertex0.Normal.Y = 0;
                 vertex0.Normal.Z = 1;
-                vertex0.TextureCoordinate = Vector3.Zero;
+                vertex0.TextureCoordinate.X = 0;
+                vertex0.TextureCoordinate.Y = 0;
+                vertex0.TextureCoordinate.Z = 0;
 
                 vertex1.Position = vertex0.Position;
                 vertex1.Position.X += w;
@@ -502,6 +514,256 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        public bool DrawCharacterSitted(Texture2D texture, int x, int y, int destX, int destY, bool mirror, float h3mod, float h6mod, float h9mod, Vector3 hue)
+        {
+            EnsureSize();
+
+            int idx = NumSprites << 2;
+            ref var vertex0 = ref VertexInfo[idx];
+            ref var vertex1 = ref VertexInfo[idx + 1];
+            ref var vertex2 = ref VertexInfo[idx + 2];
+            ref var vertex3 = ref VertexInfo[idx + 3];
+
+
+            float width = texture.Width;
+            float height = texture.Height;
+
+            float h03 = height * h3mod;
+            float h06 = height * h6mod;
+            float h09 = height * h9mod;
+
+            const float SITTING_OFFSET = 8.0f;
+
+            float widthOffset = width + SITTING_OFFSET;
+
+            vertex0.Normal.X = 0;
+            vertex0.Normal.Y = 0;
+            vertex0.Normal.Z = 1;
+            vertex1.Normal.X = 0;
+            vertex1.Normal.Y = 0;
+            vertex1.Normal.Z = 1;
+            vertex2.Normal.X = 0;
+            vertex2.Normal.Y = 0;
+            vertex2.Normal.Z = 1;
+            vertex3.Normal.X = 0;
+            vertex3.Normal.Y = 0;
+            vertex3.Normal.Z = 1;
+
+
+            if (mirror)
+            {
+                if (h3mod != 0.0f)
+                {
+                    vertex0.Position.X = x + width;
+                    vertex0.Position.Y = y;
+                    vertex0.Position.Z = 0;
+                    vertex0.TextureCoordinate.X = 0;
+                    vertex0.TextureCoordinate.Y = 0;
+                    vertex0.TextureCoordinate.Z = 0;
+
+                    vertex1.Position.X = x;
+                    vertex1.Position.Y = y;
+                    vertex1.Position.Z = 0;
+                    vertex1.TextureCoordinate.X = 1;
+                    vertex1.TextureCoordinate.Y = 0;
+                    vertex1.TextureCoordinate.Z = 0;
+
+                    vertex2.Position.X = x + width;
+                    vertex2.Position.Y = y + h03;
+                    vertex2.Position.Z = 0;
+                    vertex2.TextureCoordinate.X = 0;
+                    vertex2.TextureCoordinate.Y = h3mod;
+                    vertex2.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x;
+                    vertex3.Position.Y = y + h03;
+                    vertex3.Position.Z = 0;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = h3mod;
+                    vertex3.TextureCoordinate.Z = 0;
+                }
+
+                if (h6mod != 0.0f)
+                {
+                    if (h3mod == 0.0f)
+                    {
+                        vertex0.Position.X = x + width;
+                        vertex0.Position.Y = y;
+                        vertex0.Position.Z = 0;
+                        vertex0.TextureCoordinate.X = 0;
+                        vertex0.TextureCoordinate.Y = 0;
+                        vertex0.TextureCoordinate.Z = 0;
+
+                        vertex1.Position.X = x;
+                        vertex1.Position.Y = y;
+                        vertex1.Position.Z = 0;
+                        vertex1.TextureCoordinate.X = 1;
+                        vertex1.TextureCoordinate.Y = 0;
+                        vertex1.TextureCoordinate.Z = 0;
+                    }
+
+                    vertex2.Position.X = x + widthOffset;
+                    vertex2.Position.Y = y + h06;
+                    vertex2.Position.Z = 0;
+                    vertex2.TextureCoordinate.X = 0;
+                    vertex2.TextureCoordinate.Y = h6mod;
+                    vertex2.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x + SITTING_OFFSET;
+                    vertex3.Position.Y = y + h06;
+                    vertex3.Position.Z = 0;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = h6mod;
+                    vertex3.TextureCoordinate.Z = 0;
+                }
+
+                if (h9mod != 0.0f)
+                {
+                    if (h6mod == 0.0f)
+                    {
+                        vertex0.Position.X = x + widthOffset;
+                        vertex0.Position.Y = y;
+                        vertex0.Position.Z = 0;
+                        vertex0.TextureCoordinate.X = 0;
+                        vertex0.TextureCoordinate.Y = 0;
+                        vertex0.TextureCoordinate.Z = 0;
+
+                        vertex1.Position.X = x + SITTING_OFFSET;
+                        vertex1.Position.Y = y;
+                        vertex1.Position.Z = 0;
+                        vertex1.TextureCoordinate.X = 1;
+                        vertex1.TextureCoordinate.Y = 0;
+                        vertex1.TextureCoordinate.Z = 0;
+                    }
+
+
+                    vertex2.Position.X = x + widthOffset;
+                    vertex2.Position.Y = y + h09;
+                    vertex2.Position.Z = 0;
+                    vertex2.TextureCoordinate.X = 0;
+                    vertex2.TextureCoordinate.Y = 1;
+                    vertex2.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x + SITTING_OFFSET;
+                    vertex3.Position.Y = y + h09;
+                    vertex3.Position.Z = 0;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = 1;
+                    vertex3.TextureCoordinate.Z = 0;
+                }
+            }
+            else
+            {
+                if (h3mod != 0.0f)
+                {
+                    vertex2.Position.X = x + widthOffset;
+                    vertex2.Position.Y = y;
+                    vertex2.Position.Z = 0;
+                    vertex2.TextureCoordinate.X = 1;
+                    vertex2.TextureCoordinate.Y = 0;
+                    vertex2.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x + widthOffset;
+                    vertex3.Position.Y = y + h03;
+                    vertex3.Position.Z = 0;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = h3mod;
+                    vertex3.TextureCoordinate.Z = 0;
+
+                    vertex0.Position.X = x + SITTING_OFFSET;
+                    vertex0.Position.Y = y;
+                    vertex0.Position.Z = 0;
+                    vertex0.TextureCoordinate.X = 0;
+                    vertex0.TextureCoordinate.Y = 0;
+                    vertex0.TextureCoordinate.Z = 0;
+
+                    vertex1.Position.X = x + SITTING_OFFSET;
+                    vertex1.Position.Y = y + h03;
+                    vertex1.Position.Z = 0;
+                    vertex1.TextureCoordinate.X = 0;
+                    vertex1.TextureCoordinate.Y = h3mod;
+                    vertex1.TextureCoordinate.Z = 0;
+                }
+
+                if (h6mod != 0.0f)
+                {
+                    if (h3mod == 0.0f)
+                    {
+                        vertex0.Position.X = x + SITTING_OFFSET;
+                        vertex0.Position.Y = y;
+                        vertex0.Position.Z = 0;
+                        vertex0.TextureCoordinate.X = 0;
+                        vertex0.TextureCoordinate.Y = 0;
+                        vertex0.TextureCoordinate.Z = 0;
+
+                        vertex2.Position.X = x + width + SITTING_OFFSET;
+                        vertex2.Position.Y = y;
+                        vertex2.Position.Z = 0;
+                        vertex2.TextureCoordinate.X = 1;
+                        vertex2.TextureCoordinate.Y = 0;
+                        vertex2.TextureCoordinate.Z = 0;
+                    }
+
+                    vertex1.Position.X = x;
+                    vertex1.Position.Y = y + h06;
+                    vertex1.TextureCoordinate.X = 0;
+                    vertex1.TextureCoordinate.Y = h6mod;
+                    vertex1.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x + width;
+                    vertex3.Position.Y = y + h06;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = h6mod;
+                    vertex3.TextureCoordinate.Z = 0;
+                }
+
+                if (h9mod != 0.0f)
+                {
+                    if (h6mod == 0.0f)
+                    {
+                        vertex0.Position.X = x;
+                        vertex0.Position.Y = y;
+                        vertex0.Position.Z = 0;
+                        vertex0.TextureCoordinate.X = 0;
+                        vertex0.TextureCoordinate.Y = 0;
+                        vertex0.TextureCoordinate.Z = 0;
+
+                        vertex2.Position.X = x + width;
+                        vertex2.Position.Y = y;
+                        vertex2.Position.Z = 0;
+                        vertex2.TextureCoordinate.X = 1;
+                        vertex2.TextureCoordinate.Y = 0;
+                        vertex2.TextureCoordinate.Z = 0;
+                    }
+
+
+                    vertex1.Position.X = x;
+                    vertex1.Position.Y = y + h09;
+                    vertex1.TextureCoordinate.X = 0;
+                    vertex1.TextureCoordinate.Y = 1;
+                    vertex1.TextureCoordinate.Z = 0;
+
+                    vertex3.Position.X = x + width;
+                    vertex3.Position.Y = y + h09;
+                    vertex3.TextureCoordinate.X = 1;
+                    vertex3.TextureCoordinate.Y = 1;
+                    vertex3.TextureCoordinate.Z = 0;
+                }
+            }
+
+            vertex0.Hue = vertex1.Hue = vertex2.Hue = vertex3.Hue = hue;
+
+
+            if (CheckInScreen(idx))
+            {
+                PushSprite(texture);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public bool Draw2D(Texture2D texture, int x, int y, Vector3 hue)
         {
             EnsureSize();
@@ -518,7 +780,9 @@ namespace ClassicUO.Renderer
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
             vertex0.Normal.Z = 1;
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
 
             vertex1.Position.X = x + texture.Width;
             vertex1.Position.Y = y;
@@ -702,7 +966,9 @@ namespace ClassicUO.Renderer
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
             vertex0.Normal.Z = 1;
-            vertex0.TextureCoordinate = Vector3.Zero;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
             vertex1.Position.X = x + width;
             vertex1.Position.Y = y;
             vertex1.Position.Z = 0;

@@ -12,10 +12,12 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
         }
 
+        public ushort Hue { get; set; }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+            ShaderHuesTraslator.GetHueVector(ref hue, Hue, false, Alpha);
 
             return batcher.Draw2D(CheckerTrans.TransparentTexture, x, y, Width, Height, hue);
         }

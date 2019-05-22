@@ -98,7 +98,12 @@ namespace ClassicUO.Game
 
         public static Graphic Parse(string str)
         {
-            if (str.StartsWith("0x")) return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            if (str.StartsWith("0x"))
+                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+
+            if (str.Length > 1 && str[0] == '-')
+                return (ushort)short.Parse(str);
+
 
             return ushort.Parse(str);
         }

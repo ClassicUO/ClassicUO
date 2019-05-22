@@ -384,7 +384,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            ProcessAnimation();
+            ProcessAnimation(out _);
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -773,11 +773,12 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void ProcessAnimation()
+        public override void ProcessAnimation(out byte dir)
         {
+            dir = 0;
             if (IsCorpse)
             {
-                byte dir = (byte) Layer;
+                dir = (byte) Layer;
 
                 if (LastAnimationChangeTime < Engine.Ticks)
                 {
@@ -820,6 +821,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
+                
                 unsafe
                 {
                     _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);

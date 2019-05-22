@@ -34,7 +34,7 @@ namespace ClassicUO.IO.Resources
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
         public ushort AnimID { get; set; }
-        //public int SittingValue { get; set; }
+        public int SittingValue { get; set; }
 
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
 
@@ -741,7 +741,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        /* public readonly struct SittingInfoData
+         public readonly struct SittingInfoData
         {
             public SittingInfoData(ushort graphic, sbyte d1,
                                    sbyte d2, sbyte d3, sbyte d4,
@@ -814,8 +814,8 @@ namespace ClassicUO.IO.Resources
             new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
             new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
             new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0CF3, -1, 2, -1 , 6, 2, 8, false),
-            new SittingInfoData(0x0CF4, -1, 2, -1 , 6, 2, 8, false),
+            new SittingInfoData(0x0CF3, -1, 2, -1, 6, 2, 8, false),
+            new SittingInfoData(0x0CF4, -1, 2, -1, 6, 2, 8, false),
             new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
             new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
             new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
@@ -981,7 +981,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (Direction == 3)
                 {
-                    y += 23 + data.MirrorOffsetY;
+                    y += 25 + data.MirrorOffsetY;
                     x += offsX - 4;
                 }
                 else
@@ -998,13 +998,13 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    y += 9 + data.OffsetY;
+                    y += 10 + data.OffsetY;
                     x -= offsX + 1;
                 }
             }
         }
         
-       */
+       
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
         {

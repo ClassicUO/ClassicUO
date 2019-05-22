@@ -35,7 +35,6 @@ namespace ClassicUO.Network
     {
         private static readonly byte[] _emtpyBytes = { };
         private byte[] _data;
-        public bool IsAssistPacket = false;
 
         public Packet(byte[] data, int length)
         {

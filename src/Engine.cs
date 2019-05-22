@@ -96,8 +96,6 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
 
-        private UISystemManager _uiSystem;
-
         private Engine(string[] args)
         {
             Instance = this;

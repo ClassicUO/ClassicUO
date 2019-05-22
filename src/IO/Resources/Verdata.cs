@@ -39,7 +39,16 @@ namespace ClassicUO.IO.Resources
             else
             {
                 File = new UOFileMul(path, false);
-                Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
+
+                // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
+                try
+                {
+                    Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
+                }
+                catch
+                {
+                    Patches = new UOFileIndex5D[0];
+                }
             }
         }
 

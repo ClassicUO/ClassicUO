@@ -45,7 +45,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_background = new AlphaBlendControl(.3f)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                Hue = hue
             });
         }
 

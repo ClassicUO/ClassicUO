@@ -529,9 +529,22 @@ namespace ClassicUO.Game.UI.Gumps
             if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
             {
                 text = text.Replace("\r", string.Empty);
-                int curpage = ActiveInternalPage, oldcaretpos = m_Pages[curpage].TxEntry.CaretIndex, oldpage = curpage;
-                string original = textID == MultiLineBox.PasteCommandID ? text : m_Pages[curpage].Text;
-                text = m_Pages[curpage].TxEntry.InsertString(text);
+                int curpage = ActiveInternalPage;
+                MultiLineBox page;
+                if (curpage < 0)
+                {
+                    if (BookTitle.HasKeyboardFocus)
+                        page = BookTitle;
+                    else if (BookAuthor.HasKeyboardFocus)
+                        page = BookAuthor;
+                    else
+                        return;
+                }
+                else
+                    page = m_Pages[curpage];
+                int oldcaretpos = page.TxEntry.CaretIndex, oldpage = curpage;
+                string original = textID == MultiLineBox.PasteCommandID ? text : page.Text;
+                text = page.TxEntry.InsertString(text);
 
                 if (curpage >= 0)
                 {

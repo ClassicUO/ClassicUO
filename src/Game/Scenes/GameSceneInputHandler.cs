@@ -106,15 +106,7 @@ namespace ClassicUO.Game.Scenes
                     direction = _numPadDirection;
                 }
 
-                if (_isShiftDown)
-                {
-                    World.Player.Walk(direction, false);
-                }
-                else
-                {
-                    World.Player.Walk(direction, true);
-                }
-
+                World.Player.Walk(direction, Engine.Profile.Current.AlwaysRun);
             }
         }
 
@@ -124,12 +116,6 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (_rightMousePressed)
-            {
-                _continueRunning = true; 
-            }
-
-
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
         }
@@ -138,6 +124,11 @@ namespace ClassicUO.Game.Scenes
         {
             if (!IsMouseOverViewport)
                 return;
+
+            if (_rightMousePressed)
+            {
+                _continueRunning = true;
+            }
 
             if (_dragginObject != null)
                 _dragginObject = null;

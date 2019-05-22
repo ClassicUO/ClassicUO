@@ -69,6 +69,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public byte ChatFont { get; set; } = 1;
         [JsonProperty] public int SpeechDelay { get; set; } = 100;
         [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
+        [JsonProperty] public bool SaveJournalToFile { get; set; } = false;
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
@@ -109,6 +110,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
+
+        [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
 
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
@@ -160,6 +163,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
+        [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
@@ -225,6 +229,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
+        [JsonProperty] public bool CounterBarHighlightOnAmount { get; set; }
+        [JsonProperty] public int CounterBarHighlightAmount { get; set; } = 5;
         [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
         [JsonProperty] public int CounterBarRows { get; set; } = 1;
         [JsonProperty] public int CounterBarColumns { get; set; } = 1;

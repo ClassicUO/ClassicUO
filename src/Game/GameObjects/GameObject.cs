@@ -157,6 +157,8 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Left { get; set; }
         public GameObject Right { get; set; }
 
+        public Tile Tile => _tile;
+
         public virtual void Update(double totalMS, double frameMS)
         {
             OverheadMessageContainer?.Update();
