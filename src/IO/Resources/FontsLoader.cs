@@ -873,7 +873,7 @@ namespace ClassicUO.IO.Resources
                     lastaspace_current_charcolor = current_charcolor;
                 }
 
-                if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
+                if (ptr.Width + readWidth + ((sbyte) data[0] + (sbyte) data[2]) > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -884,11 +884,12 @@ namespace ClassicUO.IO.Resources
                         ptr.CharCount += charCount + newlineval;
                         lastSpace = i;
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
+
                         ptr.Data.Resize(ptr.CharCount - newlineval);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -909,10 +910,10 @@ namespace ClassicUO.IO.Resources
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -955,12 +956,12 @@ namespace ClassicUO.IO.Resources
                         current_charcolor = lastspace_charcolor;
                         si = i < str.Length ? str[i] : '\0';
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
                         else if (countspaces && si != '\0' && lastSpace - ptr.CharStart == ptr.CharCount)
                             ptr.CharCount++;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
 
                         ptr.Data.Resize(ptr.CharCount);
@@ -1014,7 +1015,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth == 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len != 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
@@ -1027,7 +1028,7 @@ namespace ClassicUO.IO.Resources
         {
             try
             {
-                if (font >= 20 || font >= _unicodeFontAddress.Length || _unicodeFontAddress[font] == IntPtr.Zero)
+                if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                     return null;
 
                 int len = str.Length;

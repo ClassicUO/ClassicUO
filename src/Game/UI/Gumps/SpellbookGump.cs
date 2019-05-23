@@ -225,7 +225,8 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_spells[offs])
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
-                            if (spellDone % 2 == 0) topage++;
+                            if (spellDone % 2 == 0)
+                                topage++;
 
                             spellDone++;
 
@@ -359,7 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        SpellDefinition? def = GetSpellDefinition(sender);
+                        SpellDefinition? def = GetSpellDefinition(sender as Control);
 
                         if (def != null)
                             GameActions.CastSpell(def.Value.ID);
@@ -368,7 +369,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    SpellDefinition? def = GetSpellDefinition(sender);
+                    SpellDefinition? def = GetSpellDefinition(sender as Control);
+                    if (!def.HasValue)
+                        return;
 
                     UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
@@ -413,10 +416,15 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
-        private SpellDefinition? GetSpellDefinition(object sender)
+        private SpellDefinition? GetSpellDefinition(Control ctrl)
         {
-            Control ctrl = (Control) sender;
-            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
+            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial.Value) + 1;
+
+            return GetSpellDefinition(idx);
+        }
+
+        private SpellDefinition? GetSpellDefinition(int idx)
+        {
             SpellDefinition? def = null;
 
             switch (_spellBookType)
@@ -460,10 +468,6 @@ namespace ClassicUO.Game.UI.Gumps
                     def = SpellsBardic.GetSpell(idx);
 
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException();
             }
 
             return def;
@@ -771,7 +775,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (_lastPressed != null && e.Button == MouseButton.Left)
             {
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                GameActions.CastSpell((int) _lastPressed.Tag);
+                var def = GetSpellDefinition( (int) _lastPressed.Tag);
+
+                if (def.HasValue)
+                {
+                    GameActions.CastSpell(def.Value.ID);
+                }
+
                 _lastPressed = null;
             }
         }
