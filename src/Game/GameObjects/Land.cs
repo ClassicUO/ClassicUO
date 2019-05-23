@@ -64,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        public readonly Vector3[] Normals = new Vector3[4];
+        public Vector3[] Normals = new Vector3[4];
 
         public Rectangle Rectangle;
 

@@ -53,13 +53,13 @@ namespace ClassicUO.Game.UI.Controls
 
                     var r = artTexture.ImageRectangle;
 
-                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, hue);
+                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, ref hue);
                 }
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, hue);
+                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, ref hue);
             }
 
-            return batcher.Draw2D(Texture, x, y, hue);
+            return batcher.Draw2D(Texture, x, y, ref hue);
         }
     }
 }

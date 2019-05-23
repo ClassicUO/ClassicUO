@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
 
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, hue);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref hue);
             }
 
             return base.Draw(batcher, x, y);

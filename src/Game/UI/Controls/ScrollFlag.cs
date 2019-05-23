@@ -162,13 +162,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            Vector3 zero = Vector3.Zero;
+
             if (MaxValue != MinValue)
-                batcher.Draw2D(Texture, x, (int) (y + _sliderPosition), Vector3.Zero);
+                batcher.Draw2D(Texture, x, (int) (y + _sliderPosition), ref zero);
 
             if (_showButtons)
             {
-                batcher.Draw2D(_upButton, x, y, Vector3.Zero);
-                batcher.Draw2D(_downButton, x, y + Height, Vector3.Zero);
+                batcher.Draw2D(_upButton, x, y, ref zero);
+                batcher.Draw2D(_downButton, x, y + Height, ref zero);
             }
 
             return base.Draw(batcher, x, y);

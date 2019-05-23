@@ -47,9 +47,11 @@ namespace ClassicUO.Game.UI.Controls
                 Texture.Ticks = (long) totalMS;
         }
 
+        private static Vector3 _zero = Vector3.Zero;
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            return batcher.Draw2D(Texture, x, y, Width, Height, Vector3.Zero);
+            return batcher.Draw2D(Texture, x, y, Width, Height, ref _zero);
         }
 
         public override void Dispose()

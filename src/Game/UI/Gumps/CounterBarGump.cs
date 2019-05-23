@@ -346,15 +346,16 @@ namespace ClassicUO.Game.UI.Gumps
                     color = Textures.GetTexture(Color.Red);
                 }
 
-                batcher.DrawRectangle(color, x, y, Width, Height, Vector3.Zero);
+                Vector3 hue = Vector3.Zero;
+                batcher.DrawRectangle(color, x, y, Width, Height, ref hue);
 
                 if (_graphic != 0)
                 {
-                    Vector3 hue = Vector3.Zero;
                     hue.X = 59;
                     hue.Y = 1;
+                    hue.Z = 0;
 
-                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, hue);
+                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, ref hue);
                 }
 
 

@@ -228,14 +228,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            Vector3 zero = Vector3.Zero;
+
             // sopra
-            batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, ref zero);
             // sotto
-            batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, ref zero);
             //sx
-            batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, Vector3.Zero);
+            batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, ref zero);
             //dx
-            batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, Vector3.Zero);
+            batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, ref zero);
 
             return base.Draw(batcher, x, y);
         }

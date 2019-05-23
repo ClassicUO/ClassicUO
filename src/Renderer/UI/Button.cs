@@ -133,6 +133,8 @@ namespace ClassicUO.Renderer.UI
             base.OnMouseExit(x, y);
         }
 
+        private static Vector3 _zero = Vector3.Zero;
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Texture2D texture;
@@ -157,9 +159,9 @@ namespace ClassicUO.Renderer.UI
                     break;
             }
 
-            batcher.Draw2D(texture, x, y, Width, Height, Vector3.Zero);
+            batcher.Draw2D(texture, x, y, Width, Height, ref _zero);
 
-            batcher.DrawString(Fonts.Regular, Text, x - (((int) _textSize.X - Width) >> 1), y - (((int) _textSize.Y - Height) >> 1), Vector3.Zero);
+            batcher.DrawString(Fonts.Regular, Text, x - (((int) _textSize.X - Width) >> 1), y - (((int) _textSize.Y - Height) >> 1), ref _zero);
 
             return true; // base.Draw(batcher, position, hue);
         }

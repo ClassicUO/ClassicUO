@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
             _auraHueVector.X = hue;
 
             //batcher.SetBlendState(_blend);
-            batcher.Draw2D(AuraTexture, x, y, _auraHueVector);
+            batcher.Draw2D(AuraTexture, x, y, ref _auraHueVector);
             //batcher.SetBlendState(null);
         }
     }

@@ -295,7 +295,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (y < gy || y + Height > gy + h)
                 return false;
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref zero);
 
             base.Draw(batcher, x, y);
 

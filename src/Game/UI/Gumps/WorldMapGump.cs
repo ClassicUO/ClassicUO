@@ -306,7 +306,9 @@ namespace ClassicUO.Game.UI.Gumps
             //dst.X = (int)rotDest.X;
             //dst.Y = (int)rotDest.Y;
 
-            return batcher.Draw2D(_mapTexture, dst.X, dst.Y, dst.Width, dst.Height, sx, sy, sw, sh, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+
+            return batcher.Draw2D(_mapTexture, dst.X, dst.Y, dst.Width, dst.Height, sx, sy, sw, sh, ref zero);
         }
     }
 }

@@ -290,11 +290,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsFlipped)
             {
-                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
+                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
             }
             else
             {
-                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector);
+                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
             }
 
             Texture.Ticks = Engine.Ticks;

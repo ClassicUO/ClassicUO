@@ -179,7 +179,7 @@ namespace ClassicUO.Renderer
                 huev.Y = 1;
             huev.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, huev);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref huev);
         }
 
         public void CreateTexture()

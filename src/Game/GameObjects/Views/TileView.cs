@@ -92,7 +92,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Texture.Ticks = Engine.Ticks;
 
-            if (batcher.DrawSpriteLand(Texture, posX, posY + Z * 4, Rectangle, Normals, HueVector))
+            if (batcher.DrawSpriteLand(Texture, posX, posY + Z * 4, ref Rectangle, ref Normals, ref HueVector))
             {
                 Select(posX, posY);
 

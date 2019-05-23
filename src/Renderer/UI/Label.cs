@@ -34,7 +34,8 @@ namespace ClassicUO.Renderer.UI
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            batcher.DrawString(Fonts.Regular, Text, x, y, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+            batcher.DrawString(Fonts.Regular, Text, x, y, ref zero);
 
             return base.Draw(batcher, x, y);
         }

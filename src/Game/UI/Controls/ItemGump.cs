@@ -105,10 +105,10 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
 
-            batcher.Draw2D(Texture, x, y, hue);
+            batcher.Draw2D(Texture, x, y, ref hue);
 
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, hue);
+                batcher.Draw2D(Texture, x + 5, y + 5, ref hue);
 
             return base.Draw(batcher, x, y);
         }

@@ -108,8 +108,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
+            Vector3 zero = Vector3.Zero;
+
             bool ok = base.Draw(batcher, x, y);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, Vector3.Zero);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref zero);
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
             return ok;

@@ -17,7 +17,7 @@ namespace ClassicUO.Renderer
         }
 
 
-        public void DrawString(SpriteFont spriteFont, string text, int x, int y, Vector3 color)
+        public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
         {
             if (text == null) throw new ArgumentNullException("text");
 
@@ -103,13 +103,13 @@ namespace ClassicUO.Renderer
                 Draw2D(textureValue,
                        x + (int) offsetX, y + (int) offsetY,
                        cGlyph.X, cGlyph.Y, cGlyph.Width, cGlyph.Height,
-                       color);
+                       ref color);
 
                 curOffset.X += cKern.Y + cKern.Z;
             }
         }
 
-        public bool DrawSprite(Texture2D texture, int x, int y, int w, int h, int destX, int destY, Vector3 hue)
+        public bool DrawSprite(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -173,7 +173,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawSpriteFlipped(Texture2D texture, int x, int y, int w, int h, int destX, int destY, Vector3 hue)
+        public bool DrawSpriteFlipped(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -237,7 +237,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawSpriteLand(Texture2D texture, int x, int y, Rectangle rect, Vector3[] normals, Vector3 hue)
+        public bool DrawSpriteLand(Texture2D texture, int x, int y, ref Rectangle rect, ref Vector3[] normals, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -295,7 +295,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, Vector3 hue, float angle)
+        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
         {
             EnsureSize();
 
@@ -514,7 +514,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawCharacterSitted(Texture2D texture, int x, int y, int destX, int destY, bool mirror, float h3mod, float h6mod, float h9mod, Vector3 hue)
+        public bool DrawCharacterSitted(Texture2D texture, int x, int y, int destX, int destY, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -764,7 +764,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -825,7 +825,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -889,7 +889,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -950,7 +950,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1008,7 +1008,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, Vector3 hue)
+        public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, ref Vector3 hue)
         {
             int y = dy;
             int h = dheight;
@@ -1025,7 +1025,7 @@ namespace ClassicUO.Renderer
                 {
                     if (w < texture.Width)
                         rw = w;
-                    Draw2D(texture, x, y, 0, 0, rw, rh, hue);
+                    Draw2D(texture, x, y, 0, 0, rw, rh, ref hue);
                     w -= texture.Width;
                     x += texture.Width;
                 }
@@ -1037,12 +1037,12 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, Vector3 hue)
+        public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
         {
-            Draw2D(texture, x, y, width, 1, hue);
-            Draw2D(texture, x + width, y, 1, height + 1, hue);
-            Draw2D(texture, x, y + height, width, 1, hue);
-            Draw2D(texture, x, y, 1, height, hue);
+            Draw2D(texture, x, y, width, 1, ref hue);
+            Draw2D(texture, x + width, y, 1, height + 1, ref hue);
+            Draw2D(texture, x, y + height, width, 1, ref hue);
+            Draw2D(texture, x, y, 1, height, ref hue);
 
             return true;
         }

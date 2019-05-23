@@ -811,14 +811,14 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        batcher.DrawCharacterSitted(frame, x, y, frame.Width - 44,0, mirror, h3mod, h6mod, h9mod, HueVector);
+                        batcher.DrawCharacterSitted(frame, x, y, frame.Width - 44,0, mirror, h3mod, h6mod, h9mod, ref HueVector);
                     }
                     else
                     {
                         if (mirror)
-                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, HueVector);
+                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, ref HueVector);
                         else
-                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, HueVector);
+                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, ref HueVector);
                         
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;

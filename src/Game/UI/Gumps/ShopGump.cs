@@ -755,9 +755,9 @@ namespace ClassicUO.Game.UI.Gumps
                     ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                batcher.Draw2D(_gumpTexture[0], x, y, hue);
-                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, hue);
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, hue);
+                batcher.Draw2D(_gumpTexture[0], x, y, ref hue);
+                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, ref hue);
+                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref hue);
 
                 return base.Draw(batcher, x, y);
             }

@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsTransparent)
                 hue.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, hue);
+            batcher.Draw2D(texture, x, y, Width, Height, ref hue);
 
             if (!string.IsNullOrEmpty(_caption))
             {

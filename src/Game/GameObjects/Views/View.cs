@@ -87,17 +87,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (Rotation != 0.0f)
             {
-                if (!batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector, Rotation))
+                if (!batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector, Rotation))
                     return false;
             }
             else if (IsFlipped)
             {
-                if (!batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector))
+                if (!batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
                     return false;
             }
             else
             {
-                if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, HueVector))
+                if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
                     return false;
             }
 

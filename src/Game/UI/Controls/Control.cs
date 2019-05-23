@@ -378,13 +378,15 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {
+                Vector3 zero = Vector3.Zero;
+
                 if (Engine.DebugFocus && HasKeyboardFocus)
                 {
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref zero);
                 }
                 else if (Engine.GlobalSettings.Debug)
                 {
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, Vector3.Zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref zero);
                 }
             }
         }

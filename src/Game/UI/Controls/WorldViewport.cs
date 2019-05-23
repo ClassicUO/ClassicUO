@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private MatrixEffect _xBR;
 
-        
+        private Vector3 _zero = Vector3.Zero;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -76,18 +76,17 @@ namespace ClassicUO.Game.UI.Controls
                     Y = _scene.ViewportTexture.Height
                 });
 
-
                 batcher.End();
 
                 batcher.Begin(_xBR);
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
                 batcher.End();
 
                 batcher.Begin();
             }
             else
             {
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
             }
 
 
@@ -95,7 +94,7 @@ namespace ClassicUO.Game.UI.Controls
             if (_scene.UseLights)
             {
                 batcher.SetBlendState(_blend);
-                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
+                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _zero);
                 batcher.SetBlendState(null);
             }
 

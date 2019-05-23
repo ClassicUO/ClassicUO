@@ -72,9 +72,10 @@ namespace ClassicUO.Game.Managers
                         max = BAR_WIDTH * max / 100;
                 }
 
+                Vector3 zero = Vector3.Zero;
 
-                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, Vector3.Zero);
-                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, Vector3.Zero);
+                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref zero);
+                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref zero);
 
                 Color color;
 
@@ -87,7 +88,7 @@ namespace ClassicUO.Game.Managers
                 else
                     color = Color.CornflowerBlue;
 
-                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, Vector3.Zero);
+                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref zero);
             }
         }
     }

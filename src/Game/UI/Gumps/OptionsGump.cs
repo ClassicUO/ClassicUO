@@ -1419,7 +1419,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref zero);
 
             return base.Draw(batcher, x, y);
         }
@@ -1543,9 +1545,11 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update(totalMS, frameMS);
             }
 
+            private static Vector3 _zero = Vector3.Zero;
+
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                batcher.Draw2D(_background, x - 3, y - 3, Vector3.Zero);
+                batcher.Draw2D(_background, x - 3, y - 3, ref _zero);
 
                 return base.Draw(batcher, x, y);
             }

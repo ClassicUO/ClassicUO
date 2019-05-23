@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
             Vector3 hue = Vector3.Zero;
             hue.Z = 0.5f;
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, hue);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref hue);
 
             return true;
         }

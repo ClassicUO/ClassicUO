@@ -161,14 +161,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            Vector3 zero = Vector3.Zero;
+
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, Vector3.Zero);
-                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, Vector3.Zero);
-                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref zero);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, ref zero);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref zero);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, Vector3.Zero);
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref zero);
             _text?.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
 
             return base.Draw(batcher, x, y);

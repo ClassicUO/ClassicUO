@@ -104,7 +104,7 @@ namespace ClassicUO.Game
                 //batcher.SetBlendState(_checkerBlend.Value);
 
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
-                batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
+                //batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
 
 
