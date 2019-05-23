@@ -294,21 +294,23 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        Rectangle rect = new Rectangle(drawX - obj.FrameInfo.X,
-                                                       drawY - obj.FrameInfo.Y,
-                                                       obj.FrameInfo.Width,
-                                                       obj.FrameInfo.Height);
+                        _rectangleObj.X = drawX - obj.FrameInfo.X;
+                        _rectangleObj.Y = drawY - obj.FrameInfo.Y;
+                        _rectangleObj.Width = obj.FrameInfo.Width;
+                        _rectangleObj.Height = obj.FrameInfo.Height;
 
-                        Rectangle r = World.Player.GetOnScreenRectangle();
-                        check = Exstentions.InRect(ref rect, ref r);
+                        check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
                     }
 
-                    if (obj is Static st)
-                        st.CharacterIsBehindFoliage = check;
-                    else if (obj is Multi m)
-                        m.CharacterIsBehindFoliage = check;
-                    else if (obj is Item it)
-                        it.CharacterIsBehindFoliage = check;
+                    switch (obj)
+                    {
+                        case Static st: st.CharacterIsBehindFoliage = check;
+                            break;
+                        case Multi m: m.CharacterIsBehindFoliage = check;
+                            break;
+                        case Item it: it.CharacterIsBehindFoliage = check;
+                            break;
+                    }
                 }
 
                 if (_alphaChanged && !changinAlpha)

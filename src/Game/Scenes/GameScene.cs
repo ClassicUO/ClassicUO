@@ -57,6 +57,7 @@ namespace ClassicUO.Game.Scenes
         private int _lightCount;
         private RenderTarget2D _renderTarget, _darkness;
         private int _scale = 5; // 1.0
+        private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
 
 
         private IGameEntity _selectedObject;
@@ -467,6 +468,14 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
+
+
+            _rectanglePlayer.X = (int)(World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
+            _rectanglePlayer.Y = (int)(World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
+            _rectanglePlayer.Width = World.Player.FrameInfo.Width;
+            _rectanglePlayer.Height = World.Player.FrameInfo.Height;
+
+
             int minX = _minTile.X;
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
@@ -501,7 +510,8 @@ namespace ClassicUO.Game.Scenes
 
                         Tile tile = World.Map.GetTile(x, y);
 
-                        if (tile != null) AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150);
+                        if (tile != null)
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150);
                         x++;
                         y--;
                     }
