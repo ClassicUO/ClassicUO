@@ -929,7 +929,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _defaultHotkeysArea = new ScrollAreaItem();
 
-                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows to move char", FONT, HUE_FONT, true)
+                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 15,
@@ -937,7 +937,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableArrowBtn);
 
-                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB to toggle warmode", FONT, HUE_FONT, true)
+                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT, true)
                 {
                     X = 20,
                     Y = 35,
