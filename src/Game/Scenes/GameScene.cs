@@ -574,10 +574,13 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
-            else if (_arrowKeyPressed)
-                MoveCharacterByKeyboardInput(false);
-            else if (_numPadKeyPressed)
-                MoveCharacterByKeyboardInput(true);
+            else if (!Engine.Profile.Current.DisableArrowBtn)
+            {
+                if (_arrowKeyPressed)
+                    MoveCharacterByKeyboardInput(false);
+                else if (_numPadKeyPressed)
+                    MoveCharacterByKeyboardInput(true);
+            }
 
             if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
             {
