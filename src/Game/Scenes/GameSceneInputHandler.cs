@@ -495,7 +495,7 @@ namespace ClassicUO.Game.Scenes
                     return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
                     GameActions.SetWarMode(true);
@@ -577,7 +577,7 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
