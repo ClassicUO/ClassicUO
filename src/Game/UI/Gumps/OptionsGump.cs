@@ -1413,9 +1413,19 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
-            Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
             Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
+
+            if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
+            {
+                if (!_debugGumpIsDisabled.IsChecked)
+                {
+                    Engine.Profile.Current.DisableArrowBtn = false;
+                    Engine.Profile.Current.DisableTabBtn = false;
+                }
+
+                Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
+            }
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
