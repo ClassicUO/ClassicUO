@@ -37,6 +37,8 @@ namespace ClassicUO.Game.GameObjects
 
             Engine.DebugInfo.LandsRendered++;
 
+            ResetHueVector();
+
             if (Texture == null || Texture.IsDisposed)
             {
                 if (IsStretched)

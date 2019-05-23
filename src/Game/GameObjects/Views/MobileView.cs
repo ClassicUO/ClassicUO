@@ -43,6 +43,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return false;
 
+            ResetHueVector();
 
             DrawCharacter(batcher, posX, posY);
 
@@ -732,7 +733,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    ShaderHuesTraslator.GetHueVector(ref owner.HueVector, hue, partialHue, 0);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
                     if (_transform)
                     {
@@ -810,14 +811,14 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        batcher.DrawCharacterSitted(frame, x, y, frame.Width - 44,0, mirror, h3mod, h6mod, h9mod, owner.HueVector);
+                        batcher.DrawCharacterSitted(frame, x, y, frame.Width - 44,0, mirror, h3mod, h6mod, h9mod, HueVector);
                     }
                     else
                     {
                         if (mirror)
-                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, owner.HueVector);
+                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, HueVector);
                         else
-                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, owner.HueVector);
+                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, HueVector);
                         
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;

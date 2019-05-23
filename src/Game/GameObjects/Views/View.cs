@@ -36,7 +36,14 @@ namespace ClassicUO.Game.GameObjects
     {
         public Rectangle Bounds;
         public Rectangle FrameInfo;
-        public Vector3 HueVector;
+        protected static Vector3 HueVector;
+
+        protected static void ResetHueVector()
+        {
+            HueVector.X = 0;
+            HueVector.Y = 0;
+            HueVector.Z = 0;
+        }
 
 
         protected bool IsFlipped { get; set; }

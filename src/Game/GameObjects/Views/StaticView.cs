@@ -53,6 +53,8 @@ namespace ClassicUO.Game.GameObjects
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
+            ResetHueVector();
+
             if (Texture == null || Texture.IsDisposed || _oldGraphic != Graphic)
             {
                 _oldGraphic = Graphic;

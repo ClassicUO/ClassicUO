@@ -95,6 +95,8 @@ namespace ClassicUO.Game.GameObjects
             if (AnimationGraphic == Graphic.INVALID)
                 return false;
 
+            ResetHueVector();
+
             ushort hue = Hue;
 
             if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)

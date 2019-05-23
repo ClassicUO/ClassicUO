@@ -48,6 +48,8 @@ namespace ClassicUO.Game.GameObjects
 
             Engine.DebugInfo.ItemsRendered++;
 
+            ResetHueVector();
+
             if (IsCorpse)
                 return DrawCorpse(batcher, posX, posY);
 

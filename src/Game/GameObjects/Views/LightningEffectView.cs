@@ -39,6 +39,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
+            ResetHueVector();
+
             if (AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
                 _displayed = AnimationGraphic;

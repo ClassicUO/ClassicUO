@@ -40,6 +40,8 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return false;
 
+            ResetHueVector();
+
             if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = AnimationGraphic;
