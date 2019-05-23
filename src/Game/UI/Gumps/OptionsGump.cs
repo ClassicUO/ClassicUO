@@ -56,7 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _disableDefaultHotkeys, _disableArrowBtn, _disableTabBtn;
+        private ScrollAreaItem _defaultHotkeysArea;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -913,6 +914,43 @@ namespace ClassicUO.Game.UI.Gumps
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
+
+
+            // [BLOCK] disable hotkeys
+            {
+                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT, true)
+                {
+                    Y = 0,
+                    IsChecked = Engine.Profile.Current.DisableDefaultHotkeys
+                };
+                _disableDefaultHotkeys.ValueChanged += (sender, e) => { _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked; };
+
+                rightArea.Add(_disableDefaultHotkeys);
+
+                _defaultHotkeysArea = new ScrollAreaItem();
+
+                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows to move char", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 15,
+                    IsChecked = Engine.Profile.Current.DisableArrowBtn
+                };
+                _defaultHotkeysArea.Add(_disableArrowBtn);
+
+                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB to toggle warmode", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 35,
+                    IsChecked = Engine.Profile.Current.DisableTabBtn
+                };
+                _defaultHotkeysArea.Add(_disableTabBtn);
+
+                rightArea.Add(_defaultHotkeysArea);
+
+                _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
+            }
+
+
             Add(rightArea, PAGE);
         }
 
@@ -1097,6 +1135,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
+
+                    _disableDefaultHotkeys.IsChecked = false;
+                    _disableArrowBtn.IsChecked = false;
+                    _disableTabBtn.IsChecked = false;
 
                     break;
                 case 11:
@@ -1370,6 +1412,10 @@ namespace ClassicUO.Game.UI.Gumps
             // experimental
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
+
+            Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
+            Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
+            Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {

@@ -165,6 +165,11 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
         [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
 
+
+        [JsonProperty] public bool DisableDefaultHotkeys { get; set; }
+        [JsonProperty] public bool DisableArrowBtn { get; set; }
+        [JsonProperty] public bool DisableTabBtn { get; set; }
+
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
         [JsonProperty]

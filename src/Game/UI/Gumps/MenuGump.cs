@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
@@ -19,6 +20,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
+
+            Debug.WriteLine("THIS!!");
 
             Add(new GumpPic(0, 0, 0x0910, 0));
 
