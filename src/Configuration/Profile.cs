@@ -305,7 +305,11 @@ namespace ClassicUO.Configuration
                     writer.Write(0);
             }
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin")))) Engine.UI.AnchorManager.Save(writer);
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
+                Engine.UI.AnchorManager.Save(writer);
+
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
+                SkillsGroupManager.Save(writer);
         }
 
         public List<Gump> ReadGumps()
@@ -372,6 +376,23 @@ namespace ClassicUO.Configuration
                     Log.Message(LogTypes.Error, e.StackTrace);
                 }
             }
+
+            anchorsPath = Path.Combine(path, "skillsgroups.bin");
+
+            if (File.Exists(anchorsPath))
+            {
+                try
+                {
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                        SkillsGroupManager.Load(reader);
+                }
+                catch (Exception e)
+                {
+                    Log.Message(LogTypes.Error, e.StackTrace);
+                }
+            }
+            else 
+                SkillsGroupManager.MakeDefault();
 
             return gumps;
         }

@@ -51,6 +51,37 @@ namespace ClassicUO.Game.UI.Controls
             _isResizable = isResizable;
             CanMove = true;
             AcceptMouseInput = true;
+
+
+
+            Add(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
+            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, 0x0822));
+            Add(_gumpBottom = new GumpPic(0, 0, 0x0823, 0));
+
+            if (_isResizable)
+            {
+                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 0,
+                    Y = 0
+                });
+                _gumpExpander.MouseDown += expander_OnMouseDown;
+                _gumpExpander.MouseUp += expander_OnMouseUp;
+                _gumpExpander.MouseOver += expander_OnMouseOver;
+            }
+
+
+            _gumpMiddle.X = 17;
+            _gumpMiddle.Y = _gumplingMidY;
+            _gumpMiddle.Width = 263;
+            _gumpMiddle.Height = _gumplingMidHeight;
+            _gumpMiddle.WantUpdateSize = true;
+
+            Width = _gumpMiddle.Width;
+
+
+            WantUpdateSize = true;
         }
 
         private int _gumplingMidY => _gumpTop.Height;
@@ -74,25 +105,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public int SpecialHeight { get; set; }
 
-        protected override void OnInitialize()
-        {
-            Add(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
-            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, 0x0822));
-            Add(_gumpBottom = new GumpPic(0, 0, 0x0823, 0));
-
-            if (_isResizable)
-            {
-                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 0, Y = 0
-                });
-                _gumpExpander.MouseDown += expander_OnMouseDown;
-                _gumpExpander.MouseUp += expander_OnMouseUp;
-                _gumpExpander.MouseOver += expander_OnMouseOver;
-            }
-
-            WantUpdateSize = true;
-        }
+        //protected override void OnInitialize()
+        //{
+            
+        //}
 
         public override void Dispose()
         {

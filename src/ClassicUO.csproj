@@ -143,12 +143,14 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
+    <Compile Include="Game\UI\Controls\EditableLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
@@ -159,6 +161,7 @@
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\TextContainer.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />

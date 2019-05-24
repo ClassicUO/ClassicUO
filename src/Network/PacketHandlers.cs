@@ -1191,11 +1191,11 @@ namespace ClassicUO.Network
             if (World.SkillsRequested)
             {
                 World.SkillsRequested = false;
-                SkillGumpAdvanced gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
+                var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
 
                 if (gumpSkills == null)
                 {
-                    Engine.UI.Add(new SkillGumpAdvanced
+                    Engine.UI.Add(new StandardSkillsGump
                     {
                         X = 100, Y = 100
                     });

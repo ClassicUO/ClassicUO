@@ -779,6 +779,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusLeft()
         {
+            Parent?.OnFocusLeft();
         }
 
         protected virtual void OnChildAdded()

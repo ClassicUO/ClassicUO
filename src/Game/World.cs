@@ -45,7 +45,6 @@ namespace ClassicUO.Game
 
         public static Point RangeSize;
 
-
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
