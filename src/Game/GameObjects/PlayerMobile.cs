@@ -26,6 +26,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -792,6 +793,8 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 skill.CapFixed = cap;
                 _delta |= Delta.Skills;
+
+                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -802,6 +805,8 @@ namespace ClassicUO.Game.GameObjects
                 Skill skill = _sklls[id];
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
+
+                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
             }
         }
 

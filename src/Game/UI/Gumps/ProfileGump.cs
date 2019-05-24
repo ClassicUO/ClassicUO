@@ -16,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300;
             CanMove = true;
             AcceptKeyboardInput = true;
-            Add(_scrollExp = new ExpandableScroll(0, 0, Height));
+            Add(_scrollExp = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
             Control c = new Label(header, true, 0, font: 1, maxwidth: 140)
             {

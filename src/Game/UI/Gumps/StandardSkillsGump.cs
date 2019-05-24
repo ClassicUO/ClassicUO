@@ -1,4 +1,6 @@
-﻿using ClassicUO.Game.UI.Controls;
+﻿using System;
+
+using ClassicUO.Game.UI.Controls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
@@ -16,6 +18,8 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _bottomLine, _bottomComment;
         private ScrollArea _container;
 
+        private SkillControl[] _allSkillControls;
+
         public StandardSkillsGump() : base(0, 0)
         {
             //CanBeSaved = true;
@@ -23,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             Height = 200;
 
-            _scrollArea = new ExpandableScroll(0, 0, Height, true)
+            _scrollArea = new ExpandableScroll(0, 0, Height, 0x1F40, true)
             {
                 TitleGumpID = 0x0834,
                 AcceptMouseInput = true,
@@ -45,6 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
             _container = new ScrollArea(25, 60 + _bottomLine.Height + 2, _scrollArea.Width - 14,
                 _scrollArea.Height - 98, false) {AcceptMouseInput = true, CanMove = true};
             Add(_container);
+
+            _allSkillControls = new SkillControl[FileManager.Skills.SkillsCount];
 
             foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
             {
@@ -82,13 +88,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (var skill in k.Value)
                 {
-                    var c = new SkillControl(skill, box.Width - 25);
-                    c.Width = box.Width - 25;
+                    var c = new SkillControl(skill, box.Width - 15);
+                    c.Width = box.Width - 15;
                     controls[idx++] = c;
+                    _allSkillControls[skill] = c;
                 }
                 box.SetItemsValue(controls);
             }
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -104,12 +112,19 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
+        public void Update(int skillIndex)
+        {
+            if (skillIndex < _allSkillControls.Length)
+                _allSkillControls[skillIndex].UpdateSkillValue();
+        }
+
 
         class SkillControl : Control
         {
             private GumpPic _lock;
 
-            private Label _labelValue;
+            private readonly Label _labelValue;
+            private readonly int _skills;
 
             public SkillControl(int skillIndex, int maxWidth)
             {
@@ -117,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
 
                 Skill skill = World.Player.Skills[skillIndex];
-
+                _skills = skillIndex;
                 if (skill.IsClickable)
                 {
                     Button button = new Button(0, 0x0837, 0x0838, 0x0837);
@@ -195,7 +210,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
+            public void UpdateSkillValue()
+            {
+                Skill skill = World.Player.Skills[_skills];
+                if (skill != null)
+                    _labelValue.Text = skill.Value.ToString("F1");
+            }
         }
     }
 }
