@@ -412,8 +412,11 @@ namespace ClassicUO.Game.Scenes
                 ushort graphic = lightObject.Graphic;
 
                 if (graphic >= 0x3E02 && graphic <= 0x3E0B ||
-                    graphic >= 0x3914 && graphic <= 0x3929 || graphic == 0x0B1D)
+                    graphic >= 0x3914 && graphic <= 0x3929 || 
+                    graphic == 0x0B1D)
                     light.ID = 2;
+                else if (graphic == 0x0A22)
+                    light.ID = 1;
                 else
                 {
                     if (obj == lightObject && obj is Item item)
