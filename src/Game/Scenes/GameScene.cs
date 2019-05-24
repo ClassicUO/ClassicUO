@@ -415,15 +415,15 @@ namespace ClassicUO.Game.Scenes
                     graphic >= 0x3914 && graphic <= 0x3929 || 
                     graphic == 0x0B1D)
                     light.ID = 2;
-                else if (graphic == 0x0A22)
-                    light.ID = 1;
                 else
                 {
                     if (obj == lightObject && obj is Item item)
                         light.ID = item.LightID;
+                    else if (lightObject is Item it)
+                        light.ID = (byte) it.ItemData.LightIndex;
                     else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
                         light.ID = data.Layer;
-                    else if (obj is Mobile mobile)
+                    else if (obj is Mobile _)
                         light.ID = 1;
                     else
                         return;
