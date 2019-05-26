@@ -80,7 +80,12 @@ namespace ClassicUO.Game.Scenes
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                GameObject obj = tile.FirstNode;
+
+                while (obj.Left != null)
+                    obj = obj.Left;
+
+                for (; obj != null; obj = obj.Right)
                 {
                     sbyte tileZ = obj.Z;
 
@@ -125,19 +130,24 @@ namespace ClassicUO.Game.Scenes
 
                 if (tile != null)
                 {
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    GameObject obj2 = tile.FirstNode;
+
+                    while (obj2.Left != null)
+                        obj2 = obj2.Left;
+
+                    for (; obj2 != null; obj2 = obj2.Right)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;
 
-                        if (obj is Mobile)
+                        if (obj2 is Mobile)
                             continue;
 
-                        sbyte tileZ = obj.Z;
+                        sbyte tileZ = obj2.Z;
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                            if (GameObjectHelper.TryGetStaticData(obj2, out var itemdata) && ((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();

@@ -80,7 +80,12 @@ namespace ClassicUO.Game
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
-            for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+            GameObject obj = tile.FirstNode;
+
+            while (obj.Left != null)
+                obj = obj.Left;
+
+            for (; obj != null; obj = obj.Right)
             {
                 // TODO: custom house gump
                 Graphic graphic = obj.Graphic;
@@ -123,7 +128,8 @@ namespace ClassicUO.Game
                             case Mobile mobile:
 
                             {
-                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters) list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
+                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters)
+                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
                                 canBeAdd = false;
 
                                 break;
@@ -205,7 +211,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            return list.Count > 0;
+            return list.Count != 0;
         }
 
         private static int CalculateMinMaxZ(ref int minZ, ref int maxZ, int newX, int newY, int currentZ, int newDirection, int stepState)
@@ -218,7 +224,7 @@ namespace ClassicUO.Game
             newY += _offsetY[direction];
             List<PathObject> list = new List<PathObject>();
 
-            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
+            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count == 0)
                 return 0;
 
             foreach (PathObject obj in list)
@@ -286,7 +292,7 @@ namespace ClassicUO.Game
 
             // TODO: custom house gump
 
-            if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
+            if (!CreateItemList(ref list, x, y, stepState) || list.Count == 0)
                 return false;
 
             list.Sort((a, b) =>
@@ -638,7 +644,7 @@ namespace ClassicUO.Game
                         int wantY = node.Y;
                         GetNewXY((byte) wantDirection, ref wantX, ref wantY);
 
-                        if (x != wantY || y != wantY)
+                        if (x != wantX || y != wantY)
                             diagonal = -1;
                     }
 

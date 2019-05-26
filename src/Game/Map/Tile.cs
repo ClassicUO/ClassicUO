@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-            short priorityZ = obj.Position.Z;
+            short priorityZ = obj.Z;
 
             switch (obj)
             {
