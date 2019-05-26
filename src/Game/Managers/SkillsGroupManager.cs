@@ -91,12 +91,16 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void AddNewGroup(string group)
+        public static bool AddNewGroup(string group)
         {
             if (!_groups.ContainsKey(group))
             {
                 _groups.Add(group, new List<int>());
+
+                return true;
             }
+
+            return false;
         }
 
         public static void RemoveGroup(string group)
@@ -114,6 +118,13 @@ namespace ClassicUO.Game.Managers
                     _groups.FirstOrDefault().Value.AddRange(list);
                 }
             }
+        }
+
+        public static List<int> GetSkillsInGroup(string group)
+        {
+            _groups.TryGetValue(group, out var list);
+
+            return list;
         }
 
         public static void ReplaceGroup(string oldGroup, string newGroup)
