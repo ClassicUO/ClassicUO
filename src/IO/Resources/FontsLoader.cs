@@ -2319,7 +2319,7 @@ namespace ClassicUO.IO.Resources
                             color = 0x808080FF;
 
                             break;
-                        case "blackv":
+                        case "black":
                             color = 0x010101FF;
 
                             break;
