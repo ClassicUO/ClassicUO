@@ -40,8 +40,8 @@ namespace ClassicUO.Game.GameObjects
     {
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            if (IsDestroyed)
-                return false;
+            //if (IsDestroyed)
+            //    return false;
 
             ResetHueVector();
 

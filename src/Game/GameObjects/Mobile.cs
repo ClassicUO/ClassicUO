@@ -655,7 +655,9 @@ namespace ClassicUO.Game.GameObjects
                         AddToTile();
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
-                        Offset = Vector3.Zero;
+                        Offset.X = 0;
+                        Offset.Y = 0;
+                        Offset.Z = 0;
                         Steps.RemoveFromFront();
                         CalculateRandomIdleTime();
                         LastStepTime = Engine.Ticks;
@@ -683,7 +685,7 @@ namespace ClassicUO.Game.GameObjects
                     AnimationGroup = animGroup;
                 }
 
-                Item mount = Equipment[(int) Layer.Mount];
+                Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
                 if (mount != null)
                 {
@@ -724,7 +726,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             currentDelay += currentDelay * (AnimationInterval + 1);
 
-                            if (AnimationFrameCount <= 0)
+                            if (AnimationFrameCount == 0)
                                 AnimationFrameCount = (byte) fc;
                             else
                                 fc = AnimationFrameCount;
@@ -784,7 +786,7 @@ namespace ClassicUO.Game.GameObjects
                                 if ((Serial & 0x80000000) != 0)
                                 {
                                     World.CorpseManager.Remove(0, Serial);
-                                    World.RemoveMobile(this);
+                                    World.RemoveMobile(Serial);
                                     World.Mobiles.ProcessDelta();
                                 }
                             }
@@ -795,14 +797,14 @@ namespace ClassicUO.Game.GameObjects
                     else if ((Serial & 0x80000000) != 0)
                     {
                         World.CorpseManager.Remove(0, Serial);
-                        World.RemoveMobile(this);
+                        World.RemoveMobile(Serial);
                         World.Mobiles.ProcessDelta();
                     }
                 }
                 else if ((Serial & 0x80000000) != 0)
                 {
                     World.CorpseManager.Remove(0, Serial);
-                    World.RemoveMobile(this);
+                    World.RemoveMobile(Serial);
                     World.Mobiles.ProcessDelta();
                 }
 
