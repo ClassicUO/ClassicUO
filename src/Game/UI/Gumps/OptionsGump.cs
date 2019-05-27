@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _disableDefaultHotkeys, _disableArrowBtn, _disableTabBtn;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _disableDefaultHotkeys, _disableArrowBtn, _disableTabBtn, _disableCtrlQWBtn;
         private ScrollAreaItem _defaultHotkeysArea;
 
         // sounds
@@ -945,6 +945,14 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableTabBtn);
 
+                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 55,
+                    IsChecked = Engine.Profile.Current.DisableCtrlQWBtn
+                };
+                _defaultHotkeysArea.Add(_disableCtrlQWBtn);
+
                 rightArea.Add(_defaultHotkeysArea);
 
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
@@ -1139,8 +1147,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableDefaultHotkeys.IsChecked = false;
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
-
+                    _disableCtrlQWBtn.IsChecked = false;
                     break;
+
                 case 11:
                     _showNetStats.IsChecked = false;
                     break;
@@ -1415,6 +1424,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
+            Engine.Profile.Current.DisableCtrlQWBtn = _disableTabBtn.IsChecked;
 
             if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
             {
@@ -1422,6 +1432,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Engine.Profile.Current.DisableArrowBtn = false;
                     Engine.Profile.Current.DisableTabBtn = false;
+                    Engine.Profile.Current.DisableCtrlQWBtn = false;
                 }
 
                 Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
