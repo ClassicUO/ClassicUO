@@ -176,7 +176,8 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDestroyed || !obj.AllowedToDraw) continue;
+                if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
+                    continue;
 
                 if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
@@ -343,7 +344,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     obj.UseObjectHandles = (ismobile ||
                                             iscorpse ||
-                                            (obj is Item it && !it.IsLocked && !it.IsMulti)) &&
+                                            (obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti)) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
                     _objectHandlesCount++;
                 }
