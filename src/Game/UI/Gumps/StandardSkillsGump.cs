@@ -27,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public StandardSkillsGump() : base(0, 0)
         {
-            //CanBeSaved = true;
+            CanBeSaved = true;
             AcceptMouseInput = false;
             CanMove = true;
             Height = 200;

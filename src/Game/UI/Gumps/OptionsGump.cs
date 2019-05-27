@@ -96,6 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
+        private Checkbox _useStandardSkillsGump;
 
         // network
         private Checkbox _showNetStats;
@@ -217,7 +218,8 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
-
+            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump",
+                Engine.Profile.Current.StandardSkillsGump, 0, 0);
 
 
 
@@ -712,7 +714,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
             item.Add(_scaleSpeechDelay);
-            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
@@ -989,7 +991,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
-                    _vendorGumpSize.Text = (60).ToString();
+                    _vendorGumpSize.Text = "60";
+                    _useStandardSkillsGump.IsChecked = true;
 
                     break;
                 case 2: // sounds
@@ -1153,6 +1156,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
 
             Engine.Profile.Current.VendorGumpHeight = (int)_vendorGumpSize.Tag;
+            Engine.Profile.Current.UseOldStatusGump = _useStandardSkillsGump.IsChecked;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

@@ -1265,14 +1265,31 @@ namespace ClassicUO.Network
             if (World.SkillsRequested)
             {
                 World.SkillsRequested = false;
-                var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
 
-                if (gumpSkills == null)
+                // TODO: make a base class for this gump
+                if (Engine.Profile.Current.StandardSkillsGump)
                 {
-                    Engine.UI.Add(new StandardSkillsGump
+                    var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
+                    if (gumpSkills == null)
                     {
-                        X = 100, Y = 100
-                    });
+                        Engine.UI.Add(new StandardSkillsGump
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
+                }
+                else
+                {
+                    var gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
+                    if (gumpSkills == null)
+                    {
+                        Engine.UI.Add(new SkillGumpAdvanced()
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
                 }
             }
 
