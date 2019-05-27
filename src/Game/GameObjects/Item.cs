@@ -127,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
             set => _displayedGraphic = value;
         }
 
-        public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90 && !ItemData.IsContainer;
+        public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90;
 
         public Graphic MultiGraphic { get; private set; }
 
