@@ -1811,7 +1811,10 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+
             mobile.Graphic = p.ReadUShort();
             int x = p.ReadUShort();
             int y = p.ReadUShort();
