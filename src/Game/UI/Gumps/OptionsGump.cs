@@ -1156,7 +1156,28 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
 
             Engine.Profile.Current.VendorGumpHeight = (int)_vendorGumpSize.Tag;
-            Engine.Profile.Current.UseOldStatusGump = _useStandardSkillsGump.IsChecked;
+            Engine.Profile.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
+
+            if (_useStandardSkillsGump.IsChecked)
+            {
+                var newGump = Engine.UI.GetControl<SkillGumpAdvanced>();
+
+                if (newGump != null)
+                {
+                    Engine.UI.Add(new StandardSkillsGump(){ X = newGump.X, Y = newGump.Y });
+                    newGump.Dispose();
+                }
+            }
+            else
+            {
+                var standardGump = Engine.UI.GetControl<StandardSkillsGump>();
+
+                if (standardGump != null)
+                {
+                    Engine.UI.Add(new SkillGumpAdvanced() { X = standardGump.X, Y = standardGump.Y });
+                    standardGump.Dispose();
+                }
+            }
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

@@ -126,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
             box.SetItemsValue(controls);
         }
 
+
         public override void Update(double totalMS, double frameMS)
         {
             WantUpdateSize = true;

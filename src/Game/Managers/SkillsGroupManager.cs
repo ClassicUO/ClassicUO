@@ -138,6 +138,8 @@ namespace ClassicUO.Game.Managers
 
         public static void Load(BinaryReader reader)
         {
+            _groups.Clear();
+
             try
             {
                 {
