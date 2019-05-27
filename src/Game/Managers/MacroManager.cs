@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -42,8 +43,6 @@ namespace ClassicUO.Game.Managers
         private Macro _firstNode;
         private MacroObject _lastMacro;
         private long _nextTimer;
-
-        private WorldViewportGump viewport;
 
         public MacroManager(Macro[] macros)
         {
@@ -905,185 +904,17 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.MovePlayer:
-
-
-                    switch (macro.Code)
+                    switch (macro.SubCode)
                     {
-                        case MacroType.Open:
-
-                            switch (macro.SubCode)
-                            {
-                                case MacroSubType.Configuration:
-                                    OptionsGump opt = Engine.UI.GetControl<OptionsGump>();
-
-                                    if (opt == null)
-                                    {
-                                        Engine.UI.Add(opt = new OptionsGump());
-                                        opt.SetInScreen();
-                                    }
-                                    else
-                                    {
-                                        opt.SetInScreen();
-                                        opt.BringOnTop();
-                                    }
-
-                                    break;
-                                case MacroSubType.Paperdoll:
-                                    GameActions.OpenPaperdoll(World.Player);
-
-                                    break;
-                                case MacroSubType.Status:
-
-                                    if (StatusGumpBase.GetStatusGump() == null)
-                                        StatusGumpBase.AddStatusGump(100, 100);
-
-                                    break;
-                                case MacroSubType.Journal:
-                                    JournalGump journalGump = Engine.UI.GetControl<JournalGump>();
-
-                                    if (journalGump == null)
-                                        Engine.UI.Add(new JournalGump
-                                        { X = 64, Y = 64 });
-                                    else
-                                    {
-                                        journalGump.SetInScreen();
-                                        journalGump.BringOnTop();
-                                    }
-
-                                    break;
-                                case MacroSubType.Skills:
-                                    World.SkillsRequested = true;
-                                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
-
-                                    break;
-                                case MacroSubType.MageSpellbook:
-                                case MacroSubType.NecroSpellbook:
-                                case MacroSubType.PaladinSpellbook:
-                                case MacroSubType.BushidoSpellbook:
-                                case MacroSubType.NinjitsuSpellbook:
-                                case MacroSubType.SpellWeavingSpellbook:
-                                case MacroSubType.MysticismSpellbook:
-
-                                    SpellBookType type = SpellBookType.Magery;
-
-                                    switch (macro.SubCode)
-                                    {
-                                        case MacroSubType.NecroSpellbook:
-                                            type = SpellBookType.Necromancy;
-
-                                            break;
-                                        case MacroSubType.PaladinSpellbook:
-                                            type = SpellBookType.Chivalry;
-
-                                            break;
-                                        case MacroSubType.BushidoSpellbook:
-                                            type = SpellBookType.Bushido;
-
-                                            break;
-                                        case MacroSubType.NinjitsuSpellbook:
-                                            type = SpellBookType.Ninjitsu;
-
-                                            break;
-                                        case MacroSubType.SpellWeavingSpellbook:
-                                            type = SpellBookType.Spellweaving;
-
-                                            break;
-                                        case MacroSubType.MysticismSpellbook:
-                                            type = SpellBookType.Mysticism;
-
-                                            break;
-                                        case MacroSubType.BardSpellbook:
-                                            type = SpellBookType.Bardic;
-
-                                            break;
-                                    }
-
-                                    NetClient.Socket.Send(new POpenSpellBook((byte)type));
-
-                                    break;
-                                case MacroSubType.Chat:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
-
-                                    break;
-                                case MacroSubType.Backpack:
-                                    Item backpack = World.Player.Equipment[(int)Layer.Backpack];
-
-                                    if (backpack != null)
-                                        GameActions.DoubleClick(backpack);
-
-                                    break;
-                                case MacroSubType.Owerview:
-                                    MiniMapGump miniMapGump = Engine.UI.GetControl<MiniMapGump>();
-
-                                    if (miniMapGump == null)
-                                        Engine.UI.Add(new MiniMapGump());
-                                    else
-                                    {
-                                        miniMapGump.SetInScreen();
-                                        miniMapGump.BringOnTop();
-                                    }
-
-                                    break;
-                                case MacroSubType.WorldMap:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
-
-                                    break;
-                                case MacroSubType.Mail:
-                                case MacroSubType.PartyManifest:
-                                    var party = Engine.UI.GetControl<PartyGumpAdvanced>();
-
-                                    if (party == null)
-                                        Engine.UI.Add(new PartyGumpAdvanced());
-                                    else
-                                        party.BringOnTop();
-
-                                    break;
-
-                                case MacroSubType.Guild:
-                                    GameActions.OpenGuildGump();
-
-                                    break;
-                                case MacroSubType.QuestLog:
-                                    GameActions.RequestQuestMenu();
-
-                                    break;
-                                case MacroSubType.PartyChat:
-                                case MacroSubType.CombatBook:
-                                case MacroSubType.RacialAbilitiesBook:
-                                case MacroSubType.BardSpellbook:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
-
-                                    break;
-                            }
-
+                        case MacroSubType.Top:
                             break;
-                        case MacroType.Close:
-                        case MacroType.Minimize: // TODO: miniminze/maximize
-                        case MacroType.Maximize:
-
-                            switch (macro.SubCode)
-                            {
-                                case MacroSubType.Top:
-                                    break;
-                                case MacroSubType.TopRight:
-                                    break;
-                                case MacroSubType.Right:
-                                    break;
-                                case MacroSubType.RightDown:
-                                    break;
-                                case MacroSubType.Down:
-                                    break;
-                                case MacroSubType.DownLeft:
-                                    break;
-                                case MacroSubType.Left:
-                                    break;
-                                case MacroSubType.LeftTop:
-                                    break;
-                            }
-
+                        case MacroSubType.Right:
+                            break;
+                        case MacroSubType.Down:
+                            break;
+                        case MacroSubType.Left:
                             break;
                     }
-
                     break;
 
             }
@@ -1180,48 +1011,46 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Walk:
                     offset = (int) MacroSubType.NW;
                     count = (int) MacroSubType.Configuration - (int) MacroSubType.NW;
-
                     break;
+
                 case MacroType.Open:
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
                     offset = (int) MacroSubType.Configuration;
                     count = (int) MacroSubType.Anatomy - (int) MacroSubType.Configuration;
-
                     break;
+
                 case MacroType.UseSkill:
                     offset = (int) MacroSubType.Anatomy;
                     count = (int) MacroSubType.LeftHand - (int) MacroSubType.Anatomy;
-
                     break;
+
                 case MacroType.ArmDisarm:
                     offset = (int) MacroSubType.LeftHand;
                     count = (int) MacroSubType.Honor - (int) MacroSubType.LeftHand;
-
                     break;
+
                 case MacroType.InvokeVirtue:
                     offset = (int) MacroSubType.Honor;
                     count = (int) MacroSubType.Clumsy - (int) MacroSubType.Honor;
-
                     break;
+
                 case MacroType.CastSpell:
                     offset = (int) MacroSubType.Clumsy;
                     count = (int) MacroSubType.Hostile - (int) MacroSubType.Clumsy;
-
                     break;
+
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                     offset = (int) MacroSubType.Hostile;
                     count = (int) MacroSubType.MscTotalCount - (int) MacroSubType.Hostile;
-
                     break;
 
                 case MacroType.MovePlayer:
                     offset = (int)MacroSubType.Top;
-                    count = (int)MacroSubType.LeftTop - (int)MacroSubType.Top;
-
+                    count = 4;
                     break;
             }
         }
@@ -1591,12 +1420,8 @@ namespace ClassicUO.Game.Managers
         Mobile,
         MscTotalCount,
         Top,
-        TopRight,
         Right,
-        RightDown,
         Down,
-        DownLeft,
-        Left,
-        LeftTop
+        Left
     }
 }
