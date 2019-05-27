@@ -171,8 +171,11 @@ namespace ClassicUO.Game.GameObjects
                 if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
-                _tile = World.Map.GetTile(x, y);
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    _tile = World.Map.GetTile(x, y);
+                    _tile?.AddGameObject(this);
+                }
             }
         }
 
@@ -188,8 +191,11 @@ namespace ClassicUO.Game.GameObjects
                 if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
-                _tile = tile;
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    _tile = tile;
+                    _tile?.AddGameObject(this);
+                }
             }
         }
 

@@ -382,6 +382,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDestroyed)
+                return;
+
             base.Update(totalMS, frameMS);
 
             ProcessAnimation(out _);

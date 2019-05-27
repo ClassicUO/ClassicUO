@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void Update(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex].UpdateSkillValue();
+                _allSkillControls[skillIndex]?.UpdateSkillValue();
         }
 
 

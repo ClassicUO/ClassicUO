@@ -284,6 +284,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDestroyed)
+                return;
+
             base.Update(totalMS, frameMS);
 
             if (_lastAnimationIdleDelay < Engine.Ticks)
@@ -581,7 +584,7 @@ namespace ClassicUO.Game.GameObjects
         {
             dir = (byte) GetDirectionForAnimation();
 
-            if (Steps.Count != 0)
+            if (Steps.Count != 0 && !IsDestroyed)
             {
                 bool turnOnly;
 

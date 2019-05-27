@@ -203,7 +203,7 @@ namespace ClassicUO.Game
 
             if (item == null /*|| item.IsDestroyed*/)
             {
-                Items.Remove(serial);
+                //Items.Remove(serial);
                 item = new Item(serial);
             }
 
@@ -216,7 +216,7 @@ namespace ClassicUO.Game
 
             if (mob == null /*|| mob.IsDestroyed*/)
             {
-                Mobiles.Remove(serial);
+                //Mobiles.Remove(serial);
                 mob = new Mobile(serial);
                 GameActions.RequestMobileStatus(mob);
             }
@@ -264,7 +264,6 @@ namespace ClassicUO.Game
 
             mobile.Items.Clear();
             mobile.Destroy();
-
             return true;
         }
 

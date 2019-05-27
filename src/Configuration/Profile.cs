@@ -371,7 +371,8 @@ namespace ClassicUO.Configuration
             {
                 try
                 {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath))) Engine.UI.AnchorManager.Restore(reader, gumps);
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                        Engine.UI.AnchorManager.Restore(reader, gumps);
                 }
                 catch (Exception e)
                 {
@@ -390,6 +391,7 @@ namespace ClassicUO.Configuration
                 }
                 catch (Exception e)
                 {
+                    SkillsGroupManager.MakeDefault();
                     Log.Message(LogTypes.Error, e.StackTrace);
                 }
             }
