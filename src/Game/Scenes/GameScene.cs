@@ -574,7 +574,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
-            else if (!Engine.Profile.Current.DisableArrowBtn)
+            else if (!Engine.Profile.Current.DisableArrowBtn || _isMacroMoveDown)
             {
                 if (_arrowKeyPressed)
                     MoveCharacterByKeyboardInput(false);

@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -70,10 +71,12 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
-        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown;
         private Action _queuedAction;
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
+
+        private Macro _activeMoveMacro;
         public Direction _numPadDirection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
@@ -98,7 +101,6 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
-
                 Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
 
                 if (numPadMovement)
@@ -467,16 +469,25 @@ namespace ClassicUO.Game.Scenes
             //}
         }
 
-
-
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
             _isShiftDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
             _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
-            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP;
-            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN;
-            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT;
-            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT;
+
+            _isMacroMoveDown = _isMacroMoveDown || (macro != null && macro.FirstNode.Code == MacroType.MovePlayer);
+            if (_isMacroMoveDown)
+                _activeMoveMacro = macro;
+
+            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || (macro != null && macro.FirstNode.SubCode == MacroSubType.Top);
+            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || (macro != null && macro.FirstNode.SubCode == MacroSubType.Down);
+            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || (macro != null && macro.FirstNode.SubCode == MacroSubType.Left);
+            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT || (macro != null && macro.FirstNode.SubCode == MacroSubType.Right);
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
@@ -503,19 +514,12 @@ namespace ClassicUO.Game.Scenes
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
-                
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                 {
                     _numPadKeyPressed = true;
                     _numPadDirection = dWalkN;
                 }
-                //if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                //    World.Player.Walk(dWalkN, true);
             }
-
-            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             _useObjectHandles = isshift && isctrl;
 
@@ -523,8 +527,6 @@ namespace ClassicUO.Game.Scenes
                 NameOverHeadManager.Open();
             else 
                 NameOverHeadManager.Close();
-
-            Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
             if (macro != null)
             {
@@ -563,6 +565,34 @@ namespace ClassicUO.Game.Scenes
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _isRightDown = false;
                     break;
+            }
+
+            if (_isMacroMoveDown)
+            {
+                Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+                if (macro == null)
+                    _isMacroMoveDown = _arrowKeyPressed = false;
+                else
+                {
+                    switch (macro.FirstNode.SubCode)
+                    {
+                        case MacroSubType.Top:
+                            _isUpDown = false;
+                            break;
+
+                        case MacroSubType.Down:
+                            _isDownDown = false;
+                            break;
+
+                        case MacroSubType.Left:
+                            _isLeftDown = false;
+                            break;
+
+                        case MacroSubType.Right:
+                            _isRightDown = false;
+                            break;
+                    }
+                }
             }
 
             if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown))

@@ -903,6 +903,189 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ToggleChatVisibility:
                     Engine.UI.SystemChat?.ToggleChatVisibility();
                     break;
+
+                case MacroType.MovePlayer:
+
+
+                    switch (macro.Code)
+                    {
+                        case MacroType.Open:
+
+                            switch (macro.SubCode)
+                            {
+                                case MacroSubType.Configuration:
+                                    OptionsGump opt = Engine.UI.GetControl<OptionsGump>();
+
+                                    if (opt == null)
+                                    {
+                                        Engine.UI.Add(opt = new OptionsGump());
+                                        opt.SetInScreen();
+                                    }
+                                    else
+                                    {
+                                        opt.SetInScreen();
+                                        opt.BringOnTop();
+                                    }
+
+                                    break;
+                                case MacroSubType.Paperdoll:
+                                    GameActions.OpenPaperdoll(World.Player);
+
+                                    break;
+                                case MacroSubType.Status:
+
+                                    if (StatusGumpBase.GetStatusGump() == null)
+                                        StatusGumpBase.AddStatusGump(100, 100);
+
+                                    break;
+                                case MacroSubType.Journal:
+                                    JournalGump journalGump = Engine.UI.GetControl<JournalGump>();
+
+                                    if (journalGump == null)
+                                        Engine.UI.Add(new JournalGump
+                                        { X = 64, Y = 64 });
+                                    else
+                                    {
+                                        journalGump.SetInScreen();
+                                        journalGump.BringOnTop();
+                                    }
+
+                                    break;
+                                case MacroSubType.Skills:
+                                    World.SkillsRequested = true;
+                                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
+
+                                    break;
+                                case MacroSubType.MageSpellbook:
+                                case MacroSubType.NecroSpellbook:
+                                case MacroSubType.PaladinSpellbook:
+                                case MacroSubType.BushidoSpellbook:
+                                case MacroSubType.NinjitsuSpellbook:
+                                case MacroSubType.SpellWeavingSpellbook:
+                                case MacroSubType.MysticismSpellbook:
+
+                                    SpellBookType type = SpellBookType.Magery;
+
+                                    switch (macro.SubCode)
+                                    {
+                                        case MacroSubType.NecroSpellbook:
+                                            type = SpellBookType.Necromancy;
+
+                                            break;
+                                        case MacroSubType.PaladinSpellbook:
+                                            type = SpellBookType.Chivalry;
+
+                                            break;
+                                        case MacroSubType.BushidoSpellbook:
+                                            type = SpellBookType.Bushido;
+
+                                            break;
+                                        case MacroSubType.NinjitsuSpellbook:
+                                            type = SpellBookType.Ninjitsu;
+
+                                            break;
+                                        case MacroSubType.SpellWeavingSpellbook:
+                                            type = SpellBookType.Spellweaving;
+
+                                            break;
+                                        case MacroSubType.MysticismSpellbook:
+                                            type = SpellBookType.Mysticism;
+
+                                            break;
+                                        case MacroSubType.BardSpellbook:
+                                            type = SpellBookType.Bardic;
+
+                                            break;
+                                    }
+
+                                    NetClient.Socket.Send(new POpenSpellBook((byte)type));
+
+                                    break;
+                                case MacroSubType.Chat:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                                case MacroSubType.Backpack:
+                                    Item backpack = World.Player.Equipment[(int)Layer.Backpack];
+
+                                    if (backpack != null)
+                                        GameActions.DoubleClick(backpack);
+
+                                    break;
+                                case MacroSubType.Owerview:
+                                    MiniMapGump miniMapGump = Engine.UI.GetControl<MiniMapGump>();
+
+                                    if (miniMapGump == null)
+                                        Engine.UI.Add(new MiniMapGump());
+                                    else
+                                    {
+                                        miniMapGump.SetInScreen();
+                                        miniMapGump.BringOnTop();
+                                    }
+
+                                    break;
+                                case MacroSubType.WorldMap:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                                case MacroSubType.Mail:
+                                case MacroSubType.PartyManifest:
+                                    var party = Engine.UI.GetControl<PartyGumpAdvanced>();
+
+                                    if (party == null)
+                                        Engine.UI.Add(new PartyGumpAdvanced());
+                                    else
+                                        party.BringOnTop();
+
+                                    break;
+
+                                case MacroSubType.Guild:
+                                    GameActions.OpenGuildGump();
+
+                                    break;
+                                case MacroSubType.QuestLog:
+                                    GameActions.RequestQuestMenu();
+
+                                    break;
+                                case MacroSubType.PartyChat:
+                                case MacroSubType.CombatBook:
+                                case MacroSubType.RacialAbilitiesBook:
+                                case MacroSubType.BardSpellbook:
+                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                            }
+
+                            break;
+                        case MacroType.Close:
+                        case MacroType.Minimize: // TODO: miniminze/maximize
+                        case MacroType.Maximize:
+
+                            switch (macro.SubCode)
+                            {
+                                case MacroSubType.Top:
+                                    break;
+                                case MacroSubType.TopRight:
+                                    break;
+                                case MacroSubType.Right:
+                                    break;
+                                case MacroSubType.RightDown:
+                                    break;
+                                case MacroSubType.Down:
+                                    break;
+                                case MacroSubType.DownLeft:
+                                    break;
+                                case MacroSubType.Left:
+                                    break;
+                                case MacroSubType.LeftTop:
+                                    break;
+                            }
+
+                            break;
+                    }
+
+                    break;
+
             }
 
 
@@ -1034,6 +1217,12 @@ namespace ClassicUO.Game.Managers
                     count = (int) MacroSubType.MscTotalCount - (int) MacroSubType.Hostile;
 
                     break;
+
+                case MacroType.MovePlayer:
+                    offset = (int)MacroSubType.Top;
+                    count = (int)MacroSubType.LeftTop - (int)MacroSubType.Top;
+
+                    break;
             }
         }
     }
@@ -1061,6 +1250,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
+                case MacroType.MovePlayer:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -1182,7 +1372,8 @@ namespace ClassicUO.Game.Managers
         BandageTarget,
         ToggleGargoyleFly,
         DefaultScale,
-        ToggleChatVisibility
+        ToggleChatVisibility,
+        MovePlayer
     }
 
     internal enum MacroSubType
@@ -1398,6 +1589,14 @@ namespace ClassicUO.Game.Managers
         Follower,
         Object,
         Mobile,
-        MscTotalCount
+        MscTotalCount,
+        Top,
+        TopRight,
+        Right,
+        RightDown,
+        Down,
+        DownLeft,
+        Left,
+        LeftTop
     }
 }
