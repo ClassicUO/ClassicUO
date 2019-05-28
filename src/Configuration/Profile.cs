@@ -323,8 +323,28 @@ namespace ClassicUO.Configuration
             if (!File.Exists(binpath))
                 return null;
 
-            List<Gump> gumps = new List<Gump>();
 
+
+            string skillsGroupsPath = Path.Combine(path, "skillsgroups.bin");
+            if (File.Exists(skillsGroupsPath))
+            {
+                try
+                {
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(skillsGroupsPath)))
+                        SkillsGroupManager.Load(reader);
+                }
+                catch (Exception e)
+                {
+                    SkillsGroupManager.MakeDefault();
+                    Log.Message(LogTypes.Error, e.StackTrace);
+                }
+            }
+            else
+                SkillsGroupManager.MakeDefault();
+
+
+
+            List<Gump> gumps = new List<Gump>();
             using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
@@ -365,8 +385,9 @@ namespace ClassicUO.Configuration
                 }
             }
 
-            string anchorsPath = Path.Combine(path, "anchors.bin");
 
+
+            string anchorsPath = Path.Combine(path, "anchors.bin");
             if (File.Exists(anchorsPath))
             {
                 try
@@ -380,23 +401,6 @@ namespace ClassicUO.Configuration
                 }
             }
 
-            anchorsPath = Path.Combine(path, "skillsgroups.bin");
-
-            if (File.Exists(anchorsPath))
-            {
-                try
-                {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
-                        SkillsGroupManager.Load(reader);
-                }
-                catch (Exception e)
-                {
-                    SkillsGroupManager.MakeDefault();
-                    Log.Message(LogTypes.Error, e.StackTrace);
-                }
-            }
-            else 
-                SkillsGroupManager.MakeDefault();
 
             return gumps;
         }

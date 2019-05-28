@@ -148,18 +148,18 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnDragBegin(int x, int y)
-        {
-            if (Engine.UI.MouseOverControl is SkillControl ctrl)
-            {
-                CanMove = false;
-            }
-            else
-            {
-                CanMove = true;
-                base.OnDragBegin(x, y);
-            }
-        }
+        //protected override void OnDragBegin(int x, int y)
+        //{
+        //    if (Engine.UI.MouseOverControl is SkillControl ctrl)
+        //    {
+        //        CanMove = false;
+        //    }
+        //    else
+        //    {
+        //        CanMove = true;
+        //        base.OnDragBegin(x, y);
+        //    }
+        //}
 
         //protected override void OnDragEnd(int x, int y)
         //{
@@ -263,11 +263,12 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnMouseDown(int x, int y, MouseButton button)
             {
                 _selected = true;
+                CanMove = false;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButton button)
             {
-                RootParent.CanMove = true;
+                CanMove = true;
                 _selected = false;
             }
 
