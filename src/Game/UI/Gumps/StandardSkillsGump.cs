@@ -148,30 +148,11 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        //protected override void OnDragBegin(int x, int y)
-        //{
-        //    if (Engine.UI.MouseOverControl is SkillControl ctrl)
-        //    {
-        //        CanMove = false;
-        //    }
-        //    else
-        //    {
-        //        CanMove = true;
-        //        base.OnDragBegin(x, y);
-        //    }
-        //}
-
-        //protected override void OnDragEnd(int x, int y)
-        //{
-        //    CanMove = true;
-        //    base.OnDragEnd(x, y);
-        //}
 
         class SkillControl : Control
         {
             private readonly Label _labelValue;
             private readonly int _skills;
-            private bool _selected;
 
             public SkillControl(int skillIndex, int maxWidth)
             {
@@ -239,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            private ushort GetLockValue(Lock lockStatus)
+            private static ushort GetLockValue(Lock lockStatus)
             {
                 switch (lockStatus)
                 {
@@ -262,19 +243,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseDown(int x, int y, MouseButton button)
             {
-                _selected = true;
                 CanMove = false;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 CanMove = true;
-                _selected = false;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                if (_selected)
+                if (!CanMove)
                 {
                     batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVec);
                 }
