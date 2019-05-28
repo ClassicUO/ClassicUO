@@ -33,7 +33,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        private LandTiles? _tileData;
 
         public Land(Graphic graphic)
         {
@@ -46,16 +45,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public LandTiles TileData
+        public ref readonly LandTiles TileData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_tileData.HasValue)
-                    _tileData = FileManager.TileData.LandData[Graphic];
-
-                return _tileData.Value;
-            }
+            get => ref FileManager.TileData.LandData[Graphic];
         }
 
         public sbyte MinZ { get; set; }
