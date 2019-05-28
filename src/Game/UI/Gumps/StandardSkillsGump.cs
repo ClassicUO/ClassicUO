@@ -303,11 +303,24 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 SkillsGroupManager.MoveSkillToGroup(Group, box.LabelText, _skillIndex);
 
+                                int index = -1;
+                                foreach (SkillControl skillControl in box.Items.OfType<SkillControl>())
+                                {
+                                    if (skillControl._skillIndex < _skillIndex)
+                                    {
+                                        index++;
+                                    }
+                                    else
+                                        break;
+                                }
+
                                 _parent.Remove(this);
-                                box.AddItem(this);
+                                box.AddItem(this, index);
 
                                 _parent = box;
                                 Group = box.LabelText;
+
+                                
                             }
 
                             break;

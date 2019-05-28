@@ -248,16 +248,23 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public void AddItem(Control t)
+        public void AddItem(Control t, int index = -1)
         {
             t.IsVisible = Opened;
-            _items.Add(t);
             Add(t);
+
+            if (index >= 0 && index < _items.Count)
+                _items.Insert(index, t);
+            else
+                _items.Add(t);
+
 
             if (_opened)
                 GenerateButtons();
             _arrow.IsVisible = _items.Count > 0 || _nestedBoxes.Count > 0;
         }
+
+        public List<Control> Items => _items;
 
         public override void Remove(Control c)
         {
