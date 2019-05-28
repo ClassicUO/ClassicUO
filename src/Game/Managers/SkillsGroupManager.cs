@@ -140,57 +140,45 @@ namespace ClassicUO.Game.Managers
         {
             _groups.Clear();
 
-            try
+            int version = reader.ReadInt32();
+
+            int groupCount = reader.ReadInt32();
+
+            for (int i = 0; i < groupCount; i++)
             {
+                int entriesCount = reader.ReadInt32();
+                string groupName = reader.ReadUTF8String(reader.ReadInt32());
+
+                if (!_groups.TryGetValue(groupName, out var list) || list == null)
                 {
-                    int version = reader.ReadInt32();
-
-                    int groupCount = reader.ReadInt32();
-
-                    for (int i = 0; i < groupCount; i++)
-                    {
-                        int entriesCount = reader.ReadInt32();
-                        string groupName = reader.ReadUTF8String(reader.ReadInt32());
-
-                        if (!_groups.TryGetValue(groupName, out var list) || list == null)
-                        {
-                            list = new List<int>();
-                            _groups[groupName] = list;
-                        }
-
-                        for (int j = 0; j < entriesCount; j++)
-                        {
-                            int skillIndex = reader.ReadInt32();
-                            list.Add(skillIndex);
-                        }
-                    }
-
+                    list = new List<int>();
+                    _groups[groupName] = list;
                 }
-            }
-            catch (Exception e)
-            {
-                Log.Message(LogTypes.Error, "skillgroups.bin loading failed.\r\n" + e.StackTrace);
+
+                for (int j = 0; j < entriesCount; j++)
+                {
+                    int skillIndex = reader.ReadInt32();
+                    list.Add(skillIndex);
+                }
             }
         }
 
         public static void Save(BinaryWriter writer)
         {
+            // version
+            writer.Write(1);
+
+            writer.Write(_groups.Count);
+
+            foreach (KeyValuePair<string, List<int>> k in _groups)
             {
-                // version
-                writer.Write(1);
+                writer.Write(k.Value.Count);
 
-                writer.Write(_groups.Count);
-
-                foreach (KeyValuePair<string, List<int>> k in _groups)
+                writer.Write(k.Key.Length);
+                writer.WriteUTF8String(k.Key);
+                foreach (int i in k.Value)
                 {
-                    writer.Write(k.Value.Count);
-
-                    writer.Write(k.Key.Length);
-                    writer.WriteUTF8String(k.Key);
-                    foreach (int i in k.Value)
-                    {
-                        writer.Write(i);
-                    }
+                    writer.Write(i);
                 }
             }
         }
