@@ -2,6 +2,7 @@
 
 using ClassicUO.Game.UI.Controls;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using ClassicUO.Game.Data;
@@ -10,6 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -24,6 +26,8 @@ namespace ClassicUO.Game.UI.Gumps
         private SkillControl[] _allSkillControls;
         private Label _skillsLabelSum;
         private Button _newGroupButton;
+
+        private List<MultiSelectionShrinkbox> _boxes = new List<MultiSelectionShrinkbox>();
 
         public StandardSkillsGump() : base(0, 0)
         {
@@ -124,6 +128,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _allSkillControls[skill] = c;
             }
             box.SetItemsValue(controls);
+
+            _boxes.Add(box);
         }
 
 
@@ -147,6 +153,34 @@ namespace ClassicUO.Game.UI.Gumps
                 _allSkillControls[skillIndex]?.UpdateSkillValue();
         }
 
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_scrollArea.SpecialHeight);
+
+            writer.Write(_boxes.Count);
+
+            for (int i = 0; i < _boxes.Count; i++)
+            {
+                writer.Write(_boxes[i].Opened);
+            }
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            _scrollArea.Height = _scrollArea.SpecialHeight = reader.ReadInt32();
+
+            int count = reader.ReadInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                bool opened = reader.ReadBoolean();
+
+                if (i < _boxes.Count)
+                    _boxes[i].Opened = opened;
+            }
+        }
 
 
         class SkillControl : Control
