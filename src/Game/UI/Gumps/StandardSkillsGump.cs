@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (var skill in skills)
             {
-                var c = new SkillControl(skill, box.Width - 15);
+                var c = new SkillControl(skill, box.Width - 15, group, box);
                 c.Width = box.Width - 15;
                 controls[idx++] = c;
                 _allSkillControls[skill] = c;
@@ -186,20 +186,22 @@ namespace ClassicUO.Game.UI.Gumps
         class SkillControl : Control
         {
             private readonly Label _labelValue;
-            private readonly int _skills;
+            private readonly int _skillIndex;
+            private MultiSelectionShrinkbox _parent;
 
-            public SkillControl(int skillIndex, int maxWidth)
+            public SkillControl(int skillIndexIndex, int maxWidth, string group, MultiSelectionShrinkbox parent)
             {
                 AcceptMouseInput = true;
                 CanMove = true;
-                
 
-                Skill skill = World.Player.Skills[skillIndex];
-                _skills = skillIndex;
+                _parent = parent;
+
+                Skill skill = World.Player.Skills[skillIndexIndex];
+                _skillIndex = skillIndexIndex;
                 if (skill.IsClickable)
                 {
                     Button button = new Button(0, 0x0837, 0x0838, 0x0837);
-                    button.MouseUp += (ss, e) => {  GameActions.UseSkill(skillIndex); };
+                    button.MouseUp += (ss, e) => {  GameActions.UseSkill(skillIndexIndex); };
                     Add(button);
                 }
                 
@@ -251,7 +253,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Width = maxWidth;
                 Height = label.Height;
+                Group = group;
             }
+
+            public string Group { get; private set; }
 
 
             private static ushort GetLockValue(Lock lockStatus)
@@ -280,6 +285,41 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = false;
             }
 
+            protected override void OnMouseOver(int x, int y)
+            {
+                if (CanMove)
+                    return;
+
+                var c = Engine.UI.MouseOverControl;
+                if (c != this)
+                {
+                    var p = c.Parent;
+
+                    while (p != null)
+                    {
+                        if (p is MultiSelectionShrinkbox box)
+                        {
+                            if (box.LabelText != Group)
+                            {
+                                SkillsGroupManager.MoveSkillToGroup(Group, box.LabelText, _skillIndex);
+
+                                _parent.Remove(this);
+                                box.AddItem(this);
+
+                                _parent = box;
+                                Group = box.LabelText;
+                            }
+
+                            break;
+                        }
+
+                        p = p.Parent;
+                    }
+                }
+
+                base.OnMouseOver(x, y);
+            }
+
             protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 CanMove = true;
@@ -298,7 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void UpdateSkillValue()
             {
-                Skill skill = World.Player.Skills[_skills];
+                Skill skill = World.Player.Skills[_skillIndex];
                 if (skill != null)
                     _labelValue.Text = skill.Value.ToString("F1");
             }

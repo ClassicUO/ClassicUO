@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly GumpPic _arrow;
         //private NiceButton[] _buttons;
         private int[] _correspondence;
-        private Control[] _items;
+        private List<Control> _items;
         private bool _opened;
         //private GumpPic[] _pics;
         private int _selectedIndex;
@@ -133,6 +133,9 @@ namespace ClassicUO.Game.UI.Controls
             };
         }
 
+
+        public string LabelText => _label.Text;
+
         public event EventHandler<EditableLabel> EditStateStart, EditStateEnd            ;
 
         public override void OnKeyboardReturn(int textID, string text)
@@ -209,13 +212,13 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _selectedIndex = value;
 
-                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length) OnOptionSelected?.Invoke(this, value);
+                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Count) OnOptionSelected?.Invoke(this, value);
             }
         }
 
         public int SelectedItem => _correspondence != null && _selectedIndex >= 0 && _selectedIndex < _correspondence.Length ? _correspondence[_selectedIndex] : _selectedIndex;
 
-        internal uint GetItemsLength => (uint) _items.Length;
+        internal uint GetItemsLength => (uint) _items.Count;
 
         internal bool NestBox(MultiSelectionShrinkbox box)
         {
@@ -244,9 +247,31 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
+
+        public void AddItem(Control t)
+        {
+            t.IsVisible = Opened;
+            _items.Add(t);
+            Add(t);
+
+            if (_opened)
+                GenerateButtons();
+            _arrow.IsVisible = _items.Count > 0 || _nestedBoxes.Count > 0;
+        }
+
+        public override void Remove(Control c)
+        {
+            _items.Remove(c);
+
+            base.Remove(c);
+            if (_opened)
+                GenerateButtons();
+            _arrow.IsVisible = _items.Count > 0 || _nestedBoxes.Count > 0;
+        }
+
         internal void SetItemsValue(Control[] items)
         {
-            _items = items;
+            _items = items.ToList();
             _correspondence = null;
 
             if (_opened)
@@ -262,7 +287,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal void SetItemsValue(Dictionary<int, Control> items)
         {
-            _items = items.Select(o => o.Value).ToArray();
+            _items = items.Select(o => o.Value).ToList();
             _correspondence = items.Select(o => o.Key).ToArray();
 
             _items.ForEach(s =>
@@ -335,9 +360,11 @@ namespace ClassicUO.Game.UI.Controls
             //    index++;
             //}
 
-            var totalHeight = _items.Length > 0 ? _items.Sum(o => o.Height) : _label.Height;
+            var totalHeight = _items.Sum(o => o.Height);
 
             Height = totalHeight + lh;
+
+            Parent.WantUpdateSize = true;
         }
 
         private void ClearButtons()

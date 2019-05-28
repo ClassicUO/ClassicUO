@@ -136,6 +136,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public static void MoveSkillToGroup(string oldGroup, string newGroup, int skillIndex)
+        {
+            if (_groups.TryGetValue(oldGroup, out var oldList) && _groups.TryGetValue(newGroup, out var newList))
+            {
+                oldList.Remove(skillIndex);
+                newList.Add(skillIndex);
+            }
+        }
+
         public static void Load(BinaryReader reader)
         {
             _groups.Clear();
