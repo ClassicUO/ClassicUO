@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
         private TextBox _autoOpenCorpseRange;
         private ScrollAreaItem _defaultHotkeysArea;
 
@@ -917,6 +917,23 @@ namespace ClassicUO.Game.UI.Gumps
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
+            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
+            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
+
+            var item = new ScrollAreaItem();
+
+            _autoOpenCorpseRange = CreateInputField(item, new TextBox(FONT, 2, 80, 80, true)
+            {
+                X = 20,
+                Y = _cellSize.Y + _cellSize.Height - 15,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
+            }, "Corpse Open Range:");
+
+            rightArea.Add(item);
+
             // [BLOCK] disable hotkeys
             {
                 _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT, true)
@@ -959,21 +976,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
             }
 
-            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
-            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
-            var item = new ScrollAreaItem();
-
-            _autoOpenCorpseRange = CreateInputField(item,new TextBox(FONT, 2, 80, 80, true)
-            {
-                X = 20,
-                Y = _cellSize.Y + _cellSize.Height - 15,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
-            }, "Corpse Open Range:");
-            rightArea.Add(item);
-            
             Add(rightArea, PAGE);
         }
 
