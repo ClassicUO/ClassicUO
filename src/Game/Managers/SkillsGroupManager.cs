@@ -1,4 +1,6 @@
 ﻿using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
+using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
@@ -86,17 +88,19 @@ namespace ClassicUO.Game.Managers
             );
         }
 
-        public static void MakeDefault()
+        public static void LoadDefault()
         {
             FileInfo info = new FileInfo(Path.Combine(FileManager.UoFolderPath, "skillgrp.mul"));
             try
             {
                 if (!info.Exists)
                 {
+                    Log.Message(LogTypes.Info, $"skillgrp.mul not present, using CUO defaults!");
                     MakeCUODefault();
                     return;
                 }
                 Groups.Clear();
+                Log.Message(LogTypes.Info, $"Loading skillgrp.mul...");
                 using (FileStream fs = new FileStream(info.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     int skillidx = 0;
@@ -145,12 +149,12 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
+                Log.Message(LogTypes.Debug, $"Error while reading skillgrp.mul, using CUO defaults! exception given is: {e}");
                 MakeCUODefault();
             }
         }
-
 
         public static bool AddNewGroup(string group)
         {

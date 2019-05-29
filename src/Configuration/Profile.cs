@@ -335,14 +335,10 @@ namespace ClassicUO.Configuration
                 }
                 catch (Exception e)
                 {
-                    SkillsGroupManager.MakeDefault();
+                    SkillsGroupManager.LoadDefault();
                     Log.Message(LogTypes.Error, e.StackTrace);
                 }
             }
-            else
-                SkillsGroupManager.MakeDefault();
-
-
 
             List<Gump> gumps = new List<Gump>();
             using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))

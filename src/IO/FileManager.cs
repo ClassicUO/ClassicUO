@@ -185,7 +185,7 @@ namespace ClassicUO.IO
                 }
             }
 
-
+            Game.Managers.SkillsGroupManager.LoadDefault();
 
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
