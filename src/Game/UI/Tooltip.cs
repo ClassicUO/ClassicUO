@@ -163,9 +163,8 @@ namespace ClassicUO.Game.UI
 
                 if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
                 {
-                    if (obj.Serial.IsMobile)
+                    if (obj is Mobile mobile)
                     {
-                        Mobile mobile = (Mobile) obj;
                         //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
                         _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
                     }

@@ -712,6 +712,7 @@ namespace ClassicUO.Network
                 Mobile m = (Mobile)entity;
                 World.RemoveMobile(serial);
                 m.Items.ProcessDelta();
+                World.Mobiles.Remove(m);
                 World.Items.ProcessDelta();
                 World.Mobiles.ProcessDelta();
             }
@@ -727,8 +728,8 @@ namespace ClassicUO.Network
                     cont.Items.ProcessDelta();
                 }
 
-                if (World.RemoveItem(serial))
-                    World.Items.ProcessDelta();
+                World.Items.Remove(it);
+                World.Items.ProcessDelta();
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
@@ -1871,7 +1872,8 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
 
-            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Mobile mobile = World.GetOrCreateMobile(serial);
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
