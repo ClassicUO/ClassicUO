@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using System;
+using ClassicUO.Collections;
+using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,92 +10,154 @@ namespace ClassicUO.Game.Managers
 {
     static class SkillsGroupManager
     {
-        private static readonly Dictionary<string, List<int>> _groups = new Dictionary<string, List<int>>();
+        public static Dictionary<string, List<int>> Groups { get; } = new Dictionary<string, List<int>>();
 
-        public static Dictionary<string, List<int>> Groups => _groups;
-
-
-        public static void MakeDefault()
+        private static void MakeCUODefault()
         {
-            _groups.Clear();
+            Groups.Clear();
 
             int count = FileManager.Skills.SkillsCount;
 
-            _groups.Add("Miscellaneous", new List<int>()
+            Groups.Add("Miscellaneous", new List<int>()
                 {
                     4, 6, 10, 12, 19, 3, 36
                 }
             );
 
-            _groups.Add("Combat", new List<int>()
+            Groups.Add("Combat", new List<int>()
                 {
                     1, 31, 42, 17, 41, 5, 40, 27
                 }
             );
 
             if (count > 57)
-                _groups["Combat"].Add(57);
-            _groups["Combat"].Add(43);
+                Groups["Combat"].Add(57);
+            Groups["Combat"].Add(43);
             if (count > 50)
-                _groups["Combat"].Add(50);
+                Groups["Combat"].Add(50);
             if (count > 51)
-                _groups["Combat"].Add(51);
+                Groups["Combat"].Add(51);
             if (count > 52)
-                _groups["Combat"].Add(52);
+                Groups["Combat"].Add(52);
             if (count > 53)
-                _groups["Combat"].Add(53);
+                Groups["Combat"].Add(53);
 
 
-            _groups.Add("Trade Skills", new List<int>()
+            Groups.Add("Trade Skills", new List<int>()
                 {
                     0, 7, 8, 11, 13, 23, 44, 45, 34, 37
                 }
             );
 
-            _groups.Add("Magic", new List<int>()
+            Groups.Add("Magic", new List<int>()
             {
                 16
             });
 
             if (count > 56)
-                _groups["Magic"].Add(56);
-            _groups["Magic"].Add(25);
-            _groups["Magic"].Add(46);
+                Groups["Magic"].Add(56);
+            Groups["Magic"].Add(25);
+            Groups["Magic"].Add(46);
             if (count > 55)
-                _groups["Magic"].Add(55);
-            _groups["Magic"].Add(26);
+                Groups["Magic"].Add(55);
+            Groups["Magic"].Add(26);
             if (count > 54)
-                _groups["Magic"].Add(54);
-            _groups["Magic"].Add(32);
+                Groups["Magic"].Add(54);
+            Groups["Magic"].Add(32);
             if (count > 49)
-                _groups["Magic"].Add(49);
+                Groups["Magic"].Add(49);
 
 
-            _groups.Add("Wilderness", new List<int>()
+            Groups.Add("Wilderness", new List<int>()
                 {
                     2, 35, 18, 20, 38, 39
                 }
             );
 
-            _groups.Add("Thieving", new List<int>()
+            Groups.Add("Thieving", new List<int>()
                 {
                     14, 21, 24, 30, 48, 28, 33, 47
                 }
             );
 
-            _groups.Add("Bard", new List<int>()
+            Groups.Add("Bard", new List<int>()
                 {
                     15, 29, 9, 22
                 }
             );
         }
 
+        public static void MakeDefault()
+        {
+            FileInfo info = new FileInfo(Path.Combine(FileManager.UoFolderPath, "skillgrp.mul"));
+            try
+            {
+                if (!info.Exists)
+                {
+                    MakeCUODefault();
+                    return;
+                }
+                Groups.Clear();
+                using (FileStream fs = new FileStream(info.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    int skillidx = 0;
+                    bool unicode = false;
+                    using (BinaryReader bin = new BinaryReader(fs))
+                    {
+                        int start = 4;
+                        int strlen = 17;
+                        int count = bin.ReadInt32();
+                        if (count == -1)
+                        {
+                            unicode = true;
+                            count = bin.ReadInt32();
+                            start *= 2;
+                            strlen *= 2;
+                        }
+
+                        List<string> groups = new List<string>();
+                        groups.Add("Miscellaneous");
+                        Groups.Add("Miscellaneous", new List<int>());
+                        for (int i = 0; i < count - 1; ++i)
+                        {
+                            int strbuild;
+                            fs.Seek((long)(start + (i * strlen)), SeekOrigin.Begin);
+                            StringBuilder sb = new StringBuilder(17);
+                            if (unicode)
+                            {
+                                while ((strbuild = bin.ReadInt16()) != 0)
+                                    sb.Append((char)strbuild);
+                            }
+                            else
+                            {
+                                while ((strbuild = bin.ReadByte()) != 0)
+                                    sb.Append((char)strbuild);
+                            }
+                            groups.Add(sb.ToString());
+                            Groups.Add(sb.ToString(), new List<int>());
+                        }
+                        fs.Seek((long)(start + ((count - 1) * strlen)), SeekOrigin.Begin);
+                        while (bin.BaseStream.Length != bin.BaseStream.Position)
+                        {
+                            int grp = bin.ReadInt32();
+                            if(grp < groups.Count)
+                                Groups[groups[grp]].Add(skillidx++);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                MakeCUODefault();
+            }
+        }
+
 
         public static bool AddNewGroup(string group)
         {
-            if (!_groups.ContainsKey(group))
+            if (!Groups.ContainsKey(group))
             {
-                _groups.Add(group, new List<int>());
+                Groups.Add(group, new List<int>());
 
                 return true;
             }
@@ -105,40 +167,40 @@ namespace ClassicUO.Game.Managers
 
         public static void RemoveGroup(string group)
         {
-            if (_groups.TryGetValue(group, out var list))
+            if (Groups.TryGetValue(group, out var list))
             {
-                _groups.Remove(group);
+                Groups.Remove(group);
 
-                if (_groups.Count == 0)
+                if (Groups.Count == 0)
                 {
-                    _groups.Add("All", list);
+                    Groups.Add("All", list);
                 }
                 else
                 {
-                    _groups.FirstOrDefault().Value.AddRange(list);
+                    Groups.FirstOrDefault().Value.AddRange(list);
                 }
             }
         }
 
         public static List<int> GetSkillsInGroup(string group)
         {
-            _groups.TryGetValue(group, out var list);
+            Groups.TryGetValue(group, out var list);
 
             return list;
         }
 
         public static void ReplaceGroup(string oldGroup, string newGroup)
         {
-            if (_groups.TryGetValue(oldGroup, out var oldList) && !_groups.TryGetValue(newGroup, out var newList))
+            if (Groups.TryGetValue(oldGroup, out var oldList) && !Groups.TryGetValue(newGroup, out var newList))
             {
-                _groups.Remove(oldGroup);
-                _groups[newGroup] = oldList;
+                Groups.Remove(oldGroup);
+                Groups[newGroup] = oldList;
             }
         }
 
         public static void MoveSkillToGroup(string oldGroup, string newGroup, int skillIndex)
         {
-            if (_groups.TryGetValue(oldGroup, out var oldList) && _groups.TryGetValue(newGroup, out var newList))
+            if (Groups.TryGetValue(oldGroup, out var oldList) && Groups.TryGetValue(newGroup, out var newList))
             {
                 oldList.Remove(skillIndex);
                 newList.Add(skillIndex);
@@ -147,7 +209,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Load(BinaryReader reader)
         {
-            _groups.Clear();
+            Groups.Clear();
 
             int version = reader.ReadInt32();
 
@@ -158,10 +220,10 @@ namespace ClassicUO.Game.Managers
                 int entriesCount = reader.ReadInt32();
                 string groupName = reader.ReadUTF8String(reader.ReadInt32());
 
-                if (!_groups.TryGetValue(groupName, out var list) || list == null)
+                if (!Groups.TryGetValue(groupName, out var list) || list == null)
                 {
                     list = new List<int>();
-                    _groups[groupName] = list;
+                    Groups[groupName] = list;
                 }
 
                 for (int j = 0; j < entriesCount; j++)
@@ -177,9 +239,9 @@ namespace ClassicUO.Game.Managers
             // version
             writer.Write(1);
 
-            writer.Write(_groups.Count);
+            writer.Write(Groups.Count);
 
-            foreach (KeyValuePair<string, List<int>> k in _groups)
+            foreach (KeyValuePair<string, List<int>> k in Groups)
             {
                 writer.Write(k.Value.Count);
 
