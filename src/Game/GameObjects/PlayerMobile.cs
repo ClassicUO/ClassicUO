@@ -1656,6 +1656,26 @@ namespace ClassicUO.Game.GameObjects
 
             Plugin.UpdatePlayerPosition(X, Y, Z);
             
+            TryOpenDoors();
+            
+            if (Engine.Profile.Current.AutoOpenCorpses && !TargetManager.IsTargeting)
+            {
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                {
+                    OpenedCorpses.Add(c.Serial);
+                    GameActions.DoubleClick(c.Serial);
+                }
+            }
+        }
+
+        protected override void OnDirectionChanged()
+        {
+            base.OnDirectionChanged();
+            TryOpenDoors();
+        }
+
+        private void TryOpenDoors()
+        {
             if (Engine.Profile.Current.AutoOpenDoors)
             {
                 int x = Position.X, y = Position.Y, z = Position.Z;
@@ -1665,15 +1685,6 @@ namespace ClassicUO.Game.GameObjects
                     s.Position.Z + 15 >= z))
                 {                    
                     GameActions.OpenDoor();
-                }
-            }
-            
-            if (Engine.Profile.Current.AutoOpenCorpses)
-            {
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
-                {
-                    OpenedCorpses.Add(c.Serial);
-                    GameActions.DoubleClick(c.Serial);
                 }
             }
         }
