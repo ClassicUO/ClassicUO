@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
         private TextBox _autoOpenCorpseRange;
-        private ScrollAreaItem _defaultHotkeysArea;
+        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -867,7 +867,6 @@ namespace ClassicUO.Game.UI.Gumps
             //item.Add(_counterLayout);
             rightArea.Add(item);
 
-
             item = new ScrollAreaItem();
 
             text = new Label("Cell size:", true, HUE_FONT, font: FONT)
@@ -916,13 +915,14 @@ namespace ClassicUO.Game.UI.Gumps
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
-
             _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
+
+            _autoOpenCorpseArea = new ScrollAreaItem();
+
             _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
-
-            var item = new ScrollAreaItem();
-
-            _autoOpenCorpseRange = CreateInputField(item, new TextBox(FONT, 2, 80, 80, true)
+            _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
+            
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80, true)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height - 15,
@@ -932,7 +932,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
 
-            rightArea.Add(item);
+            rightArea.Add(_autoOpenCorpseArea);
 
             // [BLOCK] disable hotkeys
             {
@@ -977,6 +977,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(rightArea, PAGE);
+
+            _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
+
         }
 
         private void BuildNetwork()
