@@ -1873,12 +1873,6 @@ namespace ClassicUO.Network
             if (World.Player == null) return;
 
             Serial serial = p.ReadUInt();
-
-            if (serial == 0x179760)
-            {
-
-            }
-
             Mobile mobile = World.GetOrCreateMobile(serial);
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
