@@ -71,12 +71,11 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
-        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         private Action _queuedAction;
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
 
-        private Macro _activeMoveMacro;
         public Direction _numPadDirection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
@@ -481,9 +480,7 @@ namespace ClassicUO.Game.Scenes
             _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
 
             _isMacroMoveDown = _isMacroMoveDown || (macro != null && macro.FirstNode.Code == MacroType.MovePlayer);
-            if (_isMacroMoveDown)
-                _activeMoveMacro = macro;
-
+            _isAuraActive = _isAuraActive || (macro != null && macro.FirstNode.Code == MacroType.Aura);
             _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || (macro != null && macro.FirstNode.SubCode == MacroSubType.Top);
             _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || (macro != null && macro.FirstNode.SubCode == MacroSubType.Down);
             _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || (macro != null && macro.FirstNode.SubCode == MacroSubType.Left);
@@ -494,6 +491,9 @@ namespace ClassicUO.Game.Scenes
                 if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
+
+            if (_isAuraActive && !Engine.AuraManager.IsEnabled)
+                Engine.AuraManager.ToggleVisibility();
 
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
@@ -565,6 +565,12 @@ namespace ClassicUO.Game.Scenes
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _isRightDown = false;
                     break;
+            }
+
+            if (_isAuraActive)
+            {
+                _isAuraActive = false;
+                Engine.AuraManager.ToggleVisibility();
             }
 
             if (_isMacroMoveDown)

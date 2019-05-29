@@ -33,6 +33,21 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        private int _saveAuraUnderFeetType;
+
+        public void ToggleVisibility()
+        {
+            if (!IsEnabled)
+            {
+                _saveAuraUnderFeetType = Engine.Profile.Current.AuraUnderFeetType;
+                Engine.Profile.Current.AuraUnderFeetType = 3;
+            }
+            else
+            {
+                Engine.Profile.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
+            }
+        }
+
         public Texture2D AuraTexture { get; private set; }
 
 

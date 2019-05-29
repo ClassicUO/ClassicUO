@@ -917,6 +917,14 @@ namespace ClassicUO.Game.Managers
                     }
                     break;
 
+                case MacroType.Aura:
+                    // hold to draw
+                    break;
+
+                case MacroType.AuraOnOff:
+                    Engine.AuraManager.ToggleVisibility();
+                    break;
+
             }
 
 
@@ -1202,7 +1210,9 @@ namespace ClassicUO.Game.Managers
         ToggleGargoyleFly,
         DefaultScale,
         ToggleChatVisibility,
-        MovePlayer
+        MovePlayer,
+        Aura,
+        AuraOnOff
     }
 
     internal enum MacroSubType
