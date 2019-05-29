@@ -137,8 +137,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (SelectedObject.Object == this && !IsLocked)
+                if (SelectedObject.LastObject == this && !IsLocked)
+                {
+                    isPartial = false;
                     hue = 0x0035;
+                }
                 else if (IsHidden)
                     hue = 0x038E;
 
