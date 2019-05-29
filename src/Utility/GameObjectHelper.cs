@@ -36,13 +36,7 @@ namespace ClassicUO.Utility
                     return false;
             }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStaticItem(GameObject obj)
-        {
-            return obj is Static || obj is Item;
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNoDrawable(ushort g)
         {
