@@ -164,6 +164,12 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
         [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
+        
+        [JsonProperty] public bool AutoOpenDoors { get; set; } = false;
+        [JsonProperty] public bool AutoOpenCorpses { get; set; } = false;
+        [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
+
+        
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
