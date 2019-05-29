@@ -23,9 +23,11 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -792,6 +794,8 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 skill.CapFixed = cap;
                 _delta |= Delta.Skills;
+
+                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -802,6 +806,8 @@ namespace ClassicUO.Game.GameObjects
                 Skill skill = _sklls[id];
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
+
+                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -1649,6 +1655,27 @@ namespace ClassicUO.Game.GameObjects
                 World.Map.Center = new Point(X, Y);
 
             Plugin.UpdatePlayerPosition(X, Y, Z);
+            
+            if (Engine.Profile.Current.AutoOpenDoors)
+            {
+                int x = Position.X, y = Position.Y, z = Position.Z;
+                Offset(Direction, ref x, ref y);
+                if (World.Items.Any(s =>
+                    IsDoor(s.Graphic) && s.Position.X == x && s.Position.Y == y && s.Position.Z - 15 <= z &&
+                    s.Position.Z + 15 >= z))
+                {                    
+                    GameActions.OpenDoor();
+                }
+            }
+            
+            if (Engine.Profile.Current.AutoOpenCorpses)
+            {
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                {
+                    OpenedCorpses.Add(c.Serial);
+                    GameActions.DoubleClick(c.Serial);
+                }
+            }
         }
 
         public override void Destroy()
@@ -1707,7 +1734,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!emptyStack)
             {
-                Step walkStep = Steps.Back();
+                ref readonly Step walkStep = ref Steps.Back();
                 x = walkStep.X;
                 y = walkStep.Y;
                 z = walkStep.Z;
@@ -2115,8 +2142,29 @@ namespace ClassicUO.Game.GameObjects
 #else
             Walker.ConfirmWalk(seq);
 #endif
-        }
 
+        }
+        
+        private bool IsDoor(ushort type)
+        {
+            return( type >= 0x0675 && type <= 0x06F6 ) || ( type >= 0x0821 && type <= 0x0875 ) || ( type >= 0x1FED && type <= 0x1FFC ) || 
+                      ( type >= 0x241F && type <= 0x2424 ) || ( type >= 0x2A05 && type <= 0x2A1C );
+        }
+        private static void Offset( Direction d, ref int x, ref int y )
+        {
+            switch ( d & Direction.Mask )
+            {
+                case Direction.North:		--y; break;
+                case Direction.South:		++y; break;
+                case Direction.West:  --x;		 break;
+                case Direction.East:  ++x;		 break;
+                case Direction.Right: ++x; --y;  break;
+                case Direction.Left:  --x; ++y;  break;
+                case Direction.Down:  ++x; ++y;  break;
+                case Direction.Up:    --x; --y;  break;
+            }
+        }
+        private List<Serial> OpenedCorpses = new List<Serial>();
 #if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {

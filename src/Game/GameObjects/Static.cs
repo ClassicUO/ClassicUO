@@ -31,8 +31,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        private StaticTiles? _itemData;
-
         public Static(Graphic graphic, Hue hue, int index)
         {
             Graphic = OriginalGraphic = graphic;
@@ -57,28 +55,20 @@ namespace ClassicUO.Game.GameObjects
 
         public Graphic OriginalGraphic { get; }
 
-        public StaticTiles ItemData
+        public ref readonly StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
+            get => ref FileManager.TileData.StaticData[Graphic];
         }
 
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
     }
 }

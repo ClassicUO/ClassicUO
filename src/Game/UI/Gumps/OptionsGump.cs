@@ -56,7 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _disableDefaultHotkeys, _disableArrowBtn, _disableTabBtn, _disableCtrlQWBtn;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn;
+        private TextBox _autoOpenCorpseRange;
         private ScrollAreaItem _defaultHotkeysArea;
 
         // sounds
@@ -97,6 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
+        private Checkbox _useStandardSkillsGump;
 
         // network
         private Checkbox _showNetStats;
@@ -218,7 +220,8 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
-
+            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump",
+                Engine.Profile.Current.StandardSkillsGump, 0, 0);
 
 
 
@@ -713,7 +716,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
             item.Add(_scaleSpeechDelay);
-            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
@@ -914,8 +917,6 @@ namespace ClassicUO.Game.UI.Gumps
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
-
-
             // [BLOCK] disable hotkeys
             {
                 _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT, true)
@@ -958,7 +959,21 @@ namespace ClassicUO.Game.UI.Gumps
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
             }
 
+            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
+            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
+            var item = new ScrollAreaItem();
 
+            _autoOpenCorpseRange = CreateInputField(item,new TextBox(FONT, 2, 80, 80, true)
+            {
+                X = 20,
+                Y = _cellSize.Y + _cellSize.Height - 15,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
+            }, "Corpse Open Range:");
+            rightArea.Add(item);
+            
             Add(rightArea, PAGE);
         }
 
@@ -1035,7 +1050,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
-                    _vendorGumpSize.Text = (60).ToString();
+                    _vendorGumpSize.Text = "60";
+                    _useStandardSkillsGump.IsChecked = true;
 
                     break;
                 case 2: // sounds
@@ -1204,6 +1220,28 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
 
             Engine.Profile.Current.VendorGumpHeight = (int)_vendorGumpSize.Tag;
+            Engine.Profile.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
+
+            if (_useStandardSkillsGump.IsChecked)
+            {
+                var newGump = Engine.UI.GetControl<SkillGumpAdvanced>();
+
+                if (newGump != null)
+                {
+                    Engine.UI.Add(new StandardSkillsGump(){ X = newGump.X, Y = newGump.Y });
+                    newGump.Dispose();
+                }
+            }
+            else
+            {
+                var standardGump = Engine.UI.GetControl<StandardSkillsGump>();
+
+                if (standardGump != null)
+                {
+                    Engine.UI.Add(new SkillGumpAdvanced() { X = standardGump.X, Y = standardGump.Y });
+                    standardGump.Dispose();
+                }
+            }
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
@@ -1467,6 +1505,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
             }
+            Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
+            Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
+            Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
+
+            
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;

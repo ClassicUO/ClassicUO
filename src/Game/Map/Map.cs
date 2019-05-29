@@ -136,6 +136,9 @@ namespace ClassicUO.Game.Map
             {
                 GameObject obj = tile.FirstNode;
 
+                while (obj.Left != null)
+                    obj = obj.Left;
+
                 for (; obj != null; obj = obj.Right)
                 {
                     if (!(obj is Static) && !(obj is Multi))

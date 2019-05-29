@@ -187,10 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
                 });
-                // Virtue menu
-                Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
-                _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
-
+                
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
@@ -231,6 +228,10 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate
                 });
             }
+
+            // Virtue menu
+            Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
+            _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
             Add(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));

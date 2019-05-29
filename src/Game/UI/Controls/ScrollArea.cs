@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     X = Width - 19, Height = h
                 };
-                Width = Width + 15;
+                Width += 15;
             }
 
             if (scrollbarHeight < 0)
@@ -84,6 +84,8 @@ namespace ClassicUO.Game.UI.Controls
                 _needUpdate = false;
             }
         }
+
+        public void ForceUpdate() => _needUpdate = true;
 
         protected override void OnInitialize()
         {

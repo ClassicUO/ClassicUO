@@ -164,6 +164,12 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
         [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
+        
+        [JsonProperty] public bool AutoOpenDoors { get; set; } = false;
+        [JsonProperty] public bool AutoOpenCorpses { get; set; } = false;
+        [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
+
+        
 
         [JsonProperty] public bool DisableDefaultHotkeys { get; set; } = false;
         [JsonProperty] public bool DisableArrowBtn { get; set; } = false;
@@ -248,6 +254,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ShowNetworkStats { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
+        [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
@@ -311,7 +319,11 @@ namespace ClassicUO.Configuration
                     writer.Write(0);
             }
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin")))) Engine.UI.AnchorManager.Save(writer);
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
+                Engine.UI.AnchorManager.Save(writer);
+
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
+                SkillsGroupManager.Save(writer);
         }
 
         public List<Gump> ReadGumps()
@@ -323,8 +335,24 @@ namespace ClassicUO.Configuration
             if (!File.Exists(binpath))
                 return null;
 
-            List<Gump> gumps = new List<Gump>();
 
+
+            string skillsGroupsPath = Path.Combine(path, "skillsgroups.bin");
+            if (File.Exists(skillsGroupsPath))
+            {
+                try
+                {
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(skillsGroupsPath)))
+                        SkillsGroupManager.Load(reader);
+                }
+                catch (Exception e)
+                {
+                    SkillsGroupManager.LoadDefault();
+                    Log.Message(LogTypes.Error, e.StackTrace);
+                }
+            }
+
+            List<Gump> gumps = new List<Gump>();
             using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
@@ -365,19 +393,22 @@ namespace ClassicUO.Configuration
                 }
             }
 
-            string anchorsPath = Path.Combine(path, "anchors.bin");
 
+
+            string anchorsPath = Path.Combine(path, "anchors.bin");
             if (File.Exists(anchorsPath))
             {
                 try
                 {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath))) Engine.UI.AnchorManager.Restore(reader, gumps);
+                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
+                        Engine.UI.AnchorManager.Restore(reader, gumps);
                 }
                 catch (Exception e)
                 {
                     Log.Message(LogTypes.Error, e.StackTrace);
                 }
             }
+
 
             return gumps;
         }

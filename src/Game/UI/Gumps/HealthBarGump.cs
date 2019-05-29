@@ -588,7 +588,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */mobile != null )
             {
-                //Mobile.IsSelected = true;
                 SelectedObject.HealthbarObject = mobile;
                 SelectedObject.Object = mobile;
             }
@@ -599,9 +598,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Mobile mobile = World.Mobiles.Get(LocalSerial);
 
-            if (mobile != null && SelectedObject.Object == mobile)
+            if (mobile != null && SelectedObject.HealthbarObject == mobile)
             {
-                //Mobile.IsSelected = false;
                 SelectedObject.HealthbarObject = null;
                 SelectedObject.Object = null;
             }

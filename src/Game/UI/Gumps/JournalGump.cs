@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanBeSaved = true;
 
-            Add(_background = new ExpandableScroll(0, 0, Height)
+            Add(_background = new ExpandableScroll(0, 0, Height, 0x0820)
             {
                 TitleGumpID = 0x82A
             });

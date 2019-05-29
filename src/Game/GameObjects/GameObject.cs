@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
-
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (this is Mobile m && m.IsMoving)
                 {
-                    Mobile.Step step = m.Steps.Back();
+                    ref readonly Mobile.Step step = ref m.Steps.Back();
                     x = step.X;
                     y = step.Y;
                 }
@@ -171,8 +171,11 @@ namespace ClassicUO.Game.GameObjects
                 if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
-                _tile = World.Map.GetTile(x, y);
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    _tile = World.Map.GetTile(x, y);
+                    _tile?.AddGameObject(this);
+                }
             }
         }
 
@@ -188,8 +191,11 @@ namespace ClassicUO.Game.GameObjects
                 if (Position != Position.INVALID)
                     _tile?.RemoveGameObject(this);
 
-                _tile = tile;
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    _tile = tile;
+                    _tile?.AddGameObject(this);
+                }
             }
         }
 
@@ -251,6 +257,8 @@ namespace ClassicUO.Game.GameObjects
             OverheadMessageContainer?.Destroy();
 
             Texture = null;
+
+            DisposedObjectManager<GameObject>.Add(this);
         }
     }
 }

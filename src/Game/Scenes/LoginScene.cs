@@ -321,6 +321,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
+            Engine.GlobalSettings.LastCharacterName = character.Name;
             NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
         }
 

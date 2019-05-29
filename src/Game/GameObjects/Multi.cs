@@ -31,8 +31,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
-        private StaticTiles? _itemData;
-
         public Multi(Graphic graphic)
         {
             Graphic = graphic;
@@ -55,16 +53,10 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetY { get; set; }
         public int MultiOffsetZ { get; set; }
 
-        public StaticTiles ItemData
+        public ref readonly StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
+            get => ref FileManager.TileData.StaticData[Graphic];
         }
     }
 }

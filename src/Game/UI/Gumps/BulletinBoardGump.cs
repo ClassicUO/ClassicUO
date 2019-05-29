@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            Add(new ExpandableScroll(0, 0, 250)
+            Add(new ExpandableScroll(0, 0, 250, 0x0820)
             {
                 TitleGumpID = 0x0820
             });

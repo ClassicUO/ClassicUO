@@ -577,8 +577,12 @@ namespace ClassicUO.Game.Managers
 
             if (TargetLine == null || TargetLine.IsDisposed)
             {
-                TargetLine = new TargetLineGump(World.Mobiles.Get(mob));
-                Engine.UI.Add(TargetLine);
+                Mobile mobile = World.Mobiles.Get(mob);
+                if (mobile != null)
+                {
+                    TargetLine = new TargetLineGump(mobile);
+                    Engine.UI.Add(TargetLine);
+                }
             }
 
             //if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))

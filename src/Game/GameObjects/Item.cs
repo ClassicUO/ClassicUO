@@ -40,7 +40,6 @@ namespace ClassicUO.Game.GameObjects
         private Graphic? _displayedGraphic;
         private bool _isMulti;
 
-        private StaticTiles? _itemData;
         private Layer _layer;
         private uint _price;
         private ulong _spellsBitFiled;
@@ -182,32 +181,13 @@ namespace ClassicUO.Game.GameObjects
 
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
-
-        public override Graphic Graphic
-        {
-            get => base.Graphic;
-            set
-            {
-                if (base.Graphic != value)
-                {
-                    base.Graphic = value;
-                    _itemData = FileManager.TileData.StaticData[value];
-                }
-            }
-        }
-
+        
         public bool CharacterIsBehindFoliage { get; set; }
 
-        public StaticTiles ItemData
+        public ref readonly StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-
-                return _itemData.Value;
-            }
+            get => ref FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
@@ -382,6 +362,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDestroyed)
+                return;
+
             base.Update(totalMS, frameMS);
 
             ProcessAnimation(out _);

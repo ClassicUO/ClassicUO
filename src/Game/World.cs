@@ -41,10 +41,9 @@ namespace ClassicUO.Game
     internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
-        private static readonly List<Entity> _toRemove = new List<Entity>();
+        private static readonly List<Serial> _toRemove = new List<Serial>();
 
         public static Point RangeSize;
-
 
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
@@ -146,10 +145,10 @@ namespace ClassicUO.Game
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
-                    {
                         Mobiles.Remove(_toRemove[i]);
-                        _toRemove.RemoveAt(i--);
-                    }
+
+                    Mobiles.ProcessDelta();
+                    _toRemove.Clear();
                 }
 
                 foreach (Item item in Items)
@@ -174,10 +173,10 @@ namespace ClassicUO.Game
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
-                    {
                         Items.Remove(_toRemove[i]);
-                        _toRemove.RemoveAt(i--);
-                    }
+
+                    Items.ProcessDelta();
+                    _toRemove.Clear();
                 }
 
                 _effectManager.Update(totalMS, frameMS);
@@ -202,9 +201,9 @@ namespace ClassicUO.Game
         {
             Item item = Items.Get(serial);
 
-            if (item == null || item.IsDestroyed)
+            if (item == null /*|| item.IsDestroyed*/)
             {
-                Items.Remove(serial);
+                //Items.Remove(serial);
                 item = new Item(serial);
             }
 
@@ -215,9 +214,9 @@ namespace ClassicUO.Game
         {
             Mobile mob = Mobiles.Get(serial);
 
-            if (mob == null || mob.IsDestroyed)
+            if (mob == null /*|| mob.IsDestroyed*/)
             {
-                Mobiles.Remove(serial);
+                //Mobiles.Remove(serial);
                 mob = new Mobile(serial);
                 GameActions.RequestMobileStatus(mob);
             }
@@ -265,7 +264,6 @@ namespace ClassicUO.Game
 
             mobile.Items.Clear();
             mobile.Destroy();
-
             return true;
         }
 

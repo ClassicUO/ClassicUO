@@ -47,6 +47,8 @@ namespace ClassicUO.Game.UI.Controls
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
+            Unicode = isunicode;
+            Font = font;
         }
 
         public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))

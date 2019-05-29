@@ -280,10 +280,14 @@ namespace ClassicUO.Game.Map
                     while (obj.Left != null)
                         obj = obj.Left;
 
-                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
+                    while (obj != null)
                     {
+                        GameObject r = obj.Right;
+
                         if (obj != World.Player)
                             obj.Destroy();
+
+                        obj = r;
                     }
 
                     Tiles[i, j] = null;

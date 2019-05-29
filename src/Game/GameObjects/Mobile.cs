@@ -284,6 +284,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDestroyed)
+                return;
+
             base.Update(totalMS, frameMS);
 
             if (_lastAnimationIdleDelay < Engine.Ticks)
@@ -393,7 +396,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                Step step = Steps.Back();
+                ref readonly Step step = ref Steps.Back();
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -542,7 +545,8 @@ namespace ClassicUO.Game.GameObjects
 
                     if (IsMounted)
                     {
-                        if (Steps.Back().Run)
+                        ref readonly Step s = ref Steps.Back();
+                        if (s.Run)
                         {
                             soundID = 0x0129;
                             delaySound = 150;
@@ -581,13 +585,13 @@ namespace ClassicUO.Game.GameObjects
         {
             dir = (byte) GetDirectionForAnimation();
 
-            if (Steps.Count != 0)
+            if (Steps.Count != 0 && !IsDestroyed)
             {
                 bool turnOnly;
 
                 do
                 {
-                    Step step = Steps.Front();
+                    ref readonly Step step = ref Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
@@ -655,7 +659,9 @@ namespace ClassicUO.Game.GameObjects
                         AddToTile();
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
-                        Offset = Vector3.Zero;
+                        Offset.X = 0;
+                        Offset.Y = 0;
+                        Offset.Z = 0;
                         Steps.RemoveFromFront();
                         CalculateRandomIdleTime();
                         LastStepTime = Engine.Ticks;
@@ -683,7 +689,7 @@ namespace ClassicUO.Game.GameObjects
                     AnimationGroup = animGroup;
                 }
 
-                Item mount = Equipment[(int) Layer.Mount];
+                Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
                 if (mount != null)
                 {
@@ -724,7 +730,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             currentDelay += currentDelay * (AnimationInterval + 1);
 
-                            if (AnimationFrameCount <= 0)
+                            if (AnimationFrameCount == 0)
                                 AnimationFrameCount = (byte) fc;
                             else
                                 fc = AnimationFrameCount;
@@ -784,8 +790,7 @@ namespace ClassicUO.Game.GameObjects
                                 if ((Serial & 0x80000000) != 0)
                                 {
                                     World.CorpseManager.Remove(0, Serial);
-                                    World.RemoveMobile(this);
-                                    World.Mobiles.ProcessDelta();
+                                    World.RemoveMobile(Serial);
                                 }
                             }
                         }
@@ -795,15 +800,13 @@ namespace ClassicUO.Game.GameObjects
                     else if ((Serial & 0x80000000) != 0)
                     {
                         World.CorpseManager.Remove(0, Serial);
-                        World.RemoveMobile(this);
-                        World.Mobiles.ProcessDelta();
+                        World.RemoveMobile(Serial);
                     }
                 }
                 else if ((Serial & 0x80000000) != 0)
                 {
                     World.CorpseManager.Remove(0, Serial);
-                    World.RemoveMobile(this);
-                    World.Mobiles.ProcessDelta();
+                    World.RemoveMobile(Serial);
                 }
 
                 LastAnimationChangeTime = Engine.Ticks + currentDelay;

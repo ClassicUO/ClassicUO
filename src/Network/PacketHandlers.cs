@@ -657,42 +657,118 @@ namespace ClassicUO.Network
             if (World.Player == serial)
                 return;
 
-            if (World.Get(serial) == null)
+            Entity entity = World.Get(serial);
+
+            if (entity == null)
                 return;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            bool updateAbilities = false;
 
-            if (scene.HeldItem.Serial == serial)
-                scene.HeldItem.Enabled = false;
+            if (serial.IsItem)
+            {
+                Item it = (Item) entity;
+                uint cont = it.Container & 0x7FFFFFFF;
+
+                if (it.Container.IsValid)
+                {
+                    Entity top = it.Items.FirstOrDefault();
+
+                    if (top != null)
+                    {
+                        if (top == World.Player)
+                        {
+                            updateAbilities = it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
+                        }
+
+                        var tradeBox = top.Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+
+                        if (tradeBox != null)
+                            Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
+                    }
+
+                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (cont == World.Player && it.Layer == Layer.Invalid)
+                        scene.HeldItem.Enabled = false;
+
+
+                    if (it.Layer != Layer.Invalid)
+                    {
+                        Engine.UI.GetControl<PaperDollGump>(cont)?.Update();
+                    }
+                }
+            }
 
             if (World.CorpseManager.Exists(0, serial))
                 return;
 
-            if (serial.IsItem)
+            if (serial.IsMobile)
             {
-                Item item = World.Items.Get(serial);
-
-                if (!item.OnGround && item.Container.IsValid)
+                if (World.Party.Contains(serial))
                 {
-                    if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded) World.Player.UpdateAbilities();
-
-                    Entity cont = World.Get(item.Container);
-
-                    if (cont != null)
-                    {
-                        cont.Items.Remove(item);
-                        cont.Items.ProcessDelta();
-                    }
+                    //
                 }
 
-                if (World.RemoveItem(serial))
-                    World.Items.ProcessDelta();
-            }
-            else if (serial.IsMobile && World.RemoveMobile(serial))
-            {
+                Mobile m = (Mobile)entity;
+                World.RemoveMobile(serial);
+                m.Items.ProcessDelta();
+                World.Mobiles.Remove(m);
                 World.Items.ProcessDelta();
                 World.Mobiles.ProcessDelta();
             }
+            else if (serial.IsItem)
+            {
+                Item it = (Item) entity;
+
+                Entity cont = World.Get(it.Container);
+
+                if (cont != null)
+                {
+                    cont.Items.Remove(it);
+                    cont.Items.ProcessDelta();
+                }
+
+                World.RemoveItem(it);
+                World.Items.Remove(it);
+                World.Items.ProcessDelta();
+
+                if (updateAbilities)
+                    World.Player.UpdateAbilities();
+            }
+
+            //GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            //if (scene.HeldItem.Serial == serial)
+            //    scene.HeldItem.Enabled = false;
+
+            //if (World.CorpseManager.Exists(0, serial))
+            //    return;
+
+            //if (serial.IsItem)
+            //{
+            //    Item item = World.Items.Get(serial);
+
+            //    if (!item.OnGround && item.Container.IsValid)
+            //    {
+            //        if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded) World.Player.UpdateAbilities();
+
+            //        Entity cont = World.Get(item.Container);
+
+            //        if (cont != null)
+            //        {
+            //            cont.Items.Remove(item);
+            //            cont.Items.ProcessDelta();
+            //        }
+            //    }
+
+            //    if (World.RemoveItem(serial))
+            //        World.Items.ProcessDelta();
+            //}
+            //else if (serial.IsMobile && World.RemoveMobile(serial))
+            //{
+            //    World.Items.ProcessDelta();
+            //    World.Mobiles.ProcessDelta();
+            //}
         }
 
         private static void UpdatePlayer(Packet p)
@@ -1191,14 +1267,31 @@ namespace ClassicUO.Network
             if (World.SkillsRequested)
             {
                 World.SkillsRequested = false;
-                SkillGumpAdvanced gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
 
-                if (gumpSkills == null)
+                // TODO: make a base class for this gump
+                if (Engine.Profile.Current.StandardSkillsGump)
                 {
-                    Engine.UI.Add(new SkillGumpAdvanced
+                    var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
+                    if (gumpSkills == null)
                     {
-                        X = 100, Y = 100
-                    });
+                        Engine.UI.Add(new StandardSkillsGump
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
+                }
+                else
+                {
+                    var gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
+                    if (gumpSkills == null)
+                    {
+                        Engine.UI.Add(new SkillGumpAdvanced()
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
                 }
             }
 
@@ -1780,7 +1873,8 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
 
-            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Mobile mobile = World.GetOrCreateMobile(serial);
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
