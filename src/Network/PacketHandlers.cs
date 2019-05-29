@@ -728,6 +728,7 @@ namespace ClassicUO.Network
                     cont.Items.ProcessDelta();
                 }
 
+                World.RemoveItem(it);
                 World.Items.Remove(it);
                 World.Items.ProcessDelta();
 
