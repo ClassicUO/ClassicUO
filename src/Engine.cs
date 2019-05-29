@@ -33,6 +33,7 @@ using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -92,7 +93,7 @@ namespace ClassicUO
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private double _statisticsTimer;
-        private float _time;
+        private double _time;
         private int _totalFrames;
         private UIManager _uiManager;
 
@@ -203,7 +204,7 @@ namespace ClassicUO
 
         public static UltimaBatcher2D Batcher => _engine._batcher;
 
-        protected float IntervalFixedUpdate { get; private set; }
+        protected double IntervalFixedUpdate { get; private set; }
 
         public static int FpsLimit
         {
@@ -220,7 +221,7 @@ namespace ClassicUO
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
 
-                    _engine.IntervalFixedUpdate = 1000.0f / _fpsLimit;
+                    _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
                 }
             }
         }
@@ -786,22 +787,21 @@ namespace ClassicUO
             // ###############################
             Profiler.ExitContext("Update");
 
-            _time += (float) framems;
+            _time += framems;
 
-            if (_time > IntervalFixedUpdate)
+            if (_time >= IntervalFixedUpdate)
             {
                 _time %= IntervalFixedUpdate;
                 Profiler.EnterContext("FixedUpdate");
                 OnFixedUpdate(totalms, framems);
                 Profiler.ExitContext("FixedUpdate");
-
-                
             }
             else
             {
                 SuppressDraw();
             }
 
+            DisposedObjectManager<GameObject>.Update();
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }

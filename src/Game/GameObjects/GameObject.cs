@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
-
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -257,6 +257,8 @@ namespace ClassicUO.Game.GameObjects
             OverheadMessageContainer?.Destroy();
 
             Texture = null;
+
+            DisposedObjectManager<GameObject>.Add(this);
         }
     }
 }

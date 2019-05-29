@@ -167,6 +167,7 @@
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Renderer\UI\UIControl.cs" />
     <Compile Include="Renderer\UI\UISystemManager.cs" />
+    <Compile Include="Utility\DisposedObjectManager.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
