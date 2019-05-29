@@ -257,8 +257,6 @@ namespace ClassicUO.Game.GameObjects
             OverheadMessageContainer?.Destroy();
 
             Texture = null;
-
-            DisposedObjectManager<GameObject>.Add(this);
         }
     }
 }

@@ -801,7 +801,6 @@ namespace ClassicUO
                 SuppressDraw();
             }
 
-            DisposedObjectManager<GameObject>.Update();
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }
