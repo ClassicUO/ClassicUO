@@ -1031,11 +1031,16 @@ namespace ClassicUO.IO.Resources
 
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
+            ANIMATION_FLAGS flags = (ANIMATION_FLAGS)DataIndex[id].Flags;
+
             switch (DataIndex[id].Type)
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
-                    return (byte) (second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
+                    if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0)
+                        return 2;
+
+                    return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
                 {
@@ -1056,12 +1061,13 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public bool AnimationExists(ushort graphic, byte group)
+        public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true).Direction[0];
+                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue).Direction[0] : 
+                                                          FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true).Direction[0];
 
 
                 return direction.Address != 0 && direction.Size != 0 ||
