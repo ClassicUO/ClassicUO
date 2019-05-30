@@ -124,6 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _direction = value;
                     _delta |= Delta.Position;
+                    OnDirectionChanged();
                 }
             }
         }

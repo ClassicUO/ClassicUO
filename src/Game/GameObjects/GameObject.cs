@@ -242,7 +242,9 @@ namespace ClassicUO.Game.GameObjects
         protected virtual void OnPositionChanged()
         {
         }
-
+        protected virtual void OnDirectionChanged()
+        {
+        }
 
         public virtual void Destroy()
         {
