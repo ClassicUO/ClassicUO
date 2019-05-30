@@ -51,9 +51,7 @@ namespace ClassicUO.Configuration
         }
 
         [JsonProperty] public string Username { get; }
-
         [JsonProperty] public string ServerName { get; }
-
         [JsonProperty] public string CharacterName { get; }
 
         // sounds
@@ -110,17 +108,13 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
-
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
-
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
         [JsonProperty] public bool EnableScaleZoom { get; set; }
         [JsonProperty] public bool SaveScaleAfterClose { get; set; }
         [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; }
-
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
-
         [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
         [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
 
@@ -149,7 +143,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
-
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
         [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
@@ -164,12 +157,13 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
         [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
-        
         [JsonProperty] public bool AutoOpenDoors { get; set; } = false;
         [JsonProperty] public bool AutoOpenCorpses { get; set; } = false;
         [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
-
-        
+        [JsonProperty] public bool DisableDefaultHotkeys { get; set; } = false;
+        [JsonProperty] public bool DisableArrowBtn { get; set; } = false;
+        [JsonProperty] public bool DisableTabBtn { get; set; } = false;
+        [JsonProperty] public bool DisableCtrlQWBtn { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

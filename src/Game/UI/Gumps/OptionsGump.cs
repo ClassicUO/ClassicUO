@@ -56,8 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
         private TextBox _autoOpenCorpseRange;
+        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -917,10 +918,13 @@ namespace ClassicUO.Game.UI.Gumps
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
             _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
-            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
-            var item = new ScrollAreaItem();
 
-            _autoOpenCorpseRange = CreateInputField(item,new TextBox(FONT, 2, 80, 80, true)
+            _autoOpenCorpseArea = new ScrollAreaItem();
+
+            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
+            _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
+
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80, true)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height - 15,
@@ -929,9 +933,54 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true,
                 Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
-            rightArea.Add(item);
-            
+
+            rightArea.Add(_autoOpenCorpseArea);
+
+            // [BLOCK] disable hotkeys
+            {
+                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT, true)
+                {
+                    Y = 0,
+                    IsChecked = Engine.Profile.Current.DisableDefaultHotkeys
+                };
+                _disableDefaultHotkeys.ValueChanged += (sender, e) => { _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked; };
+
+                rightArea.Add(_disableDefaultHotkeys);
+
+                _defaultHotkeysArea = new ScrollAreaItem();
+
+                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 15,
+                    IsChecked = Engine.Profile.Current.DisableArrowBtn
+                };
+                _defaultHotkeysArea.Add(_disableArrowBtn);
+
+                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 35,
+                    IsChecked = Engine.Profile.Current.DisableTabBtn
+                };
+                _defaultHotkeysArea.Add(_disableTabBtn);
+
+                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT, true)
+                {
+                    X = 20,
+                    Y = 55,
+                    IsChecked = Engine.Profile.Current.DisableCtrlQWBtn
+                };
+                _defaultHotkeysArea.Add(_disableCtrlQWBtn);
+
+                rightArea.Add(_defaultHotkeysArea);
+
+                _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
+            }
+
             Add(rightArea, PAGE);
+
+            _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
         }
 
         private void BuildNetwork()
@@ -991,8 +1040,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
-
-                    //_smoothMovements.IsChecked = true;
                     _enablePathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
@@ -1009,8 +1056,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _fieldsType.SelectedIndex = 0;
                     _vendorGumpSize.Text = "60";
                     _useStandardSkillsGump.IsChecked = true;
-
                     break;
+
                 case 2: // sounds
                     _enableSounds.IsChecked = true;
                     _enableMusic.IsChecked = true;
@@ -1023,8 +1070,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _loginMusic.IsChecked = true;
                     _soundsVolume.IsVisible = _enableSounds.IsChecked;
                     _musicVolume.IsVisible = _enableMusic.IsChecked;
-
                     break;
+
                 case 3: // video
                     _debugControls.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
@@ -1051,18 +1098,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
-
                     break;
+
                 case 4: // commands
-
                     break;
+
                 case 5: // tooltip
-
                     break;
+
                 case 6: // fonts
                     _fontSelectorChat.SetSelectedFont(0);
-
                     break;
+
                 case 7: // speech
                     _scaleSpeechDelay.IsChecked = true;
                     _sliderSpeechDelay.Value = 100;
@@ -1071,19 +1118,16 @@ namespace ClassicUO.Game.UI.Gumps
                     _partyMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _guildMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
-
                     _chatAfterEnter.IsChecked = false;
-
                     Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
-
                     _chatIgnodeHotkeysCheckbox.IsChecked = true;
                     _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
                     _saveJournalCheckBox.IsChecked = false;
-
                     break;
+
                 case 8: // combat
                     _innocentColorPickerBox.SetColor(0x005A, FileManager.Hues.GetPolygoneColor(12, 0x005A));
                     _friendColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
@@ -1093,7 +1137,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
                     _castSpellsByOneClick.IsChecked = false;
-
                     _beneficColorPickerBox.SetColor(0x0059, FileManager.Hues.GetPolygoneColor(12, 0x0059));
                     _harmfulColorPickerBox.SetColor(0x0020, FileManager.Hues.GetPolygoneColor(12, 0x0020));
                     _neutralColorPickerBox.SetColor(0x03B1, FileManager.Hues.GetPolygoneColor(12, 0x03B1));
@@ -1101,6 +1144,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;
                     break;
+
                 case 9:
                     _enableCounters.IsChecked = false;
                     _highlightOnUse.IsChecked = false;
@@ -1109,15 +1153,18 @@ namespace ClassicUO.Game.UI.Gumps
                     _cellSize.Value = 40;
                     _highlightOnAmount.IsChecked = false;
                     _highlightAmount.Text = "5";
-
                     break;
 
                 case 10:
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
-
+                    _disableDefaultHotkeys.IsChecked = false;
+                    _disableArrowBtn.IsChecked = false;
+                    _disableTabBtn.IsChecked = false;
+                    _disableCtrlQWBtn.IsChecked = false;
                     break;
+
                 case 11:
                     _showNetStats.IsChecked = false;
                     break;
@@ -1411,6 +1458,22 @@ namespace ClassicUO.Game.UI.Gumps
             // experimental
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
+
+            Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
+            Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
+            Engine.Profile.Current.DisableCtrlQWBtn = _disableTabBtn.IsChecked;
+
+            if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
+            {
+                if (!_debugGumpIsDisabled.IsChecked)
+                {
+                    Engine.Profile.Current.DisableArrowBtn = false;
+                    Engine.Profile.Current.DisableTabBtn = false;
+                    Engine.Profile.Current.DisableCtrlQWBtn = false;
+                }
+
+                Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
+            }
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {

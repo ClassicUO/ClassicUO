@@ -577,10 +577,13 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
-            else if (_arrowKeyPressed)
-                MoveCharacterByKeyboardInput(false);
-            else if (_numPadKeyPressed)
-                MoveCharacterByKeyboardInput(true);
+            else if (!Engine.Profile.Current.DisableArrowBtn || _isMacroMoveDown)
+            {
+                if (_arrowKeyPressed)
+                    MoveCharacterByKeyboardInput(false);
+                else if (_numPadKeyPressed)
+                    MoveCharacterByKeyboardInput(true);
+            }
 
             if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
             {
@@ -615,7 +618,6 @@ namespace ClassicUO.Game.Scenes
 
             _useItemQueue.Update(totalMS, frameMS);
 
-
             if (!IsMouseOverViewport)
                 Game.SelectedObject.Object = Game.SelectedObject.LastObject = null;
             else
@@ -643,8 +645,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
-                            //X = ((Engine.Profile.Current.GameWindowSize.X - Engine.Profile.Current.GameWindowPosition.X) >> 1) - 50,
-                            //Y = ((Engine.Profile.Current.GameWindowSize.Y - Engine.Profile.Current.GameWindowPosition.Y) >> 1) - 50,
                             X = (Engine.WindowWidth >> 1) - 50,
                             Y = (Engine.WindowHeight >> 1) - 50
                         });
@@ -659,8 +659,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             DrawWorld(batcher);
-
-
+             
             Game.SelectedObject.LastObject = Game.SelectedObject.Object;
 
             return base.Draw(batcher);
