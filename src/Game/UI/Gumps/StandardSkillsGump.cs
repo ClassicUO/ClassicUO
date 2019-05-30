@@ -42,13 +42,14 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class StandardSkillsGump : Gump
     {
-
+        private SkillNameComparer _instance = new SkillNameComparer();
         private ExpandableScroll _scrollArea;
         private GumpPic _bottomLine, _bottomComment;
         private ScrollArea _container;
         private SkillControl[] _allSkillControls;
         private Label _skillsLabelSum;
         private Button _newGroupButton;
+        internal Checkbox _checkReal, _checkCaps;
 
         private List<MultiSelectionShrinkbox> _boxes = new List<MultiSelectionShrinkbox>();
 
@@ -67,35 +68,33 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_scrollArea);
 
+            Add(new GumpPic(50, 35, 0x082B, 0));
+            Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0));
+            Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0));
 
-            Label text = new Label("Show:   Real    Cap", false, 0x0386, 180, 1)
-            {
-                X = 30,
-                Y = 33
-            };
-            Add(text);
-            Add(new GumpPic(40, 60, 0x082B, 0));
-            Add(_bottomLine = new GumpPic(40, Height - 98, 0x082B, 0));
-            Add(_bottomComment = new GumpPic(40, Height - 85, 0x0836, 0));
-
-            _container = new ScrollArea(25, 60 + _bottomLine.Height - 2, _scrollArea.Width - 14,
-                _scrollArea.Height - 98, false) {AcceptMouseInput = true, CanMove = true};
+            _container = new ScrollArea(22, 45 + _bottomLine.Height - 10, _scrollArea.Width - 14,
+                _scrollArea.Height - 83, false) {AcceptMouseInput = true, CanMove = true};
             Add(_container);
+            Add(_skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3) { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 });
 
-
+            //new group
             Add(_newGroupButton = new Button(0, 0x083A, 0x083A, 0x083A)
             {
                 X = 60,
-                Y = Height - 3,
+                Y = Height,
                 ContainsByBounds = true,
                 ButtonAction = ButtonAction.Activate,
             });
+            Add(_checkReal = new Checkbox(0x938, 0x939, " - Show Real", 1, 0x0386, false) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 });
+            Add(_checkCaps = new Checkbox(0x938, 0x939, " - Show Caps", 1, 0x0386, false) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
+            _checkReal.ValueChanged += UpdateGump;
+            _checkCaps.ValueChanged += UpdateGump;
 
             _allSkillControls = new SkillControl[FileManager.Skills.SkillsCount];
 
             foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
             {
-                AddSkillsToGroup(k.Key, k.Value);
+                AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
             }
         }
 
@@ -162,8 +161,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bottomLine.Y =  Height - 98;
             _bottomComment.Y = Height - 85;
-            _container.Height = Height - 170;
-            _newGroupButton.Y = Height - 55;
+            _container.Height = Height - 150;
+            _newGroupButton.Y = Height - 52;
+            _skillsLabelSum.Y = _bottomComment.Y + 2;
+            _checkReal.Y = _newGroupButton.Y - 6;
+            _checkCaps.Y = _newGroupButton.Y + 7;
 
             _container.ForceUpdate();
 
@@ -173,7 +175,18 @@ namespace ClassicUO.Game.UI.Gumps
         public void Update(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex]?.UpdateSkillValue();
+                _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetControl<StandardSkillsGump>());
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+        }
+
+        private void UpdateGump(object sender, EventArgs e)
+        {
+            StandardSkillsGump skg = Engine.UI.GetControl<StandardSkillsGump>();
+            for (int i = 0; i<_allSkillControls.Length; i++)
+            {
+                _allSkillControls[i]?.UpdateSkillValue(skg);
+            }
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
         public override void Save(BinaryWriter writer)
@@ -205,6 +218,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private class SkillNameComparer : IComparer<int>
+        {
+            public SkillNameComparer()
+            {
+            }
+
+            public int Compare(int x, int y)
+            {
+                return FileManager.Skills.SkillNames[x].CompareTo(FileManager.Skills.SkillNames[y]);
+            }
+        }
 
         class SkillControl : Control
         {
@@ -233,7 +257,6 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 12
                 };
                 Add(label);
-
 
                 _labelValue = new Label(skill.Value.ToString("F1"), false, 0x0288, maxwidth: maxWidth - 10, font: 9, align: TEXT_ALIGN_TYPE.TS_RIGHT);
                 Add(_labelValue);
@@ -386,11 +409,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            public void UpdateSkillValue()
+            public void UpdateSkillValue(StandardSkillsGump skg)
             {
                 Skill skill = World.Player.Skills[_skillIndex];
                 if (skill != null)
-                    _labelValue.Text = skill.Value.ToString("F1");
+                    _labelValue.Text = (skg == null || skg._checkCaps.IsChecked ? skill.Cap : (skg._checkReal.IsChecked ? skill.Base : skill.Value)).ToString("F1");
             }
         }
     }

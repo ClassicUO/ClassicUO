@@ -141,14 +141,16 @@ namespace ClassicUO.Game.Managers
                             strlen *= 2;
                         }
 
-                        List<string> groups = new List<string>();
-                        groups.Add("Miscellaneous");
+                        List<string> groups = new List<string>
+                        {
+                            "Miscellaneous"
+                        };
                         Groups.Add("Miscellaneous", new List<int>());
+                        StringBuilder sb = new StringBuilder(17);
                         for (int i = 0; i < count - 1; ++i)
                         {
-                            int strbuild;
-                            fs.Seek((long)(start + (i * strlen)), SeekOrigin.Begin);
-                            StringBuilder sb = new StringBuilder(17);
+                            short strbuild;
+                            fs.Seek(start + (i * strlen), SeekOrigin.Begin);
                             if (unicode)
                             {
                                 while ((strbuild = bin.ReadInt16()) != 0)
@@ -161,8 +163,9 @@ namespace ClassicUO.Game.Managers
                             }
                             groups.Add(sb.ToString());
                             Groups.Add(sb.ToString(), new List<int>());
+                            sb.Clear();
                         }
-                        fs.Seek((long)(start + ((count - 1) * strlen)), SeekOrigin.Begin);
+                        fs.Seek(start + ((count - 1) * strlen), SeekOrigin.Begin);
                         while (bin.BaseStream.Length != bin.BaseStream.Position)
                         {
                             int grp = bin.ReadInt32();
