@@ -36,11 +36,20 @@ namespace ClassicUO.Utility
 
             Dictionary<string, string> dict = new Dictionary<string, string>();
 
-            foreach (PropertyInfo prop in props)
+            if (props != null)
             {
-                object value = prop.GetValue(obj, null);
+                foreach (PropertyInfo prop in props)
+                {
+                    if (prop.PropertyType.IsByRef)
+                    {
+                    }
+                    else
+                    {
+                        object value = prop.GetValue(obj, null);
 
-                dict[prop.Name] = value == null ? "null" : value.ToString();
+                        dict[prop.Name] = value == null ? "null" : value.ToString();
+                    }
+                }
             }
 
             return dict;

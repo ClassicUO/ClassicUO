@@ -306,12 +306,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 int index = -1;
                                 foreach (SkillControl skillControl in box.Items.OfType<SkillControl>())
                                 {
-                                    if (skillControl._skillIndex < _skillIndex)
+                                    index++;
+
+                                    if (skillControl._skillIndex > _skillIndex)
                                     {
-                                        index++;
-                                    }
-                                    else
                                         break;
+                                    }
+
                                 }
 
                                 _parent.Remove(this);
@@ -328,6 +329,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                         p = p.Parent;
                     }
+                }
+
+                if (!(c.RootParent is StandardSkillsGump))
+                {
+                    uint serial = (uint)(World.Player + _skillIndex + 1);
+
+                    if (Engine.UI.GetControl<SkillButtonGump>(serial) != null)
+                        Engine.UI.Remove<SkillButtonGump>(serial);
+
+                    SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);
+                    Engine.UI.Add(skillButtonGump);
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
+                    Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
                 }
 
                 base.OnMouseOver(x, y);
