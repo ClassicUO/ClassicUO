@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
         private bool _isCtrlDown;
 
         private bool _isShiftDown;
-        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         private Action _queuedAction;
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
@@ -184,7 +184,6 @@ namespace ClassicUO.Game.Scenes
                         case Mobile mobile:
                             // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
                             MergeHeldItem(mobile);
-
                             break;
 
                         case Item item:
@@ -293,29 +292,24 @@ namespace ClassicUO.Game.Scenes
                 case Item item:
                     e.Result = true;
                     GameActions.DoubleClick(item);
-
                     break;
 
                 case Mobile mob:
                     e.Result = true;
-
                     if (World.Player.InWarMode && World.Player != mob)
                         GameActions.Attack(mob);
                     else
                         GameActions.DoubleClick(mob);
-
                     break;
 
                 case MessageInfo msg when msg.Parent.Parent is Entity entity:
                     e.Result = true;
                     GameActions.DoubleClick(entity);
-
                     break;
             }
 
             ClearDequeued();
         }
-
 
         // RIGHT
         private void OnRightMouseDown(object sender, EventArgs e)
@@ -367,7 +361,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         // MOUSE MOVING
         private void OnMouseMoving(object sender, EventArgs e)
         {
@@ -409,7 +402,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         // MOUSE WHEEL
         private void OnMouseWheel(object sender, bool e)
         {
@@ -427,7 +419,6 @@ namespace ClassicUO.Game.Scenes
             if (Engine.Profile.Current.SaveScaleAfterClose)
                 Engine.Profile.Current.ScaleZoom = Scale;
         }
-
 
         // MOUSE DRAG
         private void OnMouseDragBegin(object sender, EventArgs e)
@@ -467,16 +458,23 @@ namespace ClassicUO.Game.Scenes
             //}
         }
 
-
-
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
             _isShiftDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
             _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
-            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP;
-            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN;
-            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT;
-            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT;
+
+            _isMacroMoveDown = _isMacroMoveDown || (macro != null && macro.FirstNode.Code == MacroType.MovePlayer);
+            _isAuraActive = _isAuraActive || (macro != null && macro.FirstNode.Code == MacroType.Aura);
+            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || (macro != null && macro.FirstNode.SubCode == MacroSubType.Top);
+            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || (macro != null && macro.FirstNode.SubCode == MacroSubType.Down);
+            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || (macro != null && macro.FirstNode.SubCode == MacroSubType.Left);
+            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT || (macro != null && macro.FirstNode.SubCode == MacroSubType.Right);
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
@@ -484,18 +482,19 @@ namespace ClassicUO.Game.Scenes
                     _arrowKeyPressed = true;
             }
 
+            if (_isAuraActive && !Engine.AuraManager.IsEnabled)
+                Engine.AuraManager.ToggleVisibility();
+
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
             if (Engine.Profile.Current.ActivateChatAfterEnter)
             {
-                // Activate chat after `Enter` pressing, 
-                // If chat active - ignores hotkeys from cuo
                 if (Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
                     return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
                     GameActions.SetWarMode(true);
@@ -503,28 +502,19 @@ namespace ClassicUO.Game.Scenes
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
-                
                 if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
                 {
                     _numPadKeyPressed = true;
                     _numPadDirection = dWalkN;
                 }
-                //if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                //    World.Player.Walk(dWalkN, true);
             }
-
-            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             _useObjectHandles = isshift && isctrl;
 
             if (_useObjectHandles)
                 NameOverHeadManager.Open();
-            else 
+            else
                 NameOverHeadManager.Close();
-
-            Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
             if (macro != null)
             {
@@ -565,6 +555,40 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
+            if (_isAuraActive)
+            {
+                _isAuraActive = false;
+                Engine.AuraManager.ToggleVisibility();
+            }
+
+            if (_isMacroMoveDown)
+            {
+                Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+                if (macro == null)
+                    _isMacroMoveDown = _arrowKeyPressed = false;
+                else
+                {
+                    switch (macro.FirstNode.SubCode)
+                    {
+                        case MacroSubType.Top:
+                            _isUpDown = false;
+                            break;
+
+                        case MacroSubType.Down:
+                            _isDownDown = false;
+                            break;
+
+                        case MacroSubType.Left:
+                            _isLeftDown = false;
+                            break;
+
+                        case MacroSubType.Right:
+                            _isRightDown = false;
+                            break;
+                    }
+                }
+            }
+
             if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown))
             {
                 _arrowKeyPressed = false;
@@ -577,7 +601,7 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {

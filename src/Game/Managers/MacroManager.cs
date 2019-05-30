@@ -66,8 +66,6 @@ namespace ClassicUO.Game.Managers
         private MacroObject _lastMacro;
         private long _nextTimer;
 
-        private WorldViewportGump viewport;
-
         public MacroManager(Macro[] macros)
         {
             if (macros != null)
@@ -926,6 +924,29 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ToggleChatVisibility:
                     Engine.UI.SystemChat?.ToggleChatVisibility();
                     break;
+
+                case MacroType.MovePlayer:
+                    switch (macro.SubCode)
+                    {
+                        case MacroSubType.Top:
+                            break;
+                        case MacroSubType.Right:
+                            break;
+                        case MacroSubType.Down:
+                            break;
+                        case MacroSubType.Left:
+                            break;
+                    }
+                    break;
+
+                case MacroType.Aura:
+                    // hold to draw
+                    break;
+
+                case MacroType.AuraOnOff:
+                    Engine.AuraManager.ToggleVisibility();
+                    break;
+
             }
 
 
@@ -1020,42 +1041,46 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Walk:
                     offset = (int) MacroSubType.NW;
                     count = (int) MacroSubType.Configuration - (int) MacroSubType.NW;
-
                     break;
+
                 case MacroType.Open:
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
                     offset = (int) MacroSubType.Configuration;
                     count = (int) MacroSubType.Anatomy - (int) MacroSubType.Configuration;
-
                     break;
+
                 case MacroType.UseSkill:
                     offset = (int) MacroSubType.Anatomy;
                     count = (int) MacroSubType.LeftHand - (int) MacroSubType.Anatomy;
-
                     break;
+
                 case MacroType.ArmDisarm:
                     offset = (int) MacroSubType.LeftHand;
                     count = (int) MacroSubType.Honor - (int) MacroSubType.LeftHand;
-
                     break;
+
                 case MacroType.InvokeVirtue:
                     offset = (int) MacroSubType.Honor;
                     count = (int) MacroSubType.Clumsy - (int) MacroSubType.Honor;
-
                     break;
+
                 case MacroType.CastSpell:
                     offset = (int) MacroSubType.Clumsy;
                     count = (int) MacroSubType.Hostile - (int) MacroSubType.Clumsy;
-
                     break;
+
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                     offset = (int) MacroSubType.Hostile;
                     count = (int) MacroSubType.MscTotalCount - (int) MacroSubType.Hostile;
+                    break;
 
+                case MacroType.MovePlayer:
+                    offset = (int)MacroSubType.Top;
+                    count = 4;
                     break;
             }
         }
@@ -1084,6 +1109,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
+                case MacroType.MovePlayer:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -1205,7 +1231,10 @@ namespace ClassicUO.Game.Managers
         BandageTarget,
         ToggleGargoyleFly,
         DefaultScale,
-        ToggleChatVisibility
+        ToggleChatVisibility,
+        MovePlayer,
+        Aura,
+        AuraOnOff
     }
 
     internal enum MacroSubType
@@ -1421,6 +1450,10 @@ namespace ClassicUO.Game.Managers
         Follower,
         Object,
         Mobile,
-        MscTotalCount
+        MscTotalCount,
+        Top,
+        Right,
+        Down,
+        Left
     }
 }
