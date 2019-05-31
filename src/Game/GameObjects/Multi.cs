@@ -53,10 +53,18 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetY { get; set; }
         public int MultiOffsetZ { get; set; }
 
-        public ref readonly StaticTiles ItemData
+
+        private StaticTiles? _itemData;
+        public StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref FileManager.TileData.StaticData[Graphic];
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = FileManager.TileData.StaticData[Graphic];
+
+                return _itemData.Value;
+            }
         }
     }
 }

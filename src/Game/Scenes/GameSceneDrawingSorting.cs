@@ -382,11 +382,9 @@ namespace ClassicUO.Game.Scenes
             int dropMaxZIndex = -1;
 
 
-            if (entity is Mobile mob && mob.IsMoving)
+            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
             {
-                ref readonly var s = ref mob.Steps.Back();
-                if (s.Direction == 2)
-                    dropMaxZIndex = 0;
+                dropMaxZIndex = 0;
             }
 
             int[,] coordinates = new int[8, 2];

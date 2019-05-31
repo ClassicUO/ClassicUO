@@ -167,9 +167,9 @@ namespace ClassicUO.Utility
         /// </summary>
         /// <param name="index">The zero-based view index of the element to get. This index is guaranteed to be valid.</param>
         /// <returns>The element at the specified index.</returns>
-        private ref T DoGetItem(int index)
+        private T DoGetItem(int index)
         {
-            return ref _buffer[DequeIndexToBufferIndex(index)];
+            return _buffer[DequeIndexToBufferIndex(index)];
         }
 
         /// <summary>
@@ -578,14 +578,14 @@ namespace ClassicUO.Utility
             }
         }
 
-        public ref T Front()
+        public T Front()
         {
-            return ref DoGetItem(0);
+            return DoGetItem(0);
         }
 
-        public ref T Back()
+        public T Back()
         {
-            return ref DoGetItem(Count - 1);
+            return DoGetItem(Count - 1);
         }
 
         /// <summary>

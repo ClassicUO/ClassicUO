@@ -184,12 +184,20 @@ namespace ClassicUO.Game.GameObjects
         
         public bool CharacterIsBehindFoliage { get; set; }
 
-        public ref readonly StaticTiles ItemData
+
+        private StaticTiles? _itemData;
+        public StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-        }
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
 
+                return _itemData.Value;
+            }
+        }
+        
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
         {
             Item item = null;
@@ -307,6 +315,8 @@ namespace ClassicUO.Game.GameObjects
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {
+            _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+
             if (!IsMulti)
             {
                 if (!IsCorpse)

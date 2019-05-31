@@ -44,11 +44,18 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
+        private LandTiles? _tileData;
 
-        public ref readonly LandTiles TileData
+        public  LandTiles TileData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref FileManager.TileData.LandData[Graphic];
+            get
+            {
+                if (!_tileData.HasValue)
+                    _tileData = FileManager.TileData.LandData[Graphic];
+
+                return _tileData.Value;
+            }
         }
 
         public sbyte MinZ { get; set; }

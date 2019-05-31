@@ -396,7 +396,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly Step step = ref Steps.Back();
+                Step step = Steps.Back();
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -545,8 +545,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (IsMounted)
                     {
-                        ref readonly Step s = ref Steps.Back();
-                        if (s.Run)
+                        if (Steps.Back().Run)
                         {
                             soundID = 0x0129;
                             delaySound = 150;
@@ -591,7 +590,7 @@ namespace ClassicUO.Game.GameObjects
 
                 do
                 {
-                    ref readonly Step step = ref Steps.Front();
+                    Step step = Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
