@@ -62,8 +62,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int) Layer.Beard && s.ItemData.Layer != (int) Layer.Face))
                 //FIXME: this should be disabled. Server sends the right position
+            {
                 //CheckItemPosition(i);
                 Add(new ItemGump(i));
+            }
         }
 
         public Graphic Graphic { get; }
@@ -234,6 +236,12 @@ namespace ClassicUO.Game.UI.Gumps
                 x = _data.Bounds.X;
                 y = _data.Bounds.Y;
             }
+
+            if (x < 0)
+                x = 0;
+
+            if (y < 0)
+                y = 0;
 
             if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
         }
