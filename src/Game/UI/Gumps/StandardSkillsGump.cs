@@ -336,9 +336,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (CanMove)
                     return;
 
-                var c = Engine.UI.MouseOverControl ?? Parent;
+                var c = Engine.UI.MouseOverControl;
 
-                if (c != this)
+                if (c != null && c != this)
                 {
                     var p = c.Parent;
 
@@ -378,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (!(c.RootParent is StandardSkillsGump))
+                if (c == null || !(c.RootParent is StandardSkillsGump))
                 {
                     uint serial = (uint)(World.Player + _skillIndex + 1);
 
