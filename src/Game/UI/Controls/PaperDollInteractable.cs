@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
         private static readonly Layer[] _layerOrder =
         {
             Layer.Cloak, Layer.Ring, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs,
-            Layer.Torso, Layer.Arms, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Tunic, Layer.Skirt, Layer.Necklace,
+            Layer.Arms, Layer.Torso, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Tunic, Layer.Skirt, Layer.Necklace,
             Layer.Hair, Layer.Robe, Layer.Earrings, Layer.Beard, Layer.Helmet, Layer.Waist, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 

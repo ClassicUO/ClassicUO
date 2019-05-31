@@ -532,8 +532,8 @@ namespace ClassicUO.Game.GameObjects
                         tunic = mobile.Equipment[(int) Layer.Tunic];
                         Item torso = mobile.Equipment[(int) Layer.Torso];
 
-                        if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
-                            return true;
+                        //if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
+                        //    return true;
 
                         if (torso != null && (torso.Graphic == 0x782A || torso.Graphic == 0x782B))
                             return true;
