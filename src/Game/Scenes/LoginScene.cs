@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Scenes
                 if (_reconnectTime < totalMS)
                 {
                     if (!string.IsNullOrEmpty(Account))
-                        Connect(Account, Password);
+                        Connect(Account, Crypter.Decrypt(Engine.GlobalSettings.Password));
                     else if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                         Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
 
