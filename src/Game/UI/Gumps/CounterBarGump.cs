@@ -195,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.Write((byte) 1);
+            writer.Write((byte) 2);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -204,7 +204,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(controls.Length);
 
-            foreach (CounterItem c in controls) writer.Write(c.Graphic);
+            foreach (CounterItem c in controls)
+            {
+                writer.Write(c.Graphic);
+                writer.Write(c.Hue);
+            }
         }
 
         public override void Restore(BinaryReader reader)
@@ -222,7 +226,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             CounterItem[] items = GetControls<CounterItem>();
 
-            for (int i = 0; i < count; i++) items[i].SetGraphic(reader.ReadUInt16());
+            for (int i = 0; i < count; i++)
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
 
             IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
         }
@@ -234,6 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
             private int _amount;
             private TextureControl _controlPic;
             private Graphic _graphic;
+            private Hue _hue;
             private uint _time;
 
 
@@ -250,14 +256,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             public ushort Graphic => _graphic;
+            public ushort Hue => _hue;
 
-
-            public void SetGraphic(ushort graphic)
+            public void SetGraphic(ushort graphic, ushort hue)
             {
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
+                _hue = hue;
 
                 _controlPic?.Dispose();
 
@@ -265,6 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ScaleTexture = true,
                     Texture = FileManager.Art.GetTexture(_graphic),
+                    Hue = hue,
                     //Hue = gs.HeldItem.Hue,
                     //IsPartial = gs.HeldItem.IsPartialHue,
                     Width = Width,
@@ -288,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (item == null)
                         return;
 
-                    SetGraphic(gs.HeldItem.Graphic);
+                    SetGraphic(gs.HeldItem.Graphic, gs.HeldItem.Hue);
 
                     gs.DropHeldItemToContainer(item, gs.HeldItem.Position.X, gs.HeldItem.Position.Y);
                 }
@@ -324,20 +332,20 @@ namespace ClassicUO.Game.UI.Gumps
                     _time = (uint) Engine.Ticks + 100;
 
                     _amount = 0;
-                    GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, ref _amount);
+                    GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, _hue, ref _amount);
                 }
             }
 
-            private static void GetAmount(Item parent, Graphic graphic, ref int amount)
+            private static void GetAmount(Item parent, Graphic graphic, Hue hue, ref int amount)
             {
                 if (parent == null)
                     return;
 
                 foreach (Item item in parent.Items)
                 {
-                    GetAmount(item, graphic, ref amount);
+                    GetAmount(item, graphic, hue, ref amount);
 
-                    if (item.Graphic == graphic)
+                    if (item.Graphic == graphic && item.Hue == hue)
                         amount += item.Amount;
                 }
             }
