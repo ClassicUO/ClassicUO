@@ -2193,7 +2193,7 @@ namespace ClassicUO.Game.GameObjects
                 case Direction.Up:    --x; --y;  break;
             }
         }
-        private List<Serial> OpenedCorpses = new List<Serial>();
+        private readonly List<Serial> OpenedCorpses = new List<Serial>();
 #if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
