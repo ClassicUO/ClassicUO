@@ -336,7 +336,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (CanMove)
                     return;
 
-                var c = Engine.UI.MouseOverControl;
+                var c = Engine.UI.MouseOverControl ?? Parent;
+
                 if (c != this)
                 {
                     var p = c.Parent;
