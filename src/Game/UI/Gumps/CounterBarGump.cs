@@ -313,7 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (button == MouseButton.Left)
                 {
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
-                    Item item = backpack.FindItem(_graphic);
+                    Item item = backpack.FindItem(_graphic, _hue);
 
                     if (item != null)
                         GameActions.DoubleClick(item);
