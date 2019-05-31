@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -33,6 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _scrollArea;
         private readonly MultiLineBox _textBox;
         private readonly ExpandableScroll _scrollExp;
+        private readonly string _originalText;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
         {
@@ -53,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = FileManager.Fonts.GetHeightUnicode(1, body, 220, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 X = 35,
                 Y = 0,
-                Text = body
+                Text = _originalText = body
             };
             _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);
@@ -84,6 +86,15 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             // necessary to avoid closing
+        }
+
+        public override void Dispose()
+        {
+            if(_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
+            {
+                NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
+            }
+            base.Dispose();
         }
 
         public override void Update(double totalMS, double frameMS)

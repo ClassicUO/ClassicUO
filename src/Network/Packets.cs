@@ -716,13 +716,13 @@ namespace ClassicUO.Network
 
     internal sealed class PProfileUpdate : PacketWriter
     {
-        public PProfileUpdate(Serial serial, string text, int len) : base(0xB8)
+        public PProfileUpdate(Serial serial, string text) : base(0xB8)
         {
             WriteByte(1);
             WriteUInt(serial);
             WriteUShort(0x01);
-            WriteUShort((ushort) len);
-            WriteUnicode(text, len);
+            WriteUShort((ushort) text.Length);
+            WriteUnicode(text, text.Length);
         }
     }
 
