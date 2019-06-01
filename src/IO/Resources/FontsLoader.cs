@@ -714,8 +714,6 @@ namespace ClassicUO.IO.Resources
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
                 {
-                    Log.Message(LogTypes.Error, "You must set a string or width");
-
                     return null;
                 }
 
