@@ -51,14 +51,21 @@ namespace ClassicUO.Game
             _pickUpAction = onPickUpAction;
         }
 
-        public static void ToggleWarMode()
+        public static void ChangeWarMode(byte status = 0xFF)
         {
-            SetWarMode(!World.Player.InWarMode);
-        }
+            bool newStatus = !World.Player.InWarMode;
 
-        public static void SetWarMode(bool state)
-        {
-            Socket.Send(new PChangeWarMode(state));
+            if (status != 0xFF)
+            {
+                bool ok = status != 0;
+
+                if (World.Player.InWarMode == ok )
+                    return;
+
+                newStatus = ok;
+            }
+
+            Socket.Send(new PChangeWarMode(newStatus));
         }
 
         public static void OpenPaperdoll(Serial serial)

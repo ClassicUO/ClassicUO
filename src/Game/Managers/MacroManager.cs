@@ -258,7 +258,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.WarPeace:
-                    GameActions.ToggleWarMode();
+                    GameActions.ChangeWarMode();
 
                     break;
                 case MacroType.Paste:

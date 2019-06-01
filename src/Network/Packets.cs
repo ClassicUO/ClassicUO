@@ -301,9 +301,14 @@ namespace ClassicUO.Network
         public PChangeWarMode(bool state) : base(0x72)
         {
             WriteBool(state);
-            WriteByte(0x00); //always
-            WriteByte(0x32); //always
-            WriteByte(0x00); //always
+            WriteByte(0x32);
+            WriteByte(0);
+            WriteByte(0);
+        }
+
+        public PChangeWarMode(int state) : this(state != 0)
+        {
+
         }
     }
 

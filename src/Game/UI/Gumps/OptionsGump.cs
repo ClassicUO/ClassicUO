@@ -106,6 +106,24 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
 
+        private static SpriteTexture _logoTexture2D;
+        private static SpriteTexture LogoTexture
+        {
+            get
+            {
+                if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
+                {
+                    Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
+                    Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
+
+                    _logoTexture2D = new SpriteTexture(w, h);
+                    _logoTexture2D.SetData(pixels);
+                }
+
+                return _logoTexture2D;
+            }
+        }
+
         public OptionsGump() : base(0, 0)
         {
             Add(new AlphaBlendControl(0.05f)
@@ -116,22 +134,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = HEIGHT - 2
             });
 
-            Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
-            Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
-
+          
             TextureControl tc = new TextureControl
             {
                 X = 150 + ((WIDTH - 150 - 350) >> 1),
                 Y = (HEIGHT - 365) >> 1,
-                Width = w,
-                Height = h,
+                Width = LogoTexture.Width,
+                Height = LogoTexture.Height,
                 Alpha = 0.95f,
                 IsTransparent = true,
                 ScaleTexture = false,
-                Texture = new SpriteTexture(w, h)
+                Texture = LogoTexture
             };
 
-            tc.Texture.SetData(pixels);
             Add(tc);
 
             Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "General") {IsSelected = true, ButtonParameter = 1});

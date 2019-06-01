@@ -1174,7 +1174,7 @@ namespace ClassicUO.Network
                 if (Engine.Profile.Current.EnableDeathScreen)
                     World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
 
-                GameActions.SetWarMode(false);
+                GameActions.ChangeWarMode(0);
             }
         }
 

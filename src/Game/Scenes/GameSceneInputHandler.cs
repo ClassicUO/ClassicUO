@@ -33,6 +33,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -458,6 +459,8 @@ namespace ClassicUO.Game.Scenes
             //}
         }
 
+        private bool _requestedWarMode;
+
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
@@ -494,10 +497,17 @@ namespace ClassicUO.Game.Scenes
                     return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {
-                if (!World.Player.InWarMode && Engine.Profile.Current.HoldDownKeyTab)
-                    GameActions.SetWarMode(true);
+                if (Engine.Profile.Current.HoldDownKeyTab)
+                {
+                    if (!_requestedWarMode)
+                    {
+                        _requestedWarMode = true;
+                        //GameActions.ChangeWarMode(1);
+                        NetClient.Socket.Send(new PChangeWarMode(true));
+                    }
+                }
             }
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
@@ -531,7 +541,7 @@ namespace ClassicUO.Game.Scenes
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
             if (Engine.Profile.Current.EnableScaleZoom && Engine.Profile.Current.RestoreScaleAfterUnpressCtrl && _isCtrlDown && !isctrl)
-                Engine.SceneManager.GetScene<GameScene>().Scale = Engine.Profile.Current.RestoreScaleValue;
+                Scale = Engine.Profile.Current.RestoreScaleValue;
 
             _isShiftDown = isshift;
             _isCtrlDown = isctrl;
@@ -601,15 +611,21 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
-                    if (World.Player.InWarMode)
-                        GameActions.SetWarMode(false);
+                    if (_requestedWarMode)
+                    {
+                        //GameActions.ChangeWarMode(0);
+                        NetClient.Socket.Send(new PChangeWarMode(false));
+                        _requestedWarMode = false;
+                    }
                 }
                 else
-                    GameActions.ToggleWarMode();
+                {
+                    GameActions.ChangeWarMode();
+                }
             }
             else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Pathfinder.AutoWalking)
             {
