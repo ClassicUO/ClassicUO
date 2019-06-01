@@ -378,7 +378,7 @@ namespace ClassicUO.Game
             return resultZ != -128;
         }
 
-        private static void GetNewXY(byte direction, ref int x, ref int y)
+        public static void GetNewXY(byte direction, ref int x, ref int y)
         {
             switch (direction & 7)
             {

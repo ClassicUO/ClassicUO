@@ -42,7 +42,6 @@ namespace ClassicUO.Game.GameObjects
     internal class PlayerMobile : Mobile
     {
         private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
-        private readonly Skill[] _sklls;
         private ushort _damageIncrease;
         private ushort _damageMax;
         private ushort _damageMin;
@@ -93,16 +92,16 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(Serial serial) : base(serial)
         {
-            _sklls = new Skill[FileManager.Skills.SkillsCount];
+            Skills = new Skill[FileManager.Skills.SkillsCount];
 
-            for (int i = 0; i < _sklls.Length; i++)
+            for (int i = 0; i < Skills.Length; i++)
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
-                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
+                Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
         }
 
-        public Skill[] Skills => _sklls;
+        public Skill[] Skills { get; }
 
         public override bool InWarMode { get; set; }
 
@@ -777,9 +776,9 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
         {
-            if (id < _sklls.Length)
+            if (id < Skills.Length)
             {
-                Skill skill = _sklls[id];
+                Skill skill = Skills[id];
 
                 if (displayMessage && skill.ValueFixed != realValue)
                 {
@@ -801,9 +800,9 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkillLock(int id, Lock @lock)
         {
-            if (id < _sklls.Length)
+            if (id < Skills.Length)
             {
-                Skill skill = _sklls[id];
+                Skill skill = Skills[id];
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
 
@@ -1678,10 +1677,10 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Engine.Profile.Current.AutoOpenDoors)
             {
-                int x = Position.X, y = Position.Y, z = Position.Z;
-                Offset(Direction, ref x, ref y);
+                int x = X, y = Y, z = Z;
+                Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
                 if (World.Items.Any(s =>
-                    IsDoor(s.Graphic) && s.Position.X == x && s.Position.Y == y && s.Position.Z - 15 <= z &&
+                    IsDoor(s.Graphic) && s.X == x && s.Y == y && s.Z - 15 <= z &&
                     s.Position.Z + 15 >= z))
                 {                    
                     GameActions.OpenDoor();
@@ -2179,21 +2178,7 @@ namespace ClassicUO.Game.GameObjects
                 || (type >= 0x9AD7 && type <= 0x9AE6)
                 || (type >= 0x9B3C && type <= 0x9B4B);
         }
-        private static void Offset( Direction d, ref int x, ref int y )
-        {
-            switch ( d & Direction.Mask )
-            {
-                case Direction.North:		--y; break;
-                case Direction.South:		++y; break;
-                case Direction.West:  --x;		 break;
-                case Direction.East:  ++x;		 break;
-                case Direction.Right: ++x; --y;  break;
-                case Direction.Left:  --x; ++y;  break;
-                case Direction.Down:  ++x; ++y;  break;
-                case Direction.Up:    --x; --y;  break;
-            }
-        }
-        private readonly List<Serial> OpenedCorpses = new List<Serial>();
+        private readonly HashSet<Serial> OpenedCorpses = new HashSet<Serial>();
 #if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
