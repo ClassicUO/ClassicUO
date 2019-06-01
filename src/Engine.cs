@@ -204,7 +204,7 @@ namespace ClassicUO
 
         public static UltimaBatcher2D Batcher => _engine._batcher;
 
-        protected double IntervalFixedUpdate { get; private set; }
+        //protected double IntervalFixedUpdate { get; private set; }
 
         public static int FpsLimit
         {
@@ -221,7 +221,9 @@ namespace ClassicUO
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
 
-                    _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
+                    //_engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
+
+                    _engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
         }
@@ -593,7 +595,7 @@ namespace ClassicUO
         private static void Configure()
         {
             Log.Start(LogTypes.All);
-            ExePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            ExePath = Environment.CurrentDirectory; //Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -766,7 +768,7 @@ namespace ClassicUO
 
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (_currentFpsTime >= 1)
+            if (_currentFpsTime >= 1.0)
             {
                 CurrentFPS = _totalFrames;
 
@@ -787,19 +789,9 @@ namespace ClassicUO
             // ###############################
             Profiler.ExitContext("Update");
 
-            _time += framems;
-
-            if (_time >= IntervalFixedUpdate)
-            {
-                _time %= IntervalFixedUpdate;
-                Profiler.EnterContext("FixedUpdate");
-                OnFixedUpdate(totalms, framems);
-                Profiler.ExitContext("FixedUpdate");
-            }
-            else
-            {
-                SuppressDraw();
-            }
+            Profiler.EnterContext("FixedUpdate");
+            OnFixedUpdate(totalms, framems);
+            Profiler.ExitContext("FixedUpdate");
 
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
@@ -835,10 +827,6 @@ namespace ClassicUO
                     NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
                 }
             }
-
-            //_fnaBatcher2D.Begin();
-            //_fnaBatcher2D.Draw(Textures.GetTexture(Color.White), 100, 200, 100, 100, Color.CornflowerBlue);
-            //_fnaBatcher2D.End();
 
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
