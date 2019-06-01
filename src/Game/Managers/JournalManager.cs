@@ -30,19 +30,17 @@ namespace ClassicUO.Game.Managers
 {
     internal class JournalManager
     {
-        private readonly Deque<JournalEntry> _entries = new Deque<JournalEntry>();
-
-        public Deque<JournalEntry> Entries => _entries;
+        public Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>();
 
         public event EventHandler<JournalEntry> EntryAdded;
 
         public void Add(string text, Hue hue, string name, bool isunicode = true)
         {
-            if (_entries.Count >= 100)
-                _entries.RemoveFromFront();
+            if (Entries.Count >= 100)
+                Entries.RemoveFromFront();
 
             JournalEntry entry = new JournalEntry(text, (byte) (isunicode ? 0 : 9), hue, name, isunicode);
-            _entries.AddToBack(entry);
+            Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
             _fileWriter?.WriteLine($"{name}: {text}");
         }
@@ -70,12 +68,12 @@ namespace ClassicUO.Game.Managers
         private StreamWriter _fileWriter;
         public void Clear()
         {
-            _entries.Clear();
+            Entries.Clear();
             CreateWriter(false);
         }
     }
 
-    internal readonly struct JournalEntry
+    internal class JournalEntry
     {
         public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode)
         {
