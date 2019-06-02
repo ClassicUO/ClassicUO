@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            ref SpriteTexture t = ref _textures[INACTIVE];
+            SpriteTexture t = _textures[INACTIVE];
             Width = t.Width;
 
             _text = new RenderedText
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Controls
             Width += _text.Width;
 
             Height = Math.Max(t.Width, _text.Height);
-            CanMove = true;
+            CanMove = false;
             AcceptMouseInput = true;
         }
 
@@ -94,8 +94,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            foreach (SpriteTexture t in _textures)
+            for (int i = 0; i < _textures.Length; i++)
             {
+                SpriteTexture t = _textures[i];
+
                 if (t != null)
                     t.Ticks = (long) totalMS;
             }
@@ -122,9 +124,10 @@ namespace ClassicUO.Game.UI.Controls
             ValueChanged.Raise(this);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left) IsChecked = !IsChecked;
+            if (button == MouseButton.Left)
+                IsChecked = !IsChecked;
         }
 
         public override void Dispose()
