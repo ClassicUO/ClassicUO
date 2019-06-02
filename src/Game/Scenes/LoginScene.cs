@@ -425,7 +425,16 @@ namespace ClassicUO.Game.Scenes
                     if (Engine.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
-                            SelectServer((byte) Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
+                        {
+                            int index = Engine.GlobalSettings.LastServerNum;
+
+                            if (index <= 0 || index > Servers.Length)
+                            {
+                                index = 1;
+                            }
+
+                            SelectServer((byte) Servers[index - 1].Index);
+                        }
                     }
 
                     break;

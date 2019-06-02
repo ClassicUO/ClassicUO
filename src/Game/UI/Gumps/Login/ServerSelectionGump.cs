@@ -207,7 +207,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte) loginScene.Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
+                {
+                    int index = Engine.GlobalSettings.LastServerNum;
+
+                    if (index <= 0 || index > loginScene.Servers.Length)
+                    {
+                        index = 1;
+                    }
+
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                }
             }
         }
 
