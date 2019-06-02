@@ -481,7 +481,7 @@ namespace ClassicUO.Game.GameObjects
                     Item pants = mobile.Equipment[(int) Layer.Pants];
                     Item robe;
 
-                    if (mobile.Equipment[(int) Layer.Legs] != null || pants != null && pants.Graphic == 0x1411)
+                    if (mobile.Equipment[(int) Layer.Legs] != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
                         return true;
                     else
                     {
