@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         {
                             int index = Engine.GlobalSettings.LastServerNum;
 
-                            if (index < 0 || index > loginScene.Servers.Length)
+                            if (index <= 0 || index > loginScene.Servers.Length)
                             {
                                 index = 1;
                             }
