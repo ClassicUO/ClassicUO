@@ -89,8 +89,6 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public int SlotIndex { get; set; }
-
         public Mobile Mobile { get; set; }
 
         public override void Update(double totalMS, double frameMS)

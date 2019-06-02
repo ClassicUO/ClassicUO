@@ -34,8 +34,8 @@ namespace ClassicUO.Game.UI.Controls
         private static readonly Layer[] _layerOrder =
         {
             Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
-            Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Hair, Layer.Robe,
-            Layer.Waist, Layer.Necklace, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Backpack
+            Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist,
+            Layer.Necklace, Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded
         };
 
         private ItemGumpPaperdoll _backpackGump;
@@ -204,10 +204,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         switch (_layerOrder[i])
                         {
-                            case Layer.Beard:
                             case Layer.Hair:
+                                if (Mobile.IsCovered(_mobile, Layer.Hair))
+                                    continue;
+                                goto case Layer.Beard;
+                            case Layer.Beard:
                                 canPickUp = false;
-
                                 break;
 
                             case Layer.Arms:
@@ -217,7 +219,6 @@ namespace ClassicUO.Game.UI.Controls
                                 if (robe != null) continue;
 
                                 break;
-
 
                             case Layer.Helmet:
                                 robe = _mobile.Equipment[(int) Layer.Robe];
@@ -251,7 +252,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                         {
-                            SlotIndex = i, CanPickUp = canPickUp
+                            CanPickUp = canPickUp
                         });
                     }
                 }
