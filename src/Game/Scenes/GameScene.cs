@@ -796,6 +796,14 @@ namespace ClassicUO.Game.Scenes
             // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+
+            if (_isSelection)
+            {
+                Vector3 selhue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref selhue, 222, false, 0.5f);
+
+                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1 + x, _selectionArea.Item2 + y, Mouse.Position.X - (_selectionArea.Item1 + x), Mouse.Position.Y - (_selectionArea.Item2 + y), ref selhue);
+            }
         }
 
 

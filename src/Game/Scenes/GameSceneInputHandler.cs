@@ -76,6 +76,8 @@ namespace ClassicUO.Game.Scenes
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
         public Direction _numPadDirection;
+        private (int, int) _selectionArea;
+        private bool _isSelection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -119,6 +121,9 @@ namespace ClassicUO.Game.Scenes
 
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
+
+            _selectionArea = (Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+            _isSelection = true;
         }
 
         private void OnLeftMouseUp(object sender, EventArgs e)
@@ -129,6 +134,32 @@ namespace ClassicUO.Game.Scenes
             if (_rightMousePressed)
             {
                 _continueRunning = true;
+            }
+
+            if (_isSelection)
+            {
+                foreach(Mobile mobile in World.Mobiles)
+                {
+                    //if (mobile.X > _selectionArea.Item1
+                    //    && mobile.X < Mouse.Position.X - (_selectionArea.Item1))
+                    if (mobile.RealScreenPosition.X > _selectionArea.Item1
+                        && mobile.RealScreenPosition.X < Mouse.Position.X
+                        && mobile.RealScreenPosition.Y > _selectionArea.Item2
+                        && mobile.RealScreenPosition.Y < Mouse.Position.Y)
+                    {
+                        Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+
+                        if (mobile != World.Player)
+                        {
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                            HealthBarGump currentHealthBarGump;
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = mobile.RealScreenPosition.X - (rect.Width >> 1), Y = mobile.RealScreenPosition.Y - (rect.Height >> 1) - 20 });
+                            //Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                        }
+                    }
+                }
+                _isSelection = false;
+                _selectionArea = (0, 0);
             }
 
             if (_dragginObject != null)
