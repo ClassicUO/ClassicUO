@@ -33,9 +33,9 @@ namespace ClassicUO.Game.UI.Controls
     {
         private static readonly Layer[] _layerOrder =
         {
-            Layer.Cloak, Layer.Ring, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs,
-            Layer.Torso, Layer.Arms, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Tunic, Layer.Skirt, Layer.Necklace,
-            Layer.Hair, Layer.Robe, Layer.Earrings, Layer.Beard, Layer.Helmet, Layer.Waist, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+            Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
+            Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Hair, Layer.Robe,
+            Layer.Waist, Layer.Necklace, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Backpack
         };
 
         private ItemGumpPaperdoll _backpackGump;
