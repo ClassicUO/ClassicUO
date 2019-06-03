@@ -129,8 +129,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (mobile == null || mobile.IsDestroyed)
             {
-                if (Engine.Profile.Current.CloseHealthBarType == 1 ||
-                    Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000))
+                if (LocalSerial != World.Player && (Engine.Profile.Current.CloseHealthBarType == 1 ||
+                    Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     Dispose();
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (mobile != null && !mobile.IsDestroyed)
             {
-                if (!_isDead && mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
+                if (!_isDead && mobile != World.Player && mobile.IsDead && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
                     Dispose();
                     return;
