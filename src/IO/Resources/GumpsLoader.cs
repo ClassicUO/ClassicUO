@@ -202,11 +202,9 @@ namespace ClassicUO.IO.Resources
                 GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
                 int pos = y * width;
 
-
                 for (int i = 0; i < gsize; i++)
                 {
                     ushort val = gmul[i].Value;
-
                     ushort hue = (ushort) ((val != 0 ? 0x8000 : 0) | val);
 
                     int count = gmul[i].Run;
