@@ -260,6 +260,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             Children.Remove(g);
                             Children.Add(g);//move to top
+                            g = null;
                         }
                     }
                 }
