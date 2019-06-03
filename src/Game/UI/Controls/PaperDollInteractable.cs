@@ -33,12 +33,12 @@ namespace ClassicUO.Game.UI.Controls
     {
         private static readonly Layer[] _layerOrder =
         {
-            Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Arms, Layer.Tunic,
+            Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
             Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
-        private ItemGumpPaperdoll _backpackGump;
+        private ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int)Layer.Mount];// _backpackGump;
         private Item _fakeItem;
         private Mobile _mobile;
 
@@ -73,12 +73,11 @@ namespace ClassicUO.Game.UI.Controls
                 Dispose();
         }
 
-
         public override void Dispose()
         {
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
-            if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
+            if (_pgumps[(int)Layer.Backpack] != null) _pgumps[(int)Layer.Backpack].MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
 
@@ -186,6 +185,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (Mobile.HasEquipment)
                 {
+                    ItemGumpPaperdoll g = null;
                     for (int i = 0; i < _layerOrder.Length; i++)
                     {
                         int layerIndex = (int) _layerOrder[i];
@@ -199,25 +199,27 @@ namespace ClassicUO.Game.UI.Controls
                             isfake = true;
                             canPickUp = false;
                         }
-                        else if (item == null || item.IsDestroyed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
+                        else if (item == null || item.IsDestroyed || Mobile.IsCovered(_mobile, (Layer)layerIndex))
                             continue;
 
                         switch (_layerOrder[i])
                         {
                             case Layer.Hair:
-                                if (Mobile.IsCovered(_mobile, Layer.Hair))
-                                    continue;
-                                goto case Layer.Beard;
                             case Layer.Beard:
                                 canPickUp = false;
                                 break;
 
-                            case Layer.Arms:
                             case Layer.Torso:
+                                g = _pgumps[(int)Layer.Arms];
+                                if(g != null && !g.IsDisposed)
+                                {
+                                    if (g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417)
+                                        g = null;
+                                }
+                                goto case Layer.Arms;
+                            case Layer.Arms:
                                 var robe = _mobile.Equipment[(int) Layer.Robe];
-
                                 if (robe != null) continue;
-
                                 break;
 
                             case Layer.Helmet:
@@ -250,10 +252,15 @@ namespace ClassicUO.Game.UI.Controls
                                 break;
                         }
 
-                        Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                        Add(_pgumps[layerIndex] = new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                         {
                             CanPickUp = canPickUp
                         });
+                        if(g != null)
+                        {
+                            Children.Remove(g);
+                            Children.Add(g);//move to top
+                        }
                     }
                 }
             }
@@ -264,12 +271,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (backpack != null)
                 {
-                    Add(_backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                    Add(_pgumps[(int)Layer.Backpack] = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
                     {
                         AcceptMouseInput = true,
                         CanPickUp = false
                     });
-                    _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
+                    _pgumps[(int)Layer.Backpack].MouseDoubleClick += OnDoubleclickBackpackGump;
                 }
             }
         }

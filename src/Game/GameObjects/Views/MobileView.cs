@@ -529,11 +529,7 @@ namespace ClassicUO.Game.GameObjects
                         return true;
                     else
                     {
-                        tunic = mobile.Equipment[(int) Layer.Tunic];
                         Item torso = mobile.Equipment[(int) Layer.Torso];
-
-                        //if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
-                        //    return true;
 
                         if (torso != null && (torso.Graphic == 0x782A || torso.Graphic == 0x782B))
                             return true;
@@ -571,10 +567,10 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     break;
-                case Layer.Skirt:
+                /*case Layer.Skirt:
                     skirt = mobile.Equipment[(int) Layer.Skirt];
 
-                    break;
+                    break;*/
             }
 
             return false;
