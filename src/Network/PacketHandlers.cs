@@ -576,6 +576,12 @@ namespace ClassicUO.Network
 
             if (item.OnGround)
                 item.AddToTile();
+
+
+            if (graphic == 0x2006 && Engine.Profile.Current.ShowNewCorpseNameIncoming)
+            {
+                GameActions.SingleClick(item);
+            }
         }
 
         private static void EnterWorld(Packet p)
@@ -1831,6 +1837,10 @@ namespace ClassicUO.Network
                 return;
 
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+
+            if (!mobile.Exists)
+                GameActions.RequestMobileStatus(mobile);
+
             mobile.Graphic = p.ReadUShort();
             int x = p.ReadUShort();
             int y = p.ReadUShort();
@@ -1875,6 +1885,10 @@ namespace ClassicUO.Network
 
             Serial serial = p.ReadUInt();
             Mobile mobile = World.GetOrCreateMobile(serial);
+
+            if (!mobile.Exists)
+                GameActions.RequestMobileStatus(serial);
+
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -1964,8 +1978,8 @@ namespace ClassicUO.Network
             //if (string.IsNullOrEmpty(mobile.Name))
             //    NetClient.Socket.Send(new PNameRequest(mobile));
 
-            if (mobile != World.Player)
-                NetClient.Socket.Send(new PClickRequest(mobile));
+            if (mobile != World.Player && Engine.Profile.Current.ShowNewMobileNameIncoming)
+                GameActions.SingleClick(mobile);
 
             Engine.UI.GetControl<PaperDollGump>(mobile)?.Update();
         }
@@ -3474,7 +3488,13 @@ namespace ClassicUO.Network
             item.Container = Serial.INVALID;
 
             if (graphic != 0x2006)
+            {
                 graphic += graphicInc;
+            }
+            else if (Engine.Profile.Current.ShowNewCorpseNameIncoming)
+            {
+                GameActions.SingleClick(item);
+            }
 
             if (type == 2)
             {

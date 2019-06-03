@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
-        private Checkbox _useStandardSkillsGump;
+        private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
 
         // network
         private Checkbox _showNetStats;
@@ -235,8 +235,9 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
-            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump",
-                Engine.Profile.Current.StandardSkillsGump, 0, 0);
+            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
+            _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
+            _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
 
 
 
@@ -1071,6 +1072,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _fieldsType.SelectedIndex = 0;
                     _vendorGumpSize.Text = "60";
                     _useStandardSkillsGump.IsChecked = true;
+                    _showCorpseNameIncoming.IsChecked = true;
+                    _showMobileNameIncoming.IsChecked = true;
                     break;
 
                 case 2: // sounds
@@ -1256,6 +1259,10 @@ namespace ClassicUO.Game.UI.Gumps
                     standardGump.Dispose();
                 }
             }
+
+            Engine.Profile.Current.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
+            Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
+
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;

@@ -244,6 +244,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseXBR { get; set; } = true;
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
 
+        [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;
+        [JsonProperty] public bool ShowNewCorpseNameIncoming { get; set; } = true;
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
