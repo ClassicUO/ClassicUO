@@ -91,14 +91,15 @@ namespace ClassicUO.Game.Managers
         public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
-                throw new Exception("Invalid target type");
+                return;
 
             TargetingState = targeting;
             _targetCursorId = cursorID;
             TargeringType = cursorType;
             IsTargeting = cursorType < TargetType.Cancel;
 
-            if (IsTargeting) Engine.UI.RemoveTargetLineGump(LastTarget);
+            if (IsTargeting)
+                Engine.UI.RemoveTargetLineGump(LastTarget);
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)

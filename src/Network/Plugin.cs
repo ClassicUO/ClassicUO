@@ -411,8 +411,7 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            //Packet p = new Packet(data, length) {IsAssistPacket = true};
-            NetClient.EnqueuePacketFromPlugin(ref data, ref length);
+            NetClient.EnqueuePacketFromPlugin(data, length);
 
             return true;
         }

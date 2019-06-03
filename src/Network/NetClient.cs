@@ -91,7 +91,7 @@ namespace ClassicUO.Network
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
-        public static void EnqueuePacketFromPlugin(ref byte[] data, ref int length)
+        public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
@@ -294,7 +294,6 @@ namespace ClassicUO.Network
                         //LogPacket(data, false);
 #endif
 
-                        //Packet packet = new Packet(data, packetlength);
                         _workingQueue.Enqueue(Tuple.Create(data, packetlength, false));
                         Statistics.TotalPacketsReceived++;
                     }
