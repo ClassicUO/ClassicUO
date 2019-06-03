@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Scenes
         private Entity _queuedObject;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
         public Direction _numPadDirection;
-        private (int, int) _selectionArea;
+        private (int, int) _selectionStart, _selectionEnd;
         private bool _isSelection;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
@@ -122,44 +122,22 @@ namespace ClassicUO.Game.Scenes
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
 
-            _selectionArea = (Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
-            _isSelection = true;
+            if (_dragginObject is Static || _dragginObject is Land)
+            {
+                _selectionStart = (Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                _isSelection = true;
+            }
+            
         }
 
         private void OnLeftMouseUp(object sender, EventArgs e)
         {
-            if (!IsMouseOverViewport)
+            if (!IsMouseOverViewport && !_isSelection)
                 return;
 
             if (_rightMousePressed)
             {
                 _continueRunning = true;
-            }
-
-            if (_isSelection)
-            {
-                foreach(Mobile mobile in World.Mobiles)
-                {
-                    //if (mobile.X > _selectionArea.Item1
-                    //    && mobile.X < Mouse.Position.X - (_selectionArea.Item1))
-                    if (mobile.RealScreenPosition.X > _selectionArea.Item1
-                        && mobile.RealScreenPosition.X < Mouse.Position.X
-                        && mobile.RealScreenPosition.Y > _selectionArea.Item2
-                        && mobile.RealScreenPosition.Y < Mouse.Position.Y)
-                    {
-                        Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
-
-                        if (mobile != World.Player)
-                        {
-                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                            HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = mobile.RealScreenPosition.X - (rect.Width >> 1), Y = mobile.RealScreenPosition.Y - (rect.Height >> 1) - 20 });
-                            //Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-                        }
-                    }
-                }
-                _isSelection = false;
-                _selectionArea = (0, 0);
             }
 
             if (_dragginObject != null)
@@ -259,6 +237,55 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
+            }
+            else if (_isSelection)
+            {
+                if (_selectionStart.Item1 != Mouse.Position.X && _selectionStart.Item2 != Mouse.Position.Y)
+                {
+                    if (_selectionStart.Item1 > Mouse.Position.X)
+                    {
+                        _selectionEnd.Item1 = _selectionStart.Item1;
+                        _selectionStart.Item1 = Mouse.Position.X;
+                    }
+                    else
+                    {
+                        _selectionEnd.Item1 = Mouse.Position.X;
+                    }
+
+                    if (_selectionStart.Item2 > Mouse.Position.Y)
+                    {
+                        _selectionEnd.Item2 = _selectionStart.Item2;
+                        _selectionStart.Item2 = Mouse.Position.Y;
+                    }
+                    else
+                    {
+                        _selectionEnd.Item2 = Mouse.Position.Y;
+                    }
+
+                    foreach (Mobile mobile in World.Mobiles)
+                    {
+                        if (mobile.RealScreenPosition.X > _selectionStart.Item1
+                            && mobile.RealScreenPosition.X < _selectionEnd.Item1
+                            && mobile.RealScreenPosition.Y > _selectionStart.Item2
+                            && mobile.RealScreenPosition.Y < _selectionEnd.Item2)
+                        {
+                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+
+                            if (mobile != World.Player)
+                            {
+                                Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                                HealthBarGump currentHealthBarGump;
+                                //Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile));
+                                //currentHealthBarGump.X = mobile.RealScreenPosition.X - (rect.Width >> 1) + 30;
+                                //currentHealthBarGump.Y = mobile.RealScreenPosition.Y - (rect.Width >> 1) - 30;
+                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = mobile.RealScreenPosition.X - (rect.Width >> 1) + 30, Y = mobile.RealScreenPosition.Y - (rect.Height >> 1) - 30 });
+                                //Engine.UI.AttemptDragControl(currentHealthBarGump, mobile.RealScreenPosition, true);
+                            }
+                        }
+                    }
+                }
+                _isSelection = false;
+                _selectionStart = (0, 0);
             }
             else
             {

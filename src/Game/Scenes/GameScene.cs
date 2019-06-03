@@ -802,7 +802,7 @@ namespace ClassicUO.Game.Scenes
                 Vector3 selhue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref selhue, 222, false, 0.5f);
 
-                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionArea.Item1 + x, _selectionArea.Item2 + y, Mouse.Position.X - (_selectionArea.Item1 + x), Mouse.Position.Y - (_selectionArea.Item2 + y), ref selhue);
+                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionStart.Item1 + x, _selectionStart.Item2 + y, Mouse.Position.X - (_selectionStart.Item1 + x), Mouse.Position.Y - (_selectionStart.Item2 + y), ref selhue);
             }
         }
 
