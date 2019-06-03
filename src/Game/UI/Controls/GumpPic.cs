@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public Hue Hue { get; set; }
 
-        public bool IsPaperdoll { get; set; }
+        //public bool IsPaperdoll { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
