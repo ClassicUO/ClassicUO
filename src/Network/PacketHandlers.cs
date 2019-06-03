@@ -2399,14 +2399,21 @@ namespace ClassicUO.Network
         private static void TipWindow(Packet p)
         {
             byte flag = p.ReadByte();
-
-            if (flag != 1)
+            if (flag == 1)
+                return;
+            uint tip = p.ReadUInt();
+            string str = p.ReadASCII(p.ReadUShort());
+            if (flag == 0)
             {
-                Serial serial = p.ReadUInt();
-                string str = p.ReadASCII(p.ReadUShort());
+                if (TipNoticeGump._tips == null || TipNoticeGump._tips.IsDisposed)
+                {
+                    TipNoticeGump._tips = new TipNoticeGump(flag, str);
+                    Engine.UI.Add(TipNoticeGump._tips);
+                }
+                TipNoticeGump._tips.AddTip(tip, str);
             }
-
-            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `TipWindow` not implemented yet.");
+            else
+                Engine.UI.Add(new TipNoticeGump(flag, str));
         }
 
         private static void AttackCharacter(Packet p)

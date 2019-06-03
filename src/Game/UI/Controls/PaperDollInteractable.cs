@@ -163,14 +163,14 @@ namespace ClassicUO.Game.UI.Controls
                 Add(new GumpPic(0, 0, body, 0x03EA)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
 
                 Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
             }
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Controls
                 Add(new GumpPic(0, 0, body, _mobile.Hue)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
 

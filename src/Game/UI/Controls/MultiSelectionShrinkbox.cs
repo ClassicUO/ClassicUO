@@ -125,9 +125,9 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-            Add(_arrow = new GumpPic(1, 1,  (ushort) (userArrow2 ? 0x0827 : 0x15E1), 0));
+            Add(_arrow = new GumpPic(1, 1, (ushort)(userArrow2 ? 0x0827 : 0x15E1), 0) { ContainsByBounds = true });
 
-            _arrow.MouseClick += (sender, state) =>
+            _arrow.MouseUp += (sender, state) =>
             {
                 if (state.Button == MouseButton.Left) Opened = !_opened;
             };
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Controls
             //    _pics = new GumpPic[_items.Length];
 
             var index = 0;
-            int width = 0;
+            //int width = 0;
             int height = 0;
             int lh = _label.Height + 2;
 
