@@ -13,6 +13,7 @@ float2 Viewport;
 
 const int HUES_DELTA = 3000;
 const float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
+const float3 VEC3_ZERO = float3(0, 0, 0);
 
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
@@ -97,12 +98,12 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	else if (mode == SPECTRAL)
 	{
 		alpha = 1 - (color.r * 1.5f);
-		color.rgb = float3(0, 0, 0);
+		color.rgb = VEC3_ZERO;
 	}
 	else if (mode == SHADOW)
 	{
-		alpha = 0.3f;
-		color.rgb = float3(0, 0, 0);
+		alpha = 0.5f;
+		color.rgb = VEC3_ZERO;
 	}
 
 	return color * alpha;

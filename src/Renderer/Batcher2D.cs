@@ -399,7 +399,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawSpriteShadow(Texture2D texture, int x, int y, int w, int h, int destX, int destY, int offsetX, int offsetY, bool flip)
+        public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
 
@@ -409,109 +409,115 @@ namespace ClassicUO.Renderer
             ref var vertex2 = ref VertexInfo[idx + 2];
             ref var vertex3 = ref VertexInfo[idx + 3];
 
+            float width = texture.Width;
+            float height = texture.Height / 2f;
+
+            float translatedY = y + height * 0.75f;
+
+            float ratio = height / width;
 
             if (flip)
             {
-                vertex0.Position.X = x + destX + 44;
-                vertex0.Position.Y = y - destY;
+                vertex0.Position.X = x + width;
+                vertex0.Position.Y = translatedY + height;
                 vertex0.Position.Z = 0;
                 vertex0.Normal.X = 0;
                 vertex0.Normal.Y = 0;
                 vertex0.Normal.Z = 1;
                 vertex0.TextureCoordinate.X = 0;
-                vertex0.TextureCoordinate.Y = 0;
+                vertex0.TextureCoordinate.Y = 1;
                 vertex0.TextureCoordinate.Z = 0;
 
-                vertex1.Position = vertex0.Position;
-                vertex1.Position.Y += h;
-                vertex1.Normal.X = 0;
-                vertex1.Normal.Y = 0;
-                vertex1.Normal.Z = 1;
-                vertex1.TextureCoordinate.X = 0;
-                vertex1.TextureCoordinate.Y = 1;
-                vertex1.TextureCoordinate.Z = 0;
-
-                vertex2.Position = vertex0.Position;
-                vertex2.Position.X -= w;
-                vertex2.Normal.X = 0;
-                vertex2.Normal.Y = 0;
-                vertex2.Normal.Z = 1;
-                vertex2.TextureCoordinate.X = 1;
-                vertex2.TextureCoordinate.Y = 0;
-                vertex2.TextureCoordinate.Z = 0;
-
-                vertex3.Position = vertex1.Position;
-                vertex3.Position.X -= w;
-                vertex3.Normal.X = 0;
-                vertex3.Normal.Y = 0;
-                vertex3.Normal.Z = 1;
-                vertex3.TextureCoordinate.X = 1;
-                vertex3.TextureCoordinate.Y = 1;
-                vertex3.TextureCoordinate.Z = 0;
-            }
-            else
-            {
-                vertex0.Position.X = x - destX;
-                vertex0.Position.Y = y - destY;
-                vertex0.Position.Z = 0;
-                vertex0.Normal.X = 0;
-                vertex0.Normal.Y = 0;
-                vertex0.Normal.Z = 1;
-                vertex0.TextureCoordinate.X = 0;
-                vertex0.TextureCoordinate.Y = 0;
-                vertex0.TextureCoordinate.Z = 0;
-
-                vertex1.Position = vertex0.Position;
-                vertex1.Position.X += w;
+                vertex1.Position.X = x;
+                vertex1.Position.Y = translatedY + height;
                 vertex1.Normal.X = 0;
                 vertex1.Normal.Y = 0;
                 vertex1.Normal.Z = 1;
                 vertex1.TextureCoordinate.X = 1;
-                vertex1.TextureCoordinate.Y = 0;
+                vertex1.TextureCoordinate.Y = 1;
                 vertex1.TextureCoordinate.Z = 0;
 
-                vertex2.Position = vertex0.Position;
-                vertex2.Position.Y += h;
+                vertex2.Position.X = x + (width * (ratio + 1f));
+                vertex2.Position.Y = translatedY;
                 vertex2.Normal.X = 0;
                 vertex2.Normal.Y = 0;
                 vertex2.Normal.Z = 1;
                 vertex2.TextureCoordinate.X = 0;
-                vertex2.TextureCoordinate.Y = 1;
+                vertex2.TextureCoordinate.Y = 0;
                 vertex2.TextureCoordinate.Z = 0;
 
-                vertex3.Position = vertex1.Position;
-                vertex3.Position.Y += h;
+                vertex3.Position.X = x + width * ratio;
+                vertex3.Position.Y = translatedY;
                 vertex3.Normal.X = 0;
                 vertex3.Normal.Y = 0;
                 vertex3.Normal.Z = 1;
                 vertex3.TextureCoordinate.X = 1;
-                vertex3.TextureCoordinate.Y = 1;
+                vertex3.TextureCoordinate.Y = 0;
+                vertex3.TextureCoordinate.Z = 0;
+            }
+            else
+            {
+                vertex0.Position.X = x;
+                vertex0.Position.Y = translatedY + height;
+                vertex0.Position.Z = 0;
+                vertex0.Normal.X = 0;
+                vertex0.Normal.Y = 0;
+                vertex0.Normal.Z = 1;
+                vertex0.TextureCoordinate.X = 0;
+                vertex0.TextureCoordinate.Y = 1;
+                vertex0.TextureCoordinate.Z = 0;
+
+                vertex1.Position.X = x + width;
+                vertex1.Position.Y = translatedY + height;
+                vertex1.Normal.X = 0;
+                vertex1.Normal.Y = 0;
+                vertex1.Normal.Z = 1;
+                vertex1.TextureCoordinate.X = 1;
+                vertex1.TextureCoordinate.Y = 1;
+                vertex1.TextureCoordinate.Z = 0;
+
+                vertex2.Position.X = x + width * ratio;
+                vertex2.Position.Y = translatedY;
+                vertex2.Normal.X = 0;
+                vertex2.Normal.Y = 0;
+                vertex2.Normal.Z = 1;
+                vertex2.TextureCoordinate.X = 0;
+                vertex2.TextureCoordinate.Y = 0;
+                vertex2.TextureCoordinate.Z = 0;
+
+                vertex3.Position.X = x + (width * (ratio + 1f));
+                vertex3.Position.Y = translatedY;
+                vertex3.Normal.X = 0;
+                vertex3.Normal.Y = 0;
+                vertex3.Normal.Z = 1;
+                vertex3.TextureCoordinate.X = 1;
+                vertex3.TextureCoordinate.Y = 0;
                 vertex3.TextureCoordinate.Z = 0;
             }
 
 
-            float skewHorizTop = (vertex0.Position.Y - offsetY) * .5f;
-            float skewHorizBottom = (vertex3.Position.Y - offsetY) * .5f;
-            vertex0.Position.X -= skewHorizTop;
-            vertex0.Position.Y -= skewHorizTop;
+            //float skewHorizTop = (vertex0.Position.Y - offsetY) * .5f;
+            //float skewHorizBottom = (vertex3.Position.Y - offsetY) * .5f;
+            //vertex0.Position.X -= skewHorizTop;
+            //vertex0.Position.Y -= skewHorizTop;
 
-            if (flip)
-            {
-                vertex2.Position.X -= skewHorizTop;
-                vertex2.Position.Y -= skewHorizTop;
-                vertex2.Position.X -= skewHorizBottom;
-                vertex2.Position.Y -= skewHorizBottom;
-            }
-            else
-            {
-                vertex1.Position.X -= skewHorizTop;
-                vertex1.Position.Y -= skewHorizTop;
-                vertex1.Position.X -= skewHorizBottom;
-                vertex1.Position.Y -= skewHorizBottom;
-            }
+            //if (flip)
+            //{
+            //    vertex2.Position.X -= skewHorizTop;
+            //    vertex2.Position.Y -= skewHorizTop;
+            //    vertex2.Position.X -= skewHorizBottom;
+            //    vertex2.Position.Y -= skewHorizBottom;
+            //}
+            //else
+            //{
+            //    vertex1.Position.X -= skewHorizTop;
+            //    vertex1.Position.Y -= skewHorizTop;
+            //    vertex1.Position.X -= skewHorizBottom;
+            //    vertex1.Position.Y -= skewHorizBottom;
+            //}
 
-            vertex3.Position.X -= skewHorizBottom;
-            vertex3.Position.Y -= skewHorizBottom;
+            //vertex3.Position.X -= skewHorizBottom;
+            //vertex3.Position.Y -= skewHorizBottom;
 
             vertex0.Hue.Z =
                 vertex1.Hue.Z =
@@ -537,7 +543,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool DrawCharacterSitted(Texture2D texture, int x, int y, int destX, int destY, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
+        public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
             EnsureSize();
 

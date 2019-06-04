@@ -310,7 +310,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (hasShadow)
                 {
-                    batcher.DrawSpriteShadow(frame, x, y, frame.Width, frame.Height,  mirror ? frame.Width - 44 : 0, 0, 0, y + 44 + 22, mirror);
+                    batcher.DrawSpriteShadow(frame, x, y, mirror);
                 }
                 else
                 {
@@ -417,7 +417,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        batcher.DrawCharacterSitted(frame, x, y, frame.Width - 44,0, mirror, h3mod, h6mod, h9mod, ref HueVector);
+                        batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
                     }
                     else
                     {
