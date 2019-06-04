@@ -44,7 +44,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             CanCloseWithRightClick = false;
 
-            bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
             int posInList = 0;
             int yOffset = 150;
             int yBonus = 0;
@@ -161,9 +160,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (existing != null)
                     Remove(existing);
-                var text = FileManager.Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
 
-                Add(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
+                Add(new LoadingGump($"Permanently delete {charName}", LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {
                     if (buttonID == (int) LoadingGump.Buttons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);
