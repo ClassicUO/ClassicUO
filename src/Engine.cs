@@ -122,9 +122,6 @@ namespace ClassicUO
                 return;
             }
 
-            // Debug: Show resulting settings object
-            Log.Message(LogTypes.Trace, "Settings loaded from `" + SettingsFile + "` and combined with parsed args:\n" + JsonConvert.SerializeObject(_settings, Formatting.Indented));
-
             // Validate resulting settings object
             // NOTE: Check that at least `UltimaOnlineDirectory` and `ClientVersion` properties are set
             //   to some other than default values
