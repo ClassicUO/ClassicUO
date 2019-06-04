@@ -2427,7 +2427,7 @@ namespace ClassicUO.Network
             {
                 Mobile mob = World.Mobiles.Get(TargetManager.LastAttack);
 
-                if (mob != null && mob.HitsMax <= 0)
+                if (mob != null && mob.HitsMax == 0)
                     NetClient.Socket.Send(new PStatusRequest(TargetManager.LastAttack));
             }
         }
