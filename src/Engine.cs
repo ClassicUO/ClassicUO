@@ -201,8 +201,6 @@ namespace ClassicUO
 
         public static UltimaBatcher2D Batcher => _engine._batcher;
 
-        //protected double IntervalFixedUpdate { get; private set; }
-
         public static int FpsLimit
         {
             get => _fpsLimit;
@@ -218,9 +216,9 @@ namespace ClassicUO
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
 
-                    //_engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
+                    _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
 
-                    _engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
+                    //_engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
         }
@@ -790,9 +788,20 @@ namespace ClassicUO
             OnFixedUpdate(totalms, framems);
             Profiler.ExitContext("FixedUpdate");
 
+            _time += framems;
+
+            if (_time > IntervalFixedUpdate)
+            {
+                _time %= IntervalFixedUpdate;
+            }
+            else
+                SuppressDraw();
+
+
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }
+        protected double IntervalFixedUpdate { get; private set; }
 
         protected override void Draw(GameTime gameTime)
         {
