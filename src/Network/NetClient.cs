@@ -45,7 +45,7 @@ namespace ClassicUO.Network
         private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
-        private Queue<Tuple<byte[], int, bool>> _queue = new Queue<Tuple<byte[], int, bool>>(), _workingQueue = new Queue<Tuple<byte[], int, bool>>();
+        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
@@ -97,7 +97,7 @@ namespace ClassicUO.Network
             {
                 lock (Socket._sync)
                 {
-                    Socket._workingQueue.Enqueue(Tuple.Create(data, length, true));
+                    Socket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
                     Socket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -105,7 +105,7 @@ namespace ClassicUO.Network
             {
                 lock (LoginSocket._sync)
                 {
-                    LoginSocket._workingQueue.Enqueue(Tuple.Create(data, length, true));
+                    LoginSocket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
                     LoginSocket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -248,13 +248,12 @@ namespace ClassicUO.Network
             {
                 var p = _queue.Dequeue();
 
-                byte[] data = p.Item1;
-                int length = p.Item2;
+                byte[] data = p.ToArray();
+                int length = p.Length;
 
-                if (p.Item3 || Plugin.ProcessRecvPacket(ref data, ref length))
+                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
                 {
-                    Packet packet = new Packet(data, length);
-                    PacketReceived.Raise(packet);
+                    PacketReceived.Raise(p);
                 }
             }
 
@@ -294,7 +293,7 @@ namespace ClassicUO.Network
                         //LogPacket(data, false);
 #endif
 
-                        _workingQueue.Enqueue(Tuple.Create(data, packetlength, false));
+                        _workingQueue.Enqueue(new Packet(data, packetlength));
                         Statistics.TotalPacketsReceived++;
                     }
 
