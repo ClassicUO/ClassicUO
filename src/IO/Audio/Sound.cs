@@ -34,7 +34,7 @@ namespace ClassicUO.IO.Audio
 {
     internal abstract class Sound : IComparable<Sound>, IDisposable
     {
-        public static TimeSpan MinimumDelay = TimeSpan.FromSeconds(1d);
+        public static TimeSpan MinimumDelay = TimeSpan.FromMilliseconds(250d);
 
         private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
         private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
