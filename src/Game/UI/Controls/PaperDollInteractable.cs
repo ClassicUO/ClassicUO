@@ -213,7 +213,8 @@ namespace ClassicUO.Game.UI.Controls
                                 g = _pgumps[(int)Layer.Arms];
                                 if(g != null && !g.IsDisposed)
                                 {
-                                    if (g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417)
+                                    if (item.Graphic != 0x13BF && item.Graphic != 0x13C4 && //chainmail tunic
+                                        g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417)//platemail arms
                                         g = null;
                                 }
                                 goto case Layer.Arms;
@@ -280,6 +281,23 @@ namespace ClassicUO.Game.UI.Controls
                     _pgumps[(int)Layer.Backpack].MouseDoubleClick += OnDoubleclickBackpackGump;
                 }
             }
+        }
+
+        public bool Fix(int itemID)
+        {
+            if (itemID == 0x1410 || itemID == 0x1417) // platemail arms
+                return true;
+
+            if (itemID == 0x13BF || itemID == 0x13C4) // chainmail tunic
+                return true;
+
+            if (itemID == 0x1C08 || itemID == 0x1C09) // leather skirt
+                return true;
+
+            if (itemID == 0x1C00 || itemID == 0x1C01) // leather shorts
+                return true;
+
+            return false;
         }
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
