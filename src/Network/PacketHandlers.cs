@@ -63,9 +63,7 @@ namespace ClassicUO.Network
         static PacketHandlers()
         {
             ToClient = new PacketHandlers();
-            ToServer = new PacketHandlers();
             NetClient.PacketReceived += ToClient.OnPacket;
-            NetClient.PacketSended += ToServer.OnPacket;
         }
 
         private PacketHandlers()
@@ -75,7 +73,6 @@ namespace ClassicUO.Network
 
         public static PacketHandlers ToClient { get; }
 
-        public static PacketHandlers ToServer { get; }
 
         public void Add(byte id, Action<Packet> handler)
         {

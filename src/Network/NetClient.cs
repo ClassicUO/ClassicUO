@@ -89,7 +89,8 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
+        public static event EventHandler<Packet> PacketReceived;
+        public static event EventHandler<PacketWriter> PacketSended;
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
@@ -224,13 +225,12 @@ namespace ClassicUO.Network
 
         public void Send(PacketWriter p)
         {
-            byte[] data = p.ToArray();
+            ref byte[] data = ref p.ToArray();
             int length = p.Length;
 
             if (Plugin.ProcessSendPacket(ref data, ref length))
             {
-                Packet packet = new Packet(data, length);
-                PacketSended.Raise(packet);
+                PacketSended.Raise(p);
                 Send(data);
             }
         }
