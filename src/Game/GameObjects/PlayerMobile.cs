@@ -1656,7 +1656,12 @@ namespace ClassicUO.Game.GameObjects
             Plugin.UpdatePlayerPosition(X, Y, Z);
             
             TryOpenDoors();
-            
+            TryOpenCorpses();
+          
+        }
+
+        public void TryOpenCorpses()
+        {
             if (Engine.Profile.Current.AutoOpenCorpses)
             {
                 if ((Engine.Profile.Current.CorpseOpenOptions == 1 ||  Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting )
@@ -1668,7 +1673,7 @@ namespace ClassicUO.Game.GameObjects
                     OpenedCorpses.Add(c.Serial);
                     GameActions.DoubleClick(c.Serial);
                 }
-            }
+            } 
         }
         
 
