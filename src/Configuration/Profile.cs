@@ -160,6 +160,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool AutoOpenDoors { get; set; } = false;
         [JsonProperty] public bool AutoOpenCorpses { get; set; } = false;
         [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
+        [JsonProperty] public int CorpseOpenOptions { get; set; } = 3;
         [JsonProperty] public bool DisableDefaultHotkeys { get; set; } = false;
         [JsonProperty] public bool DisableArrowBtn { get; set; } = false;
         [JsonProperty] public bool DisableTabBtn { get; set; } = false;

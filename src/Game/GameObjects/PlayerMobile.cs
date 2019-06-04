@@ -1657,8 +1657,12 @@ namespace ClassicUO.Game.GameObjects
             
             TryOpenDoors();
             
-            if (Engine.Profile.Current.AutoOpenCorpses && !TargetManager.IsTargeting)
+            if (Engine.Profile.Current.AutoOpenCorpses)
             {
+                if ((Engine.Profile.Current.CorpseOpenOptions == 1 ||  Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting )
+                    return;
+                if ((Engine.Profile.Current.CorpseOpenOptions == 2 ||  Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden )
+                    return;
                 foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
                 {
                     OpenedCorpses.Add(c.Serial);
@@ -1666,6 +1670,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
+        
 
         protected override void OnDirectionChanged()
         {
