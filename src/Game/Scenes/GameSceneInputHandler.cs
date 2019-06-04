@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_dragginObject is Static || _dragginObject is Land)
             {
-                _selectionStart = (Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
                 _isSelection = true;
             }
             
@@ -274,12 +274,8 @@ namespace ClassicUO.Game.Scenes
                             if (mobile != World.Player)
                             {
                                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                                HealthBarGump currentHealthBarGump;
-                                //Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile));
-                                //currentHealthBarGump.X = mobile.RealScreenPosition.X - (rect.Width >> 1) + 30;
-                                //currentHealthBarGump.Y = mobile.RealScreenPosition.Y - (rect.Width >> 1) - 30;
-                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = mobile.RealScreenPosition.X - (rect.Width >> 1) + 30, Y = mobile.RealScreenPosition.Y - (rect.Height >> 1) - 30 });
-                                //Engine.UI.AttemptDragControl(currentHealthBarGump, mobile.RealScreenPosition, true);
+                                GameActions.RequestMobileStatus(mobile);
+                                Engine.UI.Add(new HealthBarGump(mobile) { X = mobile.RealScreenPosition.X - (rect.Width >> 1) + 30, Y = mobile.RealScreenPosition.Y - (rect.Height >> 1) - 30 });
                             }
                         }
                     }
