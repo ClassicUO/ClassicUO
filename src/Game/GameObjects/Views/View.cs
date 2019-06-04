@@ -45,7 +45,6 @@ namespace ClassicUO.Game.GameObjects
             HueVector.Z = 0;
         }
 
-
         protected bool IsFlipped { get; set; }
 
         protected float Rotation { get; set; }
@@ -81,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
                 else
                     HueVector.Z = 1f - AlphaHue / 255f;
             }
-            else
+            else if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
 
