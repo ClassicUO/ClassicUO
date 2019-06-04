@@ -40,10 +40,10 @@ namespace ClassicUO.Network
         protected abstract bool EnsureSize(int length);
         public abstract ref byte[] ToArray();
 
-        public void Skip(int lengh)
+        public void Skip(int length)
         {
-            EnsureSize(lengh);
-            Position += lengh;
+            EnsureSize(length);
+            Position += length;
         }
 
         public void Seek(int index)
@@ -58,11 +58,11 @@ namespace ClassicUO.Network
             this[Position++] = v;
         }
 
-        public void WriteBytes(byte[] buffer, int v, int length)
+        public void WriteBytes(byte[] buffer, int offset, int length)
         {
             EnsureSize(length);
 
-            for (int i = v; i < length; i++)
+            for (int i = offset; i < length; i++)
                 this[Position++] = buffer[i];
         }
 
