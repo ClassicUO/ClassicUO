@@ -726,6 +726,11 @@ namespace ClassicUO.Network
             {
                 Item it = (Item) entity;
 
+                if (it.IsMulti)
+                {
+                    World.HouseManager.Remove(it);
+                }
+
                 Entity cont = World.Get(it.Container);
 
                 if (cont != null)
