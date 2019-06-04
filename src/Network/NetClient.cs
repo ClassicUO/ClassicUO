@@ -248,7 +248,7 @@ namespace ClassicUO.Network
             {
                 var p = _queue.Dequeue();
 
-                byte[] data = p.ToArray();
+                ref byte[] data = ref p.ToArray();
                 int length = p.Length;
 
                 if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
