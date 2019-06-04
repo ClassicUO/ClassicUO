@@ -495,7 +495,8 @@ namespace ClassicUO.Network
                     break;
                 default:
 
-                    throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+                    Log.Message(LogTypes.Panic, "The last operation completed on the socket was not a receive or send");
+                    break;
             }
         }
 
