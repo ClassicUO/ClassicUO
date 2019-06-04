@@ -688,7 +688,7 @@ namespace ClassicUO.Game.Managers
 
                     break;
                 case MacroType.AttackLast:
-                    GameActions.Attack(TargetManager.LastAttack);
+                    GameActions.Attack(TargetManager.LastTarget);
 
                     break;
 
