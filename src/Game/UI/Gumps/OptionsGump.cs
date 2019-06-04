@@ -58,6 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
         private TextBox _autoOpenCorpseRange;
+        private Combobox _autoOpenCorpseOptions;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea;
 
         // sounds
@@ -949,6 +950,32 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true,
                 Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
+            
+            /* text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
+            {
+                Y = 10
+            };
+            item.Add(text);
+
+            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] {"None", "Warmode", "Ctrl+Shift", "Always"})
+            {
+                SelectedIndex = Engine.Profile.Current.AuraUnderFeetType
+            };*/
+            var text = new Label("Corpse Open Options:", true, HUE_FONT, 0, FONT)
+            {
+                Y = _autoOpenCorpseRange.Y + 30,
+                X = 10
+            };
+            _autoOpenCorpseArea.Add(text);
+            
+            _autoOpenCorpseOptions = new Combobox(text.Width + 20, text.Y, 150, new[]
+            {
+                "None", "Not Targeting", "Not Hiding", "Both"
+            })  
+            {
+                SelectedIndex = Engine.Profile.Current.CorpseOpenOptions
+            };
+            _autoOpenCorpseArea.Add(_autoOpenCorpseOptions);
 
             rightArea.Add(_autoOpenCorpseArea);
 
@@ -1529,7 +1556,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
-
+            Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
             
 
             // network
