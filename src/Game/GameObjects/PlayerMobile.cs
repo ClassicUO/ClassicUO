@@ -1656,16 +1656,26 @@ namespace ClassicUO.Game.GameObjects
             Plugin.UpdatePlayerPosition(X, Y, Z);
             
             TryOpenDoors();
-            
-            if (Engine.Profile.Current.AutoOpenCorpses && !TargetManager.IsTargeting)
+            TryOpenCorpses();
+          
+        }
+
+        public void TryOpenCorpses()
+        {
+            if (Engine.Profile.Current.AutoOpenCorpses)
             {
+                if ((Engine.Profile.Current.CorpseOpenOptions == 1 ||  Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting )
+                    return;
+                if ((Engine.Profile.Current.CorpseOpenOptions == 2 ||  Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden )
+                    return;
                 foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
                 {
                     OpenedCorpses.Add(c.Serial);
                     GameActions.DoubleClick(c.Serial);
                 }
-            }
+            } 
         }
+        
 
         protected override void OnDirectionChanged()
         {

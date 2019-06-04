@@ -582,6 +582,11 @@ namespace ClassicUO.Network
             {
                 GameActions.SingleClick(item);
             }
+
+            if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses)
+            {
+                World.Player.TryOpenCorpses();
+            }
         }
 
         private static void EnterWorld(Packet p)
