@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -143,10 +144,10 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
-            ushort flags = (ushort) World.ClientFlags.Flags;
+            ushort flags = (ushort)World.ClientFlags.Flags;
 
             for (ushort i = 0; i < flags; i++)
-                clientflag |= (uint) (1 << i);
+                clientflag |= (uint)(1 << i);
 
             WriteUInt(clientflag);
             WriteUInt(0x01);
@@ -159,33 +160,33 @@ namespace ClassicUO.Network
                 val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
             else
             {
-                val = (byte) character.Race;
+                val = (byte)character.Race;
 
                 if (FileManager.ClientVersion < ClientVersions.CV_7000)
                     val--;
-                val = (byte) (val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
+                val = (byte)(val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
             }
 
             WriteByte(val);
-            WriteByte((byte) character.Strength);
-            WriteByte((byte) character.Dexterity);
-            WriteByte((byte) character.Intelligence);
+            WriteByte((byte)character.Strength);
+            WriteByte((byte)character.Dexterity);
+            WriteByte((byte)character.Intelligence);
             var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
             foreach (var skill in skills)
             {
-                WriteByte((byte) skill.Index);
-                WriteByte((byte) skill.ValueFixed);
+                WriteByte((byte)skill.Index);
+                WriteByte((byte)skill.ValueFixed);
             }
 
             WriteUShort(character.Hue);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Graphic);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Hue);
+            WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
+            WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
 
-            if (character.Equipment[(int) Layer.Beard] != null)
+            if (character.Equipment[(int)Layer.Beard] != null)
             {
-                WriteUShort(character.Equipment[(int) Layer.Beard].Graphic);
-                WriteUShort(character.Equipment[(int) Layer.Beard].Hue);
+                WriteUShort(character.Equipment[(int)Layer.Beard].Graphic);
+                WriteUShort(character.Equipment[(int)Layer.Beard].Hue);
             }
             else
             {
@@ -193,21 +194,21 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            WriteByte((byte) serverIndex);
+            WriteByte((byte)serverIndex);
 
             var location = startingCity.Index; // City
 
             if (FileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
                 location--;
 
-            WriteByte((byte) location);
+            WriteByte((byte)location);
 
             WriteUInt(slot);
             WriteUInt(clientIP);
-            WriteUShort(character.Equipment[(int) Layer.Shirt].Hue);
+            WriteUShort(character.Equipment[(int)Layer.Shirt].Hue);
 
-            if (character.Equipment[(int) Layer.Pants] != null)
-                WriteUShort(character.Equipment[(int) Layer.Pants].Hue);
+            if (character.Equipment[(int)Layer.Pants] != null)
+                WriteUShort(character.Equipment[(int)Layer.Pants].Hue);
             else
                 WriteUShort(0x00);
         }
@@ -232,9 +233,9 @@ namespace ClassicUO.Network
             Skip(2);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
+            for (int i = 0; i < (int)World.ClientFlags.Flags; i++)
             {
-                clientFlag |= (uint) (1 << i);
+                clientFlag |= (uint)(1 << i);
             }
 
             WriteUInt(clientFlag);
@@ -291,7 +292,7 @@ namespace ClassicUO.Network
         public PEquipRequest(Serial serial, Layer layer, Serial container) : base(0x13)
         {
             WriteUInt(serial);
-            WriteByte((byte) layer);
+            WriteByte((byte)layer);
             WriteUInt(container);
         }
     }
@@ -395,7 +396,7 @@ namespace ClassicUO.Network
     {
         public PASCIISpeechRequest(string text, MessageType type, byte font, Hue hue) : base(0x03)
         {
-            WriteByte((byte) type);
+            WriteByte((byte)type);
             WriteUShort(hue);
             WriteUShort(font);
             WriteASCII(text);
@@ -406,44 +407,79 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
-            SpeechEntry[] entries = FileManager.Speeches.GetKeywords(text);
+            int len = text.Length;
+            int size = 12;
 
-            if (entries.Length > 0)
+            var entries = FileManager.Speeches.GetKeywords(text);
+
+            bool encoded = entries != null && entries.Count != 0;
+
+            List<byte> codeBytes = new List<byte>();
+            string utf8 = string.Empty;
+
+            if (encoded)
+            {
                 type |= MessageType.Encoded;
-            WriteByte((byte) type);
+
+                utf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(text));
+
+                len = utf8.Length;
+                len++;
+
+                int length = entries.Count;
+                codeBytes.Add((byte)(length >> 4));
+                int num3 = length & 15;
+                bool flag = false;
+                int index = 0;
+
+                while (index < length)
+                {
+                    int keywordID = entries[index].KeywordID;
+
+                    if (flag)
+                    {
+                        codeBytes.Add((byte)(keywordID >> 4));
+                        num3 = keywordID & 15;
+                    }
+                    else
+                    {
+                        codeBytes.Add((byte)((num3 << 4) | ((keywordID >> 8) & 15)));
+                        codeBytes.Add((byte)keywordID);
+                    }
+
+                    index++;
+                    flag = !flag;
+                }
+
+                if (!flag)
+                {
+                    codeBytes.Add((byte)(num3 << 4));
+                }
+
+                size += codeBytes.Count;
+            }
+            else
+            {
+                size += len * 2;
+                size += 2;
+            }
+
+            WriteByte((byte)type);
             WriteUShort(hue);
             WriteUShort(font);
             WriteASCII(lang, 4);
 
-            if (entries.Length > 0)
+            if (encoded)
             {
-                byte[] t = new byte[(int) Math.Ceiling((entries.Length + 1) * 1.5f)];
-                // write 12 bits at a time. first write count: byte then half byte.
-                t[0] = (byte) ((entries.Length & 0x0FF0) >> 4);
-                t[1] = (byte) ((entries.Length & 0x000F) << 4);
+                for (int i = 0; i < codeBytes.Count; i++)
+                    WriteByte(codeBytes[i]);
 
-                for (int i = 0; i < entries.Length; i++)
-                {
-                    int index = (int) ((i + 1) * 1.5f);
-
-                    if (i % 2 == 0) // write half byte and then byte
-                    {
-                        t[index + 0] |= (byte) ((entries[i].KeywordID & 0x0F00) >> 8);
-                        t[index + 1] = (byte) (entries[i].KeywordID & 0x00FF);
-                    }
-                    else // write byte and then half byte
-                    {
-                        t[index] = (byte) ((entries[i].KeywordID & 0x0FF0) >> 4);
-                        t[index + 1] = (byte) ((entries[i].KeywordID & 0x000F) << 4);
-                    }
-                }
-
-                for (int i = 0; i < t.Length; i++)
-                    WriteByte(t[i]);
-                WriteASCII(text);
+                WriteASCII(utf8, len);
             }
             else
-                WriteUnicode(text);
+            {
+                WriteUnicode(text, len);
+            }
         }
     }
 
@@ -455,7 +491,7 @@ namespace ClassicUO.Network
             {
                 WriteUShort(0x1C);
                 WriteUShort(0x02);
-                WriteUShort((ushort) idx);
+                WriteUShort((ushort)idx);
             }
             else
             {
@@ -518,20 +554,20 @@ namespace ClassicUO.Network
         {
             WriteUInt(local);
             WriteUInt(server);
-            WriteUInt((uint) buttonID);
+            WriteUInt((uint)buttonID);
 
-            WriteUInt((uint) switches.Length);
+            WriteUInt((uint)switches.Length);
 
             for (int i = switches.Length - 1; i >= 0; i--)
                 WriteUInt(switches[i]);
 
-            WriteUInt((uint) entries.Length);
+            WriteUInt((uint)entries.Length);
 
             for (int i = entries.Length - 1; i >= 0; i--)
             {
                 int length = Math.Min(239, entries[i].Item2.Length);
                 WriteUShort(entries[i].Item1);
-                WriteUShort((ushort) length);
+                WriteUShort((ushort)length);
                 WriteUnicode(entries[i].Item2, length);
             }
         }
@@ -556,7 +592,7 @@ namespace ClassicUO.Network
 
             if (code != 0)
             {
-                WriteUShort((ushort) code);
+                WriteUShort((ushort)code);
 
                 WriteUShort(itemGraphic);
                 WriteUShort(itemHue);
@@ -587,7 +623,7 @@ namespace ClassicUO.Network
             {
                 WriteByte(0x02);
                 WriteUInt(serial);
-                WriteUInt((uint) (state ? 1 : 0));
+                WriteUInt((uint)(state ? 1 : 0));
             }
         }
     }
@@ -601,7 +637,7 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteBool(code);
 
-            WriteUShort((ushort) (text.Length + 1));
+            WriteUShort((ushort)(text.Length + 1));
             WriteASCII(text, text.Length + 1);
         }
     }
@@ -658,7 +694,7 @@ namespace ClassicUO.Network
             WriteUInt(0x00);
             WriteUShort(x);
             WriteUShort(y);
-            WriteUShort((ushort) z);
+            WriteUShort((ushort)z);
             WriteUShort(modelNumber);
         }
     }
@@ -667,7 +703,7 @@ namespace ClassicUO.Network
     {
         public PTargetCancel(CursorTarget type, Serial cursorID, byte cursorType) : base(0x6C)
         {
-            WriteByte((byte) type);
+            WriteByte((byte)type);
             WriteUInt(cursorID);
             WriteByte(cursorType);
             WriteUInt(0);
@@ -683,7 +719,7 @@ namespace ClassicUO.Network
         public PASCIIPromptResponse(string text, bool cancel) : base(0x9A)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
-            WriteUInt((uint) (cancel ? 0 : 1));
+            WriteUInt((uint)(cancel ? 0 : 1));
 
             WriteASCII(text);
         }
@@ -694,7 +730,7 @@ namespace ClassicUO.Network
         public PUnicodePromptResponse(string text, string lang, bool cancel) : base(0xC2)
         {
             WriteBytes(Chat.PromptData.Data, 0, 8);
-            WriteUInt((uint) (cancel ? 0 : 1));
+            WriteUInt((uint)(cancel ? 0 : 1));
             WriteASCII(lang, 3);
             WriteUnicode(text);
         }
@@ -726,7 +762,7 @@ namespace ClassicUO.Network
             WriteByte(1);
             WriteUInt(serial);
             WriteUShort(0x01);
-            WriteUShort((ushort) text.Length);
+            WriteUShort((ushort)text.Length);
             WriteUnicode(text, text.Length);
         }
     }
@@ -854,7 +890,7 @@ namespace ClassicUO.Network
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte) (subject.Length + 1));
+            WriteByte((byte)(subject.Length + 1));
             WriteASCII(subject);
 
             string[] lines = message.Split(new[]
@@ -864,7 +900,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < lines.Length; i++)
             {
-                WriteByte((byte) lines[i].Length);
+                WriteByte((byte)lines[i].Length);
                 WriteASCII(lines[i]);
             }
         }
@@ -925,8 +961,8 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
-                clientFlag |= (uint) (1 << i);
+            for (int i = 0; i < (int)World.ClientFlags.Flags; i++)
+                clientFlag |= (uint)(1 << i);
 
             WriteUInt(clientFlag);
         }
@@ -1040,7 +1076,7 @@ namespace ClassicUO.Network
         {
             WriteUShort(0x1A);
             WriteByte(stat);
-            WriteByte((byte) state);
+            WriteByte((byte)state);
         }
     }
 
@@ -1090,7 +1126,7 @@ namespace ClassicUO.Network
         public PSellRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x9F)
         {
             WriteUInt(vendorSerial);
-            WriteUShort((ushort) items.Length);
+            WriteUShort((ushort)items.Length);
 
             for (int i = 0; i < items.Length; i++)
             {
@@ -1170,7 +1206,7 @@ namespace ClassicUO.Network
         {
             if (run)
                 direction |= Direction.Running;
-            WriteByte((byte) direction);
+            WriteByte((byte)direction);
             WriteByte(seq);
             WriteUInt(fastwalk);
         }
@@ -1373,5 +1409,4 @@ namespace ClassicUO.Network
             WriteByte(range);
         }
     }
-
 }

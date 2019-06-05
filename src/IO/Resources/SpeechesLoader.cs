@@ -91,17 +91,15 @@ namespace ClassicUO.IO.Resources
             return false;
         }
 
-        public SpeechEntry[] GetKeywords(string text)
+        public List<SpeechEntry> GetKeywords(string text)
         {
+            List<SpeechEntry> list = new List<SpeechEntry>();
+
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
             {
-                return new SpeechEntry[0]
-                {
-                };
+                return list;
             }
-
             text = text.ToLower();
-            List<SpeechEntry> list = new List<SpeechEntry>();
 
             for (int i = 0; i < _speech.Length; i++)
             {
@@ -113,7 +111,7 @@ namespace ClassicUO.IO.Resources
 
             list.Sort();
 
-            return list.ToArray();
+            return list;
         }
     }
 
