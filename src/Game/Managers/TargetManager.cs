@@ -163,9 +163,16 @@ namespace ClassicUO.Game.Managers
                 if (selectedEntity is Item item)
                 {
                     GameActions.PickUp(item,item.Amount);
-                    GameActions.DropItem(item.Serial,0,0,0,Engine.Profile.Current.GrabBagSerial == 0
+                    var bag = Engine.Profile.Current.GrabBagSerial == 0
                         ? World.Player.Equipment[(int) Layer.Backpack].Serial
-                        : (Serial)Engine.Profile.Current.GrabBagSerial);
+                        : (Serial) Engine.Profile.Current.GrabBagSerial;
+                    if (!World.Items.Contains(bag))
+                    {
+                        GameActions.Print($"Grab Bag not found, setting to Backpack.");
+                        Engine.Profile.Current.GrabBagSerial = 0;
+                        bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
+                    }
+                    GameActions.DropItem(item.Serial,0,0,0,bag);
                 }
                 ClearTargetingWithoutTargetCancelPacket();
                 return;
