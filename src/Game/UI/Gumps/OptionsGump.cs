@@ -1510,7 +1510,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
-            Engine.Profile.Current.DisableCtrlQWBtn = _disableTabBtn.IsChecked;
+            Engine.Profile.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
 
             if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
             {
