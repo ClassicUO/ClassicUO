@@ -247,6 +247,9 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;
         [JsonProperty] public bool ShowNewCorpseNameIncoming { get; set; } = true;
+        
+        [JsonProperty] public uint GrabBagSerial { get; set; }
+
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

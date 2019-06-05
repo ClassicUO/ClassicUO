@@ -37,7 +37,9 @@ namespace ClassicUO.Game.Managers
         Object = 0,
         Position = 1,
         MultiPlacement = 2,
-        SetTargetClientSide = 3
+        SetTargetClientSide = 3,
+        Grab,
+        SetGrabBag
     }
 
     public enum TargetType
@@ -145,6 +147,30 @@ namespace ClassicUO.Game.Managers
             else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
                 selectedEntity = overhead.Parent.Parent;
 
+            if (TargetingState == CursorTarget.SetGrabBag)
+            {
+                if (selectedEntity is Item item)
+                {
+                    Engine.Profile.Current.GrabBagSerial = item.Serial;
+                    GameActions.Print($"Grab Bag set: {item.Serial}");
+                }
+                ClearTargetingWithoutTargetCancelPacket();
+                return;
+            }
+            
+            if (TargetingState == CursorTarget.Grab)
+            {
+                if (selectedEntity is Item item)
+                {
+                    GameActions.PickUp(item,item.Amount);
+                    GameActions.DropItem(item.Serial,0,0,0,Engine.Profile.Current.GrabBagSerial == 0
+                        ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                        : (Serial)Engine.Profile.Current.GrabBagSerial);
+                }
+                ClearTargetingWithoutTargetCancelPacket();
+                return;
+            }
+            
             if (selectedEntity is Entity entity)
             {
                 if (selectedEntity != World.Player)
