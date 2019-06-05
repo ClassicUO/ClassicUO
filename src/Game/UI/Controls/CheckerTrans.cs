@@ -100,25 +100,6 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
         }
 
-        public static SpriteTexture TransparentTexture
-        {
-            get
-            {
-                if (_transparentTexture == null || _transparentTexture.IsDisposed)
-                {
-                    _transparentTexture = new SpriteTexture(1, 1);
-
-                    _transparentTexture.SetData(new Color[1]
-                    {
-                        Color.Black
-                    });
-                }
-
-                _transparentTexture.Ticks = Engine.Ticks;
-
-                return _transparentTexture;
-            }
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -135,7 +116,7 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hue = Vector3.Zero;
             hue.Z = 0.5f;
 
-            return batcher.Draw2D(TransparentTexture, x, y, Width, Height, ref hue);
+            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref hue);
         }
     }
 }
