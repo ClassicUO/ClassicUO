@@ -42,9 +42,8 @@ namespace ClassicUO.Renderer
 
         public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
         {
-            if (text == null) throw new ArgumentNullException("text");
-
-            if (text.Length == 0) return;
+            if (string.IsNullOrEmpty(text))
+                return;
 
             EnsureSize();
 
