@@ -176,6 +176,8 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
+                        case CursorTarget.Grab:
+                        case CursorTarget.SetGrabBag:
                             Game.SelectedObject.Object = Item;
 
 
@@ -246,7 +248,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
+                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object || TargetManager.TargetingState == CursorTarget.Grab || TargetManager.TargetingState == CursorTarget.SetGrabBag )
                 {
                     TargetManager.TargetGameObject(Item);
                     Mouse.LastLeftButtonClickTime = 0;

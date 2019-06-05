@@ -946,6 +946,14 @@ namespace ClassicUO.Game.Managers
                 case MacroType.AuraOnOff:
                     Engine.AuraManager.ToggleVisibility();
                     break;
+                case MacroType.Grab:
+                    GameActions.Print($"Target an Item to grab it.");
+                    TargetManager.SetTargeting(CursorTarget.Grab,Serial.INVALID,TargetType.Neutral);
+                    break;
+                case MacroType.SetGrabBag:
+                    GameActions.Print($"Target the container to Grab items into.");
+                    TargetManager.SetTargeting(CursorTarget.SetGrabBag,Serial.INVALID,TargetType.Neutral);
+                    break;
 
             }
 
@@ -1234,7 +1242,9 @@ namespace ClassicUO.Game.Managers
         ToggleChatVisibility,
         MovePlayer,
         Aura,
-        AuraOnOff
+        AuraOnOff,
+        Grab,
+        SetGrabBag
     }
 
     internal enum MacroSubType

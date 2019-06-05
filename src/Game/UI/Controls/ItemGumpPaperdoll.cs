@@ -146,6 +146,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
+                        case CursorTarget.Grab:
+                        case CursorTarget.SetGrabBag:
+  
                             Game.SelectedObject.Object = Item;
 
 
