@@ -30,7 +30,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace ClassicUO.Game.UI
 {
