@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
+            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
             batcher.Draw2D(Texture, x, y, ref hue);
 

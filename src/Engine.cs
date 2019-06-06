@@ -697,8 +697,8 @@ namespace ClassicUO
 
             int size = FileManager.Hues.HuesCount;
 
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
-            texture0.SetData(hues, 0, size);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
             texture1.SetData(hues, size, size);
             GraphicsDevice.Textures[1] = texture0;

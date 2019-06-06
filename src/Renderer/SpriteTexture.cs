@@ -49,16 +49,8 @@ namespace ClassicUO.Renderer
             int size = Width * Height;
             _hitMap = new bool[size];
 
-            int pos = 0;
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    _hitMap[pos] = data[pos] != 0;
-                    pos++;
-                }
-            }
+            for(int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
 
             SetData(data);
         }
@@ -68,16 +60,8 @@ namespace ClassicUO.Renderer
             int size = Width * Height;
             _hitMap = new bool[size];
 
-            int pos = 0;
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    _hitMap[pos] = data[pos] != 0;
-                    pos++;
-                }
-            }
+            for(int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
 
             SetData(data);
         }
