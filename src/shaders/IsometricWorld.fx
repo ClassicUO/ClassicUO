@@ -73,7 +73,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	
 	int mode = int(IN.Hue.y);
 	bool swap = false;
-	if(mode > COLOR_SWAP)
+	if(mode >= COLOR_SWAP)
 	{
 		mode -= COLOR_SWAP;
 		swap = true;
