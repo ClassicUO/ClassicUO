@@ -57,11 +57,7 @@ namespace ClassicUO.Game.Managers
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || !Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground)
                 return;
 
-            if (Engine.Instance.IsActive)
-            {
-                if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
-            }
-            else if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
+            if (!Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
 
             if (volume < -1 || volume > 1f)
                 return;
