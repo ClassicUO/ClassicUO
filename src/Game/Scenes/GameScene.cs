@@ -659,9 +659,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             DrawWorld(batcher);
-             
-            Game.SelectedObject.LastObject = Game.SelectedObject.Object;
-
+            
             return base.Draw(batcher);
         }
 
@@ -793,6 +791,7 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.SetBlendState(_blendText);
             Overheads.Draw(batcher, x, y);
+            Game.SelectedObject.LastObject = Game.SelectedObject.Object;
 
             // batcher.SetBlendState(null);
             // workaround to set overheads clickable

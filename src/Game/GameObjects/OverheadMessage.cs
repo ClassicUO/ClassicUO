@@ -87,6 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (a.RenderedText.Hue != hue || ishealthmessage)
                     {
+                        a.Hue = hue;
                         a.RenderedText.Hue = hue;
 
                         if (ishealthmessage)
@@ -135,6 +136,7 @@ namespace ClassicUO.Game.GameObjects
                 RenderedText = rtext,
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
+                Hue = hue,
                 Parent = this,
                 IsHealthMessage = ishealthmessage
             };
@@ -302,8 +304,23 @@ namespace ClassicUO.Game.GameObjects
                 ushort hue = 0;
 
                 if (Engine.Profile.Current.HighlightGameObjects)
-                    if (item.IsSelected)
+                {
+                    if (SelectedObject.LastObject == item)
                         hue = 23;
+                }
+                else if (SelectedObject.LastObject == item)
+                {
+                    if (item.RenderedText.Hue != 0xFF)
+                    {
+                        item.RenderedText.Hue = 0xFF;
+                        item.RenderedText.CreateTexture();
+                    }
+                }
+                else if (item.RenderedText.Hue != item.Hue)
+                {
+                    item.RenderedText.Hue = item.Hue;
+                    item.RenderedText.CreateTexture();
+                }
 
                 item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height;
@@ -515,9 +532,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = 0;
 
-                if (Engine.Profile.Current.HighlightGameObjects)
-                    if (item.IsSelected)
-                        hue = 23;
+                //if (Engine.Profile.Current.HighlightGameObjects)
+                //{
+                //    if (SelectedObject.LastObject == item)
+                //        hue = 23;
+                //}
+                //else if (SelectedObject.LastObject == item)
+                //    hue = 23;
 
                 item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height - item.OffsetY;
@@ -562,10 +583,9 @@ namespace ClassicUO.Game.GameObjects
 
         public OverheadMessage Parent;
         public RenderedText RenderedText;
+        public ushort Hue;
         public float Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
-
-        public bool IsSelected { get; set; }
     }
 }
