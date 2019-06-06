@@ -37,6 +37,7 @@ namespace ClassicUO.Game.UI
     sealed class TextContainer
     {
         private readonly List<MessageInfo> _messages = new List<MessageInfo>();
+        private readonly Rectangle[] _rects = new Rectangle[2];
 
 
         public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y)
@@ -91,8 +92,11 @@ namespace ClassicUO.Game.UI
                 else
                 {
                     int count = 0;
-                    Rectangle r1 = new Rectangle(msg.X, msg.Y, msg.RenderedText.Width, msg.RenderedText.Height);
-                    r1.X -= r1.Width >> 1;
+                    _rects[0].X = msg.X;
+                    _rects[0].Y = msg.Y;
+                    _rects[0].Width = msg.RenderedText.Width;
+                    _rects[0].Height = msg.RenderedText.Height;
+                    _rects[0].X -= _rects[0].Width >> 1;
 
                     for (int j = i + 1; j < _messages.Count; j++)
                     {
@@ -100,17 +104,19 @@ namespace ClassicUO.Game.UI
 
                         if (msg.X == m.X && msg.Y == m.Y)
                             continue;
-                        
-                        Rectangle r2 = new Rectangle(m.X, m.Y, m.RenderedText.Width, m.RenderedText.Height);
-                        r2.X -= r2.Width >> 1;
 
-                        if (r1.Intersects(r2))
+                        _rects[1].X = m.X;
+                        _rects[1].Y = m.Y;
+                        _rects[1].Width = m.RenderedText.Width;
+                        _rects[1].Height = m.RenderedText.Height;
+                        _rects[1].X -= _rects[1].Width >> 1;
+
+                        if (_rects[0].Intersects(_rects[1]))
                         {
                             msg.Alpha = 0.3f + (0.05f * count);
                             count++;
                         }
                     }
-
                 }
             }
         }
