@@ -91,6 +91,9 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
+                    if (string.IsNullOrEmpty(t))
+                        return false;
+
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
