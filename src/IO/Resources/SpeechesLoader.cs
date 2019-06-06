@@ -69,23 +69,23 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < split.Length; i++)
             {
-                if (split[i].Length > 0 && split[i].Length <= input.Length)
+                if (split[i].Length > input.Length || split[i].Length == 0)
+                    continue;
+
+                if (!entry.CheckStart)
                 {
-                    if (!entry.CheckStart)
-                    {
-                        if (input.IndexOf(split[i], 0) < 0)
-                            continue;
-                    }
-
-                    if (!entry.CheckEnd)
-                    {
-                        if (input.IndexOf(split[i], input.Length - split[i].Length) < 0)
-                            continue;
-                    }
-
-                    if (input.IndexOf(split[i]) >= 0)
-                        return true;
+                    if (input.IndexOf(split[i], 0, split[i].Length) == -1)
+                        continue;
                 }
+
+                if (!entry.CheckEnd)
+                {
+                    if (input.IndexOf(split[i], input.Length - split[i].Length) == -1)
+                        continue;
+                }
+
+                if (input.IndexOf(split[i]) != -1)
+                    return true;
             }
 
             return false;
@@ -99,12 +99,13 @@ namespace ClassicUO.IO.Resources
             {
                 return list;
             }
+
             text = text.ToLower();
 
             for (int i = 0; i < _speech.Length; i++)
             {
                 SpeechEntry entry = _speech[i];
-
+                
                 if (IsMatch(text, entry))
                     list.Add(entry);
             }
