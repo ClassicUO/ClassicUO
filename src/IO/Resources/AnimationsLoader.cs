@@ -1107,12 +1107,12 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue).Direction[0] : 
-                                                          FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true).Direction[0];
+                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : 
+                                                          FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
-                return direction.Address != 0 && direction.Size != 0 ||
-                       direction.IsUOP;
+                return direction != null && (direction.Address != 0 && direction.Size != 0 ||
+                       direction.IsUOP);
             }
 
             return false;
