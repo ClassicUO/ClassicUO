@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (IsDead)
                 {
-                    if (IsHuman)
+                    if (!IsHuman)
                         _viewHue = 0x0386;
                 }
                 else if (Engine.Profile.Current.HighlightMobilesByFlags)
