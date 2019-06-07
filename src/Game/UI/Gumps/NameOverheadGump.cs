@@ -164,18 +164,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Entity.Serial.IsMobile)
+            if (Entity is Mobile mob)
             {
-                GameActions.RequestMobileStatus(Entity);
+                GameActions.RequestMobileStatus(mob);
 
-                Engine.UI.GetControl<HealthBarGump>(Entity)?.Dispose();
+                Engine.UI.GetControl<HealthBarGump>(mob)?.Dispose();
 
-                if (Entity == World.Player)
+                if (mob == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();
 
                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                 HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump((Mobile) Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                Engine.UI.Add(currentHealthBarGump = new HealthBarGump((Mobile)mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
             else

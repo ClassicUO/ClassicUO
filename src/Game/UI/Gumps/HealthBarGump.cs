@@ -66,15 +66,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _targetBroke = false;
 
-        public HealthBarGump(Serial mob) : this()
+
+        public HealthBarGump(Mobile mobile) : this()
         {
-            Mobile mobile = World.Mobiles.Get(mob);
+            if (mobile == null)
+            {
+                Dispose();
+                return;
+            }
 
             _name = mobile.Name;
             _isDead = mobile.IsDead;
-            LocalSerial = mob;
+            LocalSerial = mobile.Serial;
 
             BuildGump();
+        }
+
+        public HealthBarGump(Serial mob) : this(World.Mobiles.Get(mob))
+        {
+
         }
 
         public HealthBarGump() : base(0, 0)
