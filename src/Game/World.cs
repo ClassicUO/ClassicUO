@@ -59,7 +59,7 @@ namespace ClassicUO.Game
 
         public static Map.Map Map { get; private set; }
 
-        public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
+        public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static bool SkillsRequested { get; set; }
 
@@ -135,7 +135,7 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (mob.Distance > ViewRange)
+                    if (mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -155,11 +155,11 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.OnGround && item.Distance > ViewRange)
+                    if (item.OnGround && item.Distance > ClientViewRange)
                     {
                         if (item.IsMulti)
                         {
-                            if (HouseManager.TryToRemove(item, ViewRange))
+                            if (HouseManager.TryToRemove(item, ClientViewRange))
                                 RemoveItem(item);
                         }
                         else

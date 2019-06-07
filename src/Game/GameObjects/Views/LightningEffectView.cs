@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;

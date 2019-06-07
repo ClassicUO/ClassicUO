@@ -816,44 +816,44 @@ namespace ClassicUO.Game.Managers
                         else if (res > Constants.MAX_VIEW_RANGE)
                             res = Constants.MAX_VIEW_RANGE;
 
-                        World.ViewRange = res;
+                        World.ClientViewRange = res;
 
-                        GameActions.Print($"ViewRange is now {res}.");
+                        GameActions.Print($"ClientViewRange is now {res}.");
                     }
 
                     break;
                 case MacroType.IncreaseUpdateRange:
-                    World.ViewRange++;
+                    World.ClientViewRange++;
 
-                    if (World.ViewRange > Constants.MAX_VIEW_RANGE)
-                        World.ViewRange = Constants.MAX_VIEW_RANGE;
+                    if (World.ClientViewRange > Constants.MAX_VIEW_RANGE)
+                        World.ClientViewRange = Constants.MAX_VIEW_RANGE;
 
-                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
+                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
 
                     break;
                 case MacroType.DecreaseUpdateRange:
-                    World.ViewRange--;
+                    World.ClientViewRange--;
 
-                    if (World.ViewRange < Constants.MIN_VIEW_RANGE)
-                        World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
+                    if (World.ClientViewRange < Constants.MIN_VIEW_RANGE)
+                        World.ClientViewRange = Constants.MIN_VIEW_RANGE;
+                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
 
                     break;
 
                 case MacroType.MaxUpdateRange:
-                    World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
+                    World.ClientViewRange = Constants.MAX_VIEW_RANGE;
+                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
 
                     break;
                 case MacroType.MinUpdateRange:
-                    World.ViewRange = Constants.MIN_VIEW_RANGE;
-                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
+                    World.ClientViewRange = Constants.MIN_VIEW_RANGE;
+                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
 
                     break;
 
                 case MacroType.DefaultUpdateRange:
-                    World.ViewRange = Constants.MAX_VIEW_RANGE;
-                    GameActions.Print($"ViewRange is now {World.ViewRange}.");
+                    World.ClientViewRange = Constants.MAX_VIEW_RANGE;
+                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
 
                     break;
                 case MacroType.SelectNext:

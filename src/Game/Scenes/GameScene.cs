@@ -593,7 +593,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     int distance = follow.Distance;
 
-                    if (distance > World.ViewRange)
+                    if (distance > World.ClientViewRange)
                         StopFollowing();
                     else if (distance > 3)
                         Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);

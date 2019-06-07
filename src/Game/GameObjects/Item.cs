@@ -358,7 +358,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), Position);
 
-                if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
+                if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
                 {
                     LoadMulti();
                     AllowedToDraw = MultiGraphic > 2;
