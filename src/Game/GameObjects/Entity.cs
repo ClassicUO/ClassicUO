@@ -60,6 +60,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Serial Serial { get; set; }
+        public bool IsClicked { get; set; }
 
         public ConcurrentDictionary<int, Property> Properties => _properties;
 

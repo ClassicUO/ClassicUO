@@ -306,11 +306,6 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteByte(0);
         }
-
-        public PChangeWarMode(int state) : this(state != 0)
-        {
-
-        }
     }
 
     internal sealed class PHelpRequest : PacketWriter

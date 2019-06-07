@@ -575,7 +575,7 @@ namespace ClassicUO.Network
                 item.AddToTile();
 
 
-            if (graphic == 0x2006 && Engine.Profile.Current.ShowNewCorpseNameIncoming)
+            if (graphic == 0x2006 && !item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming)
             {
                 GameActions.SingleClick(item);
             }
@@ -1985,7 +1985,7 @@ namespace ClassicUO.Network
             //if (string.IsNullOrEmpty(mobile.Name))
             //    NetClient.Socket.Send(new PNameRequest(mobile));
 
-            if (mobile != World.Player && Engine.Profile.Current.ShowNewMobileNameIncoming)
+            if (mobile != World.Player && !mobile.IsClicked && Engine.Profile.Current.ShowNewMobileNameIncoming)
                 GameActions.SingleClick(mobile);
 
             Engine.UI.GetControl<PaperDollGump>(mobile)?.Update();
@@ -3505,7 +3505,7 @@ namespace ClassicUO.Network
             {
                 graphic += graphicInc;
             }
-            else if (Engine.Profile.Current.ShowNewCorpseNameIncoming)
+            else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming)
             {
                 GameActions.SingleClick(item);
             }

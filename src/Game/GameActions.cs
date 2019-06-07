@@ -108,6 +108,11 @@ namespace ClassicUO.Game
         {
             // add  request context menu
             Socket.Send(new PClickRequest(serial));
+
+            Entity entity = World.Get(serial);
+
+            if (entity != null)
+                entity.IsClicked = true;
         }
 
         public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
