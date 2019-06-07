@@ -796,11 +796,14 @@ namespace ClassicUO.Game.Scenes
             // batcher.SetBlendState(null);
             // workaround to set overheads clickable
             //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+        }
 
+        public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        {
             if (_isSelection)
             {
                 Vector3 selhue = Vector3.Zero;
-                batcher.DrawRectangle(Textures.GetTexture(Color.Aqua), _selectionStart.Item1 + x, _selectionStart.Item2 + y, Mouse.Position.X - (_selectionStart.Item1 + x), Mouse.Position.Y - (_selectionStart.Item2 + y), ref selhue);
+                batcher.DrawRectangle(Textures.GetTexture(Color.Aqua), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref selhue);
             }
         }
 

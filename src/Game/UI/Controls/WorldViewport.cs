@@ -99,6 +99,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // draw overheads
+            _scene.DrawSelection(batcher, x, y);
             _scene.DrawOverheads(batcher, x, y);
 
             return base.Draw(batcher, x, y);
