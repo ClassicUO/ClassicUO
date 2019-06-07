@@ -290,7 +290,8 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._tick?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._tick?.Invoke();
         }
 
 
@@ -298,10 +299,8 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
                     result = false;
             }
@@ -322,33 +321,35 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onFocusGained?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onFocusGained?.Invoke();
         }
 
         internal static void OnFocusLost()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onFocusLost?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onFocusLost?.Invoke();
         }
 
 
         internal static void OnConnected()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onConnected?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onConnected?.Invoke();
         }
 
         internal static void OnDisconnected()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onDisconnected?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onDisconnected?.Invoke();
         }
 
         internal static bool ProcessSendPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
                     result = false;
             }
@@ -369,10 +370,8 @@ namespace ClassicUO.Network
                 Engine.SceneManager.CurrentScene is GameScene gs)
                 return true;
 
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 if (plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed))
                     result = false;
             }
@@ -382,19 +381,16 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
                 plugin._onMouse?.Invoke(button, wheel);
             }
         }
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 try
                 {
                     // TODO: need fixed on razor side
