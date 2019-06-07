@@ -44,13 +44,20 @@ namespace ClassicUO.IO.Resources
         private readonly AnimationGroup _empty = new AnimationGroup
         {
             Direction = new AnimationDirection[5]
+            {
+                new AnimationDirection(), 
+                new AnimationDirection(),
+                new AnimationDirection(), 
+                new AnimationDirection(), 
+                new AnimationDirection()
+            }
         };
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];
         //private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
 
-        private readonly List<AnimationFrameTexture> _usedTextures = new List<AnimationFrameTexture>();
+        private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
         public ushort Color { get; set; }
@@ -206,6 +213,9 @@ namespace ClassicUO.IO.Resources
 
                     for (byte d = 0; d < 5; d++)
                     {
+                        if (DataIndex[i].Groups[j].Direction[d] == null)
+                            DataIndex[i].Groups[j].Direction[d] = new AnimationDirection();
+
                         unsafe
                         {
                             AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * animIdxBlockSize);
@@ -383,6 +393,9 @@ namespace ClassicUO.IO.Resources
 
                                 for (byte d = 0; d < 5; d++)
                                 {
+                                    if (DataIndex[index].BodyConvGroups[j].Direction[d] == null)
+                                        DataIndex[index].BodyConvGroups[j].Direction[d] = new AnimationDirection();
+
                                     unsafe
                                     {
                                         AnimIdxBlock* aidx = (AnimIdxBlock*) (addressOffset + offset * animIdxBlockSize);
@@ -498,7 +511,12 @@ namespace ClassicUO.IO.Resources
                             Direction = new AnimationDirection[5]
                         };
 
-                        for (int d = 0; d < 5; d++) g.Direction[d].IsUOP = true;
+                        for (int d = 0; d < 5; d++)
+                        {
+                            if (g.Direction[d] == null)
+                                g.Direction[d] = new AnimationDirection();
+                            g.Direction[d].IsUOP = true;
+                        }
                     }
                 }
             }
@@ -1264,6 +1282,7 @@ namespace ClassicUO.IO.Resources
 
                 //_usedUopTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
 
+                _usedTextures.Add(animDirection);
 
                 reader.ReleaseData();
             }
@@ -1343,7 +1362,7 @@ namespace ClassicUO.IO.Resources
                 animDir.Frames[i] = f;
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);
             }
-
+            _usedTextures.Add(animDir);
             //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
 
@@ -1471,87 +1490,70 @@ namespace ClassicUO.IO.Resources
 
         public override void CleaUnusedResources()
         {
-            //int count = 0;
-            //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-            //ushort hue = 0;
+            int count = 0;
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            //for (int i = 0; i < _usedTextures.Count; i++)
-            //{
-            //    ToRemoveInfo info = _usedTextures[i];
+            for (int i = 0; i < _usedTextures.Count; i++)
+            {
+                var t = _usedTextures[i];
 
-            //    ushort graphic = (ushort) info.AnimID;
-            //    byte grp = (byte) info.Group;
+                if (t == null)
+                {
+                    _usedTextures.RemoveAt(i--);
+                }
+                else if (t.LastAccessTime != 0 && t.LastAccessTime < ticks)
+                {
+                    for (int j = 0; j < t.FrameCount; j++)
+                    {
+                        ref var texture = ref t.Frames[j];
+                        if (texture != null)
+                        {
+                            texture.Dispose();
+                            texture = null;
+                        }
+                    }
 
-            //    ref var dataIndex = ref DataIndex[graphic];
+                    t.FrameCount = 0;
+                    t.Frames = null;
+                    t.LastAccessTime = 0;
 
+                    _usedTextures.RemoveAt(i--);
 
-
-            //    ref var dir = ref GetBodyAnimationGroup(ref graphic, ref grp, ref hue).Direction[info.Direction];
-
-            //    if (dir.LastAccessTime != 0 && dir.LastAccessTime < ticks)
-            //    {
-            //        for (int j = 0; j < dir.FrameCount; j++)
-            //        {
-            //            ref var hash = ref dir.Frames[j];
-
-            //            if (hash != null)
-            //            {
-            //                hash.Dispose();
-            //                hash = null;
-            //            }
-            //        }
-
-            //        dir.FrameCount = 0;
-            //        dir.Frames = null;
-            //        dir.LastAccessTime = 0;
-            //        _usedTextures.RemoveAt(i--);
-
-            //        if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-            //            break;
-            //    }
-            //}
-
+                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+                        break;
+                }
+            }
         }
 
         public void Clear()
         {
-            //for (int i = 0; i < _usedTextures.Count; i++)
-            //{
-            //    ToRemoveInfo info = _usedTextures[i];
-            //    ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
-
-
-            //    for (int j = 0; j < dir.FrameCount; j++)
-            //    {
-            //        ref var hash = ref dir.Frames[j];
-
-            //        if (hash != null)
-            //        {
-            //            hash.Dispose();
-            //            hash = null;
-            //        }
-            //    }
-
-            //    dir.FrameCount = 0;
-            //    dir.Frames = null;
-            //    dir.LastAccessTime = 0;
-            //    _usedTextures.RemoveAt(i--);
-            //}
-        }
-
-
-        private readonly struct ToRemoveInfo
-        {
-            public ToRemoveInfo(int animID, int group, int direction)
+            for (int i = 0; i < _usedTextures.Count; i++)
             {
-                AnimID = animID;
-                Group = group;
-                Direction = direction;
+                var t = _usedTextures[i];
+
+                if (t == null)
+                {
+                }
+                else if (t.LastAccessTime != 0)
+                {
+                    for (int j = 0; j < t.FrameCount; j++)
+                    {
+                        ref var texture = ref t.Frames[j];
+                        if (texture != null)
+                        {
+                            texture.Dispose();
+                            texture = null;
+                        }
+                    }
+
+                    t.FrameCount = 0;
+                    t.Frames = null;
+                    t.LastAccessTime = 0;
+                }
             }
 
-            public readonly int AnimID;
-            public readonly int Group;
-            public readonly int Direction;
+            if (_usedTextures.Count != 0)
+                _usedTextures.Clear();
         }
 
         private readonly struct UOPFrameData
@@ -1834,7 +1836,7 @@ namespace ClassicUO.IO.Resources
         public uint Offset;
     }
 
-    internal struct AnimationDirection
+    internal class AnimationDirection
     {
         public byte FrameCount;
         public int FileIndex;

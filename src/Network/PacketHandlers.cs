@@ -1644,7 +1644,7 @@ namespace ClassicUO.Network
 
         private static void ClientViewRange(Packet p)
         {
-            World.ServerViewRange = World.ClientViewRange = p.ReadByte();
+            World.ClientViewRange = p.ReadByte();
         }
 
         private static void BulletinBoardData(Packet p)
