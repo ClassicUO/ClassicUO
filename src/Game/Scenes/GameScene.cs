@@ -800,13 +800,14 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_isSelection)
+            if (_isSelectionActive)
             {
-                Vector3 zero = Vector3.Zero;
+                Vector3 sellines = Vector3.Zero;
+                sellines.Z = 0.3f;
                 Vector3 selhue = new Vector3();
                 selhue.Z = 0.7f;
                 batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref selhue);
-                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref zero);
+                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref sellines);
             }
         }
 
