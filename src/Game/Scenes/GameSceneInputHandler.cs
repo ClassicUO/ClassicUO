@@ -188,7 +188,14 @@ namespace ClassicUO.Game.Scenes
                             {
                                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                                 GameActions.RequestMobileStatus(mobile);
-                                Engine.UI.Add(new HealthBarGump(mobile) { X = x - (rect.Width >> 1), Y = y - (rect.Height >> 1) - 100 });
+                                HealthBarGump hbg = new HealthBarGump(mobile);
+                                // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
+                                // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
+                                // maybe should be fixed elsewhere
+                                hbg.Initialize();
+                                hbg.X = x - (rect.Width >> 1);
+                                hbg.Y = y - (rect.Height >> 1) - 100;
+                                Engine.UI.Add(hbg);
                             }
                         }
                     }
