@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Scenes
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
         public Direction _numPadDirection;
         private (int, int) _selectionStart, _selectionEnd;
-        private bool _isSelection;
+        private bool _isSelectionActive;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -125,14 +125,14 @@ namespace ClassicUO.Game.Scenes
             if (_dragginObject is Static || _dragginObject is Land || _dragginObject is Multi || (_dragginObject is Item tmpitem && tmpitem.IsLocked))
             {
                 _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
-                _isSelection = true;
+                _isSelectionActive = true;
             }
             
         }
 
         private void OnLeftMouseUp(object sender, EventArgs e)
         {
-            if (!IsMouseOverViewport && !_isSelection)
+            if (!IsMouseOverViewport && !_isSelectionActive)
                 return;
 
             if (_rightMousePressed)
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.Scenes
 
             //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
-            if (_isSelection)
+            if (_isSelectionActive)
             {
                 if (_selectionStart.Item1 != Mouse.Position.X && _selectionStart.Item2 != Mouse.Position.Y)
                 {
@@ -182,11 +182,11 @@ namespace ClassicUO.Game.Scenes
 
                         if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
                         {
-                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
 
                             if (mobile != World.Player)
                             {
-                                Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                                Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
                                 GameActions.RequestMobileStatus(mobile);
                                 HealthBarGump hbg = new HealthBarGump(mobile);
                                 // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
                 }
-                _isSelection = false;
+                _isSelectionActive = false;
                 _selectionStart = (0, 0);
             }
             else if (TargetManager.IsTargeting)
