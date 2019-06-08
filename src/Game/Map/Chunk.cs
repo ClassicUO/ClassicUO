@@ -26,11 +26,51 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
+        private const int POOL_SIZE = 20_000;
+
+        private static readonly QueuedPool<Tile> _poolTiles = new QueuedPool<Tile>(POOL_SIZE);
+        private static readonly QueuedPool<Land> _poolLand = new QueuedPool<Land>(POOL_SIZE);
+        private static readonly QueuedPool<Static> _poolStatic = new QueuedPool<Static>(POOL_SIZE);
+
+
+        public Chunk()
+        {
+            Tiles = new Tile[8, 8];
+        }
+
+        public void Chunk_New(ushort x, ushort y)
+        {
+            X = x;
+            Y = y;
+
+            if (Tiles == null)
+            {
+                Tiles = new Tile[8, 8];
+            }
+
+            x *= 8;
+            y *= 8;
+
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    Tile t = _poolTiles.GetOne();
+                    t.X = (ushort)(i + x);
+                    t.Y = (ushort)(j + y);
+                    Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
+                }
+            }
+
+            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+        }
+
         public Chunk(ushort x, ushort y)
         {
             X = x;
@@ -43,15 +83,20 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
-                    Tiles[i, j] = new Tile((ushort) (i + x), (ushort) (j + y));
+                {
+                    Tile t = _poolTiles.GetOne();
+                    t.X = (ushort) (i + x);
+                    t.Y = (ushort) (j + y);
+                    Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
+                }
             }
 
             LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
 
-        public ushort X { get; }
-        public ushort Y { get; }
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
 
         public Tile[,] Tiles { get; private set; }
 
@@ -77,12 +122,18 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        Land land = new Land(tileID)
+
+                        var land = _poolLand.GetOne();
+                        land.SetGraphic(tileID);
+                        land.AverageZ = z;
+                        land.MinZ = z;
+
+                        /*Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z
-                        };
+                        };*/
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
@@ -118,10 +169,15 @@ namespace ClassicUO.Game.Map
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
 
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                {
-                                    Position = new Position(staticX, staticY, z)
-                                };
+                                //Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                //{
+                                //    Position = new Position(staticX, staticY, z)
+                                //};
+
+                                Static staticObject = _poolStatic.GetOne();
+                                staticObject.SetGraphic_New(sb->Color, pos);
+                                staticObject.Hue = sb->Hue;
+                                staticObject.Position = new Position(staticX, staticY, z);
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
@@ -207,12 +263,17 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        Land land = new Land(tileID)
-                        {
-                            Graphic = tileID,
-                            AverageZ = z,
-                            MinZ = z
-                        };
+                        //Land land = new Land(tileID)
+                        //{
+                        //    Graphic = tileID,
+                        //    AverageZ = z,
+                        //    MinZ = z
+                        //};
+
+                        var land = _poolLand.GetOne();
+                        land.SetGraphic(tileID);
+                        land.AverageZ = z;
+                        land.MinZ = z;
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
@@ -285,16 +346,30 @@ namespace ClassicUO.Game.Map
                         GameObject r = obj.Right;
 
                         if (obj != World.Player)
-                            obj.Destroy();
+                        {
+                            if (obj is Land t)
+                            {
+                                t.RemoveFromTile();
+                                _poolLand.ReturnOne(t);
+                            }
+                            else if (obj is Static s)
+                            {
+                                s.RemoveFromTile();
+                                _poolStatic.ReturnOne(s);
+                            }
+                            else
+                                obj.Destroy();
+                        }
 
                         obj = r;
                     }
 
+                    _poolTiles.ReturnOne(Tiles[i, j]);
                     Tiles[i, j] = null;
                 }
             }
 
-            Tiles = null;
+            //Tiles = null;
         }
 
         public bool HasNoExternalData()

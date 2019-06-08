@@ -31,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static
     {
-        private readonly int _canBeTransparent;
+        private int _canBeTransparent;
         private Graphic _oldGraphic;
 
         public bool CharacterIsBehindFoliage { get; set; }

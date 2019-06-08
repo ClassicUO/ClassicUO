@@ -1157,7 +1157,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null)
+                    if (mobile.IsMounted)
                     {
                         if (action > 0)
                         {
@@ -1221,7 +1221,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.IsMounted) return 0xFF;
 
                 return 30;
             }
@@ -1268,7 +1268,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     return 20;
                 }
@@ -1294,7 +1294,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
-                if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (mobile.IsMounted)
+                    return 0xFF;
                 if (mode % 2 != 0) return 6;
 
                 return 5;
@@ -1324,7 +1325,7 @@ namespace ClassicUO.Game.GameObjects
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 3;
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     return 34;
                 }
@@ -1337,7 +1338,7 @@ namespace ClassicUO.Game.GameObjects
 
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
-            if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+            if (mobile.IsMounted) return 0xFF;
 
             if (action > 0)
             {
@@ -1361,7 +1362,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 9;
 
-                    return mobile.Equipment[(int) Layer.Mount] != null ? (byte) 0xFF : (byte) 33;
+                    return mobile.IsMounted ? (byte) 0xFF : (byte) 33;
                 }
 
                 return 3;
@@ -1389,7 +1390,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     switch (action)
                     {

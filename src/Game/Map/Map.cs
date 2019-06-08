@@ -51,7 +51,6 @@ namespace ClassicUO.Game.Map
 
         public int Index { get; }
 
-
         public Chunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
@@ -78,7 +77,8 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = new Chunk((ushort) cellX, (ushort) cellY);
+                    chuck = _poolChunk.GetOne();  // new Chunk((ushort) cellX, (ushort) cellY);
+                    chuck.Chunk_New((ushort)cellX, (ushort)cellY);
                     chuck.Load(Index);
                 }
                 else
@@ -184,6 +184,8 @@ namespace ClassicUO.Game.Map
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
+        private static readonly QueuedPool<Chunk> _poolChunk = new QueuedPool<Chunk>(200);
+
         public void ClearUnusedBlocks()
         {
             int count = 0;
@@ -196,6 +198,7 @@ namespace ClassicUO.Game.Map
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Destroy();
+                    _poolChunk.ReturnOne(block);
                     block = null;
                     _usedIndices.RemoveAt(i--);
 

@@ -25,6 +25,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.IO.Resources;

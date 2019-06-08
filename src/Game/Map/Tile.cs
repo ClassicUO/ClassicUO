@@ -21,7 +21,10 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -29,14 +32,18 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
-        public Tile(ushort x, ushort y)
+        public Tile()
         {
-            X = x;
-            Y = y;
         }
 
-        public ushort X { get; }
-        public ushort Y { get; }
+        //public Tile(ushort x, ushort y)
+        //{
+        //    X = x;
+        //    Y = y;
+        //}
+
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
 
         public GameObject FirstNode { get; private set; }
 

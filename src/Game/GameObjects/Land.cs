@@ -33,6 +33,25 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
+        public Land()
+        {
+
+        }
+
+        public void SetGraphic(ushort graphic)
+        {
+            Texture = null;
+            RemoveFromTile();
+            Graphic = graphic;
+            _tileData = FileManager.TileData.LandData[Graphic];
+            //Array.Clear(Normals, 0, Normals.Length);
+            //Rectangle = Rectangle.Empty;
+            IsStretched = TileData.TexID == 0 && TileData.IsWet;
+
+            AllowedToDraw = Graphic > 2;
+
+            AlphaHue = 255;
+        }
 
         public Land(Graphic graphic)
         {
@@ -46,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
 
         private LandTiles? _tileData;
 
-        public  LandTiles TileData
+        public LandTiles TileData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get

@@ -235,7 +235,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Exists => World.Contains(Serial);
 
-        public bool IsMounted => Equipment[(int) Layer.Mount] != null;
+        public bool IsMounted => HasEquipment && Equipment[(int) Layer.Mount] != null;
 
         public bool IsRunning { get; internal set; }
 
@@ -957,8 +957,11 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
-            for (int i = 0; i < Equipment.Length; i++)
-                Equipment[i] = null;
+            if (HasEquipment)
+            {
+                for (int i = 0; i < Equipment.Length; i++)
+                    Equipment[i] = null;
+            }
 
             base.Destroy();
         }

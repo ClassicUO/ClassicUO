@@ -475,13 +475,16 @@ namespace ClassicUO.Game.GameObjects
 
         internal static bool IsCovered(Mobile mobile, Layer layer)
         {
+            if (!mobile.HasEquipment)
+                return false;
+
             switch (layer)
             {
                 case Layer.Shoes:
-                    Item pants = mobile.Equipment[(int) Layer.Pants];
+                    Item pants =mobile.Equipment[(int) Layer.Pants];
                     Item robe;
 
-                    if (mobile.Equipment[(int) Layer.Legs] != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                    if ((mobile.HasEquipment && mobile.Equipment[(int) Layer.Legs] != null) || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
                         return true;
                     else
                     {
