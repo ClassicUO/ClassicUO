@@ -52,8 +52,13 @@ namespace ClassicUO.Game.GameObjects
 
             Components.ForEach(s =>
             {
-                if (recalculate && item != null)
-                    s.Position = new Position(  (ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY),  (sbyte) (item.Position.Z + s.MultiOffsetZ));
+                if (item != null)
+                {
+                    if (recalculate)
+                        s.Position = new Position((ushort)(item.X + s.MultiOffsetX), (ushort)(item.Y + s.MultiOffsetY), (sbyte)(item.Position.Z + s.MultiOffsetZ));
+                    s.Hue = item.Hue;
+                }
+                
                 s.AddToTile();
             });
         }
