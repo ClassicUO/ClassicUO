@@ -666,14 +666,20 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.Graphic;
 
-                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
+                do
                 {
-                    if (graphic != newGraphic)
+                    if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                     {
-                        graphic = newGraphic;
-                        hue = index.Color;
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+                            hue = index.Color;
+                            newGraphic = DataIndex[graphic].Graphic;
+                        }
                     }
                 }
+                while (graphic != newGraphic);
+              
 
                 if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
                     return DataIndex[graphic].BodyConvGroups[group];
@@ -699,14 +705,19 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.CorpseGraphic;
 
-                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
+                do
                 {
-                    if (graphic != newGraphic)
+                    if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                     {
-                        graphic = newGraphic;
-                        hue = index.CorpseColor;
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+                            hue = index.CorpseColor;
+                            newGraphic = DataIndex[graphic].CorpseGraphic;
+                        }
                     }
                 }
+                while (graphic != newGraphic);
 
                 if (DataIndex[graphic].HasBodyConversion)
                     return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
