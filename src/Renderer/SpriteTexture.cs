@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
@@ -53,6 +54,17 @@ namespace ClassicUO.Renderer
                 _hitMap[i] = data[i] != 0;
 
             SetData(data);
+        }
+
+        public unsafe void SetDataHitMap16(ushort* data)
+        {
+            int size = Width * Height;
+            _hitMap = new bool[size];
+
+            for (int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
+
+            SetDataPointerEXT(0, new Rectangle(0, 0, Width, Height), (IntPtr) data, size);
         }
 
         public void SetDataHitMap32(uint[] data)
