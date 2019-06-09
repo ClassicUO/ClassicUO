@@ -221,10 +221,15 @@ namespace ClassicUO.Game.Map
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
 
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                {
-                                    Position = new Position(staticX, staticY, z)
-                                };
+                                Static staticObject = PoolsManager.GetStatic();
+                                staticObject.SetGraphic_New(sb->Color, pos);
+                                staticObject.Hue = sb->Hue;
+                                staticObject.Position = new Position(staticX, staticY, z);
+
+                                //Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                //{
+                                //    Position = new Position(staticX, staticY, z)
+                                //};
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));

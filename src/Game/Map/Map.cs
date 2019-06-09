@@ -71,24 +71,24 @@ namespace ClassicUO.Game.Map
             if (block >= Chunks.Length)
                 return null;
 
-            ref Chunk chuck = ref Chunks[block];
+            ref Chunk chunk = ref Chunks[block];
 
-            if (chuck == null)
+            if (chunk == null)
             {
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = PoolsManager.GetChunk();  // new Chunk((ushort) cellX, (ushort) cellY);
-                    chuck.Chunk_New((ushort)cellX, (ushort)cellY);
-                    chuck.Load(Index);
+                    chunk = PoolsManager.GetChunk();  // new Chunk((ushort) cellX, (ushort) cellY);
+                    chunk.Chunk_New((ushort)cellX, (ushort)cellY);
+                    chunk.Load(Index);
                 }
                 else
                     return null;
             }
 
-            chuck.LastAccessTime = Engine.Ticks;
+            chunk.LastAccessTime = Engine.Ticks;
 
-            return chuck.Tiles[x % 8, y % 8];
+            return chunk.Tiles[x % 8, y % 8];
         }
 
         public Tile GetTile(int x, int y, bool load = true)
@@ -260,7 +260,9 @@ namespace ClassicUO.Game.Map
                             return;
 
                         _usedIndices.Add(cellindex);
-                        chunk = new Chunk((ushort) i, (ushort) j);
+                        //chunk = new Chunk((ushort) i, (ushort) j);
+                        chunk = PoolsManager.GetChunk();  // new Chunk((ushort) cellX, (ushort) cellY);
+                        chunk.Chunk_New((ushort)i, (ushort)j);
                         chunk.Load(Index);
                     }
 
