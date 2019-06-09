@@ -410,6 +410,9 @@ namespace ClassicUO.Game.GameObjects
             if (graphic == 0)
                 graphic = mobile.GetGraphicForAnimation();
 
+            if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return 0;
+
             ANIMATION_GROUPS_TYPE type = FileManager.Animations.DataIndex[graphic].Type;
             ANIMATION_GROUPS_TYPE originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 

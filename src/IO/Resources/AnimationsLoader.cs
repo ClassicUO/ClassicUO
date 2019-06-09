@@ -677,6 +677,8 @@ namespace ClassicUO.IO.Resources
                             newGraphic = DataIndex[graphic].Graphic;
                         }
                     }
+                    else
+                        break;
                 }
                 while (graphic != newGraphic);
               
@@ -715,6 +717,10 @@ namespace ClassicUO.IO.Resources
                             hue = index.CorpseColor;
                             newGraphic = DataIndex[graphic].CorpseGraphic;
                         }
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 while (graphic != newGraphic);
