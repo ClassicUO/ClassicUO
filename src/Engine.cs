@@ -792,7 +792,7 @@ namespace ClassicUO
 
             _time += framems;
 
-            if (_time > IntervalFixedUpdate)
+            if (_time >= IntervalFixedUpdate)
             {
                 _time %= IntervalFixedUpdate;
             }

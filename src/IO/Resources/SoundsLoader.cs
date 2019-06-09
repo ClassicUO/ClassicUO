@@ -109,9 +109,73 @@ namespace ClassicUO.IO.Resources
 
                     while ((line = reader.ReadLine()) != null)
                     {
-                        if (TryParseConfigLine(line, out Tuple<int, string, bool> songData)) _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
+                        if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
+                            _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
                     }
                 }
+            }
+            else if (FileManager.ClientVersion <= ClientVersions.CV_5090)
+            {
+                return;
+                _mMusicData.Add(0, new Tuple<string, bool>("oldult01", true));
+                _mMusicData.Add(1, new Tuple<string, bool>("oldult02", true));
+                _mMusicData.Add(2, new Tuple<string, bool>("oldult05", true));
+                _mMusicData.Add(3, new Tuple<string, bool>("britain1", true));
+                _mMusicData.Add(4, new Tuple<string, bool>("jhelom", false));
+                _mMusicData.Add(5, new Tuple<string, bool>("magincia", true));
+                _mMusicData.Add(6, new Tuple<string, bool>("samlethe", false));
+                _mMusicData.Add(7, new Tuple<string, bool>("trinsic", true));
+                _mMusicData.Add(8, new Tuple<string, bool>("yew", true));
+                _mMusicData.Add(9, new Tuple<string, bool>("forest_a", false));
+                _mMusicData.Add(10, new Tuple<string, bool>("mountn_a", false));
+                _mMusicData.Add(11, new Tuple<string, bool>("swamp_a", false ));
+                _mMusicData.Add(12, new Tuple<string, bool>("tavern03", false));
+                _mMusicData.Add(13, new Tuple<string, bool>("combat2", false));
+                _mMusicData.Add(14, new Tuple<string, bool>("death", false));
+                _mMusicData.Add(15, new Tuple<string, bool>("nujelm", true));
+                _mMusicData.Add(16, new Tuple<string, bool>("moonglow", true ));
+                _mMusicData.Add(17, new Tuple<string, bool>("oldult04", false));
+                _mMusicData.Add(18, new Tuple<string, bool>("approach", false));
+
+                _mMusicData.Add(19, new Tuple<string, bool>("create1", false ));
+                _mMusicData.Add(20, new Tuple<string, bool>("oldult03", true ));
+                _mMusicData.Add(21, new Tuple<string, bool>("oldult06", true ));
+                _mMusicData.Add(22, new Tuple<string, bool>("britain2", true ));
+                _mMusicData.Add(23, new Tuple<string, bool>("lbcastle", false));
+                _mMusicData.Add(24, new Tuple<string, bool>("minoc", true));
+                _mMusicData.Add(25, new Tuple<string, bool>("serpents", true));
+                _mMusicData.Add(26, new Tuple<string, bool>("vesper", true ));
+                _mMusicData.Add(27, new Tuple<string, bool>("cave01", false));
+                _mMusicData.Add(28, new Tuple<string, bool>("intown01", false));
+                _mMusicData.Add(29, new Tuple<string, bool>("plains_a", false));
+                _mMusicData.Add(30, new Tuple<string, bool>("tavern01", false));
+                _mMusicData.Add(31, new Tuple<string, bool>("tavern04", false));
+                _mMusicData.Add(32, new Tuple<string, bool>("combat3", false ));
+                _mMusicData.Add(33, new Tuple<string, bool>("victory", false ));
+                _mMusicData.Add(34, new Tuple<string, bool>("dungeon2", false));
+                _mMusicData.Add(35, new Tuple<string, bool>("oldult02", false));
+                _mMusicData.Add(36, new Tuple<string, bool>("dragflit", false));
+                _mMusicData.Add(37, new Tuple<string, bool>("combat3", false));
+
+                _mMusicData.Add(38, new Tuple<string, bool>("dragflit", false));
+                _mMusicData.Add(39, new Tuple<string, bool>("oldult04", true));
+                _mMusicData.Add(40, new Tuple<string, bool>("stones2", true ));
+                _mMusicData.Add(41, new Tuple<string, bool>("bucsden", true ));
+                _mMusicData.Add(42, new Tuple<string, bool>("linelle", false));
+                _mMusicData.Add(43, new Tuple<string, bool>("ocllo", true));
+                _mMusicData.Add(44, new Tuple<string, bool>("skarabra", true));
+                _mMusicData.Add(45, new Tuple<string, bool>("wind", true));
+                _mMusicData.Add(46, new Tuple<string, bool>("dungeon9", false));
+                _mMusicData.Add(47, new Tuple<string, bool>("jungle_a", false));
+                _mMusicData.Add(48, new Tuple<string, bool>("sailing", false ));
+                _mMusicData.Add(49, new Tuple<string, bool>("tavern02", false));
+                _mMusicData.Add(50, new Tuple<string, bool>("combat1", false ));
+                _mMusicData.Add(51, new Tuple<string, bool>("approach", false));
+                _mMusicData.Add(52, new Tuple<string, bool>("btcastle", false));
+                _mMusicData.Add(53, new Tuple<string, bool>("cove", true));
+                _mMusicData.Add(54, new Tuple<string, bool>("serpents", true ));
+                _mMusicData.Add(55, new Tuple<string, bool>("create1", false ));
+                _mMusicData.Add(56, new Tuple<string, bool>("jungle_a", false));
             }
         }
 
