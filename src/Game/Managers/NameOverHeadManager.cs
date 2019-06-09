@@ -73,7 +73,6 @@ namespace ClassicUO.Game.Managers
         {
             if (_gump != null)
             {
-                Engine.UI.Remove<NameOverHeadHandlerGump>();
                 _gump.Dispose();
                 _gump = null;
             }

@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -47,7 +48,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             RadioButton all, mobiles, items;
             AlphaBlendControl alpha;
-            Add(alpha = new AlphaBlendControl(0.2f));
+            Add(alpha = new AlphaBlendControl(0.2f)
+            {
+                Hue = 34
+            });
+            
 
             Add(all = new RadioButton(0, 0x00D0, 0x00D1, "All", color: 0xFFFF)
             {
@@ -75,13 +80,18 @@ namespace ClassicUO.Game.UI.Gumps
             items.ValueChanged += (sender, e) => { if (items.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items; };
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            base.Update(totalMS, frameMS);
-
-            if (!Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
-                Dispose();
+            return base.Draw(batcher, x, y);
         }
+
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    base.Update(totalMS, frameMS);
+
+        //    if (!Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
+        //        Dispose();
+        //}
 
 
     }

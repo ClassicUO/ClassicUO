@@ -613,6 +613,9 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
+            if (!_useObjectHandles)
+                NameOverHeadManager.Close();
+
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
