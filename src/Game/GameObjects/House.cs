@@ -52,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Item item = World.Items.Get(Serial);
 
-            Components.ForEach(s =>
+            foreach (Multi s in Components)
             {
                 if (item != null)
                 {
@@ -60,9 +60,9 @@ namespace ClassicUO.Game.GameObjects
                         s.Position = new Position((ushort)(item.X + s.MultiOffsetX), (ushort)(item.Y + s.MultiOffsetY), (sbyte)(item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
                 }
-                
+
                 s.AddToTile();
-            });
+            }
         }
 
         public void ClearComponents()
@@ -72,11 +72,13 @@ namespace ClassicUO.Game.GameObjects
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 
-            Components.ForEach(s =>
+          
+            foreach (Multi s in Components)
             {
                 s.RemoveFromTile();
                 PoolsManager.PushMulti(s);
-            }/*s.Destroy()*/);
+            }
+
             Components.Clear();
         }
     }
