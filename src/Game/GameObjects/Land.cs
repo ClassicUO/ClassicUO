@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public void SetGraphic(ushort graphic)
+        public void Land_New(ushort graphic)
         {
             Texture = null;
             RemoveFromTile();

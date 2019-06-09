@@ -24,6 +24,7 @@
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -32,13 +33,6 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        private const int POOL_SIZE = 20_000;
-
-        private static readonly QueuedPool<Tile> _poolTiles = new QueuedPool<Tile>(POOL_SIZE);
-        private static readonly QueuedPool<Land> _poolLand = new QueuedPool<Land>(POOL_SIZE);
-        private static readonly QueuedPool<Static> _poolStatic = new QueuedPool<Static>(POOL_SIZE);
-
-
         public Chunk()
         {
             Tiles = new Tile[8, 8];
@@ -61,7 +55,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile t = _poolTiles.GetOne();
+                    Tile t = PoolsManager.GetTile();
                     t.X = (ushort)(i + x);
                     t.Y = (ushort)(j + y);
                     Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
@@ -84,7 +78,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile t = _poolTiles.GetOne();
+                    Tile t = PoolsManager.GetTile();
                     t.X = (ushort) (i + x);
                     t.Y = (ushort) (j + y);
                     Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
@@ -123,8 +117,8 @@ namespace ClassicUO.Game.Map
                         sbyte z = cells[pos].Z;
 
 
-                        var land = _poolLand.GetOne();
-                        land.SetGraphic(tileID);
+                        var land = PoolsManager.GetLand();
+                        land.Land_New(tileID);
                         land.AverageZ = z;
                         land.MinZ = z;
 
@@ -174,7 +168,7 @@ namespace ClassicUO.Game.Map
                                 //    Position = new Position(staticX, staticY, z)
                                 //};
 
-                                Static staticObject = _poolStatic.GetOne();
+                                Static staticObject = PoolsManager.GetStatic();
                                 staticObject.SetGraphic_New(sb->Color, pos);
                                 staticObject.Hue = sb->Hue;
                                 staticObject.Position = new Position(staticX, staticY, z);
@@ -270,8 +264,8 @@ namespace ClassicUO.Game.Map
                         //    MinZ = z
                         //};
 
-                        var land = _poolLand.GetOne();
-                        land.SetGraphic(tileID);
+                        var land = PoolsManager.GetLand();
+                        land.Land_New(tileID);
                         land.AverageZ = z;
                         land.MinZ = z;
 
@@ -350,12 +344,12 @@ namespace ClassicUO.Game.Map
                             if (obj is Land t)
                             {
                                 t.RemoveFromTile();
-                                _poolLand.ReturnOne(t);
+                                PoolsManager.PushLand(t);
                             }
                             else if (obj is Static s)
                             {
                                 s.RemoveFromTile();
-                                _poolStatic.ReturnOne(s);
+                                PoolsManager.PushStatic(s);
                             }
                             else
                                 obj.Destroy();
@@ -364,7 +358,7 @@ namespace ClassicUO.Game.Map
                         obj = r;
                     }
 
-                    _poolTiles.ReturnOne(Tiles[i, j]);
+                    PoolsManager.PushTile(Tiles[i, j]);
                     Tiles[i, j] = null;
                 }
             }

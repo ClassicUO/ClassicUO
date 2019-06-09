@@ -31,6 +31,31 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
+        public Multi()
+        {
+
+        }
+
+        public void Multi_New(ushort graphic)
+        {
+            Texture = null;
+            RemoveFromTile();
+            Graphic = graphic;
+            _itemData = FileManager.TileData.StaticData[Graphic];
+            _isFoliage = ItemData.IsFoliage;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+            MultiOffsetX = MultiOffsetY = MultiOffsetZ = 0;
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
+        }
+
         public Multi(Graphic graphic)
         {
             Graphic = graphic;

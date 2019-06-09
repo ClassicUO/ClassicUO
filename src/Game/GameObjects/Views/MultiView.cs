@@ -31,8 +31,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Multi
     {
-        private readonly int _canBeTransparent;
-        private readonly bool _isFoliage;
+        private int _canBeTransparent;
+        private bool _isFoliage;
 
         public bool CharacterIsBehindFoliage { get; set; }
 

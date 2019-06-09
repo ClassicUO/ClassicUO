@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -77,7 +78,7 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = _poolChunk.GetOne();  // new Chunk((ushort) cellX, (ushort) cellY);
+                    chuck = PoolsManager.GetChunk();  // new Chunk((ushort) cellX, (ushort) cellY);
                     chuck.Chunk_New((ushort)cellX, (ushort)cellY);
                     chuck.Load(Index);
                 }
@@ -184,7 +185,6 @@ namespace ClassicUO.Game.Map
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
-        private static readonly QueuedPool<Chunk> _poolChunk = new QueuedPool<Chunk>(200);
 
         public void ClearUnusedBlocks()
         {
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Map
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Destroy();
-                    _poolChunk.ReturnOne(block);
+                    PoolsManager.PushChunk(block);
                     block = null;
                     _usedIndices.RemoveAt(i--);
 

@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Managers;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed class House : IEquatable<Serial>
@@ -70,7 +72,11 @@ namespace ClassicUO.Game.GameObjects
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 
-            Components.ForEach(s => s.Destroy());
+            Components.ForEach(s =>
+            {
+                s.RemoveFromTile();
+                PoolsManager.PushMulti(s);
+            }/*s.Destroy()*/);
             Components.Clear();
         }
     }

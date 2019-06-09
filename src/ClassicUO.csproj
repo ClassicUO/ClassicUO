@@ -28,7 +28,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-	<UseSharedCompilation>false</UseSharedCompilation> 
+    <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -144,6 +144,7 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />

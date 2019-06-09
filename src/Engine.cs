@@ -729,6 +729,8 @@ namespace ClassicUO
 
             UoAssist.Start();
 
+            PoolsManager.Initialize();
+
             base.Initialize();
         }
 

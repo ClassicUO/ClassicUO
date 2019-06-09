@@ -25,6 +25,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -279,14 +280,22 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    house.Components.Add(new Multi(graphic)
-                    {
-                        Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
-                        MultiOffsetX = x,
-                        MultiOffsetY = y,
-                        MultiOffsetZ = z,
-                        AlphaHue = 0xFF
-                    });
+                    var multi = PoolsManager.GetMulti();
+                    multi.Multi_New(graphic);
+                    multi.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
+                    multi.MultiOffsetX = x;
+                    multi.MultiOffsetY = y;
+                    multi.MultiOffsetZ = z;
+                    multi.AlphaHue = 0xFF;
+                    house.Components.Add(multi);
+                    //house.Components.Add(new Multi(graphic)
+                    //{
+                    //    Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
+                    //    MultiOffsetX = x,
+                    //    MultiOffsetY = y,
+                    //    MultiOffsetZ = z,
+                    //    AlphaHue = 0xFF
+                    //});
                 }
                 else if (i == 0)
                     MultiGraphic = graphic;
