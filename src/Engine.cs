@@ -794,7 +794,7 @@ namespace ClassicUO
 
             if (_time >= IntervalFixedUpdate)
             {
-                _time %= IntervalFixedUpdate;
+                _time -= IntervalFixedUpdate;
             }
             else
                 SuppressDraw();
