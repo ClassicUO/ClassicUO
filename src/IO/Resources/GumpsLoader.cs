@@ -65,10 +65,9 @@ namespace ClassicUO.IO.Resources
                 {
                     int ingump = defReader.ReadInt();
 
-
                     if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || 
                                       ingump >= _file.Entries.Length || 
-                                      _file.Entries[ingump].DecompressedLength != 0)
+                                      _file.Entries[ingump].Length > 0)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -78,7 +77,7 @@ namespace ClassicUO.IO.Resources
                         int checkIndex = group[i];
 
                         if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
-                            _file.Entries[checkIndex].DecompressedLength == 0)
+                            _file.Entries[checkIndex].Length <= 0)
                             continue;
 
                         _file.Entries[ingump] = _file.Entries[checkIndex];
