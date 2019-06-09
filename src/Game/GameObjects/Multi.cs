@@ -54,6 +54,7 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 1;
             else
                 _canBeTransparent = 0;
+            AlphaHue = 0;
         }
 
         public Multi(Graphic graphic)
