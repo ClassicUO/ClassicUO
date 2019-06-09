@@ -175,8 +175,12 @@ namespace ClassicUO.Game.Scenes
 
         private void OnLeftMouseUp(object sender, EventArgs e)
         {
-            // should allow selection to end on mouseup outside of viewport
-            if (_isSelectionActive && _selectionStart.Item1 != Mouse.Position.X && _selectionStart.Item2 != Mouse.Position.Y)
+            //  drag-select code comes first to allow selection finish on mouseup outside of viewport
+            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y)
+            {
+                _isSelectionActive = false;
+            }
+            if (_isSelectionActive)
             {
                 SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
 
