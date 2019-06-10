@@ -666,7 +666,7 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.Graphic;
 
-                /*do
+                do
                 {
                     if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                     {
@@ -680,17 +680,7 @@ namespace ClassicUO.IO.Resources
                     else
                         break;
                 }
-                while (graphic != newGraphic);*/
-
-
-                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
-                {
-                    if (graphic != newGraphic)
-                    {
-                        graphic = DataIndex[newGraphic].Graphic;
-                        hue = index.Color;
-                    }
-                }
+                while (graphic != newGraphic);
 
 
                 if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
@@ -717,7 +707,7 @@ namespace ClassicUO.IO.Resources
 
                 ushort newGraphic = index.CorpseGraphic;
 
-                /*do
+                do
                 {
                     if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
                     {
@@ -731,16 +721,7 @@ namespace ClassicUO.IO.Resources
                     else
                         break;
                 }
-                while (graphic != newGraphic);*/
-
-                if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
-                {
-                    if (graphic != newGraphic)
-                    {
-                        graphic = DataIndex[newGraphic].CorpseGraphic;
-                        hue = index.CorpseColor;
-                    }
-                }
+                while (graphic != newGraphic);
 
                 if (DataIndex[graphic].HasBodyConversion)
                     return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
