@@ -153,6 +153,38 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
+        private void DoDragSelect()
+        {
+            SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
+
+            foreach (Mobile mobile in World.Mobiles)
+            {
+                int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
+                int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
+
+                if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
+                {
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+                    if (mobile != World.Player)
+                    {
+                        Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+                        GameActions.RequestMobileStatus(mobile);
+                        HealthBarGump hbg = new HealthBarGump(mobile);
+                        // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
+                        // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
+                        // maybe should be fixed elsewhere
+                        hbg.Initialize();
+                        hbg.X = x - (rect.Width >> 1);
+                        hbg.Y = y - (rect.Height >> 1) - 100;
+                        Engine.UI.Add(hbg);
+                    }
+                }
+            }
+
+            _isSelectionActive = false;
+        }
+
         // LEFT
         private void OnLeftMouseDown(object sender, EventArgs e)
         {
@@ -180,58 +212,35 @@ namespace ClassicUO.Game.Scenes
             {
                 _isSelectionActive = false;
             }
+
             if (_isSelectionActive)
             {
-                SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
-
-                foreach (Mobile mobile in World.Mobiles)
-                {
-                    int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
-                    int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
-
-                    if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
-                    {
-                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-
-                        if (mobile != World.Player)
-                        {
-                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
-                            GameActions.RequestMobileStatus(mobile);
-                            HealthBarGump hbg = new HealthBarGump(mobile);
-                            // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
-                            // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
-                            // maybe should be fixed elsewhere
-                            hbg.Initialize();
-                            hbg.X = x - (rect.Width >> 1);
-                            hbg.Y = y - (rect.Height >> 1) - 100;
-                            Engine.UI.Add(hbg);
-                        }
-                    }
-                }
-                _isSelectionActive = false;
+                DoDragSelect();
+                return;
             }
-            else
+
+            if (!IsMouseOverViewport)
+                return;
+
+            if (_rightMousePressed)
             {
-                if (!IsMouseOverViewport)
-                    return;
+                _continueRunning = true;
+            }
 
-                if (_rightMousePressed)
-                {
-                    _continueRunning = true;
-                }
+            if (_dragginObject != null)
+                _dragginObject = null;
 
-                if (_dragginObject != null)
-                    _dragginObject = null;
+            if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
+                return;
 
-                if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
-                    return;
+            //for (byte b = 0; b < 255; b++)
+            //FileManager.Fonts.GenerateUnicode(0xFF, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
 
-                //for (byte b = 0; b < 255; b++)
-                //FileManager.Fonts.GenerateUnicode(0xFF, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
+            //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
-                //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
-
-                if (TargetManager.IsTargeting)
+            if (TargetManager.IsTargeting)
+            {
+                switch (TargetManager.TargetingState)
                 {
                     switch (TargetManager.TargetingState)
                     {
@@ -242,130 +251,129 @@ namespace ClassicUO.Game.Scenes
                         case CursorTarget.MultiPlacement:
                             var obj = Game.SelectedObject.Object;
 
-                            if (obj != null)
-                            {
-                                TargetManager.TargetGameObject(obj);
-                                Mouse.LastLeftButtonClickTime = 0;
-                            }
-
-                            break;
-
-                        case CursorTarget.SetTargetClientSide:
-
-                            if (Game.SelectedObject.Object is GameObject obj2)
-                            {
-                                TargetManager.TargetGameObject(obj2);
-                                Mouse.LastLeftButtonClickTime = 0;
-                                Engine.UI.Add(new InfoGump(obj2));
-                            }
-
-                            break;
-
-                        default:
-                            Log.Message(LogTypes.Warning, "Not implemented.");
-
-                            break;
-                    }
-                }
-                else if (IsHoldingItem)
-                {
-                    if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
-                    {
-                        switch (obj)
+                        if (obj != null)
                         {
-                            case Mobile mobile:
-                                // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
-                                MergeHeldItem(mobile);
-                                break;
-
-                            case Item item:
-
-                                if (item.IsCorpse)
-                                    MergeHeldItem(item);
-                                else
-                                {
-                                    Game.SelectedObject.Object = item;
-
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
-                                        MergeHeldItem(item);
-                                    else
-                                        DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
-                                }
-
-                                break;
-
-                            case Multi multi:
-                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
-
-                                break;
-
-                            case Static st:
-                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
-
-                                break;
-
-                            case Land _:
-                                DropHeldItemToWorld(obj.Position);
-
-                                break;
-
-                            default:
-                                Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
-
-                                return;
+                            TargetManager.TargetGameObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
                         }
-                    }
-                    else
-                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
-                }
-                else
-                {
-                    GameObject obj = Game.SelectedObject.Object as GameObject;
 
+                        break;
+
+                    case CursorTarget.SetTargetClientSide:
+
+                        if (Game.SelectedObject.Object is GameObject obj2)
+                        {
+                            TargetManager.TargetGameObject(obj2);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            Engine.UI.Add(new InfoGump(obj2));
+                        }
+
+                        break;
+
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+
+                        break;
+                }
+            }
+            else if (IsHoldingItem)
+            {
+                if (Game.SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                {
                     switch (obj)
                     {
-                        case Static st:
-                            string name = st.Name;
+                        case Mobile mobile:
+                            // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
+                            MergeHeldItem(mobile);
+                            break;
 
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        case Item item:
+
+                            if (item.IsCorpse)
+                                MergeHeldItem(item);
+                            else
+                            {
+                                Game.SelectedObject.Object = item;
+
+                                if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
+                                    MergeHeldItem(item);
+                                else
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + item.ItemData.Height));
+                            }
 
                             break;
 
                         case Multi multi:
-                            name = multi.Name;
-
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + multi.ItemData.Height));
 
                             break;
 
-                        case Entity ent:
-
-                            if (Keyboard.Alt)
-                            {
-                                World.Player.AddOverhead(MessageType.Regular, "Now following.", 3, 0, false);
-                                _followingMode = true;
-                                _followingTarget = ent;
-                            }
-                            else if (!_inqueue)
-                            {
-                                _inqueue = true;
-                                _queuedObject = ent;
-                                _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                                _queuedAction = () =>
-                                {
-                                    if (!World.ClientFlags.TooltipsEnabled)
-                                        GameActions.SingleClick(_queuedObject);
-                                    GameActions.OpenPopupMenu(_queuedObject);
-                                };
-                            }
+                        case Static st:
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + st.ItemData.Height));
 
                             break;
+
+                        case Land _:
+                            DropHeldItemToWorld(obj.Position);
+
+                            break;
+
+                        default:
+                            Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
+
+                            return;
                     }
+                }
+                else
+                    Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
+            }
+            else
+            {
+                GameObject obj = Game.SelectedObject.Object as GameObject;
+
+                switch (obj)
+                {
+                    case Static st:
+                        string name = st.Name;
+
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+
+                        break;
+
+                    case Multi multi:
+                        name = multi.Name;
+
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+
+                        break;
+
+                    case Entity ent:
+
+                        if (Keyboard.Alt)
+                        {
+                            World.Player.AddOverhead(MessageType.Regular, "Now following.", 3, 0, false);
+                            _followingMode = true;
+                            _followingTarget = ent;
+                        }
+                        else if (!_inqueue)
+                        {
+                            _inqueue = true;
+                            _queuedObject = ent;
+                            _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+
+                            _queuedAction = () =>
+                            {
+                                if (!World.ClientFlags.TooltipsEnabled)
+                                    GameActions.SingleClick(_queuedObject);
+                                GameActions.OpenPopupMenu(_queuedObject);
+                            };
+                        }
+
+                        break;
                 }
             }
         }
