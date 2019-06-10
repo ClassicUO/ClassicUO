@@ -1032,12 +1032,12 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 60
             };
             item.Add(text);
-
-            _dragSelectModifierKey = new Combobox(text.Width + 100, text.Y, 100, new[] { "None", "Ctrl", "Shift" })
+            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] { "None", "Ctrl", "Shift" })
             {
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
             item.Add(_dragSelectModifierKey);
+            _enableDragSelect.ValueChanged += (sender, e) => { item.IsVisible = _enableDragSelect.IsChecked; };
             rightArea.Add(item);
             Add(rightArea, PAGE);
 
