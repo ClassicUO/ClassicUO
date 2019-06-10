@@ -240,36 +240,39 @@ namespace ClassicUO.Game.Scenes
 
             if (TargetManager.IsTargeting)
             {
-                case CursorTarget.Grab:
-                case CursorTarget.SetGrabBag:
-                case CursorTarget.Position:
-                case CursorTarget.Object:
-                case CursorTarget.MultiPlacement:
-                    var obj = Game.SelectedObject.Object;
-
-                if (obj != null)
+                switch (TargetManager.TargetingState)
                 {
-                    TargetManager.TargetGameObject(obj);
-                    Mouse.LastLeftButtonClickTime = 0;
+                    case CursorTarget.Grab:
+                    case CursorTarget.SetGrabBag:
+                    case CursorTarget.Position:
+                    case CursorTarget.Object:
+                    case CursorTarget.MultiPlacement:
+                        var obj = Game.SelectedObject.Object;
+
+                        if (obj != null)
+                        {
+                            TargetManager.TargetGameObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
+                        }
+
+                        break;
+
+                    case CursorTarget.SetTargetClientSide:
+
+                        if (Game.SelectedObject.Object is GameObject obj2)
+                        {
+                            TargetManager.TargetGameObject(obj2);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            Engine.UI.Add(new InfoGump(obj2));
+                        }
+
+                        break;
+
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+
+                        break;
                 }
-
-                break;
-
-            case CursorTarget.SetTargetClientSide:
-
-                if (Game.SelectedObject.Object is GameObject obj2)
-                {
-                    TargetManager.TargetGameObject(obj2);
-                    Mouse.LastLeftButtonClickTime = 0;
-                    Engine.UI.Add(new InfoGump(obj2));
-                }
-
-                break;
-
-            default:
-                Log.Message(LogTypes.Warning, "Not implemented.");
-
-                break;
             }
             else if (IsHoldingItem)
             {
@@ -293,18 +296,18 @@ namespace ClassicUO.Game.Scenes
                                 if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                     MergeHeldItem(item);
                                 else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + item.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                             }
 
                             break;
 
                         case Multi multi:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + multi.ItemData.Height));
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
 
                             break;
 
                         case Static st:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + st.ItemData.Height));
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
 
                             break;
 
