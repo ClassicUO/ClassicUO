@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool CanDragSelectOnObject(GameObject obj)
         {
-            return (obj is Static || obj is Land || obj is Multi || (obj is Item tmpitem && tmpitem.IsLocked));
+            return (obj is null || obj is Static || obj is Land || obj is Multi || (obj is Item tmpitem && tmpitem.IsLocked));
         }
         
         private void SetDragSelectionStartEnd(ref (int, int) start, ref (int, int) end)
