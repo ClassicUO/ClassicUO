@@ -302,7 +302,7 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
-            ushort* pixels = stackalloc ushort[width * height];
+            ushort[] pixels = new ushort[width * height];
             ushort* ptr = (ushort*)_file.PositionAddress;
             ushort* lineoffsets = ptr;
             byte* datastart = (byte*)ptr + height * 2;

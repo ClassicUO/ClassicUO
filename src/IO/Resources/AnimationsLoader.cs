@@ -719,9 +719,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                     else
-                    {
                         break;
-                    }
                 }
                 while (graphic != newGraphic);
 
@@ -1261,9 +1259,9 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                   ushort* data = stackalloc ushort[imageWidth * imageHeight];
+                   ushort[] data = new ushort[imageWidth * imageHeight];
 
-                    //fixed (ushort* ptrData = data)
+                    fixed (ushort* ptrData = data)
                     {
                         int header;
 
@@ -1275,7 +1273,7 @@ namespace ClassicUO.IO.Resources
                             int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
                             int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
 
-                            ushort* cur = data + y * imageWidth + x;
+                            ushort* cur = ptrData + y * imageWidth + x;
                             ushort* end = cur + (header & 0xFFF);
                             int filecounter = 0;
                             byte[] filedata = reader.ReadArray(header & 0xFFF);
@@ -1341,11 +1339,11 @@ namespace ClassicUO.IO.Resources
                 if (imageWidth == 0 || imageHeight == 0)
                     continue;
 
-                ushort* data = stackalloc ushort[imageWidth * imageHeight];
+                ushort[] data = new ushort[imageWidth * imageHeight];
 
-                //fixed (ushort* ptrData = data)
+                fixed (ushort* ptrData = data)
                 {
-                    //ushort* dataRef = ptrData;
+                    ushort* dataRef = ptrData;
 
                     int header;
 
@@ -1357,7 +1355,7 @@ namespace ClassicUO.IO.Resources
                         int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
                         int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
 
-                        ushort* cur = data + y * imageWidth + x;
+                        ushort* cur = dataRef + y * imageWidth + x;
                         ushort* end = cur + (header & 0xFFF);
                         int filecounter = 0;
                         byte[] filedata = reader.ReadArray(header & 0xFFF);
