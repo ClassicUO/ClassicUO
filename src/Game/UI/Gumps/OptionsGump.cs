@@ -60,6 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _autoOpenCorpseRange;
         private Combobox _autoOpenCorpseOptions;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea;
+        private Checkbox _enableDragSelect;
+        private Combobox _dragSelectModifierKey;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -930,7 +932,8 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 10;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
@@ -1021,6 +1024,21 @@ namespace ClassicUO.Game.UI.Gumps
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
             }
 
+            _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", Engine.Profile.Current.EnableDragSelect, 0, 0);
+
+            ScrollAreaItem item = new ScrollAreaItem();
+            Label text = new Label("Drag-select modifier key", true, HUE_FONT, 0, FONT)
+            {
+                X = 60
+            };
+            item.Add(text);
+
+            _dragSelectModifierKey = new Combobox(text.Width + 100, text.Y, 100, new[] { "None", "Ctrl", "Shift" })
+            {
+                SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
+            };
+            item.Add(_dragSelectModifierKey);
+            rightArea.Add(item);
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1557,7 +1575,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
-            
+
+            Engine.Profile.Current.EnableDragSelect = _enableDragSelect.IsChecked;
+            Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;           
+
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;

@@ -122,12 +122,20 @@ namespace ClassicUO.Game.Scenes
             _dragginObject = Game.SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
 
-            if (_dragginObject is Static || _dragginObject is Land || _dragginObject is Multi || (_dragginObject is Item tmpitem && tmpitem.IsLocked))
+            if (Engine.Profile.Current.EnableDragSelect)
             {
-                _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
-                _isSelectionActive = true;
+                if (Engine.Profile.Current.DragSelectModifierKey == 0 ||
+                    (Engine.Profile.Current.DragSelectModifierKey == 1 && _isCtrlDown) ||
+                    (Engine.Profile.Current.DragSelectModifierKey == 2 && _isShiftDown))
+                {
+                    if (_dragginObject is Static || _dragginObject is Land || _dragginObject is Multi || (_dragginObject is Item tmpitem && tmpitem.IsLocked))
+                    {
+                        _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
+                        _isSelectionActive = true;
+                    }
+                }
             }
-            
+
         }
 
         private void OnLeftMouseUp(object sender, EventArgs e)
