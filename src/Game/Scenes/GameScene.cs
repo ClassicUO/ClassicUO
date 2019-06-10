@@ -806,7 +806,7 @@ namespace ClassicUO.Game.Scenes
                 sellines.Z = 0.3f;
                 Vector3 selhue = new Vector3();
                 selhue.Z = 0.7f;
-                batcher.Draw2D(CheckerTrans.TransparentTexture, _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref selhue);
+                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref selhue);
                 batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref sellines);
             }
         }
