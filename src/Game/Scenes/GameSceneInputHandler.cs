@@ -240,41 +240,36 @@ namespace ClassicUO.Game.Scenes
 
             if (TargetManager.IsTargeting)
             {
-                switch (TargetManager.TargetingState)
+                case CursorTarget.Grab:
+                case CursorTarget.SetGrabBag:
+                case CursorTarget.Position:
+                case CursorTarget.Object:
+                case CursorTarget.MultiPlacement:
+                    var obj = Game.SelectedObject.Object;
+
+                if (obj != null)
                 {
-                    switch (TargetManager.TargetingState)
-                    {
-                        case CursorTarget.Grab:
-                        case CursorTarget.SetGrabBag:
-                        case CursorTarget.Position:
-                        case CursorTarget.Object:
-                        case CursorTarget.MultiPlacement:
-                            var obj = Game.SelectedObject.Object;
-
-                        if (obj != null)
-                        {
-                            TargetManager.TargetGameObject(obj);
-                            Mouse.LastLeftButtonClickTime = 0;
-                        }
-
-                        break;
-
-                    case CursorTarget.SetTargetClientSide:
-
-                        if (Game.SelectedObject.Object is GameObject obj2)
-                        {
-                            TargetManager.TargetGameObject(obj2);
-                            Mouse.LastLeftButtonClickTime = 0;
-                            Engine.UI.Add(new InfoGump(obj2));
-                        }
-
-                        break;
-
-                    default:
-                        Log.Message(LogTypes.Warning, "Not implemented.");
-
-                        break;
+                    TargetManager.TargetGameObject(obj);
+                    Mouse.LastLeftButtonClickTime = 0;
                 }
+
+                break;
+
+            case CursorTarget.SetTargetClientSide:
+
+                if (Game.SelectedObject.Object is GameObject obj2)
+                {
+                    TargetManager.TargetGameObject(obj2);
+                    Mouse.LastLeftButtonClickTime = 0;
+                    Engine.UI.Add(new InfoGump(obj2));
+                }
+
+                break;
+
+            default:
+                Log.Message(LogTypes.Warning, "Not implemented.");
+
+                break;
             }
             else if (IsHoldingItem)
             {

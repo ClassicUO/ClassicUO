@@ -1027,7 +1027,7 @@ namespace ClassicUO.Game.UI.Gumps
             _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", Engine.Profile.Current.EnableDragSelect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
-            Label text = new Label("Drag-select modifier key", true, HUE_FONT, 0, FONT)
+            text = new Label("Drag-select modifier key", true, HUE_FONT, 0, FONT)
             {
                 X = 60
             };
