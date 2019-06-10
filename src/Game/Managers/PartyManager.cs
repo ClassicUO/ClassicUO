@@ -148,10 +148,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < Members.Length; i++)
             {
-                if (Members[i] == null)
-                    break;
-
-                if (Members[i].Serial == serial)
+                if (Members[i] != null && Members[i].Serial == serial)
                     return true;
             }
 
