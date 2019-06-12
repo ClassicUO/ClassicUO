@@ -60,7 +60,7 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -100,7 +100,7 @@ namespace ClassicUO.IO.Resources
                 return list;
             }
 
-            text = text.ToLower();
+            text = text.ToLower().TrimStart(' ').TrimEnd(' ');
 
             for (int i = 0; i < _speech.Length; i++)
             {
