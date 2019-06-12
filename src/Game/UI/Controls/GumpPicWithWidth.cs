@@ -32,7 +32,8 @@ namespace ClassicUO.Game.UI.Controls
         public GumpPicWithWidth(int x, int y, Graphic graphic, Hue hue, int perc) : base(x, y, graphic, hue)
         {
             Percent = perc;
-            AcceptMouseInput = false;
+            CanMove = true;
+            //AcceptMouseInput = false;
         }
 
         public int Percent { get; set; }

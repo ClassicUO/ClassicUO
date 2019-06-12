@@ -32,7 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using Microsoft.Xna.Framework;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.Hue = textColor;
 
                         if (_canChangeName)
-                            _textBox.MouseClick -= TextBoxOnMouseClick;
+                            _textBox.MouseClick -= TextBoxOnMouseUp;
                     }
 
                     if (_background.Hue != 0)
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-                            _textBox.MouseClick += TextBoxOnMouseClick;
+                            _textBox.MouseClick += TextBoxOnMouseUp;
                         }
                     }
 
@@ -496,12 +496,46 @@ namespace ClassicUO.Game.UI.Gumps
                         AcceptKeyboardInput = _canChangeName,
                         SafeCharactersOnly = true,
                         WantUpdateSize = false,
+                        CanMove = true,
                         Text = _name
                     });
                     if (_canChangeName)
-                        _textBox.MouseClick += TextBoxOnMouseClick;
+                    {
+                        _textBox.MouseUp += TextBoxOnMouseUp;
+                        _textBox.MouseOver += TextBoxOnMouseOver;
+                    }
                 }
             }
+        }
+
+        private void TextBoxOnMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButton.Left)
+                return;
+
+            Point p = Mouse.LDroppedOffset;
+
+            if (Math.Max(Math.Abs(p.X), Math.Abs(p.Y)) >= 1)
+            {
+                return;
+            }
+
+            if (TargetManager.IsTargeting)
+            {
+                TargetManager.TargetGameObject(World.Get(LocalSerial));
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+            else if (_canChangeName && !_targetBroke)
+            {
+                _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
+            }
+
+            _targetBroke = false;
+        }
+
+        private void TextBoxOnMouseOver(object sender, MouseEventArgs e)
+        {
         }
 
         private static int CalculatePercents(int max, int current, int maxValue)
@@ -520,24 +554,7 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
-        private void TextBoxOnMouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButton.Left)
-                return;
 
-            if (TargetManager.IsTargeting)
-            {
-                TargetManager.TargetGameObject(World.Get(LocalSerial));
-                Mouse.LastLeftButtonClickTime = 0;
-            }
-            else if (_canChangeName && !_targetBroke)
-            {
-                _textBox.IsEditable = true;
-                _textBox.SetKeyboardFocus();
-            }
-
-            _targetBroke = false;
-        }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
