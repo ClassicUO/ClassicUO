@@ -21,9 +21,6 @@
 
 #endregion
 
-using System;
-using System.Diagnostics;
-using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -34,6 +31,8 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using SDL2;
+using System;
+using System.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -127,10 +126,10 @@ namespace ClassicUO.Game.UI.Gumps
             
             bool inparty = World.Party.Contains(LocalSerial);
 
-            //if (!inparty && _textBox == null)
-            //{
-            //    Update();
-            //}
+            if (!inparty && _textBox != null && _textBox.IsDisposed)
+            {
+                Update();
+            }
 
             Hue textColor = 0x0386;
             Hue hitsColor = 0x0386;
