@@ -57,7 +57,10 @@ namespace ClassicUO.Game.GameObjects
             _equipConvData = null;
             _transform = false;
             FileManager.Animations.SittingValue = 0;
-            FrameInfo = Rectangle.Empty;
+            FrameInfo.X = 0;
+            FrameInfo.Y = 0;
+            FrameInfo.Width = 0;
+            FrameInfo.Height = 0;
             
             int drawX = posX + (int) Offset.X;
             int drawY = (int) (posY + Offset.Y - Offset.Z - 3);
@@ -154,11 +157,6 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                int mountHeightOffset = 0;
-
-                //if (mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                //    mountHeightOffset = FileManager.Animations.DataIndex[graphic].MountedHeightOffset;
-
                 if (hasShadow)
                 {
                     DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
@@ -170,8 +168,7 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
                 }
 
-                mountHeightOffset = DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
-                drawY += mountHeightOffset;
+                drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
             }
             else
             {
