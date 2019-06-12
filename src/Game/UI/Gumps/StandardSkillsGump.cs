@@ -219,6 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Label _labelValue;
             private readonly int _skillIndex;
             private MultiSelectionShrinkbox _parent;
+            private GumpPic _lock;
 
             public SkillControl(int skillIndexIndex, int maxWidth, string group, MultiSelectionShrinkbox parent)
             {
@@ -247,38 +248,38 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_labelValue);
 
 
-                GumpPic @lock = new GumpPic(maxWidth - 8, 1, GetLockValue(skill.Lock), 0) {AcceptMouseInput = true};
+                _lock = new GumpPic(maxWidth - 8, 1, GetLockValue(skill.Lock), 0) {AcceptMouseInput = true};
 
-                @lock.MouseUp += (sender, e) =>
+                _lock.MouseUp += (sender, e) =>
                 {
                     switch (skill.Lock)
                     {
                         case Lock.Up:
-                            skill.Lock = Lock.Down;
-                            GameActions.ChangeSkillLockStatus((ushort) skill.Index, (byte) Lock.Down);
-                            @lock.Graphic = 0x985;
-                            @lock.Texture = FileManager.Gumps.GetTexture(0x985);
+                            //skill.Lock = Lock.Down;
+                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Down);
+                            _lock.Graphic = 0x985;
+                            _lock.Texture = FileManager.Gumps.GetTexture(0x985);
 
                             break;
 
                         case Lock.Down:
-                            skill.Lock = Lock.Locked;
-                            GameActions.ChangeSkillLockStatus((ushort) skill.Index, (byte) Lock.Locked);
-                            @lock.Graphic = 0x82C;
-                            @lock.Texture = FileManager.Gumps.GetTexture(0x82C);
+                            //skill.Lock = Lock.Locked;
+                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Locked);
+                            _lock.Graphic = 0x82C;
+                            _lock.Texture = FileManager.Gumps.GetTexture(0x82C);
 
                             break;
 
                         case Lock.Locked:
-                            skill.Lock = Lock.Up;
-                            GameActions.ChangeSkillLockStatus((ushort) skill.Index, (byte) Lock.Up);
-                            @lock.Graphic = 0x983;
-                            @lock.Texture = FileManager.Gumps.GetTexture(0x983);
+                            //skill.Lock = Lock.Up;
+                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Up);
+                            _lock.Graphic = 0x983;
+                            _lock.Texture = FileManager.Gumps.GetTexture(0x983);
 
                             break;
                     }
                 };
-                Add(@lock);
+                Add(_lock);
 
                 WantUpdateSize = false;
 
@@ -311,6 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return Graphic.INVALID;
                 }
             }
+            
 
             protected override void OnMouseDown(int x, int y, MouseButton button)
             {
@@ -393,7 +395,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Skill skill = World.Player.Skills[_skillIndex];
 
                 if (skill != null)
+                {
                     _labelValue.Text = (skg == null || skg._checkCaps.IsChecked ? skill.Cap : skg._checkReal.IsChecked ? skill.Base : skill.Value).ToString("F1");
+
+
+                    ushort graphic = GetLockValue(skill.Lock);
+
+                    _lock.Graphic = graphic;
+                    _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+
+                }
             }
         }
     }
