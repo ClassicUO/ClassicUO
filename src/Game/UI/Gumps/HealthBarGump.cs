@@ -502,7 +502,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_canChangeName)
                     {
                         _textBox.MouseUp += TextBoxOnMouseUp;
-                        _textBox.MouseOver += TextBoxOnMouseOver;
                     }
                 }
             }
@@ -534,9 +533,6 @@ namespace ClassicUO.Game.UI.Gumps
             _targetBroke = false;
         }
 
-        private void TextBoxOnMouseOver(object sender, MouseEventArgs e)
-        {
-        }
 
         private static int CalculatePercents(int max, int current, int maxValue)
         {
