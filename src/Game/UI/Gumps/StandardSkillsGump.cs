@@ -252,32 +252,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lock.MouseUp += (sender, e) =>
                 {
-                    switch (skill.Lock)
-                    {
-                        case Lock.Up:
-                            //skill.Lock = Lock.Down;
-                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Down);
-                            _lock.Graphic = 0x985;
-                            _lock.Texture = FileManager.Gumps.GetTexture(0x985);
+                    byte slock = (byte) skill.Lock;
 
-                            break;
+                    if (slock < 2)
+                        slock++;
+                    else
+                        slock = 0;
 
-                        case Lock.Down:
-                            //skill.Lock = Lock.Locked;
-                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Locked);
-                            _lock.Graphic = 0x82C;
-                            _lock.Texture = FileManager.Gumps.GetTexture(0x82C);
+                    skill.Lock = (Lock) slock;
 
-                            break;
+                    GameActions.ChangeSkillLockStatus((ushort)skill.Index, slock);
 
-                        case Lock.Locked:
-                            //skill.Lock = Lock.Up;
-                            GameActions.ChangeSkillLockStatus((ushort)skill.Index, (byte)Lock.Up);
-                            _lock.Graphic = 0x983;
-                            _lock.Texture = FileManager.Gumps.GetTexture(0x983);
-
-                            break;
-                    }
+                    ushort graphic = GetLockValue(skill.Lock);
+                    _lock.Graphic = graphic;
+                    _lock.Texture = FileManager.Gumps.GetTexture(graphic);
                 };
                 Add(_lock);
 
@@ -361,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (c == null || !(c.RootParent is StandardSkillsGump))
+                if (!(c?.RootParent is StandardSkillsGump))
                 {
                     uint serial = (uint) (World.Player + _skillIndex + 1);
 
@@ -400,7 +388,6 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                     ushort graphic = GetLockValue(skill.Lock);
-
                     _lock.Graphic = graphic;
                     _lock.Texture = FileManager.Gumps.GetTexture(graphic);
 
