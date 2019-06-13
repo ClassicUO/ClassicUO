@@ -26,6 +26,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
@@ -364,6 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !Engine.Profile.Current.DisableCtrlQWBtn:
 
+                    var scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                        return;
+
                     if (!IsActive)
                         IsActive = true;
 
@@ -376,6 +382,11 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !Engine.Profile.Current.DisableCtrlQWBtn:
+
+                    scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                        return;
 
                     if (!IsActive)
                         IsActive = true;
