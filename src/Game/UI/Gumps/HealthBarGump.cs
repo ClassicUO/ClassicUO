@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
         private bool _outOfRange;
 
-        private Label _partyNameLabel;
+        //private Label _partyNameLabel;
         private TextBox _textBox;
 
         private bool _targetBroke = false;
@@ -107,11 +107,11 @@ namespace ClassicUO.Game.UI.Gumps
         public void Update()
         {
             Clear();
+            Children.Clear();
 
-            for (int i = 0; i < Children.Count; i++)
-            {
-                Children.RemoveAt(i--);
-            }
+            _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
+            _buttonHeal1 = _buttonHeal2 = null;
+            _textBox = null;
 
             BuildGump();
             Initialize();
@@ -126,10 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
             
             bool inparty = World.Party.Contains(LocalSerial);
 
-            if (!inparty && _textBox != null && _textBox.IsDisposed)
-            {
-                Update();
-            }
+
 
             Hue textColor = 0x0386;
             Hue hitsColor = 0x0386;
@@ -161,8 +158,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hitsColor = textColor = 912;
 
-                        if (_partyNameLabel.Hue != textColor)
-                            _partyNameLabel.Hue = textColor;
+                        if (_textBox.Hue != textColor)
+                            _textBox.Hue = textColor;
 
                         _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = false;
 
@@ -230,8 +227,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (inparty)
                     {
-                        if (_partyNameLabel.Hue != textColor)
-                            _partyNameLabel.Hue = textColor;
+                        if (_textBox.Hue != textColor)
+                            _textBox.Hue = textColor;
 
                         _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = true;
 
@@ -420,13 +417,25 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 55;
 
                 if (CanBeSaved)
-                    Add(_partyNameLabel = new Label("[* SELF *]", false, 0x0386, font: 3) {X = 0, Y = -2});
-                else
                 {
-                    Add(_partyNameLabel = new Label(_name, false, Notoriety.GetHue(mobile?.NotorietyFlag ?? NotorietyFlag.Gray), 109, 3, FontStyle.Cropped)
+                    Add(_textBox = new TextBox(3, width: 120, isunicode: false, style: FontStyle.Fixed, hue: 0x0386)
                     {
                         X = 0,
-                        Y = -2
+                        Y = -2,
+                        IsEditable = false,
+                        CanMove = true,
+                        Text = "[* SELF *]"
+                    });
+                }
+                else
+                {
+                    Add(_textBox = new TextBox(3, width: 109, maxWidth: 109, isunicode: false, style: FontStyle.Cropped, hue: Notoriety.GetHue(mobile?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    {
+                        X = 0,
+                        Y = -2,
+                        IsEditable = false,
+                        CanMove = true,
+                        Text = _name
                     });
                 }
 
