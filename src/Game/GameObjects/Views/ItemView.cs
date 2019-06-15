@@ -56,9 +56,12 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(_originalGraphic))
+            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(Graphic)) // static
             {
-                _originalGraphic = DisplayedGraphic;
+                unsafe
+                {
+                    _originalGraphic = (Graphic)(Graphic + _animDataFrame.FrameData[_animDataFrame.FrameCount >> 1]);
+                }
                 _force = false;
             }
             else if (Engine.Profile.Current.FieldsType == 2)
