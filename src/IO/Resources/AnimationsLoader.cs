@@ -499,6 +499,8 @@ namespace ClassicUO.IO.Resources
                             {
                                 UopGroups = new AnimationGroupUop[100]
                             };
+
+                            DataIndex[animID].InitializeUOP();
                         }
 
                         ref var g = ref DataIndex[animID].UopGroups[grpID];
@@ -1757,8 +1759,7 @@ namespace ClassicUO.IO.Resources
             return group < 100 && UopGroups != null ? UopGroups[_uopReplaceGroupIndex[group]] : null;
         }
 
-
-        public void ReplaceUopGroup(byte old, byte newG)
+        public void InitializeUOP()
         {
             if (_uopReplaceGroupIndex == null)
             {
@@ -1767,7 +1768,10 @@ namespace ClassicUO.IO.Resources
                 for (byte i = 0; i < 100; i++)
                     _uopReplaceGroupIndex[i] = i;
             }
+        }
 
+        public void ReplaceUopGroup(byte old, byte newG)
+        {
             _uopReplaceGroupIndex[old] = newG;
         }
 
