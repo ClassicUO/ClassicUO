@@ -616,6 +616,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long) totalMS + 1000;
             }
 
+            Macros.Update();
             _useItemQueue.Update(totalMS, frameMS);
 
             if (!IsMouseOverViewport)
