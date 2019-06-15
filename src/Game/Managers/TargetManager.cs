@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -172,7 +173,11 @@ namespace ClassicUO.Game.Managers
                         Engine.Profile.Current.GrabBagSerial = 0;
                         bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
                     }
-                    GameActions.DropItem(item.Serial,0,0,0,bag);
+                    GameActions.DropItem(item.Serial,ushort.MaxValue,ushort.MaxValue,0,bag);
+                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    scene.HeldItem.Enabled = false;
+                    scene.HeldItem.Dropped = false;
                 }
                 ClearTargetingWithoutTargetCancelPacket();
                 return;
