@@ -759,7 +759,7 @@ namespace ClassicUO
 
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
-
+ 
             Ticks = (long) totalms;
             TicksFrame = (long) framems;
 
@@ -786,23 +786,25 @@ namespace ClassicUO
             // ###############################
             Profiler.ExitContext("Update");
 
-            Profiler.EnterContext("FixedUpdate");
-            OnFixedUpdate(totalms, framems);
-            Profiler.ExitContext("FixedUpdate");
 
             _time += framems;
 
             if (_time >= IntervalFixedUpdate)
             {
-                _time -= IntervalFixedUpdate;
+                _time %= IntervalFixedUpdate;
+
+                Profiler.EnterContext("FixedUpdate");
+                OnFixedUpdate(totalms, framems);
+                Profiler.ExitContext("FixedUpdate");
             }
             else
                 SuppressDraw();
 
-
+            
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }
+
         protected double IntervalFixedUpdate { get; private set; }
 
         protected override void Draw(GameTime gameTime)
