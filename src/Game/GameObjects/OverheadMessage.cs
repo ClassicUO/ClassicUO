@@ -302,6 +302,7 @@ namespace ClassicUO.Game.GameObjects
             foreach (var item in _messages)
             {
                 ushort hue = 0;
+                float alpha = _alpha;
 
                 if (Engine.Profile.Current.HighlightGameObjects)
                 {
@@ -314,6 +315,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         item.RenderedText.Hue = 0xFF;
                         item.RenderedText.CreateTexture();
+                        alpha = 0;
                     }
                 }
                 else if (item.RenderedText.Hue != item.Hue)
@@ -324,7 +326,7 @@ namespace ClassicUO.Game.GameObjects
 
                 item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height;
-                item.RenderedText.Draw(batcher, item.X, item.Y, _alpha != 0.0f ? _alpha : item.Alpha, hue);
+                item.RenderedText.Draw(batcher, item.X, item.Y, alpha != 0.0f ? alpha : item.Alpha, hue);
                 offY += item.RenderedText.Height;
             }
 
