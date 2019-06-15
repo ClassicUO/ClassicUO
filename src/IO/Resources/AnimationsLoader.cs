@@ -1725,7 +1725,7 @@ namespace ClassicUO.IO.Resources
 
     internal class IndexAnimation
     {
-        private readonly byte[] _uopReplaceGroupIndex = new byte[100];
+        private byte[] _uopReplaceGroupIndex;
         public AnimationGroup[] BodyConvGroups;
         public ushort Color;
         public ushort CorpseColor;
@@ -1748,11 +1748,6 @@ namespace ClassicUO.IO.Resources
         public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
         public AnimationGroupUop[] UopGroups;
 
-        public IndexAnimation()
-        {
-            for (byte i = 0; i < 100; i++)
-                _uopReplaceGroupIndex[i] = i;
-        }
 
         public bool IsUOP => (Flags & (uint) ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
@@ -1767,6 +1762,14 @@ namespace ClassicUO.IO.Resources
 
         public void ReplaceUopGroup(byte old, byte newG)
         {
+            if (_uopReplaceGroupIndex == null)
+            {
+                _uopReplaceGroupIndex = new byte[100];
+
+                for (byte i = 0; i < 100; i++)
+                    _uopReplaceGroupIndex[i] = i;
+            }
+
             _uopReplaceGroupIndex[old] = newG;
         }
 
