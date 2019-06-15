@@ -805,18 +805,18 @@ namespace ClassicUO
         }
 
         private double _previous = SDL.SDL_GetTicks();
-        private double _lag;
-        private double _frame;
+        //private double _lag;
+        //private double _frame;
         private double _totalElapsed;
 
-        private GameTime _gametime = new GameTime();
+        //private GameTime _gametime = new GameTime();
 
         public override void Tick()
         {
             double current = Ticks = SDL.SDL_GetTicks();
             double elapsed = current - _previous;
             _previous = current;
-            _lag += elapsed;
+            //_lag += elapsed;
 
             // ###############################
             // This should be the right order
