@@ -233,10 +233,14 @@ namespace ClassicUO.Game.GameObjects
 
 
             byte animGroup = FileManager.Animations.AnimGroup;
+            ushort newHue = 0;
 
             var gr = layer == Layer.Invalid
-                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
-                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+
+            if (color == 0)
+                color = newHue;
 
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
