@@ -2559,6 +2559,9 @@ namespace ClassicUO.Network
             owner.SetAnimation(group, 0, 5, 1);
             owner.ClearSteps();
             owner.LastStepTime = Engine.Ticks;
+            
+            if (Engine.Profile.Current.AutoOpenCorpses)
+                World.Player.TryOpenCorpses();
         }
 
         private static void OpenGump(Packet p)
@@ -3524,6 +3527,11 @@ namespace ClassicUO.Network
                 GameActions.SingleClick(item);
             }
 
+            if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses)
+            {
+                World.Player.TryOpenCorpses();
+            }
+            
             if (type == 2)
             {
                 //if (item.IsMulti)
