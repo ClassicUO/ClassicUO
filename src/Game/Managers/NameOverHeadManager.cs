@@ -38,6 +38,8 @@ namespace ClassicUO.Game.Managers
         All,
         Mobiles,
         Items,
+        Corpses,
+        MobilesCorpses = Mobiles | Corpses
     }
 
     static class NameOverHeadManager
@@ -56,8 +58,13 @@ namespace ClassicUO.Game.Managers
 
             if (serial.Serial.IsItem && TypeAllowed == NameOverheadTypeAllowed.Items)
                 return true;
-
-            return serial.Serial.IsMobile && TypeAllowed == NameOverheadTypeAllowed.Mobiles;
+            
+            if (serial.Serial.IsMobile && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
+                return true;
+            
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && serial.Serial.IsItem && World.Items.Get(serial)?.IsCorpse == true )
+                return true;
+            return false;
         }
 
         public static void Open()

@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ControlInfo.Layer = UILayer.Over;
 
-            RadioButton all, mobiles, items;
+            RadioButton all, mobiles, items,mobilesCorpses;
             AlphaBlendControl alpha;
             Add(alpha = new AlphaBlendControl(0.2f)
             {
@@ -68,9 +68,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = mobiles.Y + mobiles.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
             });
+            Add(mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles and Corpses only", color: 0xFFFF)
+            {
+                Y = items.Y + items.Height,
+                IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
+            });
 
-            alpha.Width = Math.Max(items.Width, Math.Max(all.Width, mobiles.Width));
-            alpha.Height = all.Height + mobiles.Height + items.Height;
+            alpha.Width = Math.Max(mobilesCorpses.Width,Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
+            alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
 
             Width = alpha.Width;
             Height = alpha.Height;
@@ -78,6 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
             all.ValueChanged += (sender, e) => { if (all.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All; };
             mobiles.ValueChanged += (sender, e) => { if (mobiles.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles; };
             items.ValueChanged += (sender, e) => { if (items.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items; };
+            mobilesCorpses.ValueChanged += (sender, e) => { if (mobilesCorpses.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses; };
+
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
