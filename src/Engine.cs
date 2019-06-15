@@ -46,6 +46,8 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
+using CUO_API;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -218,7 +220,7 @@ namespace ClassicUO
 
                     _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
 
-                    //_engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
+                    _engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
         }
@@ -238,7 +240,7 @@ namespace ClassicUO
         /// <summary>
         ///     Total game time in milliseconds
         /// </summary>
-        public static long Ticks { get; private set; }
+        public static uint Ticks { get; private set; }
 
         /// <summary>
         ///     Milliseconds from last frame
@@ -757,11 +759,14 @@ namespace ClassicUO
 
             Profiler.EnterContext("Update");
 
-            double totalms = gameTime.TotalGameTime.TotalMilliseconds;
-            double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
+            uint last = Ticks;
+            Ticks = SDL.SDL_GetTicks();
+
+            double totalms = Ticks; //gameTime.TotalGameTime.TotalMilliseconds;
+            double framems = Ticks - last;  //gameTime.ElapsedGameTime.TotalMilliseconds;
  
-            Ticks = (long) totalms;
-            TicksFrame = (long) framems;
+            //Ticks = (long) totalms;
+            //TicksFrame = (long) framems;
 
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -776,40 +781,137 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            // ###############################
-            // This should be the right order
-            OnNetworkUpdate(totalms, framems);
-            OnInputUpdate(totalms, framems);
-            OnUIUpdate(totalms, framems);
-            OnUpdate(totalms, framems);
-            Plugin.Tick();
-            // ###############################
+         
             Profiler.ExitContext("Update");
 
+            Profiler.EnterContext("FixedUpdate");
+            OnFixedUpdate(totalms, framems);
+            Profiler.ExitContext("FixedUpdate");
 
-            _time += framems;
 
-            if (_time >= IntervalFixedUpdate)
-            {
-                _time %= IntervalFixedUpdate;
 
-                Profiler.EnterContext("FixedUpdate");
-                OnFixedUpdate(totalms, framems);
-                Profiler.ExitContext("FixedUpdate");
-            }
-            else
-                SuppressDraw();
+            //_time += framems;
 
-            
+            //if (_time >= IntervalFixedUpdate)
+            //{
+            //    _time %= IntervalFixedUpdate;
+            //}
+            //else
+            //    SuppressDraw();
+
+
             base.Update(gameTime);
             Profiler.EnterContext("OutOfContext");
         }
 
+        private double _previous = SDL.SDL_GetTicks();
+        private double _lag;
+        private double _frame;
+        private double _totalElapsed;
+
+        private GameTime _gametime = new GameTime();
+
+        public override void Tick()
+        {
+            double current = Ticks = SDL.SDL_GetTicks();
+            double elapsed = current - _previous;
+            _previous = current;
+            _lag += elapsed;
+
+            // ###############################
+            // This should be the right order
+            OnNetworkUpdate(current, elapsed);
+            OnInputUpdate(current, elapsed);
+            OnUIUpdate(current, elapsed);
+            Plugin.Tick();
+            // ###############################
+
+            OnUpdate(current, elapsed);
+            FrameworkDispatcher.Update();
+
+            OnFixedUpdate(current, elapsed);
+
+            //base.Tick(); // mainloop
+
+            //const int TICK = 4;
+
+            //while (_lag >= TICK)
+            //{
+
+            //    _lag -= TICK;
+            //}
+
+
+
+            _currentFpsTime += elapsed;
+
+            if (_currentFpsTime >= 1000)
+            {
+                CurrentFPS = _totalFrames;
+
+                FPSMax = CurrentFPS > FPSMax || FPSMax > FpsLimit ? CurrentFPS : FPSMax;
+                FPSMin = CurrentFPS < FPSMin && CurrentFPS != 0 ? CurrentFPS : FPSMin;
+
+                _totalFrames = 0;
+                _currentFpsTime = 0;
+            }
+
+
+            _totalElapsed += elapsed;
+
+            if (_totalElapsed > IntervalFixedUpdate)
+            {
+                Render();
+                _totalElapsed %= IntervalFixedUpdate;
+                _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
+            }
+        }
+
         protected double IntervalFixedUpdate { get; private set; }
+
+
+        private void Render()
+        {
+            _debugInfo.Reset();
+
+            Profiler.EndFrame();
+            Profiler.BeginFrame();
+
+            if (Profiler.InContext("OutOfContext"))
+                Profiler.ExitContext("OutOfContext");
+            Profiler.EnterContext("RenderFrame");
+
+            _totalFrames++;
+
+            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
+                _sceneManager.CurrentScene.Draw(_batcher);
+
+            _uiManager.Draw(_batcher);
+
+            if (_profileManager.Current != null && _profileManager.Current.ShowNetworkStats)
+            {
+                if (!NetClient.Socket.IsConnected)
+                {
+                    NetClient.LoginSocket.Statistics.Draw(_batcher, 10, 50);
+                }
+                else if (!NetClient.Socket.IsDisposed)
+                {
+                    NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
+                }
+            }
+
+
+            Profiler.ExitContext("RenderFrame");
+            Profiler.EnterContext("OutOfContext");
+            UpdateWindowCaption();
+
+
+            GraphicsDevice?.Present();
+        }
 
         protected override void Draw(GameTime gameTime)
         {
-            _isRunningSlowly = gameTime.IsRunningSlowly;
+            //_isRunningSlowly = gameTime.IsRunningSlowly;
             _debugInfo.Reset();
 
             Profiler.EndFrame();
@@ -840,12 +942,12 @@ namespace ClassicUO
 
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
-            UpdateWindowCaption(gameTime);
+            UpdateWindowCaption();
 
             base.Draw(gameTime);
         }
 
-        private void UpdateWindowCaption(GameTime gameTime)
+        private void UpdateWindowCaption()
         {
             if (!_settings.Profiler || DisableUpdateWindowCaption)
                 return;
@@ -858,7 +960,7 @@ namespace ClassicUO
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 #if DEV_BUILD
-            Window.Title = string.Format("ClassicUO [dev] {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+            Window.Title = string.Format("ClassicUO [dev] {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
 #else
             Window.Title = string.Format("ClassicUO {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
 #endif
