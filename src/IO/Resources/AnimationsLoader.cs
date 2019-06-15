@@ -1094,10 +1094,8 @@ namespace ClassicUO.IO.Resources
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
-                    if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0 || (flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
                         return 2;
-                    else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
-                        goto case ANIMATION_GROUPS_TYPE.MONSTER;
 
                     return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
