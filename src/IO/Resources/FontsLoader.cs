@@ -2116,6 +2116,8 @@ namespace ClassicUO.IO.Resources
             {
                 ' ', '=', '\\'
             }, StringSplitOptions.RemoveEmptyEntries);
+
+
             int size = strings.Length;
 
             for (int i = 0; i < size; i += 2)
@@ -2127,7 +2129,7 @@ namespace ClassicUO.IO.Resources
                 string value = strings[i + 1];
                 TrimHTMLString(ref value);
 
-                if (value.Length <= 0)
+                if (value.Length == 0)
                     continue;
 
                 switch (info.Tag)
@@ -2197,6 +2199,16 @@ namespace ClassicUO.IO.Resources
                         {
                             info.Flags = UOFONT_UNDERLINE;
                             info.Color = _webLinkColor;
+
+                            int start = i + 1;
+
+                            while (value[0] == '"' && value[value.Length - 1] != '"' && start + 1 < size)
+                            {
+                                value += strings[++start];
+                            }
+
+                            i = start;
+
                             info.Link = GetWebLinkID(value, ref info.Color);
                         }
 

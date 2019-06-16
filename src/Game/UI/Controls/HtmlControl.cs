@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Controls
                 foreach (WebLinkRect link in _gameText.Links)
                 {
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, _scrollBar.Value + y);
+                    bool inbounds = rect.Contains(x,  (_scrollBar == null ? 0 :_scrollBar.Value) + y);
 
                     if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {

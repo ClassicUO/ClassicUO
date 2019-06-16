@@ -20,8 +20,7 @@ namespace ClassicUO.Utility
 
         public T GetOne()
         {
-            T result = null;
-            result = _pool.Count > 0 ? _pool.Dequeue() : new T();
+            T result = _pool.Count > 0 ? _pool.Dequeue() : new T();
 
             //if (result is IPoolable poolable)
             //    poolable.OnPickup();

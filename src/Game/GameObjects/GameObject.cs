@@ -203,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null && _tile != null)
             {
-                _tile?.RemoveGameObject(this);
+                _tile.RemoveGameObject(this);
                 _tile = null;
             }
         }

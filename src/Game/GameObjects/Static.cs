@@ -57,24 +57,6 @@ namespace ClassicUO.Game.GameObjects
             Texture = null;
         }
 
-        public Static(Graphic graphic, Hue hue, int index)
-        {
-            Graphic = OriginalGraphic = graphic;
-            Hue = hue;
-            Index = index;
-
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
-
         public int Index { get; private set; }
 
         public string Name => ItemData.Name;
