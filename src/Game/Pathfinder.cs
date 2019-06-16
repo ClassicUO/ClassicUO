@@ -788,7 +788,7 @@ namespace ClassicUO.Game
 #elif JAEDAN_MOVEMENT_PATCH
             if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
 #else
-            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
+            if (AutoWalking && World.InGame && World.Player.Walker.StepsCount < Constants.MAX_STEP_COUNT && World.Player.Walker.LastStepRequestTime <= Engine.Ticks)
 #endif
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)

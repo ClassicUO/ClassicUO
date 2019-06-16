@@ -1735,6 +1735,11 @@ namespace ClassicUO.Game.GameObjects
             }*/ 
         }
 
+        protected override bool NoIterateAnimIndex()
+        {
+            return false;
+        }
+
         public bool Walk(Direction direction, bool run)
         {
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
@@ -1819,7 +1824,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
-
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;
@@ -1842,10 +1846,10 @@ namespace ClassicUO.Game.GameObjects
                 Run = run
             });
 
-            //EnqueueStep(x, y, z, direction, run);
+            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
-            byte sequence = Walker.WalkSequence;
-            NetClient.Socket.Send(new PWalkRequest(direction, sequence, run, Walker.FastWalkStack.GetValue()));
+            Console.WriteLine("SEND - seq {0}", Walker.WalkSequence);
+
 
             if (Walker.WalkSequence == 0xFF)
                 Walker.WalkSequence = 1;
@@ -1859,7 +1863,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
             {
-                nowDelta = (int) (Engine.Ticks - _lastStepTime - walkTime + _lastDelta);
+                nowDelta = (int) ((Engine.Ticks - _lastStepTime) - walkTime + _lastDelta);
 
                 if (Math.Abs(nowDelta) > 70)
                     nowDelta = 0;
@@ -1881,7 +1885,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         private bool _lastRun, _lastMount;
-        private int _lastDir, _lastDelta, _lastStepTime;
+        private int _lastDir = -1, _lastDelta, _lastStepTime;
 
 #elif !MOVEMENT2
         private int _movementX, _movementY;

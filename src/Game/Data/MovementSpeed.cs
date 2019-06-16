@@ -52,74 +52,60 @@ namespace ClassicUO.Game.Data
 
             switch (dir & 7)
             {
-                case 0:
-
+                case 0: //W
                 {
                     x *= step_NESW;
                     y *= -step_NESW;
-
                     break;
                 }
-                case 1:
-
+                case 1: //NW
                 {
                     x *= step_NESW_D;
                     checkX = 44;
                     y = 0.0f;
-
                     break;
                 }
-                case 2:
-
+                case 2: //N
                 {
                     x *= step_NESW;
                     y *= step_NESW;
-
                     break;
                 }
-                case 3:
-
+                case 3: //NE
                 {
                     x = 0.0f;
                     y *= step_NESW_D;
                     checkY = 44;
-
                     break;
                 }
-                case 4:
-
+                case 4: //E
                 {
                     x *= -step_NESW;
                     y *= step_NESW;
-
                     break;
                 }
-                case 5:
-
+                case 5: //SE
                 {
                     x *= -step_NESW_D;
                     checkX = 44;
                     y = 0.0f;
-
                     break;
                 }
-                case 6:
-
+                case 6: //S
                 {
                     x *= -step_NESW;
                     y *= -step_NESW;
-
                     break;
                 }
-                case 7:
-
+                case 7: //SW
                 {
                     x = 0.0f;
                     y *= -step_NESW_D;
                     checkY = 44;
-
                     break;
                 }
+                default:
+                    break;
             }
 
             int valueX = (int) x;

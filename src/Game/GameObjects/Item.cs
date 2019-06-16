@@ -775,7 +775,7 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void ProcessAnimation(out byte dir)
+        public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
             dir = 0;
             if (IsCorpse)

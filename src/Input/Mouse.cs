@@ -82,7 +82,7 @@ namespace ClassicUO.Input
             if (!MouseInWindow)
             {
                 SDL.SDL_GetGlobalMouseState(out int x, out int y);
-                SDL.SDL_GetWindowPosition(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int winX, out int winY);
+                SDL.SDL_GetWindowPosition(Engine.Instance.Window.Handle, out int winX, out int winY);
                 _position.X = x - winX;
                 _position.Y = y - winY;
             }

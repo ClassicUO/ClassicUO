@@ -36,14 +36,31 @@ namespace ClassicUO.Game.Map
         {
         }
 
-        //public Tile(ushort x, ushort y)
-        //{
-        //    X = x;
-        //    Y = y;
-        //}
+        public void Tile_New(ushort x, ushort y)
+        {
+            X = x;
+            Y = y;
 
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
+            var t = FirstNode;
+
+            if (t != null)
+            {
+                while (t.Left != null)
+                    t = t.Left;
+
+                while (t != null)
+                {
+                    var temp = t;
+
+                    RemoveGameObject(t);
+
+                    t = temp.Right;
+                }
+            }
+        }
+
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
 
         public GameObject FirstNode { get; private set; }
 

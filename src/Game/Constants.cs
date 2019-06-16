@@ -43,7 +43,7 @@ namespace ClassicUO.Game
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100;
         public const int TURN_DELAY_FAST = 45;
-        public const int WALKING_DELAY = 150; // 750
+        public const int WALKING_DELAY = 750; // 750
         public const int PLAYER_WALKING_DELAY = 150;
         public const int DEFAULT_CHARACTER_HEIGHT = 16;
         public const int DEFAULT_BLOCK_HEIGHT = 16;

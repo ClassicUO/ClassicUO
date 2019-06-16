@@ -137,6 +137,8 @@ namespace ClassicUO.Game.GameObjects
                 int i;
                 int j;
 
+                Normals = new Vector3[4];
+
                 for (i = -1; i < 2; i++)
                 {
                     int curX = x + i;

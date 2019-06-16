@@ -150,7 +150,7 @@ namespace ClassicUO
 
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
-            IsFixedTimeStep = _settings.FixedTimeStep;
+            IsFixedTimeStep = false; // _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
@@ -832,11 +832,13 @@ namespace ClassicUO
             Plugin.Tick();
             // ###############################
 
+
             OnUpdate(current, elapsed);
             FrameworkDispatcher.Update();
-
             OnFixedUpdate(current, elapsed);
+
             Profiler.ExitContext("Update");
+
 
             _currentFpsTime += elapsed;
 
@@ -860,6 +862,12 @@ namespace ClassicUO
                 _totalElapsed %= IntervalFixedUpdate;
                 _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
             }
+
+
+            //int dyn = (int)(SDL.SDL_GetTicks() - current);
+            //int delay = (int)IntervalFixedUpdate;
+
+            //SDL.SDL_Delay((uint)Math.Max(delay - dyn, 2));
         }
 
         protected double IntervalFixedUpdate { get; private set; }
@@ -902,6 +910,11 @@ namespace ClassicUO
 
 
             GraphicsDevice?.Present();
+        }
+
+        public override void OnSDLEvent(ref SDL.SDL_Event ev)
+        {
+            _inputManager.EventHandler(ref ev);
         }
 
         //protected override void Draw(GameTime gameTime)

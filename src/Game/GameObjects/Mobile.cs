@@ -50,6 +50,8 @@ namespace ClassicUO.Game.GameObjects
         FastUnmountAndCantRun
     }
 
+
+
     internal partial class Mobile : Entity
     {
         private ushort _hits;
@@ -292,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
             if (_lastAnimationIdleDelay < Engine.Ticks)
                 SetIdleAnimation();
 
-            ProcessAnimation(out _);
+            ProcessAnimation(out _, true);
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -387,11 +389,11 @@ namespace ClassicUO.Game.GameObjects
 
         internal void GetEndPosition(out int x, out int y, out sbyte z, out Direction dir)
         {
-            if (Steps.Count <= 0)
+            if (Steps.Count == 0)
             {
-                x = Position.X;
-                y = Position.Y;
-                z = Position.Z;
+                x = X;
+                y = Y;
+                z = Z;
                 dir = Direction;
             }
             else
@@ -580,40 +582,67 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void ProcessAnimation(out byte dir)
+        public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
-            dir = (byte) GetDirectionForAnimation();
+            dir = (byte) Direction;
+            dir &= 7;
 
             if (Steps.Count != 0 && !IsDestroyed)
             {
-                bool turnOnly;
+                Step step = Steps.Front();
+                dir = step.Direction;
 
-                do
+                if (step.Run)
+                    dir &= 7;
+
+                if (evalutate)
                 {
-                    Step step = Steps.Front();
-                    if (AnimationFromServer) SetAnimation(0xFF);
+                    if (AnimationFromServer)
+                        SetAnimation(0xFF);
+
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
+                    bool directionChange = false;
 
-                    //if ((byte) Direction == step.Direction)
                     if (X != step.X || Y != step.Y)
                     {
-                        float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float x = frameOffset;
-                        float y = frameOffset;
+                        bool badStep = false;
 
-                        MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                        Offset.X = x;
-                        Offset.Y = y;
-                        Offset.Z = (step.Z - Z) * frameOffset * (4.0f / framesPerTile);
+                        if (Offset.X == 0 && Offset.Y == 0)
+                        {
+                            int absX = Math.Abs(X - step.X);
+                            int absY = Math.Abs(Y - step.Y);
 
-                        turnOnly = false;
+                            badStep = (absX > 1 || absY > 1 || absX + absY == 0);
+
+                            if (!badStep)
+                            {
+                                absX = X;
+                                absY = Y;
+
+                                Pathfinder.GetNewXY((byte) (step.Direction & 7), ref absX, ref absY);
+
+                                badStep = (absX != step.X || absY != step.Y);
+                            }
+                        }
+
+                        if (badStep)
+                            removeStep = true;
+                        else
+                        {
+                            float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float y = x;
+                            Offset.Z = (sbyte) (((step.Z - Z) * x) * (4.0f / steps));
+                            MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, steps);
+                            Offset.X = (sbyte) x;
+                            Offset.Y = (sbyte) y;
+                        }
                     }
                     else
                     {
-                        turnOnly = true;
+                        directionChange = true;
                         removeStep = true;
                     }
 
@@ -655,7 +684,6 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
-                        AddToTile();
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset.X = 0;
@@ -663,10 +691,26 @@ namespace ClassicUO.Game.GameObjects
                         Offset.Z = 0;
                         Steps.RemoveFromFront();
                         CalculateRandomIdleTime();
+
+                        if (directionChange)
+                        {
+                            ProcessAnimation(out dir, evalutate);
+                            return;
+                        }
+
+                        if (Right != null || Left != null)
+                            AddToTile();
+
                         LastStepTime = Engine.Ticks;
                         ProcessDelta();
                     }
-                } while (Steps.Count != 0 && turnOnly);
+                }
+            }
+            else
+            {
+                Offset.X = 0;
+                Offset.Y = 0;
+                Offset.Z = 0;
             }
 
             ProcessFootstepsSound();
@@ -759,7 +803,7 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 if (frameIndex < 0)
                                 {
-                                    if (fc <= 0)
+                                    if (fc == 0)
                                         frameIndex = 0;
                                     else
                                         frameIndex = (sbyte) (fc - 1);
@@ -773,7 +817,8 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1) SetAnimation(0xFF);
+                                        else if (repCount == 1)
+                                            SetAnimation(0xFF);
                                     }
                                     else
                                         SetAnimation(0xFF);

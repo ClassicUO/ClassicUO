@@ -56,9 +56,8 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tile t = PoolsManager.GetTile();
-                    t.X = (ushort)(i + x);
-                    t.Y = (ushort)(j + y);
-                    Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
+                    t.Tile_New((ushort)(i + x), (ushort)(j + y));
+                    Tiles[i, j] = t;
                 }
             }
 
@@ -79,9 +78,8 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tile t = PoolsManager.GetTile();
-                    t.X = (ushort) (i + x);
-                    t.Y = (ushort) (j + y);
-                    Tiles[i, j] = t; // new Tile((ushort) (i + x), (ushort) (j + y));
+                    t.Tile_New((ushort)(i + x), (ushort)(j + y));
+                    Tiles[i, j] = t;
                 }
             }
 
@@ -355,6 +353,11 @@ namespace ClassicUO.Game.Map
                             {
                                 s.RemoveFromTile();
                                 PoolsManager.PushStatic(s);
+                            }
+                            else if (obj is Multi m)
+                            {
+                                m.RemoveFromTile();
+                                PoolsManager.PushMulti(m);
                             }
                             else
                                 obj.Destroy();

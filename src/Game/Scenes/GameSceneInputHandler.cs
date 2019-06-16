@@ -82,18 +82,26 @@ namespace ClassicUO.Game.Scenes
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
+
+
         private void MoveCharacterByMouseInput()
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
-                Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
-                Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
+                int x = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
+                int y = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
 
-                float distanceFromCenter = MathHelper.GetDistance(center, Mouse.Position);
+                Direction direction = (Direction) GameCursor.GetMouseDirection(x, y, Mouse.Position.X, Mouse.Position.Y, 1);
+                double mouseRange = MathHelper.Hypotenuse(x - Mouse.Position.X, y - Mouse.Position.Y);
 
-                bool run = distanceFromCenter >= 150.0f;
+                Direction facing = direction;
 
-                World.Player.Walk(direction, run);
+                if (facing == Direction.North)
+                    facing = (Direction) 8;
+
+                bool run = mouseRange >= 190;
+
+                World.Player.Walk(facing - 1, run);
             }
         }
 
@@ -101,7 +109,6 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
-
                 Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
 
                 if (numPadMovement)
@@ -416,13 +423,11 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (!_rightMousePressed)
-            {
-                _rightMousePressed = true;
-                _continueRunning = false;
+            Console.WriteLine("MOUSE DOWN");
 
-                StopFollowing();
-            }
+            _rightMousePressed = true;
+            _continueRunning = false;
+            StopFollowing();
         }
 
         private void StopFollowing()
@@ -438,8 +443,9 @@ namespace ClassicUO.Game.Scenes
 
         private void OnRightMouseUp(object sender, EventArgs e)
         {
-            if (_rightMousePressed)
-                _rightMousePressed = false;
+            Console.WriteLine("MOUSE UP");
+
+            _rightMousePressed = false;
         }
 
         private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
@@ -460,8 +466,28 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        // MOUSE MOVING
-        private void OnMouseMoving(object sender, EventArgs e)
+
+
+        // MOUSE WHEEL
+        private void OnMouseWheel(object sender, bool e)
+        {
+            if (!IsMouseOverViewport)
+                return;
+
+            if (!Engine.Profile.Current.EnableScaleZoom || !Keyboard.Ctrl)
+                return;
+
+            if (!e)
+                ScalePos++;
+            else
+                ScalePos--;
+
+            if (Engine.Profile.Current.SaveScaleAfterClose)
+                Engine.Profile.Current.ScaleZoom = Scale;
+        }
+
+        // MOUSE DRAG
+        private void OnMouseDragging(object sender, EventArgs e)
         {
             if (!IsMouseOverViewport)
                 return;
@@ -486,7 +512,7 @@ namespace ClassicUO.Game.Scenes
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
                             break;
 
@@ -499,62 +525,6 @@ namespace ClassicUO.Game.Scenes
                     _dragginObject = null;
                 }
             }
-        }
-
-        // MOUSE WHEEL
-        private void OnMouseWheel(object sender, bool e)
-        {
-            if (!IsMouseOverViewport)
-                return;
-
-            if (!Engine.Profile.Current.EnableScaleZoom || !Keyboard.Ctrl)
-                return;
-
-            if (!e)
-                ScalePos++;
-            else
-                ScalePos--;
-
-            if (Engine.Profile.Current.SaveScaleAfterClose)
-                Engine.Profile.Current.ScaleZoom = Scale;
-        }
-
-        // MOUSE DRAG
-        private void OnMouseDragBegin(object sender, EventArgs e)
-        {
-            //if (!IsMouseOverViewport)
-            //    return;
-
-            //if (!IsHoldingItem)
-            //{
-            //    GameObject obj = _dragginObject;
-
-            //    if (obj is AnimatedItemEffect eff && eff.Source is Item it)
-            //        obj = it;
-
-            //    switch (obj)
-            //    {
-            //        case Mobile mobile:
-            //            GameActions.RequestMobileStatus(mobile);
-
-            //            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
-
-            //            if (mobile == World.Player)
-            //                StatusGumpBase.GetStatusGump()?.Dispose();
-
-            //            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-            //            HealthBarGump currentHealthBarGump;
-            //            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-            //            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-            //            break;
-
-            //        case Item item:
-            //            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-            //            break;
-            //    }
-
-            //    _dragginObject = null;
-            //}
         }
 
         private bool _requestedWarMode;

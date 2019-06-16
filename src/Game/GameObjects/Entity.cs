@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public abstract void ProcessAnimation(out byte dir);
+        public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
 
         public abstract Graphic GetGraphicForAnimation();
 

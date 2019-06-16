@@ -43,9 +43,29 @@ namespace ClassicUO.Game.GameObjects
             Texture = null;
             RemoveFromTile();
             Graphic = graphic;
+            Bounds.X = 0;
+            Bounds.Y = 0;
+            Bounds.Width = 0;
+            Bounds.Height = 0;
+
+            Rectangle.X = 0;
+            Rectangle.Y = 0;
+            Rectangle.Width = 0;
+            Rectangle.Height = 0;
+
+            if (Normals != null)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    Normals[i].X = 0;
+                    Normals[i].Y = 0;
+                    Normals[i].Z = 0;
+                }
+
+                Normals = null;
+            }
+
             _tileData = FileManager.TileData.LandData[Graphic];
-            //Array.Clear(Normals, 0, Normals.Length);
-            //Rectangle = Rectangle.Empty;
             IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
             AllowedToDraw = Graphic > 2;
@@ -53,15 +73,15 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
-        public Land(Graphic graphic)
-        {
-            Graphic = graphic;
-            IsStretched = TileData.TexID == 0 && TileData.IsWet;
+        //public Land(Graphic graphic)
+        //{
+        //    Graphic = graphic;
+        //    IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
-            AllowedToDraw = Graphic > 2;
+        //    AllowedToDraw = Graphic > 2;
 
-            AlphaHue = 255;
-        }
+        //    AlphaHue = 255;
+        //}
 
         private LandTiles? _tileData;
 
@@ -83,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        public Vector3[] Normals = new Vector3[4];
+        public Vector3[] Normals;
 
         public Rectangle Rectangle;
 

@@ -84,17 +84,21 @@ namespace ClassicUO.Game.Managers
 
     internal class WalkerManager
     {
-        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
-        public long LastStepRequestTime { get; set; }
-        public int UnacceptedPacketsCount { get; set; }
-        public int StepsCount { get; set; }
-        public byte WalkSequence { get; set; }
-        public byte CurrentWalkSequence { get; set; }
-        public bool ResendPacketSended { get; set; }
-        public bool WantChangeCoordinates { get; set; }
-        public bool WalkingFailed { get; set; }
-        public ushort CurrentPlayerZ { get; set; }
-        public ushort NewPlayerZ { get; set; }
+        public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT]
+        {
+            new StepInfo(), new StepInfo(), new StepInfo(),
+            new StepInfo(), new StepInfo()
+        };
+        public long LastStepRequestTime;
+        public int UnacceptedPacketsCount;
+        public int StepsCount;
+        public byte WalkSequence;
+        public byte CurrentWalkSequence;
+        public bool ResendPacketSended;
+        public bool WantChangeCoordinates;
+        public bool WalkingFailed;
+        public ushort CurrentPlayerZ;
+        public ushort NewPlayerZ;
 
         public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 
@@ -102,7 +106,9 @@ namespace ClassicUO.Game.Managers
         {
             World.Player.Steps.Clear();
 
-            World.Player.Offset = Vector3.Zero;
+            World.Player.Offset.X = 0;
+            World.Player.Offset.Y = 0;
+            World.Player.Offset.Z = 0;
 
             Reset();
 
@@ -134,6 +140,7 @@ namespace ClassicUO.Game.Managers
             }
 
             bool isBadStep = stepIndex == StepsCount;
+
 
             if (!isBadStep)
             {

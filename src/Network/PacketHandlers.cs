@@ -830,6 +830,11 @@ namespace ClassicUO.Network
             World.Player.AddToTile();
 #endif
             World.Player.ProcessDelta();
+
+            var scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (scene != null)
+                scene.UpdateDrawPosition = true;
         }
 
         private static void DenyWalk(Packet p)
@@ -864,8 +869,11 @@ namespace ClassicUO.Network
             byte seq = p.ReadByte();
             byte noto = (byte) (p.ReadByte() & ~0x40);
 
-            if (noto == 0 || noto >= 7)
+            if (noto == 0 || noto >= 8)
                 noto = 0x01;
+
+            Console.WriteLine("CONFIRMED - seq {0}", seq);
+
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
@@ -1869,7 +1877,7 @@ namespace ClassicUO.Network
 
             if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
             {
-                mobile.Position = new Position((ushort) x, (ushort) y, z);
+                mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
 
@@ -1878,7 +1886,7 @@ namespace ClassicUO.Network
 
             if (!mobile.EnqueueStep(x, y, z, dir, isrun))
             {
-                mobile.Position = new Position((ushort) x, (ushort) y, z);
+                mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
                 mobile.ClearSteps();

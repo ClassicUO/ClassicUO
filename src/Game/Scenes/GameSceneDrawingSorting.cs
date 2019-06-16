@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Scenes
 
         private GameObject[] _renderList = new GameObject[2000];
         private int _renderListCount;
-        private bool _updateDrawPosition;
 
         public void UpdateMaxDrawZ(bool force = false)
         {
@@ -179,7 +178,7 @@ namespace ClassicUO.Game.Scenes
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
                     continue;
 
-                if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
 
                 //obj.UseInRender = 0xFF;
@@ -466,19 +465,19 @@ namespace ClassicUO.Game.Scenes
 
             int size = Math.Max(width, height);
 
-            int realMinRangeX = World.Player.Position.X - size;
+            int realMinRangeX = World.Player.X - size;
 
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = World.Player.Position.X + size;
+            int realMaxRangeX = World.Player.X + size;
 
             //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
             //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
-            int realMinRangeY = World.Player.Position.Y - size;
+            int realMinRangeY = World.Player.Y - size;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Position.Y + size;
+            int realMaxRangeY = World.Player.Y + size;
 
             //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
@@ -507,8 +506,11 @@ namespace ClassicUO.Game.Scenes
             int maxPixelsX = (int) newMaxX;
             int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY + maxY));
             int maxPixlesY = (int) newMaxY;
-            if (_updateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) _updateDrawPosition = true;
 
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
+            {
+                UpdateDrawPosition = true;
+            }
 
             _minTile.X = realMinRangeX;
             _minTile.Y = realMinRangeY;
@@ -522,6 +524,9 @@ namespace ClassicUO.Game.Scenes
 
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
+
+
+            UpdateMaxDrawZ();
         }
     }
 }

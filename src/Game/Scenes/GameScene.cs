@@ -60,11 +60,12 @@ namespace ClassicUO.Game.Scenes
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
 
 
-        private IGameEntity _selectedObject;
         private long _timePing;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
         private WorldViewport _viewPortGump;
+
+        public bool UpdateDrawPosition { get; set; }
 
         private int ScalePos
         {
@@ -178,14 +179,11 @@ namespace ClassicUO.Game.Scenes
             Engine.Input.RightMouseButtonUp += OnRightMouseUp;
             Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
 
-            // MOUSE MOVING
-            Engine.Input.MouseMoving += OnMouseMoving;
-
             // MOUSE WHEEL
             Engine.Input.MouseWheel += OnMouseWheel;
 
             // MOUSE DRAG
-            Engine.Input.DragBegin += OnMouseDragBegin;
+            Engine.Input.MouseDragging += OnMouseDragging;
 
             // KEYBOARD
             Engine.Input.KeyDown += OnKeyDown;
@@ -323,15 +321,12 @@ namespace ClassicUO.Game.Scenes
             Engine.Input.RightMouseButtonDown -= OnRightMouseDown;
             Engine.Input.RightMouseButtonUp -= OnRightMouseUp;
             Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-
-            // MOUSE MOVING
-            Engine.Input.MouseMoving -= OnMouseMoving;
-
+            
             // MOUSE WHEEL
             Engine.Input.MouseWheel -= OnMouseWheel;
 
             // MOUSE DRAG
-            Engine.Input.DragBegin -= OnMouseDragBegin;
+            Engine.Input.MouseDragging -= OnMouseDragging;
 
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
@@ -467,7 +462,6 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            UpdateMaxDrawZ();
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
@@ -525,7 +519,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
-            _updateDrawPosition = false;
+            UpdateDrawPosition = false;
 
 
             //if (_renderList.Length - _renderListCount != 0)
@@ -554,6 +548,9 @@ namespace ClassicUO.Game.Scenes
                 _darkness = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int) (Engine.Profile.Current.GameWindowSize.X * Scale), (int) (Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
+            Mouse.Update();
+            World.Update(totalMS, frameMS);
+            Overheads.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
 
 
@@ -604,9 +601,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            World.Update(totalMS, frameMS);
-            Overheads.Update(totalMS, frameMS);
-
+           
             if (totalMS > _timePing)
             {
                 //NetClient.Socket.Send(new PPing());

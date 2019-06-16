@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -47,6 +48,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Update(double totalMS, double frameMS)
         {
+            Mouse.Update();
             Audio?.Update();
             Coroutines.Update();
         }
