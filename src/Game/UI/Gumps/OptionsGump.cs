@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
         private TextBox _autoOpenCorpseRange;
         private Combobox _autoOpenCorpseOptions;
-        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea;
+        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Checkbox _enableDragSelect;
         private Combobox _dragSelectModifierKey;
 
@@ -998,7 +998,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT, true)
                 {
                     X = 20,
-                    Y = 15,
+                    Y = 5,
                     IsChecked = Engine.Profile.Current.DisableArrowBtn
                 };
                 _defaultHotkeysArea.Add(_disableArrowBtn);
@@ -1006,7 +1006,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT, true)
                 {
                     X = 20,
-                    Y = 35,
+                    Y = 25,
                     IsChecked = Engine.Profile.Current.DisableTabBtn
                 };
                 _defaultHotkeysArea.Add(_disableTabBtn);
@@ -1014,7 +1014,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT, true)
                 {
                     X = 20,
-                    Y = 55,
+                    Y = 45,
                     IsChecked = Engine.Profile.Current.DisableCtrlQWBtn
                 };
                 _defaultHotkeysArea.Add(_disableCtrlQWBtn);
@@ -1026,22 +1026,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", Engine.Profile.Current.EnableDragSelect, 0, 0);
 
-            ScrollAreaItem item = new ScrollAreaItem();
+            _dragSelectArea = new ScrollAreaItem();
             text = new Label("Drag-select modifier key", true, HUE_FONT, 0, FONT)
             {
-                X = 60
+                X = 20
             };
-            item.Add(text);
+            _dragSelectArea.Add(text);
             _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] { "None", "Ctrl", "Shift" })
             {
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
-            item.Add(_dragSelectModifierKey);
-            _enableDragSelect.ValueChanged += (sender, e) => { item.IsVisible = _enableDragSelect.IsChecked; };
-            rightArea.Add(item);
+            _dragSelectArea.Add(_dragSelectModifierKey);
+            _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
+            rightArea.Add(_dragSelectArea);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
+            _dragSelectArea.IsVisible = _enableDragSelect.IsChecked;
         }
 
         private void BuildNetwork()
