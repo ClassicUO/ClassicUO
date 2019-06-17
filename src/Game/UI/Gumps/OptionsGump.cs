@@ -1228,6 +1228,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
+                    _enableDragSelect.IsChecked = false;
                     break;
 
                 case 11:
