@@ -48,7 +48,6 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            Mouse.Update();
             Audio?.Update();
             Coroutines.Update();
         }

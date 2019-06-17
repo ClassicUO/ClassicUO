@@ -138,7 +138,9 @@ namespace ClassicUO.Game.GameObjects
 
 
             bool mirror = false;
-            byte dir = (byte)GetDirectionForAnimation();
+
+            ProcessSteps(out byte dir);
+
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -177,7 +179,7 @@ namespace ClassicUO.Game.GameObjects
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
 
-                    ProcessAnimation(out dir);
+                    ProcessSteps(out dir);
                     FileManager.Animations.Direction = dir;
                     FileManager.Animations.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 

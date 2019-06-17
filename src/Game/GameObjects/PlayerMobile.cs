@@ -1848,8 +1848,6 @@ namespace ClassicUO.Game.GameObjects
 
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
-            Console.WriteLine("SEND - seq {0}", Walker.WalkSequence);
-
 
             if (Walker.WalkSequence == 0xFF)
                 Walker.WalkSequence = 1;

@@ -548,7 +548,6 @@ namespace ClassicUO.Game.Scenes
                 _darkness = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int) (Engine.Profile.Current.GameWindowSize.X * Scale), (int) (Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
-            Mouse.Update();
             World.Update(totalMS, frameMS);
             Overheads.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();

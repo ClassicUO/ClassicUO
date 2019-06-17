@@ -872,8 +872,6 @@ namespace ClassicUO.Network
             if (noto == 0 || noto >= 8)
                 noto = 0x01;
 
-            Console.WriteLine("CONFIRMED - seq {0}", seq);
-
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();

@@ -150,7 +150,7 @@ namespace ClassicUO
 
 
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
-            IsFixedTimeStep = false; // _settings.FixedTimeStep;
+            IsFixedTimeStep = _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
@@ -806,10 +806,28 @@ namespace ClassicUO
         private double _previous;
         private double _totalElapsed;
 
+
         protected override void BeginRun()
         {
             base.BeginRun();
             _previous = SDL.SDL_GetTicks();
+            
+        }
+
+        private double _lag;
+
+        protected override void Update(GameTime gameTime)
+        {
+            OnUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
+            OnFixedUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            Render();
+            base.Draw(gameTime);
         }
 
 
@@ -827,10 +845,11 @@ namespace ClassicUO
             // ###############################
             // This should be the right order
             OnNetworkUpdate(current, elapsed);
-            OnInputUpdate(current, elapsed);
-            OnUIUpdate(current, elapsed);
+            Mouse.Update();
             Plugin.Tick();
+            OnUIUpdate(current, elapsed);
             // ###############################
+
 
 
             OnUpdate(current, elapsed);
@@ -838,6 +857,7 @@ namespace ClassicUO
             OnFixedUpdate(current, elapsed);
 
             Profiler.ExitContext("Update");
+
 
 
             _currentFpsTime += elapsed;
@@ -853,6 +873,7 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
+            //base.Tick();
 
             _totalElapsed += elapsed;
 
@@ -974,10 +995,6 @@ namespace ClassicUO
 #endif
         }
 
-        private void OnInputUpdate(double totalMS, double frameMS)
-        {
-            Mouse.Update();
-        }
 
         private void OnNetworkUpdate(double totalMS, double frameMS)
         {

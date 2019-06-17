@@ -584,134 +584,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
-            dir = (byte) Direction;
-            dir &= 7;
-
-            if (Steps.Count != 0 && !IsDestroyed)
-            {
-                Step step = Steps.Front();
-                dir = step.Direction;
-
-                if (step.Run)
-                    dir &= 7;
-
-                if (evalutate)
-                {
-                    if (AnimationFromServer)
-                        SetAnimation(0xFF);
-
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
-                    int delay = (int) Engine.Ticks - (int) LastStepTime;
-                    bool removeStep = delay >= maxDelay;
-                    bool directionChange = false;
-
-                    if (X != step.X || Y != step.Y)
-                    {
-                        bool badStep = false;
-
-                        if (Offset.X == 0 && Offset.Y == 0)
-                        {
-                            int absX = Math.Abs(X - step.X);
-                            int absY = Math.Abs(Y - step.Y);
-
-                            badStep = (absX > 1 || absY > 1 || absX + absY == 0);
-
-                            if (!badStep)
-                            {
-                                absX = X;
-                                absY = Y;
-
-                                Pathfinder.GetNewXY((byte) (step.Direction & 7), ref absX, ref absY);
-
-                                badStep = (absX != step.X || absY != step.Y);
-                            }
-                        }
-
-                        if (badStep)
-                            removeStep = true;
-                        else
-                        {
-                            float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float y = x;
-                            Offset.Z = (sbyte) (((step.Z - Z) * x) * (4.0f / steps));
-                            MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, steps);
-                            Offset.X = (sbyte) x;
-                            Offset.Y = (sbyte) y;
-                        }
-                    }
-                    else
-                    {
-                        directionChange = true;
-                        removeStep = true;
-                    }
-
-                    if (removeStep)
-                    {
-                        if (this == World.Player)
-                        {
-                            //if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
-                            //{
-                            //}
-
-                            if (Position.Z - step.Z >= 22)
-                            {
-                                // oUCH!!!!
-                                AddOverhead(MessageType.Label, "Ouch!");
-                            }
-
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
-                            if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
-                            {
-                                int sequence = World.Player.Walker.CurrentWalkSequence + 1;
-
-                                if (sequence < World.Player.Walker.StepsCount)
-                                {
-                                    int count = World.Player.Walker.StepsCount - sequence;
-
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                        World.Player.Walker.StepInfos[sequence - 1] = World.Player.Walker.StepInfos[sequence];
-                                        sequence++;
-                                    }
-                                }
-
-                                World.Player.Walker.StepsCount--;
-                            }
-                            else
-                                World.Player.Walker.CurrentWalkSequence++;
-#endif
-                        }
-
-                        Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
-                        Direction = (Direction) step.Direction;
-                        IsRunning = step.Run;
-                        Offset.X = 0;
-                        Offset.Y = 0;
-                        Offset.Z = 0;
-                        Steps.RemoveFromFront();
-                        CalculateRandomIdleTime();
-
-                        if (directionChange)
-                        {
-                            ProcessAnimation(out dir, evalutate);
-                            return;
-                        }
-
-                        if (Right != null || Left != null)
-                            AddToTile();
-
-                        LastStepTime = Engine.Ticks;
-                        ProcessDelta();
-                    }
-                }
-            }
-            else
-            {
-                Offset.X = 0;
-                Offset.Y = 0;
-                Offset.Z = 0;
-            }
+            ProcessSteps(out dir, evalutate);
 
             ProcessFootstepsSound();
 
@@ -854,6 +727,138 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 LastAnimationChangeTime = Engine.Ticks + currentDelay;
+            }
+        }
+
+        public void ProcessSteps(out byte dir, bool evalutate = false)
+        {
+            dir = (byte)Direction;
+            dir &= 7;
+
+            if (Steps.Count != 0 && !IsDestroyed)
+            {
+                Step step = Steps.Front();
+                dir = step.Direction;
+
+                if (step.Run)
+                    dir &= 7;
+
+                if (evalutate)
+                {
+                    if (AnimationFromServer)
+                        SetAnimation(0xFF);
+
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int delay = (int)Engine.Ticks - (int)LastStepTime;
+                    bool removeStep = delay >= maxDelay;
+                    bool directionChange = false;
+
+                    if (X != step.X || Y != step.Y)
+                    {
+                        bool badStep = false;
+
+                        if (Offset.X == 0 && Offset.Y == 0)
+                        {
+                            int absX = Math.Abs(X - step.X);
+                            int absY = Math.Abs(Y - step.Y);
+
+                            badStep = (absX > 1 || absY > 1 || absX + absY == 0);
+
+                            if (!badStep)
+                            {
+                                absX = X;
+                                absY = Y;
+
+                                Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+
+                                badStep = (absX != step.X || absY != step.Y);
+                            }
+                        }
+
+                        if (badStep)
+                            removeStep = true;
+                        else
+                        {
+                            float steps = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                            float x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                            float y = x;
+                            Offset.Z = (sbyte)(((step.Z - Z) * x) * (4.0f / steps));
+                            MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, steps);
+                            Offset.X = (sbyte)x;
+                            Offset.Y = (sbyte)y;
+                        }
+                    }
+                    else
+                    {
+                        directionChange = true;
+                        removeStep = true;
+                    }
+
+                    if (removeStep)
+                    {
+                        if (Serial == World.Player)
+                        {
+                            //if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
+                            //{
+                            //}
+
+                            if (Z - step.Z >= 22)
+                            {
+                                // oUCH!!!!
+                                AddOverhead(MessageType.Label, "Ouch!");
+                            }
+
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
+                            if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
+                            {
+                                int sequence = World.Player.Walker.CurrentWalkSequence + 1;
+
+                                if (sequence < World.Player.Walker.StepsCount)
+                                {
+                                    int count = World.Player.Walker.StepsCount - sequence;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        World.Player.Walker.StepInfos[sequence - 1] = World.Player.Walker.StepInfos[sequence];
+                                        sequence++;
+                                    }
+                                }
+
+                                World.Player.Walker.StepsCount--;
+                            }
+                            else
+                                World.Player.Walker.CurrentWalkSequence++;
+#endif
+                        }
+
+                        Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
+                        Direction = (Direction)step.Direction;
+                        IsRunning = step.Run;
+                        Offset.X = 0;
+                        Offset.Y = 0;
+                        Offset.Z = 0;
+                        Steps.RemoveFromFront();
+                        CalculateRandomIdleTime();
+
+                        if (directionChange)
+                        {
+                            ProcessSteps(out dir, evalutate);
+                            return;
+                        }
+
+                        if (Right != null || Left != null)
+                            AddToTile();
+
+                        LastStepTime = Engine.Ticks;
+                        ProcessDelta();
+                    }
+                }
+            }
+            else
+            {
+                Offset.X = 0;
+                Offset.Y = 0;
+                Offset.Z = 0;
             }
         }
 
