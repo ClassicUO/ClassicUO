@@ -25,20 +25,16 @@ namespace ClassicUO.Utility.Coroutines
     internal class WaitCondition<T> : IWaitCondition
     {
         private readonly Func<T, bool> _condition;
-        private readonly Func<T, T> _update;
-        private T _parameter;
+        private readonly T _parameter;
 
-        public WaitCondition(Func<T, T> update, Func<T, bool> condition, T startingValue)
+        public WaitCondition(Func<T, bool> condition, T startingValue)
         {
-            _update = update;
             _condition = condition;
             _parameter = startingValue;
         }
 
         public bool Update()
         {
-            _parameter = _update(_parameter);
-
             return _condition(_parameter);
         }
     }

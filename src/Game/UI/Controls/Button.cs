@@ -171,8 +171,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            foreach (SpriteTexture t in _textures)
+            for (int i = 0; i < _textures.Length; i++)
             {
+                SpriteTexture t = _textures[i];
+
                 if (t != null)
                     t.Ticks = Engine.Ticks;
             }

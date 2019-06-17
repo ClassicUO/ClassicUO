@@ -748,7 +748,7 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.Instance.IntervalFixedUpdate;
                     int delay = (int)Engine.Ticks - (int)LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;

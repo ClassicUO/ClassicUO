@@ -242,11 +242,6 @@ namespace ClassicUO
         /// </summary>
         public static uint Ticks { get; private set; }
 
-        /// <summary>
-        ///     Milliseconds from last frame
-        /// </summary>
-        public static long TicksFrame { get; private set; }
-
         public static uint[] FrameDelay { get; } = new uint[2];
 
         public static bool IsMaximized
@@ -811,8 +806,8 @@ namespace ClassicUO
         {
             base.BeginRun();
             _previous = SDL.SDL_GetTicks();
-            
         }
+
 
         private double _lag;
 
@@ -891,7 +886,7 @@ namespace ClassicUO
             //SDL.SDL_Delay((uint)Math.Max(delay - dyn, 2));
         }
 
-        protected double IntervalFixedUpdate { get; private set; }
+        public double IntervalFixedUpdate { get; private set; }
 
 
         private void Render()

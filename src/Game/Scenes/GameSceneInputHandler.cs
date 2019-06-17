@@ -423,8 +423,6 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            Console.WriteLine("MOUSE DOWN");
-
             _rightMousePressed = true;
             _continueRunning = false;
             StopFollowing();
@@ -443,8 +441,6 @@ namespace ClassicUO.Game.Scenes
 
         private void OnRightMouseUp(object sender, EventArgs e)
         {
-            Console.WriteLine("MOUSE UP");
-
             _rightMousePressed = false;
         }
 

@@ -92,6 +92,8 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
 
+            yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
+
             while (!IsDestroyed)
             {
                 FileManager.Art.CleaUnusedResources();
