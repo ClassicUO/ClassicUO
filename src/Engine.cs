@@ -220,7 +220,7 @@ namespace ClassicUO
 
                     _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
 
-                    _engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
+                    //_engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
         }
@@ -813,10 +813,24 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
+            Profiler.EnterContext("Update");
+
             OnUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
             OnFixedUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
 
             base.Update(gameTime);
+
+            
+            _time += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if (_time > IntervalFixedUpdate)
+            {
+                _time %= IntervalFixedUpdate;
+            }
+            else
+                SuppressDraw();
+
+            Profiler.ExitContext("Update");
         }
 
         protected override void Draw(GameTime gameTime)
@@ -831,7 +845,6 @@ namespace ClassicUO
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
 
-            Profiler.EnterContext("Update");
 
             double current = Ticks = SDL.SDL_GetTicks();
             double elapsed = current - _previous;
@@ -847,14 +860,14 @@ namespace ClassicUO
 
 
 
-            OnUpdate(current, elapsed);
-            FrameworkDispatcher.Update();
-            OnFixedUpdate(current, elapsed);
+            //OnUpdate(current, elapsed);
+            //FrameworkDispatcher.Update();
+            //OnFixedUpdate(current, elapsed);
 
-            Profiler.ExitContext("Update");
+            //Profiler.ExitContext("Update");
+       
 
-
-
+            
             _currentFpsTime += elapsed;
 
             if (_currentFpsTime >= 1000)
@@ -868,22 +881,17 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            //base.Tick();
+            base.Tick();
 
-            _totalElapsed += elapsed;
+            //_totalElapsed += elapsed;
 
-            if (_totalElapsed > IntervalFixedUpdate)
-            {
-                Render();
-                _totalElapsed %= IntervalFixedUpdate;
-                _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
-            }
+            //if (_totalElapsed > IntervalFixedUpdate)
+            //{
+            //    Render();
+            //    _totalElapsed -= IntervalFixedUpdate;
+            //    _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
 
 
-            //int dyn = (int)(SDL.SDL_GetTicks() - current);
-            //int delay = (int)IntervalFixedUpdate;
-
-            //SDL.SDL_Delay((uint)Math.Max(delay - dyn, 2));
         }
 
         public double IntervalFixedUpdate { get; private set; }
@@ -925,7 +933,7 @@ namespace ClassicUO
             UpdateWindowCaption();
 
 
-            GraphicsDevice?.Present();
+            //GraphicsDevice?.Present();
         }
 
         public override void OnSDLEvent(ref SDL.SDL_Event ev)
