@@ -1038,8 +1038,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _dragSelectArea.Add(_dragSelectModifierKey);
 
-            _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
-
             _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, "Select humanoids only", FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.DragSelectHumanoidsOnly,
