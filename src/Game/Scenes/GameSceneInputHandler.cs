@@ -166,6 +166,9 @@ namespace ClassicUO.Game.Scenes
 
             foreach (Mobile mobile in World.Mobiles)
             {
+                if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
+                    continue;
+
                 int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
                 int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
 

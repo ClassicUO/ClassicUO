@@ -167,6 +167,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; } = false;
         [JsonProperty] public bool EnableDragSelect { get; set; } = false;
         [JsonProperty] public int DragSelectModifierKey { get; set; } = 0; // 0 = none, 1 = control, 2 = shift
+        [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; } = false;
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 

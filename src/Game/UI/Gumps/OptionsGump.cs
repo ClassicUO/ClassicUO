@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _autoOpenCorpseRange;
         private Combobox _autoOpenCorpseOptions;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
-        private Checkbox _enableDragSelect;
+        private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
         private Combobox _dragSelectModifierKey;
 
         // sounds
@@ -1037,7 +1037,19 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
             _dragSelectArea.Add(_dragSelectModifierKey);
+
             _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
+
+            _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, "Select humanoids only", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.DragSelectHumanoidsOnly,
+                X = 20,
+                Y = 20
+            };
+            _dragSelectArea.Add(_dragSelectHumanoidsOnly);
+
+            _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
+
             rightArea.Add(_dragSelectArea);
 
             Add(rightArea, PAGE);
@@ -1229,6 +1241,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
+                    _dragSelectHumanoidsOnly.IsChecked = false;
                     break;
 
                 case 11:
@@ -1580,7 +1593,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
 
             Engine.Profile.Current.EnableDragSelect = _enableDragSelect.IsChecked;
-            Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;           
+            Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
+            Engine.Profile.Current.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
 
 
             // network
