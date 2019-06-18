@@ -104,6 +104,12 @@ namespace ClassicUO.Game.GameObjects
             AnimationFromServer = false;
             StepSoundOffset = 0;
             AnimationGroup = 0xFF;
+
+            FrameInfo.X = 0;
+            FrameInfo.Y = 0;
+            FrameInfo.Width = 0;
+            FrameInfo.Height = 0;
+            DeathScreenTimer = 0;
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);

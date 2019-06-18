@@ -50,6 +50,7 @@ namespace ClassicUO.Game.GameObjects
         protected void Entity_New(Serial serial)
         {
             Serial = serial;
+            IsFlipped = false;
             IsDestroyed = false;
             Items = new EntityCollection<Item>();
             _equipment = null;
@@ -73,6 +74,12 @@ namespace ClassicUO.Game.GameObjects
             OverheadMessageContainer = null;
             CurrentRenderIndex = 0;
             PriorityZ = 0;
+
+            AlphaHue = 0;
+            Bounds.X = 0;
+            Bounds.Y = 0;
+            Bounds.Width = 0;
+            Bounds.Height = 0;
         }
 
         protected long LastAnimationChangeTime { get; set; }
