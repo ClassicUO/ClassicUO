@@ -992,6 +992,9 @@ namespace ClassicUO.Network
                 }
                 else
                 {
+
+                    //Engine.UI.Add(new GridLootGump(serial));
+
                     Engine.UI.GetControl<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
