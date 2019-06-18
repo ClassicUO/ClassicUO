@@ -359,6 +359,16 @@ namespace ClassicUO.Game.Map
                                 m.RemoveFromTile();
                                 PoolsManager.PushMulti(m);
                             }
+                            else if (obj is Item it)
+                            {
+                                it.RemoveFromTile();
+                                PoolsManager.PushItem(it);
+                            }
+                            else if (obj is Mobile mob)
+                            {
+                                mob.RemoveFromTile();
+                                PoolsManager.PushMobile(mob);
+                            }
                             else
                                 obj.Destroy();
                         }

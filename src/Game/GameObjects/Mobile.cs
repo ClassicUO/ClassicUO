@@ -67,10 +67,43 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
-        public Mobile(Serial serial) : base(serial)
+        //public Mobile(Serial serial) : base(serial)
+        //{
+        //    LastAnimationChangeTime = Engine.Ticks;
+        //    CalculateRandomIdleTime();
+        //}
+
+        public Mobile()
         {
+
+        }
+
+        public void Mobile_New(Serial serial)
+        {
+            RemoveFromTile();
+
+            Entity_New(serial);
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
+
+            Texture = null;
+
+            ClearSteps();
+            SpeedMode = CharacterSpeedType.Normal;
+            _isFemale = _isDead = _isRenamable = _isSA_Poisoned = _transform = false;
+            _race = RaceType.HUMAN;
+            _hits = _hitsMax = _mana = _manaMax = _stamina = _staminaMax = 0;
+            _notorietyFlag = NotorietyFlag.Unknown;
+            IsRunning = false;
+            LastStepSoundTime = 0;
+            LastStepTime = 0;
+            AnimationInterval = 0;
+            AnimationFrameCount = 0;
+            AnimationRepeatMode = 1;
+            AnimationRepeat = false;
+            AnimationFromServer = false;
+            StepSoundOffset = 0;
+            AnimationGroup = 0xFF;
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);

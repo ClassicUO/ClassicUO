@@ -714,22 +714,22 @@ namespace ClassicUO.Game.Scenes
 
                 }
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                {
-                    Item multiTarget = new Item(Serial.INVALID)
-                    {
-                        Graphic = TargetManager.MultiTargetInfo.Model,
-                        IsMulti = true
-                    };
+                //if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                //{
+                //    Item multiTarget = new Item(Serial.INVALID)
+                //    {
+                //        Graphic = TargetManager.MultiTargetInfo.Model,
+                //        IsMulti = true
+                //    };
 
-                    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj && (gobj is Land || gobj is Static))
-                    {
-                        multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
-                        multiTarget.CheckGraphicChange();
-                    }
+                //    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj && (gobj is Land || gobj is Static))
+                //    {
+                //        multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
+                //        multiTarget.CheckGraphicChange();
+                //    }
 
-                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
-                }
+                //    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
+                //}
             }
 
             //batcher.SetStencil(null);

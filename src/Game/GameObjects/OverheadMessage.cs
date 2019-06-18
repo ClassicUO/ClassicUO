@@ -299,6 +299,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             //int startY = offY;
+
             foreach (var item in _messages)
             {
                 ushort hue = 0;

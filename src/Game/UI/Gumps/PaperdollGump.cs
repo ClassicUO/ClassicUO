@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -119,11 +120,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gs.IsHoldingItem)
             {
-                _paperDollInteractable.AddFakeDress(new Item(gs.HeldItem.Serial)
-                {
-                    Graphic = gs.HeldItem.Graphic,
-                    Hue = gs.HeldItem.Hue
-                });
+                Item it = new Item();
+                it.Item_New(gs.HeldItem.Serial);
+                it.Graphic = gs.HeldItem.Graphic;
+                it.Hue = gs.HeldItem.Hue;
+
+                _paperDollInteractable.AddFakeDress(it);
             }
         }
 

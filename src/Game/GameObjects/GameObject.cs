@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        public OverheadMessage OverheadMessageContainer { get; private set; }
+        public OverheadMessage OverheadMessageContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool IsDestroyed { get; private set; }
+        public bool IsDestroyed { get; protected set; }
 
         public int Distance
         {

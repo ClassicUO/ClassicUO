@@ -78,7 +78,11 @@ namespace ClassicUO.Game.Managers
                     float alpha = first.IsOverlap(first.Right);
                     first.Draw(batcher, startX, startY, scale);
                     first.SetAlpha(alpha);
-                    first.Contains(mouseX, mouseY);
+
+                    if (first.Contains(mouseX, mouseY))
+                    {
+
+                    }
 
                     var temp = first.Right;
                     first.Right = null;

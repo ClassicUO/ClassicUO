@@ -40,6 +40,10 @@ namespace ClassicUO.Game.GameObjects
         {
             Texture = null;
             RemoveFromTile();
+            Position = Position.INVALID;
+            CurrentRenderIndex = 0;
+            PriorityZ = 0;
+            Hue = 0;
             Graphic = graphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
             _isFoliage = ItemData.IsFoliage;

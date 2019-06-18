@@ -45,10 +45,39 @@ namespace ClassicUO.Game.GameObjects
         private uint _price;
         private ulong _spellsBitFiled;
 
-        public Item(Serial serial) : base(serial)
+        //public Item(Serial serial) : base(serial)
+        //{
+        //}
+
+        public Item()
         {
+
         }
 
+
+        public void Item_New(Serial serial)
+        {
+            Entity_New(serial);
+            _price = 0;
+            _amount = 0;
+            _container = 0;
+            _displayedGraphic = null;
+            _isMulti = false;
+            _layer = Layer.Invalid;
+            _spellsBitFiled = 0;
+            UsedLayer = false;
+            MultiDistanceBonus = 0;
+            MultiGraphic = 0;
+            MultiInfo = null;
+            LightID = 0;
+            WantUpdateMulti = true;
+            BookType = SpellBookType.Unknown;
+            _itemData = null;
+            _animDataFrame = default;
+            _animSpeed = 0;
+            _force = false;
+            _originalGraphic = 0;
+        }
 
         public uint Price
         {

@@ -41,15 +41,43 @@ namespace ClassicUO.Game.GameObjects
         private Hue _hue;
         private string _name;
 
-        protected Entity(Serial serial)
+        //protected Entity(Serial serial)
+        //{
+        //    Serial = serial;
+        //    Items = new EntityCollection<Item>();
+        //}
+
+        protected void Entity_New(Serial serial)
         {
             Serial = serial;
+            IsDestroyed = false;
             Items = new EntityCollection<Item>();
+            _equipment = null;
+            IsClicked = false;
+            _properties.Clear();
+            Graphic = 0;
+            Hue = 0;
+            _name = string.Empty;
+            Flags = 0;
+            _direction = 0;
+            PropertiesHash = 0;
+
+            UseObjectHandles = false;
+            ObjectHandlesOpened = false;
+            ClosedObjectHandles = false;
+            _delta = Delta.None;
+
+            AnimIndex = 0;
+            Position = Position.INVALID;
+            OverheadMessageContainer?.Destroy();
+            OverheadMessageContainer = null;
+            CurrentRenderIndex = 0;
+            PriorityZ = 0;
         }
 
         protected long LastAnimationChangeTime { get; set; }
 
-        public EntityCollection<Item> Items { get; }
+        public EntityCollection<Item> Items { get; private set; }
 
         public bool HasEquipment => _equipment != null;
 

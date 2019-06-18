@@ -90,8 +90,10 @@ namespace ClassicUO.Game.GameObjects
         private ushort _weight;
         private ushort _weightMax;
 
-        public PlayerMobile(Serial serial) : base(serial)
+        public PlayerMobile(Serial serial)
         {
+            Entity_New(serial);
+
             Skills = new Skill[FileManager.Skills.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
@@ -1735,10 +1737,10 @@ namespace ClassicUO.Game.GameObjects
             }*/ 
         }
 
-        protected override bool NoIterateAnimIndex()
-        {
-            return false;
-        }
+        //protected override bool NoIterateAnimIndex()
+        //{
+        //    return false;
+        //}
 
         public bool Walk(Direction direction, bool run)
         {

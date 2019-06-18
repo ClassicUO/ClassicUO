@@ -42,6 +42,10 @@ namespace ClassicUO.Game.GameObjects
         {
             Texture = null;
             RemoveFromTile();
+            Position = Position.INVALID;
+            CurrentRenderIndex = 0;
+            PriorityZ = 0;
+            Hue = 0;
             Graphic = graphic;
             Bounds.X = 0;
             Bounds.Y = 0;

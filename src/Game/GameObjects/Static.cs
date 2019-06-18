@@ -39,6 +39,10 @@ namespace ClassicUO.Game.GameObjects
         public void SetGraphic_New(ushort graphic, int index)
         {
             RemoveFromTile();
+            Position = Position.INVALID;
+            CurrentRenderIndex = 0;
+            PriorityZ = 0;
+            Hue = 0;
             Graphic = OriginalGraphic = graphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
             Index = index;
