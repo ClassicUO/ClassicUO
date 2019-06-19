@@ -43,6 +43,8 @@ namespace ClassicUO.Game.Managers
         private static NameOverHeadHandlerGump _gump;
         public static NameOverheadTypeAllowed TypeAllowed { get; set; }
 
+        public static bool IsToggled = false;
+
         public static bool IsAllowed(Entity serial)
         {
             if (serial == null)
@@ -79,6 +81,11 @@ namespace ClassicUO.Game.Managers
                 _gump.Dispose();
                 _gump = null;
             }
+        }
+
+        public static void ToggleOverheads()
+        {
+            IsToggled = !IsToggled;
         }
     }
 }

@@ -1027,6 +1027,11 @@ namespace ClassicUO.Game.Managers
                     TargetManager.SetTargeting(CursorTarget.SetGrabBag, Serial.INVALID, TargetType.Neutral);
 
                     break;
+
+                case MacroType.NamesOnOff:
+                    NameOverHeadManager.ToggleOverheads();
+
+                    break;
             }
 
 
@@ -1327,7 +1332,8 @@ namespace ClassicUO.Game.Managers
         Aura,
         AuraOnOff,
         Grab,
-        SetGrabBag
+        SetGrabBag,
+        NamesOnOff
     }
 
     internal enum MacroSubType

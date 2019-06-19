@@ -469,6 +469,12 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
+            _useObjectHandles = NameOverHeadManager.IsToggled || _useObjectHandles;
+
+            if (_useObjectHandles)
+                NameOverHeadManager.Open();
+            else
+                NameOverHeadManager.Close();
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
             _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
