@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Item _corpse;
         private readonly AlphaBlendControl _background;
         private readonly ushort _gumpID;
-        private readonly NiceButton _buttonPrev, _buttonNext;
+        private readonly NiceButton _buttonPrev, _buttonNext, _grabAll;
 
         public GridLootGump(Serial local, ushort gumpid) : base(local, 0)
         {
@@ -51,11 +51,11 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _background.Height;
 
 
-            NiceButton grabAll = new NiceButton(3, Height - 23, 50, 20, ButtonAction.Activate, "Grab All")
+            _grabAll = new NiceButton(3, Height - 23, 50, 20, ButtonAction.Activate, "Grab All")
             {
                 ButtonParameter = 2, IsSelectable = false
             };
-            Add(grabAll);
+            Add(_grabAll);
 
             _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") { ButtonParameter = 0, IsSelectable = false };
             _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") { ButtonParameter = 1, IsSelectable = false };
@@ -112,11 +112,11 @@ namespace ClassicUO.Game.UI.Gumps
                     GameScene scene = Engine.SceneManager.GetScene<GameScene>();
                     if (scene == null)
                         return;
-
+                    
                     IEnumerable<IWaitCondition> grabAllItems()
                     {
                         var items = _corpse.Items.ToList();
-
+                        _grabAll.IsEnabled = false;
                         foreach (Item item in items)
                         {
                             if (item == null || item.ItemData.Layer == (int)Layer.Hair || item.ItemData.Layer == (int)Layer.Beard || item.ItemData.Layer == (int)Layer.Face)
@@ -127,6 +127,8 @@ namespace ClassicUO.Game.UI.Gumps
                             GameActions.Print($"Grabbing {item.Serial}...");
                             yield return new WaitTime(TimeSpan.FromMilliseconds(650));
                         }
+
+                        _grabAll.IsEnabled = true;
                     }
 
                     Coroutine.Start(scene, grabAllItems(), "grabber");
