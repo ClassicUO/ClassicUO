@@ -469,7 +469,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                WriteUnicode(text, len);
+                WriteUnicode(text, size);
             }
         }
     }
