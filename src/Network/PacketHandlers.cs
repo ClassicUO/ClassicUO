@@ -932,6 +932,8 @@ namespace ClassicUO.Network
             // effect moving. To do
         }
 
+        private static Serial _requestedGridLoot;
+
         private static void OpenContainer(Packet p)
         {
             if (World.Player == null)
@@ -1006,7 +1008,7 @@ namespace ClassicUO.Network
                     {
                         Engine.UI.GetControl<GridLootGump>(serial)?.Dispose();
                         Engine.UI.Add(new GridLootGump(serial, graphic));
-
+                        _requestedGridLoot = serial;
                         if (Engine.Profile.Current.GridLootType == 1)
                             return;
                     }
@@ -1436,12 +1438,21 @@ namespace ClassicUO.Network
                 }
 
 
+                
+
+                AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+
                 if (grid == null && Engine.Profile.Current.GridLootType > 0)
                 {
                     grid = Engine.UI.GetControl<GridLootGump>(containerSerial);
-                }
 
-                AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+                    if (_requestedGridLoot != 0 && _requestedGridLoot == containerSerial && grid == null)
+                    {
+                        grid = new GridLootGump(_requestedGridLoot, 0);
+                        Engine.UI.Add(grid);
+                        _requestedGridLoot = 0;
+                    }
+                }
 
                 if (grid != null)
                 {
