@@ -105,6 +105,12 @@ namespace ClassicUO.Game.UI.Gumps
             //    ok = true;
             //}
 
+            if (rows > 30)
+                rows = 30;
+
+            if (columns > 30)
+                columns = 30;
+
             if (size < 30)
                 size = 30;
             else if (size > 80)
