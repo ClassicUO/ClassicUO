@@ -580,11 +580,6 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isshift && isctrl;
 
-            if (_useObjectHandles)
-                NameOverHeadManager.Open();
-            else
-                NameOverHeadManager.Close();
-
             if (macro != null)
             {
                 Macros.SetMacroToExecute(macro.FirstNode);
@@ -672,9 +667,6 @@ namespace ClassicUO.Game.Scenes
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM) _numPadKeyPressed = false;
 
             _useObjectHandles = isctrl && isshift;
-
-            if (!_useObjectHandles)
-                NameOverHeadManager.Close();
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {
