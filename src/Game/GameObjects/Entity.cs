@@ -193,6 +193,7 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Y = 0;
             FrameInfo.Width = 0;
             FrameInfo.Height = 0;
+            _direction = Direction.NONE;
 
             return this;
         }
