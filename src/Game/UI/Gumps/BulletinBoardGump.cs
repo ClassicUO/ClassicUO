@@ -237,6 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     break;
+
                 case 1:
 
                     Add(_buttonReply = new Button((int) ButtonType.Reply, 0x0884, 0x0884)
@@ -248,6 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     break;
+
                 case 2:
 
                     Add(_buttonRemove = new Button((int) ButtonType.Remove, 0x0885, 0x0885)
@@ -276,11 +278,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     break;
+
                 case ButtonType.Remove:
                     Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, "RE: " + _subjectTextbox.Text, "Date/Time", string.Empty, 0));
                     Dispose();
 
                     break;
+
                 case ButtonType.Reply:
                     NetClient.Socket.Send(new PBulletinBoardRemoveMessage(LocalSerial, _msgSerial));
                     Dispose();
@@ -297,6 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.Value -= 5;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += 5;
 

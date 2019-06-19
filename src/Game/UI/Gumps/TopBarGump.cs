@@ -172,6 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Paperdoll:
                     PaperDollGump paperdollGump = Engine.UI.GetControl<PaperDollGump>(World.Player);
 
@@ -184,6 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Inventory:
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
 
@@ -198,6 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Journal:
                     JournalGump journalGump = Engine.UI.GetControl<JournalGump>();
 
@@ -213,14 +216,17 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Chat:
                     Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
 
                     break;
+
                 case Buttons.Help:
                     GameActions.RequestHelp();
 
                     break;
+
                 case Buttons.Debug:
 
                     DebugGump debugGump = Engine.UI.GetControl<DebugGump>();

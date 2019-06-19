@@ -46,7 +46,7 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            UOFileMul tiledata = new UOFileMul(path, true);
+            UOFileMul tiledata = new UOFileMul(path);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
             int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 

@@ -205,9 +205,8 @@ namespace ClassicUO.Game.Managers
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             foreach (HotKeyCombination h in _hotkeys)
-            {
-                if (h.Key == key && h.Mod == mod) return false;
-            }
+                if (h.Key == key && h.Mod == mod)
+                    return false;
 
             _hotkeys.Add(new HotKeyCombination
             {

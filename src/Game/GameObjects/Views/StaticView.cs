@@ -25,8 +25,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static
@@ -87,7 +85,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            
 
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
@@ -105,9 +102,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
-            }
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, posX, posY);
@@ -136,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
                 if (d <= maxD && d <= 3)
                     return;
             }
-            
+
             if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }

@@ -125,6 +125,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(1);
 
                     break;
+
                 case CharCreationStep.ChooseProfession:
                     var existing = Children.FirstOrDefault(page => page.Page == 2);
 
@@ -136,6 +137,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(2);
 
                     break;
+
                 case CharCreationStep.ChooseTrade:
                     existing = Children.FirstOrDefault(page => page.Page == 3);
 
@@ -146,6 +148,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(3);
 
                     break;
+
                 case CharCreationStep.ChooseCity:
                     existing = Children.FirstOrDefault(page => page.Page == 4);
 

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-    static class PoolsManager
+    internal static class PoolsManager
     {
         private static QueuedPool<Tile> _tilePool;
         private static QueuedPool<Chunk> _chunkPool;
@@ -36,47 +30,75 @@ namespace ClassicUO.Game.Managers
 
 
         public static Chunk GetChunk()
-            => _chunkPool.GetOne();
+        {
+            return _chunkPool.GetOne();
+        }
 
         public static Tile GetTile()
-            => _tilePool.GetOne();
+        {
+            return _tilePool.GetOne();
+        }
 
         public static Land GetLand()
-            => _landPool.GetOne();
+        {
+            return _landPool.GetOne();
+        }
 
         public static Static GetStatic()
-            => _staticPool.GetOne();
+        {
+            return _staticPool.GetOne();
+        }
 
         public static Multi GetMulti()
-            => _multiPool.GetOne();
+        {
+            return _multiPool.GetOne();
+        }
 
         public static Mobile GetMobile()
-            => _mobilePool.GetOne();
+        {
+            return _mobilePool.GetOne();
+        }
 
         public static Item GetItem()
-            => _itemPool.GetOne();
+        {
+            return _itemPool.GetOne();
+        }
 
 
 
         public static void PushChunk(Chunk c)
-            => _chunkPool.ReturnOne(c);
+        {
+            _chunkPool.ReturnOne(c);
+        }
 
         public static void PushTile(Tile t)
-            => _tilePool.ReturnOne(t);
+        {
+            _tilePool.ReturnOne(t);
+        }
 
         public static void PushLand(Land l)
-            => _landPool.ReturnOne(l);
+        {
+            _landPool.ReturnOne(l);
+        }
 
         public static void PushStatic(Static s)
-            => _staticPool.ReturnOne(s);
+        {
+            _staticPool.ReturnOne(s);
+        }
 
         public static void PushMulti(Multi m)
-            => _multiPool.ReturnOne(m);
+        {
+            _multiPool.ReturnOne(m);
+        }
 
         public static void PushMobile(Mobile m)
-            => _mobilePool.ReturnOne(m);
+        {
+            _mobilePool.ReturnOne(m);
+        }
 
         public static void PushItem(Item i)
-            => _itemPool.ReturnOne(i);
+        {
+            _itemPool.ReturnOne(i);
+        }
     }
 }

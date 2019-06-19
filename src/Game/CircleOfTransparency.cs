@@ -24,9 +24,7 @@
 using System;
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
@@ -50,15 +48,6 @@ namespace ClassicUO.Game
             return state;
         });
 
-        DepthStencilState s1 = new DepthStencilState
-        {
-            StencilEnable = true,
-            StencilFunction = CompareFunction.Always,
-            StencilPass = StencilOperation.Replace,
-            ReferenceStencil = 0,
-            DepthBufferEnable = true,
-        };
-
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
             BlendState blend = BlendState.AlphaBlend;
@@ -70,6 +59,15 @@ namespace ClassicUO.Game
 
         private Texture2D _texture;
         private short _width, _height;
+
+        private DepthStencilState s1 = new DepthStencilState
+        {
+            StencilEnable = true,
+            StencilFunction = CompareFunction.Always,
+            StencilPass = StencilOperation.Replace,
+            ReferenceStencil = 0,
+            DepthBufferEnable = true
+        };
 
         private CircleOfTransparency(int radius)
         {

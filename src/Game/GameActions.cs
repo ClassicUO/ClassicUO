@@ -59,7 +59,7 @@ namespace ClassicUO.Game
             {
                 bool ok = status != 0;
 
-                if (World.Player.InWarMode == ok )
+                if (World.Player.InWarMode == ok)
                     return;
 
                 newStatus = ok;
@@ -305,9 +305,8 @@ namespace ClassicUO.Game
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile != World.Player) Socket.Send(new PClickRequest(mobile));
-            }
+                if (mobile != World.Player)
+                    Socket.Send(new PClickRequest(mobile));
 
             foreach (Item item in World.Items.Where(s => s.IsCorpse)) Socket.Send(new PClickRequest(item));
         }

@@ -21,18 +21,19 @@
 
 #endregion
 
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+
 using ClassicUO.IO;
+using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    static class SkillsGroupManager
+    internal static class SkillsGroupManager
     {
         public static Dictionary<string, List<int>> Groups { get; } = new Dictionary<string, List<int>>();
 
@@ -42,38 +43,42 @@ namespace ClassicUO.Game.Managers
 
             int count = FileManager.Skills.SkillsCount;
 
-            Groups.Add("Miscellaneous", new List<int>()
-                {
-                    4, 6, 10, 12, 19, 3, 36
-                }
-            );
+            Groups.Add("Miscellaneous", new List<int>
+                       {
+                           4, 6, 10, 12, 19, 3, 36
+                       }
+                      );
 
-            Groups.Add("Combat", new List<int>()
-                {
-                    1, 31, 42, 17, 41, 5, 40, 27
-                }
-            );
+            Groups.Add("Combat", new List<int>
+                       {
+                           1, 31, 42, 17, 41, 5, 40, 27
+                       }
+                      );
 
             if (count > 57)
                 Groups["Combat"].Add(57);
             Groups["Combat"].Add(43);
+
             if (count > 50)
                 Groups["Combat"].Add(50);
+
             if (count > 51)
                 Groups["Combat"].Add(51);
+
             if (count > 52)
                 Groups["Combat"].Add(52);
+
             if (count > 53)
                 Groups["Combat"].Add(53);
 
 
-            Groups.Add("Trade Skills", new List<int>()
-                {
-                    0, 7, 8, 11, 13, 23, 44, 45, 34, 37
-                }
-            );
+            Groups.Add("Trade Skills", new List<int>
+                       {
+                           0, 7, 8, 11, 13, 23, 44, 45, 34, 37
+                       }
+                      );
 
-            Groups.Add("Magic", new List<int>()
+            Groups.Add("Magic", new List<int>
             {
                 16
             });
@@ -82,57 +87,66 @@ namespace ClassicUO.Game.Managers
                 Groups["Magic"].Add(56);
             Groups["Magic"].Add(25);
             Groups["Magic"].Add(46);
+
             if (count > 55)
                 Groups["Magic"].Add(55);
             Groups["Magic"].Add(26);
+
             if (count > 54)
                 Groups["Magic"].Add(54);
             Groups["Magic"].Add(32);
+
             if (count > 49)
                 Groups["Magic"].Add(49);
 
 
-            Groups.Add("Wilderness", new List<int>()
-                {
-                    2, 35, 18, 20, 38, 39
-                }
-            );
+            Groups.Add("Wilderness", new List<int>
+                       {
+                           2, 35, 18, 20, 38, 39
+                       }
+                      );
 
-            Groups.Add("Thieving", new List<int>()
-                {
-                    14, 21, 24, 30, 48, 28, 33, 47
-                }
-            );
+            Groups.Add("Thieving", new List<int>
+                       {
+                           14, 21, 24, 30, 48, 28, 33, 47
+                       }
+                      );
 
-            Groups.Add("Bard", new List<int>()
-                {
-                    15, 29, 9, 22
-                }
-            );
+            Groups.Add("Bard", new List<int>
+                       {
+                           15, 29, 9, 22
+                       }
+                      );
         }
 
         public static void LoadDefault()
         {
             FileInfo info = new FileInfo(Path.Combine(FileManager.UoFolderPath, "skillgrp.mul"));
+
             try
             {
                 if (!info.Exists)
                 {
-                    Log.Message(LogTypes.Info, $"skillgrp.mul not present, using CUO defaults!");
+                    Log.Message(LogTypes.Info, "skillgrp.mul not present, using CUO defaults!");
                     MakeCUODefault();
+
                     return;
                 }
+
                 Groups.Clear();
-                Log.Message(LogTypes.Info, $"Loading skillgrp.mul...");
+                Log.Message(LogTypes.Info, "Loading skillgrp.mul...");
+
                 using (FileStream fs = new FileStream(info.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     int skillidx = 0;
                     bool unicode = false;
+
                     using (BinaryReader bin = new BinaryReader(fs))
                     {
                         int start = 4;
                         int strlen = 17;
                         int count = bin.ReadInt32();
+
                         if (count == -1)
                         {
                             unicode = true;
@@ -147,35 +161,41 @@ namespace ClassicUO.Game.Managers
                         };
                         Groups.Add("Miscellaneous", new List<int>());
                         StringBuilder sb = new StringBuilder(17);
+
                         for (int i = 0; i < count - 1; ++i)
                         {
                             short strbuild;
-                            fs.Seek(start + (i * strlen), SeekOrigin.Begin);
+                            fs.Seek(start + i * strlen, SeekOrigin.Begin);
+
                             if (unicode)
                             {
                                 while ((strbuild = bin.ReadInt16()) != 0)
-                                    sb.Append((char)strbuild);
+                                    sb.Append((char) strbuild);
                             }
                             else
                             {
                                 while ((strbuild = bin.ReadByte()) != 0)
-                                    sb.Append((char)strbuild);
+                                    sb.Append((char) strbuild);
                             }
+
                             groups.Add(sb.ToString());
                             Groups.Add(sb.ToString(), new List<int>());
                             sb.Clear();
                         }
-                        fs.Seek(start + ((count - 1) * strlen), SeekOrigin.Begin);
+
+                        fs.Seek(start + (count - 1) * strlen, SeekOrigin.Begin);
+
                         while (bin.BaseStream.Length != bin.BaseStream.Position)
                         {
                             int grp = bin.ReadInt32();
-                            if(grp < groups.Count)
+
+                            if (grp < groups.Count)
                                 Groups[groups[grp]].Add(skillidx++);
                         }
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.Message(LogTypes.Debug, $"Error while reading skillgrp.mul, using CUO defaults! exception given is: {e}");
                 MakeCUODefault();
@@ -201,13 +221,9 @@ namespace ClassicUO.Game.Managers
                 Groups.Remove(group);
 
                 if (Groups.Count == 0)
-                {
                     Groups.Add("All", list);
-                }
                 else
-                {
                     Groups.FirstOrDefault().Value.AddRange(list);
-                }
             }
         }
 
@@ -276,10 +292,7 @@ namespace ClassicUO.Game.Managers
 
                 writer.Write(k.Key.Length);
                 writer.WriteUTF8String(k.Key);
-                foreach (int i in k.Value)
-                {
-                    writer.Write(i);
-                }
+                foreach (int i in k.Value) writer.Write(i);
             }
         }
     }

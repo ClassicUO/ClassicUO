@@ -81,7 +81,6 @@ namespace ClassicUO.Game.Managers
 
                     if (first.Contains(mouseX, mouseY))
                     {
-
                     }
 
                     var temp = first.Right;

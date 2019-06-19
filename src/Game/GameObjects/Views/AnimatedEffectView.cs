@@ -137,9 +137,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0);
-            }
 
             switch (Blend)
             {
@@ -149,6 +147,7 @@ namespace ClassicUO.Game.GameObjects
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
@@ -156,24 +155,28 @@ namespace ClassicUO.Game.GameObjects
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 default:
                     base.Draw(batcher, posX, posY);
 

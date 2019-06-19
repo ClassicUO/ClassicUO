@@ -155,39 +155,46 @@ namespace ClassicUO.Game.Managers
                     Engine.Profile.Current.GrabBagSerial = item.Serial;
                     GameActions.Print($"Grab Bag set: {item.Serial}");
                 }
+
                 ClearTargetingWithoutTargetCancelPacket();
+
                 return;
             }
-            
+
             if (TargetingState == CursorTarget.Grab)
             {
                 if (selectedEntity is Item item)
                 {
-                    GameActions.PickUp(item,item.Amount);
+                    GameActions.PickUp(item, item.Amount);
+
                     var bag = Engine.Profile.Current.GrabBagSerial == 0
-                        ? World.Player.Equipment[(int) Layer.Backpack].Serial
-                        : (Serial) Engine.Profile.Current.GrabBagSerial;
+                                  ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                                  : (Serial) Engine.Profile.Current.GrabBagSerial;
+
                     if (!World.Items.Contains(bag))
                     {
-                        GameActions.Print($"Grab Bag not found, setting to Backpack.");
+                        GameActions.Print("Grab Bag not found, setting to Backpack.");
                         Engine.Profile.Current.GrabBagSerial = 0;
                         bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
                     }
-                    GameActions.DropItem(item.Serial,ushort.MaxValue,ushort.MaxValue,0,bag);
+
+                    GameActions.DropItem(item.Serial, ushort.MaxValue, ushort.MaxValue, 0, bag);
                     GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
                     scene.HeldItem.Enabled = false;
                     scene.HeldItem.Dropped = false;
                 }
+
                 ClearTargetingWithoutTargetCancelPacket();
+
                 return;
             }
-            
+
             if (selectedEntity is Entity entity)
             {
                 if (selectedEntity != World.Player)
                 {
-                    Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
+                    Engine.UI.RemoveTargetLineGump(LastAttack);
                     Engine.UI.RemoveTargetLineGump(LastTarget);
                     LastTarget = entity.Serial;
                 }

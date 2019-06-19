@@ -21,19 +21,18 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    sealed class TextContainer
+    internal sealed class TextContainer
     {
         private readonly List<MessageInfo> _messages = new List<MessageInfo>();
         private readonly Rectangle[] _rects = new Rectangle[2];
@@ -42,11 +41,11 @@ namespace ClassicUO.Game.UI
         public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y)
         {
             int offset = _messages.Where(s => s.X /*+ (s.RenderedText.Width >> 1)*/ == x && s.Y == y)
-                .Sum(s => s.RenderedText.Height);
+                                  .Sum(s => s.RenderedText.Height);
 
-            MessageInfo msg = new MessageInfo()
+            MessageInfo msg = new MessageInfo
             {
-                RenderedText = new RenderedText()
+                RenderedText = new RenderedText
                 {
                     Font = font,
                     FontStyle = FontStyle.BlackBorder,
@@ -54,7 +53,7 @@ namespace ClassicUO.Game.UI
                     IsUnicode = isunicode,
                     MaxWidth = 200,
                     Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                    Text = text,
+                    Text = text
                 },
                 Time = Engine.Ticks + 4000,
                 X = x,
@@ -80,6 +79,7 @@ namespace ClassicUO.Game.UI
                 if (time > 0 && time < 1000)
                 {
                     float alpha = 1f - time / 1000f;
+
                     if (msg.Alpha < alpha)
                         msg.Alpha = alpha;
                 }
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI
 
                         if (_rects[0].Intersects(_rects[1]))
                         {
-                            msg.Alpha = 0.3f + (0.05f * count);
+                            msg.Alpha = 0.3f + 0.05f * count;
                             count++;
                         }
                     }

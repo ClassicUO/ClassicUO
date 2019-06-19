@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
                 if (item != null)
                 {
                     if (recalculate)
-                        s.Position = new Position((ushort)(item.X + s.MultiOffsetX), (ushort)(item.Y + s.MultiOffsetY), (sbyte)(item.Position.Z + s.MultiOffsetZ));
+                        s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
                 }
 
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 
-          
+
             foreach (Multi s in Components)
             {
                 s.RemoveFromTile();

@@ -135,6 +135,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     charCreationGump.StepBack();
 
                     break;
+
                 case Buttons.Next:
 
                     if (ValidateValues())

@@ -27,7 +27,7 @@ namespace ClassicUO.Utility
 {
     internal static class StringHelper
     {
-        private static readonly char[] _dots = { '.', ',', ';', '!' };
+        private static readonly char[] _dots = {'.', ',', ';', '!'};
         private static readonly StringBuilder _sb = new StringBuilder();
 
 
@@ -64,6 +64,7 @@ namespace ClassicUO.Utility
                     if (str[i] == _dots[j])
                     {
                         capitalizeNext = true;
+
                         break;
                     }
                 }

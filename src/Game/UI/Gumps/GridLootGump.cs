@@ -1,39 +1,35 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Coroutines;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class GridLootGump : Gump
+    internal class GridLootGump : Gump
     {
-        private readonly Item _corpse;
+        private static Vector3 _vec = Vector3.Zero;
         private readonly AlphaBlendControl _background;
-        private readonly ushort _gumpID;
-        private readonly NiceButton _buttonPrev, _buttonNext, _grabAll;
+        private readonly NiceButton _buttonPrev, _buttonNext;
+        private readonly Item _corpse;
 
-        public GridLootGump(Serial local, ushort gumpid) : base(local, 0)
+        private int _currentPage = 1;
+        private int _pagesCount;
+
+        public GridLootGump(Serial local) : base(local, 0)
         {
             _corpse = World.Items.Get(local);
-            _gumpID = gumpid;
 
             if (_corpse == null)
             {
                 Dispose();
+
                 return;
             }
 
@@ -52,14 +48,8 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _background.Height;
 
 
-            _grabAll = new NiceButton(3, Height - 23, 50, 20, ButtonAction.Activate, "Grab All")
-            {
-                ButtonParameter = 2, IsSelectable = false
-            };
-            Add(_grabAll);
-
-            _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") { ButtonParameter = 0, IsSelectable = false };
-            _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") { ButtonParameter = 1, IsSelectable = false };
+            _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
+            _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
 
             _buttonNext.IsEnabled = _buttonPrev.IsEnabled = false;
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
@@ -70,9 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             RedrawItems();
         }
-
-        private int _currentPage = 1;
-        private int _pagesCount;
 
         public override void OnButtonClick(int buttonID)
         {
@@ -106,36 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ChangePage(_currentPage);
             }
-            else if (buttonID == 2)
-            {
-                if (_corpse != null && !_corpse.IsDestroyed)
-                {
-                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
-                    if (scene == null)
-                        return;
-                    
-                    IEnumerable<IWaitCondition> grabAllItems()
-                    {
-                        var items = _corpse.Items.ToList();
-                        _grabAll.IsEnabled = false;
-                        foreach (Item item in items)
-                        {
-                            if (item == null || item.ItemData.Layer == (int)Layer.Hair || item.ItemData.Layer == (int)Layer.Beard || item.ItemData.Layer == (int)Layer.Face)
-                                continue;
-
-                            NetClient.Socket.Send(new PPickUpRequest(item, item.Amount));
-                            GameActions.DropItem(item, Position.INVALID, World.Player.Equipment[(int)Layer.Backpack]);
-                            GameActions.Print($"Grabbing {item.Serial}...");
-                            yield return new WaitTime(TimeSpan.FromMilliseconds(650));
-                        }
-
-                        _grabAll.IsEnabled = true;
-                    }
-
-                    Coroutine.Start(scene, grabAllItems(), "grabber");
-                }
-            }
-            else 
+            else
                 base.OnButtonClick(buttonID);
         }
 
@@ -144,17 +102,14 @@ namespace ClassicUO.Game.UI.Gumps
             int x = 20;
             int y = 20;
 
-            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
-            {
-                gridLootItem.Dispose();
-            }
+            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>()) gridLootItem.Dispose();
 
             int count = 0;
             _pagesCount = 1;
 
             foreach (Item item in _corpse.Items)
             {
-                if (item == null || item.ItemData.Layer == (int)Layer.Hair || item.ItemData.Layer == (int)Layer.Beard || item.ItemData.Layer == (int)Layer.Face)
+                if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
                     continue;
 
                 GridLootItem gridItem = new GridLootItem(item);
@@ -198,12 +153,9 @@ namespace ClassicUO.Game.UI.Gumps
                     SelectedObject.CorpseObject = null;
             }
 
-            
+
             base.Dispose();
         }
-
-
-        private static Vector3 _vec = Vector3.Zero;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -219,6 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_corpse == null || _corpse.IsDestroyed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -237,27 +190,27 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (_corpse != null && !_corpse.IsDestroyed)
-            {
-                SelectedObject.CorpseObject = null;
-            }
+            if (_corpse != null && !_corpse.IsDestroyed) SelectedObject.CorpseObject = null;
         }
 
 
-        class GridLootItem : Control
+        private class GridLootItem : Control
         {
-            private Serial _serial;
+            private static Vector3 _vec = Vector3.Zero;
+            private readonly Serial _serial;
 
-            private TextureControl _texture;
+            private readonly TextureControl _texture;
 
             public GridLootItem(Serial serial)
             {
                 _serial = serial;
 
                 Item item = World.Items.Get(serial);
+
                 if (item == null)
                 {
                     Dispose();
+
                     return;
                 }
 
@@ -265,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(0, 0, SIZE, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp:true);
+                HSliderBar amount = new HSliderBar(0, 0, SIZE, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
                 Add(amount);
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
@@ -278,7 +231,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
 
 
-
                 _texture = new TextureControl();
                 _texture.IsPartial = item.ItemData.IsPartialHue;
                 _texture.ScaleTexture = true;
@@ -289,13 +241,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.Height = SIZE;
                 _texture.CanMove = false;
 
-                if (World.ClientFlags.TooltipsEnabled)
-                {
-                    _texture.SetTooltip(item);
-                }
+                if (World.ClientFlags.TooltipsEnabled) _texture.SetTooltip(item);
 
                 Add(_texture);
-
 
 
                 _texture.MouseUp += (sender, e) =>
@@ -313,8 +261,6 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false;
             }
 
-            private static Vector3 _vec = Vector3.Zero;
-
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
@@ -329,7 +275,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return true;
             }
-
         }
     }
 }

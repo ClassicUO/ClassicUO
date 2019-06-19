@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -46,10 +45,10 @@ namespace ClassicUO.IO.Resources
         {
             Direction = new AnimationDirection[5]
             {
-                new AnimationDirection(), 
                 new AnimationDirection(),
-                new AnimationDirection(), 
-                new AnimationDirection(), 
+                new AnimationDirection(),
+                new AnimationDirection(),
+                new AnimationDirection(),
                 new AnimationDirection()
             }
         };
@@ -74,6 +73,110 @@ namespace ClassicUO.IO.Resources
         public List<Tuple<ushort, byte>>[] GroupReplaces { get; } = new List<Tuple<ushort, byte>>[2]
         {
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
+        };
+
+        public SittingInfoData[] SittingInfos { get; } =
+        {
+            new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x045B, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x045C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0A2A, 0, 2, 4, 6, -4, -4, false),
+            new SittingInfoData(0x0A2B, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B2C, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData(0x0B2D, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x0B2E, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B2F, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B30, 6, 6, 6, 6, -8, 8, true),
+            new SittingInfoData(0x0B31, 0, 0, 0, 0, 0, 4, true),
+            new SittingInfoData(0x0B32, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B33, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4E, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B4F, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B50, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B51, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B52, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x0B53, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x0B54, 0, 0, 0, 0, 0, 0, true),
+            new SittingInfoData(0x0B55, 6, 6, 6, 6, 0, 0, true),
+            new SittingInfoData(0x0B56, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x0B57, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x0B58, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x0B59, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5A, 2, 2, 2, 2, 8, 8, false),
+            new SittingInfoData(0x0B5B, 4, 4, 4, 4, 8, 8, false),
+            new SittingInfoData(0x0B5C, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x0B5D, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x0B5E, 0, 2, 4, 6, -8, -8, false),
+            new SittingInfoData(0x0B5F, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B60, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B61, -1, 2, -1, 6, 3, 14, false),
+            new SittingInfoData(0x0B62, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B63, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B64, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x0B65, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B66, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B67, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B68, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B69, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B6A, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x0B91, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
+            new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x0CF3, -1, 2, -1, 6, 2, 8, false),
+            new SittingInfoData(0x0CF4, -1, 2, -1, 6, 2, 8, false),
+            new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
+            new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
+            new SittingInfoData(0x1218, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x1219, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x121A, 0, 0, 0, 0, 0, 8, true),
+            new SittingInfoData(0x121B, 6, 6, 6, 6, 0, 8, true),
+            new SittingInfoData(0x1527, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x1771, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x1776, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x1779, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x1DC7, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC8, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DC9, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCA, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCB, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCC, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DCD, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCE, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DCF, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData(0x1DD0, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD1, 0, -1, 4, -1, 3, 10, false),
+            new SittingInfoData(0x1DD2, -1, 2, -1, 6, 3, 10, false),
+
+            new SittingInfoData(0x2A58, 4, 4, 4, 4, 0, 0, false),
+            new SittingInfoData(0x2A59, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x2A5A, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A5B, 0, 2, 4, 6, 10, 10, false),
+            new SittingInfoData(0x2A7F, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2A80, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x2DDF, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE0, 0, 2, 4, 6, 2, 2, false),
+            new SittingInfoData(0x2DE3, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DE4, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DE5, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DE6, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEB, 0, 0, 0, 0, 4, 4, false),
+            new SittingInfoData(0x2DEC, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x2DED, 2, 2, 2, 2, 4, 4, false),
+            new SittingInfoData(0x2DEE, 6, 6, 6, 6, 4, 4, false),
+            new SittingInfoData(0x2DF5, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x2DF6, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3088, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x3089, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308A, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x308B, 0, 2, 4, 6, 4, 4, false),
+            new SittingInfoData(0x35ED, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
+
+            new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
+            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
         };
 
 
@@ -190,10 +293,7 @@ namespace ClassicUO.IO.Resources
 
                 long offsetToData = DataIndex[i].CalculateOffset(i, out int count);
 
-                if (offsetToData >= idxfile0.Length)
-                {
-                    continue;
-                }
+                if (offsetToData >= idxfile0.Length) continue;
 
                 bool isValid = false;
 
@@ -240,24 +340,28 @@ namespace ClassicUO.IO.Resources
             }
 
             if (File.Exists(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
-            using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
             {
-                while (defReader.Next())
+                using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))
                 {
-                    ushort group = (ushort) defReader.ReadInt();
-                    int replace = defReader.ReadGroupInt();
-                    GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte) replace));
+                    while (defReader.Next())
+                    {
+                        ushort group = (ushort) defReader.ReadInt();
+                        int replace = defReader.ReadGroupInt();
+                        GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte) replace));
+                    }
                 }
             }
 
             if (File.Exists(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))
-            using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))
             {
-                while (defReader.Next())
+                using (DefReader defReader = new DefReader(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))
                 {
-                    ushort group = (ushort) defReader.ReadInt();
-                    int replace = defReader.ReadGroupInt();
-                    GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte) replace));
+                    while (defReader.Next())
+                    {
+                        ushort group = (ushort) defReader.ReadInt();
+                        int replace = defReader.ReadGroupInt();
+                        GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte) replace));
+                    }
                 }
             }
 
@@ -681,8 +785,7 @@ namespace ClassicUO.IO.Resources
                     }
                     else
                         break;
-                }
-                while (graphic != newGraphic);
+                } while (graphic != newGraphic);
 
 
                 if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
@@ -722,8 +825,7 @@ namespace ClassicUO.IO.Resources
                     }
                     else
                         break;
-                }
-                while (graphic != newGraphic);
+                } while (graphic != newGraphic);
 
                 if (DataIndex[graphic].HasBodyConversion)
                     return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
@@ -762,8 +864,10 @@ namespace ClassicUO.IO.Resources
                     replace = (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AgeOfShadows) != 0;
 
                 if (replace)
+                {
                     if (!DataIndex[i].HasBodyConversion)
                         DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
+                }
             }
         }
 
@@ -777,22 +881,26 @@ namespace ClassicUO.IO.Resources
                     dir = 1;
 
                     break;
+
                 case 1:
                 case 5:
                     mirror = dir == 1;
                     dir = 2;
 
                     break;
+
                 case 0:
                 case 6:
                     mirror = dir == 0;
                     dir = 3;
 
                     break;
+
                 case 3:
                     dir = 0;
 
                     break;
+
                 case 7:
                     dir = 4;
 
@@ -800,134 +908,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-         public readonly struct SittingInfoData
-        {
-            public SittingInfoData(ushort graphic, sbyte d1,
-                                   sbyte d2, sbyte d3, sbyte d4,
-                                   sbyte offsetY,
-                                   sbyte mirrorOffsetY,
-                                   bool drawback)
-            {
-                Graphic = graphic;
-                Direction1 = d1;
-                Direction2 = d2;
-                Direction3 = d3;
-                Direction4 = d4;
-                OffsetY = offsetY;
-                MirrorOffsetY = mirrorOffsetY;
-                DrawBack = drawback;
-            }
-
-            public readonly ushort Graphic;
-            public readonly sbyte Direction1, Direction2, Direction3, Direction4;
-            public readonly sbyte OffsetY, MirrorOffsetY;
-            public readonly bool DrawBack;
-        }
-
-        public SittingInfoData[] SittingInfos { get; } =
-        {
-            new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x045B, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x045C, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x0A2A, 0, 2, 4, 6, -4, -4, false),
-            new SittingInfoData(0x0A2B, 0, 2, 4, 6, -8, -8, false),
-            new SittingInfoData(0x0B2C, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x0B2D, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x0B2E, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B2F, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0B30, 6, 6, 6, 6, -8, 8, true),
-            new SittingInfoData(0x0B31, 0, 0, 0, 0, 0, 4, true),
-            new SittingInfoData(0x0B32, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B33, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B4E, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B4F, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B50, 0, 0, 0, 0, 0, 0, true),
-            new SittingInfoData(0x0B51, 6, 6, 6, 6, 0, 0, true),
-            new SittingInfoData(0x0B52, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B53, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B54, 0, 0, 0, 0, 0, 0, true),
-            new SittingInfoData(0x0B55, 6, 6, 6, 6, 0, 0, true),
-            new SittingInfoData(0x0B56, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x0B57, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x0B58, 6, 6, 6, 6, 0, 8, true),
-            new SittingInfoData(0x0B59, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x0B5A, 2, 2, 2, 2, 8, 8, false),
-            new SittingInfoData(0x0B5B, 4, 4, 4, 4, 8, 8, false),
-            new SittingInfoData(0x0B5C, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x0B5D, 6, 6, 6, 6, 0 ,8, true),
-            new SittingInfoData(0x0B5E, 0, 2, 4, 6, -8, -8, false),
-            new SittingInfoData(0x0B5F, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B60, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B61, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B62, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B63, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B64, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B65, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B66, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B67, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B68, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B69, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B6A, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B91, 4, 4, 4, 4, 6, 6, false),
-            new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
-            new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0CF3, -1, 2, -1, 6, 2, 8, false),
-            new SittingInfoData(0x0CF4, -1, 2, -1, 6, 2, 8, false),
-            new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
-            new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
-            new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
-            new SittingInfoData(0x1218, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x1219, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x121A, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x121B, 6, 6, 6, 6, 0, 8, true),
-            new SittingInfoData(0x1527, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x1771, 0, 2, 4, 6, 0 , 0, false),
-            new SittingInfoData(0x1776, 0, 2, 4, 6, 0 , 0, false),
-            new SittingInfoData(0x1779, 0, 2, 4, 6, 0 , 0, false),       
-            new SittingInfoData(0x1DC7, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DC8, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DC9, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCA, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCB, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCC, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCD, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCE, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCF, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DD0, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DD1, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DD2, -1, 2, -1, 6, 3, 10, false),
-
-            new SittingInfoData(0x2A58, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x2A59, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x2A5A, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2A5B, 0, 2, 4, 6, 10, 10, false),
-            new SittingInfoData(0x2A7F, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2A80, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2DDF, 0, 2, 4, 6, 2, 2, false),
-            new SittingInfoData(0x2DE0, 0, 2, 4, 6, 2, 2, false),
-            new SittingInfoData(0x2DE3, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x2DE4, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x2DE5, 6, 6, 6, 6, 4, 4, false),
-            new SittingInfoData(0x2DE6, 0, 0, 0, 0, 4, 4, false),
-            new SittingInfoData(0x2DEB, 0, 0, 0, 0, 4, 4, false),
-            new SittingInfoData(0x2DEC, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x2DED, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x2DEE, 6, 6, 6, 6, 4, 4, false),
-            new SittingInfoData(0x2DF5, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x2DF6, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x3088, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x3089, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x308A, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x308B, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x35ED, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
-
-            new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
-        };
-       
 
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
@@ -938,16 +918,19 @@ namespace ClassicUO.IO.Resources
                     dir = 3;
 
                     break;
+
                 case 2:
                     mirror = true;
                     dir = 1;
 
                     break;
+
                 case 4:
                     mirror = false;
                     dir = 1;
 
                     break;
+
                 case 6:
                     mirror = false;
                     dir = 3;
@@ -978,6 +961,7 @@ namespace ClassicUO.IO.Resources
 
                     break;
                 }
+
                 case 1:
                 case 2:
                 {
@@ -993,6 +977,7 @@ namespace ClassicUO.IO.Resources
 
                     break;
                 }
+
                 case 3:
                 case 4:
                 {
@@ -1008,6 +993,7 @@ namespace ClassicUO.IO.Resources
 
                     break;
                 }
+
                 case 5:
                 case 6:
                 {
@@ -1023,8 +1009,6 @@ namespace ClassicUO.IO.Resources
 
                     break;
                 }
-                default:
-                    break;
             }
 
             layerDirection = Direction;
@@ -1044,9 +1028,7 @@ namespace ClassicUO.IO.Resources
                     x += offsX - 4;
                 }
                 else
-                {
                     y += data.OffsetY + 9;
-                }
             }
             else
             {
@@ -1062,8 +1044,8 @@ namespace ClassicUO.IO.Resources
                 }
             }
         }
-        
-       
+
+
 
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
         {
@@ -1075,10 +1057,12 @@ namespace ClassicUO.IO.Resources
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
                     return ANIMATION_GROUPS.AG_LOW;
+
                 case ANIMATION_GROUPS_TYPE.MONSTER:
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
                     return ANIMATION_GROUPS.AG_HIGHT;
+
                 case ANIMATION_GROUPS_TYPE.HUMAN:
                 case ANIMATION_GROUPS_TYPE.EQUIPMENT:
 
@@ -1090,7 +1074,7 @@ namespace ClassicUO.IO.Resources
 
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS)DataIndex[id].Flags;
+            ANIMATION_FLAGS flags = (ANIMATION_FLAGS) DataIndex[id].Flags;
 
             switch (DataIndex[id].Type)
             {
@@ -1099,7 +1083,8 @@ namespace ClassicUO.IO.Resources
                     if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0 || (flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
                         return 2;
 
-                    return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
+                    return (byte) (second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
+
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
                 {
@@ -1108,9 +1093,11 @@ namespace ClassicUO.IO.Resources
 
                     goto case ANIMATION_GROUPS_TYPE.MONSTER;
                 }
+
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
                     return (byte) (second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
+
                 case ANIMATION_GROUPS_TYPE.HUMAN:
                 case ANIMATION_GROUPS_TYPE.EQUIPMENT:
 
@@ -1125,12 +1112,11 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : 
-                                                          FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 ||
-                       direction.IsUOP);
+                                             direction.IsUOP);
             }
 
             return false;
@@ -1259,7 +1245,7 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                   ushort[] data = new ushort[imageWidth * imageHeight];
+                    ushort[] data = new ushort[imageWidth * imageHeight];
 
                     fixed (ushort* ptrData = data)
                     {
@@ -1378,6 +1364,7 @@ namespace ClassicUO.IO.Resources
                 animDir.Frames[i] = f;
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);
             }
+
             _usedTextures.Add(animDir);
             //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
@@ -1514,14 +1501,13 @@ namespace ClassicUO.IO.Resources
                 var t = _usedTextures[i];
 
                 if (t == null)
-                {
                     _usedTextures.RemoveAt(i--);
-                }
                 else if (t.LastAccessTime != 0 && t.LastAccessTime < ticks)
                 {
                     for (int j = 0; j < t.FrameCount; j++)
                     {
                         ref var texture = ref t.Frames[j];
+
                         if (texture != null)
                         {
                             texture.Dispose();
@@ -1555,6 +1541,7 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < t.FrameCount; j++)
                     {
                         ref var texture = ref t.Frames[j];
+
                         if (texture != null)
                         {
                             texture.Dispose();
@@ -1570,6 +1557,30 @@ namespace ClassicUO.IO.Resources
 
             if (_usedTextures.Count != 0)
                 _usedTextures.Clear();
+        }
+
+        public readonly struct SittingInfoData
+        {
+            public SittingInfoData(ushort graphic, sbyte d1,
+                                   sbyte d2, sbyte d3, sbyte d4,
+                                   sbyte offsetY,
+                                   sbyte mirrorOffsetY,
+                                   bool drawback)
+            {
+                Graphic = graphic;
+                Direction1 = d1;
+                Direction2 = d2;
+                Direction3 = d3;
+                Direction4 = d4;
+                OffsetY = offsetY;
+                MirrorOffsetY = mirrorOffsetY;
+                DrawBack = drawback;
+            }
+
+            public readonly ushort Graphic;
+            public readonly sbyte Direction1, Direction2, Direction3, Direction4;
+            public readonly sbyte OffsetY, MirrorOffsetY;
+            public readonly bool DrawBack;
         }
 
         private readonly struct UOPFrameData
@@ -1794,11 +1805,13 @@ namespace ClassicUO.IO.Resources
                         group = ANIMATION_GROUPS.AG_HIGHT;
 
                     break;
+
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
                     result = AnimationsLoader.CalculateHighGroupOffset(graphic);
                     groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
 
                     break;
+
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
                     if ((Flags & (uint) ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
@@ -1814,6 +1827,7 @@ namespace ClassicUO.IO.Resources
                         group = ANIMATION_GROUPS.AG_LOW;
 
                     break;
+
                 default:
                     group = ANIMATION_GROUPS.AG_PEOPLE;
 
@@ -1827,11 +1841,13 @@ namespace ClassicUO.IO.Resources
                     groupCount = (int) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT;
 
                     break;
+
                 case ANIMATION_GROUPS.AG_HIGHT:
                     result = AnimationsLoader.CalculateHighGroupOffset(graphic);
                     groupCount = (int) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT;
 
                     break;
+
                 case ANIMATION_GROUPS.AG_PEOPLE:
                     result = AnimationsLoader.CalculatePeopleGroupOffset(graphic);
                     groupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
@@ -1859,14 +1875,14 @@ namespace ClassicUO.IO.Resources
 
     internal class AnimationDirection
     {
-        public byte FrameCount;
-        public int FileIndex;
         public long Address;
-        public uint Size;
+        public int FileIndex;
+        public byte FrameCount;
+        public AnimationFrameTexture[] Frames;
         public bool IsUOP;
         public bool IsVerdata;
         public long LastAccessTime;
-        public AnimationFrameTexture[] Frames;
+        public uint Size;
     }
 
     internal readonly struct EquipConvData

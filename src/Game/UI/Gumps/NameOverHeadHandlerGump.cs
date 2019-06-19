@@ -22,10 +22,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -33,7 +29,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class NameOverHeadHandlerGump : Gump
+    internal class NameOverHeadHandlerGump : Gump
     {
         public NameOverHeadHandlerGump() : base(0, 0)
         {
@@ -46,45 +42,63 @@ namespace ClassicUO.Game.UI.Gumps
 
             ControlInfo.Layer = UILayer.Over;
 
-            RadioButton all, mobiles, items,mobilesCorpses;
+            RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
+
             Add(alpha = new AlphaBlendControl(0.2f)
             {
                 Hue = 34
             });
-            
+
 
             Add(all = new RadioButton(0, 0x00D0, 0x00D1, "All", color: 0xFFFF)
             {
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
             });
+
             Add(mobiles = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles only", color: 0xFFFF)
             {
                 Y = all.Y + all.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
             });
+
             Add(items = new RadioButton(0, 0x00D0, 0x00D1, "Items only", color: 0xFFFF)
             {
                 Y = mobiles.Y + mobiles.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
             });
+
             Add(mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles and Corpses only", color: 0xFFFF)
             {
                 Y = items.Y + items.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
             });
 
-            alpha.Width = Math.Max(mobilesCorpses.Width,Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
+            alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
             alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
 
             Width = alpha.Width;
             Height = alpha.Height;
 
-            all.ValueChanged += (sender, e) => { if (all.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All; };
-            mobiles.ValueChanged += (sender, e) => { if (mobiles.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles; };
-            items.ValueChanged += (sender, e) => { if (items.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items; };
-            mobilesCorpses.ValueChanged += (sender, e) => { if (mobilesCorpses.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses; };
+            all.ValueChanged += (sender, e) =>
+            {
+                if (all.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+            };
 
+            mobiles.ValueChanged += (sender, e) =>
+            {
+                if (mobiles.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+            };
+
+            items.ValueChanged += (sender, e) =>
+            {
+                if (items.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
+            };
+
+            mobilesCorpses.ValueChanged += (sender, e) =>
+            {
+                if (mobilesCorpses.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
+            };
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -99,7 +113,5 @@ namespace ClassicUO.Game.UI.Gumps
         //    if (!Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
         //        Dispose();
         //}
-
-
     }
 }

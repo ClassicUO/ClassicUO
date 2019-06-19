@@ -31,9 +31,24 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        public Static()
-        {
+        private StaticTiles? _itemData;
 
+        public int Index { get; private set; }
+
+        public string Name => ItemData.Name;
+
+        public Graphic OriginalGraphic { get; private set; }
+
+        public StaticTiles ItemData
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = FileManager.TileData.StaticData[Graphic];
+
+                return _itemData.Value;
+            }
         }
 
         public void SetGraphic_New(ushort graphic, int index)
@@ -49,6 +64,7 @@ namespace ClassicUO.Game.GameObjects
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
             AlphaHue = 0;
+
             if (ItemData.Height > 5)
                 _canBeTransparent = 1;
             else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
@@ -59,25 +75,6 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
 
             Texture = null;
-        }
-
-        public int Index { get; private set; }
-
-        public string Name => ItemData.Name;
-
-        public Graphic OriginalGraphic { get; private set; }
-
-        private StaticTiles? _itemData;
-        public StaticTiles ItemData
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            } 
         }
 
         public void SetGraphic(Graphic g)

@@ -27,17 +27,23 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Mobile
     {
+        private static ushort _viewHue;
+        private static EquipConvData? _equipConvData;
+        private static bool _transform;
+        private static int _characterFrameStartY;
+        private static int _startCharacterWaistY;
+        private static int _startCharacterKneesY;
+        private static int _startCharacterFeetY;
+        private static int _characterFrameHeight;
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             //if (IsDestroyed)
@@ -61,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Y = 0;
             FrameInfo.Width = 0;
             FrameInfo.Height = 0;
-            
+
             int drawX = posX + (int) Offset.X;
             int drawY = (int) (posY + Offset.Y - Offset.Z - 3);
 
@@ -87,13 +93,9 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else if (IsHidden)
-            {
                 _viewHue = 0x038E;
-            }
             else if (SelectedObject.HealthbarObject == this)
-            {
                 _viewHue = Notoriety.GetHue(NotorietyFlag);
-            }
             else
             {
                 _viewHue = 0;
@@ -115,7 +117,6 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0030;
                 }
             }
-
 
 
             bool isAttack = Serial == TargetManager.LastAttack;
@@ -166,9 +167,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
                 }
                 else
-                {
                     FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                }
 
                 drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
             }
@@ -184,18 +183,11 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 
                     if (FileManager.Animations.Direction == 3)
-                    {
                         animGroup = 25;
-                    }
                     else
-                    {
                         _transform = true;
-                    }
                 }
-                else if (hasShadow)
-                {
-                    DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, true, graphic);
-                }
+                else if (hasShadow) DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, true, graphic);
             }
 
             FileManager.Animations.AnimGroup = animGroup;
@@ -208,7 +200,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                    Item item = Equipment[(int)layer];
+                    Item item = Equipment[(int) layer];
 
                     if (item == null)
                         continue;
@@ -234,6 +226,7 @@ namespace ClassicUO.Game.GameObjects
 
                         DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, false);
                     }
+
                     _equipConvData = null;
                 }
 
@@ -256,20 +249,11 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
         }
 
-        private static ushort _viewHue;
-        private static EquipConvData? _equipConvData;
-        private static bool _transform;
-        private static int _characterFrameStartY = 0;
-        private static int _startCharacterWaistY = 0;
-        private static int _startCharacterKneesY = 0;
-        private static int _startCharacterFeetY = 0;
-        private static int _characterFrameHeight;
-
         private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isParent = true)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
-            
+
             x += 22;
             y += 22;
 
@@ -286,10 +270,7 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if (fc > 0 && frameIndex >= fc)
-            {
-                frameIndex = 0;
-            }
+            if (fc > 0 && frameIndex >= fc) frameIndex = 0;
 
             if (frameIndex < direction.FrameCount)
             {
@@ -304,13 +285,11 @@ namespace ClassicUO.Game.GameObjects
                     x -= frame.Width - frame.CenterX;
                 else
                     x -= frame.CenterX;
-                
+
                 y -= frame.Height + frame.CenterY;
 
                 if (hasShadow)
-                {
                     batcher.DrawSpriteShadow(frame, x, y, mirror);
-                }
                 else
                 {
                     ushort hue = _viewHue;
@@ -352,9 +331,9 @@ namespace ClassicUO.Game.GameObjects
                             int frameHeight = frame.Height;
                             _characterFrameStartY = y;
                             _characterFrameHeight = frame.Height;
-                            _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                            _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
                         }
 
                         float h3mod = UPPER_BODY_RATIO;
@@ -364,7 +343,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (entity != null)
                         {
-                            float itemsEndY = (float) (y + frame.Height);
+                            float itemsEndY = y + frame.Height;
 
                             if (y >= _startCharacterWaistY)
                                 h3mod = 0;
@@ -372,7 +351,7 @@ namespace ClassicUO.Game.GameObjects
                                 h3mod = 1.0f;
                             else
                             {
-                                float upperBodyDiff = (float) (_startCharacterWaistY - y);
+                                float upperBodyDiff = _startCharacterWaistY - y;
                                 h3mod = upperBodyDiff / frame.Height;
 
                                 if (h3mod < 0)
@@ -389,11 +368,11 @@ namespace ClassicUO.Game.GameObjects
                                 float midBodyDiff;
 
                                 if (y >= _startCharacterWaistY)
-                                    midBodyDiff = (float) (_startCharacterKneesY - y);
+                                    midBodyDiff = _startCharacterKneesY - y;
                                 else if (itemsEndY <= _startCharacterKneesY)
-                                    midBodyDiff = (float) (itemsEndY - _startCharacterWaistY);
+                                    midBodyDiff = itemsEndY - _startCharacterWaistY;
                                 else
-                                    midBodyDiff = (float) (_startCharacterKneesY - _startCharacterWaistY);
+                                    midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
 
                                 h6mod = h3mod + midBodyDiff / frame.Height;
 
@@ -424,7 +403,7 @@ namespace ClassicUO.Game.GameObjects
                             batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, ref HueVector);
                         else
                             batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, ref HueVector);
-                        
+
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;
 
@@ -445,12 +424,9 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     owner.Texture = frame;
-                    owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X: SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
+                    owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
-                    if (entity != null && entity.ItemData.IsLight)
-                    {
-                        Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x , y);
-                    }
+                    if (entity != null && entity.ItemData.IsLight) Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return FileManager.Animations.DataIndex[id].MountedHeightOffset;
@@ -461,10 +437,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object != this && Texture.Contains(x, y))
-            {
-                SelectedObject.Object = this;
-            }
+            if (SelectedObject.Object != this && Texture.Contains(x, y)) SelectedObject.Object = this;
 
             //if (SelectedObject.IsPointInMobile(this, x, y))
             //{
@@ -480,10 +453,10 @@ namespace ClassicUO.Game.GameObjects
             switch (layer)
             {
                 case Layer.Shoes:
-                    Item pants =mobile.Equipment[(int) Layer.Pants];
+                    Item pants = mobile.Equipment[(int) Layer.Pants];
                     Item robe;
 
-                    if ((mobile.HasEquipment && mobile.Equipment[(int) Layer.Legs] != null) || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                    if (mobile.HasEquipment && mobile.Equipment[(int) Layer.Legs] != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
                         return true;
                     else
                     {
@@ -494,6 +467,7 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     break;
+
                 case Layer.Pants:
                     Item skirt;
                     robe = mobile.Equipment[(int) Layer.Robe];
@@ -514,6 +488,7 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     break;
+
                 case Layer.Tunic:
                     robe = mobile.Equipment[(int) Layer.Robe];
                     Item tunic = mobile.Equipment[(int) Layer.Tunic];
@@ -524,6 +499,7 @@ namespace ClassicUO.Game.GameObjects
                         return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
 
                     break;
+
                 case Layer.Torso:
                     robe = mobile.Equipment[(int) Layer.Robe];
 
@@ -538,10 +514,12 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     break;
+
                 case Layer.Arms:
                     robe = mobile.Equipment[(int) Layer.Robe];
 
                     return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
+
                 case Layer.Helmet:
                 case Layer.Hair:
                     robe = mobile.Equipment[(int) Layer.Robe];

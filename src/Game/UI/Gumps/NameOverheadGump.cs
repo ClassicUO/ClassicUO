@@ -175,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                 HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump((Mobile)mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
             else
@@ -239,8 +239,9 @@ namespace ClassicUO.Game.UI.Gumps
                             else if (Entity.Serial.IsMobile)
                                 scene.MergeHeldItem(World.Mobiles.Get(Entity));
                         }
-                        else 
+                        else
                             scene.Audio.PlaySound(0x0051);
+
                         return;
                     }
 
@@ -258,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift) Dispose();
+            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Keyboard.Ctrl || !Keyboard.Shift) Dispose();
 
             if (_isPressed)
             {
@@ -276,6 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _clickTiming = 0;
                     _isPressed = false;
+
                     if (!World.ClientFlags.TooltipsEnabled)
                         GameActions.SingleClick(Entity);
                     GameActions.OpenPopupMenu(Entity);

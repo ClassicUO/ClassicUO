@@ -119,6 +119,7 @@ namespace ClassicUO.Game
                         }
 
                         break;
+
                     default:
                         bool canBeAdd = true;
                         bool dropFlags = false;
@@ -134,6 +135,7 @@ namespace ClassicUO.Game
 
                                 break;
                             }
+
                             case Item item when item.IsMulti || item.ItemData.IsInternal:
 
                             {
@@ -141,6 +143,7 @@ namespace ClassicUO.Game
 
                                 break;
                             }
+
                             case Item item2:
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
@@ -389,6 +392,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 1:
 
                 {
@@ -397,6 +401,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 2:
 
                 {
@@ -404,6 +409,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 3:
 
                 {
@@ -412,6 +418,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 4:
 
                 {
@@ -419,6 +426,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 5:
 
                 {
@@ -427,6 +435,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 6:
 
                 {
@@ -434,6 +443,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 7:
 
                 {
@@ -648,7 +658,7 @@ namespace ClassicUO.Game
                             diagonal = -1;
                     }
 
-                    if (diagonal >= 0 && AddNodeToList(0, (int)direction, x, y, z, node, 1) != -1)
+                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1) != -1)
                         found = true;
                 }
             }

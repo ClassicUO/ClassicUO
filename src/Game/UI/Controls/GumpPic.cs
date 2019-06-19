@@ -21,10 +21,8 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -113,7 +111,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
-            
         }
 
         public GumpPic(int x, int y, SpriteTexture texture, Hue hue)
@@ -138,8 +135,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVirtue)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
+
                 return false;
             }
+
             return base.OnMouseDoubleClick(x, y, button);
         }
 

@@ -182,10 +182,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         {
                             int index = Engine.GlobalSettings.LastServerNum;
 
-                            if (index <= 0 || index > loginScene.Servers.Length)
-                            {
-                                index = 1;
-                            }
+                            if (index <= 0 || index > loginScene.Servers.Length) index = 1;
 
                             loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                         }
@@ -210,10 +207,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     int index = Engine.GlobalSettings.LastServerNum;
 
-                    if (index <= 0 || index > loginScene.Servers.Length)
-                    {
-                        index = 1;
-                    }
+                    if (index <= 0 || index > loginScene.Servers.Length) index = 1;
 
                     loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                 }

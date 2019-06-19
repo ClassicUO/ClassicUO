@@ -85,7 +85,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void ForceUpdate() => _needUpdate = true;
+        public void ForceUpdate()
+        {
+            _needUpdate = true;
+        }
 
         protected override void OnInitialize()
         {
@@ -158,6 +161,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -258,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void OnPageChanged()
         {
-            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? (o.Y < 0 ? o.Height + o.Y : o.Height) : 0) : 0;
+            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Y < 0 ? o.Height + o.Y : o.Height : 0) : 0;
             IsVisible = maxheight > 0;
             Height = maxheight;
             Parent?.OnPageChanged();

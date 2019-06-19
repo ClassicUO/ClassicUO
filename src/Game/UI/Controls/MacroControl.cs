@@ -277,6 +277,7 @@ namespace ClassicUO.Game.UI.Controls
                             b.Parent.WantUpdateSize = true;
 
                             break;
+
                         case 2: // string
 
                             b.Parent.Add(new ResizePic(0x0BB8)
@@ -287,7 +288,7 @@ namespace ClassicUO.Game.UI.Controls
                                 Height = b.Height
                             });
 
-                            TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder, 0)
+                            TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder)
                             {
                                 X = 22,
                                 Y = b.Height + 5,
@@ -341,6 +342,7 @@ namespace ClassicUO.Game.UI.Controls
                         box.Parent.WantUpdateSize = true;
 
                         break;
+
                     case 2:
 
                         box.Parent.Add(new ResizePic(0x0BB8)
@@ -351,7 +353,7 @@ namespace ClassicUO.Game.UI.Controls
                             Height = box.Height
                         });
 
-                        TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder, 0)
+                        TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder)
                         {
                             X = 22,
                             Y = box.Height + 5,

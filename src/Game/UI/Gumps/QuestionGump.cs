@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     break;
+
                 case 1:
                     _result(true);
                     Dispose();

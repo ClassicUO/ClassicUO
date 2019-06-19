@@ -29,8 +29,6 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using SDL2;
-
 namespace ClassicUO.Game.UI.Controls
 {
     internal class WorldViewport : Control
@@ -45,6 +43,10 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly GameScene _scene;
 
+        private MatrixEffect _xBR;
+
+        private Vector3 _zero = Vector3.Zero;
+
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
             X = x;
@@ -55,22 +57,15 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        private MatrixEffect _xBR;
-
-        private Vector3 _zero = Vector3.Zero;
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
             {
                 // draw regular world
 
-                if (_xBR == null || _xBR.IsDisposed)
-                {
-                    _xBR = new MatrixEffect(batcher.GraphicsDevice, Resources.xBREffect);
-                }
+                if (_xBR == null || _xBR.IsDisposed) _xBR = new MatrixEffect(batcher.GraphicsDevice, Resources.xBREffect);
 
-                _xBR.Parameters["textureSize"].SetValue(new Vector2()
+                _xBR.Parameters["textureSize"].SetValue(new Vector2
                 {
                     X = _scene.ViewportTexture.Width,
                     Y = _scene.ViewportTexture.Height
@@ -85,9 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Begin();
             }
             else
-            {
                 batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
-            }
 
 
             // draw lights

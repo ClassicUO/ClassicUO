@@ -44,28 +44,28 @@ namespace ClassicUO.Game.UI.Gumps
 
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
+
+        private static SpriteTexture _logoTexture2D;
         private ScrollAreaItem _activeChatArea;
+        private Combobox _autoOpenCorpseOptions;
+        private TextBox _autoOpenCorpseRange;
+        private Checkbox _castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
+        private HSliderBar _cellSize;
 
         // video
         private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR;
-        private HSliderBar _lightBar;
+        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
+        private Combobox _dragSelectModifierKey;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
-        private TextBox _rows, _columns, _highlightAmount;
-        private HSliderBar _cellSize;
+        private Checkbox _enableDragSelect;
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
-        private TextBox _autoOpenCorpseRange;
-        private Combobox _autoOpenCorpseOptions;
-        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
-        private Checkbox _enableDragSelect;
-        private Combobox _dragSelectModifierKey;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
-        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -78,55 +78,39 @@ namespace ClassicUO.Game.UI.Gumps
 
         // GameWindowSize
         private TextBox _gameWindowWidth;
+        private Combobox _gridLoot;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType;
 
-        //VendorGump Size Option
-        private ArrowNumbersTextBox _vendorGumpSize;
-
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
-        private Checkbox _castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
-        private TextBox _spellFormatBox;
+        private HSliderBar _lightBar;
 
         // macro
         private MacroControl _macroControl;
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
+        private TextBox _rows, _columns, _highlightAmount;
 
         // speech
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Combobox _shardType, _auraType;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
-
-        // general
-        private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
-        private HSliderBar _sliderSpeechDelay;
-        private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Combobox _gridLoot;
 
         // network
         private Checkbox _showNetStats;
 
+        // general
+        private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
+        private HSliderBar _sliderSpeechDelay;
+        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private TextBox _spellFormatBox;
+        private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
+
+        //VendorGump Size Option
+        private ArrowNumbersTextBox _vendorGumpSize;
+
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
-
-        private static SpriteTexture _logoTexture2D;
-        private static SpriteTexture LogoTexture
-        {
-            get
-            {
-                if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
-                {
-                    Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
-                    Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
-
-                    _logoTexture2D = new SpriteTexture(w, h);
-                    _logoTexture2D.SetData(pixels);
-                }
-
-                return _logoTexture2D;
-            }
-        }
 
         public OptionsGump() : base(0, 0)
         {
@@ -138,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = HEIGHT - 2
             });
 
-          
+
             TextureControl tc = new TextureControl
             {
                 X = 150 + ((WIDTH - 150 - 350) >> 1),
@@ -161,9 +145,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
             Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") { ButtonParameter = 9 });
-            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") { ButtonParameter = 10 });
-            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") { ButtonParameter = 11 });
+            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
+            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
+            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
 
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
@@ -211,22 +195,39 @@ namespace ClassicUO.Game.UI.Gumps
             ChangePage(1);
         }
 
+        private static SpriteTexture LogoTexture
+        {
+            get
+            {
+                if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
+                {
+                    Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
+                    Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
+
+                    _logoTexture2D = new SpriteTexture(w, h);
+                    _logoTexture2D.SetData(pixels);
+                }
+
+                return _logoTexture2D;
+            }
+        }
+
         private void BuildGeneral()
         {
             const int PAGE = 1;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             ScrollAreaItem fpsItem = new ScrollAreaItem();
-            Label text = new Label("- FPS:", true, HUE_FONT, font: FONT);
+            Label text = new Label("- FPS:", true, HUE_FONT);
             fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPS);
             rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
-            text = new Label("- Login FPS:", true, HUE_FONT, font: FONT);
+            text = new Label("- Login FPS:", true, HUE_FONT);
             fpsItem.Add(text);
-            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
@@ -245,11 +246,12 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             fpsItem = new ScrollAreaItem();
-            text = new Label("Grid Loot", true, HUE_FONT, font: FONT)
+
+            text = new Label("Grid Loot", true, HUE_FONT)
             {
                 Y = _showCorpseNameIncoming.Bounds.Bottom + 10
             };
-            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new []{ "None", "Grid loot only", "Both"}, Engine.Profile.Current.GridLootType);
+            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] {"None", "Grid loot only", "Both"}, Engine.Profile.Current.GridLootType);
 
             fpsItem.Add(text);
             fpsItem.Add(_gridLoot);
@@ -257,19 +259,17 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(fpsItem);
 
             ScrollAreaItem item = new ScrollAreaItem();
-            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT, true)
+
+            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT)
             {
                 Y = 20,
                 IsChecked = Engine.Profile.Current.UseCircleOfTransparency
             };
             _useCircleOfTransparency.ValueChanged += (sender, e) => { _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
             item.Add(_useCircleOfTransparency);
-            _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 50, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 50, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_circleOfTranspRadius);
             rightArea.Add(item);
-
-
-
 
 
             _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 15);
@@ -278,10 +278,9 @@ namespace ClassicUO.Game.UI.Gumps
             _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
 
 
-
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
 
-            _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT, true)
+            _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT)
             {
                 X = 0, Y = 20, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
@@ -303,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            text = new Label("Close healthbar gump when:", true, HUE_FONT, font: FONT)
+            text = new Label("Close healthbar gump when:", true, HUE_FONT)
             {
                 Y = _hpComboBox.Bounds.Bottom + 10
             };
@@ -315,13 +314,14 @@ namespace ClassicUO.Game.UI.Gumps
             }, mode);
             hpAreaItem.Add(_healtbarType);
 
-            text = new Label("Fields: ", true, HUE_FONT, font: FONT)
+            text = new Label("Fields: ", true, HUE_FONT)
             {
                 Y = _hpComboBox.Bounds.Bottom + 45
             };
             hpAreaItem.Add(text);
 
             mode = Engine.Profile.Current.FieldsType;
+
             if (mode < 0 || mode > 2)
                 mode = 0;
 
@@ -336,9 +336,9 @@ namespace ClassicUO.Game.UI.Gumps
             _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
             hpAreaItem = new ScrollAreaItem();
-            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT, font: FONT) { Y = 10 };
+            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};
             hpAreaItem.Add(c);
-            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) { Text = Engine.Profile.Current.VendorGumpHeight.ToString(), Tag = Engine.Profile.Current.VendorGumpHeight });
+            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) {Text = Engine.Profile.Current.VendorGumpHeight.ToString(), Tag = Engine.Profile.Current.VendorGumpHeight});
             rightArea.Add(hpAreaItem);
 
             Add(rightArea, PAGE);
@@ -351,52 +351,48 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
 
-
             ScrollAreaItem item = new ScrollAreaItem();
-            _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT, true)
+
+            _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.EnableSound
             };
             _enableSounds.ValueChanged += (sender, e) => { _soundsVolume.IsVisible = _enableSounds.IsChecked; };
             item.Add(_enableSounds);
-            _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_soundsVolume);
             rightArea.Add(item);
 
 
             item = new ScrollAreaItem();
-            _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT, true)
+
+            _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.EnableMusic
             };
             _enableMusic.ValueChanged += (sender, e) => { _musicVolume.IsVisible = _enableMusic.IsChecked; };
             item.Add(_enableMusic);
-            _musicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _musicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_musicVolume);
             rightArea.Add(item);
 
 
             item = new ScrollAreaItem();
-            _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT, true)
+
+            _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT)
             {
                 IsChecked = Engine.GlobalSettings.LoginMusic
             };
             _loginMusic.ValueChanged += (sender, e) => { _loginMusicVolume.IsVisible = _loginMusic.IsChecked; };
             item.Add(_loginMusic);
-            _loginMusicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _loginMusicVolume = new HSliderBar(90, 0, 180, 0, 100, Engine.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
-
-
-
-
 
 
             _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", Engine.Profile.Current.EnableFootstepsSound, 0, 15);
             _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
             _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
-
-
 
 
             _loginMusicVolume.IsVisible = _loginMusic.IsChecked;
@@ -417,7 +413,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] game size
             {
-                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT, true)
+                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT)
                 {
                     IsChecked = Engine.Profile.Current.GameWindowFullSize
                 };
@@ -427,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _windowSizeArea = new ScrollAreaItem();
 
-                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT, true)
+                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -436,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _windowSizeArea.Add(_gameWindowLock);
 
-                text = new Label("Game Play Window Size: ", true, HUE_FONT, 0, FONT)
+                text = new Label("Game Play Window Size: ", true, HUE_FONT)
                 {
                     X = 20,
                     Y = 40
@@ -463,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UNumericOnly = true
                 });
 
-                text = new Label("Game Play Window Position: ", true, HUE_FONT, 0, FONT)
+                text = new Label("Game Play Window Position: ", true, HUE_FONT)
                 {
                     X = 205,
                     Y = 40
@@ -496,7 +492,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] scale
             {
-                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT, true)
+                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
                 {
                     IsChecked = Engine.Profile.Current.EnableScaleZoom
                 };
@@ -506,7 +502,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _zoomSizeArea = new ScrollAreaItem();
 
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT, true)
+                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -514,7 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _zoomSizeArea.Add(_savezoomCheckbox);
 
-                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT, true)
+                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -531,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            text = new Label("- Status gump type:", true, HUE_FONT, 0, FONT)
+            text = new Label("- Status gump type:", true, HUE_FONT)
             {
                 Y = 30
             };
@@ -547,19 +543,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT, true)
+            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
             {
                 Y = 20,
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
-            _lightBar = new HSliderBar(_enableLight.Width + 10, 20, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _lightBar = new HSliderBar(_enableLight.Width + 10, 20, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
             item.Add(_enableLight);
             item.Add(_lightBar);
             rightArea.Add(item);
 
 
-            _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT, true)
+            _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ShadowsEnabled
             };
@@ -568,7 +564,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
+            text = new Label("- Aura under feet:", true, HUE_FONT)
             {
                 Y = 10
             };
@@ -724,7 +720,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            Label text = new Label("Speech font:", true, HUE_FONT, 0, FONT);
+            Label text = new Label("Speech font:", true, HUE_FONT);
 
             rightArea.Add(text);
 
@@ -741,26 +737,24 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             ScrollAreaItem item = new ScrollAreaItem();
-            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay", FONT, HUE_FONT, true)
+
+            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
             _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
             item.Add(_scaleSpeechDelay);
-            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
             _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
-            _saveJournalCheckBox.ValueChanged += (o, e) =>
-            {
-                Engine.SceneManager.GetScene<GameScene>().Journal?.CreateWriter(_saveJournalCheckBox.IsChecked);
-            };
+            _saveJournalCheckBox.ValueChanged += (o, e) => { Engine.SceneManager.GetScene<GameScene>().Journal?.CreateWriter(_saveJournalCheckBox.IsChecked); };
             _saveJournalCheckBox.IsChecked = Engine.Profile.Current.SaveJournalToFile;
 
             // [BLOCK] activate chat
             {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT, true)
+                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
@@ -771,7 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ | -", FONT, HUE_FONT, true)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ | -", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -779,7 +773,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
 
-                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT, true)
+                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -787,7 +781,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT, 0, FONT)
+                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT)
                 {
                     X = 20,
                     Y = 60
@@ -795,7 +789,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea.Add(text);
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT, true)
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT)
                 {
                     X = 40,
                     Y = 85,
@@ -803,7 +797,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
 
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT, true)
+                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT)
                 {
                     X = 40,
                     Y = 105,
@@ -844,12 +838,13 @@ namespace ClassicUO.Game.UI.Gumps
             _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, "Animal Color", 20, 0);
             _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer Color", 20, 0);
             _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy Color", 20, 0);
-            
+
             _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.BeneficHue, "Benefic Spell Hue", 20, 20);
             _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
             _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
 
             ScrollAreaItem it = new ScrollAreaItem();
+
             _spellFormatBox = CreateInputField(it, new TextBox(FONT, 30, 200, 200)
             {
                 Text = Engine.Profile.Current.SpellDisplayFormat,
@@ -875,7 +870,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80, true)
+            _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80)
             {
                 X = _highlightOnAmount.X + 30,
                 Y = 10,
@@ -889,7 +884,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            Label text = new Label("Counter Layout:", true, HUE_FONT, font: FONT)
+            Label text = new Label("Counter Layout:", true, HUE_FONT)
             {
                 Y = _highlightOnUse.Bounds.Bottom + 5
             };
@@ -901,20 +896,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            text = new Label("Cell size:", true, HUE_FONT, font: FONT)
+            text = new Label("Cell size:", true, HUE_FONT)
             {
                 X = 10,
                 Y = 10
             };
             item.Add(text);
 
-            _cellSize = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 80, 30, 80, Engine.Profile.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _cellSize = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 80, 30, 80, Engine.Profile.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_cellSize);
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
 
-            _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
+            _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height + 25,
@@ -924,7 +919,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = Engine.Profile.Current.CounterBarRows.ToString()
             }, "Rows:");
 
-            _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80, true)
+            _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
             {
                 X = _rows.X + _rows.Width + 30,
                 Y = _cellSize.Y + _cellSize.Height + 25,
@@ -945,7 +940,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
-            
+
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
@@ -956,7 +951,7 @@ namespace ClassicUO.Game.UI.Gumps
             _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 0);
             _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
 
-            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80, true)
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height - 15,
@@ -965,7 +960,7 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true,
                 Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
-            
+
             /* text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
             {
                 Y = 10
@@ -976,17 +971,17 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SelectedIndex = Engine.Profile.Current.AuraUnderFeetType
             };*/
-            var text = new Label("Corpse Open Options:", true, HUE_FONT, 0, FONT)
+            var text = new Label("Corpse Open Options:", true, HUE_FONT)
             {
                 Y = _autoOpenCorpseRange.Y + 30,
                 X = 10
             };
             _autoOpenCorpseArea.Add(text);
-            
+
             _autoOpenCorpseOptions = new Combobox(text.Width + 20, text.Y, 150, new[]
             {
                 "None", "Not Targeting", "Not Hiding", "Both"
-            })  
+            })
             {
                 SelectedIndex = Engine.Profile.Current.CorpseOpenOptions
             };
@@ -996,7 +991,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] disable hotkeys
             {
-                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT, true)
+                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.DisableDefaultHotkeys
@@ -1007,7 +1002,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _defaultHotkeysArea = new ScrollAreaItem();
 
-                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT, true)
+                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 5,
@@ -1015,7 +1010,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableArrowBtn);
 
-                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT, true)
+                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 25,
@@ -1023,7 +1018,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableTabBtn);
 
-                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT, true)
+                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 45,
@@ -1039,12 +1034,14 @@ namespace ClassicUO.Game.UI.Gumps
             _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", Engine.Profile.Current.EnableDragSelect, 0, 0);
 
             _dragSelectArea = new ScrollAreaItem();
-            text = new Label("Drag-select modifier key", true, HUE_FONT, 0, FONT)
+
+            text = new Label("Drag-select modifier key", true, HUE_FONT)
             {
                 X = 20
             };
             _dragSelectArea.Add(text);
-            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] { "None", "Ctrl", "Shift" })
+
+            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] {"None", "Ctrl", "Shift"})
             {
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
@@ -1081,19 +1078,23 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Cancel:
                     Dispose();
+
                     break;
 
                 case Buttons.Apply:
                     Apply();
+
                     break;
 
                 case Buttons.Default:
                     SetDefault();
+
                     break;
 
                 case Buttons.Ok:
                     Apply();
                     Dispose();
+
                     break;
 
                 case Buttons.NewMacro:
@@ -1134,6 +1135,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
+
                     break;
 
                 case 2: // sounds
@@ -1148,6 +1150,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _loginMusic.IsChecked = true;
                     _soundsVolume.IsVisible = _enableSounds.IsChecked;
                     _musicVolume.IsVisible = _enableMusic.IsChecked;
+
                     break;
 
                 case 3: // video
@@ -1176,6 +1179,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
+
                     break;
 
                 case 4: // commands
@@ -1186,6 +1190,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 6: // fonts
                     _fontSelectorChat.SetSelectedFont(0);
+
                     break;
 
                 case 7: // speech
@@ -1204,6 +1209,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
                     _saveJournalCheckBox.IsChecked = false;
+
                     break;
 
                 case 8: // combat
@@ -1221,6 +1227,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _spellFormatBox.SetText("{power} [{spell}]");
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;
+
                     break;
 
                 case 9:
@@ -1231,6 +1238,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _cellSize.Value = 40;
                     _highlightOnAmount.IsChecked = false;
                     _highlightAmount.Text = "5";
+
                     break;
 
                 case 10:
@@ -1242,10 +1250,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
+
                     break;
 
                 case 11:
                     _showNetStats.IsChecked = false;
+
                     break;
             }
         }
@@ -1297,7 +1307,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
             Engine.Profile.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
 
-            Engine.Profile.Current.VendorGumpHeight = (int)_vendorGumpSize.Tag;
+            Engine.Profile.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             Engine.Profile.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             if (_useStandardSkillsGump.IsChecked)
@@ -1306,7 +1316,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (newGump != null)
                 {
-                    Engine.UI.Add(new StandardSkillsGump(){ X = newGump.X, Y = newGump.Y });
+                    Engine.UI.Add(new StandardSkillsGump
+                                      {X = newGump.X, Y = newGump.Y});
                     newGump.Dispose();
                 }
             }
@@ -1316,7 +1327,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (standardGump != null)
                 {
-                    Engine.UI.Add(new SkillGumpAdvanced() { X = standardGump.X, Y = standardGump.Y });
+                    Engine.UI.Add(new SkillGumpAdvanced
+                                      {X = standardGump.X, Y = standardGump.Y});
                     standardGump.Dispose();
                 }
             }
@@ -1418,8 +1430,10 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
             if (gameWindowPositionX != Engine.Profile.Current.GameWindowPosition.X || gameWindowPositionY != Engine.Profile.Current.GameWindowPosition.Y)
+            {
                 if (vp != null)
                     vp.Location = Engine.Profile.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+            }
 
             if (Engine.Profile.Current.GameWindowLock != _gameWindowLock.IsChecked)
             {
@@ -1588,13 +1602,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Engine.Profile.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
             }
+
             Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
 
             Engine.Profile.Current.EnableDragSelect = _enableDragSelect.IsChecked;
-            Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;           
+            Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
 
 
             // network
@@ -1626,7 +1641,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (label != null)
             {
-                Label text = new Label(label, true, HUE_FONT, maxWidth, FONT)
+                Label text = new Label(label, true, HUE_FONT, maxWidth)
                 {
                     X = elem.X - 10,
                     Y = elem.Y
@@ -1651,7 +1666,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox CreateCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
         {
-            Checkbox box = new Checkbox(0x00D2, 0x00D3, text, FONT, HUE_FONT, true)
+            Checkbox box = new Checkbox(0x00D2, 0x00D3, text, FONT, HUE_FONT)
             {
                 IsChecked = ischecked
             };
@@ -1687,7 +1702,7 @@ namespace ClassicUO.Game.UI.Gumps
             ClickableColorBox box = new ClickableColorBox(x, y, 13, 14, hue, color);
             item.Add(box);
 
-            item.Add(new Label(text, true, HUE_FONT, font: FONT)
+            item.Add(new Label(text, true, HUE_FONT)
             {
                 X = labelX, Y = labelY
             });
@@ -1723,6 +1738,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private const int CELL = 12;
 
+            private static Vector3 _zero = Vector3.Zero;
+
             private readonly SpriteTexture _background;
 
             public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
@@ -1740,8 +1757,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 base.Update(totalMS, frameMS);
             }
-
-            private static Vector3 _zero = Vector3.Zero;
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
@@ -1775,7 +1790,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (FileManager.Fonts.UnicodeFontExists(i))
                     {
-                        Add(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, HUE_FONT, true)
+                        Add(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, HUE_FONT)
                         {
                             Y = y,
                             Tag = i,

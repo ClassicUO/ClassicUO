@@ -173,6 +173,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     character.Equipment[(int) Layer.Robe] = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2);
 
                     break;
+
                 case RaceType.ELF when isFemale:
                     character.Graphic = 0x025E;
                     character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
@@ -180,6 +181,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
 
                     break;
+
                 case RaceType.ELF:
                     character.Graphic = 0x025D;
                     character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
@@ -187,6 +189,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
 
                     break;
+
                 default:
 
                 {
@@ -392,22 +395,27 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     _femaleRadio.IsChecked = true;
 
                     break;
+
                 case Buttons.MaleButton:
                     _maleRadio.IsChecked = true;
 
                     break;
+
                 case Buttons.HumanButton:
                     _humanRadio.IsChecked = true;
 
                     break;
+
                 case Buttons.ElfButton:
                     _elfRadio.IsChecked = true;
 
                     break;
+
                 case Buttons.GargoyleButton:
                     _gargoyleRadio.IsChecked = true;
 
                     break;
+
                 case Buttons.Next:
                     _character.Name = _nameTextBox.Text;
 
@@ -415,6 +423,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         charCreationGump.SetCharacter(_character);
 
                     break;
+
                 case Buttons.Prev:
                     charCreationGump.StepBack();
 
@@ -455,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (id == 0)
                 return null;
 
-            return new Item()
+            return new Item
             {
                 Graphic = (ushort) id, Hue = hue
             };

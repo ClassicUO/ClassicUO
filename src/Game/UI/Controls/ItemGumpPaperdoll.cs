@@ -148,8 +148,8 @@ namespace ClassicUO.Game.UI.Controls
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-  
-                            Game.SelectedObject.Object = Item;
+
+                            SelectedObject.Object = Item;
 
 
                             if (Item != null)
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            Game.SelectedObject.Object = Item;
+                            SelectedObject.Object = Item;
 
                             if (Item != null)
                             {

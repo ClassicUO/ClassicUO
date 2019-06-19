@@ -21,7 +21,6 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,10 +50,7 @@ namespace ClassicUO.IO.Resources
 
             _file = new UOFileMul(path, pathidx, 0, 16);
 
-            for (int i = 0; i < _file.Entries.Length; i++)
-            {
-                GetSkill(i);
-            }
+            for (int i = 0; i < _file.Entries.Length; i++) GetSkill(i);
 
             SkillNames = _skills.Select(o => o.Value.Name).ToArray();
         }

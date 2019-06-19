@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private static SpriteTexture[] _shopGumpParts = null;
+        private static SpriteTexture[] _shopGumpParts;
         private readonly GumpPicTiled _middleGumpLeft, _middleGumpRight;
         private readonly Dictionary<Item, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
@@ -55,13 +55,10 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _shiftPressed;
         private bool _updateTotal;
 
-        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0)//60 is the base height, original size
+        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
         {
             int height = Engine.Profile.Current.VendorGumpHeight;
-            if (_shopGumpParts == null)
-            {
-                GenerateVirtualTextures();
-            }
+            if (_shopGumpParts == null) GenerateVirtualTextures();
             X = x;
             Y = y;
             AcceptMouseInput = false;
@@ -98,8 +95,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 1
             };
 
-            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
-            boxClear.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
+            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
+            boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
             Add(boxAccept);
             Add(boxClear);
 
@@ -175,44 +172,54 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Input.KeyUp += InputOnKeyUp;
         }
 
+        public bool IsBuyGump { get; }
+
         private void GenerateVirtualTextures()
         {
             _shopGumpParts = new SpriteTexture[12];
             SpriteTexture t = FileManager.Gumps.GetTexture(0x0870);
             SpriteTexture[][] splits = new SpriteTexture[4][];
+
             splits[0] = GraphicHelper.SplitTexture16(t,
-                new int[3, 4]{
-                        { 0, 0, t.Width, 64 },
-                        { 0, 64, t.Width, 124 },
-                        { 0, 124, t.Width, t.Height - 124 }});
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 124},
+                                                         {0, 124, t.Width, t.Height - 124}
+                                                     });
             t = FileManager.Gumps.GetTexture(0x0871);
+
             splits[1] = GraphicHelper.SplitTexture16(t,
-                new int[3, 4]{
-                        { 0, 0, t.Width, 64 },
-                        { 0, 64, t.Width, 94 },
-                        { 0, 94, t.Width, t.Height - 94 }});
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 94},
+                                                         {0, 94, t.Width, t.Height - 94}
+                                                     });
             t = FileManager.Gumps.GetTexture(0x0872);
+
             splits[2] = GraphicHelper.SplitTexture16(t,
-                new int[3, 4]{
-                        { 0, 0, t.Width, 64 },
-                        { 0, 64, t.Width, 124 },
-                        { 0, 124, t.Width, t.Height - 124 }});
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 124},
+                                                         {0, 124, t.Width, t.Height - 124}
+                                                     });
             t = FileManager.Gumps.GetTexture(0x0873);
+
             splits[3] = GraphicHelper.SplitTexture16(t,
-                new int[3, 4]{
-                        { 0, 0, t.Width, 64 },
-                        { 0, 64, t.Width, 94 },
-                        { 0, 94, t.Width, t.Height - 94 }});
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 94},
+                                                         {0, 94, t.Width, t.Height - 94}
+                                                     });
+
             for (int i = 0, idx = 0; i < splits.Length; i++)
             {
-                for (int ii = 0; ii < splits[i].Length; ii++)
-                {
-                    _shopGumpParts[idx++] = splits[i][ii];
-                }
+                for (int ii = 0; ii < splits[i].Length; ii++) _shopGumpParts[idx++] = splits[i][ii];
             }
         }
-
-        public bool IsBuyGump { get; }
 
         private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
@@ -222,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
+            if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
                 _shiftPressed = true;
         }
 
@@ -296,7 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            var shopItem = (ShopItem)sender;
+            var shopItem = (ShopItem) sender;
 
             if (shopItem.Amount <= 0)
                 return;
@@ -321,7 +328,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnDecreaseButtomClicked(object sender, EventArgs e)
         {
-            var transactionItem = (TransactionItem)sender;
+            var transactionItem = (TransactionItem) sender;
 
             int total = _shiftPressed ? transactionItem.Amount : 1;
 
@@ -348,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnIncreaseButtomClicked(object sender, EventArgs e)
         {
-            var transactionItem = (TransactionItem)sender;
+            var transactionItem = (TransactionItem) sender;
 
             if (_shopItems[transactionItem.Item].Amount > 0)
             {
@@ -366,10 +373,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons)buttonID)
+            switch ((Buttons) buttonID)
             {
                 case Buttons.Accept:
-                    var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort)t.Value.Amount)).ToArray();
+                    var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
 
                     if (IsBuyGump)
                         NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
@@ -379,6 +386,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     break;
+
                 case Buttons.Clear:
 
                     foreach (var t in _transactionItems.Values.ToList())
@@ -412,15 +420,17 @@ namespace ClassicUO.Game.UI.Gumps
                     switch (FileManager.Animations.GetGroupIndex(item.Graphic))
                     {
                         case ANIMATION_GROUPS.AG_LOW:
-                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                            group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
 
                             break;
+
                         case ANIMATION_GROUPS.AG_HIGHT:
-                            group = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                            group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
 
                             break;
+
                         case ANIMATION_GROUPS.AG_PEOPLE:
-                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                            group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
 
                             break;
                     }
@@ -442,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue == 0 ? (Hue)hue2 : item.Hue,
+                        Hue = item.Hue == 0 ? (Hue) hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
@@ -498,10 +508,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height;
                 WantUpdateSize = false;
 
-                if (World.ClientFlags.TooltipsEnabled)
-                {
-                    SetTooltip(item);
-                }
+                if (World.ClientFlags.TooltipsEnabled) SetTooltip(item);
             }
 
             internal string ShopItemName => _name.Text;
@@ -520,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps
                 set
                 {
                     foreach (var label in Children.OfType<Label>())
-                        label.Hue = (Hue)(value ? 0x0021 : 0x021F);
+                        label.Hue = (Hue) (value ? 0x0021 : 0x021F);
                 }
             }
 
@@ -550,15 +557,17 @@ namespace ClassicUO.Game.UI.Gumps
                         switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
                         {
                             case ANIMATION_GROUPS.AG_LOW:
-                                group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                                group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
 
                                 break;
+
                             case ANIMATION_GROUPS.AG_HIGHT:
-                                group = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                                group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
 
                                 break;
+
                             case ANIMATION_GROUPS.AG_PEOPLE:
-                                group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                                group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
 
                                 break;
                         }
@@ -716,6 +725,7 @@ namespace ClassicUO.Game.UI.Gumps
                         OnIncreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
                         break;
+
                     case 1:
                         OnDecreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
@@ -738,7 +748,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < _gumpTexture.Length; i++)
                 {
                     if (_gumpTexture[i] == null)
-                        _gumpTexture[i] = FileManager.Gumps.GetTexture((Graphic)(_graphic + i));
+                        _gumpTexture[i] = FileManager.Gumps.GetTexture((Graphic) (_graphic + i));
                 }
 
                 Height = _gumpTexture.Max(o => o.Height);
@@ -747,7 +757,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update(double totalMS, double frameMS)
             {
                 foreach (SpriteTexture t in _gumpTexture)
-                    t.Ticks = (long)totalMS;
+                    t.Ticks = (long) totalMS;
 
                 base.Update(totalMS, frameMS);
             }

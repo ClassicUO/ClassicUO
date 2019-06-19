@@ -62,13 +62,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int) Layer.Beard && s.ItemData.Layer != (int) Layer.Face))
                 //FIXME: this should be disabled. Server sends the right position
-            {
                 //CheckItemPosition(i);
                 Add(new ItemGump(i));
-            }
         }
 
         public Graphic Graphic { get; }
+
+        public TextContainer TextContainer { get; } = new TextContainer();
 
         private void BuildGump()
         {
@@ -143,8 +143,6 @@ namespace ClassicUO.Game.UI.Gumps
             TextContainer.Update();
         }
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
         public void AddLabel(string text, ushort hue, byte font, bool isunicode)
         {
             if (World.ClientFlags.TooltipsEnabled)
@@ -158,6 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
             TextContainer.Draw(batcher, x, y);
+
             return true;
         }
 

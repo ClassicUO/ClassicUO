@@ -23,9 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Input;
 
@@ -34,11 +31,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.UI
 {
-    class UISystemManager : DrawableGameComponent
+    internal class UISystemManager : DrawableGameComponent
     {
-        private readonly SpriteBatch _spriteBatch;
-
         private readonly List<UIControl> _controls = new List<UIControl>();
+        private readonly SpriteBatch _spriteBatch;
         private UIControl _currentControl;
 
         public UISystemManager(Microsoft.Xna.Framework.Game game) : base(game)
@@ -126,10 +122,7 @@ namespace ClassicUO.Renderer.UI
         {
             CheckMouseOverUIControl();
 
-            for (int i = 0; i < _controls.Count; i++)
-            {
-                _controls[i].Update(gameTime);
-            }
+            for (int i = 0; i < _controls.Count; i++) _controls[i].Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -138,14 +131,11 @@ namespace ClassicUO.Renderer.UI
         {
             _spriteBatch.Begin();
 
-            for (int i = _controls.Count - 1; i >= 0 ; i--)
+            for (int i = _controls.Count - 1; i >= 0; i--)
             {
                 var c = _controls[i];
 
-                if (c.IsVisible)
-                {
-                    c.Draw(_spriteBatch, c.X, c.Y);
-                }
+                if (c.IsVisible) c.Draw(_spriteBatch, c.X, c.Y);
             }
 
             _spriteBatch.End();
@@ -184,6 +174,5 @@ namespace ClassicUO.Renderer.UI
                 }
             }
         }
-
     }
 }

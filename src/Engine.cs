@@ -32,8 +32,6 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -41,17 +39,12 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Renderer.UI;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
-using CUO_API;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using Newtonsoft.Json;
 
 using SDL2;
 
@@ -92,10 +85,67 @@ namespace ClassicUO
         private DebugInfo _debugInfo;
         private InputManager _inputManager;
         private bool _isRunningSlowly;
+
+
+        private double _lag;
+
+        //protected override void Update(GameTime gameTime)
+        //{
+        //    if (Profiler.InContext("OutOfContext"))
+        //        Profiler.ExitContext("OutOfContext");
+
+        //    Profiler.EnterContext("Update");
+
+        //    uint last = Ticks;
+        //    Ticks = SDL.SDL_GetTicks();
+
+        //    double totalms = Ticks; //gameTime.TotalGameTime.TotalMilliseconds;
+        //    double framems = Ticks - last;  //gameTime.ElapsedGameTime.TotalMilliseconds;
+
+        //    //Ticks = (long) totalms;
+        //    //TicksFrame = (long) framems;
+
+        //    _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
+
+        //    if (_currentFpsTime >= 1.0)
+        //    {
+        //        CurrentFPS = _totalFrames;
+
+        //        FPSMax = CurrentFPS > FPSMax || FPSMax > FpsLimit ? CurrentFPS : FPSMax;
+        //        FPSMin = CurrentFPS < FPSMin && CurrentFPS != 0 ? CurrentFPS : FPSMin;
+
+        //        _totalFrames = 0;
+        //        _currentFpsTime = 0;
+        //    }
+
+        //    Profiler.ExitContext("Update");
+
+        //    Profiler.EnterContext("FixedUpdate");
+        //    OnFixedUpdate(totalms, framems);
+        //    Profiler.ExitContext("FixedUpdate");
+
+
+
+        //    //_time += framems;
+
+        //    //if (_time >= IntervalFixedUpdate)
+        //    //{
+        //    //    _time %= IntervalFixedUpdate;
+        //    //}
+        //    //else
+        //    //    SuppressDraw();
+
+
+        //    base.Update(gameTime);
+        //    Profiler.EnterContext("OutOfContext");
+        //}
+
+        private double _previous;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private double _statisticsTimer;
         private double _time;
+        private double _totalElapsed;
         private int _totalFrames;
         private UIManager _uiManager;
 
@@ -176,7 +226,7 @@ namespace ClassicUO
                     height *= 2;
                 }
 
-                if (! IsMaximized)
+                if (!IsMaximized)
                     _engine._profileManager.Current.WindowClientBounds = new Point(width, height);
 
                 SetPreferredBackBufferSize(width, height);
@@ -251,7 +301,7 @@ namespace ClassicUO
                 IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
                 uint flags = SDL.SDL_GetWindowFlags(wnd);
 
-                return ((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0);
+                return (flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
             }
             set
             {
@@ -291,13 +341,6 @@ namespace ClassicUO
             }
         }
 
-        public static void SetPreferredBackBufferSize(int width, int height)
-        {
-            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
-            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
-            _engine._graphicDeviceManager.ApplyChanges();
-        }
-
         public static UIManager UI => _engine._uiManager;
 
         public static InputManager Input => _engine._inputManager;
@@ -315,6 +358,15 @@ namespace ClassicUO
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
         public static bool IsRunningSlowly => _engine._isRunningSlowly;
+
+        public double IntervalFixedUpdate { get; private set; }
+
+        public static void SetPreferredBackBufferSize(int width, int height)
+        {
+            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
+            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
+            _engine._graphicDeviceManager.ApplyChanges();
+        }
 
         public static void DropFpsMinMaxValues()
         {
@@ -340,8 +392,10 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             using (_engine = new Engine(args))
+            {
                 if (!_engine.IsQuitted)
                     _engine.Run();
+            }
         }
 
         private static bool CheckUpdate(string[] args)
@@ -509,8 +563,8 @@ namespace ClassicUO
 
                             break;
 
-                        //case "preload_maps":
-                        //    settings.PreloadMaps = bool.Parse(value);
+                            //case "preload_maps":
+                            //    settings.PreloadMaps = bool.Parse(value);
 
                             break;
 
@@ -747,69 +801,12 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        //protected override void Update(GameTime gameTime)
-        //{
-        //    if (Profiler.InContext("OutOfContext"))
-        //        Profiler.ExitContext("OutOfContext");
-
-        //    Profiler.EnterContext("Update");
-
-        //    uint last = Ticks;
-        //    Ticks = SDL.SDL_GetTicks();
-
-        //    double totalms = Ticks; //gameTime.TotalGameTime.TotalMilliseconds;
-        //    double framems = Ticks - last;  //gameTime.ElapsedGameTime.TotalMilliseconds;
- 
-        //    //Ticks = (long) totalms;
-        //    //TicksFrame = (long) framems;
-
-        //    _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
-
-        //    if (_currentFpsTime >= 1.0)
-        //    {
-        //        CurrentFPS = _totalFrames;
-
-        //        FPSMax = CurrentFPS > FPSMax || FPSMax > FpsLimit ? CurrentFPS : FPSMax;
-        //        FPSMin = CurrentFPS < FPSMin && CurrentFPS != 0 ? CurrentFPS : FPSMin;
-
-        //        _totalFrames = 0;
-        //        _currentFpsTime = 0;
-        //    }
-
-        //    Profiler.ExitContext("Update");
-
-        //    Profiler.EnterContext("FixedUpdate");
-        //    OnFixedUpdate(totalms, framems);
-        //    Profiler.ExitContext("FixedUpdate");
-
-
-
-        //    //_time += framems;
-
-        //    //if (_time >= IntervalFixedUpdate)
-        //    //{
-        //    //    _time %= IntervalFixedUpdate;
-        //    //}
-        //    //else
-        //    //    SuppressDraw();
-
-
-        //    base.Update(gameTime);
-        //    Profiler.EnterContext("OutOfContext");
-        //}
-
-        private double _previous;
-        private double _totalElapsed;
-
 
         protected override void BeginRun()
         {
             base.BeginRun();
             _previous = SDL.SDL_GetTicks();
         }
-
-
-        private double _lag;
 
         protected override void Update(GameTime gameTime)
         {
@@ -820,13 +817,11 @@ namespace ClassicUO
 
             base.Update(gameTime);
 
-            
+
             _time += gameTime.ElapsedGameTime.TotalMilliseconds;
 
             if (_time > IntervalFixedUpdate)
-            {
                 _time %= IntervalFixedUpdate;
-            }
             else
                 SuppressDraw();
 
@@ -859,15 +854,13 @@ namespace ClassicUO
             // ###############################
 
 
-
             //OnUpdate(current, elapsed);
             //FrameworkDispatcher.Update();
             //OnFixedUpdate(current, elapsed);
 
             //Profiler.ExitContext("Update");
-       
 
-            
+
             _currentFpsTime += elapsed;
 
             if (_currentFpsTime >= 1000)
@@ -890,11 +883,7 @@ namespace ClassicUO
             //    Render();
             //    _totalElapsed -= IntervalFixedUpdate;
             //    _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
-
-
         }
-
-        public double IntervalFixedUpdate { get; private set; }
 
 
         private void Render()
@@ -918,13 +907,8 @@ namespace ClassicUO
             if (_profileManager.Current != null && _profileManager.Current.ShowNetworkStats)
             {
                 if (!NetClient.Socket.IsConnected)
-                {
                     NetClient.LoginSocket.Statistics.Draw(_batcher, 10, 50);
-                }
-                else if (!NetClient.Socket.IsDisposed)
-                {
-                    NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
-                }
+                else if (!NetClient.Socket.IsDisposed) NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
             }
 
 

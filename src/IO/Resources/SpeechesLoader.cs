@@ -60,7 +60,6 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -95,10 +94,7 @@ namespace ClassicUO.IO.Resources
         {
             List<SpeechEntry> list = new List<SpeechEntry>();
 
-            if (FileManager.ClientVersion < ClientVersions.CV_305D)
-            {
-                return list;
-            }
+            if (FileManager.ClientVersion < ClientVersions.CV_305D) return list;
 
             text = text.ToLower().TrimStart(' ').TrimEnd(' ');
 
@@ -106,10 +102,7 @@ namespace ClassicUO.IO.Resources
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, entry))
-                {
-                    list.Add(entry);
-                }
+                if (IsMatch(text, entry)) list.Add(entry);
             }
 
             list.Sort();

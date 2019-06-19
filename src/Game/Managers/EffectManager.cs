@@ -79,10 +79,12 @@ namespace ClassicUO.Game.Managers
                         effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9));
 
                     break;
+
                 case GraphicEffectType.Lightning:
                     effect = new LightningEffect(source, srcPos.X, srcPos.Y, srcPos.Z, hue);
 
                     break;
+
                 case GraphicEffectType.FixedXYZ:
 
                     if (graphic <= 0)
@@ -94,6 +96,7 @@ namespace ClassicUO.Game.Managers
                     };
 
                     break;
+
                 case GraphicEffectType.FixedFrom:
 
                     if (graphic <= 0)
@@ -105,10 +108,12 @@ namespace ClassicUO.Game.Managers
                     };
 
                     break;
+
                 case GraphicEffectType.ScreenFade:
                     Log.Message(LogTypes.Warning, "Unhandled 'Screen Fade' effect.");
 
                     break;
+
                 default:
                     Log.Message(LogTypes.Warning, "Unhandled effect.");
 

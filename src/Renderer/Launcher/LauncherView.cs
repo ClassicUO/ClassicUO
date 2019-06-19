@@ -21,18 +21,11 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer.UI;
 
 namespace ClassicUO.Renderer.Launcher
 {
-    class LauncherView : Control
+    internal class LauncherView : Control
     {
         public LauncherView()
         {

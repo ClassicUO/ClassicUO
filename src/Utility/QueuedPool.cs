@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using ClassicUO.Game.Map;
-using ClassicUO.Interfaces;
+﻿using System.Collections.Generic;
 
 namespace ClassicUO.Utility
 {

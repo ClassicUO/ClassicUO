@@ -73,11 +73,6 @@ namespace ClassicUO.Game.GameObjects
         //    CalculateRandomIdleTime();
         //}
 
-        public Mobile()
-        {
-
-        }
-
         public void Mobile_New(Serial serial)
         {
             Entity_New(serial);
@@ -300,7 +295,10 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StaminaChanged;
 
-        public Item GetSecureTradeBox() => Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+        public Item GetSecureTradeBox()
+        {
+            return Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+        }
 
         public void SetSAPoison(bool value)
         {
@@ -523,10 +521,12 @@ namespace ClassicUO.Game.GameObjects
                         animGroup = ANIMATION_GROUPS.AG_HIGHT;
 
                         break;
+
                     case ANIMATION_GROUPS_TYPE.ANIMAL:
                         animGroup = ANIMATION_GROUPS.AG_LOW;
 
                         break;
+
                     case ANIMATION_GROUPS_TYPE.HUMAN:
                     case ANIMATION_GROUPS_TYPE.EQUIPMENT:
                         animGroup = ANIMATION_GROUPS.AG_PEOPLE;
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count == 0;
+            return LastStepTime > Engine.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
         }
 
         private void ProcessFootstepsSound()
@@ -619,7 +619,6 @@ namespace ClassicUO.Game.GameObjects
 
             if ((Serial & 0x80000000) != 0)
             {
-
             }
 
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
@@ -766,7 +765,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ProcessSteps(out byte dir, bool evalutate = false)
         {
-            dir = (byte)Direction;
+            dir = (byte) Direction;
             dir &= 7;
 
             if (Steps.Count != 0 && !IsDestroyed)
@@ -783,7 +782,7 @@ namespace ClassicUO.Game.GameObjects
                         SetAnimation(0xFF);
 
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.Instance.IntervalFixedUpdate;
-                    int delay = (int)Engine.Ticks - (int)LastStepTime;
+                    int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
@@ -796,16 +795,16 @@ namespace ClassicUO.Game.GameObjects
                             int absX = Math.Abs(X - step.X);
                             int absY = Math.Abs(Y - step.Y);
 
-                            badStep = (absX > 1 || absY > 1 || absX + absY == 0);
+                            badStep = absX > 1 || absY > 1 || absX + absY == 0;
 
                             if (!badStep)
                             {
                                 absX = X;
                                 absY = Y;
 
-                                Pathfinder.GetNewXY((byte)(step.Direction & 7), ref absX, ref absY);
+                                Pathfinder.GetNewXY((byte) (step.Direction & 7), ref absX, ref absY);
 
-                                badStep = (absX != step.X || absY != step.Y);
+                                badStep = absX != step.X || absY != step.Y;
                             }
                         }
 
@@ -813,13 +812,13 @@ namespace ClassicUO.Game.GameObjects
                             removeStep = true;
                         else
                         {
-                            float steps = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
-                            float x = delay / (float)Constants.CHARACTER_ANIMATION_DELAY;
+                            float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                             float y = x;
-                            Offset.Z = (sbyte)(((step.Z - Z) * x) * (4.0f / steps));
+                            Offset.Z = (sbyte) ((step.Z - Z) * x * (4.0f / steps));
                             MovementSpeed.GetPixelOffset(step.Direction, ref x, ref y, steps);
-                            Offset.X = (sbyte)x;
-                            Offset.Y = (sbyte)y;
+                            Offset.X = (sbyte) x;
+                            Offset.Y = (sbyte) y;
                         }
                     }
                     else
@@ -865,8 +864,8 @@ namespace ClassicUO.Game.GameObjects
 #endif
                         }
 
-                        Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
-                        Direction = (Direction)step.Direction;
+                        Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+                        Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset.X = 0;
                         Offset.Y = 0;
@@ -877,6 +876,7 @@ namespace ClassicUO.Game.GameObjects
                         if (directionChange)
                         {
                             ProcessSteps(out dir, evalutate);
+
                             return;
                         }
 
@@ -909,7 +909,7 @@ namespace ClassicUO.Game.GameObjects
 
                     while (start != null && result == 0)
                     {
-                        if ( (start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
+                        if ((start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
                         {
                             ushort graphic = start.Graphic;
 

@@ -30,6 +30,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ColorBox : Control
     {
+        private static Vector3 _zero = Vector3.Zero;
         private Color _colorRGBA;
 
         public ColorBox(int width, int height, ushort hue, uint pol)
@@ -69,8 +70,6 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Ticks = (long) totalMS;
         }
-
-        private static Vector3 _zero = Vector3.Zero;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {

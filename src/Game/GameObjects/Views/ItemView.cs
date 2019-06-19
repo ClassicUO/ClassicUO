@@ -21,26 +21,21 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-
-using MathHelper = ClassicUO.Utility.MathHelper;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item
     {
-        private Graphic _originalGraphic;
         private bool _force;
+        private Graphic _originalGraphic;
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
@@ -61,8 +56,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 unsafe
                 {
-                    _originalGraphic = (Graphic)(Graphic + _animDataFrame.FrameData[_animDataFrame.FrameCount >> 1]);
+                    _originalGraphic = (Graphic) (Graphic + _animDataFrame.FrameData[_animDataFrame.FrameCount >> 1]);
                 }
+
                 _force = false;
             }
             else if (Engine.Profile.Current.FieldsType == 2)
@@ -93,7 +89,6 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x038A;
                 }
             }
-
 
 
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
@@ -287,11 +282,8 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-
                     if (Engine.Profile.Current.GridLootType > 0 && SelectedObject.CorpseObject == this)
-                    {
                         color = 0x0034;
-                    }
                     else if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
                         color = 0x0023;
 
@@ -300,20 +292,15 @@ namespace ClassicUO.Game.GameObjects
 
                 DrawInternal(batcher, posX, posY);
                 Select(IsFlipped ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
-
             }
         }
 
         private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsFlipped)
-            {
                 batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
-            }
             else
-            {
                 batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
-            }
 
             Texture.Ticks = Engine.Ticks;
         }
@@ -326,7 +313,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
-                if (Texture.Contains( x, y))
+                if (Texture.Contains(x, y))
                     SelectedObject.Object = this;
             }
             else

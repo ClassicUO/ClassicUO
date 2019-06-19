@@ -21,17 +21,11 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Threading;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -238,7 +232,7 @@ namespace ClassicUO.Game
 
                 if (e != null && e.HasEquipment)
                 {
-                    int index = (int)item.Layer;
+                    int index = (int) item.Layer;
 
                     if (index >= 0 && index < e.Equipment.Length)
                         e.Equipment[index] = null;
@@ -272,6 +266,7 @@ namespace ClassicUO.Game
 
             mobile.RemoveFromTile();
             PoolsManager.PushMobile(mobile);
+
             return true;
         }
 

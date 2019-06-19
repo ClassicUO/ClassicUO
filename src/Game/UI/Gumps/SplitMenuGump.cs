@@ -147,9 +147,8 @@ namespace ClassicUO.Game.UI.Gumps
             _okButton.MouseClick -= OkButtonOnMouseClick;
 
             if (_itemGump != null && _itemGump.IsAlive)
-            {
-                if (_itemGump.Target is ItemGump gump) gump.Disposed -= ItemGumpOnDisposed;
-            }
+                if (_itemGump.Target is ItemGump gump)
+                    gump.Disposed -= ItemGumpOnDisposed;
 
             base.Dispose();
         }

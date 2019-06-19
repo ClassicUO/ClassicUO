@@ -414,6 +414,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case TEXT_ALIGN_TYPE.TS_RIGHT:
 
                     {
@@ -424,6 +425,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
                         w = ptr.IndentionOffset;
 
@@ -712,10 +714,7 @@ namespace ClassicUO.IO.Resources
         {
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
-                if (width == 0 || string.IsNullOrEmpty(str))
-                {
-                    return null;
-                }
+                if (width == 0 || string.IsNullOrEmpty(str)) return null;
 
                 int realWidth = GetWidthUnicode(font, str);
 
@@ -894,7 +893,7 @@ namespace ClassicUO.IO.Resources
                     lastaspace_current_charcolor = current_charcolor;
                 }
 
-                if (ptr.Width + readWidth + ((sbyte) data[0] + (sbyte) data[2]) > width || si == '\n')
+                if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -1125,7 +1124,7 @@ namespace ClassicUO.IO.Resources
                 int blocksize = height * width;
                 uint[] pData = new uint[blocksize];
                 //uint* pData = stackalloc uint[blocksize];
-                uint* table = (uint*)_unicodeFontAddress[font];
+                uint* table = (uint*) _unicodeFontAddress[font];
                 int lineOffsY = 1 + _topMargin;
                 MultilinesFontInfo ptr = info;
                 uint datacolor = 0;
@@ -1159,24 +1158,26 @@ namespace ClassicUO.IO.Resources
                     {
                         case TEXT_ALIGN_TYPE.TS_CENTER:
 
-                            {
-                                w += (width - ptr.Width) >> 1;
+                        {
+                            w += (width - ptr.Width) >> 1;
 
-                                if (w < 0)
-                                    w = 0;
+                            if (w < 0)
+                                w = 0;
 
-                                break;
-                            }
+                            break;
+                        }
+
                         case TEXT_ALIGN_TYPE.TS_RIGHT:
 
-                            {
-                                w += width - 10 - ptr.Width;
+                        {
+                            w += width - 10 - ptr.Width;
 
-                                if (w < 0)
-                                    w = 0;
+                            if (w < 0)
+                                w = 0;
 
-                                break;
-                            }
+                            break;
+                        }
+
                         case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
                             w += ptr.IndentionOffset;
 
@@ -1190,7 +1191,7 @@ namespace ClassicUO.IO.Resources
                     {
                         MultilinesFontData dataPtr = ptr.Data[i];
                         char si = dataPtr.Item;
-                        table = (uint*)_unicodeFontAddress[dataPtr.Font];
+                        table = (uint*) _unicodeFontAddress[dataPtr.Font];
 
                         if (!isLink)
                         {
@@ -1219,8 +1220,8 @@ namespace ClassicUO.IO.Resources
                             }
                             else
                             {
-                                byte* xData = (byte*)((IntPtr)table + (int)table[si]);
-                                ofsX = (sbyte)xData[2];
+                                byte* xData = (byte*) ((IntPtr) table + (int) table[si]);
+                                ofsX = (sbyte) xData[2];
                             }
 
                             WebLinkRect wlr = new WebLinkRect
@@ -1238,7 +1239,7 @@ namespace ClassicUO.IO.Resources
                         if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                             continue;
 
-                        byte* data = (byte*)((IntPtr)table + (int)table[si]);
+                        byte* data = (byte*) ((IntPtr) table + (int) table[si]);
                         int offsX = 0;
                         int offsY = 0;
                         int dw = 0;
@@ -1251,10 +1252,10 @@ namespace ClassicUO.IO.Resources
                         }
                         else
                         {
-                            offsX = (sbyte)data[0] + 1;
-                            offsY = (sbyte)data[1];
-                            dw = (sbyte)data[2];
-                            dh = (sbyte)data[3];
+                            offsX = (sbyte) data[0] + 1;
+                            offsY = (sbyte) data[1];
+                            dw = (sbyte) data[2];
+                            dh = (sbyte) data[3];
                             data += 4;
                         }
 
@@ -1296,7 +1297,7 @@ namespace ClassicUO.IO.Resources
                                 int italicOffset = 0;
 
                                 if (isItalic)
-                                    italicOffset = (int)((dh - y) / ITALIC_FONT_KOEFFICIENT);
+                                    italicOffset = (int) ((dh - y) / ITALIC_FONT_KOEFFICIENT);
                                 int testX = w + offsX + italicOffset + (isSolid ? 1 : 0);
 
                                 for (int c = 0; c < scanlineCount; c++)
@@ -1313,7 +1314,7 @@ namespace ClassicUO.IO.Resources
                                         if (nowX >= width)
                                             break;
 
-                                        byte cl = (byte)(scanlines[c] & (1 << (7 - j)));
+                                        byte cl = (byte) (scanlines[c] & (1 << (7 - j)));
                                         int block = testY * width + nowX;
 
                                         if (cl != 0)
@@ -1342,7 +1343,7 @@ namespace ClassicUO.IO.Resources
                                     int italicOffset = 0;
 
                                     if (isItalic && cy < dh)
-                                        italicOffset = (int)((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
                                     for (int cx = minXOk; cx < maxXOk; cx++)
                                     {
@@ -1386,7 +1387,7 @@ namespace ClassicUO.IO.Resources
                                     int italicOffset = 0;
 
                                     if (isItalic)
-                                        italicOffset = (int)((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
                                     for (int cx = 0; cx < dw; cx++)
                                     {
@@ -1422,7 +1423,7 @@ namespace ClassicUO.IO.Resources
                                     int italicOffset = 0;
 
                                     if (isItalic && cy >= 0 && cy < dh)
-                                        italicOffset = (int)((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
                                     for (int cx = minXOk; cx < maxXOk; cx++)
                                     {
@@ -1491,8 +1492,8 @@ namespace ClassicUO.IO.Resources
                         {
                             int minXOk = tmpW + offsX > 0 ? -1 : 0;
                             int maxXOk = w + offsX + dw < width ? 1 : 0;
-                            byte* aData = (byte*)((IntPtr)table + (int)table[(byte)'a']);
-                            int testY = lineOffsY + (sbyte)aData[1] + (sbyte)aData[3];
+                            byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
+                            int testY = lineOffsY + (sbyte) aData[1] + (sbyte) aData[3];
 
                             if (testY >= height)
                                 break;
@@ -1825,6 +1826,7 @@ namespace ClassicUO.IO.Resources
                             if (newlen != 0)
                                 endTag = true;
                             goto case HTML_TAG_TYPE.HTT_P;
+
                         case HTML_TAG_TYPE.HTT_P:
 
                             if (endTag)
@@ -1833,12 +1835,14 @@ namespace ClassicUO.IO.Resources
                                 si = (char) 0;
 
                             break;
+
                         case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
                         case HTML_TAG_TYPE.HTT_BR:
                         case HTML_TAG_TYPE.HTT_BQ:
                             si = '\n';
 
                             break;
+
                         default:
                             si = (char) 0;
 
@@ -1886,6 +1890,7 @@ namespace ClassicUO.IO.Resources
                         info = current;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_B:
                     case HTML_TAG_TYPE.HTT_I:
                     case HTML_TAG_TYPE.HTT_U:
@@ -1893,12 +1898,14 @@ namespace ClassicUO.IO.Resources
                         info.Flags |= current.Flags;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_A:
                         info.Flags |= current.Flags;
                         info.Color = current.Color;
                         info.Link = current.Link;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_BIG:
                     case HTML_TAG_TYPE.HTT_SMALL:
 
@@ -1906,6 +1913,7 @@ namespace ClassicUO.IO.Resources
                             info.Font = current.Font;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_BASEFONT:
 
                         if (current.Font != 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
@@ -1915,12 +1923,14 @@ namespace ClassicUO.IO.Resources
                             info.Color = current.Color;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_H1:
                     case HTML_TAG_TYPE.HTT_H2:
                     case HTML_TAG_TYPE.HTT_H4:
                     case HTML_TAG_TYPE.HTT_H5:
                         info.Flags |= current.Flags;
                         goto case HTML_TAG_TYPE.HTT_H3;
+
                     case HTML_TAG_TYPE.HTT_H3:
                     case HTML_TAG_TYPE.HTT_H6:
 
@@ -1928,17 +1938,20 @@ namespace ClassicUO.IO.Resources
                             info.Font = current.Font;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_BQ:
                         info.Color = current.Color;
                         info.Flags |= current.Flags;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_LEFT:
                     case HTML_TAG_TYPE.HTT_CENTER:
                     case HTML_TAG_TYPE.HTT_RIGHT:
                         info.Align = current.Align;
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_DIV:
                         info.Align = current.Align;
 
@@ -1985,86 +1998,107 @@ namespace ClassicUO.IO.Resources
                         tag = HTML_TAG_TYPE.HTT_B;
 
                         break;
+
                     case "i":
                         tag = HTML_TAG_TYPE.HTT_I;
 
                         break;
+
                     case "a":
                         tag = HTML_TAG_TYPE.HTT_A;
 
                         break;
+
                     case "u":
                         tag = HTML_TAG_TYPE.HTT_U;
 
                         break;
+
                     case "p":
                         tag = HTML_TAG_TYPE.HTT_P;
 
                         break;
+
                     case "big":
                         tag = HTML_TAG_TYPE.HTT_BIG;
 
                         break;
+
                     case "small":
                         tag = HTML_TAG_TYPE.HTT_SMALL;
 
                         break;
+
                     case "body":
                         tag = HTML_TAG_TYPE.HTT_BODY;
 
                         break;
+
                     case "basefont":
                         tag = HTML_TAG_TYPE.HTT_BASEFONT;
 
                         break;
+
                     case "h1":
                         tag = HTML_TAG_TYPE.HTT_H1;
 
                         break;
+
                     case "h2":
                         tag = HTML_TAG_TYPE.HTT_H2;
 
                         break;
+
                     case "h3":
                         tag = HTML_TAG_TYPE.HTT_H3;
 
                         break;
+
                     case "h4":
                         tag = HTML_TAG_TYPE.HTT_H4;
 
                         break;
+
                     case "h5":
                         tag = HTML_TAG_TYPE.HTT_H5;
 
                         break;
+
                     case "h6":
                         tag = HTML_TAG_TYPE.HTT_H6;
 
                         break;
+
                     case "br":
                         tag = HTML_TAG_TYPE.HTT_BR;
 
                         break;
+
                     case "bq":
                         tag = HTML_TAG_TYPE.HTT_BQ;
 
                         break;
+
                     case "left":
                         tag = HTML_TAG_TYPE.HTT_LEFT;
 
                         break;
+
                     case "center":
                         tag = HTML_TAG_TYPE.HTT_CENTER;
 
                         break;
+
                     case "right":
                         tag = HTML_TAG_TYPE.HTT_RIGHT;
 
                         break;
+
                     case "div":
                         tag = HTML_TAG_TYPE.HTT_DIV;
 
                         break;
+
                     default:
 
                         if (str.Contains("bodybgcolor"))
@@ -2143,32 +2177,39 @@ namespace ClassicUO.IO.Resources
                                 info.Color = GetHTMLColorFromText(ref value);
 
                                 break;
+
                             case "bgcolor":
 
                                 if (_HTMLBackgroundCanBeColored)
                                     _backgroundColor = GetHTMLColorFromText(ref value);
 
                                 break;
+
                             case "link":
                                 _webLinkColor = GetHTMLColorFromText(ref value);
 
                                 break;
+
                             case "vlink":
                                 _visitedWebLinkColor = GetHTMLColorFromText(ref value);
 
                                 break;
+
                             case "leftmargin":
                                 _leftMargin = int.Parse(value);
 
                                 break;
+
                             case "topmargin":
                                 _topMargin = int.Parse(value);
 
                                 break;
+
                             case "rightmargin":
                                 _rightMargin = int.Parse(value);
 
                                 break;
+
                             case "bottommargin":
                                 _bottomMargin = int.Parse(value);
 
@@ -2176,6 +2217,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_BASEFONT:
 
                         if (str == "color")
@@ -2193,6 +2235,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_A:
 
                         if (str == "href")
@@ -2202,10 +2245,7 @@ namespace ClassicUO.IO.Resources
 
                             int start = i + 1;
 
-                            while (value[0] == '"' && value[value.Length - 1] != '"' && start + 1 < size)
-                            {
-                                value += strings[++start];
-                            }
+                            while (value[0] == '"' && value[value.Length - 1] != '"' && start + 1 < size) value += strings[++start];
 
                             i = start;
 
@@ -2213,6 +2253,7 @@ namespace ClassicUO.IO.Resources
                         }
 
                         break;
+
                     case HTML_TAG_TYPE.HTT_DIV:
 
                         if (str == "align")
@@ -2225,10 +2266,12 @@ namespace ClassicUO.IO.Resources
                                     info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
 
                                     break;
+
                                 case "center":
                                     info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
 
                                     break;
+
                                 case "right":
                                     info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
 
@@ -2307,71 +2350,88 @@ namespace ClassicUO.IO.Resources
                             color = 0x0000FFFF;
 
                             break;
+
                         case "cyan":
                             color = 0xFFFF00FF;
 
                             break;
+
                         case "blue":
                             color = 0xFF0000FF;
 
                             break;
+
                         case "darkblue":
                             color = 0xA00000FF;
 
                             break;
+
                         case "lightblue":
                             color = 0xE6D8ADFF;
 
                             break;
+
                         case "purple":
                             color = 0x800080FF;
 
                             break;
+
                         case "yellow":
                             color = 0x00FFFFFF;
 
                             break;
+
                         case "lime":
                             color = 0x00FF00FF;
 
                             break;
+
                         case "magenta":
                             color = 0xFF00FFFF;
 
                             break;
+
                         case "white":
                             color = 0xFFFEFEFF;
 
                             break;
+
                         case "silver":
                             color = 0xC0C0C0FF;
 
                             break;
+
                         case "gray":
                         case "grey":
                             color = 0x808080FF;
 
                             break;
+
                         case "black":
                             color = 0x010101FF;
 
                             break;
+
                         case "orange":
                             color = 0x00A5FFFF;
 
                             break;
+
                         case "brown":
                             color = 0x2A2AA5FF;
 
                             break;
+
                         case "maroon":
                             color = 0x000080FF;
 
                             break;
+
                         case "green":
                             color = 0x008000FF;
 
                             break;
+
                         case "olive":
                             color = 0x008080FF;
 
@@ -2407,67 +2467,82 @@ namespace ClassicUO.IO.Resources
                     info.Flags = UOFONT_SOLID;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_I:
                     info.Flags = UOFONT_ITALIC;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_U:
                     info.Flags = UOFONT_UNDERLINE;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_P:
                     info.Flags = UOFONT_INDENTION;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_BIG:
                     info.Font = 0;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_SMALL:
                     info.Font = 2;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H1:
                     info.Flags = UOFONT_SOLID | UOFONT_UNDERLINE;
                     info.Font = 0;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H2:
                     info.Flags = UOFONT_SOLID;
                     info.Font = 0;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H3:
                     info.Font = 0;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H4:
                     info.Flags = UOFONT_SOLID;
                     info.Font = 2;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H5:
                     info.Flags = UOFONT_ITALIC;
                     info.Font = 2;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_H6:
                     info.Font = 2;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_BQ:
                     info.Flags = UOFONT_BQ;
                     info.Color = 0x008000FF;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_LEFT:
                     info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_CENTER:
                     info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
 
                     break;
+
                 case HTML_TAG_TYPE.HTT_RIGHT:
                     info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
 

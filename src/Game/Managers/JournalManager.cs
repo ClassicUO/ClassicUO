@@ -30,6 +30,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class JournalManager
     {
+        private StreamWriter _fileWriter;
         public Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>();
 
         public event EventHandler<JournalEntry> EntryAdded;
@@ -55,7 +56,9 @@ namespace ClassicUO.Game.Managers
                     _fileWriter = info.CreateText();
                     _fileWriter.AutoFlush = true;
                 }
-                catch { }
+                catch
+                {
+                }
             }
             else
             {
@@ -65,7 +68,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private StreamWriter _fileWriter;
         public void Clear()
         {
             Entries.Clear();
@@ -75,6 +77,13 @@ namespace ClassicUO.Game.Managers
 
     internal class JournalEntry
     {
+        public readonly byte Font;
+        public readonly Hue Hue;
+
+        public readonly bool IsUnicode;
+        public readonly string Name;
+        public readonly string Text;
+
         public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode)
         {
             IsUnicode = isunicode;
@@ -83,11 +92,5 @@ namespace ClassicUO.Game.Managers
             Name = name;
             Text = text;
         }
-
-        public readonly bool IsUnicode;
-        public readonly byte Font;
-        public readonly Hue Hue;
-        public readonly string Name;
-        public readonly string Text;
     }
 }

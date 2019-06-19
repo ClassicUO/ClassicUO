@@ -156,6 +156,7 @@ namespace ClassicUO.Game.UI.Controls
                     HotkeyChanged.Raise(this);
 
                     break;
+
                 case ButtonState.Cancel:
                     _label.Text = string.Empty;
 

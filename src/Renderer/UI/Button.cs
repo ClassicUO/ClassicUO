@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer.UI
 {
-    class Button2 : UIControl
+    internal class Button2 : UIControl
     {
         private Rectangle _rect;
 
@@ -50,7 +50,7 @@ namespace ClassicUO.Renderer.UI
             _rect.Width = Width;
             _rect.Height = Height;
 
-           //batcher.Draw(Texture, x, y, Width, Height, Color.Red);
+            //batcher.Draw(Texture, x, y, Width, Height, Color.Red);
 
             batcher.Draw(Texture, _rect, Color.Red);
         }
@@ -76,6 +76,7 @@ namespace ClassicUO.Renderer.UI
 
     internal class Button : Control
     {
+        private static Vector3 _zero = Vector3.Zero;
         private bool _adaptSizeToText;
 
         private StateType _state;
@@ -156,8 +157,6 @@ namespace ClassicUO.Renderer.UI
             base.OnMouseExit(x, y);
         }
 
-        private static Vector3 _zero = Vector3.Zero;
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Texture2D texture;
@@ -170,11 +169,13 @@ namespace ClassicUO.Renderer.UI
                     texture = Textures.GetTexture(color);
 
                     break;
+
                 case StateType.Over:
                     color = new Color(104, 44, 44);
                     texture = Textures.GetTexture(color);
 
                     break;
+
                 case StateType.Pressed:
                     color = new Color(89, 59, 59);
                     texture = Textures.GetTexture(color);

@@ -436,7 +436,7 @@ namespace ClassicUO.Renderer
                 vertex1.TextureCoordinate.Y = 1;
                 vertex1.TextureCoordinate.Z = 0;
 
-                vertex2.Position.X = x + (width * (ratio + 1f));
+                vertex2.Position.X = x + width * (ratio + 1f);
                 vertex2.Position.Y = translatedY;
                 vertex2.Normal.X = 0;
                 vertex2.Normal.Y = 0;
@@ -484,7 +484,7 @@ namespace ClassicUO.Renderer
                 vertex2.TextureCoordinate.Y = 0;
                 vertex2.TextureCoordinate.Z = 0;
 
-                vertex3.Position.X = x + (width * (ratio + 1f));
+                vertex3.Position.X = x + width * (ratio + 1f);
                 vertex3.Position.Y = translatedY;
                 vertex3.Normal.X = 0;
                 vertex3.Normal.Y = 0;
@@ -493,7 +493,7 @@ namespace ClassicUO.Renderer
                 vertex3.TextureCoordinate.Y = 0;
                 vertex3.TextureCoordinate.Z = 0;
             }
-            
+
             vertex0.Hue.Z =
                 vertex1.Hue.Z =
                     vertex2.Hue.Z =
@@ -517,6 +517,7 @@ namespace ClassicUO.Renderer
 
             return false;
         }
+
         public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
             EnsureSize();
@@ -772,7 +773,7 @@ namespace ClassicUO.Renderer
             EnsureSize();
 
             int idx = NumSprites << 2;
-            
+
             float width = texture.Width;
             float height = texture.Height;
 
@@ -1081,7 +1082,7 @@ namespace ClassicUO.Renderer
 
                 PushSprite(texture);
             }
-            
+
             return true;
         }
 
@@ -1372,8 +1373,10 @@ namespace ClassicUO.Renderer
         protected override bool CheckInScreen(int index)
         {
             for (byte i = 0; i < 4; i++)
+            {
                 if (DrawingArea.Contains(VertexInfo[index + i].Position) == ContainmentType.Contains)
                     return true;
+            }
 
             return false;
         }
@@ -1548,7 +1551,6 @@ namespace ClassicUO.Renderer
                 curOffset.X += cKern.Y + cKern.Z;
             }
         }
-
     }
 
 
@@ -1564,6 +1566,8 @@ namespace ClassicUO.Renderer
         private readonly Vector3 _minVector3 = new Vector3(0, 0, -150);
         private readonly RasterizerState _rasterizerState;
         private readonly VertexBuffer _vertexBuffer;
+        protected readonly Texture2D[] TextureInfo;
+        protected readonly T[] VertexInfo;
         private BlendState _blendState;
         private Effect _customEffect;
         private bool _started;
@@ -1573,8 +1577,6 @@ namespace ClassicUO.Renderer
 
         protected BoundingBox DrawingArea;
         protected int NumSprites;
-        protected readonly Texture2D[] TextureInfo;
-        protected readonly T[] VertexInfo;
 
 
         protected Batcher2D(GraphicsDevice device, MatrixEffect defaultEffect)
@@ -1725,7 +1727,6 @@ namespace ClassicUO.Renderer
             }
 
 
-
             for (int i = 1; i < NumSprites; i++)
             {
                 if (TextureInfo[i] != current)
@@ -1865,7 +1866,6 @@ namespace ClassicUO.Renderer
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct PositionNormalTextureColor : IVertexType
     {
-
         public Vector3 Position;
         public Vector3 Normal;
         public Vector3 TextureCoordinate;
@@ -1877,7 +1877,7 @@ namespace ClassicUO.Renderer
                                                                                            new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
                                                                                            new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
                                                                                            new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
-                                                                                         );
+                                                                                          );
 
         public const int SizeInBytes = sizeof(float) * 12 * 4;
 

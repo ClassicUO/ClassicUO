@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
-using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Renderer;

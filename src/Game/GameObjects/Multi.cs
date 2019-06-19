@@ -31,9 +31,44 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
+        private StaticTiles? _itemData;
+
         public Multi()
         {
+        }
 
+        public Multi(Graphic graphic)
+        {
+            Graphic = graphic;
+            _isFoliage = ItemData.IsFoliage;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
+        }
+
+        public string Name => ItemData.Name;
+
+        public int MultiOffsetX { get; set; }
+        public int MultiOffsetY { get; set; }
+        public int MultiOffsetZ { get; set; }
+
+        public StaticTiles ItemData
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = FileManager.TileData.StaticData[Graphic];
+
+                return _itemData.Value;
+            }
         }
 
         public void Multi_New(ushort graphic)
@@ -59,42 +94,6 @@ namespace ClassicUO.Game.GameObjects
             else
                 _canBeTransparent = 0;
             AlphaHue = 0;
-        }
-
-        public Multi(Graphic graphic)
-        {
-            Graphic = graphic;
-            _isFoliage = ItemData.IsFoliage;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
-
-        public string Name => ItemData.Name;
-
-        public int MultiOffsetX { get; set; }
-        public int MultiOffsetY { get; set; }
-        public int MultiOffsetZ { get; set; }
-
-
-        private StaticTiles? _itemData;
-        public StaticTiles ItemData
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
         }
     }
 }

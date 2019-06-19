@@ -27,7 +27,6 @@ using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -49,6 +48,7 @@ namespace ClassicUO.IO.Resources
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+
                 if (File.Exists(path) && File.Exists(pathidx))
                     _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
                 FileManager.UseUOPGumps = false;
@@ -65,9 +65,9 @@ namespace ClassicUO.IO.Resources
                 {
                     int ingump = defReader.ReadInt();
 
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || 
-                                      ingump >= _file.Entries.Length || 
-                                      _file.Entries[ingump].Length > 0)
+                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                        ingump >= _file.Entries.Length ||
+                        _file.Entries[ingump].Length > 0)
                         continue;
 
                     int[] group = defReader.ReadGroup();
@@ -218,7 +218,7 @@ namespace ClassicUO.IO.Resources
                     //byte b = (byte) (( (val >> 0)  ) );
                     //byte a = (byte) (( (val >> 15) ) );
 
-                   
+
                     //if (b == 8)
                     //{
                     //    hue = (ushort)((

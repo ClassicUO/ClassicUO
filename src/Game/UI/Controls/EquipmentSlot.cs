@@ -21,11 +21,8 @@
 
 #endregion
 
-using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -63,7 +60,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public Item Item { get; private set; }
-
 
 
 

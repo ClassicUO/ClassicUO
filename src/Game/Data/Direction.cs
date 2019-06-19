@@ -83,44 +83,26 @@ namespace ClassicUO.Game.Data
             if (upPressed)
             {
                 if (leftPressed)
-                {
                     direction = 6;
-                }
                 else if (rightPressed)
-                {
                     direction = 0;
-                }
                 else
-                {
                     direction = 7;
-                }
             }
             else if (downPressed)
             {
                 if (leftPressed)
-                {
                     direction = 4;
-                }
                 else if (rightPressed)
-                {
                     direction = 2;
-                }
                 else
-                {
                     direction = 3;
-                }
             }
             else if (leftPressed)
-            {
                 direction = 5;
-            }
-            else if (rightPressed)
-            {
-                direction = 1;
-            }
+            else if (rightPressed) direction = 1;
 
             return (Direction) direction;
-
         }
 
         public static Direction GetCardinal(Direction inDirection)

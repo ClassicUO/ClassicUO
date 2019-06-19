@@ -21,7 +21,6 @@
 
 #endregion
 
-using System;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -55,9 +54,9 @@ namespace ClassicUO.Game.Scenes
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
         private int _lightCount;
+        private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
         private RenderTarget2D _renderTarget, _darkness;
         private int _scale = 5; // 1.0
-        private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
 
 
         private long _timePing;
@@ -242,6 +241,7 @@ namespace ClassicUO.Game.Scenes
                         hue = Engine.Profile.Current.EmoteHue;
 
                     break;
+
                 case MessageType.Label:
                     name = "You see";
                     text = e.Text;
@@ -253,24 +253,28 @@ namespace ClassicUO.Game.Scenes
                     text = e.Text;
 
                     break;
+
                 case MessageType.Party:
                     text = e.Text;
                     name = $"[Party][{e.Name}]";
                     hue = Engine.Profile.Current.PartyMessageHue;
 
                     break;
+
                 case MessageType.Alliance:
                     text = e.Text;
                     name = $"[Alliance][{e.Name}]";
                     hue = Engine.Profile.Current.AllyMessageHue;
 
                     break;
+
                 case MessageType.Guild:
                     text = e.Text;
                     name = $"[Guild][{e.Name}]";
                     hue = Engine.Profile.Current.GuildMessageHue;
 
                     break;
+
                 default:
                     text = e.Text;
                     name = e.Name;
@@ -321,7 +325,7 @@ namespace ClassicUO.Game.Scenes
             Engine.Input.RightMouseButtonDown -= OnRightMouseDown;
             Engine.Input.RightMouseButtonUp -= OnRightMouseUp;
             Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            
+
             // MOUSE WHEEL
             Engine.Input.MouseWheel -= OnMouseWheel;
 
@@ -407,7 +411,7 @@ namespace ClassicUO.Game.Scenes
                 ushort graphic = lightObject.Graphic;
 
                 if (graphic >= 0x3E02 && graphic <= 0x3E0B ||
-                    graphic >= 0x3914 && graphic <= 0x3929 || 
+                    graphic >= 0x3914 && graphic <= 0x3929 ||
                     graphic == 0x0B1D)
                     light.ID = 2;
                 else
@@ -466,9 +470,8 @@ namespace ClassicUO.Game.Scenes
             _objectHandlesCount = 0;
 
 
-
-            _rectanglePlayer.X = (int)(World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
-            _rectanglePlayer.Y = (int)(World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
+            _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
+            _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
             _rectanglePlayer.Height = World.Player.FrameInfo.Height;
 
@@ -584,7 +587,7 @@ namespace ClassicUO.Game.Scenes
             if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
             {
                 Mobile follow = World.Mobiles.Get(_followingTarget);
-                
+
                 if (follow != null)
                 {
                     int distance = follow.Distance;
@@ -595,12 +598,10 @@ namespace ClassicUO.Game.Scenes
                         Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
                 }
                 else
-                {
                     StopFollowing();
-                }
             }
 
-           
+
             if (totalMS > _timePing)
             {
                 //NetClient.Socket.Send(new PPing());
@@ -614,16 +615,16 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue.Update(totalMS, frameMS);
 
             if (!IsMouseOverViewport)
-                Game.SelectedObject.Object = Game.SelectedObject.LastObject = null;
+                SelectedObject.Object = SelectedObject.LastObject = null;
             else
             {
                 if (_viewPortGump != null)
                 {
-                    Game.SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale);
-                    Game.SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale);
+                    SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale);
+                    SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale);
                 }
                 else
-                    Game.SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
+                    SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
         }
 
@@ -654,7 +655,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             DrawWorld(batcher);
-            
+
             return base.Draw(batcher);
         }
 
@@ -672,7 +673,7 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawWorld(UltimaBatcher2D batcher)
         {
-            Game.SelectedObject.Object = null;
+            SelectedObject.Object = null;
 
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
@@ -706,12 +707,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
-                        {
-                            RenderedObjectsCount++;
-                        }
+                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
                     }
-
                 }
 
                 //if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -786,7 +783,7 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.SetBlendState(_blendText);
             Overheads.Draw(batcher, x, y);
-            Game.SelectedObject.LastObject = Game.SelectedObject.Object;
+            SelectedObject.LastObject = SelectedObject.Object;
 
             // batcher.SetBlendState(null);
             // workaround to set overheads clickable
@@ -801,8 +798,8 @@ namespace ClassicUO.Game.Scenes
                 sellines.Z = 0.3f;
                 Vector3 selhue = new Vector3();
                 selhue.Z = 0.7f;
-                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref selhue);
-                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - (_selectionStart.Item1), Mouse.Position.Y - (_selectionStart.Item2), ref sellines);
+                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref selhue);
+                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref sellines);
             }
         }
 

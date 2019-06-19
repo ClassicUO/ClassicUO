@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             //why we make calculations on program if it could be done outside?
-            var mapCenterX = 253;//393 / 2 + 57;
+            var mapCenterX = 253; //393 / 2 + 57;
 
             Add(new Button((int) Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
             {
@@ -141,6 +141,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     charCreationGump.StepBack(_selectedProfession > 0 ? 2 : 1);
 
                     break;
+
                 case Buttons.Finish:
 
                     if (_selectedCity != default)
@@ -154,6 +155,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     SelectedMapIndex--;
 
                     break;
+
                 case Buttons.NextCollection:
                     SelectedMapIndex++;
 

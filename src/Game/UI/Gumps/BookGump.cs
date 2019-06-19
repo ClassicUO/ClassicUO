@@ -213,6 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Backwards:
 
                     return;
+
                 case Buttons.Forward:
 
                     return;
@@ -554,6 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
                 text = text.Replace("\r", string.Empty);
                 int curpage = ActiveInternalPage;
                 MultiLineBox page;
+
                 if (curpage < 0)
                 {
                     if (BookTitle.HasKeyboardFocus)
@@ -565,6 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                     page = m_Pages[curpage];
+
                 int oldcaretpos = page.TxEntry.CaretIndex, oldpage = curpage;
                 string original = textID == MultiLineBox.PasteCommandID ? text : page.Text;
                 text = page.TxEntry.InsertString(text);
@@ -695,8 +698,11 @@ namespace ClassicUO.Game.UI.Gumps
                 List<int> changed = new List<int>();
 
                 for (int i = 1; i < gump.PageChanged.Length; i++)
+                {
                     if (gump.PageChanged[i])
                         changed.Add(i);
+                }
+
                 WriteUShort((ushort) changed.Count);
 
                 for (int i = changed.Count - 1; i >= 0; --i)

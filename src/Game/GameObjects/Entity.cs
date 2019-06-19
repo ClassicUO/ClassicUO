@@ -33,63 +33,12 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class Entity : GameObject
     {
-        private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
         private Item[] _equipment;
         private Flags _flags;
         private Hue _hue;
         private string _name;
-
-        //protected Entity(Serial serial)
-        //{
-        //    Serial = serial;
-        //    Items = new EntityCollection<Item>();
-        //}
-
-        protected void Entity_New(Serial serial)
-        {
-            IsDestroyed = false;
-            RemoveFromTile();
-
-            Texture = null;
-            Serial = serial;
-            IsFlipped = false;
-            Items = new EntityCollection<Item>();
-            _equipment = null;
-            IsClicked = false;
-            _properties.Clear();
-            Graphic = 0;
-            Hue = 0;
-            _name = string.Empty;
-            Flags = 0;
-            _direction = 0;
-            PropertiesHash = 0;
-
-            UseObjectHandles = false;
-            ObjectHandlesOpened = false;
-            ClosedObjectHandles = false;
-            _delta = Delta.None;
-
-            AnimIndex = 0;
-            Position = Position.INVALID;
-            OverheadMessageContainer?.Destroy();
-            OverheadMessageContainer = null;
-            CurrentRenderIndex = 0;
-            PriorityZ = 0;
-            Rotation = 0;
-            AllowedToDraw = true;
-            DrawTransparent = false;
-            AlphaHue = 0;
-            Bounds.X = 0;
-            Bounds.Y = 0;
-            Bounds.Width = 0;
-            Bounds.Height = 0;
-            FrameInfo.X = 0;
-            FrameInfo.Y = 0;
-            FrameInfo.Width = 0;
-            FrameInfo.Height = 0;
-        }
 
         protected long LastAnimationChangeTime { get; set; }
 
@@ -106,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
         public Serial Serial { get; set; }
         public bool IsClicked { get; set; }
 
-        public ConcurrentDictionary<int, Property> Properties => _properties;
+        public ConcurrentDictionary<int, Property> Properties { get; } = new ConcurrentDictionary<int, Property>();
 
         public override Graphic Graphic
         {
@@ -191,13 +140,63 @@ namespace ClassicUO.Game.GameObjects
 
         public uint PropertiesHash { get; set; }
 
+        //protected Entity(Serial serial)
+        //{
+        //    Serial = serial;
+        //    Items = new EntityCollection<Item>();
+        //}
+
+        protected void Entity_New(Serial serial)
+        {
+            IsDestroyed = false;
+            RemoveFromTile();
+
+            Texture = null;
+            Serial = serial;
+            IsFlipped = false;
+            Items = new EntityCollection<Item>();
+            _equipment = null;
+            IsClicked = false;
+            Properties.Clear();
+            Graphic = 0;
+            Hue = 0;
+            _name = string.Empty;
+            Flags = 0;
+            _direction = 0;
+            PropertiesHash = 0;
+
+            UseObjectHandles = false;
+            ObjectHandlesOpened = false;
+            ClosedObjectHandles = false;
+            _delta = Delta.None;
+
+            AnimIndex = 0;
+            Position = Position.INVALID;
+            OverheadMessageContainer?.Destroy();
+            OverheadMessageContainer = null;
+            CurrentRenderIndex = 0;
+            PriorityZ = 0;
+            Rotation = 0;
+            AllowedToDraw = true;
+            DrawTransparent = false;
+            AlphaHue = 0;
+            Bounds.X = 0;
+            Bounds.Y = 0;
+            Bounds.Width = 0;
+            Bounds.Height = 0;
+            FrameInfo.X = 0;
+            FrameInfo.Y = 0;
+            FrameInfo.Width = 0;
+            FrameInfo.Height = 0;
+        }
+
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
         {
-            _properties.Clear();
+            Properties.Clear();
             int temp = 0;
-            foreach (Property p in props) _properties.TryAdd(temp++, p);
+            foreach (Property p in props) Properties.TryAdd(temp++, p);
             _delta |= Delta.Properties;
         }
 
@@ -243,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
         public override void Destroy()
         {
             _equipment = null;
-            _properties.Clear();
+            Properties.Clear();
             base.Destroy();
         }
 

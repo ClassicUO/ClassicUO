@@ -24,9 +24,6 @@
 using System;
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-
-using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -34,13 +31,13 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int TIME_BETWEEN_CLICKS = 250;
         private readonly int _Min, _Max;
-        private readonly Button _up, _down;
         private readonly TextBox _textBox;
+        private readonly Button _up, _down;
         private float _timeUntilNextClick;
 
         public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            TextEntry txe = new TextEntry(font, maxcharlength, width, width, isunicode, style, hue) { NumericOnly = true };
+            TextEntry txe = new TextEntry(font, maxcharlength, width, width, isunicode, style, hue) {NumericOnly = true};
             int height = txe.Height + 5;
             X = x;
             Y = y;
@@ -87,7 +84,13 @@ namespace ClassicUO.Game.UI.Controls
                 }
             };
             Add(_down);
-            Add(_textBox = new TextBox(txe, true) { X = 2, Y = 2, Height = height, Width = width - 17 });
+            Add(_textBox = new TextBox(txe, true) {X = 2, Y = 2, Height = height, Width = width - 17});
+        }
+
+        public string Text
+        {
+            get => _textBox.Text;
+            set => _textBox.SetText(value);
         }
 
         private void UpdateValue()
@@ -133,12 +136,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             base.Update(totalMS, frameMS);
-        }
-
-        public string Text
-        {
-            get => _textBox.Text;
-            set => _textBox.SetText(value);
         }
     }
 }

@@ -133,14 +133,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     DeleteCharacter(loginScene);
 
                     break;
+
                 case Buttons.New:
                     loginScene.StartCharCreation();
 
                     break;
+
                 case Buttons.Next:
                     LoginCharacter(_selectedCharacter);
 
                     break;
+
                 case Buttons.Prev:
                     loginScene.StepBack();
 

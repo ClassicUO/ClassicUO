@@ -126,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                             switches.Add(control.LocalSerial);
 
                             break;
+
                         case TextBox textBox:
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 

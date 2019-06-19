@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
-            GameObject obj = Game.SelectedObject.Object as GameObject;
+            GameObject obj = SelectedObject.Object as GameObject;
             Serial serial;
 
             if (obj is Item item && item.ItemData.IsContainer)

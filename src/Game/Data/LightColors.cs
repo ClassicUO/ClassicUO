@@ -47,18 +47,22 @@ namespace ClassicUO.Game.Data
                     color = 31;
 
                     break;
+
                 case 0x0FAC:
                     color = 30;
 
                     break;
+
                 case 0x0FB1:
                     color = 60;
 
                     break;
+
                 case 0x1647:
                     color = 61;
 
                     break;
+
                 case 0x19BB:
                 case 0x1F2B:
                     color = 40;
@@ -156,18 +160,22 @@ namespace ClassicUO.Game.Data
                                                                         color = 40;
 
                                                                         break;
+
                                                                     case 0x40FF:
                                                                         color = 10;
 
                                                                         break;
+
                                                                     case 0x4100:
                                                                         color = 20;
 
                                                                         break;
+
                                                                     case 0x4101:
                                                                         color = 32;
 
                                                                         break;
+
                                                                     default:
 
                                                                         if (id >= 0x983B &&

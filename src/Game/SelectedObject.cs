@@ -25,7 +25,6 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -38,11 +37,10 @@ namespace ClassicUO.Game
 {
     internal static class SelectedObject
     {
+        public static Point TranslatedMousePositionByViewport;
         public static IGameEntity Object { get; set; }
         public static IGameEntity LastObject { get; set; }
 
-        public static Point TranslatedMousePositionByViewport;
-        
         public static GameObject HealthbarObject { get; set; }
         public static GameObject CorpseObject { get; set; }
 
@@ -80,8 +78,10 @@ namespace ClassicUO.Game
                         graphic = item.ItemData.AnimID;
 
                         if (FileManager.Animations.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
                             if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                 graphic = data.Graphic;
+                        }
                     }
                     else
                         continue;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game
                     int drawX;
 
                     int drawCenterY = frame.CenterY;
-                    int yOff = ((int)mobile.Offset.Z >> 2) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+                    int yOff = ((int) mobile.Offset.Z >> 2) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
                     int drawY = drawCenterY + yOff;
 
                     if (mirror)

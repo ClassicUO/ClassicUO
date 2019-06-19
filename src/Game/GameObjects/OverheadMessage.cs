@@ -582,11 +582,11 @@ namespace ClassicUO.Game.GameObjects
     internal class MessageInfo : IGameEntity
     {
         public float Alpha;
+        public ushort Hue;
         public bool IsHealthMessage;
 
         public OverheadMessage Parent;
         public RenderedText RenderedText;
-        public ushort Hue;
         public float Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;

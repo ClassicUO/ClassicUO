@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -51,7 +50,7 @@ namespace ClassicUO.IO.Resources
 
             if (address != IntPtr.Zero)
             {
-                IntPtr addr =  address + (graphic * 68 + 4 * ((graphic >> 3) + 1));
+                IntPtr addr = address + (graphic * 68 + 4 * ((graphic >> 3) + 1));
 
                 //Stopwatch sw = Stopwatch.StartNew();
                 //for (int i = 0; i < 2000000; i++)
@@ -78,6 +77,7 @@ namespace ClassicUO.IO.Resources
                 //if (pad.FrameInterval == 0)
                 //    pad.FrameInterval = 1;
                 AnimDataFrame2 a = UnsafeMemoryManager.ToStruct<AnimDataFrame2>(addr);
+
                 return a;
             }
 

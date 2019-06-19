@@ -22,10 +22,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -33,7 +29,7 @@ using ClassicUO.Game.UI.Gumps;
 namespace ClassicUO.Game.Managers
 {
     [Flags]
-    enum NameOverheadTypeAllowed
+    internal enum NameOverheadTypeAllowed
     {
         All,
         Mobiles,
@@ -42,11 +38,10 @@ namespace ClassicUO.Game.Managers
         MobilesCorpses = Mobiles | Corpses
     }
 
-    static class NameOverHeadManager
+    internal static class NameOverHeadManager
     {
-        public static NameOverheadTypeAllowed TypeAllowed { get; set; }
-
         private static NameOverHeadHandlerGump _gump;
+        public static NameOverheadTypeAllowed TypeAllowed { get; set; }
 
         public static bool IsAllowed(Entity serial)
         {
@@ -58,12 +53,13 @@ namespace ClassicUO.Game.Managers
 
             if (serial.Serial.IsItem && TypeAllowed == NameOverheadTypeAllowed.Items)
                 return true;
-            
+
             if (serial.Serial.IsMobile && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
                 return true;
-            
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && serial.Serial.IsItem && World.Items.Get(serial)?.IsCorpse == true )
+
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && serial.Serial.IsItem && World.Items.Get(serial)?.IsCorpse == true)
                 return true;
+
             return false;
         }
 

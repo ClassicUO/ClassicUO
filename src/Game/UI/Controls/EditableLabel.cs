@@ -21,34 +21,29 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class EditableLabel : Control
+    internal class EditableLabel : Control
     {
+        private static Vector3 _hue = Vector3.Zero;
         private readonly TextBox _label;
-        private string _backupText;
-        
+
         public EditableLabel(string text, byte font, ushort hue, bool unicode, int width, FontStyle style)
         {
-            _backupText = text;
+            BackupText = text;
 
             _label = new TextBox(font, 32, width, width, unicode, style, hue)
             {
                 Text = text,
                 Width = width,
                 Height = 15,
-                IsEditable = false,
+                IsEditable = false
             };
 
 
@@ -58,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
             _label.MouseClick += (sender, e) => { InvokeMouseClick(e.Location, e.Button); };
-            
+
 
             Add(_label);
             CalculateSize();
@@ -73,24 +68,23 @@ namespace ClassicUO.Game.UI.Controls
             set => _label.Text = value;
         }
 
-        public string BackupText => _backupText;
-        
-        private static Vector3 _hue = Vector3.Zero;
+        public string BackupText { get; private set; }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
             if (string.IsNullOrEmpty(_label.Text))
             {
-                _label.Text = _backupText;
+                _label.Text = BackupText;
                 CalculateSize();
                 SetEditable(false);
+
                 return;
             }
 
             CalculateSize();
             base.OnKeyboardReturn(textID, text);
             SetEditable(false);
-            _backupText = _label.Text;
+            BackupText = _label.Text;
         }
 
         internal override void OnFocusLeft()
@@ -112,7 +106,10 @@ namespace ClassicUO.Game.UI.Controls
                 _label.SetKeyboardFocus();
         }
 
-        public bool GetEditable() => _label.IsEditable;
+        public bool GetEditable()
+        {
+            return _label.IsEditable;
+        }
 
         private void CalculateSize()
         {
@@ -141,6 +138,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_label.IsEditable)
                 batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hue);
+
             return base.Draw(batcher, x, y);
         }
     }

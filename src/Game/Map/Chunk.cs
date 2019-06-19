@@ -27,7 +27,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Map
 {
@@ -36,32 +35,6 @@ namespace ClassicUO.Game.Map
         public Chunk()
         {
             Tiles = new Tile[8, 8];
-        }
-
-        public void Chunk_New(ushort x, ushort y)
-        {
-            X = x;
-            Y = y;
-
-            if (Tiles == null)
-            {
-                Tiles = new Tile[8, 8];
-            }
-
-            x *= 8;
-            y *= 8;
-
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    Tile t = PoolsManager.GetTile();
-                    t.Tile_New((ushort)(i + x), (ushort)(j + y));
-                    Tiles[i, j] = t;
-                }
-            }
-
-            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
         public Chunk(ushort x, ushort y)
@@ -78,7 +51,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tile t = PoolsManager.GetTile();
-                    t.Tile_New((ushort)(i + x), (ushort)(j + y));
+                    t.Tile_New((ushort) (i + x), (ushort) (j + y));
                     Tiles[i, j] = t;
                 }
             }
@@ -93,6 +66,29 @@ namespace ClassicUO.Game.Map
         public Tile[,] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
+
+        public void Chunk_New(ushort x, ushort y)
+        {
+            X = x;
+            Y = y;
+
+            if (Tiles == null) Tiles = new Tile[8, 8];
+
+            x *= 8;
+            y *= 8;
+
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    Tile t = PoolsManager.GetTile();
+                    t.Tile_New((ushort) (i + x), (ushort) (j + y));
+                    Tiles[i, j] = t;
+                }
+            }
+
+            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)

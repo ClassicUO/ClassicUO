@@ -37,6 +37,8 @@ namespace ClassicUO.IO.Resources
     internal class ArtLoader : ResourceLoader<ArtTexture>
     {
         private static readonly ushort[] _empty = { };
+
+        private static readonly ushort[] _landBytes = new ushort[44 * 44];
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
         private UOFile _file;
 
@@ -159,12 +161,12 @@ namespace ClassicUO.IO.Resources
                 return _empty;
 
             ushort[] pixels = new ushort[width * height];
-            ushort* ptr = (ushort*)_file.PositionAddress;
+            ushort* ptr = (ushort*) _file.PositionAddress;
             ushort* lineoffsets = ptr;
-            byte* datastart = (byte*)ptr + height * 2;
+            byte* datastart = (byte*) ptr + height * 2;
             int x = 0;
             int y = 0;
-            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
+            ptr = (ushort*) (datastart + lineoffsets[0] * 2);
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
             while (y < height)
@@ -189,7 +191,7 @@ namespace ClassicUO.IO.Resources
                         ushort val = *ptr++;
 
                         if (val != 0)
-                            val = (ushort)(0x8000 | val);
+                            val = (ushort) (0x8000 | val);
                         pixels[pos++] = val;
                     }
 
@@ -199,7 +201,7 @@ namespace ClassicUO.IO.Resources
                 {
                     x = 0;
                     y++;
-                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    ptr = (ushort*) (datastart + lineoffsets[y] * 2);
                 }
             }
 
@@ -289,6 +291,7 @@ namespace ClassicUO.IO.Resources
             if (length == 0)
             {
                 texture = new ArtTexture(imageRectangle, 0, 0);
+
                 return;
             }
 
@@ -299,16 +302,17 @@ namespace ClassicUO.IO.Resources
             if (width == 0 || height == 0)
             {
                 texture = new ArtTexture(imageRectangle, 0, 0);
+
                 return;
             }
 
             ushort[] pixels = new ushort[width * height];
-            ushort* ptr = (ushort*)_file.PositionAddress;
+            ushort* ptr = (ushort*) _file.PositionAddress;
             ushort* lineoffsets = ptr;
-            byte* datastart = (byte*)ptr + height * 2;
+            byte* datastart = (byte*) ptr + height * 2;
             int x = 0;
             int y = 0;
-            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
+            ptr = (ushort*) (datastart + lineoffsets[0] * 2);
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
             while (y < height)
@@ -319,6 +323,7 @@ namespace ClassicUO.IO.Resources
                 if (xoffs + run >= 2048)
                 {
                     texture = new ArtTexture(imageRectangle, 0, 0);
+
                     return;
                 }
 
@@ -332,7 +337,7 @@ namespace ClassicUO.IO.Resources
                         ushort val = *ptr++;
 
                         if (val != 0)
-                            val = (ushort)(0x8000 | val);
+                            val = (ushort) (0x8000 | val);
                         pixels[pos++] = val;
                     }
 
@@ -342,7 +347,7 @@ namespace ClassicUO.IO.Resources
                 {
                     x = 0;
                     y++;
-                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    ptr = (ushort*) (datastart + lineoffsets[y] * 2);
                 }
             }
 
@@ -432,8 +437,6 @@ namespace ClassicUO.IO.Resources
             CleaUnusedResources();
         }
 
-        private static readonly ushort[] _landBytes = new ushort[44 * 44];
-
         private ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
@@ -441,7 +444,8 @@ namespace ClassicUO.IO.Resources
 
             if (length == 0)
             {
-                Array.Clear(_landBytes, 0 , _landBytes.Length);
+                Array.Clear(_landBytes, 0, _landBytes.Length);
+
                 return _landBytes;
             }
 

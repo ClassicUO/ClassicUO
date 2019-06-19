@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateMap()
         {
-            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort)5011 : (ushort)5010);
+            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
             Width = _gumpTexture.Width;
             Height = _gumpTexture.Height;
             CreateMiniMapTexture(true);
@@ -82,10 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (!World.InGame)
                 return;
 
-            if (_gumpTexture == null || _gumpTexture.IsDisposed)
-            {
-                CreateMap();
-            }
+            if (_gumpTexture == null || _gumpTexture.IsDisposed) CreateMap();
 
             if (_lastMap != World.MapIndex)
             {
@@ -165,6 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _useLargeMap = !_useLargeMap;
                 CreateMap();
+
                 return true;
             }
 
@@ -184,13 +182,13 @@ namespace ClassicUO.Game.UI.Gumps
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 
-            
+
             if (_x != lastX || _y != lastY)
             {
                 _x = lastX;
                 _y = lastY;
             }
-            else if(!force)
+            else if (!force)
                 return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)

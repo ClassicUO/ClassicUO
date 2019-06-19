@@ -267,6 +267,7 @@ namespace ClassicUO.Game.UI.Controls
                         ChangePage(ToPage);
 
                         break;
+
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);
 

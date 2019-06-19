@@ -46,6 +46,8 @@ namespace ClassicUO.Game.UI.Controls
         private readonly RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
+
+        private readonly bool _drawUp;
         private SpriteTexture[] _gumpSpliderBackground;
         private SpriteTexture _gumpWidget;
         private Rectangle _rect;
@@ -53,8 +55,6 @@ namespace ClassicUO.Game.UI.Controls
         //private int _newValue;
         private int _sliderX;
         private int _value = -1;
-
-        private bool _drawUp;
 
         public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
         {
@@ -136,6 +136,7 @@ namespace ClassicUO.Game.UI.Controls
                         _gumpWidget = FileManager.Gumps.GetTexture(216);
 
                         break;
+
                     case HSliderBarStyle.BlueWidgetNoBar:
                         _gumpWidget = FileManager.Gumps.GetTexture(0x845);
 
@@ -178,13 +179,9 @@ namespace ClassicUO.Game.UI.Controls
             if (_text != null)
             {
                 if (_drawUp)
-                {
                     _text.Draw(batcher, x, y - _text.Height);
-                }
                 else
-                {
                     _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
-                }
             }
 
             return base.Draw(batcher, x, y);
@@ -224,6 +221,7 @@ namespace ClassicUO.Game.UI.Controls
                     Value--;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     Value++;
 

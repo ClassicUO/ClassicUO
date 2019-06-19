@@ -31,7 +31,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -44,7 +43,6 @@ namespace ClassicUO.Network
     internal unsafe class Plugin
     {
         private static readonly List<Plugin> _plugins = new List<Plugin>();
-        private delegate void OnInstall(void* header);
 
 
         private readonly string _path;
@@ -381,10 +379,7 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
-            foreach (Plugin plugin in _plugins)
-            {
-                plugin._onMouse?.Invoke(button, wheel);
-            }
+            foreach (Plugin plugin in _plugins) plugin._onMouse?.Invoke(button, wheel);
         }
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
@@ -422,6 +417,6 @@ namespace ClassicUO.Network
             return true;
         }
 
-
+        private delegate void OnInstall(void* header);
     }
 }

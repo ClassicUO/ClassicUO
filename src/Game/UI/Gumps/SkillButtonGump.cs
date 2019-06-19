@@ -89,13 +89,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Input.Keyboard.Alt)
+            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Input.Keyboard.Alt)
+            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
 
             return true;

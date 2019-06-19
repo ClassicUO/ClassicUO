@@ -40,12 +40,14 @@ namespace ClassicUO.Game.UI.Controls
         private GumpPic _gumplingTitle;
         private int _gumplingTitleGumpID;
         private bool _gumplingTitleGumpIDDelta;
-        private GumpPicTiled _gumpMiddle, _gumpRight;
-        private GumpPic _gumpTop, _gumpBottom;
+        private readonly GumpPicTiled _gumpMiddle;
+        private readonly GumpPicTiled _gumpRight;
+        private readonly GumpPic _gumpTop;
+        private readonly GumpPic _gumpBottom;
         private bool _isExpanding;
         private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
 
-        private int _maxWidth;
+        private readonly int _maxWidth;
 
         public ExpandableScroll(int x, int y, int height, ushort graphic, bool isResizable = true)
         {
@@ -57,13 +59,15 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
             var textures = new SpriteTexture[4];
+
             for (int i = 0; i < 4; i++)
             {
-                var t = FileManager.Gumps.GetTexture((ushort)(graphic + i));
+                var t = FileManager.Gumps.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
                     Dispose();
+
                     return;
                 }
 
@@ -75,8 +79,8 @@ namespace ClassicUO.Game.UI.Controls
 
 
             Add(_gumpTop = new GumpPic(0, 0, graphic, 0));
-            Add(_gumpRight = new GumpPicTiled(0, 0, 0, 0, (ushort)(graphic + 1)));
-            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, (ushort)(graphic + 2)));
+            Add(_gumpRight = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 1)));
+            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 2)));
             Add(_gumpBottom = new GumpPic(0, 0, (ushort) (graphic + 3), 0));
 
             if (_isResizable)
@@ -92,7 +96,7 @@ namespace ClassicUO.Game.UI.Controls
                 _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
-            int off = (textures[0].Width - textures[3].Width);
+            int off = textures[0].Width - textures[3].Width;
             _maxWidth = textures[1].Width;
 
             _gumpRight.X = _gumpMiddle.X = 17;

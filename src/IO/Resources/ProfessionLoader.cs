@@ -86,8 +86,10 @@ namespace ClassicUO.IO.Resources
                 kvp.Key.Childrens = null;
 
                 if (kvp.Value != null)
+                {
                     foreach (ProfessionInfo info in kvp.Value)
                         info.Childrens = null;
+                }
             }
         }
 
@@ -97,8 +99,10 @@ namespace ClassicUO.IO.Resources
             int result = 0;
 
             for (int i = 0; i < _Keys.Length && result <= 0; i++)
+            {
                 if (key == _Keys[i])
                     result = i + 1;
+            }
 
             return result;
         }
@@ -137,6 +141,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.NAME:
 
                     {
@@ -144,6 +149,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.TRUENAME:
 
                     {
@@ -151,6 +157,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.DESC:
 
                     {
@@ -158,6 +165,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.TOPLEVEL:
 
                     {
@@ -165,6 +173,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.GUMP:
 
                     {
@@ -172,6 +181,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.TYPE:
 
                     {
@@ -182,6 +192,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.CHILDREN:
 
                     {
@@ -190,6 +201,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.SKILL:
 
                     {
@@ -223,6 +235,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.STAT:
 
                     {
@@ -240,6 +253,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.NAME_CLILOC_ID:
 
                     {
@@ -248,6 +262,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
                     }
+
                     case PM_CODE.DESCRIPTION_CLILOC_ID:
 
                     {

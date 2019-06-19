@@ -21,7 +21,6 @@
 
 #endregion
 
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -32,6 +31,7 @@ namespace ClassicUO.Game.UI
 {
     internal abstract class AbstractEntry
     {
+        private int? _height;
         private bool _isChanged;
         private bool _isSelection;
 
@@ -88,15 +88,16 @@ namespace ClassicUO.Game.UI
         public int MaxCharCount { get; }
 
         public int Width { get; }
-
-        private int? _height;
         public int Height => _height.HasValue && _height.Value > RenderText.Height ? _height.Value : RenderText.Height < 15 ? 15 : RenderText.Height;
-
-        public void SetHeight(int h) => _height = h;
 
         public int MaxWidth { get; }
 
         public int Offset { get; set; }
+
+        public void SetHeight(int h)
+        {
+            _height = h;
+        }
 
         public void Destroy()
         {
@@ -248,7 +249,7 @@ namespace ClassicUO.Game.UI
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
 
-            if (mouseclick && (World.InGame && Engine.Profile.Current.EnableSelectionArea))
+            if (mouseclick && World.InGame && Engine.Profile.Current.EnableSelectionArea)
             {
                 _selectionArea = (x, y);
                 _isSelection = true;

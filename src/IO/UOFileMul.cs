@@ -21,8 +21,6 @@
 
 #endregion
 
-using ClassicUO.IO.Resources;
-
 namespace ClassicUO.IO
 {
     internal class UOFileMul : UOFile

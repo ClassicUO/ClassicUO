@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(pathdef))
                 return;
 
-            using (DefReader defReader = new DefReader(pathdef, 2))
+            using (DefReader defReader = new DefReader(pathdef))
             {
                 while (defReader.Next())
                 {

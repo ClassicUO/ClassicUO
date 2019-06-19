@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Add(new ResizePic(0x2486)
                 {
-                    Width = this.Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
+                    Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
                 });
             }
 
@@ -182,6 +182,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -234,7 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                 foreach (WebLinkRect link in _gameText.Links)
                 {
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x,  (_scrollBar == null ? 0 :_scrollBar.Value) + y);
+                    bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
                     if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {

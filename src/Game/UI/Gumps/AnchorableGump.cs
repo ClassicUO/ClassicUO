@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Input.Keyboard.Alt && Engine.UI.AnchorManager[this] != null && _lockGumpPic == null)
+            if (Keyboard.Alt && Engine.UI.AnchorManager[this] != null && _lockGumpPic == null)
             {
                 _lockGumpPic = new GumpPic(0, 0, 0x082C, 0);
                 _lockGumpPic.Update(totalMS, frameMS);
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_lockGumpPic);
             }
-            else if ((!Input.Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
+            else if ((!Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
             {
                 Remove(_lockGumpPic);
                 _lockGumpPic.Dispose();
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (Engine.UI.AnchorManager[this] == null || Input.Keyboard.Alt || !Engine.Profile.Current.HoldDownKeyAltToCloseAnchored)
+            if (Engine.UI.AnchorManager[this] == null || Keyboard.Alt || !Engine.Profile.Current.HoldDownKeyAltToCloseAnchored)
             {
                 Engine.UI.AnchorManager.DisposeAllControls(this);
                 base.CloseWithRightClick();

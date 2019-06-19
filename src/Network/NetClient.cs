@@ -23,17 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-using ClassicUO.Game.Data;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
-using SDL2;
 
 namespace ClassicUO.Network
 {
@@ -98,7 +94,7 @@ namespace ClassicUO.Network
             {
                 lock (Socket._sync)
                 {
-                    Socket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
+                    Socket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
                     Socket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -106,7 +102,7 @@ namespace ClassicUO.Network
             {
                 lock (LoginSocket._sync)
                 {
-                    LoginSocket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
+                    LoginSocket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
                     LoginSocket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -251,10 +247,7 @@ namespace ClassicUO.Network
                 ref byte[] data = ref p.ToArray();
                 int length = p.Length;
 
-                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
-                {
-                    PacketReceived.Raise(p);
-                }
+                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length)) PacketReceived.Raise(p);
             }
 
             Flush();
@@ -430,6 +423,7 @@ namespace ClassicUO.Network
             {
                 if (data.Length <= 0)
                     return;
+
                 try
                 {
 #if !DEBUG
@@ -439,6 +433,7 @@ namespace ClassicUO.Network
                     lock (_sendLock)
                     {
                         SendQueue.Gram gram;
+
                         lock (_sendQueue)
                             gram = _sendQueue.Enqueue(data, 0, data.Length);
 
@@ -468,6 +463,7 @@ namespace ClassicUO.Network
                     if (!IsDisposed) StartRecv();
 
                     break;
+
                 case SocketAsyncOperation.Send:
                     ProcessSend(e);
 
@@ -493,9 +489,11 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 default:
 
                     Log.Message(LogTypes.Panic, "The last operation completed on the socket was not a receive or send");
+
                     break;
             }
         }

@@ -33,10 +33,39 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        public Land()
-        {
+        //public Land(Graphic graphic)
+        //{
+        //    Graphic = graphic;
+        //    IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
+        //    AllowedToDraw = Graphic > 2;
+
+        //    AlphaHue = 255;
+        //}
+
+        private LandTiles? _tileData;
+
+        public Vector3[] Normals;
+
+        public Rectangle Rectangle;
+
+        public LandTiles TileData
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (!_tileData.HasValue)
+                    _tileData = FileManager.TileData.LandData[Graphic];
+
+                return _tileData.Value;
+            }
         }
+
+        public sbyte MinZ { get; set; }
+
+        public sbyte AverageZ { get; set; }
+
+        public bool IsStretched { get; set; }
 
         public void Land_New(ushort graphic)
         {
@@ -76,40 +105,6 @@ namespace ClassicUO.Game.GameObjects
 
             AlphaHue = 255;
         }
-
-        //public Land(Graphic graphic)
-        //{
-        //    Graphic = graphic;
-        //    IsStretched = TileData.TexID == 0 && TileData.IsWet;
-
-        //    AllowedToDraw = Graphic > 2;
-
-        //    AlphaHue = 255;
-        //}
-
-        private LandTiles? _tileData;
-
-        public LandTiles TileData
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (!_tileData.HasValue)
-                    _tileData = FileManager.TileData.LandData[Graphic];
-
-                return _tileData.Value;
-            }
-        }
-
-        public sbyte MinZ { get; set; }
-
-        public sbyte AverageZ { get; set; }
-
-        public bool IsStretched { get; set; }
-
-        public Vector3[] Normals;
-
-        public Rectangle Rectangle;
 
 
         public void Calculate(int x, int y, sbyte z)

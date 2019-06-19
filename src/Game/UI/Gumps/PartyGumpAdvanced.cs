@@ -21,7 +21,6 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
@@ -32,7 +31,6 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -174,10 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _scrollArea.Clear();
 
-            foreach (PartyListEntry entry in _partyListEntries)
-            {
-                entry.Dispose();
-            }
+            foreach (PartyListEntry entry in _partyListEntries) entry.Dispose();
             _partyListEntries.Clear();
 
             for (int i = 0; i < World.Party.Members.Length; i++)
@@ -208,6 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void UpdateGumpStatus()
         {
             bool hasParty = World.Party.Leader != 0;
+
             if (prevStatus != hasParty)
             {
                 prevStatus = hasParty;
@@ -263,19 +259,15 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Add:
                     //World.Party.TriggerAddPartyMember();
 
-                    if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
-                    {
-                        GameActions.RequestPartyInviteByTarget();
-                    }
+                    if (World.Party.Leader == 0 || World.Party.Leader == World.Player) GameActions.RequestPartyInviteByTarget();
 
                     break;
+
                 case Buttons.Leave:
                     //World.Party.QuitParty();
 
                     if (World.Party.Leader == 0)
-                    {
                         Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
-                    }
                     else
                     {
                         for (int i = 0; i < World.Party.Members.Length; i++)
@@ -286,6 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Loot:
                     //World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
 
@@ -296,6 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Message:
 
                     //
@@ -327,6 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (member == null || member.Serial == 0)
             {
                 Dispose();
+
                 return;
             }
 
@@ -336,14 +331,14 @@ namespace ClassicUO.Game.UI.Gumps
             string name = string.IsNullOrEmpty(member.Name) ? "<Not seen>" : member.Name;
 
             Label name1 = World.Party.Leader == member.Serial
-                ? new Label(name + "(L)", true, 1161, font: 3)
-                {
-                    X = 80
-                }
-                : new Label(name, true, 1153, font: 3)
-                {
-                    X = 80
-                };
+                              ? new Label(name + "(L)", true, 1161, font: 3)
+                              {
+                                  X = 80
+                              }
+                              : new Label(name, true, 1153, font: 3)
+                              {
+                                  X = 80
+                              };
             Add(name1);
 
             Mobile mobile = member.Mobile;
@@ -395,6 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             PartyMember member = World.Party.Members[PartyMemeberIndex];
+
             if (member == null)
                 return;
 
@@ -402,11 +398,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Kick:
                     //
-                    
+
                     GameActions.RequestPartyRemoveMember(member.Serial);
-                    
+
 
                     break;
+
                 case Buttons.GetBar:
 
                     Engine.UI.GetControl<HealthBarGump>(member.Serial)?.Dispose();
@@ -415,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                         StatusGumpBase.GetStatusGump()?.Dispose();
 
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.Add(new HealthBarGump(member.Serial) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
 
                     break;
             }

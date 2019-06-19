@@ -41,7 +41,6 @@ namespace ClassicUO.IO
 {
     internal class UltimaLive
     {
-        internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
@@ -62,6 +61,7 @@ namespace ClassicUO.IO
         //       values in index 2 and 3 is for the wrap size of map (virtual size), x and y
         private ushort[,] MapSizeWrapSize;
         protected string ShardName;
+        internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
 
         internal static void Enable()
         {
@@ -145,6 +145,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x00: //statics update
 
                 {
@@ -236,6 +237,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x01: //map definition update
 
                 {
@@ -307,6 +309,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x02: //Live login confirmation
 
                 {
@@ -331,6 +334,7 @@ namespace ClassicUO.IO
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                     break;
                 }
+
                 /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
                     {
                         break;

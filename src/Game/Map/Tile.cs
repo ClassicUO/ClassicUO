@@ -21,10 +21,7 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -32,9 +29,10 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
-        public Tile()
-        {
-        }
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
+
+        public GameObject FirstNode { get; private set; }
 
         public void Tile_New(ushort x, ushort y)
         {
@@ -59,11 +57,6 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
-
-        public GameObject FirstNode { get; private set; }
-
         public void AddGameObject(GameObject obj)
         {
             short priorityZ = obj.Z;
@@ -78,18 +71,22 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
 
                     break;
+
                 case Mobile _:
                     priorityZ++;
 
                     break;
+
                 case Item item when item.IsCorpse:
                     priorityZ++;
 
                     break;
+
                 case GameEffect effect when effect.Source == null || !effect.IsItemEffect:
                     priorityZ += 2;
 
                     break;
+
                 default:
 
                 {

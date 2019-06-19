@@ -136,7 +136,7 @@ namespace ClassicUO.IO.Resources
                 MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
                 //if (Engine.GlobalSettings.PreloadMaps)
-                    LoadMap(i);
+                LoadMap(i);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-     
+
         public void PatchMapBlock(ulong block, ulong address)
         {
             int w = MapBlocksSize[0, 0];
@@ -293,7 +293,7 @@ namespace ClassicUO.IO.Resources
                     if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
 
-                    mapPatchesCount = Math.Min(mapPatchesCount, ((int)difl.Length >> 2));
+                    mapPatchesCount = Math.Min(mapPatchesCount, (int) difl.Length >> 2);
 
                     difl.Seek(0);
                     dif.Seek(0);
@@ -322,7 +322,7 @@ namespace ClassicUO.IO.Resources
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
-                    staticPatchesCount = Math.Min(staticPatchesCount, ((int)difl.Length >> 2));
+                    staticPatchesCount = Math.Min(staticPatchesCount, (int) difl.Length >> 2);
 
                     difl.Seek(0);
                     difi.Seek(0);
@@ -404,9 +404,7 @@ namespace ClassicUO.IO.Resources
 
         public void SanitizeMapIndex(ref int map)
         {
-            if (map == 1 && ((_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero) ||
-                             (_filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero) ||
-                             (_filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero)))
+            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero || _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero || _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
                 map = 0;
         }
 

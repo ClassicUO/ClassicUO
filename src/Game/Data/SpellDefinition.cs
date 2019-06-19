@@ -112,55 +112,68 @@ namespace ClassicUO.Game.Data
                         sb.Append("Black Pearl");
 
                         break;
+
                     case Reagents.Bloodmoss:
                         sb.Append("Bloodmoss");
 
                         break;
+
                     case Reagents.Garlic:
                         sb.Append("Garlic");
 
                         break;
+
                     case Reagents.Ginseng:
                         sb.Append("Ginseng");
 
                         break;
+
                     case Reagents.MandrakeRoot:
                         sb.Append("Mandrake Root");
 
                         break;
+
                     case Reagents.Nightshade:
                         sb.Append("Nightshade");
 
                         break;
+
                     case Reagents.SulfurousAsh:
                         sb.Append("Sulfurous Ash");
 
                         break;
+
                     case Reagents.SpidersSilk:
                         sb.Append("Spiders Silk");
 
                         break;
+
                     // pagan reagents
                     case Reagents.BatWing:
                         sb.Append("Bat Wing");
 
                         break;
+
                     case Reagents.GraveDust:
                         sb.Append("Grave Dust");
 
                         break;
+
                     case Reagents.DaemonBlood:
                         sb.Append("Daemon Blood");
 
                         break;
+
                     case Reagents.NoxCrystal:
                         sb.Append("Nox Crystal");
 
                         break;
+
                     case Reagents.PigIron:
                         sb.Append("Pig Iron");
 
                         break;
+
                     default:
 
                         if (Regs[i] < Reagents.None)

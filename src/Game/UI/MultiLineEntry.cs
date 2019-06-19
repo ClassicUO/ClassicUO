@@ -67,9 +67,8 @@ namespace ClassicUO.Game.UI
                 CaretIndex = Text.Length;
 
             if (MaxCharCount > 0)
-            {
-                if (Text.Length >= MaxCharCount) return c;
-            }
+                if (Text.Length >= MaxCharCount)
+                    return c;
 
             string text = Text.Insert(CaretIndex, c);
             int count = c.Length;

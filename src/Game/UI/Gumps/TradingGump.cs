@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -40,10 +41,10 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _hisPic;
 
         private bool _imAccepting, _heIsAccepting;
+        private Point _lastClick;
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
-        private Point _lastClick;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -111,6 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
             TextContainer.Draw(batcher, x, y);
+
             return true;
         }
 
@@ -198,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-     
+
         public override void Dispose()
         {
             base.Dispose();

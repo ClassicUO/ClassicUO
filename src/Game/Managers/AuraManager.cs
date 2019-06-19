@@ -38,6 +38,8 @@ namespace ClassicUO.Game.Managers
         };*/
         private Vector3 _auraHueVector = new Vector3(0, 13, 0);
 
+        private int _saveAuraUnderFeetType;
+
         public bool IsEnabled
         {
             get
@@ -56,7 +58,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private int _saveAuraUnderFeetType;
+        public Texture2D AuraTexture { get; private set; }
 
         public void ToggleVisibility()
         {
@@ -66,12 +68,8 @@ namespace ClassicUO.Game.Managers
                 Engine.Profile.Current.AuraUnderFeetType = 3;
             }
             else
-            {
                 Engine.Profile.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
-            }
         }
-
-        public Texture2D AuraTexture { get; private set; }
 
         public void CreateAuraTexture(int radius = 30)
         {

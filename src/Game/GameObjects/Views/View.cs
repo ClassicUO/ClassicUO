@@ -21,12 +21,9 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 using IDrawable = ClassicUO.Interfaces.IDrawable;
 
@@ -34,16 +31,9 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract partial class GameObject : IDrawable
     {
+        protected static Vector3 HueVector;
         public Rectangle Bounds;
         public Rectangle FrameInfo;
-        protected static Vector3 HueVector;
-
-        protected static void ResetHueVector()
-        {
-            HueVector.X = 0;
-            HueVector.Y = 0;
-            HueVector.Z = 0;
-        }
 
         protected bool IsFlipped { get; set; }
 
@@ -106,6 +96,13 @@ namespace ClassicUO.Game.GameObjects
             Texture.Ticks = Engine.Ticks;
 
             return true;
+        }
+
+        protected static void ResetHueVector()
+        {
+            HueVector.X = 0;
+            HueVector.Y = 0;
+            HueVector.Z = 0;
         }
 
         public Rectangle GetOnScreenRectangle()

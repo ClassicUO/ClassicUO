@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -179,7 +180,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 string s;
 
-                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
+                if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {
                     if (!IsEditable)
                         return;
@@ -196,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
                 }
-                else if (!TxEntry.IsPassword && Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+                else if (!TxEntry.IsPassword && Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
                 {
                     if (!IsEditable)
                         key = SDL.SDL_Keycode.SDLK_c;

@@ -297,8 +297,10 @@ namespace ClassicUO.Game.Managers
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    {
                         if (controlMatrix[x, y] != null)
                             Engine.UI.MakeTopMostGump(controlMatrix[x, y]);
+                    }
                 }
             }
 
@@ -307,8 +309,10 @@ namespace ClassicUO.Game.Managers
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    {
                         if (controlMatrix[x, y] == control)
                             controlMatrix[x, y] = null;
+                    }
                 }
             }
 
@@ -446,8 +450,10 @@ namespace ClassicUO.Game.Managers
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    {
                         if (controlMatrix[x, y] == control)
                             return new Point(x, y);
+                    }
                 }
 
                 return null;

@@ -283,10 +283,7 @@ namespace ClassicUO.Game.GameObjects
                     wantUpdateInRenderList = true;
                 }
 
-                if (wantUpdateInRenderList)
-                {
-                    SetSource(sx, sy, sz);
-                }
+                if (wantUpdateInRenderList) SetSource(sx, sy, sz);
             }
         }
 

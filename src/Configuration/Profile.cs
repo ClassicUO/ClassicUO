@@ -25,9 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using ClassicUO.Game;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -67,7 +65,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public byte ChatFont { get; set; } = 1;
         [JsonProperty] public int SpeechDelay { get; set; } = 100;
         [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
-        [JsonProperty] public bool SaveJournalToFile { get; set; } = false;
+        [JsonProperty] public bool SaveJournalToFile { get; set; }
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
@@ -85,8 +83,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort BeneficHue { get; set; } = 0x0059;
         [JsonProperty] public ushort HarmfulHue { get; set; } = 0x0020;
         [JsonProperty] public ushort NeutralHue { get; set; } = 0x03B1;
-        [JsonProperty] public bool EnabledSpellHue { get; set; } = false;
-        [JsonProperty] public bool EnabledSpellFormat { get; set; } = false;
+        [JsonProperty] public bool EnabledSpellHue { get; set; }
+        [JsonProperty] public bool EnabledSpellFormat { get; set; }
         [JsonProperty] public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
 
         // visual
@@ -151,22 +149,22 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
         // Experimental
-        [JsonProperty] public bool EnableSelectionArea { get; set; } = false;
-        [JsonProperty] public bool DebugGumpIsDisabled { get; set; } = false;
+        [JsonProperty] public bool EnableSelectionArea { get; set; }
+        [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
-        [JsonProperty] public bool RestoreLastGameSize { get; set; } = false;
-        [JsonProperty] public bool CastSpellsByOneClick { get; set; } = false;
-        [JsonProperty] public bool AutoOpenDoors { get; set; } = false;
-        [JsonProperty] public bool AutoOpenCorpses { get; set; } = false;
+        [JsonProperty] public bool RestoreLastGameSize { get; set; }
+        [JsonProperty] public bool CastSpellsByOneClick { get; set; }
+        [JsonProperty] public bool AutoOpenDoors { get; set; }
+        [JsonProperty] public bool AutoOpenCorpses { get; set; }
         [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
         [JsonProperty] public int CorpseOpenOptions { get; set; } = 3;
-        [JsonProperty] public bool DisableDefaultHotkeys { get; set; } = false;
-        [JsonProperty] public bool DisableArrowBtn { get; set; } = false;
-        [JsonProperty] public bool DisableTabBtn { get; set; } = false;
-        [JsonProperty] public bool DisableCtrlQWBtn { get; set; } = false;
-        [JsonProperty] public bool EnableDragSelect { get; set; } = false;
-        [JsonProperty] public int DragSelectModifierKey { get; set; } = 0; // 0 = none, 1 = control, 2 = shift
+        [JsonProperty] public bool DisableDefaultHotkeys { get; set; }
+        [JsonProperty] public bool DisableArrowBtn { get; set; }
+        [JsonProperty] public bool DisableTabBtn { get; set; }
+        [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
+        [JsonProperty] public bool EnableDragSelect { get; set; }
+        [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
@@ -249,10 +247,10 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;
         [JsonProperty] public bool ShowNewCorpseNameIncoming { get; set; } = true;
-        
+
         [JsonProperty] public uint GrabBagSerial { get; set; }
 
-        [JsonProperty] public int GridLootType { get; set; } = 0; // 0 = none, 1 = only grid, 2 = both
+        [JsonProperty] public int GridLootType { get; set; } // 0 = none, 1 = only grid, 2 = both
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
@@ -334,8 +332,8 @@ namespace ClassicUO.Configuration
                 return null;
 
 
-
             string skillsGroupsPath = Path.Combine(path, "skillsgroups.bin");
+
             if (File.Exists(skillsGroupsPath))
             {
                 try
@@ -351,6 +349,7 @@ namespace ClassicUO.Configuration
             }
 
             List<Gump> gumps = new List<Gump>();
+
             using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
@@ -392,8 +391,8 @@ namespace ClassicUO.Configuration
             }
 
 
-
             string anchorsPath = Path.Combine(path, "anchors.bin");
+
             if (File.Exists(anchorsPath))
             {
                 try

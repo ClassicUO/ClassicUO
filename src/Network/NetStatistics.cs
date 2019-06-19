@@ -23,16 +23,23 @@
 
 using System;
 using System.Diagnostics;
+
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Network
 {
     internal class NetStatistics
     {
+        private readonly Stopwatch _pingStopwatch = new Stopwatch();
+
+        private readonly RenderedText _renderedText = new RenderedText
+        {
+            Font = 0xFF,
+            FontStyle = FontStyle.BlackBorder,
+            IsUnicode = true
+        };
         private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
         private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;
-
-        private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
         public DateTime ConnectedFrom { get; set; }
 
@@ -61,13 +68,6 @@ namespace ClassicUO.Network
             _pingStopwatch.Restart();
             NetClient.Socket.Send(new PPing());
         }
-
-        private readonly RenderedText _renderedText = new RenderedText()
-        {
-            Font = 0xFF,
-            FontStyle = FontStyle.BlackBorder,        
-            IsUnicode = true
-        };
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -98,21 +98,13 @@ namespace ClassicUO.Network
             ushort hue;
 
             if (Ping < 100)
-            {
                 hue = 0x44; // green
-            }
             else if (Ping < 150)
-            {
                 hue = 0x034; // yellow
-            }
             else if (Ping < 200)
-            {
                 hue = 0x0031; // orange
-            }
             else
-            {
                 hue = 0x20; // red
-            }
 
             _renderedText.Hue = hue;
             _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";

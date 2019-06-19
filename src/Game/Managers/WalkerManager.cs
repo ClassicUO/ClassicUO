@@ -23,8 +23,6 @@
 
 using ClassicUO.Network;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.Managers
 {
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -84,21 +82,21 @@ namespace ClassicUO.Game.Managers
 
     internal class WalkerManager
     {
+        public ushort CurrentPlayerZ;
+        public byte CurrentWalkSequence;
+        public long LastStepRequestTime;
+        public ushort NewPlayerZ;
+        public bool ResendPacketSended;
         public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT]
         {
             new StepInfo(), new StepInfo(), new StepInfo(),
             new StepInfo(), new StepInfo()
         };
-        public long LastStepRequestTime;
-        public int UnacceptedPacketsCount;
         public int StepsCount;
-        public byte WalkSequence;
-        public byte CurrentWalkSequence;
-        public bool ResendPacketSended;
-        public bool WantChangeCoordinates;
+        public int UnacceptedPacketsCount;
         public bool WalkingFailed;
-        public ushort CurrentPlayerZ;
-        public ushort NewPlayerZ;
+        public byte WalkSequence;
+        public bool WantChangeCoordinates;
 
         public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 

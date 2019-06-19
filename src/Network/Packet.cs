@@ -178,9 +178,8 @@ namespace ClassicUO.Network
             StringBuilder sb = new StringBuilder(s.Length);
 
             for (int i = 0; i < s.Length; ++i)
-            {
-                if (StringHelper.IsSafeChar(s[i])) sb.Append(s[i]);
-            }
+                if (StringHelper.IsSafeChar(s[i]))
+                    sb.Append(s[i]);
 
             return sb.ToString();
         }

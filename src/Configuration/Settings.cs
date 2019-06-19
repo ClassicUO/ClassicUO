@@ -63,7 +63,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "profiler")]
         public bool Profiler { get; set; } = true;
-        
+
         [JsonProperty(PropertyName = "saveaccount")]
         public bool SaveAccount { get; set; }
 

@@ -108,19 +108,17 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 32; x++)
-                    {
-                        hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-                    }
+                    for (int x = 0; x < 32; x++) hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
                 }
             }
+
             for (int r = 0; r < len; r++)
             {
                 for (int y = 0; y < 8; y++)
                 {
                     for (int x = 0; x < 32; x++)
                     {
-                        if(x == 0)
+                        if (x == 0)
                             hues[idx++] = HuesHelper.Color16To32(HuesRange[0].Entries[0].ColorTable[0]);
                         else
                             hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);

@@ -110,8 +110,10 @@ namespace ClassicUO.Game.Scenes
             Audio.PlayMusic(music);
 
             if ((Engine.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
+            {
                 if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
                     Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
+            }
         }
 
 
@@ -178,6 +180,7 @@ namespace ClassicUO.Game.Scenes
                     PopupMessage = null;
 
                     return new LoginGump();
+
                 case LoginStep.Connecting:
                 case LoginStep.VerifyingAccount:
                 case LoginStep.LoginInToServer:
@@ -194,6 +197,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.ServerSelection:
 
                     return new ServerSelectionGump();
+
                 case LoginStep.CharCreation:
 
                     return new CharCreationGump();
@@ -221,14 +225,17 @@ namespace ClassicUO.Game.Scenes
                         labelText = FileManager.Cliloc.GetString(3000002); // "Connecting..."
 
                         break;
+
                     case LoginStep.VerifyingAccount:
                         labelText = FileManager.Cliloc.GetString(3000003); // "Verifying Account..."
 
                         break;
+
                     case LoginStep.LoginInToServer:
                         labelText = FileManager.Cliloc.GetString(3000053); // logging into shard
 
                         break;
+
                     case LoginStep.EnteringBritania:
                         labelText = FileManager.Cliloc.GetString(3000001); // Entering Britania...
 
@@ -428,16 +435,14 @@ namespace ClassicUO.Game.Scenes
                         {
                             int index = Engine.GlobalSettings.LastServerNum;
 
-                            if (index <= 0 || index > Servers.Length)
-                            {
-                                index = 1;
-                            }
+                            if (index <= 0 || index > Servers.Length) index = 1;
 
                             SelectServer((byte) Servers[index - 1].Index);
                         }
                     }
 
                     break;
+
                 case 0x8C: // ReceiveServerRelay
                     // On OSI, upon receiving this packet, the client would disconnect and
                     // log in to the specified server. Since emulated servers use the same
@@ -445,6 +450,7 @@ namespace ClassicUO.Game.Scenes
                     HandleRelayServerPacket(e);
 
                     break;
+
                 case 0x86: // UpdateCharacterList
                     ParseCharacterList(e);
 
@@ -493,6 +499,7 @@ namespace ClassicUO.Game.Scenes
                     NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 
                     break;
+
                 case 0x82: // ReceiveLoginRejection
                 case 0x85: // character list notification
                 case 0x53: // Error Code

@@ -23,17 +23,16 @@
 
 using System;
 using System.IO;
-using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -50,6 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private GumpPic _combatBook, _racialAbilitiesBook;
         private bool _isWarMode;
+
+        private Point _lastClick;
         private PaperDollInteractable _paperDollInteractable;
         private GumpPic _partyManifestPic;
         private GumpPic _profilePic;
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         public Mobile Mobile { get; set; }
 
         public TextContainer TextContainer { get; } = new TextContainer();
-     
+
         public void AddLabel(string text, ushort hue, byte font, bool isunicode)
         {
             if (World.ClientFlags.TooltipsEnabled)
@@ -87,8 +88,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
         }
-
-        private Point _lastClick;
 
         public override void Dispose()
         {
@@ -189,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
                 });
-                
+
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
@@ -289,9 +288,9 @@ namespace ClassicUO.Game.UI.Gumps
                                       0x000001CD,
                                       0x00000001,
                                       new[]
-                {
-                    Mobile.Serial
-                }, new Tuple<ushort, string>[0]);
+                                      {
+                                          Mobile.Serial
+                                      }, new Tuple<ushort, string>[0]);
             }
         }
 
@@ -377,6 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.RequestHelp();
 
                     break;
+
                 case Buttons.Options:
 
                     OptionsGump gump = Engine.UI.GetControl<OptionsGump>();
@@ -397,28 +397,34 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                     break;
+
                 case Buttons.LogOut:
                     Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
+
                 case Buttons.Quests:
                     GameActions.RequestQuestMenu();
 
                     break;
+
                 case Buttons.Skills:
 
                     World.SkillsRequested = true;
                     NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
                     break;
+
                 case Buttons.Guild:
                     GameActions.OpenGuildGump();
 
                     break;
+
                 case Buttons.PeaceWarToggle:
                     GameActions.ChangeWarMode();
 
                     break;
+
                 case Buttons.Status:
 
                     if (Mobile == World.Player)

@@ -225,6 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_spells[offs])
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
+
                             if (spellDone % 2 == 0)
                                 topage++;
 
@@ -308,6 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     }
+
                     case SpellBookType.Bardic:
 
                     {
@@ -327,6 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     }
+
                     default:
 
                     {
@@ -370,6 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
                 icon.DragBegin += (sender, e) =>
                 {
                     SpellDefinition? def = GetSpellDefinition(sender as Control);
+
                     if (!def.HasValue)
                         return;
 
@@ -540,6 +544,7 @@ namespace ClassicUO.Game.UI.Gumps
                     iconStartGraphic = 0x945;
 
                     break;
+
                 default:
 
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -775,12 +780,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_lastPressed != null && e.Button == MouseButton.Left)
             {
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                var def = GetSpellDefinition( (int) _lastPressed.Tag);
+                var def = GetSpellDefinition((int) _lastPressed.Tag);
 
-                if (def.HasValue)
-                {
-                    GameActions.CastSpell(def.Value.ID);
-                }
+                if (def.HasValue) GameActions.CastSpell(def.Value.ID);
 
                 _lastPressed = null;
             }

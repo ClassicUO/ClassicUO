@@ -288,6 +288,7 @@ namespace ClassicUO.Game.UI.Controls
                     Value -= ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     Value += ScrollStep;
 

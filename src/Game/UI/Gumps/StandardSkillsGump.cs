@@ -41,16 +41,16 @@ namespace ClassicUO.Game.UI.Gumps
     internal class StandardSkillsGump : Gump
     {
         private readonly SkillControl[] _allSkillControls;
-        private readonly GumpPic _bottomLine;
         private readonly GumpPic _bottomComment;
+        private readonly GumpPic _bottomLine;
 
         private readonly List<MultiSelectionShrinkbox> _boxes = new List<MultiSelectionShrinkbox>();
-        internal Checkbox _checkReal, _checkCaps;
         private readonly ScrollArea _container;
         private readonly SkillNameComparer _instance = new SkillNameComparer();
         private readonly Button _newGroupButton;
         private readonly ExpandableScroll _scrollArea;
         private readonly Label _skillsLabelSum;
+        internal Checkbox _checkReal, _checkCaps;
 
         public StandardSkillsGump() : base(0, 0)
         {
@@ -218,8 +218,8 @@ namespace ClassicUO.Game.UI.Gumps
             private static Vector3 _hueVec = Vector3.Zero;
             private readonly Label _labelValue;
             private readonly int _skillIndex;
+            private readonly GumpPic _lock;
             private MultiSelectionShrinkbox _parent;
-            private GumpPic _lock;
 
             public SkillControl(int skillIndexIndex, int maxWidth, string group, MultiSelectionShrinkbox parent)
             {
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     skill.Lock = (Lock) slock;
 
-                    GameActions.ChangeSkillLockStatus((ushort)skill.Index, slock);
+                    GameActions.ChangeSkillLockStatus((ushort) skill.Index, slock);
 
                     ushort graphic = GetLockValue(skill.Lock);
                     _lock.Graphic = graphic;
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return Graphic.INVALID;
                 }
             }
-            
+
 
             protected override void OnMouseDown(int x, int y, MouseButton button)
             {
@@ -390,7 +390,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort graphic = GetLockValue(skill.Lock);
                     _lock.Graphic = graphic;
                     _lock.Texture = FileManager.Gumps.GetTexture(graphic);
-
                 }
             }
         }

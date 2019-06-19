@@ -21,12 +21,8 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Input;
 
@@ -37,11 +33,8 @@ using SDL2;
 
 namespace ClassicUO.Renderer.UI
 {
-    abstract class UIControl
+    internal abstract class UIControl
     {
-        private readonly List<UIControl> _children = new List<UIControl>();
-
-
         public Rectangle Bounds;
 
         public int X
@@ -49,21 +42,32 @@ namespace ClassicUO.Renderer.UI
             get => Bounds.X;
             set => Bounds.X = value;
         }
+
         public int Y
         {
             get => Bounds.Y;
             set => Bounds.Y = value;
         }
+
         public int Width
         {
             get => Bounds.Width;
             set => Bounds.Width = value;
         }
+
         public int Height
         {
             get => Bounds.Height;
             set => Bounds.Height = value;
         }
+
+        public List<UIControl> Children { get; } = new List<UIControl>();
+
+        public bool IsVisible { get; set; } = true;
+        public bool IsEnabled { get; set; } = true;
+        public Texture2D Texture { get; set; }
+
+        public UIControl Parent { get; private set; }
 
         public int GetParentX()
         {
@@ -93,27 +97,19 @@ namespace ClassicUO.Renderer.UI
             return (x, y);
         }
 
-        public List<UIControl> Children => _children;
-
-        public bool IsVisible { get; set; } = true;
-        public bool IsEnabled { get; set; } = true;
-        public Texture2D Texture { get; set; }
-
-        public UIControl Parent { get; private set; }
-
 
 
         public void Add(UIControl control)
         {
-           Debug.Assert(control.Parent == null);
+            Debug.Assert(control.Parent == null);
             control.Parent = this;
-            _children.Add(control);
+            Children.Add(control);
         }
 
         public void Remove(UIControl control)
         {
             control.Parent = null;
-            _children.Remove(control);
+            Children.Remove(control);
         }
 
 
@@ -133,13 +129,13 @@ namespace ClassicUO.Renderer.UI
                 {
                     results.Push(this);
 
-                    for (int i = 0; i < _children.Count; i++)
+                    for (int i = 0; i < Children.Count; i++)
                     {
-                        var list = _children[i].HitTest(x, y);
+                        var list = Children[i].HitTest(x, y);
 
                         if (list != null)
                         {
-                            for (int j = list.Length - 1; j >= 0 ; j--)
+                            for (int j = list.Length - 1; j >= 0; j--)
                                 results.Push(list[j]);
                         }
                     }
@@ -153,9 +149,9 @@ namespace ClassicUO.Renderer.UI
 
         public virtual void Update(GameTime gameTime)
         {
-            for (int i = 0; i < _children.Count; i++)
+            for (int i = 0; i < Children.Count; i++)
             {
-                var c = _children[i];
+                var c = Children[i];
 
                 c.Update(gameTime);
             }
@@ -166,14 +162,11 @@ namespace ClassicUO.Renderer.UI
             if (!IsVisible)
                 return;
 
-            for (int i = 0; i < _children.Count; i++)
+            for (int i = 0; i < Children.Count; i++)
             {
-                var c = _children[i];
+                var c = Children[i];
 
-                if (c.IsVisible)
-                {
-                    c.Draw(batcher, x + c.X, y + c.Y);
-                }
+                if (c.IsVisible) c.Draw(batcher, x + c.X, y + c.Y);
             }
         }
 
@@ -185,50 +178,40 @@ namespace ClassicUO.Renderer.UI
 
 
 
-
         public virtual void OnDragBegin(int x, int y, MouseButton button)
         {
-
         }
 
         public virtual void OnDragEnd(int x, int y, MouseButton button)
         {
-
         }
 
         public virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-
         }
 
         public virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-
         }
 
         public virtual void OnMouseEnter(int x, int y)
         {
-
         }
 
         public virtual void OnMouseExit(int x, int y)
         {
-
         }
 
         public virtual void OnMouseWheel(MouseEvent delta)
         {
-
         }
 
         public virtual void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-
         }
 
         public virtual void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-
         }
     }
 }

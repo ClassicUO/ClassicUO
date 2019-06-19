@@ -263,11 +263,14 @@ namespace ClassicUO.Utility.Platforms
                         _wndRegs.Add(wParam, new WndRegEnt(wParam, lParam == 1 ? 1 : 0));
 
                         if (lParam == 1 && World.InGame)
+                        {
                             foreach (Item item in World.Items.Where(s => s.IsMulti))
                                 PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) (int) item.Graphic);
+                        }
 
                         return 1;
                     case UOAMessage.COUNT_RESOURCES: break;
+
                     case UOAMessage.GET_COORDS:
 
                         if (World.Player != null)
@@ -275,6 +278,7 @@ namespace ClassicUO.Utility.Platforms
 
                         break;
                     case UOAMessage.GET_SKILL: break;
+
                     case UOAMessage.GET_STAT:
 
                         if (World.Player == null || wParam < 0 || wParam > 5)
@@ -293,6 +297,7 @@ namespace ClassicUO.Utility.Platforms
                         return 0;
                     case UOAMessage.SET_MACRO: break;
                     case UOAMessage.PLAY_MACRO: break;
+
                     case UOAMessage.DISPLAY_TEXT:
 
                         if (World.Player != null)
@@ -312,6 +317,7 @@ namespace ClassicUO.Utility.Platforms
                         }
 
                         break;
+
                     case UOAMessage.REQUEST_MULTIS:
 
                         return World.Player != null ? 1 : 0;
@@ -339,6 +345,7 @@ namespace ClassicUO.Utility.Platforms
                     case UOAMessage.GET_UID: return World.Player != null ? (int) World.Player.Serial.Value : 0;
                     case UOAMessage.GET_SHARDNAME: break;
                     case UOAMessage.ADD_USER_2_PARTY: break;
+
                     case UOAMessage.GET_UO_HWND:
                         SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                         SDL.SDL_VERSION(out info.version);
@@ -350,6 +357,7 @@ namespace ClassicUO.Utility.Platforms
                             hwnd = info.info.win.window;
 
                         return (int) hwnd;
+
                     case UOAMessage.GET_POISON:
 
                         return World.Player != null && World.Player.IsPoisoned ? 1 : 0;

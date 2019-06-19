@@ -204,6 +204,7 @@ namespace ClassicUO.Game.Scenes
                         ismobile = true;
 
                         break;
+
                     default:
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
@@ -314,11 +315,19 @@ namespace ClassicUO.Game.Scenes
 
                     switch (obj)
                     {
-                        case Static st: st.CharacterIsBehindFoliage = check;
+                        case Static st:
+                            st.CharacterIsBehindFoliage = check;
+
                             break;
-                        case Multi m: m.CharacterIsBehindFoliage = check;
+
+                        case Multi m:
+                            m.CharacterIsBehindFoliage = check;
+
                             break;
-                        case Item it: it.CharacterIsBehindFoliage = check;
+
+                        case Item it:
+                            it.CharacterIsBehindFoliage = check;
+
                             break;
                     }
                 }
@@ -343,7 +352,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     obj.UseObjectHandles = (ismobile ||
                                             iscorpse ||
-                                            (obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti)) &&
+                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
                     _objectHandlesCount++;
                 }
@@ -381,10 +390,7 @@ namespace ClassicUO.Game.Scenes
             int dropMaxZIndex = -1;
 
 
-            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
-            {
-                dropMaxZIndex = 0;
-            }
+            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2) dropMaxZIndex = 0;
 
             int[,] coordinates = new int[8, 2];
             coordinates[0, 0] = charX + 1;
@@ -507,10 +513,7 @@ namespace ClassicUO.Game.Scenes
             int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY + maxY));
             int maxPixlesY = (int) newMaxY;
 
-            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
-            {
-                UpdateDrawPosition = true;
-            }
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) UpdateDrawPosition = true;
 
             _minTile.X = realMinRangeX;
             _minTile.Y = realMinRangeY;

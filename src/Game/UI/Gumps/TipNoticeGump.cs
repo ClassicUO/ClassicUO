@@ -25,18 +25,20 @@ using System;
 
 using ClassicUO.Collections;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TipNoticeGump : Gump
     {
-        internal static TipNoticeGump _tips = null;
+        internal static TipNoticeGump _tips;
         private readonly ExpandableScroll _background;
-        private readonly MultiLineBox _textBox;
-        private readonly ScrollArea _scrollArea;
-        private readonly OrderedDictionary<uint, string> _pages = null;
+        private readonly OrderedDictionary<uint, string> _pages;
         private readonly Button _prev, _next;
+        private readonly ScrollArea _scrollArea;
+        private readonly MultiLineBox _textBox;
         private int _idx;
 
         public TipNoticeGump(byte type, string page) : base(0, 0)
@@ -46,6 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanBeSaved = true;
 
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
+
             _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), false)
             {
                 Height = 20,
@@ -56,6 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea.Add(_textBox);
             Add(_scrollArea);
+
             if (type == 0)
             {
                 _pages = new OrderedDictionary<uint, string>();
@@ -63,23 +67,23 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.TitleGumpID = 0x9CA;
                 _idx = 0;
                 Button b;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
+                Add(_prev = new Button(0, 0x9cc, 0x9cc) {X = 35, ContainsByBounds = true});
+
                 _prev.MouseUp += (o, e) =>
                 {
-                    if (e.Button == Input.MouseButton.Left)
+                    if (e.Button == MouseButton.Left)
                         SetPage(_idx - 1);
                 };
-                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
+                Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
+
                 _next.MouseUp += (o, e) =>
                 {
-                    if (e.Button == Input.MouseButton.Left)
+                    if (e.Button == MouseButton.Left)
                         SetPage(_idx + 1);
                 };
             }
             else
-            {
                 _background.TitleGumpID = 0x9D2;
-            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -97,13 +101,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (!_textBox.IsDisposed && _textBox.IsChanged)
             {
-                _textBox.Height = Math.Max(FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+                _textBox.Height = Math.Max(FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+
                 foreach (Control c in _scrollArea.Children)
                 {
                     if (c is ScrollAreaItem)
                         c.OnPageChanged();
                 }
             }
+
             base.Update(totalMS, frameMS);
         }
 
@@ -111,15 +117,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Height = _background.SpecialHeight;
             _scrollArea.Height = _background.SpecialHeight - 96;
+
             foreach (Control c in _scrollArea.Children)
             {
                 if (c is ScrollAreaItem)
                     c.OnPageChanged();
             }
-            if (_prev != null && _next != null)
-            {
-                _prev.Y = _next.Y = _background.SpecialHeight - 53;
-            }
+
+            if (_prev != null && _next != null) _prev.Y = _next.Y = _background.SpecialHeight - 53;
         }
 
         internal void AddTip(uint tipnum, string entry)

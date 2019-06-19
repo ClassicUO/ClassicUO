@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
             CounterItem[] items = GetControls<CounterItem>();
 
             for (int i = 0; i < count; i++)
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
 
             IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
         }
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     gs.DropHeldItemToContainer(item, gs.HeldItem.Position.X, gs.HeldItem.Position.Y);
                 }
-                else if (button == MouseButton.Right && Input.Keyboard.Alt && _graphic != 0)
+                else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
                 {
                     _controlPic?.Dispose();
                     _amount = 0;
@@ -329,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_time < Engine.Ticks)
                 {
-                    _time = (uint) Engine.Ticks + 100;
+                    _time = Engine.Ticks + 100;
 
                     _amount = 0;
                     GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, _hue, ref _amount);
@@ -373,9 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (Engine.Profile.Current.CounterBarHighlightOnAmount &&
                     _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0)
-                {
                     color = Textures.GetTexture(Color.Red);
-                }
 
                 Vector3 hue = Vector3.Zero;
                 batcher.DrawRectangle(color, x, y, Width, Height, ref hue);

@@ -21,21 +21,13 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using ClassicUO.Collections;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-
-    class PartyManager
+    internal class PartyManager
     {
         public Serial Leader { get; set; }
         public Serial Inviter { get; set; }
@@ -71,7 +63,6 @@ namespace ClassicUO.Game.Managers
                             HealthBarGump gump = Engine.UI.GetControl<HealthBarGump>(Members[i].Serial);
 
 
-
                             if (gump != null)
                             {
                                 if (code == 2)
@@ -83,8 +74,10 @@ namespace ClassicUO.Game.Managers
 
                         Clear();
                         Engine.UI.GetControl<PartyGumpAdvanced>()?.Update();
+
                         break;
                     }
+
                     Clear();
 
                     for (int i = 0; i < count; i++)
@@ -107,12 +100,10 @@ namespace ClassicUO.Game.Managers
                         {
                             if (serial == World.Player)
                             {
-
                             }
-
                         }
-                        
                     }
+
                     Engine.UI.GetControl<PartyGumpAdvanced>()?.Update();
 
                     break;
@@ -126,9 +117,11 @@ namespace ClassicUO.Game.Managers
                     {
                         if (Members[i] == null)
                             break;
+
                         if (Members[i].Serial == ser)
                         {
                             Mobile m = Members[i].Mobile;
+
                             if (m != null)
                                 Chat.HandleMessage(null, name, m.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
 
@@ -137,6 +130,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     break;
+
                 case 7:
                     Inviter = p.ReadUInt();
 
@@ -157,10 +151,7 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            for (int i = 0; i < Members.Length; i++)
-            {
-                Members[i] = null;
-            }
+            for (int i = 0; i < Members.Length; i++) Members[i] = null;
         }
     }
 
@@ -342,8 +333,8 @@ namespace ClassicUO.Game.Managers
 
     internal class PartyMember
     {
-        public Serial Serial;
         private string _name;
+        public Serial Serial;
 
         public PartyMember(Serial serial)
         {
