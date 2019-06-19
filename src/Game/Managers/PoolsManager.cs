@@ -78,26 +78,31 @@ namespace ClassicUO.Game.Managers
 
         public static void PushLand(Land l)
         {
+            l.RemoveFromTile();
             _landPool.ReturnOne(l);
         }
 
         public static void PushStatic(Static s)
         {
+            s.RemoveFromTile();
             _staticPool.ReturnOne(s);
         }
 
         public static void PushMulti(Multi m)
         {
+            m.RemoveFromTile();
             _multiPool.ReturnOne(m);
         }
 
         public static void PushMobile(Mobile m)
         {
+            m.RemoveFromTile();
             _mobilePool.ReturnOne(m);
         }
 
         public static void PushItem(Item i)
         {
+            i.RemoveFromTile();
             _itemPool.ReturnOne(i);
         }
     }

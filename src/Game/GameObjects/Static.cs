@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void SetGraphic_New(ushort graphic, int index)
+        public Static SetGraphic_New(ushort graphic, int index)
         {
             RemoveFromTile();
             Position = Position.INVALID;
@@ -75,6 +75,8 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
 
             Texture = null;
+
+            return this;
         }
 
         public void SetGraphic(Graphic g)

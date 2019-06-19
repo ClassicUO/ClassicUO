@@ -67,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        public void Land_New(ushort graphic)
+        public Land Land_New(ushort graphic)
         {
             Texture = null;
             RemoveFromTile();
@@ -104,6 +104,8 @@ namespace ClassicUO.Game.GameObjects
             AllowedToDraw = Graphic > 2;
 
             AlphaHue = 255;
+
+            return this;
         }
 
 

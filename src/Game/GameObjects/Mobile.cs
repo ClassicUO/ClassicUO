@@ -73,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
         //    CalculateRandomIdleTime();
         //}
 
-        public void Mobile_New(Serial serial)
+        public Mobile Mobile_New(Serial serial)
         {
             Entity_New(serial);
             LastAnimationChangeTime = Engine.Ticks;
@@ -95,6 +95,8 @@ namespace ClassicUO.Game.GameObjects
             StepSoundOffset = 0;
             AnimationGroup = 0xFF;
             DeathScreenTimer = 0;
+
+            return this;
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);

@@ -3308,8 +3308,8 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    var m = PoolsManager.GetMulti();
-                                    m.Multi_New(id);
+                                    var m = PoolsManager.GetMulti()
+                                                        .Multi_New(id);
                                     m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
                                     house.Components.Add(m);
                                     //house.Components.Add(new Multi(id)
@@ -3336,8 +3336,8 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    var m = PoolsManager.GetMulti();
-                                    m.Multi_New(id);
+                                    var m = PoolsManager.GetMulti()
+                                                        .Multi_New(id);
                                     m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
                                     house.Components.Add(m);
 
@@ -3386,8 +3386,8 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    var m = PoolsManager.GetMulti();
-                                    m.Multi_New(id);
+                                    var m = PoolsManager.GetMulti()
+                                                        .Multi_New(id);
                                     m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
                                     house.Components.Add(m);
 

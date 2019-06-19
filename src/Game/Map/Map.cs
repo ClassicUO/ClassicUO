@@ -78,8 +78,8 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chunk = PoolsManager.GetChunk(); // new Chunk((ushort) cellX, (ushort) cellY);
-                    chunk.Chunk_New((ushort) cellX, (ushort) cellY);
+                    chunk = PoolsManager.GetChunk()
+                                        .Chunk_New((ushort) cellX, (ushort) cellY);
                     chunk.Load(Index);
                 }
                 else
@@ -260,9 +260,8 @@ namespace ClassicUO.Game.Map
                             return;
 
                         _usedIndices.Add(cellindex);
-                        //chunk = new Chunk((ushort) i, (ushort) j);
-                        chunk = PoolsManager.GetChunk(); // new Chunk((ushort) cellX, (ushort) cellY);
-                        chunk.Chunk_New((ushort) i, (ushort) j);
+                        chunk = PoolsManager.GetChunk()
+                                            .Chunk_New((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }
 

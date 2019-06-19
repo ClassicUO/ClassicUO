@@ -203,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void Item_New(Serial serial)
+        public Item Item_New(Serial serial)
         {
             Entity_New(serial);
             _price = 0;
@@ -226,6 +226,8 @@ namespace ClassicUO.Game.GameObjects
             _force = false;
             _originalGraphic = 0;
             CharacterIsBehindFoliage = false;
+
+            return this;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
@@ -309,8 +311,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    var multi = PoolsManager.GetMulti();
-                    multi.Multi_New(graphic);
+                    var multi = PoolsManager.GetMulti()
+                                            .Multi_New(graphic);
                     multi.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
                     multi.MultiOffsetX = x;
                     multi.MultiOffsetY = y;

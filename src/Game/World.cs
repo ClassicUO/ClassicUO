@@ -198,8 +198,8 @@ namespace ClassicUO.Game
             if (item == null /*|| item.IsDestroyed*/)
             {
                 //Items.Remove(serial);
-                item = PoolsManager.GetItem(); //new Item(serial);
-                item.Item_New(serial);
+                item = PoolsManager.GetItem()
+                                   .Item_New(serial);
             }
 
             return item;
@@ -212,8 +212,8 @@ namespace ClassicUO.Game
             if (mob == null /*|| mob.IsDestroyed*/)
             {
                 //Mobiles.Remove(serial);
-                mob = PoolsManager.GetMobile(); // new Mobile(serial);
-                mob.Mobile_New(serial);
+                mob = PoolsManager.GetMobile()
+                                  .Mobile_New(serial);
             }
 
             return mob;
@@ -245,7 +245,6 @@ namespace ClassicUO.Game
             item.Items.Clear();
             item.Destroy();
 
-            item.RemoveFromTile();
             PoolsManager.PushItem(item);
 
             return true;
@@ -264,7 +263,6 @@ namespace ClassicUO.Game
             mobile.Items.Clear();
             mobile.Destroy();
 
-            mobile.RemoveFromTile();
             PoolsManager.PushMobile(mobile);
 
             return true;

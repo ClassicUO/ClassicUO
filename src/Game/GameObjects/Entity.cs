@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
         //    Items = new EntityCollection<Item>();
         //}
 
-        protected void Entity_New(Serial serial)
+        protected Entity Entity_New(Serial serial)
         {
             IsDestroyed = false;
             RemoveFromTile();
@@ -154,7 +154,11 @@ namespace ClassicUO.Game.GameObjects
             Texture = null;
             Serial = serial;
             IsFlipped = false;
-            Items = new EntityCollection<Item>();
+            if (Items == null)
+                Items = new EntityCollection<Item>();
+            else if (Items.Count != 0)
+                Items.Clear();
+
             _equipment = null;
             IsClicked = false;
             Properties.Clear();
@@ -179,6 +183,7 @@ namespace ClassicUO.Game.GameObjects
             Rotation = 0;
             AllowedToDraw = true;
             DrawTransparent = false;
+            IsPositionChanged = false;
             AlphaHue = 0;
             Bounds.X = 0;
             Bounds.Y = 0;
@@ -188,6 +193,8 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Y = 0;
             FrameInfo.Width = 0;
             FrameInfo.Height = 0;
+
+            return this;
         }
 
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;

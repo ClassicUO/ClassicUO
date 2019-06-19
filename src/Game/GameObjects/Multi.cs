@@ -36,23 +36,7 @@ namespace ClassicUO.Game.GameObjects
         public Multi()
         {
         }
-
-        public Multi(Graphic graphic)
-        {
-            Graphic = graphic;
-            _isFoliage = ItemData.IsFoliage;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
-
+        
         public string Name => ItemData.Name;
 
         public int MultiOffsetX { get; set; }
@@ -71,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Multi_New(ushort graphic)
+        public Multi Multi_New(ushort graphic)
         {
             Texture = null;
             RemoveFromTile();
@@ -94,6 +78,8 @@ namespace ClassicUO.Game.GameObjects
             else
                 _canBeTransparent = 0;
             AlphaHue = 0;
+
+            return this;
         }
     }
 }

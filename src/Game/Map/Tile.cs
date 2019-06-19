@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Map
 
         public GameObject FirstNode { get; private set; }
 
-        public void Tile_New(ushort x, ushort y)
+        public Tile Tile_New(ushort x, ushort y)
         {
             X = x;
             Y = y;
@@ -55,6 +55,8 @@ namespace ClassicUO.Game.Map
                     t = temp.Right;
                 }
             }
+
+            return this;
         }
 
         public void AddGameObject(GameObject obj)

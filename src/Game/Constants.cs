@@ -37,6 +37,8 @@ namespace ClassicUO.Game
             UNUMERIC = 0x00000010 // unsigned
         }
 
+        public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
+
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
