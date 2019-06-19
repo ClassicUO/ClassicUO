@@ -75,8 +75,7 @@ namespace ClassicUO.Game.GameObjects
 
             foreach (Multi s in Components)
             {
-                s.RemoveFromTile();
-                PoolsManager.PushMulti(s);
+                s.Destroy();
             }
 
             Components.Clear();

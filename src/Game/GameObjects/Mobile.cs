@@ -25,6 +25,7 @@ using System;
 using System.Linq;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -1043,6 +1044,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            if (!IsDestroyed && !(this is PlayerMobile))
+                PoolsManager.PushMobile(this);
+
             if (HasEquipment)
             {
                 for (int i = 0; i < Equipment.Length; i++)

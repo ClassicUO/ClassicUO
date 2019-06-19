@@ -30,12 +30,13 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk
+    internal sealed class Chunk : IPoolObject
     {
         public Chunk()
         {
             Tiles = new Tile[8, 8];
         }
+        public bool InUse { get; set; }
 
         //public Chunk(ushort x, ushort y)
         //{
@@ -71,8 +72,6 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-
-            if (Tiles == null) Tiles = new Tile[8, 8];
 
             x *= 8;
             y *= 8;
@@ -164,7 +163,7 @@ namespace ClassicUO.Game.Map
                                 //};
 
                                 Static staticObject = PoolsManager.GetStatic()
-                                                                  .SetGraphic_New(sb->Color, pos);
+                                                                  .Static_New(sb->Color, pos);
                                 staticObject.Hue = sb->Hue;
                                 staticObject.Position = new Position(staticX, staticY, z);
 
@@ -217,7 +216,7 @@ namespace ClassicUO.Game.Map
                                 ushort staticY = (ushort) (by + y);
 
                                 Static staticObject = PoolsManager.GetStatic()
-                                                                  .SetGraphic_New(sb->Color, pos);
+                                                                  .Static_New(sb->Color, pos);
                                 staticObject.Hue = sb->Hue;
                                 staticObject.Position = new Position(staticX, staticY, z);
 
@@ -335,37 +334,10 @@ namespace ClassicUO.Game.Map
                     while (obj.Left != null)
                         obj = obj.Left;
 
-                    while (obj != null)
+                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
-                        GameObject r = obj.Right;
-
                         if (obj != World.Player)
-                        {
-                            if (obj is Land t)
-                            {
-                                PoolsManager.PushLand(t);
-                            }
-                            else if (obj is Static s)
-                            {
-                                PoolsManager.PushStatic(s);
-                            }
-                            else if (obj is Multi m)
-                            {
-                                PoolsManager.PushMulti(m);
-                            }
-                            else if (obj is Item it)
-                            {
-                                PoolsManager.PushItem(it);
-                            }
-                            else if (obj is Mobile mob)
-                            {
-                                PoolsManager.PushMobile(mob);
-                            }
-                            else
-                                obj.Destroy();
-                        }
-
-                        obj = r;
+                            obj.Destroy();
                     }
 
                     PoolsManager.PushTile(Tiles[i, j]);

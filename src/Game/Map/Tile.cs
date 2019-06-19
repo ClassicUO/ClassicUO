@@ -27,8 +27,10 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Tile
+    internal sealed class Tile : IPoolObject
     {
+        public bool InUse { get; set; }
+
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
 
@@ -169,5 +171,6 @@ namespace ClassicUO.Game.Map
             obj.Left = null;
             obj.Right = null;
         }
+
     }
 }

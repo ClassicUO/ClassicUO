@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Utility.Coroutines
 {
-    internal sealed class Coroutine : IDisposable
+    internal sealed class Coroutine : IDisposable, IPoolObject
     {
         private IEnumerator<IWaitCondition> _enumerator;
         private string _name;
+        public bool InUse { get; set; }
 
         public CoroutineStatus Status { get; private set; }
 

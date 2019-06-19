@@ -55,6 +55,11 @@ namespace ClassicUO.Game.GameObjects
         //{
         //}
 
+        public Item()
+        {
+
+        }
+
         public uint Price
         {
             get => _price;
@@ -908,6 +913,13 @@ namespace ClassicUO.Game.GameObjects
 
                 LastAnimationChangeTime = Engine.Ticks + _animSpeed;
             }
+        }
+
+        public override void Destroy()
+        {
+            if (!IsDestroyed)
+                PoolsManager.PushItem(this);
+            base.Destroy();
         }
     }
 }

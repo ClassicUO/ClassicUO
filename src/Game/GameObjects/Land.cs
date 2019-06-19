@@ -24,6 +24,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -69,6 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Land Land_New(ushort graphic)
         {
+            IsDestroyed = false;
             Texture = null;
             RemoveFromTile();
             Position = Position.INVALID;
@@ -166,6 +168,13 @@ namespace ClassicUO.Game.GameObjects
                 case 3: return Rectangle.Top >> 2;
                 default: return Z;
             }
+        }
+
+        public override void Destroy()
+        {
+            if (!IsDestroyed)
+                PoolsManager.PushLand(this);
+            base.Destroy();
         }
     }
 }

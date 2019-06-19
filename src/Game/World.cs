@@ -245,8 +245,6 @@ namespace ClassicUO.Game
             item.Items.Clear();
             item.Destroy();
 
-            PoolsManager.PushItem(item);
-
             return true;
         }
 
@@ -262,8 +260,6 @@ namespace ClassicUO.Game
 
             mobile.Items.Clear();
             mobile.Destroy();
-
-            PoolsManager.PushMobile(mobile);
 
             return true;
         }

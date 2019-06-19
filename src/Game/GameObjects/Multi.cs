@@ -23,6 +23,7 @@
 
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -57,6 +58,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Multi Multi_New(ushort graphic)
         {
+            IsDestroyed = false;
             Texture = null;
             RemoveFromTile();
             Position = Position.INVALID;
@@ -80,6 +82,13 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 0;
 
             return this;
+        }
+
+        public override void Destroy()
+        {
+            if (!IsDestroyed)
+                PoolsManager.PushMulti(this);
+            base.Destroy();
         }
     }
 }

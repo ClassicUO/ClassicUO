@@ -48,8 +48,16 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                _houses[serial].ClearComponents();
-                _houses.Remove(serial);
+                if (_houses.TryGetValue(serial, out var house))
+                {
+                    house.ClearComponents();
+                    _houses.Remove(serial);
+                }
+                else
+                {
+
+                }
+            
 
                 return true;
             }

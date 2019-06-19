@@ -23,9 +23,12 @@
 
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -51,13 +54,17 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Static SetGraphic_New(ushort graphic, int index)
+        public Static Static_New(ushort graphic, int index)
         {
+            IsDestroyed = false;
             RemoveFromTile();
             Position = Position.INVALID;
             CurrentRenderIndex = 0;
             PriorityZ = 0;
             Hue = 0;
+            _oldGraphic = 0;
+            Offset = Vector3.Zero;
+            CharacterIsBehindFoliage = false;
             Graphic = OriginalGraphic = graphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
             Index = index;
@@ -89,6 +96,14 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = OriginalGraphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
+        }
+
+        public override void Destroy()
+        {
+            if (!IsDestroyed)
+                PoolsManager.PushStatic(this);
+
+            base.Destroy();
         }
     }
 }

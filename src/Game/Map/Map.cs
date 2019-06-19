@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Map
                 {
                     block.Destroy();
                     PoolsManager.PushChunk(block);
-                    block = null;
+                    //block = null;
                     _usedIndices.RemoveAt(i--);
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
@@ -214,7 +214,8 @@ namespace ClassicUO.Game.Map
             {
                 ref Chunk block = ref Chunks[_usedIndices[i]];
                 block.Destroy();
-                block = null;
+                PoolsManager.PushChunk(block);
+                //block = null;
                 _usedIndices.RemoveAt(i--);
             }
 
