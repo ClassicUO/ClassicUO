@@ -93,5 +93,38 @@ namespace ClassicUO.Game.UI.Controls
 
             return base.Draw(batcher, x, y);
         }
+
+        public override bool Contains(int x, int y)
+        {
+            int width = Width;
+            int height = Height;
+
+            if (width == 0)
+                width = Texture.Width;
+
+            if (height == 0)
+                height = Texture.Height;
+
+            while (x > Texture.Width && width > Texture.Width)
+            {
+                x -= Texture.Width;
+                width -= Texture.Width;
+            }
+
+            while (y > Texture.Height && height > Texture.Height)
+            {
+                y -= Texture.Height;
+                height -= Texture.Height;
+            }
+
+
+            if (x > width || y > height)
+            {
+                return false;
+            }
+
+
+            return Texture.Contains(x, y);
+        }
     }
 }

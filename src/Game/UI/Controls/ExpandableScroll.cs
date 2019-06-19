@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             Point position = new Point(x + ScreenCoordinateX, y + ScreenCoordinateY);
 

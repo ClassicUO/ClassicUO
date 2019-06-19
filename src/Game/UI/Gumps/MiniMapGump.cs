@@ -313,7 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return _mapTexture.Contains(x, y);
         }

@@ -739,6 +739,16 @@ namespace ClassicUO.Network
                 {
                     cont.Items.Remove(it);
                     cont.Items.ProcessDelta();
+
+                    if (Engine.Profile.Current.GridLootType > 0)
+                    {
+                        GridLootGump grid = Engine.UI.GetControl<GridLootGump>(it.Container);
+
+                        if (grid != null)
+                        {
+                            grid.RedrawItems();
+                        }
+                    }
                 }
 
                 World.RemoveItem(it);
@@ -992,8 +1002,14 @@ namespace ClassicUO.Network
                 }
                 else
                 {
+                    if (item.IsCorpse && (Engine.Profile.Current.GridLootType == 1 || Engine.Profile.Current.GridLootType == 2))
+                    {
+                        Engine.UI.GetControl<GridLootGump>(serial)?.Dispose();
+                        Engine.UI.Add(new GridLootGump(serial, graphic));
 
-                    //Engine.UI.Add(new GridLootGump(serial));
+                        if (Engine.Profile.Current.GridLootType == 1)
+                            return;
+                    }
 
                     Engine.UI.GetControl<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
@@ -1369,6 +1385,8 @@ namespace ClassicUO.Network
 
             Entity container = null;
 
+            GridLootGump grid = null;
+
             for (int i = 0; i < count; i++)
             {
                 Serial serial = p.ReadUInt();
@@ -1417,7 +1435,18 @@ namespace ClassicUO.Network
                     }
                 }
 
+
+                if (grid == null && Engine.Profile.Current.GridLootType > 0)
+                {
+                    grid = Engine.UI.GetControl<GridLootGump>(containerSerial);
+                }
+
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+
+                if (grid != null)
+                {
+                    grid.RedrawItems();
+                }
             }
 
             container?.Items.ProcessDelta();
@@ -2564,11 +2593,9 @@ namespace ClassicUO.Network
             if (corpseSerial.IsValid)
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
+
             byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0, true);
             owner.SetAnimation(group, 0, 5, 1);
-            owner.ClearSteps();
-            owner.LastStepTime = Engine.Ticks;
-            
             if (Engine.Profile.Current.AutoOpenCorpses)
                 World.Player.TryOpenCorpses();
         }

@@ -54,7 +54,9 @@ namespace ClassicUO.Game.UI.Controls
         private int _sliderX;
         private int _value = -1;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
+        private bool _drawUp;
+
+        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
         {
             X = x;
             Y = y;
@@ -65,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Font = font, Hue = color, IsUnicode = unicode
                 };
+                _drawUp = drawUp;
             }
 
             MinValue = min;
@@ -171,7 +174,18 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref zero);
-            _text?.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+
+            if (_text != null)
+            {
+                if (_drawUp)
+                {
+                    _text.Draw(batcher, x, y - _text.Height);
+                }
+                else
+                {
+                    _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+                }
+            }
 
             return base.Draw(batcher, x, y);
         }
@@ -255,7 +269,7 @@ namespace ClassicUO.Game.UI.Controls
                 _sliderX = 0;
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             _rect.X = 0;
             _rect.Y = 0;

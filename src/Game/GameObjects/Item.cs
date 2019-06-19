@@ -77,6 +77,7 @@ namespace ClassicUO.Game.GameObjects
             _animSpeed = 0;
             _force = false;
             _originalGraphic = 0;
+            CharacterIsBehindFoliage = false;
         }
 
         public uint Price
@@ -816,7 +817,7 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    var corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
 
                     if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
 
@@ -828,7 +829,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[FileManager.Animations.Direction];
+                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         FileManager.Animations.AnimID = id;
                         FileManager.Animations.AnimGroup = animGroup;
                         FileManager.Animations.Direction = dir;
@@ -836,7 +837,7 @@ namespace ClassicUO.Game.GameObjects
                         if (direction.FrameCount == 0 || direction.Frames == null)
                             FileManager.Animations.LoadDirectionGroup(ref direction);
 
-                        if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
+                        if ((direction.Address != 0 && direction.Size != 0) || direction.IsUOP)
                         {
                             direction.LastAccessTime = Engine.Ticks;
                             int fc = direction.FrameCount;

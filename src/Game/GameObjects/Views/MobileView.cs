@@ -269,7 +269,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
-
+            
             x += 22;
             y += 22;
 

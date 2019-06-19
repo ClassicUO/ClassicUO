@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -51,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
             if (IsCorpse)
-                return DrawCorpse(batcher, posX, posY);
+                return DrawCorpse(batcher, posX, posY - 3);
 
 
             ushort hue = Hue;
@@ -286,7 +287,14 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this) color = 0x0023;
+
+                    if (Engine.Profile.Current.GridLootType > 0 && SelectedObject.CorpseObject == this)
+                    {
+                        color = 0x0034;
+                    }
+                    else if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+                        color = 0x0023;
+
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color);
                 }
 

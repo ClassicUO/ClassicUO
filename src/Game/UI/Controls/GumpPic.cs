@@ -73,9 +73,20 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+            if (Texture.Contains(x, y))
+                return true;
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var c = Children[i];
+
+                if (c.Contains(x, y))
+                    return true;
+            }
+
+            return false;
         }
     }
 
@@ -132,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
             return base.OnMouseDoubleClick(x, y, button);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return ContainsByBounds || base.Contains(x, y);
         }

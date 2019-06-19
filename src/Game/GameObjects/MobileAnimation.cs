@@ -74,11 +74,17 @@ namespace ClassicUO.Game.GameObjects
         private static void CalculateHight(ushort graphic, Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
         {
             if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
-                result = 0;
+            {
+                if (result == 0xFF)
+                    result = 0;
+            }
             else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
             {
                 if (!iswalking)
-                    result = 2;
+                {
+                    if (result == 0xFF)
+                        result = 2;
+                }
                 else if (isrun)
                     result = 1;
                 else
@@ -90,10 +96,13 @@ namespace ClassicUO.Game.GameObjects
                     result = 19;
                 else if (!iswalking)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && FileManager.Animations.AnimationExists(graphic, 8))
-                        result = 8;
-                    else
-                        result = 1;
+                    if (result == 0xFF)
+                    {
+                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && FileManager.Animations.AnimationExists(graphic, 8))
+                            result = 8;
+                        else
+                            result = 1;
+                    }
                 }
                 else if (isrun)
                 {
@@ -835,7 +844,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            byte result = 0;
+            byte result = mobile.AnimationGroup;
 
 
             bool isWalking = mobile.IsWalking;
@@ -856,7 +865,10 @@ namespace ClassicUO.Game.GameObjects
                     else
                     {
                         if (!isWalking)
-                            result = 2;
+                        {
+                            if (result == 0xFF)
+                                result = 2;
+                        }
                         else if (isRun)
                         {
                             result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
@@ -873,7 +885,10 @@ namespace ClassicUO.Game.GameObjects
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
                     if (!isWalking)
-                        result = 2;
+                    {
+                        if (result == 0xFF)
+                            result = 2;
+                    }
                     else if (isRun)
                         result = 1;
                     else
@@ -887,40 +902,43 @@ namespace ClassicUO.Game.GameObjects
 
                     if (!isWalking)
                     {
-                        bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
+                        if (result == 0xFF)
+                        { 
+                            bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
-                        if (mobile.IsMounted)
-                            result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
-                        else if (!mobile.InWarMode || mobile.IsDead)
-                            result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
-                        else if (haveLightAtHand2)
-                            result = 2;
-                        else
-                        {
-                            ushort[] handAnimIDs = {0, 0};
-                            Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
-
-                            if (hand1 != null)
-                                handAnimIDs[0] = hand1.ItemData.AnimID;
-
-                            if (hand2 != null)
-                                handAnimIDs[1] = hand2.ItemData.AnimID;
-
-
-                            if (hand1 == null)
+                            if (mobile.IsMounted)
+                                result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
+                            else if (!mobile.InWarMode || mobile.IsDead)
+                                result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
+                            else if (haveLightAtHand2)
+                                result = 2;
+                            else
                             {
+                                ushort[] handAnimIDs = {0, 0};
+                                Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+
+                                if (hand1 != null)
+                                    handAnimIDs[0] = hand1.ItemData.AnimID;
+
                                 if (hand2 != null)
+                                    handAnimIDs[1] = hand2.ItemData.AnimID;
+
+
+                                if (hand1 == null)
                                 {
-                                    result = handAnimIDs.Where(handAnimID => handAnimID >= 0x0263 && handAnimID <= 0x028B)
-                                                        .Any(handBaseGraphic => HANDS_BASE_ANIMID.Any(s => s == handBaseGraphic))
-                                                 ? (byte) 8
-                                                 : (byte) 7;
+                                    if (hand2 != null)
+                                    {
+                                        result = handAnimIDs.Where(handAnimID => handAnimID >= 0x0263 && handAnimID <= 0x028B)
+                                                            .Any(handBaseGraphic => HANDS_BASE_ANIMID.Any(s => s == handBaseGraphic))
+                                                     ? (byte) 8
+                                                     : (byte) 7;
+                                    }
+                                    else
+                                        result = 7;
                                 }
                                 else
                                     result = 7;
                             }
-                            else
-                                result = 7;
                         }
                     }
                     else if (mobile.IsMounted)

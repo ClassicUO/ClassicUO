@@ -252,6 +252,7 @@ namespace ClassicUO.Configuration
         
         [JsonProperty] public uint GrabBagSerial { get; set; }
 
+        [JsonProperty] public int GridLootType { get; set; } = 0; // 0 = none, 1 = only grid, 2 = both
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

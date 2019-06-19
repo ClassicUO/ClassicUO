@@ -102,6 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
+        private Combobox _gridLoot;
 
         // network
         private Checkbox _showNetStats;
@@ -243,16 +244,27 @@ namespace ClassicUO.Game.UI.Gumps
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
 
 
+            fpsItem = new ScrollAreaItem();
+            text = new Label("Grid Loot", true, HUE_FONT, font: FONT)
+            {
+                Y = _showCorpseNameIncoming.Bounds.Bottom + 10
+            };
+            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new []{ "None", "Grid loot only", "Both"}, Engine.Profile.Current.GridLootType);
 
+            fpsItem.Add(text);
+            fpsItem.Add(_gridLoot);
+
+            rightArea.Add(fpsItem);
 
             ScrollAreaItem item = new ScrollAreaItem();
             _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT, true)
             {
+                Y = 20,
                 IsChecked = Engine.Profile.Current.UseCircleOfTransparency
             };
             _useCircleOfTransparency.ValueChanged += (sender, e) => { _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
             item.Add(_useCircleOfTransparency);
-            _circleOfTranspRadius = new HSliderBar(210, 5, 50, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
+            _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 50, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, Engine.Profile.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true);
             item.Add(_circleOfTranspRadius);
             rightArea.Add(item);
 
@@ -1121,6 +1133,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useStandardSkillsGump.IsChecked = true;
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
+                    _gridLoot.SelectedIndex = 0;
                     break;
 
                 case 2: // sounds
@@ -1310,6 +1323,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
             Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
+            Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
 
 
             // sounds

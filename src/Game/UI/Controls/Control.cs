@@ -756,7 +756,7 @@ namespace ClassicUO.Game.UI.Controls
             Parent?.OnKeyUp(key, mod);
         }
 
-        protected virtual bool Contains(int x, int y)
+        public virtual bool Contains(int x, int y)
         {
             return !IsDisposed;
         }

@@ -80,14 +80,9 @@ namespace ClassicUO.Game.GameObjects
 
         public void Mobile_New(Serial serial)
         {
-            RemoveFromTile();
-
             Entity_New(serial);
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
-
-            Texture = null;
-
             ClearSteps();
             SpeedMode = CharacterSpeedType.Normal;
             _isFemale = _isDead = _isRenamable = _isSA_Poisoned = _transform = false;
@@ -104,11 +99,6 @@ namespace ClassicUO.Game.GameObjects
             AnimationFromServer = false;
             StepSoundOffset = 0;
             AnimationGroup = 0xFF;
-
-            FrameInfo.X = 0;
-            FrameInfo.Y = 0;
-            FrameInfo.Width = 0;
-            FrameInfo.Height = 0;
             DeathScreenTimer = 0;
         }
 
@@ -626,6 +616,11 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out dir, evalutate);
 
             ProcessFootstepsSound();
+
+            if ((Serial & 0x80000000) != 0)
+            {
+
+            }
 
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {

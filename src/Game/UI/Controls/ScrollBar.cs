@@ -295,7 +295,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return x >= 0 && x <= Width && y >= 0 && y <= Height;
         }

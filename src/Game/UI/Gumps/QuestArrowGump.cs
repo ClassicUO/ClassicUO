@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.QuestArrow(rightClick);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             if (_arrow == null)
                 return true;

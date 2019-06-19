@@ -44,6 +44,7 @@ namespace ClassicUO.Game
         public static Point TranslatedMousePositionByViewport;
         
         public static GameObject HealthbarObject { get; set; }
+        public static GameObject CorpseObject { get; set; }
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {

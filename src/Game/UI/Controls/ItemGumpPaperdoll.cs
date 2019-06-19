@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
         }
