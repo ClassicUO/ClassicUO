@@ -9,6 +9,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -267,6 +268,8 @@ namespace ClassicUO.Game.UI.Gumps
                 HSliderBar amount = new HSliderBar(0, 0, SIZE, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp:true);
                 Add(amount);
 
+                amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
+
 
                 AlphaBlendControl background = new AlphaBlendControl();
                 background.Y = 15;
@@ -297,8 +300,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _texture.MouseUp += (sender, e) =>
                 {
-                    NetClient.Socket.Send(new PPickUpRequest(item, (ushort)amount.Value));
-                    GameActions.DropItem(_serial, Position.INVALID, World.Player.Equipment[(int)Layer.Backpack]);
+                    if (e.Button == MouseButton.Left)
+                    {
+                        NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount.Value));
+                        GameActions.DropItem(_serial, Position.INVALID, World.Player.Equipment[(int) Layer.Backpack]);
+                    }
                 };
 
                 Width = background.Width;
@@ -312,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _vec);
+                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _vec);
 
                 if (_texture.MouseIsOver)
                 {
