@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Managers
             _chunkPool = new QueuedPool<Chunk>(200);
             _tilePool = new QueuedPool<Tile>(20_000);
             _landPool = new QueuedPool<Land>(20_000);
-            _staticPool = new QueuedPool<Static>(20_000);
+            _staticPool = new QueuedPool<Static>(40_000);
             _multiPool = new QueuedPool<Multi>(20_000);
 
             _itemPool = new QueuedPool<Item>(5000);
