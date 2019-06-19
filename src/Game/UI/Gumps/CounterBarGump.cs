@@ -189,6 +189,8 @@ namespace ClassicUO.Game.UI.Gumps
                     items[i].Dispose();
                 }
             }
+
+            SetInScreen();
         }
 
         public override void Save(BinaryWriter writer)
