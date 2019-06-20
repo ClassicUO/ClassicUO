@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            X = 100;
+            X = Engine.Profile.Current.GridLootType == 2 ? 200 : 100;
             Y = 100;
 
             CanMove = true;
