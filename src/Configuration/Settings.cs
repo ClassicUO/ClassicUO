@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using Newtonsoft.Json;
@@ -108,6 +109,20 @@ namespace ClassicUO.Configuration
             // NOTE: We can do any other settings clean-ups here before we save them
 
             ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, Engine.SettingsFile));
+        }
+
+        public bool IsValid()
+        {
+            bool valid = !string.IsNullOrWhiteSpace(UltimaOnlineDirectory);
+
+
+            if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
+            {
+                valid = false;
+            }
+
+
+            return valid;
         }
     }
 }
