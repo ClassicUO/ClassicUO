@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
-        private Checkbox _enableDragSelect;
+        private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _openContainersNearRealPosition;
@@ -1048,7 +1048,17 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
             _dragSelectArea.Add(_dragSelectModifierKey);
+
+            _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, "Select humanoids only", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.DragSelectHumanoidsOnly,
+                X = 20,
+                Y = 20
+            };
+            _dragSelectArea.Add(_dragSelectHumanoidsOnly);
+
             _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
+
             rightArea.Add(_dragSelectArea);
 
             _openContainersNearRealPosition = CreateCheckBox(rightArea, "Containers open near their point of origin", Engine.Profile.Current.OpenContainersNearRealPosition, 0, 0);
@@ -1256,6 +1266,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
                     _openContainersNearRealPosition.IsChecked = false;
+                    _dragSelectHumanoidsOnly.IsChecked = false;
 
                     break;
 
@@ -1617,6 +1628,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.EnableDragSelect = _enableDragSelect.IsChecked;
             Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
+            Engine.Profile.Current.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
 
             Engine.Profile.Current.OpenContainersNearRealPosition = _openContainersNearRealPosition.IsChecked;
 
