@@ -77,6 +77,7 @@ namespace ClassicUO.Game.Scenes
         public Direction _numPadDirection;
         private Action _queuedAction;
         private Entity _queuedObject;
+        private bool _wasShiftDown;
 
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
@@ -362,12 +363,13 @@ namespace ClassicUO.Game.Scenes
                             _inqueue = true;
                             _queuedObject = ent;
                             _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                            _wasShiftDown = _isShiftDown;
 
                             _queuedAction = () =>
                             {
                                 if (!World.ClientFlags.TooltipsEnabled)
                                     GameActions.SingleClick(_queuedObject);
-                                GameActions.OpenPopupMenu(_queuedObject);
+                                GameActions.OpenPopupMenu(_queuedObject, _wasShiftDown);
                             };
                         }
 
