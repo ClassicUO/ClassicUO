@@ -272,8 +272,13 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void OpenPopupMenu(Serial serial)
+        public static void OpenPopupMenu(Serial serial, bool shift = false)
         {
+            shift = shift || Input.Keyboard.Shift;
+
+            if (Engine.Profile.Current.HoldShiftForContext && !shift)
+                return;
+
             Socket.Send(new PRequestPopupMenu(serial));
         }
 
