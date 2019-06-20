@@ -168,12 +168,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_corpse == null || _corpse.IsDestroyed)
+            if (_corpse == null || _corpse.IsDestroyed || _corpse.OnGround && _corpse.Distance > 3)
             {
                 Dispose();
 
                 return;
             }
+
 
             base.Update(totalMS, frameMS);
 
