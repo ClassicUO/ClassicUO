@@ -832,6 +832,8 @@ namespace ClassicUO
             base.Draw(gameTime);
         }
 
+        const long OPTIMAL_TIME = 1000000000 / MAX_FPS;
+
 
         public override void Tick()
         {
@@ -851,12 +853,13 @@ namespace ClassicUO
             OnUIUpdate(current, elapsed);
             // ###############################
 
+            Profiler.EnterContext("Update");
 
-            //OnUpdate(current, elapsed);
-            //FrameworkDispatcher.Update();
-            //OnFixedUpdate(current, elapsed);
+            OnUpdate(current, elapsed);
+            FrameworkDispatcher.Update();
+            OnFixedUpdate(current, elapsed);
 
-            //Profiler.ExitContext("Update");
+            Profiler.ExitContext("Update");
 
 
             _currentFpsTime += elapsed;
@@ -872,15 +875,35 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            base.Tick();
+            //base.Tick();
 
-            //_totalElapsed += elapsed;
 
-            //if (_totalElapsed > IntervalFixedUpdate)
-            //{
-            //    Render();
-            //    _totalElapsed -= IntervalFixedUpdate;
-            //    _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
+            _totalElapsed += elapsed;
+
+            if (_totalElapsed > IntervalFixedUpdate)
+            {
+                Render();
+                GraphicsDevice?.Present();
+                _totalElapsed -= IntervalFixedUpdate;
+                _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
+
+                if (_isRunningSlowly)
+                {
+                    _totalElapsed %= IntervalFixedUpdate;
+                }
+            }
+
+
+            uint sleep = SDL.SDL_GetTicks() - Ticks;
+
+            if (sleep < IntervalFixedUpdate)
+            {
+                //sleep %= (uint)IntervalFixedUpdate;
+
+                SDL.SDL_Delay(1);
+            }
+            else
+                Thread.Yield();
         }
 
 
