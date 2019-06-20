@@ -85,61 +85,6 @@ namespace ClassicUO
         private DebugInfo _debugInfo;
         private InputManager _inputManager;
         private bool _isRunningSlowly;
-
-
-        private double _lag;
-
-        //protected override void Update(GameTime gameTime)
-        //{
-        //    if (Profiler.InContext("OutOfContext"))
-        //        Profiler.ExitContext("OutOfContext");
-
-        //    Profiler.EnterContext("Update");
-
-        //    uint last = Ticks;
-        //    Ticks = SDL.SDL_GetTicks();
-
-        //    double totalms = Ticks; //gameTime.TotalGameTime.TotalMilliseconds;
-        //    double framems = Ticks - last;  //gameTime.ElapsedGameTime.TotalMilliseconds;
-
-        //    //Ticks = (long) totalms;
-        //    //TicksFrame = (long) framems;
-
-        //    _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
-
-        //    if (_currentFpsTime >= 1.0)
-        //    {
-        //        CurrentFPS = _totalFrames;
-
-        //        FPSMax = CurrentFPS > FPSMax || FPSMax > FpsLimit ? CurrentFPS : FPSMax;
-        //        FPSMin = CurrentFPS < FPSMin && CurrentFPS != 0 ? CurrentFPS : FPSMin;
-
-        //        _totalFrames = 0;
-        //        _currentFpsTime = 0;
-        //    }
-
-        //    Profiler.ExitContext("Update");
-
-        //    Profiler.EnterContext("FixedUpdate");
-        //    OnFixedUpdate(totalms, framems);
-        //    Profiler.ExitContext("FixedUpdate");
-
-
-
-        //    //_time += framems;
-
-        //    //if (_time >= IntervalFixedUpdate)
-        //    //{
-        //    //    _time %= IntervalFixedUpdate;
-        //    //}
-        //    //else
-        //    //    SuppressDraw();
-
-
-        //    base.Update(gameTime);
-        //    Profiler.EnterContext("OutOfContext");
-        //}
-
         private double _previous;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
@@ -280,16 +225,11 @@ namespace ClassicUO
         public static int CurrentFPS { get; private set; }
         public static int FPSMin { get; private set; } = int.MaxValue;
         public static int FPSMax { get; private set; }
-
         public static bool AllowWindowResizing
         {
             get => _window.AllowUserResizing;
             set => _window.AllowUserResizing = value;
         }
-
-        /// <summary>
-        ///     Total game time in milliseconds
-        /// </summary>
         public static uint Ticks { get; private set; }
 
         public static uint[] FrameDelay { get; } = new uint[2];
@@ -832,9 +772,6 @@ namespace ClassicUO
             base.Draw(gameTime);
         }
 
-        const long OPTIMAL_TIME = 1000000000 / MAX_FPS;
-
-
         public override void Tick()
         {
             if (Profiler.InContext("OutOfContext"))
@@ -887,23 +824,23 @@ namespace ClassicUO
                 _totalElapsed -= IntervalFixedUpdate;
                 _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
 
-                if (_isRunningSlowly)
-                {
-                    _totalElapsed %= IntervalFixedUpdate;
-                }
+                //if (_isRunningSlowly)
+                //{
+                //    _totalElapsed %= IntervalFixedUpdate;
+                //}
             }
 
-
-            uint sleep = SDL.SDL_GetTicks() - Ticks;
-
-            if (sleep < IntervalFixedUpdate)
+            if (!_isRunningSlowly)
             {
-                //sleep %= (uint)IntervalFixedUpdate;
+                uint sleep = SDL.SDL_GetTicks() - Ticks;
 
-                SDL.SDL_Delay(1);
+                if (sleep < IntervalFixedUpdate)
+                {
+                    SDL.SDL_Delay(1);
+                }
+                else
+                    Thread.Yield();
             }
-            else
-                Thread.Yield();
         }
 
 

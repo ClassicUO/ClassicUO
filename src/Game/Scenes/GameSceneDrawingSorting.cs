@@ -171,6 +171,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private static readonly StaticTiles _emptyStaticTiles = default;
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
@@ -194,7 +196,7 @@ namespace ClassicUO.Game.Scenes
 
                 bool ismobile = false;
 
-                StaticTiles itemData = default;
+                StaticTiles itemData = _emptyStaticTiles;
                 bool changinAlpha = false;
 
                 switch (obj)
