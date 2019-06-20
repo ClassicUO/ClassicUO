@@ -29,6 +29,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
+        public override bool CanUseAlpha => false;
+
         protected readonly SpriteTexture _texture;
 
         public HitBox(int x, int y, int w, int h)

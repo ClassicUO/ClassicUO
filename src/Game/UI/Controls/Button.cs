@@ -40,6 +40,8 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class Button : Control
     {
+        public override bool CanUseAlpha => false;
+
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;

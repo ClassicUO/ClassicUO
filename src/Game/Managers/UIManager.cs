@@ -359,13 +359,13 @@ namespace ClassicUO.Game.Managers
                             if (c is CheckerTrans)
                                 break;
 
-                            c.IsTransparent = true;
-                            c.Alpha = 0.5f;
-
                             if (t.Bounds.Intersects(c.Bounds))
                             {
-                                if (c is Button)
-                                    c.Alpha = 1f;
+                                if (c.CanUseAlpha)
+                                {
+                                    c.IsTransparent = true;
+                                    c.Alpha = 0.6f;
+                                }
                             }
                         }
 

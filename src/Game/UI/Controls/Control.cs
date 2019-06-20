@@ -120,6 +120,7 @@ namespace ClassicUO.Game.UI.Controls
         public float Alpha { get; set; }
 
         public List<Control> Children { get; }
+        public virtual bool CanUseAlpha => true;
 
         public object Tag { get; set; }
 
