@@ -29,37 +29,18 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile : IPoolObject
     {
-        public bool InUse { get; set; }
-
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
-
-        public GameObject FirstNode { get; private set; }
-
-        public Tile Tile_New(ushort x, ushort y)
+        public Tile(ushort x, ushort y)
         {
             X = x;
             Y = y;
-
-            var t = FirstNode;
-
-            if (t != null)
-            {
-                while (t.Left != null)
-                    t = t.Left;
-
-                while (t != null)
-                {
-                    var temp = t;
-
-                    RemoveGameObject(t);
-
-                    t = temp.Right;
-                }
-            }
-
-            return this;
         }
+
+        public bool InUse { get; set; }
+
+        public ushort X { get; }
+        public ushort Y { get; }
+
+        public GameObject FirstNode { get; private set; }
 
         public void AddGameObject(GameObject obj)
         {

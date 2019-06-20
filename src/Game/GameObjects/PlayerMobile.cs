@@ -89,10 +89,8 @@ namespace ClassicUO.Game.GameObjects
         private ushort _weight;
         private ushort _weightMax;
 
-        public PlayerMobile(Serial serial)
+        public PlayerMobile(Serial serial) : base(serial)
         {
-            Entity_New(serial);
-
             Skills = new Skill[FileManager.Skills.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)

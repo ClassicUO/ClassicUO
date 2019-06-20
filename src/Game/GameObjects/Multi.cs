@@ -34,10 +34,23 @@ namespace ClassicUO.Game.GameObjects
     {
         private StaticTiles? _itemData;
 
-        public Multi()
+
+        public Multi(Graphic graphic)
         {
+            Graphic = graphic;
+            _isFoliage = ItemData.IsFoliage;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
         }
-        
+
         public string Name => ItemData.Name;
 
         public int MultiOffsetX { get; set; }
@@ -54,41 +67,6 @@ namespace ClassicUO.Game.GameObjects
 
                 return _itemData.Value;
             }
-        }
-
-        public Multi Multi_New(ushort graphic)
-        {
-            IsDestroyed = false;
-            Texture = null;
-            RemoveFromTile();
-            Position = Position.INVALID;
-            CurrentRenderIndex = 0;
-            PriorityZ = 0;
-            Hue = 0;
-            Graphic = graphic;
-            _itemData = FileManager.TileData.StaticData[Graphic];
-            _isFoliage = ItemData.IsFoliage;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-            MultiOffsetX = MultiOffsetY = MultiOffsetZ = 0;
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-            AlphaHue = 0;
-
-            return this;
-        }
-
-        public override void Destroy()
-        {
-            if (!IsDestroyed)
-                PoolsManager.PushMulti(this);
-            base.Destroy();
         }
     }
 }

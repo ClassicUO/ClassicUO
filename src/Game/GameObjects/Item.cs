@@ -51,14 +51,10 @@ namespace ClassicUO.Game.GameObjects
         private uint _price;
         private ulong _spellsBitFiled;
 
-        //public Item(Serial serial) : base(serial)
-        //{
-        //}
-
-        public Item()
+        public Item(Serial serial) : base(serial)
         {
-
         }
+
 
         public uint Price
         {
@@ -207,34 +203,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
-        public Item Item_New(Serial serial)
-        {
-            Entity_New(serial);
-            _price = 0;
-            _amount = 0;
-            _container = 0;
-            _displayedGraphic = null;
-            _isMulti = false;
-            _layer = Layer.Invalid;
-            _spellsBitFiled = 0;
-            UsedLayer = false;
-            MultiDistanceBonus = 0;
-            MultiGraphic = 0;
-            MultiInfo = null;
-            LightID = 0;
-            WantUpdateMulti = true;
-            BookType = SpellBookType.Unknown;
-            _itemData = null;
-            _animDataFrame = default;
-            _animSpeed = 0;
-            _force = false;
-            _originalGraphic = 0;
-            CharacterIsBehindFoliage = false;
-
-            return this;
-        }
-
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
         {
             Item item = null;
@@ -316,22 +284,14 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    var multi = PoolsManager.GetMulti()
-                                            .Multi_New(graphic);
-                    multi.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
-                    multi.MultiOffsetX = x;
-                    multi.MultiOffsetY = y;
-                    multi.MultiOffsetZ = z;
-                    multi.AlphaHue = 0xFF;
-                    house.Components.Add(multi);
-                    //house.Components.Add(new Multi(graphic)
-                    //{
-                    //    Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
-                    //    MultiOffsetX = x,
-                    //    MultiOffsetY = y,
-                    //    MultiOffsetZ = z,
-                    //    AlphaHue = 0xFF
-                    //});
+                    house.Components.Add(new Multi(graphic)
+                    {
+                        Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
+                        MultiOffsetX = x,
+                        MultiOffsetY = y,
+                        MultiOffsetZ = z,
+                        AlphaHue = 0xFF
+                    });
                 }
                 else if (i == 0)
                     MultiGraphic = graphic;
@@ -913,13 +873,6 @@ namespace ClassicUO.Game.GameObjects
 
                 LastAnimationChangeTime = Engine.Ticks + _animSpeed;
             }
-        }
-
-        public override void Destroy()
-        {
-            if (!IsDestroyed)
-                PoolsManager.PushItem(this);
-            base.Destroy();
         }
     }
 }

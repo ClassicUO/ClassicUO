@@ -68,36 +68,10 @@ namespace ClassicUO.Game.GameObjects
         private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
-        //public Mobile(Serial serial) : base(serial)
-        //{
-        //    LastAnimationChangeTime = Engine.Ticks;
-        //    CalculateRandomIdleTime();
-        //}
-
-        public Mobile Mobile_New(Serial serial)
+        public Mobile(Serial serial) : base(serial)
         {
-            Entity_New(serial);
             LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
-            ClearSteps();
-            SpeedMode = CharacterSpeedType.Normal;
-            _isFemale = _isDead = _isRenamable = _isSA_Poisoned = _transform = false;
-            _race = RaceType.HUMAN;
-            _hits = _hitsMax = _mana = _manaMax = _stamina = _staminaMax = 0;
-            _notorietyFlag = NotorietyFlag.Unknown;
-            IsRunning = false;
-            LastStepSoundTime = 0;
-            LastStepTime = 0;
-            AnimationInterval = 0;
-            AnimationFrameCount = 0;
-            AnimationRepeatMode = 1;
-            AnimationRepeat = false;
-            AnimationFromServer = false;
-            StepSoundOffset = 0;
-            AnimationGroup = 0xFF;
-            DeathScreenTimer = 0;
-
-            return this;
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
@@ -1044,9 +1018,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
-            if (!IsDestroyed && !(this is PlayerMobile))
-                PoolsManager.PushMobile(this);
-
             if (HasEquipment)
             {
                 for (int i = 0; i < Equipment.Length; i++)

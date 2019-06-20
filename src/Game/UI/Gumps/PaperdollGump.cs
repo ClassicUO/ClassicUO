@@ -119,10 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gs.IsHoldingItem)
             {
-                Item it = new Item();
-                it.Item_New(gs.HeldItem.Serial);
-                it.Graphic = gs.HeldItem.Graphic;
-                it.Hue = gs.HeldItem.Hue;
+                Item it = new Item(gs.HeldItem.Serial) {Graphic = gs.HeldItem.Graphic, Hue = gs.HeldItem.Hue};
 
                 _paperDollInteractable.AddFakeDress(it);
             }

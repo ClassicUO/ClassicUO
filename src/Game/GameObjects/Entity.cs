@@ -140,63 +140,12 @@ namespace ClassicUO.Game.GameObjects
 
         public uint PropertiesHash { get; set; }
 
-        //protected Entity(Serial serial)
-        //{
-        //    Serial = serial;
-        //    Items = new EntityCollection<Item>();
-        //}
-
-        protected Entity Entity_New(Serial serial)
+        protected Entity(Serial serial)
         {
-            IsDestroyed = false;
-            RemoveFromTile();
-
-            Texture = null;
             Serial = serial;
-            IsFlipped = false;
-            if (Items == null)
-                Items = new EntityCollection<Item>();
-            else if (Items.Count != 0)
-                Items.Clear();
-
-            _equipment = null;
-            IsClicked = false;
-            Properties.Clear();
-            Graphic = 0;
-            Hue = 0;
-            _name = string.Empty;
-            Flags = 0;
-            _direction = 0;
-            PropertiesHash = 0;
-
-            UseObjectHandles = false;
-            ObjectHandlesOpened = false;
-            ClosedObjectHandles = false;
-            _delta = Delta.None;
-
-            AnimIndex = 0;
-            Position = Position.INVALID;
-            OverheadMessageContainer?.Destroy();
-            OverheadMessageContainer = null;
-            CurrentRenderIndex = 0;
-            PriorityZ = 0;
-            Rotation = 0;
-            AllowedToDraw = true;
-            DrawTransparent = false;
-            IsPositionChanged = false;
-            AlphaHue = 0;
-            Bounds.X = 0;
-            Bounds.Y = 0;
-            Bounds.Width = 0;
-            Bounds.Height = 0;
-            FrameInfo.X = 0;
-            FrameInfo.Y = 0;
-            FrameInfo.Width = 0;
-            FrameInfo.Height = 0;
-            _direction = Direction.NONE;
-
-            return this;
+            Items = new EntityCollection<Item>();
         }
+
 
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 

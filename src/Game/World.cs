@@ -198,8 +198,7 @@ namespace ClassicUO.Game
             if (item == null /*|| item.IsDestroyed*/)
             {
                 //Items.Remove(serial);
-                item = PoolsManager.GetItem()
-                                   .Item_New(serial);
+                item = new Item(serial);
             }
 
             return item;
@@ -212,8 +211,7 @@ namespace ClassicUO.Game
             if (mob == null /*|| mob.IsDestroyed*/)
             {
                 //Mobiles.Remove(serial);
-                mob = PoolsManager.GetMobile()
-                                  .Mobile_New(serial);
+                mob = new Mobile(serial);
             }
 
             return mob;

@@ -34,15 +34,15 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        //public Land(Graphic graphic)
-        //{
-        //    Graphic = graphic;
-        //    IsStretched = TileData.TexID == 0 && TileData.IsWet;
+        public Land(Graphic graphic)
+        {
+            Graphic = graphic;
+            IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
-        //    AllowedToDraw = Graphic > 2;
+            AllowedToDraw = Graphic > 2;
 
-        //    AlphaHue = 255;
-        //}
+            AlphaHue = 255;
+        }
 
         private LandTiles? _tileData;
 
@@ -67,50 +67,7 @@ namespace ClassicUO.Game.GameObjects
         public sbyte AverageZ { get; set; }
 
         public bool IsStretched { get; set; }
-
-        public Land Land_New(ushort graphic)
-        {
-            IsDestroyed = false;
-            Texture = null;
-            RemoveFromTile();
-            Position = Position.INVALID;
-            CurrentRenderIndex = 0;
-            PriorityZ = 0;
-            Hue = 0;
-            Graphic = graphic;
-            Bounds.X = 0;
-            Bounds.Y = 0;
-            Bounds.Width = 0;
-            Bounds.Height = 0;
-
-            Rectangle.X = 0;
-            Rectangle.Y = 0;
-            Rectangle.Width = 0;
-            Rectangle.Height = 0;
-
-            if (Normals != null)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    Normals[i].X = 0;
-                    Normals[i].Y = 0;
-                    Normals[i].Z = 0;
-                }
-
-                Normals = null;
-            }
-
-            _tileData = FileManager.TileData.LandData[Graphic];
-            IsStretched = TileData.TexID == 0 && TileData.IsWet;
-
-            AllowedToDraw = Graphic > 2;
-
-            AlphaHue = 255;
-
-            return this;
-        }
-
-
+        
         public void Calculate(int x, int y, sbyte z)
         {
             UpdateStreched(x, y, z);
@@ -168,13 +125,6 @@ namespace ClassicUO.Game.GameObjects
                 case 3: return Rectangle.Top >> 2;
                 default: return Z;
             }
-        }
-
-        public override void Destroy()
-        {
-            if (!IsDestroyed)
-                PoolsManager.PushLand(this);
-            base.Destroy();
         }
     }
 }

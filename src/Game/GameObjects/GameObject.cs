@@ -125,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool IsDestroyed { get; protected set; }
+        public bool IsDestroyed { get; private set; }
 
         public int Distance
         {

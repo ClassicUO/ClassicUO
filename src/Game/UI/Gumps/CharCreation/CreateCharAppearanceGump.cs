@@ -464,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (id == 0)
                 return null;
 
-            return new Item
+            return new Item(0)
             {
                 Graphic = (ushort) id, Hue = hue
             };

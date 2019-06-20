@@ -36,11 +36,29 @@ namespace ClassicUO.Game.GameObjects
     {
         private StaticTiles? _itemData;
 
-        public int Index { get; private set; }
+        public Static(Graphic graphic, Hue hue, int index)
+        {
+            Graphic = OriginalGraphic = graphic;
+            Hue = hue;
+            Index = index;
+
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+
+            if (ItemData.Height > 5)
+                _canBeTransparent = 1;
+            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
+                _canBeTransparent = 1;
+            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
+                _canBeTransparent = 1;
+            else
+                _canBeTransparent = 0;
+        }
+
+        public int Index { get; }
 
         public string Name => ItemData.Name;
 
-        public Graphic OriginalGraphic { get; private set; }
+        public Graphic OriginalGraphic { get; }
 
         public StaticTiles ItemData
         {
@@ -54,38 +72,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Static Static_New(ushort graphic, int index)
-        {
-            IsDestroyed = false;
-            RemoveFromTile();
-            Position = Position.INVALID;
-            CurrentRenderIndex = 0;
-            PriorityZ = 0;
-            Hue = 0;
-            _oldGraphic = 0;
-            Offset = Vector3.Zero;
-            CharacterIsBehindFoliage = false;
-            Graphic = OriginalGraphic = graphic;
-            _itemData = FileManager.TileData.StaticData[Graphic];
-            Index = index;
-
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-            AlphaHue = 0;
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-
-            Texture = null;
-
-            return this;
-        }
-
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
@@ -96,14 +82,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = OriginalGraphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
-        }
-
-        public override void Destroy()
-        {
-            if (!IsDestroyed)
-                PoolsManager.PushStatic(this);
-
-            base.Destroy();
         }
     }
 }

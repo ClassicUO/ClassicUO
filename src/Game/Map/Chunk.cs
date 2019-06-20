@@ -32,33 +32,28 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk : IPoolObject
     {
-        public Chunk()
-        {
-            Tiles = new Tile[8, 8];
-        }
         public bool InUse { get; set; }
 
-        //public Chunk(ushort x, ushort y)
-        //{
-        //    X = x;
-        //    Y = y;
-        //    Tiles = new Tile[8, 8];
+        public Chunk(ushort x, ushort y)
+        {
+            X = x;
+            Y = y;
+            Tiles = new Tile[8, 8];
 
-        //    x *= 8;
-        //    y *= 8;
+            x *= 8;
+            y *= 8;
 
-        //    for (int i = 0; i < 8; i++)
-        //    {
-        //        for (int j = 0; j < 8; j++)
-        //        {
-        //            Tile t = PoolsManager.GetTile();
-        //            t.Tile_New((ushort) (i + x), (ushort) (j + y));
-        //            Tiles[i, j] = t;
-        //        }
-        //    }
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    Tile t = new Tile((ushort)(i + x), (ushort)(j + y));
+                    Tiles[i, j] = t;
+                }
+            }
 
-        //    LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        //}
+            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+        }
 
 
         public ushort X { get; private set; }
@@ -68,27 +63,6 @@ namespace ClassicUO.Game.Map
 
         public long LastAccessTime { get; set; }
 
-        public Chunk Chunk_New(ushort x, ushort y)
-        {
-            X = x;
-            Y = y;
-
-            x *= 8;
-            y *= 8;
-
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    Tiles[i, j] = PoolsManager.GetTile()
-                                              .Tile_New((ushort)(i + x), (ushort)(j + y));
-                }
-            }
-
-            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-
-            return this;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)
@@ -111,17 +85,12 @@ namespace ClassicUO.Game.Map
                         sbyte z = cells[pos].Z;
 
 
-                        var land = PoolsManager.GetLand()
-                                               .Land_New(tileID);
-                        land.AverageZ = z;
-                        land.MinZ = z;
-
-                        /*Land land = new Land(tileID)
+                        Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z
-                        };*/
+                        };
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
@@ -157,15 +126,10 @@ namespace ClassicUO.Game.Map
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
 
-                                //Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                //{
-                                //    Position = new Position(staticX, staticY, z)
-                                //};
-
-                                Static staticObject = PoolsManager.GetStatic()
-                                                                  .Static_New(sb->Color, pos);
-                                staticObject.Hue = sb->Hue;
-                                staticObject.Position = new Position(staticX, staticY, z);
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                {
+                                    Position = new Position(staticX, staticY, z)
+                                };
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
@@ -215,15 +179,10 @@ namespace ClassicUO.Game.Map
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
 
-                                Static staticObject = PoolsManager.GetStatic()
-                                                                  .Static_New(sb->Color, pos);
-                                staticObject.Hue = sb->Hue;
-                                staticObject.Position = new Position(staticX, staticY, z);
-
-                                //Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                //{
-                                //    Position = new Position(staticX, staticY, z)
-                                //};
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                {
+                                    Position = new Position(staticX, staticY, z)
+                                };
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
@@ -256,18 +215,14 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        //Land land = new Land(tileID)
-                        //{
-                        //    Graphic = tileID,
-                        //    AverageZ = z,
-                        //    MinZ = z
-                        //};
+                        Land land = new Land(tileID)
+                        {
+                            Graphic = tileID,
+                            AverageZ = z,
+                            MinZ = z
+                        };
 
-                        var land = PoolsManager.GetLand()
-                                               .Land_New(tileID);
-                        land.AverageZ = z;
-                        land.MinZ = z;
-
+                        
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
@@ -340,12 +295,11 @@ namespace ClassicUO.Game.Map
                             obj.Destroy();
                     }
 
-                    PoolsManager.PushTile(Tiles[i, j]);
                     Tiles[i, j] = null;
                 }
             }
 
-            //Tiles = null;
+            Tiles = null;
         }
 
         public bool HasNoExternalData()

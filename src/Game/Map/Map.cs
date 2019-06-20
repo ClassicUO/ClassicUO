@@ -78,8 +78,7 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chunk = PoolsManager.GetChunk()
-                                        .Chunk_New((ushort) cellX, (ushort) cellY);
+                    chunk = new Chunk((ushort) cellX, (ushort) cellY);
                     chunk.Load(Index);
                 }
                 else
@@ -198,8 +197,7 @@ namespace ClassicUO.Game.Map
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Destroy();
-                    PoolsManager.PushChunk(block);
-                    //block = null;
+                    block = null;
                     _usedIndices.RemoveAt(i--);
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
@@ -214,8 +212,7 @@ namespace ClassicUO.Game.Map
             {
                 ref Chunk block = ref Chunks[_usedIndices[i]];
                 block.Destroy();
-                PoolsManager.PushChunk(block);
-                //block = null;
+                block = null;
                 _usedIndices.RemoveAt(i--);
             }
 
@@ -261,8 +258,7 @@ namespace ClassicUO.Game.Map
                             return;
 
                         _usedIndices.Add(cellindex);
-                        chunk = PoolsManager.GetChunk()
-                                            .Chunk_New((ushort) i, (ushort) j);
+                        chunk = new Chunk((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }
 
