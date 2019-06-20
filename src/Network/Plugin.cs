@@ -43,9 +43,10 @@ namespace ClassicUO.Network
     internal unsafe class Plugin
     {
         private static readonly List<Plugin> _plugins = new List<Plugin>();
-
-
+        public static IReadOnlyList<Plugin> Plugins => _plugins;
         private readonly string _path;
+        public string PluginPath => _path;
+
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnCastSpell _castSpell;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPacketLength _getPacketLength;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPlayerPosition _getPlayerPosition;
