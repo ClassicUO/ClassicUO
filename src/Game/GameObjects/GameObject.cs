@@ -38,17 +38,11 @@ namespace ClassicUO.Game.GameObjects
         //bool IsSelected { get; set; }
     }
 
-    interface IPoolObject
-    {
-        bool InUse { get; set; }
-    }
 
-    internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>, IPoolObject
+    internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
-
-        public bool InUse { get; set; }
 
 
         public Vector3 Offset;

@@ -4,7 +4,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Utility
 {
-    internal class QueuedPool<T> where T : class, IPoolObject, new()
+    internal class QueuedPool<T> where T : class, new()
     {
         private readonly Stack<T> _pool;
 
@@ -23,12 +23,6 @@ namespace ClassicUO.Utility
         {
             T result = _pool.Count > 0 ? _pool.Pop() : _maxSize == 0 ? new T() : null;
 
-            if (result.InUse)
-            {
-
-            }
-
-            result.InUse = true;
             //if (result is IPoolable poolable)
             //    poolable.OnPickup();
 
@@ -39,12 +33,6 @@ namespace ClassicUO.Utility
         {
             if (obj != null)
             {
-                if (_maxSize != 0 && _pool.Count + 1 > _maxSize)
-                {
-
-                }
-
-                obj.InUse = false;
                 _pool.Push(obj);
             }
         }

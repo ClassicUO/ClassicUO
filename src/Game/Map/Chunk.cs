@@ -30,10 +30,8 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk : IPoolObject
+    internal sealed class Chunk 
     {
-        public bool InUse { get; set; }
-
         public Chunk(ushort x, ushort y)
         {
             X = x;

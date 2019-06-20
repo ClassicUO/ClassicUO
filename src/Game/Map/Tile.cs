@@ -27,15 +27,13 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Tile : IPoolObject
+    internal sealed class Tile
     {
         public Tile(ushort x, ushort y)
         {
             X = x;
             Y = y;
         }
-
-        public bool InUse { get; set; }
 
         public ushort X { get; }
         public ushort Y { get; }
