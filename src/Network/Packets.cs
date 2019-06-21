@@ -368,10 +368,10 @@ namespace ClassicUO.Network
 
     internal sealed class PClientVersion : PacketWriter
     {
-        //public PClientVersion(byte[] version) : base(0xBD)
-        //{
-        //    WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
-        //}
+        public PClientVersion(byte[] version) : base(0xBD)
+        {
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+        }
 
         public PClientVersion(string v) : base(0xBD)
         {

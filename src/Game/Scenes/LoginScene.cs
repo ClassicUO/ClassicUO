@@ -54,7 +54,6 @@ namespace ClassicUO.Game.Scenes
             PopUpMessage
         }
 
-        private byte[] _clientVersionBuffer;
         private Gump _currentGump;
         private LoginStep _lastLoginStep;
 
@@ -95,17 +94,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
-            string[] parts = Engine.GlobalSettings.ClientVersion.Split(new[]
-            {
-                '.'
-            }, StringSplitOptions.RemoveEmptyEntries);
-
-            _clientVersionBuffer = new[]
-            {
-                byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
-            };
-
-            int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
+           int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
 
             Audio.PlayMusic(music);
 
@@ -381,7 +370,7 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
-            NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, _clientVersionBuffer));
+            NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, FileManager.ClientBufferVersion));
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
