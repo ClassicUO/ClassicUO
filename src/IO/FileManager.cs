@@ -43,15 +43,63 @@ namespace ClassicUO.IO
             {
                 _uofolderpath = value;
 
-                if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
-                {
-                    Log.Message(LogTypes.Error, "Wrong version.");
+                string[] vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
 
-                    throw new InvalidDataException("Wrong version");
+                if (vers.Length < 3)
+                {
+                    Log.Message(LogTypes.Error, "Invalid UO version.");
+
+                    throw new InvalidDataException("Invalid UO version");
                 }
 
-                ClientVersion = (ClientVersions) ((version.Major << 24) | (version.Minor << 16) | (version.Build << 8) | version.Revision);
-                Log.Message(LogTypes.Trace, $"Client version: {version} - {ClientVersion}");
+                int major = int.Parse(vers[0]);
+                int minor = int.Parse(vers[1]);
+                int extra = 0;
+
+                if (!int.TryParse(vers[2], out int build))
+                {
+                    int index = vers[2].IndexOf('.');
+
+                    if (index != -1)
+                    {
+                        build = int.Parse(vers[2].Substring(0, index));
+                    }
+                    else
+                    {
+                        int i = 0;
+
+                        for (; i < vers[2].Length; i++)
+                        {
+                            if (!char.IsNumber(vers[2][i]))
+                            {
+                                build = int.Parse(vers[2].Substring(0, i));
+                                break;
+                            }
+                        }
+
+                        if (i < vers[2].Length)
+                        {
+                            extra = (sbyte) vers[2].Substring(i, vers[2].Length - i)[0];
+
+                            char start = 'a';
+                            index = 0;
+                            while (start != extra && start <= 'z')
+                            {
+                                start++;
+                                index++;
+                            }
+
+                            extra = index;
+                        }
+                    }
+                }
+
+                if (vers.Length > 3)
+                    extra = int.Parse(vers[3]);
+
+
+                ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
+                Log.Message(LogTypes.Trace, $"Client version: {major}.{minor}.{build}.{extra} - {ClientVersion}");
             }
         }
 
