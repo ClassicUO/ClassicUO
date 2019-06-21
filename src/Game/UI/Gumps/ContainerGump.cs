@@ -105,14 +105,14 @@ namespace ClassicUO.Game.UI.Gumps
                         if (World.Player.Equipment[(int)Layer.Bank] != null && _item.Serial == World.Player.Equipment[(int) Layer.Bank])
                         {
                             // open bank near player
-                            X = World.Player.RealScreenPosition.X;
-                            Y = World.Player.RealScreenPosition.Y;
+                            X = World.Player.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                            Y = World.Player.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
                         }
                         else if (_item.OnGround)
                         {
                             // item is in world
-                            X = _item.RealScreenPosition.X;
-                            Y = _item.RealScreenPosition.Y;
+                            X = _item.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                            Y = _item.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
                         }
                         else
                         {
@@ -120,8 +120,8 @@ namespace ClassicUO.Game.UI.Gumps
                             ContainerGump parentContainer = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == _item.Container);
                             if (parentContainer != null)
                             {
-                                X = parentContainer.X + 20;
-                                Y = parentContainer.Y + 20;
+                                X = parentContainer.X + (Width >> 1);
+                                Y = parentContainer.Y;
                             }
                             else
                             {
