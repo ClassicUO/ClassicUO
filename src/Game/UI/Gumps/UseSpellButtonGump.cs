@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Game.Data;
@@ -64,7 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
-                GameActions.CastSpell(_spell.ID);
+            {
+                if (Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) <= 1)
+                    GameActions.CastSpell(_spell.ID);
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
