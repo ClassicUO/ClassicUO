@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _enableDragSelect;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _openContainersNearRealPosition;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -1051,6 +1051,8 @@ namespace ClassicUO.Game.UI.Gumps
             _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
             rightArea.Add(_dragSelectArea);
 
+            _openContainersNearRealPosition = CreateCheckBox(rightArea, "Containers open near their point of origin", Engine.Profile.Current.OpenContainersNearRealPosition, 0, 0);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1253,6 +1255,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
+                    _openContainersNearRealPosition.IsChecked = false;
 
                     break;
 
@@ -1615,6 +1618,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableDragSelect = _enableDragSelect.IsChecked;
             Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
 
+            Engine.Profile.Current.OpenContainersNearRealPosition = _openContainersNearRealPosition.IsChecked;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
