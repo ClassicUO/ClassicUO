@@ -29,6 +29,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -359,6 +360,14 @@ namespace ClassicUO.Game.UI.Gumps
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
 
+                GetSpellToolTip(out int toolTipCliloc);
+
+                if (toolTipCliloc > 0)
+                {
+                    string tooltip = FileManager.Cliloc.GetString(toolTipCliloc + i);
+                    icon.SetTooltip(tooltip, 150);
+                }
+
                 icon.MouseDoubleClick += (sender, e) =>
                 {
                     if (e.Button == MouseButton.Left)
@@ -555,6 +564,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (dictionaryPagesCount % 2 != 0)
                 dictionaryPagesCount++;
+        }
+
+        private void GetSpellToolTip(out int offset)
+        {
+            switch (_spellBookType)
+            {
+                case SpellBookType.Magery:
+                    offset = 1061290;
+                    break;
+                case SpellBookType.Necromancy:
+                    offset = 1061390;
+                    break;
+                case SpellBookType.Chivalry:
+                    offset = 1061490;
+                    break;
+                case SpellBookType.Bushido:
+                    offset = 1063263;
+                    break;
+                case SpellBookType.Ninjitsu:
+                    offset = 1063279;
+                    break;
+                case SpellBookType.Spellweaving:
+                    offset = 1072042;
+                    break;
+                case SpellBookType.Mysticism:
+                    offset = 0; //TODO
+                    break;
+                case SpellBookType.Bardic:
+                    offset = 0; //TODO
+                    break;
+                default:
+                    offset = 0;
+                    break;
+            }
+
         }
 
         private void GetSpellNames(int offset, out string name, out string abbreviature, out string reagents)
