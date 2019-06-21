@@ -100,9 +100,55 @@ namespace ClassicUO.Game.UI.Gumps
                     Location = location;
                 else
                 {
-                    ContainerManager.CalculateContainerPosition(g);
-                    X = ContainerManager.X;
-                    Y = ContainerManager.Y;
+                    if (Engine.Profile.Current.OpenContainersNearRealPosition)
+                    {
+                        if (World.Player.Equipment[(int)Layer.Bank] != null && _item.Serial == World.Player.Equipment[(int) Layer.Bank])
+                        {
+                            // open bank near player
+                            X = World.Player.RealScreenPosition.X;
+                            Y = World.Player.RealScreenPosition.Y;
+                        }
+                        else if (_item.OnGround)
+                        {
+                            // item is in world
+                            X = _item.RealScreenPosition.X;
+                            Y = _item.RealScreenPosition.Y;
+                        }
+                        else
+                        {
+                            // in a container, open near the container
+                            ContainerGump parentContainer = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == _item.Container);
+                            if (parentContainer != null)
+                            {
+                                X = parentContainer.X + 20;
+                                Y = parentContainer.Y + 20;
+                            }
+                            else
+                            {
+                                // I don't think we ever get here?
+                                ContainerManager.CalculateContainerPosition(g);
+                                X = ContainerManager.X;
+                                Y = ContainerManager.Y;
+                            }
+                        }
+
+                        if ((X + Width) > Engine.WindowWidth)
+                        {
+                            X -= Width;
+                        }
+
+                        if ((Y + Height) > Engine.WindowHeight)
+                        {
+                            Y -= Height;
+                        }
+                    }
+                    else
+                    {
+                        ContainerManager.CalculateContainerPosition(g);
+                        X = ContainerManager.X;
+                        Y = ContainerManager.Y;
+                    }
+
                 }
             }
             else

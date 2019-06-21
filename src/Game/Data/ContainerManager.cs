@@ -216,7 +216,7 @@ namespace ClassicUO.Game.Data
             if (X == DefaultX || Y == DefaultY)
 
                 X = X;
-            Y = Y;
+                Y = Y;
         }
     }
 
