@@ -56,6 +56,7 @@ namespace ClassicUO.IO.Resources
                         buffer = new byte[(length + 1023) & ~1023];
                     reader.Read(buffer, 0, length);
                     string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
+
                     _entries[number] = new StringEntry(number, text);
                 }
             }
@@ -67,7 +68,14 @@ namespace ClassicUO.IO.Resources
 
         public string GetString(int number)
         {
-            return GetEntry(number).Text;
+            string s = GetEntry(number).Text;
+
+            if (string.IsNullOrEmpty(s))
+            {
+                s = $"Unknown Cliloc #{number}";
+            }
+
+            return s;
         }
 
         public StringEntry GetEntry(int number)
