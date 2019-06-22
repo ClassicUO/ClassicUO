@@ -1815,7 +1815,7 @@ namespace ClassicUO.Game.GameObjects
                 foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
                 {
                     OpenedCorpses.Add(c.Serial);
-                    GameActions.DoubleClick(c.Serial);
+                    GameActions.DoubleClickQueued(c.Serial);
                 }
             }
         }
