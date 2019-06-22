@@ -225,7 +225,6 @@ namespace ClassicUO.Game.GameObjects
             else
                 return;
 
-            FileManager.Animations.AnimID = graphic;
 
 
             byte animGroup = FileManager.Animations.AnimGroup;
@@ -234,6 +233,8 @@ namespace ClassicUO.Game.GameObjects
             var gr = layer == Layer.Invalid
                          ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
                          : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+
+            FileManager.Animations.AnimID = graphic;
 
             if (color == 0)
                 color = newHue;
