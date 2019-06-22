@@ -440,25 +440,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override void FixedUpdate(double totalMS, double frameMS)
+        private void FillGameObjectList()
         {
-            base.FixedUpdate(totalMS, frameMS);
-
-            if (!World.InGame)
-                return;
-
-            if (_forceStopScene)
-            {
-                Engine.SceneManager.ChangeScene(ScenesType.Login);
-
-                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
-
-                if (loginScene != null)
-                    loginScene.Reconnect = true;
-
-                return;
-            }
-
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
             if (_alphaChanged)
@@ -543,7 +526,16 @@ namespace ClassicUO.Game.Scenes
             base.Update(totalMS, frameMS);
 
             if (_forceStopScene)
+            {
+                Engine.SceneManager.ChangeScene(ScenesType.Login);
+
+                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+
+                if (loginScene != null)
+                    loginScene.Reconnect = true;
+
                 return;
+            }
 
             if (!World.InGame)
                 return;
@@ -610,10 +602,7 @@ namespace ClassicUO.Game.Scenes
 
             if (totalMS > _timePing)
             {
-                //NetClient.Socket.Send(new PPing());
-
                 NetClient.Socket.Statistics.SendPing();
-
                 _timePing = (long) totalMS + 1000;
             }
 
@@ -632,7 +621,11 @@ namespace ClassicUO.Game.Scenes
                 else
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
+
+            FillGameObjectList();
         }
+
+
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
@@ -796,16 +789,16 @@ namespace ClassicUO.Game.Scenes
             //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
         }
 
+        private Vector3 _selectionLines = Vector3.Zero;
+
         public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
             if (_isSelectionActive)
             {
-                Vector3 sellines = Vector3.Zero;
-                sellines.Z = 0.3f;
-                Vector3 selhue = new Vector3();
-                selhue.Z = 0.7f;
-                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref selhue);
-                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref sellines);
+                _selectionLines.Z = 0.3F;
+                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+                _selectionLines.Z = 0.7f;
+                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
             }
         }
 

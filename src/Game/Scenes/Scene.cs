@@ -77,11 +77,7 @@ namespace ClassicUO.Game.Scenes
             Audio?.StopMusic();
             Coroutines.Clear();
         }
-
-        public virtual void FixedUpdate(double totalMS, double frameMS)
-        {
-        }
-
+        
         public virtual bool Draw(UltimaBatcher2D batcher)
         {
             return true;

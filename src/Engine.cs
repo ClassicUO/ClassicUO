@@ -654,7 +654,6 @@ namespace ClassicUO
             Profiler.EnterContext("Update");
 
             OnUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
-            OnFixedUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
 
             base.Update(gameTime);
 
@@ -697,7 +696,6 @@ namespace ClassicUO
 
             OnUpdate(current, elapsed);
             FrameworkDispatcher.Update();
-            OnFixedUpdate(current, elapsed);
 
             Profiler.ExitContext("Update");
 
@@ -847,12 +845,6 @@ namespace ClassicUO
                 else
                     scene.Update(totalMS, frameMS);
             }
-        }
-
-        private void OnFixedUpdate(double totalMS, double frameMS)
-        {
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
-                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }
 }
