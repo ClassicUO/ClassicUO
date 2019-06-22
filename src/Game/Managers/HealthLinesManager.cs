@@ -34,6 +34,7 @@ namespace ClassicUO.Game.Managers
         public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP && Engine.Profile.Current.MobileHPType >= 1;
 
 
+        private Vector3 _vectorHue = Vector3.Zero;
 
         public void Draw(UltimaBatcher2D batcher, float scale)
         {
@@ -51,6 +52,8 @@ namespace ClassicUO.Game.Managers
 
             Texture2D black = Textures.GetTexture(Color.Black);
             Texture2D red = Textures.GetTexture(Color.Red);
+
+            Color color;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -95,12 +98,9 @@ namespace ClassicUO.Game.Managers
                         max = BAR_WIDTH * max / 100;
                 }
 
-                Vector3 zero = Vector3.Zero;
 
-                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref zero);
-                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref zero);
-
-                Color color;
+                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
+                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
 
                 if (mobile.IsParalyzed)
                     color = Color.AliceBlue;
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Managers
                 else
                     color = Color.CornflowerBlue;
 
-                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref zero);
+                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
             }
         }
     }

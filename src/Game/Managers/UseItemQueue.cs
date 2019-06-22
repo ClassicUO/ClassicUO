@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Managers
             {
                 _timer = (long) (totalMS + 1000);
 
-                if (_actions.Count <= 0)
+                if (_actions.Count == 0)
                     return;
 
                 Serial serial = _actions.RemoveFromFront();
