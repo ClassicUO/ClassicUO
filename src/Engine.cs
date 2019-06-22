@@ -408,12 +408,7 @@ namespace ClassicUO
                             settings.Profiler = Boolean.Parse(value);
 
                             break;
-
-                            //case "preload_maps":
-                            //    settings.PreloadMaps = bool.Parse(value);
-
-                            break;
-
+                        
                         case "saveaccount":
                             settings.SaveAccount = Boolean.Parse(value);
 
