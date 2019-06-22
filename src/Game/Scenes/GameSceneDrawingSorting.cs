@@ -293,7 +293,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (itemData.IsFoliage)
+                else if (!island && itemData.IsFoliage)
                 {
                     bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
