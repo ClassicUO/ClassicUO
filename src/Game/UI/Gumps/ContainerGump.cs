@@ -114,6 +114,16 @@ namespace ClassicUO.Game.UI.Gumps
                             X = _item.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
                             Y = _item.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
                         }
+                        else if (_item.Container.IsMobile)
+                        {
+                            // pack animal, snooped player, npc vendor
+                            Mobile mobile = World.Mobiles.Get(_item.Container);
+                            if (mobile != null)
+                            {
+                                X = mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                                Y = mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+                            }
+                        }
                         else
                         {
                             // in a container, open near the container
