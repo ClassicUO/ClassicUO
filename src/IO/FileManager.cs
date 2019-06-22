@@ -152,7 +152,7 @@ namespace ClassicUO.IO
             Map.Load();
 
             Cliloc = new ClilocLoader();
-            Cliloc.Load();
+            Cliloc.Load(Engine.GlobalSettings.ClilocFile);
 
             Gumps = new GumpsLoader();
             Gumps.Load();

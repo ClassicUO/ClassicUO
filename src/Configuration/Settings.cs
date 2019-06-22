@@ -54,6 +54,9 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "lastcharactername")]
         public string LastCharacterName { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "cliloc")]
+        public string ClilocFile { get; set; } = "Cliloc.enu";
+
         [JsonProperty(PropertyName = "lastservernum")]
         public ushort LastServerNum { get; set; } = 1;
 

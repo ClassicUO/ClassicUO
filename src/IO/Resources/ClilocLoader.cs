@@ -32,10 +32,24 @@ namespace ClassicUO.IO.Resources
     internal class ClilocLoader : ResourceLoader
     {
         private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
+        private string _cliloc;
+
+        public void Load(string cliloc)
+        {
+            _cliloc = cliloc;
+
+            if (!File.Exists(Path.Combine(FileManager.UoFolderPath, cliloc)))
+                _cliloc = "Cliloc.enu";
+
+            Load();
+        }
 
         public override void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
+            if (string.IsNullOrEmpty(_cliloc))
+                _cliloc = "Cliloc.enu";
+
+            string path = Path.Combine(FileManager.UoFolderPath, _cliloc);
 
             if (!File.Exists(path))
                 return;
