@@ -117,6 +117,30 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
+        {
+            Tile tile = GetTile(x, y);
+
+            var obj = tile.FirstNode;
+
+            groundZ = staticZ = 0;
+
+            while (obj != null)
+            {
+                switch (obj)
+                {
+                    case Land land:
+                        groundZ = land.Z;
+                        break;
+                    case Static stat:
+                        staticZ = stat.Z;
+                        break;
+                }
+
+                obj = obj.Right;
+            }
+        }
+
         public void ClearBockAccess()
         {
             Array.Clear(_blockAccessList, 0, _blockAccessList.Length);

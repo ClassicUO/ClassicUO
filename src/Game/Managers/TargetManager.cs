@@ -61,9 +61,11 @@ namespace ClassicUO.Game.Managers
             XOff = x;
             YOff = y;
             ZOff = z;
+
+            Offset = new Position(XOff, YOff, (sbyte)ZOff);
         }
 
-        public Position Offset => new Position(XOff, YOff, (sbyte) ZOff);
+        public readonly Position Offset;
     }
 
     internal static class TargetManager
@@ -255,6 +257,14 @@ namespace ClassicUO.Game.Managers
                 Mouse.CancelDoubleClick = true;
                 ClearTargetingWithoutTargetCancelPacket();
             }
+        }
+
+        public static void SendMultiTarget(ushort x, ushort y, sbyte z)
+        {
+            NetClient.Socket.Send(new PTargetXYZ(x, y, z, 0, _targetCursorId, (byte)TargeringType));
+            Mouse.CancelDoubleClick = true;
+            MultiTargetInfo = null;
+            ClearTargetingWithoutTargetCancelPacket();
         }
     }
 }

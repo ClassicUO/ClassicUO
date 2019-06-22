@@ -712,22 +712,33 @@ namespace ClassicUO.Game.Scenes
                     _renderList[i] = null;
                 }
 
-                //if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                //{
-                //    Item multiTarget = new Item(Serial.INVALID)
-                //    {
-                //        Graphic = TargetManager.MultiTargetInfo.Model,
-                //        IsMulti = true
-                //    };
+                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                {
+                    Item multiTarget = new Item(Serial.INVALID)
+                    {
+                        Graphic = TargetManager.MultiTargetInfo.Model,
+                        IsMulti = true
+                    };
 
-                //    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj && (gobj is Land || gobj is Static))
-                //    {
-                //        multiTarget.Position = gobj.Position + TargetManager.MultiTargetInfo.Offset;
-                //        multiTarget.CheckGraphicChange();
-                //    }
+                    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj /*&& (gobj is Land || gobj is Static)*/)
+                    {
+                        Position pos = TargetManager.MultiTargetInfo.Offset;
+                        Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
 
-                //    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
-                //}
+                        World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
+
+                        if (gobj is Static st && st.ItemData.IsWet)
+                            groundZ = gobj.Z;
+
+
+                        pos = new Position((ushort) (pos2.X - pos.X), (ushort) (pos2.Y - pos.Y), groundZ);
+
+                        multiTarget.Position = pos;
+                        multiTarget.CheckGraphicChange();
+                    }
+
+                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
+                }
             }
 
             //batcher.SetStencil(null);
