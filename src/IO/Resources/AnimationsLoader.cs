@@ -1422,11 +1422,9 @@ namespace ClassicUO.IO.Resources
                         return;
                     }
                 }
-                else if (direction1.IsUOP)
+                else if (direction1.IsUOP && FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
                 {
-                    var animDataStruct = DataIndex[AnimID].GetUopGroup(AnimGroup);
-
-                    if (!(animDataStruct == null || animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
+                    if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                     {
                         int decLen = (int) animDataStruct.DecompressedLength;
                         UOFileUopNoFormat file = _filesUop[animDataStruct.FileIndex];
