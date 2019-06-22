@@ -43,7 +43,7 @@ namespace ClassicUO.Network
     internal unsafe class Plugin
     {
         private static readonly List<Plugin> _plugins = new List<Plugin>();
-        public static IReadOnlyList<Plugin> Plugins => _plugins;
+        public static List<Plugin> Plugins => _plugins;
         private readonly string _path;
         public string PluginPath => _path;
 
