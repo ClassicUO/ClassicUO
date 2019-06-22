@@ -57,7 +57,11 @@ namespace ClassicUO.Game.Managers
 
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
+                foreach ( Serial s in _toRemoveDamages)
+                {
+                    _damages.Remove(s);
+                }
+
                 _toRemoveDamages.Clear();
             }
         }
@@ -190,7 +194,11 @@ namespace ClassicUO.Game.Managers
         {
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
+                foreach (Serial s in _toRemoveDamages)
+                {
+                    _damages.Remove(s);
+                }
+
                 _toRemoveDamages.Clear();
             }
 
@@ -212,7 +220,10 @@ namespace ClassicUO.Game.Managers
 
             _firstNode = null;
 
-            _staticToUpdate.ForEach(s => s.Destroy());
+            foreach (GameObject s in _staticToUpdate)
+            {
+                s.Destroy();
+            }
             _staticToUpdate.Clear();
         }
     }
