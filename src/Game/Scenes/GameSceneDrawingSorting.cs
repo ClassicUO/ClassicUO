@@ -198,6 +198,7 @@ namespace ClassicUO.Game.Scenes
 
                 StaticTiles itemData = _emptyStaticTiles;
                 bool changinAlpha = false;
+                bool island = false;
 
                 switch (obj)
                 {
@@ -205,6 +206,10 @@ namespace ClassicUO.Game.Scenes
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
 
+                        break;
+
+                    case Land _:
+                        island = true;
                         break;
 
                     default:
@@ -248,12 +253,10 @@ namespace ClassicUO.Game.Scenes
 
                 obj.CurrentRenderIndex = _renderIndex;
 
-                bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
+                bool iscorpse = !ismobile && !island && obj is Item item && item.IsCorpse;
 
-                if (!ismobile && !iscorpse && itemData.IsInternal)
+                if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
-
-                bool island = !ismobile && !iscorpse && obj is Land;
 
                 if (!island && z >= _maxZ)
                 {
