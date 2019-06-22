@@ -27,6 +27,7 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -98,6 +99,10 @@ namespace ClassicUO.Game
             Socket.Send(new PAttackRequest(serial));
         }
 
+        public static void DoubleClickQueued(Serial serial)
+        {
+            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+        }
         public static void DoubleClick(Serial serial)
         {
             LastObject = serial;
