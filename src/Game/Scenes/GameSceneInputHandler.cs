@@ -233,13 +233,8 @@ namespace ClassicUO.Game.Scenes
             if (_dragginObject != null)
                 _dragginObject = null;
 
-            if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
+            if (Engine.UI.IsDragging)
                 return;
-
-            //for (byte b = 0; b < 255; b++)
-            //FileManager.Fonts.GenerateUnicode(0xFF, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
-
-            //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
             if (TargetManager.IsTargeting)
             {
@@ -300,7 +295,6 @@ namespace ClassicUO.Game.Scenes
                     switch (obj)
                     {
                         case Mobile mobile:
-                            // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
                             MergeHeldItem(mobile);
 
                             break;
@@ -464,7 +458,6 @@ namespace ClassicUO.Game.Scenes
         internal override void OnRightMouseUp()
         {
             _rightMousePressed = false;
-
         }
 
 
