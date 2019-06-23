@@ -220,6 +220,7 @@ namespace ClassicUO.Game.Managers
             Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
+
         public AnchorManager AnchorManager { get; }
 
         public List<Control> Gumps { get; } = new List<Control>();
