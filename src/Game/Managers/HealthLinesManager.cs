@@ -1,4 +1,27 @@
-﻿using ClassicUO.Game.GameObjects;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -11,8 +34,9 @@ namespace ClassicUO.Game.Managers
         public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP && Engine.Profile.Current.MobileHPType >= 1;
 
 
+        private Vector3 _vectorHue = Vector3.Zero;
 
-        public void Draw(Batcher2D batcher, float scale)
+        public void Draw(UltimaBatcher2D batcher, float scale)
         {
             if (!IsEnabled)
                 return;
@@ -28,6 +52,8 @@ namespace ClassicUO.Game.Managers
 
             Texture2D black = Textures.GetTexture(Color.Black);
             Texture2D red = Textures.GetTexture(Color.Red);
+
+            Color color;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -73,10 +99,8 @@ namespace ClassicUO.Game.Managers
                 }
 
 
-                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, Vector3.Zero);
-                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, Vector3.Zero);
-
-                Color color;
+                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
+                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
 
                 if (mobile.IsParalyzed)
                     color = Color.AliceBlue;
@@ -87,7 +111,7 @@ namespace ClassicUO.Game.Managers
                 else
                     color = Color.CornflowerBlue;
 
-                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, Vector3.Zero);
+                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
             }
         }
     }

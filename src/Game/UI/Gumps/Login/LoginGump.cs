@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                SafeCharactersOnly = true,
+                SafeCharactersOnly = true
             });
 
             Add(_textboxPassword = new TextBox(5, 16, 190, 190, false)
@@ -220,6 +220,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
+
                 case Buttons.Quit:
                     Engine.Quit();
 

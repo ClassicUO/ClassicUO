@@ -22,10 +22,12 @@
 #endregion
 
 using System.IO;
+using System.Text.RegularExpressions;
 
 using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ClassicUO.Configuration
 {
@@ -40,7 +42,14 @@ namespace ClassicUO.Configuration
                 return null;
             }
 
-            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file), jsonsettings);
+            string text = File.ReadAllText(file);
+            text = Regex.Replace(text,
+                                         @"(?<!\\)  # lookbehind: Check that previous character isn't a \
+                                                \\         # match a \
+                                                (?!\\)     # lookahead: Check that the following character isn't a \",
+                                    @"\\", RegexOptions.IgnorePatternWhitespace);
+
+            T settings = JsonConvert.DeserializeObject<T>(text, jsonsettings);
 
             return settings;
         }

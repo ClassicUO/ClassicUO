@@ -1,4 +1,27 @@
-﻿using System.Text;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Text;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -80,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
@@ -89,8 +112,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (Game.SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
-                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(Game.SelectedObject.Object));
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
             }
             else
                 _sb.AppendFormat(DEBUG_STRING_SMALL, Engine.CurrentFPS);
@@ -109,24 +132,30 @@ namespace ClassicUO.Game.UI.Gumps
                     case Mobile mob:
 
                         return $"Mobile ({mob.Serial})  graphic: {mob.Graphic}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
+
                     case Item item:
 
                         return $"Item ({item.Serial})  graphic: {item.Graphic}  flags: {item.Flags}  amount: {item.Amount}";
+
                     case Static st:
 
                         return $"Static ({st.Graphic})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
+
                     case Multi multi:
 
                         return $"Multi ({multi.Graphic})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
+
                     case GameEffect effect:
 
                         if (effect.Source is Static s)
                             return $"Static ({s.Graphic})  height: {s.ItemData.Height}  flags: {s.ItemData.Flags}";
 
                         return "GameEffect";
+
                     case MessageInfo overhead:
 
                         return $"TextOverhead type: {overhead.Type}";
+
                     case Land land:
 
                         return $"Static ({land.Graphic})  flags: {land.TileData.Flags}";

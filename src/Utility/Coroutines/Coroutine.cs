@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Utility.Coroutines

@@ -1,4 +1,27 @@
-﻿using System.Linq;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -45,7 +68,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_background = new AlphaBlendControl(.3f)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                Hue = hue
             });
         }
 
@@ -66,6 +90,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+
+                    if (string.IsNullOrEmpty(t))
+                        return false;
 
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
@@ -137,18 +164,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Entity.Serial.IsMobile)
+            if (Entity is Mobile mob)
             {
-                GameActions.RequestMobileStatus(Entity);
+                GameActions.RequestMobileStatus(mob);
 
-                Engine.UI.GetByLocalSerial<HealthBarGump>(Entity)?.Dispose();
+                Engine.UI.GetControl<HealthBarGump>(mob)?.Dispose();
 
-                if (Entity == World.Player)
+                if (mob == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();
 
                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                 HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump((Mobile) Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
             else
@@ -184,6 +211,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
+                        case CursorTarget.Grab:
+                        case CursorTarget.SetGrabBag:
                             TargetManager.TargetGameObject(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
 
@@ -204,9 +233,15 @@ namespace ClassicUO.Game.UI.Gumps
                     if (scene.IsHoldingItem)
                     {
                         if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
-                            scene.DropHeldItemToContainer(World.Items.Get(Entity));
-                        else 
+                        {
+                            if (Entity.Serial.IsItem)
+                                scene.DropHeldItemToContainer(World.Items.Get(Entity));
+                            else if (Entity.Serial.IsMobile)
+                                scene.MergeHeldItem(World.Mobiles.Get(Entity));
+                        }
+                        else
                             scene.Audio.PlaySound(0x0051);
+
                         return;
                     }
 
@@ -224,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles || !Input.Keyboard.Ctrl || !Input.Keyboard.Shift) Dispose();
+            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles) Dispose();
 
             if (_isPressed)
             {
@@ -242,6 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _clickTiming = 0;
                     _isPressed = false;
+
                     if (!World.ClientFlags.TooltipsEnabled)
                         GameActions.SingleClick(Entity);
                     GameActions.OpenPopupMenu(Entity);
@@ -249,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed || !SetName())
                 return false;
@@ -294,7 +330,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (y < gy || y + Height > gy + h)
                 return false;
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref zero);
 
             base.Draw(batcher, x, y);
 

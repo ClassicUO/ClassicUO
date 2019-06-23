@@ -1,4 +1,27 @@
-﻿using System.Linq;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
@@ -44,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             hitbox.MouseClick += (sender, e) =>
             {
-                Engine.UI.GetByLocalSerial<BulletinBoardItem>(LocalSerial)?.Dispose();
+                Engine.UI.GetControl<BulletinBoardItem>(LocalSerial)?.Dispose();
 
                 Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, "Date/Time", string.Empty, 0));
             };
@@ -113,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            Add(new ExpandableScroll(0, 0, 250)
+            Add(new ExpandableScroll(0, 0, 250, 0x0820)
             {
                 TitleGumpID = 0x0820
             });
@@ -214,6 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     break;
+
                 case 1:
 
                     Add(_buttonReply = new Button((int) ButtonType.Reply, 0x0884, 0x0884)
@@ -225,6 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     break;
+
                 case 2:
 
                     Add(_buttonRemove = new Button((int) ButtonType.Remove, 0x0885, 0x0885)
@@ -253,11 +278,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     break;
+
                 case ButtonType.Remove:
                     Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, "RE: " + _subjectTextbox.Text, "Date/Time", string.Empty, 0));
                     Dispose();
 
                     break;
+
                 case ButtonType.Reply:
                     NetClient.Socket.Send(new PBulletinBoardRemoveMessage(LocalSerial, _msgSerial));
                     Dispose();
@@ -274,6 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.Value -= 5;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += 5;
 

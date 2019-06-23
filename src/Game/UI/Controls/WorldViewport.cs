@@ -40,7 +40,12 @@ namespace ClassicUO.Game.UI.Controls
 
             ColorBlendFunction = BlendFunction.Add
         };
+
         private readonly GameScene _scene;
+
+        private MatrixEffect _xBR;
+
+        private Vector3 _zero = Vector3.Zero;
 
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
@@ -52,20 +57,42 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            // draw regular world
-            batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, Vector3.Zero);
+            if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
+            {
+                // draw regular world
+
+                if (_xBR == null || _xBR.IsDisposed) _xBR = new MatrixEffect(batcher.GraphicsDevice, Resources.xBREffect);
+
+                _xBR.Parameters["textureSize"].SetValue(new Vector2
+                {
+                    X = _scene.ViewportTexture.Width,
+                    Y = _scene.ViewportTexture.Height
+                });
+
+                batcher.End();
+
+                batcher.Begin(_xBR);
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
+                batcher.End();
+
+                batcher.Begin();
+            }
+            else
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
+
 
             // draw lights
             if (_scene.UseLights)
             {
                 batcher.SetBlendState(_blend);
-                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, Vector3.Zero);
+                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _zero);
                 batcher.SetBlendState(null);
             }
 
             // draw overheads
+            _scene.DrawSelection(batcher, x, y);
             _scene.DrawOverheads(batcher, x, y);
 
             return base.Draw(batcher, x, y);
@@ -74,6 +101,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            _xBR?.Dispose();
             _blend?.Dispose();
             base.Dispose();
         }

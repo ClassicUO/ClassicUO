@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsMysticism
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Mysticism.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsMysticism()
@@ -87,6 +86,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Mysticism.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

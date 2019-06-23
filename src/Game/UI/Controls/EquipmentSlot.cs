@@ -21,11 +21,8 @@
 
 #endregion
 
-using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -63,7 +60,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public Item Item { get; private set; }
-
 
 
 
@@ -180,12 +176,12 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override bool Draw(Batcher2D batcher, int x, int y)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
+                ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, hue);
+                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, ref hue);
             }
 
             //protected override void OnMouseClick(int x, int y, MouseButton button)
@@ -200,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-            protected override bool Contains(int x, int y)
+            public override bool Contains(int x, int y)
             {
                 return true;
             }

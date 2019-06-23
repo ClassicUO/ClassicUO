@@ -77,12 +77,8 @@ namespace ClassicUO.Game.Scenes
             Audio?.StopMusic();
             Coroutines.Clear();
         }
-
-        public virtual void FixedUpdate(double totalMS, double frameMS)
-        {
-        }
-
-        public virtual bool Draw(Batcher2D batcher)
+        
+        public virtual bool Draw(UltimaBatcher2D batcher)
         {
             return true;
         }
@@ -90,6 +86,8 @@ namespace ClassicUO.Game.Scenes
         private IEnumerable<IWaitCondition> CleaningResources()
         {
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
+
+            yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
 
             while (!IsDestroyed)
             {

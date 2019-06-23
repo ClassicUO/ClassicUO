@@ -42,7 +42,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public CharacterSelectionGump() : base(0, 0)
         {
-            bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
+            CanCloseWithRightClick = false;
+
             int posInList = 0;
             int yOffset = 150;
             int yBonus = 0;
@@ -132,14 +133,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     DeleteCharacter(loginScene);
 
                     break;
+
                 case Buttons.New:
                     loginScene.StartCharCreation();
 
                     break;
+
                 case Buttons.Next:
                     LoginCharacter(_selectedCharacter);
 
                     break;
+
                 case Buttons.Prev:
                     loginScene.StepBack();
 
@@ -159,9 +163,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (existing != null)
                     Remove(existing);
-                var text = FileManager.Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
 
-                Add(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
+                Add(new LoadingGump($"Permanently delete {charName}", LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {
                     if (buttonID == (int) LoadingGump.Buttons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);

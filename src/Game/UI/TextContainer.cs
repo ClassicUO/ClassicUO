@@ -1,29 +1,51 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace ClassicUO.Game.UI
 {
-    sealed class TextContainer
+    internal sealed class TextContainer
     {
         private readonly List<MessageInfo> _messages = new List<MessageInfo>();
+        private readonly Rectangle[] _rects = new Rectangle[2];
 
 
         public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y)
         {
             int offset = _messages.Where(s => s.X /*+ (s.RenderedText.Width >> 1)*/ == x && s.Y == y)
-                .Sum(s => s.RenderedText.Height);
+                                  .Sum(s => s.RenderedText.Height);
 
-            MessageInfo msg = new MessageInfo()
+            MessageInfo msg = new MessageInfo
             {
-                RenderedText = new RenderedText()
+                RenderedText = new RenderedText
                 {
                     Font = font,
                     FontStyle = FontStyle.BlackBorder,
@@ -31,7 +53,7 @@ namespace ClassicUO.Game.UI
                     IsUnicode = isunicode,
                     MaxWidth = 200,
                     Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                    Text = text,
+                    Text = text
                 },
                 Time = Engine.Ticks + 4000,
                 X = x,
@@ -57,6 +79,7 @@ namespace ClassicUO.Game.UI
                 if (time > 0 && time < 1000)
                 {
                     float alpha = 1f - time / 1000f;
+
                     if (msg.Alpha < alpha)
                         msg.Alpha = alpha;
                 }
@@ -68,8 +91,11 @@ namespace ClassicUO.Game.UI
                 else
                 {
                     int count = 0;
-                    Rectangle r1 = new Rectangle(msg.X, msg.Y, msg.RenderedText.Width, msg.RenderedText.Height);
-                    r1.X -= r1.Width >> 1;
+                    _rects[0].X = msg.X;
+                    _rects[0].Y = msg.Y;
+                    _rects[0].Width = msg.RenderedText.Width;
+                    _rects[0].Height = msg.RenderedText.Height;
+                    _rects[0].X -= _rects[0].Width >> 1;
 
                     for (int j = i + 1; j < _messages.Count; j++)
                     {
@@ -77,22 +103,24 @@ namespace ClassicUO.Game.UI
 
                         if (msg.X == m.X && msg.Y == m.Y)
                             continue;
-                        
-                        Rectangle r2 = new Rectangle(m.X, m.Y, m.RenderedText.Width, m.RenderedText.Height);
-                        r2.X -= r2.Width >> 1;
 
-                        if (r1.Intersects(r2))
+                        _rects[1].X = m.X;
+                        _rects[1].Y = m.Y;
+                        _rects[1].Width = m.RenderedText.Width;
+                        _rects[1].Height = m.RenderedText.Height;
+                        _rects[1].X -= _rects[1].Width >> 1;
+
+                        if (_rects[0].Intersects(_rects[1]))
                         {
-                            msg.Alpha = 0.3f + (0.05f * count);
+                            msg.Alpha = 0.3f + 0.05f * count;
                             count++;
                         }
                     }
-
                 }
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             for (int i = 0; i < _messages.Count; i++)
             {

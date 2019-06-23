@@ -33,7 +33,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class Entity : GameObject
     {
-        private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
         private Item[] _equipment;
@@ -41,15 +40,9 @@ namespace ClassicUO.Game.GameObjects
         private Hue _hue;
         private string _name;
 
-        protected Entity(Serial serial)
-        {
-            Serial = serial;
-            Items = new EntityCollection<Item>();
-        }
-
         protected long LastAnimationChangeTime { get; set; }
 
-        public EntityCollection<Item> Items { get; }
+        public EntityCollection<Item> Items { get; private set; }
 
         public bool HasEquipment => _equipment != null;
 
@@ -60,8 +53,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Serial Serial { get; set; }
+        public bool IsClicked { get; set; }
 
-        public ConcurrentDictionary<int, Property> Properties => _properties;
+        public ConcurrentDictionary<int, Property> Properties { get; } = new ConcurrentDictionary<int, Property>();
 
         public override Graphic Graphic
         {
@@ -124,6 +118,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _direction = value;
                     _delta |= Delta.Position;
+                    OnDirectionChanged();
                 }
             }
         }
@@ -145,13 +140,20 @@ namespace ClassicUO.Game.GameObjects
 
         public uint PropertiesHash { get; set; }
 
+        protected Entity(Serial serial)
+        {
+            Serial = serial;
+            Items = new EntityCollection<Item>();
+        }
+
+
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
         {
-            _properties.Clear();
+            Properties.Clear();
             int temp = 0;
-            foreach (Property p in props) _properties.TryAdd(temp++, p);
+            foreach (Property p in props) Properties.TryAdd(temp++, p);
             _delta |= Delta.Properties;
         }
 
@@ -197,7 +199,7 @@ namespace ClassicUO.Game.GameObjects
         public override void Destroy()
         {
             _equipment = null;
-            _properties.Clear();
+            Properties.Clear();
             base.Destroy();
         }
 
@@ -217,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public abstract void ProcessAnimation();
+        public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
 
         public abstract Graphic GetGraphicForAnimation();
 

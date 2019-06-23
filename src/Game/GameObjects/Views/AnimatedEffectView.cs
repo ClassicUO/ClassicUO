@@ -87,13 +87,15 @@ namespace ClassicUO.Game.GameObjects
         });
         private Graphic _displayedGraphic = Graphic.INVALID;
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
 
             if (AnimationGraphic == Graphic.INVALID)
                 return false;
+
+            ResetHueVector();
 
             ushort hue = Hue;
 
@@ -124,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -135,9 +137,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0);
-            }
 
             switch (Blend)
             {
@@ -147,6 +147,7 @@ namespace ClassicUO.Game.GameObjects
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
@@ -154,24 +155,28 @@ namespace ClassicUO.Game.GameObjects
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
                     base.Draw(batcher, posX, posY);
                     batcher.SetBlendState(null);
 
                     break;
+
                 default:
                     base.Draw(batcher, posX, posY);
 

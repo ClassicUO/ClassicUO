@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateMap()
         {
-            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort)5011 : (ushort)5010);
+            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
             Width = _gumpTexture.Width;
             Height = _gumpTexture.Height;
             CreateMiniMapTexture(true);
@@ -82,10 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (!World.InGame)
                 return;
 
-            if (_gumpTexture == null || _gumpTexture.IsDisposed)
-            {
-                CreateMap();
-            }
+            if (_gumpTexture == null || _gumpTexture.IsDisposed) CreateMap();
 
             if (_lastMap != World.MapIndex)
             {
@@ -107,14 +104,16 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
                 return false;
 
-            batcher.Draw2D(_gumpTexture, x, y, Vector3.Zero);
+            Vector3 zero = Vector3.Zero;
+
+            batcher.Draw2D(_gumpTexture, x, y, ref zero);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, Vector3.Zero);
+            batcher.Draw2D(_mapTexture, x, y, ref zero);
 
             if (_draw)
             {
@@ -142,14 +141,16 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    Vector3 hue = Vector3.Zero;
-                    ShaderHuesTraslator.GetHueVector(ref hue, Notoriety.GetHue(mob.NotorietyFlag));
+                    zero.Z = 0;
 
-                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, hue);
+                    ShaderHuesTraslator.GetHueVector(ref zero, Notoriety.GetHue(mob.NotorietyFlag));
+
+                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref zero);
                 }
 
                 //DRAW DOT OF PLAYER
-                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, Vector3.Zero);
+                zero.X = zero.Y = zero.Z = 0;
+                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, ref zero);
             }
 
             return base.Draw(batcher, x, y);
@@ -161,6 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _useLargeMap = !_useLargeMap;
                 CreateMap();
+
                 return true;
             }
 
@@ -180,13 +182,13 @@ namespace ClassicUO.Game.UI.Gumps
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 
-            
+
             if (_x != lastX || _y != lastY)
             {
                 _x = lastX;
                 _y = lastY;
             }
-            else if(!force)
+            else if (!force)
                 return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)
@@ -309,7 +311,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return _mapTexture.Contains(x, y);
         }

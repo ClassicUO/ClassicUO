@@ -66,9 +66,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             SetStep(CharCreationStep.ChooseProfession);
         }
 
-        public void SetAttributes()
+        public void SetAttributes(bool force = false)
         {
-            SetStep(CharCreationStep.ChooseCity);
+            SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void SetCity(CityInfo city)
@@ -125,6 +125,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(1);
 
                     break;
+
                 case CharCreationStep.ChooseProfession:
                     var existing = Children.FirstOrDefault(page => page.Page == 2);
 
@@ -136,6 +137,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(2);
 
                     break;
+
                 case CharCreationStep.ChooseTrade:
                     existing = Children.FirstOrDefault(page => page.Page == 3);
 
@@ -146,6 +148,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     ChangePage(3);
 
                     break;
+
                 case CharCreationStep.ChooseCity:
                     existing = Children.FirstOrDefault(page => page.Page == 4);
 

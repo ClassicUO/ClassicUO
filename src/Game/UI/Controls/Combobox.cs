@@ -25,7 +25,6 @@ using System;
 using System.Linq;
 
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -54,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             });
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            Add(_label = new Label(initialText, false, 0x0453, font: _font, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            Add(_label = new Label(initialText, false, 0x0453, font: _font)
             {
                 X = 2, Y = 5
             });
@@ -120,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 foreach (var item in items)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: _box._font, align: TEXT_ALIGN_TYPE.TS_LEFT)
+                    var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,

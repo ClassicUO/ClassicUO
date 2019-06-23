@@ -22,6 +22,8 @@
 #endregion
 
 using ClassicUO.Input;
+using ClassicUO.IO;
+using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
@@ -38,12 +40,16 @@ namespace ClassicUO.Game.UI.Controls
         private GumpPic _gumplingTitle;
         private int _gumplingTitleGumpID;
         private bool _gumplingTitleGumpIDDelta;
-        private GumpPicTiled _gumpMiddle;
-        private GumpPic _gumpTop, _gumpBottom;
+        private readonly GumpPicTiled _gumpMiddle;
+        private readonly GumpPicTiled _gumpRight;
+        private readonly GumpPic _gumpTop;
+        private readonly GumpPic _gumpBottom;
         private bool _isExpanding;
         private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
 
-        public ExpandableScroll(int x, int y, int height, bool isResizable = true)
+        private readonly int _maxWidth;
+
+        public ExpandableScroll(int x, int y, int height, ushort graphic, bool isResizable = true)
         {
             X = x;
             Y = y;
@@ -51,6 +57,58 @@ namespace ClassicUO.Game.UI.Controls
             _isResizable = isResizable;
             CanMove = true;
             AcceptMouseInput = true;
+
+            var textures = new SpriteTexture[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                var t = FileManager.Gumps.GetTexture((ushort) (graphic + i));
+
+                if (t == null)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                if (t.Width > _maxWidth)
+                    _maxWidth = t.Width;
+
+                textures[i] = t;
+            }
+
+
+            Add(_gumpTop = new GumpPic(0, 0, graphic, 0));
+            Add(_gumpRight = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 1)));
+            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 2)));
+            Add(_gumpBottom = new GumpPic(0, 0, (ushort) (graphic + 3), 0));
+
+            if (_isResizable)
+            {
+                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = 0,
+                    Y = 0
+                });
+                _gumpExpander.MouseDown += expander_OnMouseDown;
+                _gumpExpander.MouseUp += expander_OnMouseUp;
+                _gumpExpander.MouseOver += expander_OnMouseOver;
+            }
+
+            int off = textures[0].Width - textures[3].Width;
+            _maxWidth = textures[1].Width;
+
+            _gumpRight.X = _gumpMiddle.X = 17;
+            _gumpRight.X = _gumpMiddle.Y = _gumplingMidY;
+            _gumpRight.Width = _gumpMiddle.Width = _maxWidth;
+            _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
+            _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
+
+            Width = _gumpMiddle.Width;
+
+
+            WantUpdateSize = true;
         }
 
         private int _gumplingMidY => _gumpTop.Height;
@@ -74,25 +132,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public int SpecialHeight { get; set; }
 
-        protected override void OnInitialize()
-        {
-            Add(_gumpTop = new GumpPic(0, 0, 0x0820, 0));
-            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, 0x0822));
-            Add(_gumpBottom = new GumpPic(0, 0, 0x0823, 0));
-
-            if (_isResizable)
-            {
-                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 0, Y = 0
-                });
-                _gumpExpander.MouseDown += expander_OnMouseDown;
-                _gumpExpander.MouseUp += expander_OnMouseUp;
-                _gumpExpander.MouseOver += expander_OnMouseOver;
-            }
-
-            WantUpdateSize = true;
-        }
 
         public override void Dispose()
         {
@@ -108,7 +147,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             Point position = new Point(x + ScreenCoordinateX, y + ScreenCoordinateY);
 
@@ -116,6 +155,9 @@ namespace ClassicUO.Game.UI.Controls
                 return true;
 
             if (_gumpMiddle.HitTest(position) != null)
+                return true;
+
+            if (_gumpRight.HitTest(position) != null)
                 return true;
 
             if (_gumpBottom.HitTest(position) != null)
@@ -154,11 +196,11 @@ namespace ClassicUO.Game.UI.Controls
                 _gumpTop.Y = 0;
                 _gumpTop.WantUpdateSize = true;
                 //MIDDLE
-                _gumpMiddle.X = 17;
-                _gumpMiddle.Y = _gumplingMidY;
-                _gumpMiddle.Width = 263;
-                _gumpMiddle.Height = _gumplingMidHeight;
-                _gumpMiddle.WantUpdateSize = true;
+                _gumpRight.X = _gumpMiddle.X = 17;
+                _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
+                _gumpRight.Width = _gumpMiddle.Width = _maxWidth;
+                _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
+                _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
                 //BOTTOM
                 _gumpBottom.X = 17;
                 _gumpBottom.Y = _gumplingBottomY;
@@ -179,6 +221,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 WantUpdateSize = true;
+                Parent?.OnPageChanged();
             }
 
             base.Update(totalMS, frameMS);

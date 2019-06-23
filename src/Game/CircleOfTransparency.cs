@@ -1,9 +1,30 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
@@ -27,15 +48,6 @@ namespace ClassicUO.Game
             return state;
         });
 
-        DepthStencilState s1 = new DepthStencilState
-        {
-            StencilEnable = true,
-            StencilFunction = CompareFunction.Always,
-            StencilPass = StencilOperation.Replace,
-            ReferenceStencil = 0,
-            DepthBufferEnable = true,
-        };
-
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
             BlendState blend = BlendState.AlphaBlend;
@@ -47,6 +59,15 @@ namespace ClassicUO.Game
 
         private Texture2D _texture;
         private short _width, _height;
+
+        private DepthStencilState s1 = new DepthStencilState
+        {
+            StencilEnable = true,
+            StencilFunction = CompareFunction.Always,
+            StencilPass = StencilOperation.Replace,
+            ReferenceStencil = 0,
+            DepthBufferEnable = true
+        };
 
         private CircleOfTransparency(int radius)
         {
@@ -92,7 +113,7 @@ namespace ClassicUO.Game
             return pixels;
         }
 
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
             {
@@ -104,7 +125,7 @@ namespace ClassicUO.Game
                 //batcher.SetBlendState(_checkerBlend.Value);
 
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
-                batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
+                //batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
 
 

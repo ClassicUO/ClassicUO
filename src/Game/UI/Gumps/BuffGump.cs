@@ -177,6 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Height = 25 + offset;
 
                         break;
+
                     case GumpDirection.LEFT_HORIZONTAL:
                         e.X = 26 + offset;
                         e.Y = 5;
@@ -186,6 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Width = 26 + offset;
 
                         break;
+
                     case GumpDirection.RIGHT_VERTICAL:
                         e.X = 5;
                         e.Y = Height - 48 - offset;
@@ -206,6 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
                         offset += 31;
 
                         break;
+
                     case GumpDirection.RIGHT_HORIZONTAL:
                         e.X = Width - 48 - offset;
                         e.Y = 5;
@@ -253,18 +256,21 @@ namespace ClassicUO.Game.UI.Gumps
                     _direction = GumpDirection.LEFT_HORIZONTAL;
 
                     break;
+
                 case 0x7581:
                     _button.X = 34;
                     _button.Y = 78;
                     _direction = GumpDirection.RIGHT_VERTICAL;
 
                     break;
+
                 case 0x7582:
                     _button.X = 76;
                     _button.Y = 36;
                     _direction = GumpDirection.RIGHT_HORIZONTAL;
 
                     break;
+
                 case 0x757F:
                 default:
                     _button.X = 0;
@@ -372,12 +378,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public override bool Draw(Batcher2D batcher, int x, int y)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 1.0f - _alpha / 255f);
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 1.0f - _alpha / 255f, true);
 
-                return batcher.Draw2D(Texture, x, y, hue);
+                return batcher.Draw2D(Texture, x, y, ref hue);
             }
         }
     }

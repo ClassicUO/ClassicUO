@@ -28,11 +28,9 @@ using System.Text;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
@@ -106,6 +104,7 @@ namespace ClassicUO.Game
                             sb.Replace("{spell}", spell.Name);
                             text = sb.ToString().Trim();
                         }
+
                         //server hue color per default if not enabled
                         if (Engine.Profile.Current.EnabledSpellHue)
                         {
@@ -120,6 +119,7 @@ namespace ClassicUO.Game
 
                     goto case MessageType.Label;
                 }
+
                 case MessageType.Focus:
                 case MessageType.Whisper:
                 case MessageType.Yell:
@@ -131,16 +131,12 @@ namespace ClassicUO.Game
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        Gump gump = Engine.UI.GetByLocalSerial<Gump>(it.Container);
+                        Gump gump = Engine.UI.GetControl<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
-                        {
                             paperDoll.AddLabel(text, hue, font, unicode);
-                        }
                         else if (gump is ContainerGump container)
-                        {
                             container.AddLabel(text, hue, font, unicode);
-                        }
                         else
                         {
                             Entity ent = World.Get(it.RootContainer);
@@ -148,10 +144,10 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            var trade = Engine.UI.GetByLocalSerial<TradingGump>(ent);
+                            var trade = Engine.UI.GetControl<TradingGump>(ent);
 
                             if (trade == null)
-                            { 
+                            {
                                 Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
 
                                 if (item == null)
@@ -161,9 +157,7 @@ namespace ClassicUO.Game
                             }
 
                             if (trade != null)
-                            {
                                 trade.AddLabel(text, hue, font, unicode);
-                            }
                             else
                                 Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }
@@ -172,6 +166,7 @@ namespace ClassicUO.Game
                         parent.AddOverhead(type, text, font, hue, unicode);
 
                     break;
+
                 case MessageType.Emote:
                     parent?.AddOverhead(type, $"*{text}*", font, hue, unicode);
 
@@ -186,6 +181,7 @@ namespace ClassicUO.Game
                 case MessageType.Alliance:
 
                     break;
+
                 default:
                     parent?.AddOverhead(type, text, font, hue, unicode);
 

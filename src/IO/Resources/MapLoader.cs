@@ -1,4 +1,27 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -113,7 +136,7 @@ namespace ClassicUO.IO.Resources
                 MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
                 //if (Engine.GlobalSettings.PreloadMaps)
-                    LoadMap(i);
+                LoadMap(i);
             }
         }
 
@@ -134,10 +157,10 @@ namespace ClassicUO.IO.Resources
 
         public unsafe void LoadMap(int i)
         {
-            if (i < 0 || i >= 5 || _filesMap[i] == null)
+            if (i < 0 || i > 5 || _filesMap[i] == null)
                 i = 0;
 
-            if (/*Engine.GlobalSettings.PreloadMaps &&*/ BlockData[i] != null || _filesMap[i] == null)
+            if (BlockData[i] != null || _filesMap[i] == null)
                 return;
 
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
@@ -211,13 +234,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public void UnloadMap(int i)
-        {
-            if (Engine.GlobalSettings.PreloadMaps)
-                return;
-
-            //if (BlockData[i] != null) BlockData[i] = null;
-        }
 
         public void PatchMapBlock(ulong block, ulong address)
         {
@@ -277,7 +293,7 @@ namespace ClassicUO.IO.Resources
                     if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
 
-                    mapPatchesCount = Math.Min(mapPatchesCount, ((int)difl.Length >> 2));
+                    mapPatchesCount = Math.Min(mapPatchesCount, (int) difl.Length >> 2);
 
                     difl.Seek(0);
                     dif.Seek(0);
@@ -306,7 +322,7 @@ namespace ClassicUO.IO.Resources
 
                     ulong startAddress = (ulong) _staDif[i].StartAddress;
 
-                    staticPatchesCount = Math.Min(staticPatchesCount, ((int)difl.Length >> 2));
+                    staticPatchesCount = Math.Min(staticPatchesCount, (int) difl.Length >> 2);
 
                     difl.Seek(0);
                     difi.Seek(0);
@@ -386,8 +402,16 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public void SanitizeMapIndex(ref int map)
+        {
+            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero || _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero || _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
+                map = 0;
+        }
+
         public unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
+            SanitizeMapIndex(ref map);
+
             ref IndexMap indexMap = ref GetIndex(map, blockX, blockY);
 
             if (indexMap.MapAddress == 0)

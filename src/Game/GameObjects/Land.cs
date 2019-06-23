@@ -24,6 +24,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -33,8 +34,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        private LandTiles? _tileData;
-
         public Land(Graphic graphic)
         {
             Graphic = graphic;
@@ -45,6 +44,11 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
+        private LandTiles? _tileData;
+
+        public Vector3[] Normals;
+
+        public Rectangle Rectangle;
 
         public LandTiles TileData
         {
@@ -63,12 +67,7 @@ namespace ClassicUO.Game.GameObjects
         public sbyte AverageZ { get; set; }
 
         public bool IsStretched { get; set; }
-
-        public readonly Vector3[] Normals = new Vector3[4];
-
-        public Rectangle Rectangle;
-
-
+        
         public void Calculate(int x, int y, sbyte z)
         {
             UpdateStreched(x, y, z);

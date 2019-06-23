@@ -66,7 +66,7 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
-                    value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
                 _font = value;
             }
         }
@@ -132,12 +132,12 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(Batcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
             return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
-        public bool Draw(Batcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
@@ -179,7 +179,7 @@ namespace ClassicUO.Renderer
                 huev.Y = 1;
             huev.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, huev);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref huev);
         }
 
         public void CreateTexture()

@@ -25,6 +25,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -36,11 +37,16 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Item : Entity
     {
         private ushort _amount;
+
+        private AnimDataFrame2 _animDataFrame;
+        private int _animSpeed;
         private Serial _container;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
 
+
         private StaticTiles? _itemData;
+
         private Layer _layer;
         private uint _price;
         private ulong _spellsBitFiled;
@@ -183,19 +189,6 @@ namespace ClassicUO.Game.GameObjects
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
 
-        public override Graphic Graphic
-        {
-            get => base.Graphic;
-            set
-            {
-                if (base.Graphic != value)
-                {
-                    base.Graphic = value;
-                    _itemData = FileManager.TileData.StaticData[value];
-                }
-            }
-        }
-
         public bool CharacterIsBehindFoliage { get; set; }
 
         public StaticTiles ItemData
@@ -306,7 +299,7 @@ namespace ClassicUO.Game.GameObjects
 
             FileManager.Multi.ReleaseLastMultiDataRead();
 
-            MultiInfo = new MultiInfo((short)X, (short)Y)
+            MultiInfo = new MultiInfo((short) X, (short) Y)
             {
                 MinX = minX,
                 MaxX = maxX,
@@ -318,15 +311,14 @@ namespace ClassicUO.Game.GameObjects
 
             house.Generate();
 
-            Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+            Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
         }
-
-        private AnimDataFrame2 _animDataFrame;
-        private int _animSpeed;
 
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {
+            _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+
             if (!IsMulti)
             {
                 if (!IsCorpse)
@@ -341,12 +333,10 @@ namespace ClassicUO.Game.GameObjects
                         LastAnimationChangeTime = Engine.Ticks;
                     }
                     else
-                    {
                         _animDataFrame = default;
-                    }
-                    
+
                     _originalGraphic = DisplayedGraphic;
-                    _force = true;                    
+                    _force = true;
                 }
                 else
                 {
@@ -368,10 +358,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), Position);
 
-                if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ViewRange))
+                if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
                 {
                     LoadMulti();
-                    AllowedToDraw = MultiGraphic != 0;
+                    AllowedToDraw = MultiGraphic > 2;
                     _originalGraphic = MultiGraphic;
                     _force = true;
                 }
@@ -382,9 +372,12 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDestroyed)
+                return;
+
             base.Update(totalMS, frameMS);
 
-            ProcessAnimation();
+            ProcessAnimation(out _);
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -408,6 +401,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E91: // 16017
 
                     {
@@ -415,6 +409,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E92: // 16018
 
                     {
@@ -422,6 +417,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E94: // 16020
 
                     {
@@ -429,6 +425,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E95: // 16021
 
                     {
@@ -436,6 +433,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E97: // 16023 Ethereal Giant Beetle
 
                     {
@@ -443,6 +441,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E98: // 16024 Ethereal Swamp Dragon
 
                     {
@@ -450,6 +449,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E9A: // 16026 Ethereal Ridgeback
 
                     {
@@ -457,6 +457,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E9B: // 16027
                     case 0x3E9D: // 16029 Ethereal Unicorn
 
@@ -465,6 +466,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E9C: // 16028 Ethereal Kirin
 
                     {
@@ -472,6 +474,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3E9E: // 16030
 
                     {
@@ -479,6 +482,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA0: // 16032 light grey/horse3
 
                     {
@@ -486,6 +490,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA1: // 16033 greybrown/horse4
 
                     {
@@ -493,6 +498,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA2: // 16034 dark brown/horse
 
                     {
@@ -500,6 +506,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA3: // 16035 desert ostard
 
                     {
@@ -507,6 +514,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA4: // 16036 frenzied ostard (=zostrich)
 
                     {
@@ -514,6 +522,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA5: // 16037 forest ostard
 
                     {
@@ -521,6 +530,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA6: // 16038 Llama
 
                     {
@@ -528,6 +538,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA7: // 16039 Nightmare / Vortex
 
                     {
@@ -535,6 +546,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA8: // 16040 Silver Steed
 
                     {
@@ -542,6 +554,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EA9: // 16041 Nightmare
 
                     {
@@ -549,6 +562,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EAA: // 16042 Ethereal Horse
 
                     {
@@ -556,6 +570,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EAB: // 16043 Ethereal Llama
 
                     {
@@ -563,6 +578,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EAC: // 16044 Ethereal Ostard
 
                     {
@@ -570,6 +586,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EAD: // 16045 Kirin
 
                     {
@@ -577,6 +594,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EAF: // 16047 War Horse (Blood Red)
 
                     {
@@ -584,6 +602,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB0: // 16048 War Horse (Light Green)
 
                     {
@@ -591,6 +610,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB1: // 16049 War Horse (Light Blue)
 
                     {
@@ -598,6 +618,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB2: // 16050 War Horse (Purple)
 
                     {
@@ -605,6 +626,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB3: // 16051 Sea Horse (Medium Blue)
 
                     {
@@ -612,6 +634,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB4: // 16052 Unicorn
 
                     {
@@ -619,6 +642,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB5: // 16053 Nightmare
 
                     {
@@ -626,6 +650,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB6: // 16054 Nightmare 4
 
                     {
@@ -633,6 +658,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB7: // 16055 Dark Steed
 
                     {
@@ -640,6 +666,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EB8: // 16056 Ridgeback
 
                     {
@@ -647,6 +674,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EBA: // 16058 Ridgeback, Savage
 
                     {
@@ -654,6 +682,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EBB: // 16059 Skeletal Mount
 
                     {
@@ -661,6 +690,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EBC: // 16060 Beetle
 
                     {
@@ -668,6 +698,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EBD: // 16061 SwampDragon
 
                     {
@@ -675,6 +706,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EBE: // 16062 Armored Swamp Dragon
 
                     {
@@ -682,6 +714,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC3: //16067 Beetle
 
                     {
@@ -689,6 +722,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC5: // 16069
                     case 0x3F3A: // 16186 snow bear ???
 
@@ -697,6 +731,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC6: // 16070 Boura
 
                     {
@@ -704,6 +739,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC7: // 16071 Tiger
 
                     {
@@ -711,6 +747,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC8: // 16072 Tiger
 
                     {
@@ -718,6 +755,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3EC9: // 16073
 
                     {
@@ -725,6 +763,7 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     default: //lightbrown/horse2
 
                     {
@@ -773,18 +812,20 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
-        public override void ProcessAnimation()
+        public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
+            dir = 0;
+
             if (IsCorpse)
             {
-                byte dir = (byte) Layer;
+                dir = (byte) Layer;
 
                 if (LastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    var corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
 
                     if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
 
@@ -796,7 +837,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[FileManager.Animations.Direction];
+                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         FileManager.Animations.AnimID = id;
                         FileManager.Animations.AnimGroup = animGroup;
                         FileManager.Animations.Direction = dir;
@@ -822,7 +863,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 unsafe
                 {
-                    _originalGraphic = (Graphic)(DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
+                    _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
                 }
 
                 if (AnimIndex >= _animDataFrame.FrameCount)

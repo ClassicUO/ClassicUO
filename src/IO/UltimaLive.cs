@@ -61,6 +61,7 @@ namespace ClassicUO.IO
         //       values in index 2 and 3 is for the wrap size of map (virtual size), x and y
         private ushort[,] MapSizeWrapSize;
         protected string ShardName;
+        internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
 
         internal static void Enable()
         {
@@ -144,6 +145,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x00: //statics update
 
                 {
@@ -227,7 +229,7 @@ namespace ClassicUO.IO
 
                         _UL._ULMap.ReloadBlock(mapID, block);
                         chunk?.LoadStatics(mapID);
-                        Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+                        Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapID][block] = ushort.MaxValue;
@@ -235,6 +237,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x01: //map definition update
 
                 {
@@ -306,6 +309,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x02: //Live login confirmation
 
                 {
@@ -330,6 +334,7 @@ namespace ClassicUO.IO
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                     break;
                 }
+
                 /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
                     {
                         break;
@@ -395,7 +400,7 @@ namespace ClassicUO.IO
                     }
                 }
 
-                Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+                Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
             }
         }
 
@@ -651,15 +656,12 @@ namespace ClassicUO.IO
                 if (!foundedOneMap)
                     throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
 
-                int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
-
                 for (int i = 0; i < NumMaps; i++)
                 {
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-
-                    //if (Engine.GlobalSettings.PreloadMaps)
-                        LoadMap(i);
+                    //on ultimalive map always preload
+                    LoadMap(i);
                 }
             }
 

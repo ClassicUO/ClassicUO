@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-            short priorityZ = obj.Position.Z;
+            short priorityZ = obj.Z;
 
             switch (obj)
             {
@@ -54,18 +54,22 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
 
                     break;
+
                 case Mobile _:
                     priorityZ++;
 
                     break;
+
                 case Item item when item.IsCorpse:
                     priorityZ++;
 
                     break;
+
                 case GameEffect effect when effect.Source == null || !effect.IsItemEffect:
                     priorityZ += 2;
 
                     break;
+
                 default:
 
                 {
@@ -146,5 +150,6 @@ namespace ClassicUO.Game.Map
             obj.Left = null;
             obj.Right = null;
         }
+
     }
 }

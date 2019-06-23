@@ -182,6 +182,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -208,17 +209,17 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
-                base.Draw(batcher, x, y); // TODO: set a scrollarea
+                base.Draw(batcher, x, y);
                 _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
@@ -234,7 +235,7 @@ namespace ClassicUO.Game.UI.Controls
                 foreach (WebLinkRect link in _gameText.Links)
                 {
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, _scrollBar.Value + y);
+                    bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
                     if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {

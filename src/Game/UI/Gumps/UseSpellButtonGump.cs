@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            Engine.UI.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
+            Engine.UI.GetControl<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
             _spell = spell;
             BuildGump();
         }
@@ -61,9 +61,15 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
+                GameActions.CastSpell(_spell.ID);
+        }
+
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
+            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
                 GameActions.CastSpell(_spell.ID);
 
             return true;

@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanBeSaved = true;
 
-            Add(_background = new ExpandableScroll(0, 0, Height)
+            Add(_background = new ExpandableScroll(0, 0, Height, 0x0820)
             {
                 TitleGumpID = 0x82A
             });
@@ -62,6 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.Value -= 5;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += 5;
 
@@ -92,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
             //TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, (byte) entry.Font, entry.Hue, entry.IsUnicode);
+            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode);
         }
 
         //private void TransformFont(ref byte font, ref bool asUnicode)

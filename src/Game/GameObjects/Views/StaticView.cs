@@ -25,13 +25,11 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static
     {
-        private readonly int _canBeTransparent;
+        private int _canBeTransparent;
         private Graphic _oldGraphic;
 
         public bool CharacterIsBehindFoliage { get; set; }
@@ -48,10 +46,12 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
+
+            ResetHueVector();
 
             if (Texture == null || Texture.IsDisposed || _oldGraphic != Graphic)
             {
@@ -85,14 +85,13 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            
 
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -103,9 +102,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
-            }
 
             Engine.DebugInfo.StaticsRendered++;
             base.Draw(batcher, posX, posY);
@@ -134,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
                 if (d <= maxD && d <= 3)
                     return;
             }
-            
+
             if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }

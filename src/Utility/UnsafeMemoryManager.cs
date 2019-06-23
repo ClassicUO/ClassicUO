@@ -25,20 +25,23 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Utility.Platforms;
+
 namespace ClassicUO.Utility
 {
     public static unsafe class UnsafeMemoryManager
     {
         static UnsafeMemoryManager()
         {
-            Console.WriteLine("Platform: {0}", Platforms.PlatformHelper.IsMonoRuntime ? "Mono" : ".NET");
+            Console.WriteLine("Platform: {0}", PlatformHelper.IsMonoRuntime ? "Mono" : ".NET");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void* AsPointer<T>(ref T v)
         {
             TypedReference t = __makeref(v);
-            return (void*)*((IntPtr*)&t + (Platforms.PlatformHelper.IsMonoRuntime ? 1 : 0));
+
+            return (void*) *((IntPtr*) &t + (PlatformHelper.IsMonoRuntime ? 1 : 0));
         }
 
         public static T ToStruct<T>(IntPtr ptr)
@@ -49,18 +52,15 @@ namespace ClassicUO.Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ToStruct<T>(IntPtr ptr, int size)
         {
-            byte* str = (byte*)ptr;
+            byte* str = (byte*) ptr;
 
             T result = default;
             TypedReference resultRef = __makeref(result);
-            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + (Platforms.PlatformHelper.IsMonoRuntime ? 1 : 0));
+            byte* resultPtr = (byte*) *((IntPtr*) &resultRef + (PlatformHelper.IsMonoRuntime ? 1 : 0));
 
             int sizeOf = size;
 
-            for (int i = 0; i < sizeOf; i++)
-            {
-                resultPtr[i] = str[i];
-            }
+            for (int i = 0; i < sizeOf; i++) resultPtr[i] = str[i];
 
             return result;
         }
@@ -81,26 +81,18 @@ namespace ClassicUO.Utility
             TypedReference tRef1 = __makeref(doubleStruct.Second);
             IntPtr ptrToT0, ptrToT1;
 
-            if (Platforms.PlatformHelper.IsMonoRuntime)
+            if (PlatformHelper.IsMonoRuntime)
             {
-                ptrToT0 = *(((IntPtr*)&tRef0) + 1);
-                ptrToT1 = *(((IntPtr*)&tRef1) + 1);
+                ptrToT0 = *((IntPtr*) &tRef0 + 1);
+                ptrToT1 = *((IntPtr*) &tRef1 + 1);
             }
             else
             {
-                ptrToT0 = *(IntPtr*)&tRef0;
-                ptrToT1 = *(IntPtr*)&tRef1;
+                ptrToT0 = *(IntPtr*) &tRef0;
+                ptrToT1 = *(IntPtr*) &tRef1;
             }
 
-            return (int)((byte*)ptrToT1 - (byte*)ptrToT0);
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleStruct<T>
-        {
-            public T First;
-            public T Second;
-            public static readonly DoubleStruct<T> Value;
+            return (int) ((byte*) ptrToT1 - (byte*) ptrToT0);
         }
 
 
@@ -116,10 +108,10 @@ namespace ClassicUO.Utility
             TypedReference curValueRef = __makeref(curValue);
 
 
-            int offset = (Platforms.PlatformHelper.IsMonoRuntime ? 1 : 0);
+            int offset = PlatformHelper.IsMonoRuntime ? 1 : 0;
 
-            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + offset);
-            byte* curValuePtr = (byte*)*((IntPtr*)&curValueRef + offset);
+            byte* resultPtr = (byte*) *((IntPtr*) &resultRef + offset);
+            byte* curValuePtr = (byte*) *((IntPtr*) &curValueRef + offset);
 
             //for (int i = 0; i < sizeBytes; ++i)
             //    resultPtr[i] = curValuePtr[i];
@@ -127,6 +119,14 @@ namespace ClassicUO.Utility
             Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
 
             return result;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct DoubleStruct<T>
+        {
+            public T First;
+            public T Second;
+            public static readonly DoubleStruct<T> Value;
         }
 
         //[StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -27,6 +27,7 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -51,14 +52,21 @@ namespace ClassicUO.Game
             _pickUpAction = onPickUpAction;
         }
 
-        public static void ToggleWarMode()
+        public static void ChangeWarMode(byte status = 0xFF)
         {
-            SetWarMode(!World.Player.InWarMode);
-        }
+            bool newStatus = !World.Player.InWarMode;
 
-        public static void SetWarMode(bool state)
-        {
-            Socket.Send(new PChangeWarMode(state));
+            if (status != 0xFF)
+            {
+                bool ok = status != 0;
+
+                if (World.Player.InWarMode == ok)
+                    return;
+
+                newStatus = ok;
+            }
+
+            Socket.Send(new PChangeWarMode(newStatus));
         }
 
         public static void OpenPaperdoll(Serial serial)
@@ -91,6 +99,10 @@ namespace ClassicUO.Game
             Socket.Send(new PAttackRequest(serial));
         }
 
+        public static void DoubleClickQueued(Serial serial)
+        {
+            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+        }
         public static void DoubleClick(Serial serial)
         {
             LastObject = serial;
@@ -101,6 +113,11 @@ namespace ClassicUO.Game
         {
             // add  request context menu
             Socket.Send(new PClickRequest(serial));
+
+            Entity entity = World.Get(serial);
+
+            if (entity != null)
+                entity.IsClicked = true;
         }
 
         public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
@@ -260,8 +277,13 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void OpenPopupMenu(Serial serial)
+        public static void OpenPopupMenu(Serial serial, bool shift = false)
         {
+            shift = shift || Input.Keyboard.Shift;
+
+            if (Engine.Profile.Current.HoldShiftForContext && !shift)
+                return;
+
             Socket.Send(new PRequestPopupMenu(serial));
         }
 
@@ -293,9 +315,8 @@ namespace ClassicUO.Game
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile != World.Player) Socket.Send(new PClickRequest(mobile));
-            }
+                if (mobile != World.Player)
+                    Socket.Send(new PClickRequest(mobile));
 
             foreach (Item item in World.Items.Where(s => s.IsCorpse)) Socket.Send(new PClickRequest(item));
         }
@@ -312,7 +333,7 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook()
         {
-            if (Engine.UI.GetByLocalSerial<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
+            if (Engine.UI.GetControl<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
         }
 
         public static void UsePrimaryAbility()

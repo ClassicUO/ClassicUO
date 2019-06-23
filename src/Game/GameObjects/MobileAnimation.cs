@@ -71,14 +71,20 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void CalculateHight(Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
+        private static void CalculateHight(ushort graphic, Mobile mobile, ANIMATION_FLAGS flags, bool isrun, bool iswalking, ref byte result)
         {
             if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
-                result = 0;
+            {
+                if (result == 0xFF)
+                    result = 0;
+            }
             else if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
             {
                 if (!iswalking)
-                    result = 2;
+                {
+                    if (result == 0xFF)
+                        result = 2;
+                }
                 else if (isrun)
                     result = 1;
                 else
@@ -90,10 +96,13 @@ namespace ClassicUO.Game.GameObjects
                     result = 19;
                 else if (!iswalking)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0)
-                        result = 8;
-                    else
-                        result = 1;
+                    if (result == 0xFF)
+                    {
+                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && FileManager.Animations.AnimationExists(graphic, 8))
+                            result = 8;
+                        else
+                            result = 1;
+                    }
                 }
                 else if (isrun)
                 {
@@ -124,10 +133,12 @@ namespace ClassicUO.Game.GameObjects
                         v13 = 0;
 
                         goto LABEL_243;
+
                     case 1:
                         v13 = 19;
 
                         goto LABEL_243;
+
                     case 5:
                     case 6:
 
@@ -137,14 +148,17 @@ namespace ClassicUO.Game.GameObjects
                             v13 = (ushort) (6 - (RandomHelper.GetValue() % 2 != 0 ? 1 : 0));
 
                         goto LABEL_243;
+
                     case 8:
                         v13 = 2;
 
                         goto LABEL_243;
+
                     case 9:
                         v13 = 17;
 
                         goto LABEL_243;
+
                     case 10:
                         v13 = 18;
 
@@ -152,6 +166,7 @@ namespace ClassicUO.Game.GameObjects
                             v13--;
 
                         goto LABEL_243;
+
                     case 12:
                         v13 = 3;
 
@@ -172,14 +187,17 @@ namespace ClassicUO.Game.GameObjects
                             v13 = 0;
 
                             break;
+
                         case 2:
                             v13 = 8;
 
                             break;
+
                         case 3:
                             v13 = 12;
 
                             break;
+
                         case 4:
                         case 6:
                         case 7:
@@ -191,33 +209,40 @@ namespace ClassicUO.Game.GameObjects
                             v13 = 5;
 
                             break;
+
                         case 5:
                             v13 = 6;
 
                             break;
+
                         case 10:
                         case 21:
                             v13 = 7;
 
                             break;
+
                         case 11:
                             //LABEL_238:
                             v13 = 3;
 
                             break;
+
                         case 17:
                             v13 = 9;
 
                             break;
+
                         case 18:
                             v13 = 10;
 
                             break;
+
                         case 19:
 
                             v13 = 1;
 
                             break;
+
                         default:
                             //LABEL_242:
                             v13 = 2;
@@ -271,6 +296,7 @@ namespace ClassicUO.Game.GameObjects
                             LABEL_222(flags, ref v13);
 
                             return;
+
                         case 11:
                             v13 = 17;
                             LABEL_222(flags, ref v13);
@@ -307,81 +333,96 @@ namespace ClassicUO.Game.GameObjects
                         v13 = 0;
 
                         break;
+
                     case 2:
                         v13 = 21;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 3:
                         v13 = 22;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 4:
                     case 9:
                         v13 = 9;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 5:
                         v13 = 11;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 6:
                         v13 = 13;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 7:
                         v13 = 18;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 8:
                         v13 = 19;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 10:
                     case 21:
                         v13 = 20;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 11:
                         v13 = 3;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 12:
                     case 14:
                         v13 = 16;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 13:
                         //LABEL_202:
                         v13 = 17;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 15:
                     case 16:
                         v13 = 30;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 17:
                         v13 = 5;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 18:
                         v13 = 6;
                         LABEL_222(flags, ref v13);
 
                         return;
+
                     case 19:
                         //LABEL_201:
                         v13 = 1;
@@ -409,6 +450,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (graphic == 0)
                 graphic = mobile.GetGraphicForAnimation();
+
+            if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return 0;
 
             ANIMATION_GROUPS_TYPE type = FileManager.Animations.DataIndex[graphic].Type;
             ANIMATION_GROUPS_TYPE originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
@@ -440,7 +484,7 @@ namespace ClassicUO.Game.GameObjects
 
             ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
 
-            if (mobile.AnimationFromServer)
+            if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {
                 ushort v13 = mobile.AnimationGroup;
 
@@ -476,18 +520,22 @@ namespace ClassicUO.Game.GameObjects
                                     v13 = 0;
 
                                     break;
+
                                 case 24:
                                     v13 = 1;
 
                                     break;
+
                                 case 26:
                                     v13 = 9;
 
                                     break;
+
                                 case 28:
                                     v13 = 10;
 
                                     break;
+
                                 default:
                                     v13 = 2;
 
@@ -549,47 +597,56 @@ namespace ClassicUO.Game.GameObjects
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 1:
                                 v13 = 19;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 3:
                                 v13 = 11;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 5:
                                 v13 = 4;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 6:
                                 v13 = 5;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 7:
                             case 11:
                                 v13 = 10;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 8:
                                 v13 = 2;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 9:
                                 v13 = 17;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 10:
                                 v13 = 18;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 12:
                                 v13 = 3;
                                 LABEL_190(flags, ref v13);
@@ -616,68 +673,82 @@ namespace ClassicUO.Game.GameObjects
                                 v13 = 0;
 
                                 goto LABEL_189;
+
                             case 2:
                                 v13 = 21;
 
                                 goto LABEL_189;
+
                             case 3:
                                 v13 = 22;
 
                                 goto LABEL_189;
+
                             case 4:
                             case 9:
                                 v13 = 9;
 
                                 goto LABEL_189;
+
                             case 5:
                                 //LABEL_163:
                                 v13 = 11;
 
                                 goto LABEL_189;
+
                             case 6:
                                 v13 = 13;
 
                                 goto LABEL_189;
+
                             case 7:
                                 //LABEL_165:
                                 v13 = 18;
 
                                 goto LABEL_189;
+
                             case 8:
                                 //LABEL_172:
                                 v13 = 19;
 
                                 goto LABEL_189;
+
                             case 10:
                             case 21:
                                 v13 = 20;
 
                                 goto LABEL_189;
+
                             case 12:
                             case 14:
                                 v13 = 16;
 
                                 goto LABEL_189;
+
                             case 13:
                                 //LABEL_164:
                                 v13 = 17;
 
                                 goto LABEL_189;
+
                             case 15:
                             case 16:
                                 v13 = 30;
 
                                 goto LABEL_189;
+
                             case 17:
                                 v13 = 5;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 18:
                                 v13 = 6;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 19:
                                 v13 = 1;
                                 LABEL_190(flags, ref v13);
@@ -698,15 +769,18 @@ namespace ClassicUO.Game.GameObjects
                                 v13 = 0;
 
                                 goto LABEL_189;
+
                             case 2:
                                 v13 = 8;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 3:
                                 v13 = 12;
 
                                 goto LABEL_189;
+
                             case 4:
                             case 6:
                             case 7:
@@ -719,32 +793,38 @@ namespace ClassicUO.Game.GameObjects
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 5:
                                 v13 = 6;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 10:
                             case 21:
                                 v13 = 7;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 11:
                                 v13 = 3;
                                 LABEL_190(flags, ref v13);
 
                                 return (byte) v13;
+
                             case 17:
                                 //LABEL_170:
                                 v13 = 9;
 
                                 goto LABEL_189;
+
                             case 18:
                                 //LABEL_162:
                                 v13 = 10;
 
                                 goto LABEL_189;
+
                             case 19:
                                 v13 = 1;
                                 LABEL_190(flags, ref v13);
@@ -766,12 +846,14 @@ namespace ClassicUO.Game.GameObjects
                                 v13 = 0;
 
                                 goto LABEL_189;
+
                             case 2:
                             case 3:
                                 //LABEL_178:
                                 v13 = 8;
 
                                 goto LABEL_189;
+
                             case 4:
                             case 6:
                             case 7:
@@ -784,26 +866,31 @@ namespace ClassicUO.Game.GameObjects
                                 v13 = 5;
 
                                 goto LABEL_189;
+
                             case 5:
                                 //LABEL_184:
                                 v13 = 6;
 
                                 goto LABEL_189;
+
                             case 10:
                             case 21:
                                 //LABEL_185:
                                 v13 = 7;
 
                                 goto LABEL_189;
+
                             case 17:
                                 //LABEL_186:
                                 v13 = 3;
 
                                 goto LABEL_189;
+
                             case 18:
                                 v13 = 4;
 
                                 goto LABEL_189;
+
                             case 19:
                                 LABEL_190(flags, ref v13);
 
@@ -832,7 +919,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            byte result = 0;
+            byte result = mobile.AnimationGroup;
 
 
             bool isWalking = mobile.IsWalking;
@@ -849,32 +936,41 @@ namespace ClassicUO.Game.GameObjects
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
                     if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
-                        CalculateHight(mobile, flags, isRun, isWalking, ref result);
+                        CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
                     else
                     {
                         if (!isWalking)
-                            result = 2;
+                        {
+                            if (result == 0xFF)
+                                result = 2;
+                        }
                         else if (isRun)
-                            result = 1;
+                            result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
                         else
                             result = 0;
                     }
 
                     break;
+
                 case ANIMATION_GROUPS_TYPE.MONSTER:
-                    CalculateHight(mobile, flags, isRun, isWalking, ref result);
+                    CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
 
                     break;
+
                 case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
 
                     if (!isWalking)
-                        result = 2;
+                    {
+                        if (result == 0xFF)
+                            result = 2;
+                    }
                     else if (isRun)
                         result = 1;
                     else
                         result = 0;
 
                     break;
+
                 default:
 
                 {
@@ -882,40 +978,43 @@ namespace ClassicUO.Game.GameObjects
 
                     if (!isWalking)
                     {
-                        bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
-
-                        if (mobile.IsMounted)
-                            result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
-                        else if (!mobile.InWarMode || mobile.IsDead)
-                            result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
-                        else if (haveLightAtHand2)
-                            result = 2;
-                        else
+                        if (result == 0xFF)
                         {
-                            ushort[] handAnimIDs = {0, 0};
-                            Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+                            bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
-                            if (hand1 != null)
-                                handAnimIDs[0] = hand1.ItemData.AnimID;
-
-                            if (hand2 != null)
-                                handAnimIDs[1] = hand2.ItemData.AnimID;
-
-
-                            if (hand1 == null)
+                            if (mobile.IsMounted)
+                                result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
+                            else if (!mobile.InWarMode || mobile.IsDead)
+                                result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
+                            else if (haveLightAtHand2)
+                                result = 2;
+                            else
                             {
+                                ushort[] handAnimIDs = {0, 0};
+                                Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+
+                                if (hand1 != null)
+                                    handAnimIDs[0] = hand1.ItemData.AnimID;
+
                                 if (hand2 != null)
+                                    handAnimIDs[1] = hand2.ItemData.AnimID;
+
+
+                                if (hand1 == null)
                                 {
-                                    result = handAnimIDs.Where(handAnimID => handAnimID >= 0x0263 && handAnimID <= 0x028B)
-                                                        .Any(handBaseGraphic => HANDS_BASE_ANIMID.Any(s => s == handBaseGraphic))
-                                                 ? (byte) 8
-                                                 : (byte) 7;
+                                    if (hand2 != null)
+                                    {
+                                        result = handAnimIDs.Where(handAnimID => handAnimID >= 0x0263 && handAnimID <= 0x028B)
+                                                            .Any(handBaseGraphic => HANDS_BASE_ANIMID.Any(s => s == handBaseGraphic))
+                                                     ? (byte) 8
+                                                     : (byte) 7;
+                                    }
+                                    else
+                                        result = 7;
                                 }
                                 else
                                     result = 7;
                             }
-                            else
-                                result = 7;
                         }
                     }
                     else if (mobile.IsMounted)
@@ -968,6 +1067,7 @@ namespace ClassicUO.Game.GameObjects
 
 
                         break;
+
                     case ANIMATION_GROUPS.AG_HIGHT:
 
                         if (result == 1)
@@ -978,6 +1078,7 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         break;
+
                     case ANIMATION_GROUPS.AG_PEOPLE:
 
                         if (result == 1)
@@ -1057,33 +1158,42 @@ namespace ClassicUO.Game.GameObjects
                 case 0:
 
                     return GetObjectNewAnimationType_0(mobile, action, mode);
+
                 case 1:
                 case 2:
 
                     return GetObjectNewAnimationType_1_2(mobile, action, mode);
+
                 case 3:
 
                     return GetObjectNewAnimationType_3(mobile, action, mode);
+
                 case 4:
 
                     return GetObjectNewAnimationType_4(mobile, action, mode);
+
                 case 5:
 
                     return GetObjectNewAnimationType_5(mobile, action, mode);
+
                 case 6:
                 case 14:
 
                     return GetObjectNewAnimationType_6_14(mobile, action, mode);
+
                 case 7:
 
                     return GetObjectNewAnimationType_7(mobile, action, mode);
+
                 case 8:
 
                     return GetObjectNewAnimationType_8(mobile, action, mode);
+
                 case 9:
                 case 10:
 
                     return GetObjectNewAnimationType_9_10(mobile, action, mode);
+
                 case 11:
 
                     return GetObjectNewAnimationType_11(mobile, action, mode);
@@ -1133,14 +1243,17 @@ namespace ClassicUO.Game.GameObjects
                         case 1:
 
                             return 5;
+
                         case 2:
 
                             return 6;
+
                         case 3:
 
                             if ((ia.Flags & 1) != 0) return 12;
 
                             goto case 0;
+
                         case 0:
 
                             return 4;
@@ -1155,7 +1268,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null)
+                    if (mobile.IsMounted)
                     {
                         if (action > 0)
                         {
@@ -1173,27 +1286,35 @@ namespace ClassicUO.Game.GameObjects
                         default:
 
                             return 31;
+
                         case 1:
 
                             return 18;
+
                         case 2:
 
                             return 19;
+
                         case 6:
 
                             return 12;
+
                         case 7:
 
                             return 13;
+
                         case 8:
 
                             return 14;
+
                         case 3:
 
                             return 11;
+
                         case 4:
 
                             return 9;
+
                         case 5:
 
                             return 10;
@@ -1219,7 +1340,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.IsMounted) return 0xFF;
 
                 return 30;
             }
@@ -1266,7 +1387,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     return 20;
                 }
@@ -1292,7 +1413,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
-                if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                if (mobile.IsMounted)
+                    return 0xFF;
                 if (mode % 2 != 0) return 6;
 
                 return 5;
@@ -1303,6 +1425,7 @@ namespace ClassicUO.Game.GameObjects
                 case 1:
 
                     return 10;
+
                 case 2:
 
                     return 3;
@@ -1322,7 +1445,7 @@ namespace ClassicUO.Game.GameObjects
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 3;
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     return 34;
                 }
@@ -1335,7 +1458,7 @@ namespace ClassicUO.Game.GameObjects
 
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
-            if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+            if (mobile.IsMounted) return 0xFF;
 
             if (action > 0)
             {
@@ -1359,7 +1482,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 9;
 
-                    return mobile.Equipment[(int) Layer.Mount] != null ? (byte) 0xFF : (byte) 33;
+                    return mobile.IsMounted ? (byte) 0xFF : (byte) 33;
                 }
 
                 return 3;
@@ -1387,7 +1510,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
+                    if (mobile.IsMounted) return 0xFF;
 
                     switch (action)
                     {

@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -37,7 +38,9 @@ namespace ClassicUO.Game.Managers
         Object = 0,
         Position = 1,
         MultiPlacement = 2,
-        SetTargetClientSide = 3
+        SetTargetClientSide = 3,
+        Grab,
+        SetGrabBag
     }
 
     public enum TargetType
@@ -58,9 +61,11 @@ namespace ClassicUO.Game.Managers
             XOff = x;
             YOff = y;
             ZOff = z;
+
+            Offset = new Position(XOff, YOff, (sbyte)ZOff);
         }
 
-        public Position Offset => new Position(XOff, YOff, (sbyte) ZOff);
+        public readonly Position Offset;
     }
 
     internal static class TargetManager
@@ -91,14 +96,15 @@ namespace ClassicUO.Game.Managers
         public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
-                throw new Exception("Invalid target type");
+                return;
 
             TargetingState = targeting;
             _targetCursorId = cursorID;
             TargeringType = cursorType;
             IsTargeting = cursorType < TargetType.Cancel;
 
-            if (IsTargeting) Engine.UI.RemoveTargetLineGump(LastTarget);
+            if (IsTargeting)
+                Engine.UI.RemoveTargetLineGump(LastTarget);
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
@@ -144,11 +150,53 @@ namespace ClassicUO.Game.Managers
             else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
                 selectedEntity = overhead.Parent.Parent;
 
+            if (TargetingState == CursorTarget.SetGrabBag)
+            {
+                if (selectedEntity is Item item)
+                {
+                    Engine.Profile.Current.GrabBagSerial = item.Serial;
+                    GameActions.Print($"Grab Bag set: {item.Serial}");
+                }
+
+                ClearTargetingWithoutTargetCancelPacket();
+
+                return;
+            }
+
+            if (TargetingState == CursorTarget.Grab)
+            {
+                if (selectedEntity is Item item)
+                {
+                    GameActions.PickUp(item, item.Amount);
+
+                    var bag = Engine.Profile.Current.GrabBagSerial == 0
+                                  ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                                  : (Serial) Engine.Profile.Current.GrabBagSerial;
+
+                    if (!World.Items.Contains(bag))
+                    {
+                        GameActions.Print("Grab Bag not found, setting to Backpack.");
+                        Engine.Profile.Current.GrabBagSerial = 0;
+                        bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
+                    }
+
+                    GameActions.DropItem(item.Serial, ushort.MaxValue, ushort.MaxValue, 0, bag);
+                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    scene.HeldItem.Enabled = false;
+                    scene.HeldItem.Dropped = false;
+                }
+
+                ClearTargetingWithoutTargetCancelPacket();
+
+                return;
+            }
+
             if (selectedEntity is Entity entity)
             {
                 if (selectedEntity != World.Player)
                 {
-                    Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
+                    Engine.UI.RemoveTargetLineGump(LastAttack);
                     Engine.UI.RemoveTargetLineGump(LastTarget);
                     LastTarget = entity.Serial;
                 }
@@ -209,6 +257,14 @@ namespace ClassicUO.Game.Managers
                 Mouse.CancelDoubleClick = true;
                 ClearTargetingWithoutTargetCancelPacket();
             }
+        }
+
+        public static void SendMultiTarget(ushort x, ushort y, sbyte z)
+        {
+            NetClient.Socket.Send(new PTargetXYZ(x, y, z, 0, _targetCursorId, (byte)TargeringType));
+            Mouse.CancelDoubleClick = true;
+            MultiTargetInfo = null;
+            ClearTargetingWithoutTargetCancelPacket();
         }
     }
 }

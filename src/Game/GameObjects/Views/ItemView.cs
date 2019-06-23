@@ -25,38 +25,40 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-
-using MathHelper = ClassicUO.Utility.MathHelper;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item
     {
-        private Graphic _originalGraphic;
         private bool _force;
+        private Graphic _originalGraphic;
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
             Engine.DebugInfo.ItemsRendered++;
 
+            ResetHueVector();
+
             if (IsCorpse)
-                return DrawCorpse(batcher, posX, posY);
+                return DrawCorpse(batcher, posX, posY - 3);
 
 
             ushort hue = Hue;
 
-            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(_originalGraphic))
+            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(Graphic)) // static
             {
-                _originalGraphic = DisplayedGraphic;
+                unsafe
+                {
+                    _originalGraphic = (Graphic) (Graphic + _animDataFrame.FrameData[_animDataFrame.FrameCount >> 1]);
+                }
+
                 _force = false;
             }
             else if (Engine.Profile.Current.FieldsType == 2)
@@ -87,7 +89,6 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x038A;
                 }
             }
-
 
 
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
@@ -121,7 +122,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -135,8 +136,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (SelectedObject.Object == this && !IsLocked)
+                if (SelectedObject.LastObject == this && !IsLocked)
+                {
+                    isPartial = false;
                     hue = 0x0035;
+                }
                 else if (IsHidden)
                     hue = 0x038E;
 
@@ -161,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
             return base.Draw(batcher, posX, posY);
         }
 
-        private bool DrawCorpse(Batcher2D batcher, int posX, int posY)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
                 return false;
@@ -184,7 +188,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private void DrawLayer(Batcher2D batcher, int posX, int posY, Layer layer, byte animIndex)
+        private void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Layer layer, byte animIndex)
         {
             ushort graphic;
             ushort color = 0;
@@ -221,14 +225,19 @@ namespace ClassicUO.Game.GameObjects
             else
                 return;
 
-            FileManager.Animations.AnimID = graphic;
 
 
             byte animGroup = FileManager.Animations.AnimGroup;
+            ushort newHue = 0;
 
             var gr = layer == Layer.Invalid
-                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
-                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+
+            FileManager.Animations.AnimID = graphic;
+
+            if (color == 0)
+                color = newHue;
 
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
@@ -262,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = frame.Height;
 
 
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
                     HueVector.Y = 1;
@@ -274,60 +283,26 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this) color = 0x0023;
+                    if (Engine.Profile.Current.GridLootType > 0 && SelectedObject.CorpseObject == this)
+                        color = 0x0034;
+                    else if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+                        color = 0x0023;
+
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color);
                 }
 
                 DrawInternal(batcher, posX, posY);
                 Select(IsFlipped ? posX + x + 44 - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX + x, SelectedObject.TranslatedMousePositionByViewport.Y - posY - y);
-
             }
         }
 
-        private void DrawInternal(Batcher2D batcher, int posX, int posY)
+        private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY)
         {
-            SpriteVertex[] vertex;
-
             if (IsFlipped)
-            {
-                vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X += Bounds.X + 44f;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.Y += Bounds.Height;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.X -= Bounds.Width;
-                vertex[2].TextureCoordinate.Y = 0;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.X -= Bounds.Width;
-            }
+                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
             else
-            {
-                vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X -= Bounds.X;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.X += Bounds.Width;
-                vertex[1].TextureCoordinate.Y = 0;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.Y += Bounds.Height;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += Bounds.Height;
-            }
+                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
 
-
-            if (vertex[0].Hue != HueVector)
-                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
-
-
-
-            batcher.DrawSprite(Texture, ref vertex);
             Texture.Ticks = Engine.Ticks;
         }
 
@@ -339,7 +314,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
-                if (Texture.Contains( x, y))
+                if (Texture.Contains(x, y))
                     SelectedObject.Object = this;
             }
             else

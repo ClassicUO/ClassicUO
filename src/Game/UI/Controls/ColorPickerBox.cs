@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_pointer == null)
             {
@@ -160,7 +160,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             if (_hues.Length > 1)
-                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, Vector3.Zero);
+            {
+                Vector3 zero = Vector3.Zero;
+
+                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref zero);
+            }
 
             return base.Draw(batcher, x, y);
         }

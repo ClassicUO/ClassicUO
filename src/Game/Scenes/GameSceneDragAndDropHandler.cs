@@ -60,12 +60,12 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead || item == null /*|| item.IsCorpse*/ || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (World.Player.IsDead || item == null || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
+                if (Engine.UI.GetControl<SplitMenuGump>(item) != null)
                     return false;
 
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
-            GameObject obj = Game.SelectedObject.Object as GameObject;
+            GameObject obj = SelectedObject.Object as GameObject;
             Serial serial;
 
             if (obj is Item item && item.ItemData.IsContainer)
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
-                ContainerGump gump = Engine.UI.GetByLocalSerial<ContainerGump>(container);
+                ContainerGump gump = Engine.UI.GetControl<ContainerGump>(container);
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {

@@ -58,14 +58,13 @@ namespace ClassicUO.Network
 
     internal class PacketHandlers
     {
+        private static Serial _requestedGridLoot;
         private readonly List<PacketHandler>[] _handlers = new List<PacketHandler>[0x100];
 
         static PacketHandlers()
         {
             ToClient = new PacketHandlers();
-            ToServer = new PacketHandlers();
             NetClient.PacketReceived += ToClient.OnPacket;
-            NetClient.PacketSended += ToServer.OnPacket;
         }
 
         private PacketHandlers()
@@ -75,7 +74,6 @@ namespace ClassicUO.Network
 
         public static PacketHandlers ToClient { get; }
 
-        public static PacketHandlers ToServer { get; }
 
         public void Add(byte id, Action<Packet> handler)
         {
@@ -254,6 +252,8 @@ namespace ClassicUO.Network
                 {
                     trading.ImAccepting = id1 != 0;
                     trading.HeIsAccepting = id2 != 0;
+
+                    trading.UpdateContent();
                 }
             }
         }
@@ -265,12 +265,15 @@ namespace ClassicUO.Network
                 case 0x78:
 
                     break;
+
                 case 0x3C:
 
                     break;
+
                 case 0x25:
 
                     break;
+
                 case 0x2E:
 
                     break;
@@ -293,7 +296,6 @@ namespace ClassicUO.Network
                       .AddDamage(entity,
                                  damage
                                 );
-                //new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
             }
         }
 
@@ -572,15 +574,13 @@ namespace ClassicUO.Network
 
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            //if (item.ItemData.IsAnimated)
-            //{
-            //    item.AllowedToDraw = false;
-
-            //    World.AddEffect(new AnimatedItemEffect(item.Serial, x, y, z, item.Graphic, item.Hue, -1));
-            //}
-
             if (item.OnGround)
                 item.AddToTile();
+
+
+            if (graphic == 0x2006 && !item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
+
+            if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
         }
 
         private static void EnterWorld(Packet p)
@@ -662,42 +662,121 @@ namespace ClassicUO.Network
             if (World.Player == serial)
                 return;
 
-            if (World.Get(serial) == null)
+            Entity entity = World.Get(serial);
+
+            if (entity == null)
                 return;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            bool updateAbilities = false;
 
-            if (scene.HeldItem.Serial == serial)
-                scene.HeldItem.Enabled = false;
+            if (serial.IsItem)
+            {
+                Item it = (Item) entity;
+                uint cont = it.Container & 0x7FFFFFFF;
+
+                if (it.Container.IsValid)
+                {
+                    Entity top = it.Items.FirstOrDefault();
+
+                    if (top != null)
+                    {
+                        if (top == World.Player) updateAbilities = it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
+
+                        var tradeBox = top.Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+
+                        if (tradeBox != null)
+                            Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
+                    }
+
+                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (cont == World.Player && it.Layer == Layer.Invalid)
+                        scene.HeldItem.Enabled = false;
+
+
+                    if (it.Layer != Layer.Invalid) Engine.UI.GetControl<PaperDollGump>(cont)?.Update();
+                }
+            }
 
             if (World.CorpseManager.Exists(0, serial))
                 return;
 
-            if (serial.IsItem)
+            if (serial.IsMobile)
             {
-                Item item = World.Items.Get(serial);
-
-                if (!item.OnGround && item.Container.IsValid)
+                if (World.Party.Contains(serial))
                 {
-                    if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded) World.Player.UpdateAbilities();
-
-                    Entity cont = World.Get(item.Container);
-
-                    if (cont != null)
-                    {
-                        cont.Items.Remove(item);
-                        cont.Items.ProcessDelta();
-                    }
+                    //
                 }
 
-                if (World.RemoveItem(serial))
-                    World.Items.ProcessDelta();
-            }
-            else if (serial.IsMobile && World.RemoveMobile(serial))
-            {
+                Mobile m = (Mobile) entity;
+                World.RemoveMobile(serial);
+                m.Items.ProcessDelta();
+                World.Mobiles.Remove(m);
                 World.Items.ProcessDelta();
                 World.Mobiles.ProcessDelta();
             }
+            else if (serial.IsItem)
+            {
+                Item it = (Item) entity;
+
+                if (it.IsMulti) World.HouseManager.Remove(it);
+
+                Entity cont = World.Get(it.Container);
+
+                if (cont != null)
+                {
+                    cont.Items.Remove(it);
+                    cont.Items.ProcessDelta();
+
+                    if (Engine.Profile.Current.GridLootType > 0)
+                    {
+                        GridLootGump grid = Engine.UI.GetControl<GridLootGump>(it.Container);
+
+                        if (grid != null) grid.RedrawItems();
+                    }
+                }
+
+                World.RemoveItem(it);
+                World.Items.Remove(it);
+                World.Items.ProcessDelta();
+
+                if (updateAbilities)
+                    World.Player.UpdateAbilities();
+            }
+
+            //GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+            //if (scene.HeldItem.Serial == serial)
+            //    scene.HeldItem.Enabled = false;
+
+            //if (World.CorpseManager.Exists(0, serial))
+            //    return;
+
+            //if (serial.IsItem)
+            //{
+            //    Item item = World.Items.Get(serial);
+
+            //    if (!item.OnGround && item.Container.IsValid)
+            //    {
+            //        if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded) World.Player.UpdateAbilities();
+
+            //        Entity cont = World.Get(item.Container);
+
+            //        if (cont != null)
+            //        {
+            //            cont.Items.Remove(item);
+            //            cont.Items.ProcessDelta();
+            //        }
+            //    }
+
+            //    if (World.RemoveItem(serial))
+            //        World.Items.ProcessDelta();
+            //}
+            //else if (serial.IsMobile && World.RemoveMobile(serial))
+            //{
+            //    World.Items.ProcessDelta();
+            //    World.Mobiles.ProcessDelta();
+            //}
         }
 
         private static void UpdatePlayer(Packet p)
@@ -746,6 +825,11 @@ namespace ClassicUO.Network
             World.Player.AddToTile();
 #endif
             World.Player.ProcessDelta();
+
+            var scene = Engine.SceneManager.GetScene<GameScene>();
+
+            if (scene != null)
+                scene.UpdateDrawPosition = true;
         }
 
         private static void DenyWalk(Packet p)
@@ -780,8 +864,9 @@ namespace ClassicUO.Network
             byte seq = p.ReadByte();
             byte noto = (byte) (p.ReadByte() & ~0x40);
 
-            if (noto == 0 || noto >= 7)
+            if (noto == 0 || noto >= 8)
                 noto = 0x01;
+
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
@@ -848,7 +933,7 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
-                Engine.UI.GetByLocalSerial<ShopGump>(serial)?.Dispose();
+                Engine.UI.GetControl<ShopGump>(serial)?.Dispose();
                 ShopGump gump = new ShopGump(serial, true, 150, 5);
                 Engine.UI.Add(gump);
 
@@ -890,7 +975,7 @@ namespace ClassicUO.Network
                 {
                     if (item.IsSpellBook)
                     {
-                        Engine.UI.GetByLocalSerial<SpellbookGump>(serial)?.Dispose();
+                        Engine.UI.GetControl<SpellbookGump>(serial)?.Dispose();
                         SpellbookGump spellbookGump = new SpellbookGump(item);
                         if (!Engine.UI.GetGumpCachePosition(item, out Point location)) location = new Point(64, 64);
 
@@ -902,7 +987,17 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Engine.UI.GetByLocalSerial<ContainerGump>(serial)?.Dispose();
+                    if (item.IsCorpse && (Engine.Profile.Current.GridLootType == 1 || Engine.Profile.Current.GridLootType == 2))
+                    {
+                        Engine.UI.GetControl<GridLootGump>(serial)?.Dispose();
+                        Engine.UI.Add(new GridLootGump(serial));
+                        _requestedGridLoot = serial;
+
+                        if (Engine.Profile.Current.GridLootType == 1)
+                            return;
+                    }
+
+                    Engine.UI.GetControl<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
@@ -946,6 +1041,26 @@ namespace ClassicUO.Network
 
             World.Get(containerSerial)?.Items.ProcessDelta();
             World.Items.ProcessDelta();
+
+
+            if (containerSerial.IsMobile)
+            {
+                Mobile m = World.Mobiles.Get(containerSerial);
+                Item secureBox = m.GetSecureTradeBox();
+
+                if (secureBox != null)
+                {
+                    var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
+
+                    if (gump != null) gump.UpdateContent();
+                }
+            }
+            else if (containerSerial.IsItem)
+            {
+                var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == containerSerial || s.ID1 == containerSerial || s.ID2 == containerSerial);
+
+                if (gump != null) gump.UpdateContent();
+            }
         }
 
         private static void DenyMoveItem(Packet p)
@@ -1074,7 +1189,7 @@ namespace ClassicUO.Network
                 if (Engine.Profile.Current.EnableDeathScreen)
                     World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
 
-                GameActions.SetWarMode(false);
+                GameActions.ChangeWarMode(0);
             }
         }
 
@@ -1167,14 +1282,33 @@ namespace ClassicUO.Network
             if (World.SkillsRequested)
             {
                 World.SkillsRequested = false;
-                SkillGumpAdvanced gumpSkills = Engine.UI.GetByLocalSerial<SkillGumpAdvanced>();
 
-                if (gumpSkills == null)
+                // TODO: make a base class for this gump
+                if (Engine.Profile.Current.StandardSkillsGump)
                 {
-                    Engine.UI.Add(new SkillGumpAdvanced
+                    var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
+
+                    if (gumpSkills == null)
                     {
-                        X = 100, Y = 100
-                    });
+                        Engine.UI.Add(new StandardSkillsGump
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
+                }
+                else
+                {
+                    var gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
+
+                    if (gumpSkills == null)
+                    {
+                        Engine.UI.Add(new SkillGumpAdvanced
+                        {
+                            X = 100,
+                            Y = 100
+                        });
+                    }
                 }
             }
 
@@ -1188,17 +1322,20 @@ namespace ClassicUO.Network
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
 
                     break;
+
                 case 2:
 
                     while (p.Position + 2 <= p.Length && (id = p.ReadUShort()) > 0)
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort());
 
                     break;
+
                 case 0xDF:
                     id = p.ReadUShort();
                     World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort(), true);
 
                     break;
+
                 case 0xFF:
                     id = p.ReadUShort();
                     World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
@@ -1229,6 +1366,8 @@ namespace ClassicUO.Network
             ushort count = p.ReadUShort();
 
             Entity container = null;
+
+            GridLootGump grid = null;
 
             for (int i = 0; i < count; i++)
             {
@@ -1278,7 +1417,22 @@ namespace ClassicUO.Network
                     }
                 }
 
+
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+
+                if (grid == null && Engine.Profile.Current.GridLootType > 0)
+                {
+                    grid = Engine.UI.GetControl<GridLootGump>(containerSerial);
+
+                    if (_requestedGridLoot != 0 && _requestedGridLoot == containerSerial && grid == null)
+                    {
+                        grid = new GridLootGump(_requestedGridLoot);
+                        Engine.UI.Add(grid);
+                        _requestedGridLoot = 0;
+                    }
+                }
+
+                if (grid != null) grid.RedrawItems();
             }
 
             container?.Items.ProcessDelta();
@@ -1287,7 +1441,7 @@ namespace ClassicUO.Network
             {
                 SpellbookData.GetData(itemContainer, out ulong field, out SpellBookType type);
 
-                if (itemContainer.FillSpellbook(type, field)) Engine.UI.GetByLocalSerial<SpellbookGump>(itemContainer)?.Update();
+                if (itemContainer.FillSpellbook(type, field)) Engine.UI.GetControl<SpellbookGump>(itemContainer)?.Update();
             }
 
 
@@ -1346,9 +1500,9 @@ namespace ClassicUO.Network
 
             float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
 
-            if (distance <= World.ViewRange && distance >= 1)
+            if (distance <= World.ClientViewRange && distance >= 1)
             {
-                float volumeByDist = volume / World.ViewRange;
+                float volumeByDist = volume / World.ClientViewRange;
                 volume -= volumeByDist * distance;
             }
 
@@ -1374,7 +1528,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientType());
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_305D)
-                    NetClient.Socket.Send(new PClientViewRange(World.ViewRange));
+                    NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
 
                 Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
 
@@ -1389,7 +1543,7 @@ namespace ClassicUO.Network
 
             Serial serial = p.ReadUInt();
 
-            MapGump gump = Engine.UI.GetByLocalSerial<MapGump>(serial);
+            MapGump gump = Engine.UI.GetControl<MapGump>(serial);
 
             if (gump != null)
             {
@@ -1407,11 +1561,13 @@ namespace ClassicUO.Network
                     case MapMessageType.Insert: break;
                     case MapMessageType.Move: break;
                     case MapMessageType.Remove: break;
+
                     case MapMessageType.Clear:
                         gump.ClearContainer();
 
                         break;
                     case MapMessageType.Edit: break;
+
                     case MapMessageType.EditResponse:
                         gump.SetPlotState(p.ReadByte());
 
@@ -1437,7 +1593,7 @@ namespace ClassicUO.Network
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
             var pages = new string[pageCnt];
-            var gump = ui.GetByLocalSerial<BookGump>(serial);
+            var gump = ui.GetControl<BookGump>(serial);
 
             if (gump == null) return;
 
@@ -1514,7 +1670,7 @@ namespace ClassicUO.Network
 
         private static void ClientViewRange(Packet p)
         {
-            World.ViewRange = p.ReadByte();
+            World.ClientViewRange = p.ReadByte();
         }
 
         private static void BulletinBoardData(Packet p)
@@ -1532,7 +1688,7 @@ namespace ClassicUO.Network
 
                     if (item != null)
                     {
-                        BulletinBoardGump bulletinBoard = Engine.UI.GetByLocalSerial<BulletinBoardGump>(serial);
+                        BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(serial);
                         bulletinBoard?.Dispose();
 
                         int x = (Engine.WindowWidth >> 1) - 245;
@@ -1544,11 +1700,12 @@ namespace ClassicUO.Network
                 }
 
                     break;
+
                 case 1: // summary msg
 
                 {
                     Serial boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = Engine.UI.GetByLocalSerial<BulletinBoardGump>(boardSerial);
+                    BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
@@ -1568,11 +1725,12 @@ namespace ClassicUO.Network
                 }
 
                     break;
+
                 case 2: // message
 
                 {
                     Serial boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = Engine.UI.GetByLocalSerial<BulletinBoardGump>(boardSerial);
+                    BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
@@ -1629,7 +1787,8 @@ namespace ClassicUO.Network
 
         private static void Ping(Packet p)
         {
-            NetClient.Socket.Statistics.PingReceived();
+            if (NetClient.Socket.IsConnected && !NetClient.Socket.IsDisposed)
+                NetClient.Socket.Statistics.PingReceived();
         }
 
 
@@ -1647,7 +1806,7 @@ namespace ClassicUO.Network
             if (vendor == null) return;
 
 
-            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>();
+            ShopGump gump = Engine.UI.GetControl<ShopGump>();
 
             if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
             {
@@ -1713,6 +1872,10 @@ namespace ClassicUO.Network
                 return;
 
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+
+            if (!mobile.Exists)
+                GameActions.RequestMobileStatus(mobile);
+
             mobile.Graphic = p.ReadUShort();
             int x = p.ReadUShort();
             int y = p.ReadUShort();
@@ -1755,7 +1918,12 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
 
-            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Mobile mobile = World.GetOrCreateMobile(serial);
+
+            if (!mobile.Exists)
+                GameActions.RequestMobileStatus(serial);
+
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -1845,10 +2013,10 @@ namespace ClassicUO.Network
             //if (string.IsNullOrEmpty(mobile.Name))
             //    NetClient.Socket.Send(new PNameRequest(mobile));
 
-            if (mobile != World.Player)
-                NetClient.Socket.Send(new PClickRequest(mobile));
+            if (mobile != World.Player && !mobile.IsClicked && Engine.Profile.Current.ShowNewMobileNameIncoming)
+                GameActions.SingleClick(mobile);
 
-            Engine.UI.GetByLocalSerial<PaperDollGump>(mobile)?.Update();
+            Engine.UI.GetControl<PaperDollGump>(mobile)?.Update();
         }
 
         private static void OpenMenu(Packet p)
@@ -1957,7 +2125,7 @@ namespace ClassicUO.Network
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
 
-            var paperdoll = Engine.UI.GetByLocalSerial<PaperDollGump>(mobile);
+            var paperdoll = Engine.UI.GetControl<PaperDollGump>(mobile);
 
             if (paperdoll == null)
             {
@@ -2036,7 +2204,7 @@ namespace ClassicUO.Network
             else
                 p.Skip(1);
             UIManager ui = Engine.UI;
-            BookGump bgump = ui.GetByLocalSerial<BookGump>(serial);
+            BookGump bgump = ui.GetControl<BookGump>(serial);
 
             if (bgump == null || bgump.IsDisposed)
             {
@@ -2147,7 +2315,7 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
-            ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(vendor);
+            ShopGump gump = Engine.UI.GetControl<ShopGump>(vendor);
             gump?.Dispose();
             gump = new ShopGump(vendor, false, 100, 0);
 
@@ -2198,15 +2366,23 @@ namespace ClassicUO.Network
 
                 if (type == 0 || type == 2)
                 {
-                    int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
-
-                    if (oldPerc != newPerc)
+                    try
                     {
-                        Hue[] hues = HealthPercentageHues.Hues;
+                        int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
 
-                        int index = (newPerc + 5) / 10 % hues.Length;
+                        if (oldPerc != newPerc)
+                        {
+                            Hue[] hues = HealthPercentageHues.Hues;
 
-                        if (index >= 0 && index < hues.Length) mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+
+                            int index = (newPerc + 5) / 10 % hues.Length;
+
+                            if (index >= 0 && index < hues.Length)
+                                mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
+                        }
+                    }
+                    catch
+                    {
                     }
                 }
             }
@@ -2258,13 +2434,24 @@ namespace ClassicUO.Network
         {
             byte flag = p.ReadByte();
 
-            if (flag != 1)
-            {
-                Serial serial = p.ReadUInt();
-                string str = p.ReadASCII(p.ReadUShort());
-            }
+            if (flag == 1)
+                return;
 
-            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `TipWindow` not implemented yet.");
+            uint tip = p.ReadUInt();
+            string str = p.ReadASCII(p.ReadUShort());
+
+            if (flag == 0)
+            {
+                if (TipNoticeGump._tips == null || TipNoticeGump._tips.IsDisposed)
+                {
+                    TipNoticeGump._tips = new TipNoticeGump(flag, str);
+                    Engine.UI.Add(TipNoticeGump._tips);
+                }
+
+                TipNoticeGump._tips.AddTip(tip, str);
+            }
+            else
+                Engine.UI.Add(new TipNoticeGump(flag, str));
         }
 
         private static void AttackCharacter(Packet p)
@@ -2278,7 +2465,7 @@ namespace ClassicUO.Network
             {
                 Mobile mob = World.Mobiles.Get(TargetManager.LastAttack);
 
-                if (mob != null && mob.HitsMax <= 0)
+                if (mob != null && mob.HitsMax == 0)
                     NetClient.Socket.Send(new PStatusRequest(TargetManager.LastAttack));
             }
         }
@@ -2339,6 +2526,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+
             Serial serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
@@ -2346,12 +2534,33 @@ namespace ClassicUO.Network
             Hue hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string lang = p.ReadASCII(4);
-            string name = p.ReadASCII(30);
-            string text = p.ReadUnicode();
+            string name = p.ReadASCII();
+
+            if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.ToLower() == "system")
+            {
+                byte[] buffer =
+                {
+                    0x03, 0x00, 0x28, 0x20, 0x00, 0x34, 0x00, 0x03, 0xdb, 0x13,
+                    0x14, 0x3f, 0x45, 0x2c, 0x58, 0x0f, 0x5d, 0x44, 0x2e, 0x50,
+                    0x11, 0xdf, 0x75, 0x5c, 0xe0, 0x3e, 0x71, 0x4f, 0x31, 0x34,
+                    0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00
+                };
+
+                NetClient.Socket.Send(buffer);
+
+                return;
+            }
+
+            string text = string.Empty;
+
+            if (p.Length > 48)
+            {
+                p.Seek(48);
+                text = p.ReadUnicode();
+            }
 
             if (entity != null)
             {
-                //entity.Graphic = graphic;
                 if (string.IsNullOrEmpty(entity.Name))
                     entity.Name = name;
                 entity.ProcessDelta();
@@ -2381,10 +2590,12 @@ namespace ClassicUO.Network
             if (corpseSerial.IsValid)
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
+
             byte group = FileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0, true);
             owner.SetAnimation(group, 0, 5, 1);
-            owner.ClearSteps();
-            owner.LastStepTime = Engine.Ticks;
+
+            if (Engine.Profile.Current.AutoOpenCorpses)
+                World.Player.TryOpenCorpses();
         }
 
         private static void OpenGump(Packet p)
@@ -2413,12 +2624,6 @@ namespace ClassicUO.Network
                 Buffer.BlockCopy(decData, index, text, 0, text.Length);
                 index += text.Length;
                 lines[i] = Encoding.BigEndianUnicode.GetString(text);
-                //ushort lineLen = p.ReadUShort();
-                ////byte[] text = new byte[lineLen * 2];
-                ////Buffer.BlockCopy();
-                //string text = p.ReadUnicode(lineLen);
-
-                //lines[i] = text;
             }
 
             Engine.UI.Create(sender, gumpID, x, y, cmd, lines);
@@ -2443,7 +2648,7 @@ namespace ClassicUO.Network
 
             string body = p.ReadUnicode();
 
-            Engine.UI.GetByLocalSerial<ProfileGump>(serial)?.Dispose();
+            Engine.UI.GetControl<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, serial == World.Player.Serial));
         }
 
@@ -2473,7 +2678,7 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 serial = p.ReadUInt();
 
-            var arrow = ui.GetByLocalSerial<QuestArrowGump>(serial);
+            var arrow = ui.GetControl<QuestArrowGump>(serial);
 
             if (display)
             {
@@ -2528,6 +2733,7 @@ namespace ClassicUO.Network
                 case 0:
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 1: // fast walk prevention
@@ -2537,6 +2743,7 @@ namespace ClassicUO.Network
                     for (int i = 0; i < 6; i++) World.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt());
 #endif
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 2: // add key to fast walk stack
@@ -2544,30 +2751,38 @@ namespace ClassicUO.Network
                     World.Player.Walker.FastWalkStack.AddValue(p.ReadUInt());
 #endif
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
-                case 4: // close generic gump
-                    Engine.UI.GetByServerSerial(p.ReadUInt())?.OnButtonClick((int) p.ReadUInt());
+                case 4: // close generic gump 
+                    Serial ser = p.ReadUInt();
+                    Engine.UI.Gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser)?.OnButtonClick((int) p.ReadUInt());
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    PartyManager.HandlePartyPacket(p);
+                    //PartyManager.HandlePartyPacket(p);
+
+                    World.Party.ParsePacket(p);
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 8: // map change
                     World.MapIndex = p.ReadByte();
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x0C: // close statusbar gump
                     Engine.UI.Remove<HealthBarGump>(p.ReadUInt());
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x10: // display equip info
@@ -2585,7 +2800,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                       Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
+                        Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
                     }
 
                     str = string.Empty;
@@ -2643,14 +2858,12 @@ namespace ClassicUO.Network
                     if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
                         strBuffer.Append(']');
 
-                    if (strBuffer.Length != 0)
-                    {
-                        Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
-                    }
+                    if (strBuffer.Length != 0) Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
 
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x14: // display popup/context menu
@@ -2663,6 +2876,7 @@ namespace ClassicUO.Network
                     });
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x16: // close user interface windows
@@ -2675,14 +2889,17 @@ namespace ClassicUO.Network
                             Engine.UI.Remove<PaperDollGump>(serial);
 
                             break;
+
                         case 2: //statusbar
                             Engine.UI.Remove<HealthBarGump>(serial);
 
                             break;
+
                         case 8: // char profile
                             Engine.UI.Remove<ProfileGump>();
 
                             break;
+
                         case 0x0C: //container
                             Engine.UI.Remove<ContainerGump>(serial);
 
@@ -2690,10 +2907,11 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x18: // enable map patches
-                   
+
                     if (FileManager.Map.ApplyPatches(p))
                     {
                         //int indx = World.MapIndex;
@@ -2702,6 +2920,7 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x19: //extened stats
@@ -2719,6 +2938,7 @@ namespace ClassicUO.Network
                             bonded.IsDead = dead;
 
                             break;
+
                         case 2:
 
                             if (serial == World.Player)
@@ -2730,9 +2950,12 @@ namespace ClassicUO.Network
                                 World.Player.StrLock = (Lock) ((state >> 4) & 3);
                                 World.Player.DexLock = (Lock) ((state >> 2) & 3);
                                 World.Player.IntLock = (Lock) (state & 3);
+
+                                StatusGumpBase.GetStatusGump()?.UpdateLocksAfterPacket();
                             }
 
                             break;
+
                         case 5:
                             Mobile character = World.Mobiles.Get(serial);
 
@@ -2743,6 +2966,7 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x1B: // new spellbook content
@@ -2763,22 +2987,27 @@ namespace ClassicUO.Network
                             sbtype = SpellBookType.Magery;
 
                             break;
+
                         case 101:
                             sbtype = SpellBookType.Necromancy;
 
                             break;
+
                         case 201:
                             sbtype = SpellBookType.Chivalry;
 
                             break;
+
                         case 401:
                             sbtype = SpellBookType.Bushido;
 
                             break;
+
                         case 501:
                             sbtype = SpellBookType.Ninjitsu;
 
                             break;
+
                         case 601:
                             sbtype = SpellBookType.Spellweaving;
 
@@ -2787,11 +3016,12 @@ namespace ClassicUO.Network
 
                     if (spellbook.FillSpellbook(sbtype, filed))
                     {
-                        SpellbookGump gump = Engine.UI.GetByLocalSerial<SpellbookGump>(spellbook);
+                        SpellbookGump gump = Engine.UI.GetControl<SpellbookGump>(spellbook);
                         gump?.Update();
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x1D: // house revision state
@@ -2803,10 +3033,11 @@ namespace ClassicUO.Network
                     else
                     {
                         house.Generate();
-                        Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+                        Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x20:
@@ -2820,6 +3051,7 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x21:
@@ -2827,6 +3059,7 @@ namespace ClassicUO.Network
                     World.Player.SecondaryAbility = (Ability) ((byte) World.Player.SecondaryAbility & 0x7F);
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x22:
@@ -2841,17 +3074,10 @@ namespace ClassicUO.Network
                         Engine.SceneManager.GetScene<GameScene>()
                               .Overheads
                               .AddDamage(en, damage);
-
-
-                        //new Mess(mobile,
-                        //         damage.ToString(), 
-                        //         hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), 
-                        //         font: 3, 
-                        //         isunicode: false, 
-                        //         timeToLive: 1500));
                     }
 
                     break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x26:
@@ -2995,7 +3221,7 @@ namespace ClassicUO.Network
 
             if (entity is Item it)
             {
-                ShopGump gump = Engine.UI.GetByLocalSerial<ShopGump>(it.RootContainer);
+                ShopGump gump = Engine.UI.GetControl<ShopGump>(it.RootContainer);
 
                 if (gump != null)
                 {
@@ -3084,12 +3310,13 @@ namespace ClassicUO.Network
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
+                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
                                     });
                                 }
                             }
 
                             break;
+
                         case 1:
 
                             if (planeZ > 0)
@@ -3107,12 +3334,13 @@ namespace ClassicUO.Network
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
+                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
                                     });
                                 }
                             }
 
                             break;
+
                         case 2:
                             short offX = 0, offY = 0;
                             short multiHeight = 0;
@@ -3151,7 +3379,7 @@ namespace ClassicUO.Network
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
+                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
                                     });
                                 }
                             }
@@ -3160,7 +3388,7 @@ namespace ClassicUO.Network
                     }
 
                     house.Generate();
-                    Engine.UI.GetByLocalSerial<MiniMapGump>()?.ForceUpdate();
+                    Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
                 }
             }
         }
@@ -3234,7 +3462,7 @@ namespace ClassicUO.Network
             if (iconID < TABLE_COUNT)
             {
                 UIManager ui = Engine.UI;
-                BuffGump gump = ui.GetByLocalSerial<BuffGump>();
+                BuffGump gump = ui.GetControl<BuffGump>();
                 ushort mode = p.ReadUShort();
 
                 if (mode != 0)
@@ -3339,6 +3567,9 @@ namespace ClassicUO.Network
 
             if (graphic != 0x2006)
                 graphic += graphicInc;
+            else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
+
+            if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
 
             if (type == 2)
             {
@@ -3369,14 +3600,8 @@ namespace ClassicUO.Network
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
 
-            //if (item.ItemData.IsAnimated)
-            //{
-            //    item.AllowedToDraw = false;
-            //    World.AddEffect(new AnimatedItemEffect(item.Serial, position.X, position.Y, position.Z, item.Graphic, item.Hue, -1));
-            //}
-
-            if (item.OnGround)
-                item.AddToTile();
+            //if (item.OnGround)
+            item.AddToTile();
         }
 
         private static void BoatMoving(Packet p)
@@ -3400,7 +3625,8 @@ namespace ClassicUO.Network
             item.Position = new Position(x, y, (sbyte) z);
             item.AddToTile();
 
-            if (World.HouseManager.TryGetHouse(item, out House house)) house.Generate(true);
+            if (World.HouseManager.TryGetHouse(item, out House house))
+                house.Generate(true);
 
 
             int count = p.ReadUShort();
@@ -3416,6 +3642,12 @@ namespace ClassicUO.Network
 
                 if (entity != null)
                 {
+                    if (entity == World.Player)
+                    {
+                        World.RangeSize.X = cx;
+                        World.RangeSize.Y = cy;
+                    }
+
                     entity.Position = new Position(cx, cy, (sbyte) cz);
                     entity.AddToTile();
                 }

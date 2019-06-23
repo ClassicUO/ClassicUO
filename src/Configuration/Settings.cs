@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using Newtonsoft.Json;
@@ -53,6 +54,9 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "lastcharactername")]
         public string LastCharacterName { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "cliloc")]
+        public string ClilocFile { get; set; } = "Cliloc.enu";
+
         [JsonProperty(PropertyName = "lastservernum")]
         public ushort LastServerNum { get; set; } = 1;
 
@@ -63,9 +67,6 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "profiler")]
         public bool Profiler { get; set; } = true;
-
-        [JsonProperty(PropertyName = "preload_maps")]
-        public bool PreloadMaps { get; set; }
 
         [JsonProperty(PropertyName = "saveaccount")]
         public bool SaveAccount { get; set; }
@@ -92,7 +93,8 @@ namespace ClassicUO.Configuration
         public bool FixedTimeStep { get; set; } = true;
 
         [JsonProperty(PropertyName = "plugins")]
-        public string[] Plugins { get; set; } = {@".\Assistant\Razor.dll"};
+        public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
+
 
         public void Save()
         {
@@ -110,6 +112,20 @@ namespace ClassicUO.Configuration
             // NOTE: We can do any other settings clean-ups here before we save them
 
             ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, Engine.SettingsFile));
+        }
+
+        public bool IsValid()
+        {
+            bool valid = !string.IsNullOrWhiteSpace(UltimaOnlineDirectory);
+
+
+            if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
+            {
+                valid = false;
+            }
+
+
+            return valid;
         }
     }
 }

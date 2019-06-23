@@ -32,7 +32,6 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -83,18 +82,19 @@ namespace ClassicUO
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
         private AuraManager _auraManager;
-        private Batcher2D _batcher;
+        private UltimaBatcher2D _batcher;
         private double _currentFpsTime;
         private DebugInfo _debugInfo;
         private InputManager _inputManager;
         private bool _isRunningSlowly;
+        private double _previous;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private double _statisticsTimer;
-        private float _time;
+        private double _time;
+        private double _totalElapsed;
         private int _totalFrames;
         private UIManager _uiManager;
-
 
         private Engine(string[] args)
         {
@@ -106,7 +106,7 @@ namespace ClassicUO
             // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
             // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
             //   a new settings object and populate it with the passed settings
-            _settings = ArgsParser(args, _settings);
+            ArgsParser(args, _settings);
 
             // If no still no settings after loading a file and parsing command-line settings,
             //   then show an error, generate default settings file and exit
@@ -121,20 +121,9 @@ namespace ClassicUO
                 return;
             }
 
-            // Debug: Show resulting settings object
-            Log.Message(LogTypes.Trace, "Settings loaded from `" + SettingsFile + "` and combined with parsed args:\n" + JsonConvert.SerializeObject(_settings, Formatting.Indented));
-
-            // Validate resulting settings object
-            // NOTE: Check that at least `UltimaOnlineDirectory` and `ClientVersion` properties are set
-            //   to some other than default values
-            Settings defaultSettings = new Settings();
-            bool settingsAreValid = _settings.UltimaOnlineDirectory != defaultSettings.UltimaOnlineDirectory;
-
-            if (_settings.ClientVersion == defaultSettings.ClientVersion)
-                settingsAreValid = false;
-
+       
             // If settings are invalid, then show an error and exit
-            if (!settingsAreValid)
+            if (!_settings.IsValid())
             {
                 SDL.SDL_ShowSimpleMessageBox(
                                              SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
@@ -176,12 +165,12 @@ namespace ClassicUO
                     height *= 2;
                 }
 
-                if (! IsMaximized)
+                if (!IsMaximized)
                     _engine._profileManager.Current.WindowClientBounds = new Point(width, height);
 
                 SetPreferredBackBufferSize(width, height);
 
-                WorldViewportGump gump = _uiManager.GetByLocalSerial<WorldViewportGump>();
+                WorldViewportGump gump = _uiManager.GetControl<WorldViewportGump>();
 
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
                 {
@@ -201,9 +190,7 @@ namespace ClassicUO
 
         public bool DisableUpdateWindowCaption { get; set; }
 
-        public static Batcher2D Batcher => _engine._batcher;
-
-        protected float IntervalFixedUpdate { get; private set; }
+        public static UltimaBatcher2D Batcher => _engine._batcher;
 
         public static int FpsLimit
         {
@@ -220,7 +207,9 @@ namespace ClassicUO
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
 
-                    _engine.IntervalFixedUpdate = 1000.0f / _fpsLimit;
+                    _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
+
+                    //_engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
         }
@@ -228,24 +217,14 @@ namespace ClassicUO
         public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
-        public static int FPSMin { get; private set; } = int.MaxValue;
+        public static int FPSMin { get; private set; } = Int32.MaxValue;
         public static int FPSMax { get; private set; }
-
         public static bool AllowWindowResizing
         {
             get => _window.AllowUserResizing;
             set => _window.AllowUserResizing = value;
         }
-
-        /// <summary>
-        ///     Total game time in milliseconds
-        /// </summary>
-        public static long Ticks { get; private set; }
-
-        /// <summary>
-        ///     Milliseconds from last frame
-        /// </summary>
-        public static long TicksFrame { get; private set; }
+        public static uint Ticks { get; private set; }
 
         public static uint[] FrameDelay { get; } = new uint[2];
 
@@ -256,7 +235,7 @@ namespace ClassicUO
                 IntPtr wnd = SDL.SDL_GL_GetCurrentWindow();
                 uint flags = SDL.SDL_GetWindowFlags(wnd);
 
-                return ((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0);
+                return (flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
             }
             set
             {
@@ -296,13 +275,6 @@ namespace ClassicUO
             }
         }
 
-        public static void SetPreferredBackBufferSize(int width, int height)
-        {
-            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
-            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
-            _engine._graphicDeviceManager.ApplyChanges();
-        }
-
         public static UIManager UI => _engine._uiManager;
 
         public static InputManager Input => _engine._inputManager;
@@ -319,123 +291,46 @@ namespace ClassicUO
 
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
-        public static bool IsRunningSlowly => _engine._isRunningSlowly;
+        public double IntervalFixedUpdate { get; private set; }
+
+        public static void SetPreferredBackBufferSize(int width, int height)
+        {
+            _engine._graphicDeviceManager.PreferredBackBufferWidth = width;
+            _engine._graphicDeviceManager.PreferredBackBufferHeight = height;
+            _engine._graphicDeviceManager.ApplyChanges();
+        }
 
         public static void DropFpsMinMaxValues()
         {
             FPSMax = 0;
-            FPSMin = int.MaxValue;
+            FPSMin = Int32.MaxValue;
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
-        private static void Main(string[] args)
+
+        internal static void Run(string[] args)
         {
-            Configure();
-
-            //new Updater()
-            //   .Check();
-
-            if (CheckUpdate(args))
-                return;
-
-            Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
-            ThreadID = Thread.CurrentThread.ManagedThreadId;
-
             using (_engine = new Engine(args))
+            {
                 if (!_engine.IsQuitted)
                     _engine.Run();
+            }
         }
 
-        private static bool CheckUpdate(string[] args)
+        public static void Quit()
         {
-            string path = string.Empty;
-            string action = string.Empty;
-            int pid = -1;
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "--source" && i < args.Length - 1)
-                    path = args[i + 1];
-                else if (args[i] == "--action" && i < args.Length - 1)
-                    action = args[i + 1];
-                else if (args[i] == "--pid" && i < args.Length - 1) pid = int.Parse(args[i + 1]);
-            }
-
-            if (action == "update")
-            {
-                Log.Message(LogTypes.Trace, "ClassicUO Updating...", ConsoleColor.Yellow);
-
-                try
-                {
-                    Process proc = Process.GetProcessById(pid);
-                    proc.Kill();
-                    proc.WaitForExit(5000);
-                }
-                catch
-                {
-                }
-
-
-                //File.SetAttributes(Path.GetDirectoryName(path), FileAttributes.Normal);
-
-                foreach (string file in Directory.EnumerateFiles(ExePath, "*", SearchOption.AllDirectories))
-                {
-                    string sub = Path.Combine(file, file.Replace(ExePath, path));
-                    File.Copy(file, sub, true);
-                    Console.WriteLine("COPIED {0} over {1}", file, sub);
-                }
-
-                string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
-
-                new Process
-                {
-                    StartInfo =
-                    {
-                        WorkingDirectory = path,
-                        FileName = prefix + Path.Combine(path, "ClassicUO.exe"),
-                        UseShellExecute = false,
-                        Arguments =
-                            $"--source \"{ExePath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup"
-                    }
-                }.Start();
-
-                return true;
-            }
-
-            if (action == "cleanup")
-            {
-                try
-                {
-                    Process.GetProcessById(pid);
-                    Thread.Sleep(1000);
-                    Process.GetProcessById(pid).Kill();
-                }
-                catch
-                {
-                }
-
-                try
-                {
-                    Directory.Delete(path, true);
-                }
-                catch (Exception e)
-                {
-                }
-
-                Log.Message(LogTypes.Trace, "ClassicUO updated successful!", ConsoleColor.Green);
-            }
-
-            return false;
+            _engine?.Exit();
         }
 
-        private static Settings ArgsParser(string[] args, Settings settings = null)
+        private static void ArgsParser(string[] args, Settings settings = null)
         {
             if (args.Length > 1)
             {
-                if (settings == null) settings = new Settings();
+                if (settings == null)
+                    settings = new Settings();
 
                 for (int i = 0; i < args.Length - 1; i += 2)
                 {
@@ -472,7 +367,7 @@ namespace ClassicUO
                             break;
 
                         case "port":
-                            settings.Port = ushort.Parse(value);
+                            settings.Port = UInt16.Parse(value);
 
                             break;
 
@@ -494,71 +389,66 @@ namespace ClassicUO
                             break;
 
                         case "lastservernum":
-                            settings.LastServerNum = ushort.Parse(value);
+                            settings.LastServerNum = UInt16.Parse(value);
 
                             break;
 
                         case "login_fps":
                         case "fps":
-                            settings.MaxLoginFPS = int.Parse(value);
+                            settings.MaxLoginFPS = Int32.Parse(value);
 
                             break;
 
                         case "debug":
-                            settings.Debug = bool.Parse(value);
+                            settings.Debug = Boolean.Parse(value);
 
                             break;
 
                         case "profiler":
-                            settings.Profiler = bool.Parse(value);
+                            settings.Profiler = Boolean.Parse(value);
 
                             break;
-
-                        //case "preload_maps":
-                        //    settings.PreloadMaps = bool.Parse(value);
-
-                            break;
-
+                        
                         case "saveaccount":
-                            settings.SaveAccount = bool.Parse(value);
+                            settings.SaveAccount = Boolean.Parse(value);
 
                             break;
 
                         case "autologin":
-                            settings.AutoLogin = bool.Parse(value);
+                            settings.AutoLogin = Boolean.Parse(value);
 
                             break;
 
                         case "reconnect":
-                            settings.Reconnect = bool.Parse(value);
+                            settings.Reconnect = Boolean.Parse(value);
 
                             break;
 
                         case "reconnect_time":
-                            settings.ReconnectTime = int.Parse(value);
+                            settings.ReconnectTime = Int32.Parse(value);
 
                             break;
 
                         case "login_music":
                         case "music":
-                            settings.LoginMusic = bool.Parse(value);
+                            settings.LoginMusic = Boolean.Parse(value);
 
                             break;
 
                         case "login_music_volume":
                         case "music_volume":
-                            settings.LoginMusicVolume = int.Parse(value);
+                            settings.LoginMusicVolume = Int32.Parse(value);
 
                             break;
 
                         case "shard_type":
                         case "shard":
-                            settings.ShardType = int.Parse(value);
+                            settings.ShardType = Int32.Parse(value);
 
                             break;
 
                         case "fixed_time_step":
-                            settings.FixedTimeStep = bool.Parse(value);
+                            settings.FixedTimeStep = Boolean.Parse(value);
 
                             break;
 
@@ -573,13 +463,6 @@ namespace ClassicUO
                     }
                 }
             }
-
-            return settings;
-        }
-
-        public static void Quit()
-        {
-            _engine?.Exit();
         }
 
         protected override void OnExiting(object sender, EventArgs args)
@@ -589,10 +472,13 @@ namespace ClassicUO
         }
 
 
-        private static void Configure()
+        internal static void Configure()
         {
+            Thread.CurrentThread.Name = "CUO_MAIN_THREAD";
+            ThreadID = Thread.CurrentThread.ManagedThreadId;
+
             Log.Start(LogTypes.All);
-            ExePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            ExePath = Environment.CurrentDirectory;
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -636,6 +522,7 @@ namespace ClassicUO
 
             //Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(ExePath, "Data", "Plugins"));
         }
@@ -651,7 +538,7 @@ namespace ClassicUO
             Log.NewLine();
 
 
-            _batcher = new Batcher2D(GraphicsDevice);
+            _batcher = new UltimaBatcher2D(GraphicsDevice);
             _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
@@ -669,6 +556,11 @@ namespace ClassicUO
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
+
+
+            //_uiSystem = new UISystemManager(this);
+            //Components.Add(_uiSystem);
+
 
             try
             {
@@ -694,8 +586,8 @@ namespace ClassicUO
 
             int size = FileManager.Hues.HuesCount;
 
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
-            texture0.SetData(hues, 0, size);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
             texture1.SetData(hues, size, size);
             GraphicsDevice.Textures[1] = texture0;
@@ -745,22 +637,67 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+
+        protected override void BeginRun()
+        {
+            base.BeginRun();
+            _previous = SDL.SDL_GetTicks();
+        }
+
         protected override void Update(GameTime gameTime)
+        {
+            Profiler.EnterContext("Update");
+
+            OnUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
+
+            base.Update(gameTime);
+
+
+            _time += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if (_time > IntervalFixedUpdate)
+                _time %= IntervalFixedUpdate;
+            else
+                SuppressDraw();
+
+            Profiler.ExitContext("Update");
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            Render();
+            base.Draw(gameTime);
+        }
+
+        public override void Tick()
         {
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
 
+
+            double current = Ticks = SDL.SDL_GetTicks();
+            double elapsed = current - _previous;
+            _previous = current;
+
+            // ###############################
+            // This should be the right order
+            OnNetworkUpdate(current, elapsed);
+            Mouse.Update();
+            Plugin.Tick();
+            OnUIUpdate(current, elapsed);
+            // ###############################
+
             Profiler.EnterContext("Update");
 
-            double totalms = gameTime.TotalGameTime.TotalMilliseconds;
-            double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
+            OnUpdate(current, elapsed);
+            FrameworkDispatcher.Update();
 
-            Ticks = (long) totalms;
-            TicksFrame = (long) framems;
+            Profiler.ExitContext("Update");
 
-            _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (_currentFpsTime >= 1)
+            _currentFpsTime += elapsed;
+
+            if (_currentFpsTime >= 1000)
             {
                 CurrentFPS = _totalFrames;
 
@@ -771,39 +708,40 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            // ###############################
-            // This should be the right order
-            OnNetworkUpdate(totalms, framems);
-            OnInputUpdate(totalms, framems);
-            OnUIUpdate(totalms, framems);
-            OnUpdate(totalms, framems);
-            Plugin.Tick();
-            // ###############################
-            Profiler.ExitContext("Update");
+            //base.Tick();
 
-            _time += (float) framems;
 
-            if (_time > IntervalFixedUpdate)
+            _totalElapsed += elapsed;
+
+            if (_totalElapsed > IntervalFixedUpdate)
             {
-                _time %= IntervalFixedUpdate;
-                Profiler.EnterContext("FixedUpdate");
-                OnFixedUpdate(totalms, framems);
-                Profiler.ExitContext("FixedUpdate");
+                Render();
+                GraphicsDevice?.Present();
+                _totalElapsed -= IntervalFixedUpdate;
+                _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
 
-                
-            }
-            else
-            {
-                SuppressDraw();
+                //if (_isRunningSlowly)
+                //{
+                //    _totalElapsed %= IntervalFixedUpdate;
+                //}
             }
 
-            base.Update(gameTime);
-            Profiler.EnterContext("OutOfContext");
+            if (!_isRunningSlowly)
+            {
+                uint sleep = SDL.SDL_GetTicks() - Ticks;
+
+                if (sleep < IntervalFixedUpdate)
+                {
+                    SDL.SDL_Delay(1);
+                }
+                else
+                    Thread.Yield();
+            }
         }
 
-        protected override void Draw(GameTime gameTime)
+
+        private void Render()
         {
-            _isRunningSlowly = gameTime.IsRunningSlowly;
             _debugInfo.Reset();
 
             Profiler.EndFrame();
@@ -823,48 +761,43 @@ namespace ClassicUO
             if (_profileManager.Current != null && _profileManager.Current.ShowNetworkStats)
             {
                 if (!NetClient.Socket.IsConnected)
-                {
                     NetClient.LoginSocket.Statistics.Draw(_batcher, 10, 50);
-                }
-                else if (!NetClient.Socket.IsDisposed)
-                {
-                    NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
-                }
+                else if (!NetClient.Socket.IsDisposed) NetClient.Socket.Statistics.Draw(_batcher, 10, 50);
             }
 
 
-            //_batcher.DrawString(_font, gameTime.TotalGameTime.Milliseconds.ToString(), new Point(200, 200), new Vector3(22, 0, 0));
-
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
-            UpdateWindowCaption(gameTime);
+            UpdateWindowCaption();
 
-            base.Draw(gameTime);
+
+            //GraphicsDevice?.Present();
         }
 
-        private void UpdateWindowCaption(GameTime gameTime)
+        public override void OnSDLEvent(ref SDL.SDL_Event ev)
+        {
+            _inputManager.EventHandler(ref ev);
+        }
+
+        private void UpdateWindowCaption()
         {
             if (!_settings.Profiler || DisableUpdateWindowCaption)
                 return;
 
             double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
             double timeUpdate = Profiler.GetContext("Update").TimeInContext;
-            double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
             double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
-            double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate + timeFixedUpdate;
+            double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+
 #if DEV_BUILD
-            Window.Title = string.Format("ClassicUO [dev] {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+            Window.Title = String.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : String.Empty, CurrentFPS, Version);
 #else
-            Window.Title = string.Format("ClassicUO {6} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
+            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
 #endif
         }
 
-        private void OnInputUpdate(double totalMS, double frameMS)
-        {
-            Mouse.Update();
-        }
 
         private void OnNetworkUpdate(double totalMS, double frameMS)
         {
@@ -907,12 +840,6 @@ namespace ClassicUO
                 else
                     scene.Update(totalMS, frameMS);
             }
-        }
-
-        private void OnFixedUpdate(double totalMS, double frameMS)
-        {
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
-                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }
 }

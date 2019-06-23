@@ -26,7 +26,9 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -114,13 +116,6 @@ namespace ClassicUO.Game.UI.Gumps
             IsActive = !Engine.Profile.Current.ActivateChatAfterEnter;
         }
 
-        public void SetFocus()
-        {
-            textBox.IsEditable = true;
-            textBox.SetKeyboardFocus();
-            textBox.IsEditable = _isActive;
-        }
-
         public bool IsActive
         {
             get => _isActive;
@@ -163,34 +158,42 @@ namespace ClassicUO.Game.UI.Gumps
                             textBox.SetText(string.Empty);
 
                             break;
+
                         case ChatMode.Whisper:
                             AppendChatModePrefix("[Whisper]: ", Engine.Profile.Current.WhisperHue);
 
                             break;
+
                         case ChatMode.Emote:
                             AppendChatModePrefix("[Emote]: ", Engine.Profile.Current.EmoteHue);
 
                             break;
+
                         case ChatMode.Party:
                             AppendChatModePrefix("[Party]: ", Engine.Profile.Current.PartyMessageHue);
 
                             break;
+
                         case ChatMode.PartyPrivate:
                             AppendChatModePrefix("[Private Party Message]: ", Engine.Profile.Current.PartyMessageHue);
 
                             break;
+
                         case ChatMode.Guild:
                             AppendChatModePrefix("[Guild]: ", Engine.Profile.Current.GuildMessageHue);
 
                             break;
+
                         case ChatMode.Alliance:
                             AppendChatModePrefix("[Alliance]: ", Engine.Profile.Current.AllyMessageHue);
 
                             break;
+
                         case ChatMode.ClientCommand:
                             AppendChatModePrefix("[Command]: ", 1161);
 
                             break;
+
                         case ChatMode.UOAMChat:
                             DisposeChatModePrefix();
                             AppendChatModePrefix("[UOAM]: ", 83);
@@ -199,6 +202,13 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+        }
+
+        public void SetFocus()
+        {
+            textBox.IsEditable = true;
+            textBox.SetKeyboardFocus();
+            textBox.IsEditable = _isActive;
         }
 
         public void ToggleChatVisibility()
@@ -212,22 +222,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
                 case MessageType.System:
-                    AddLine(e.Text, (byte) e.Font, e.Hue, e.IsUnicode);
+                    AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Party:
-                    AddLine($"[Party][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+                    AddLine($"[Party][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Guild:
-                    AddLine($"[Guild][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+                    AddLine($"[Guild][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Alliance:
-                    AddLine($"[Alliance][{e.Name}]: {e.Text}", (byte) e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+                    AddLine($"[Alliance][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
 
                     break;
             }
@@ -311,18 +321,22 @@ namespace ClassicUO.Game.UI.Gumps
                             Mode = ChatMode.Whisper;
 
                             break;
+
                         case '/':
                             Mode = ChatMode.Party;
 
                             break;
+
                         case '\\':
                             Mode = ChatMode.Guild;
 
                             break;
+
                         case '|':
                             Mode = ChatMode.Alliance;
 
                             break;
+
                         case '-':
                             Mode = ChatMode.ClientCommand;
 
@@ -343,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int yy = textBox.Y + y - 20;
 
@@ -362,7 +376,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1:
+                case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !Engine.Profile.Current.DisableCtrlQWBtn:
+
+                    var scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                        return;
 
                     if (!IsActive)
                         IsActive = true;
@@ -375,7 +394,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_w when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
+                case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !Engine.Profile.Current.DisableCtrlQWBtn:
+
+                    scene = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (scene.Macros.FindMacro(key, false, true, false) != null)
+                        return;
 
                     if (!IsActive)
                         IsActive = true;
@@ -391,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(textBox.Text):
                     Mode = ChatMode.Default;
 
                     break;
@@ -406,8 +430,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_1 when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
-                case SDL.SDL_Keycode.SDLK_BACKSLASH when Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
 
                     if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
                         IsActive = true;
@@ -427,7 +451,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_MINUS: // -
                 case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
 
-                    if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                    if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
                         IsActive = true;
 
                     break;
@@ -439,7 +463,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Mode = ChatMode.Default;
 
-                        if (!(Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && Engine.Profile.Current.ActivateChatShiftEnterSupport))
+                        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && Engine.Profile.Current.ActivateChatShiftEnterSupport))
                             ToggleChatVisibility();
                     }
 
@@ -482,14 +506,17 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.Say(text, Engine.Profile.Current.SpeechHue);
 
                         break;
+
                     case ChatMode.Whisper:
                         GameActions.Say(text, 33, MessageType.Whisper);
 
                         break;
+
                     case ChatMode.Emote:
                         GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
 
                         break;
+
                     case ChatMode.Party:
 
                         text = text.ToLower();
@@ -497,53 +524,90 @@ namespace ClassicUO.Game.UI.Gumps
                         switch (text)
                         {
                             case "add":
-                                World.Party.TriggerAddPartyMember();
+                                if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
+                                    GameActions.RequestPartyInviteByTarget();
+                                else
+                                    Chat.HandleMessage(null, "You are not party leader.", "System", Hue.INVALID, MessageType.Regular, 3);
 
                                 break;
+
                             case "loot":
 
-                                if (World.Party.IsInParty)
-                                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
+                                if (World.Party.Leader != 0)
+                                    World.Party.CanLoot = !World.Party.CanLoot;
+                                else
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+
 
                                 break;
+
                             case "quit":
 
-                                if (World.Party.IsInParty)
-                                    World.Party.QuitParty();
+                                if (World.Party.Leader == 0)
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                else
+                                {
+                                    for (int i = 0; i < World.Party.Members.Length; i++)
+                                    {
+                                        if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                                            GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
+                                    }
+                                }
 
                                 break;
+
                             case "accept":
 
-                                if (!World.Party.IsInParty)
-                                    World.Party.AcceptPartyInvite();
+                                if (World.Party.Leader == 0 && World.Party.Inviter != 0)
+                                {
+                                    GameActions.RequestPartyAccept(World.Party.Inviter);
+                                    World.Party.Leader = World.Party.Inviter;
+                                    World.Party.Inviter = 0;
+                                }
+                                else
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
 
                                 break;
+
                             case "decline":
 
-                                if (!World.Party.IsInParty)
-                                    World.Party.DeclinePartyInvite();
+                                if (World.Party.Leader == 0 && World.Party.Inviter != 0)
+                                {
+                                    NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
+                                    World.Party.Leader = 0;
+                                    World.Party.Inviter = 0;
+                                }
+                                else
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+
 
                                 break;
+
                             default:
 
-                                if (World.Party.IsInParty) World.Party.PartyMessage(text);
+                                if (World.Party.Leader != 0)
+                                    GameActions.SayParty(text);
 
                                 break;
                         }
 
                         break;
+
                     case ChatMode.PartyPrivate:
 
                         //GameActions.Say(text, hue, speechType);
                         break;
+
                     case ChatMode.Guild:
                         GameActions.Say(text, Engine.Profile.Current.GuildMessageHue, MessageType.Guild);
 
                         break;
+
                     case ChatMode.Alliance:
                         GameActions.Say(text, Engine.Profile.Current.AllyMessageHue, MessageType.Alliance);
 
                         break;
+
                     case ChatMode.ClientCommand:
                         CommandManager.Execute(text);
 
@@ -599,7 +663,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            public bool Draw(Batcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 return _renderedText.Draw(batcher, x, y /*, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true)*/);
             }

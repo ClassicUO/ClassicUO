@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Managers;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed class House : IEquatable<Serial>
@@ -50,12 +52,17 @@ namespace ClassicUO.Game.GameObjects
         {
             Item item = World.Items.Get(Serial);
 
-            Components.ForEach(s =>
+            foreach (Multi s in Components)
             {
-                if (recalculate && item != null)
-                    s.Position = new Position(  (ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY),  (sbyte) (item.Position.Z + s.MultiOffsetZ));
+                if (item != null)
+                {
+                    if (recalculate)
+                        s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
+                    s.Hue = item.Hue;
+                }
+
                 s.AddToTile();
-            });
+            }
         }
 
         public void ClearComponents()
@@ -65,7 +72,12 @@ namespace ClassicUO.Game.GameObjects
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 
-            Components.ForEach(s => s.Destroy());
+
+            foreach (Multi s in Components)
+            {
+                s.Destroy();
+            }
+
             Components.Clear();
         }
     }

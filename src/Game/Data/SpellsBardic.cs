@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsBardic
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Bardic.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsBardic()
@@ -57,6 +56,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Bardic.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

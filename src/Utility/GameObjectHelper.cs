@@ -18,29 +18,27 @@ namespace ClassicUO.Utility
                     itemdata = st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] : st.ItemData;
 
                     return true;
+
                 case Item item:
                     itemdata = item.ItemData;
 
                     return true;
+
                 case Multi multi:
                     itemdata = multi.ItemData;
 
                     return true;
+
                 case AnimatedItemEffect ef when ef.Source is Static s:
                     itemdata = s.ItemData;
 
                     return true;
+
                 default:
                     itemdata = default;
 
                     return false;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStaticItem(GameObject obj)
-        {
-            return obj is Static || obj is Item;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

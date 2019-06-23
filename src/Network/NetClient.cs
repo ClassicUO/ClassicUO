@@ -23,17 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-using ClassicUO.Game.Data;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
-using SDL2;
 
 namespace ClassicUO.Network
 {
@@ -89,15 +85,16 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
+        public static event EventHandler<Packet> PacketReceived;
+        public static event EventHandler<PacketWriter> PacketSended;
 
-        public static void EnqueuePacketFromPlugin(Packet p)
+        public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
                 lock (Socket._sync)
                 {
-                    Socket._workingQueue.Enqueue(p);
+                    Socket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
                     Socket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -105,7 +102,7 @@ namespace ClassicUO.Network
             {
                 lock (LoginSocket._sync)
                 {
-                    LoginSocket._workingQueue.Enqueue(p);
+                    LoginSocket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
                     LoginSocket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -224,12 +221,12 @@ namespace ClassicUO.Network
 
         public void Send(PacketWriter p)
         {
-            byte[] data = p.ToArray();
-            Packet packet = new Packet(data, p.Length);
+            ref byte[] data = ref p.ToArray();
+            int length = p.Length;
 
-            if (Plugin.ProcessSendPacket(data, packet.Length))
+            if (Plugin.ProcessSendPacket(ref data, ref length))
             {
-                PacketSended.Raise(packet);
+                PacketSended.Raise(p);
                 Send(data);
             }
         }
@@ -238,17 +235,19 @@ namespace ClassicUO.Network
         {
             lock (_sync)
             {
-                Queue<Packet> temp = _workingQueue;
+                var temp = _workingQueue;
                 _workingQueue = _queue;
                 _queue = temp;
             }
 
             while (_queue.Count != 0)
             {
-                Packet p = _queue.Dequeue();
+                var p = _queue.Dequeue();
 
-                if (Plugin.ProcessRecvPacket(p))
-                    PacketReceived.Raise(p);
+                ref byte[] data = ref p.ToArray();
+                int length = p.Length;
+
+                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length)) PacketReceived.Raise(p);
             }
 
             Flush();
@@ -284,11 +283,10 @@ namespace ClassicUO.Network
                     lock (_sync)
                     {
 #if !DEBUG
-                        LogPacket(data, false);
+                        //LogPacket(data, false);
 #endif
 
-                        Packet packet = new Packet(data, packetlength);
-                        _workingQueue.Enqueue(packet);
+                        _workingQueue.Enqueue(new Packet(data, packetlength));
                         Statistics.TotalPacketsReceived++;
                     }
 
@@ -299,10 +297,13 @@ namespace ClassicUO.Network
 
 
 #if !DEBUG
-        private static readonly LogFile _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+        private static LogFile _logFile;
 
         private static void LogPacket(byte[] buffer, bool toServer)
         {
+            if (_logFile == null)
+                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+
             int length = buffer.Length;
             int pos = 0;
 
@@ -422,15 +423,17 @@ namespace ClassicUO.Network
             {
                 if (data.Length <= 0)
                     return;
+
                 try
                 {
 #if !DEBUG
-                    LogPacket(data, true);
+                    //LogPacket(data, true);
 #endif
 
                     lock (_sendLock)
                     {
                         SendQueue.Gram gram;
+
                         lock (_sendQueue)
                             gram = _sendQueue.Enqueue(data, 0, data.Length);
 
@@ -460,6 +463,7 @@ namespace ClassicUO.Network
                     if (!IsDisposed) StartRecv();
 
                     break;
+
                 case SocketAsyncOperation.Send:
                     ProcessSend(e);
 
@@ -485,9 +489,12 @@ namespace ClassicUO.Network
                     }
 
                     break;
+
                 default:
 
-                    throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+                    Log.Message(LogTypes.Panic, "The last operation completed on the socket was not a receive or send");
+
+                    break;
             }
         }
 
@@ -515,7 +522,7 @@ namespace ClassicUO.Network
         {
             int bytesLen = e.BytesTransferred;
 
-            if (bytesLen > 0 && e.SocketError == SocketError.Success)
+            if (bytesLen > 0 && e.SocketError == SocketError.Success && _circularBuffer != null)
             {
                 Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;

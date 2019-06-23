@@ -52,7 +52,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
-        private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
         private bool _attempToDrag;
@@ -64,7 +63,7 @@ namespace ClassicUO.Game.UI.Controls
         protected Control(Control parent = null)
         {
             Parent = parent;
-            _children = new List<Control>();
+            Children = new List<Control>();
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
@@ -120,7 +119,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public float Alpha { get; set; }
 
-        public List<Control> Children => _children;
+        public List<Control> Children { get; }
+        public virtual bool CanUseAlpha => true;
 
         public object Tag { get; set; }
 
@@ -202,9 +202,9 @@ namespace ClassicUO.Game.UI.Controls
             internal set
             {
                 if (value == null)
-                    _parent?._children.Remove(this);
+                    _parent?.Children.Remove(this);
                 else
-                    value._children.Add(this);
+                    value.Children.Add(this);
                 _parent = value;
             }
         }
@@ -237,10 +237,10 @@ namespace ClassicUO.Game.UI.Controls
                 if (_handlesKeyboardFocus)
                     return true;
 
-                if (_children == null)
+                if (Children == null)
                     return false;
 
-                foreach (Control c in _children)
+                foreach (Control c in Children)
                 {
                     if (c.HandlesKeyboardFocus)
                         return true;
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(Batcher2D batcher, int x, int y)
+        public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
 
@@ -328,14 +328,14 @@ namespace ClassicUO.Game.UI.Controls
                 InitializeControls();
                 int w = 0, h = 0;
 
-                for (int i = 0; i < _children.Count; i++)
+                for (int i = 0; i < Children.Count; i++)
                 {
-                    Control c = _children[i];
+                    Control c = Children[i];
 
                     if (c.IsDisposed)
                     {
                         OnChildRemoved();
-                        _children.RemoveAt(i--);
+                        Children.RemoveAt(i--);
 
                         continue;
                     }
@@ -369,20 +369,20 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void OnPageChanged()
         {
+            //Update size as pages may vary in size.
+            if (ServerSerial != 0)
+                WantUpdateSize = true;
         }
 
-        private void DrawDebug(Batcher2D batcher, int x, int y)
+        private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {
+                Vector3 zero = Vector3.Zero;
+
                 if (Engine.DebugFocus && HasKeyboardFocus)
-                {
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, Vector3.Zero);
-                }
-                else if (Engine.GlobalSettings.Debug)
-                {
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, Vector3.Zero);
-                }
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref zero);
+                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref zero);
             }
         }
 
@@ -422,11 +422,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler Disposed;
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
-
-        internal event EventHandler<KeyboardEventArgs> Keyboard;
 
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
@@ -445,7 +443,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool initializedKeyboardFocusedControl = false;
 
-            foreach (Control c in _children)
+            foreach (Control c in Children)
             {
                 if (!c.IsInitialized && !IsDisposed)
                 {
@@ -468,9 +466,12 @@ namespace ClassicUO.Game.UI.Controls
 
             Stack<Control> results = new Stack<Control>();
 
-            if (Bounds.Contains(position.X - ParentX, position.Y - ParentY))
+            int parentX = ParentX;
+            int parentY = ParentY;
+
+            if (Bounds.Contains(position.X - parentX, position.Y - parentY))
             {
-                if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
+                if (Contains(position.X - X - parentX, position.Y - Y - parentY))
                 {
                     if (AcceptMouseInput)
                         results.Push(this);
@@ -510,12 +511,13 @@ namespace ClassicUO.Game.UI.Controls
             if (World.InGame && Engine.UI.SystemChat != null)
                 return Engine.UI.SystemChat.textBox;
 
-            if (_children == null || _children.Count == 0)
+            if (Children == null || Children.Count == 0)
                 return null;
 
-            foreach (Control c in _children)
+            foreach (Control c in Children)
             {
                 Control a = c.GetFirstControlAcceptKeyboardInput();
+
                 if (a != null)
                     return a;
             }
@@ -536,13 +538,13 @@ namespace ClassicUO.Game.UI.Controls
                 return;
 
             c.Parent = null;
-            _children.Remove(c);
+            Children.Remove(c);
             OnChildRemoved();
         }
 
         public virtual void Clear()
         {
-            _children.ForEach(s => s.Dispose());
+            Children.ForEach(s => s.Dispose());
         }
 
         public T[] GetControls<T>() where T : Control
@@ -569,7 +571,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
+            MouseUp.Raise(new MouseEventArgs(x, y, button), this);
         }
 
         public void InvokeMouseCloseGumpWithRClick()
@@ -750,7 +752,7 @@ namespace ClassicUO.Game.UI.Controls
             Parent?.OnKeyUp(key, mod);
         }
 
-        protected virtual bool Contains(int x, int y)
+        public virtual bool Contains(int x, int y)
         {
             return !IsDisposed;
         }
@@ -773,6 +775,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusLeft()
         {
+            Parent?.OnFocusLeft();
         }
 
         protected virtual void OnChildAdded()
@@ -806,13 +809,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public void KeyboardTabToNextFocus(Control c)
         {
-            int startIndex = _children.IndexOf(c);
+            int startIndex = Children.IndexOf(c);
 
-            for (int i = startIndex + 1; i < _children.Count; i++)
+            for (int i = startIndex + 1; i < Children.Count; i++)
             {
-                if (_children[i].AcceptKeyboardInput)
+                if (Children[i].AcceptKeyboardInput)
                 {
-                    _children[i].SetKeyboardFocus();
+                    Children[i].SetKeyboardFocus();
 
                     return;
                 }
@@ -820,9 +823,9 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < startIndex; i++)
             {
-                if (_children[i].AcceptKeyboardInput)
+                if (Children[i].AcceptKeyboardInput)
                 {
-                    _children[i].SetKeyboardFocus();
+                    Children[i].SetKeyboardFocus();
 
                     return;
                 }
@@ -849,12 +852,12 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            for (int i = 0; i < _children.Count; i++)
+            for (int i = 0; i < Children.Count; i++)
             {
-                Control c = _children[i];
+                Control c = Children[i];
                 c.Dispose();
 
-                _children.RemoveAt(i--);
+                Children.RemoveAt(i--);
             }
 
             IsDisposed = true;

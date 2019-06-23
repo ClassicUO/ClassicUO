@@ -1,4 +1,27 @@
-﻿using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Input;
@@ -60,9 +83,8 @@ namespace ClassicUO.Game.UI.Controls
                         list = p.FindControls<NiceButton>();
 
                     foreach (var b in list)
-                    {
-                        if (b != this && b._groupnumber == _groupnumber) b.IsSelected = false;
-                    }
+                        if (b != this && b._groupnumber == _groupnumber)
+                            b.IsSelected = false;
                 }
             }
         }
@@ -72,9 +94,8 @@ namespace ClassicUO.Game.UI.Controls
             IEnumerable<NiceButton> list = p is ScrollArea ? p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>()) : p.FindControls<NiceButton>();
 
             foreach (var b in list)
-            {
-                if (b._groupnumber == group && b.IsSelected) return b;
-            }
+                if (b._groupnumber == group && b.IsSelected)
+                    return b;
 
             return null;
         }
@@ -92,13 +113,13 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsSelected)
             {
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, hue);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref hue);
             }
 
             return base.Draw(batcher, x, y);

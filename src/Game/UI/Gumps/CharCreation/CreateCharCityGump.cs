@@ -1,4 +1,27 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             //why we make calculations on program if it could be done outside?
-            var mapCenterX = 253;//393 / 2 + 57;
+            var mapCenterX = 253; //393 / 2 + 57;
 
             Add(new Button((int) Buttons.PreviousCollection, 0x15A1, 0x15A3, 0x15A2)
             {
@@ -110,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -118,6 +141,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     charCreationGump.StepBack(_selectedProfession > 0 ? 2 : 1);
 
                     break;
+
                 case Buttons.Finish:
 
                     if (_selectedCity != default)
@@ -131,6 +155,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     SelectedMapIndex--;
 
                     break;
+
                 case Buttons.NextCollection:
                     SelectedMapIndex++;
 

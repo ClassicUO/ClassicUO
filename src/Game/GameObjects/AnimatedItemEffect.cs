@@ -83,10 +83,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 (int x, int y, int z) = GetSource();
 
-                if (Source != null)
-                {
-                    Offset = Source.Offset;
-                }
+                if (Source != null) Offset = Source.Offset;
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {

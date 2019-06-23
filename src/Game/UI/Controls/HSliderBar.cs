@@ -46,6 +46,8 @@ namespace ClassicUO.Game.UI.Controls
         private readonly RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
+
+        private readonly bool _drawUp;
         private SpriteTexture[] _gumpSpliderBackground;
         private SpriteTexture _gumpWidget;
         private Rectangle _rect;
@@ -54,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _sliderX;
         private int _value = -1;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
+        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
         {
             X = x;
             Y = y;
@@ -65,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Font = font, Hue = color, IsUnicode = unicode
                 };
+                _drawUp = drawUp;
             }
 
             MinValue = min;
@@ -133,6 +136,7 @@ namespace ClassicUO.Game.UI.Controls
                         _gumpWidget = FileManager.Gumps.GetTexture(216);
 
                         break;
+
                     case HSliderBarStyle.BlueWidgetNoBar:
                         _gumpWidget = FileManager.Gumps.GetTexture(0x845);
 
@@ -159,17 +163,26 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            Vector3 zero = Vector3.Zero;
+
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, Vector3.Zero);
-                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, Vector3.Zero);
-                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref zero);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, ref zero);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref zero);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, Vector3.Zero);
-            _text?.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref zero);
+
+            if (_text != null)
+            {
+                if (_drawUp)
+                    _text.Draw(batcher, x, y - _text.Height);
+                else
+                    _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+            }
 
             return base.Draw(batcher, x, y);
         }
@@ -208,6 +221,7 @@ namespace ClassicUO.Game.UI.Controls
                     Value--;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     Value++;
 
@@ -253,7 +267,7 @@ namespace ClassicUO.Game.UI.Controls
                 _sliderX = 0;
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             _rect.X = 0;
             _rect.Y = 0;

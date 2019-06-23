@@ -24,9 +24,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
@@ -43,17 +43,71 @@ namespace ClassicUO.IO
             {
                 _uofolderpath = value;
 
-                if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
-                {
-                    Log.Message(LogTypes.Error, "Wrong version.");
+                string[] vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
 
-                    throw new InvalidDataException("Wrong version");
+                if (vers.Length < 3)
+                {
+                    Log.Message(LogTypes.Error, "Invalid UO version.");
+
+                    throw new InvalidDataException("Invalid UO version");
                 }
 
-                ClientVersion = (ClientVersions) ((version.Major << 24) | (version.Minor << 16) | (version.Build << 8) | version.Revision);
-                Log.Message(LogTypes.Trace, $"Client version: {version} - {ClientVersion}");
+                int major = int.Parse(vers[0]);
+                int minor = int.Parse(vers[1]);
+                int extra = 0;
+
+                if (!int.TryParse(vers[2], out int build))
+                {
+                    int index = vers[2].IndexOf('.');
+
+                    if (index != -1)
+                    {
+                        build = int.Parse(vers[2].Substring(0, index));
+                    }
+                    else
+                    {
+                        int i = 0;
+
+                        for (; i < vers[2].Length; i++)
+                        {
+                            if (!char.IsNumber(vers[2][i]))
+                            {
+                                build = int.Parse(vers[2].Substring(0, i));
+                                break;
+                            }
+                        }
+
+                        if (i < vers[2].Length)
+                        {
+                            extra = (sbyte) vers[2].Substring(i, vers[2].Length - i)[0];
+
+                            char start = 'a';
+                            index = 0;
+                            while (start != extra && start <= 'z')
+                            {
+                                start++;
+                                index++;
+                            }
+
+                            extra = index;
+                        }
+                    }
+                }
+
+                if (vers.Length > 3)
+                    extra = int.Parse(vers[3]);
+
+                ClientBufferVersion[0] = (byte) major;
+                ClientBufferVersion[1] = (byte) minor;
+                ClientBufferVersion[2] = (byte) build;
+                ClientBufferVersion[3] = (byte) extra;
+
+                ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
+                Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion}");
             }
         }
+
+        public static byte[] ClientBufferVersion { get; } = new byte[4];
 
         public static ClientVersions ClientVersion { get; private set; }
 
@@ -85,8 +139,6 @@ namespace ClassicUO.IO
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            //new AnimationsLoader2().Load();
-
             Animations = new AnimationsLoader();
             Animations.Load();
 
@@ -100,7 +152,7 @@ namespace ClassicUO.IO
             Map.Load();
 
             Cliloc = new ClilocLoader();
-            Cliloc.Load();
+            Cliloc.Load(Engine.GlobalSettings.ClilocFile);
 
             Gumps = new GumpsLoader();
             Gumps.Load();
@@ -148,44 +200,33 @@ namespace ClassicUO.IO
                     UOFileIndex5D vh = Verdata.Patches[i];
 
                     if (vh.FileID == 0)
-                    {
                         Map.PatchMapBlock(vh.BlockID, vh.Position);
-                    }
                     else if (vh.FileID == 4)
                     {
                         if (vh.BlockID >= Constants.MAX_LAND_DATA_INDEX_COUNT)
                         {
                             ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
                         }
-                        else
-                        {
-                            
-                        }
                     }
                     else if (vh.FileID == 12)
                     {
-
                     }
                     else if (vh.FileID == 14 && vh.BlockID < Multi.Count)
                     {
-
                     }
                     else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
                     {
-
                     }
                     else if (vh.FileID == 30)
                     {
-
                     }
                     else if (vh.FileID == 32)
                     {
-
                     }
                 }
             }
 
-
+            SkillsGroupManager.LoadDefault();
 
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();

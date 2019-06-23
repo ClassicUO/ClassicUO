@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -29,21 +30,21 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class TradingGump : Gump
+    internal sealed class TradingGump : Gump
     {
-        private readonly Entity _entity1, _entity2;
         private readonly string _name;
         private GumpPic _hisPic;
 
         private bool _imAccepting, _heIsAccepting;
+        private Point _lastClick;
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
-        private Point _lastClick;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -55,12 +56,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             ID1 = id1;
             ID2 = id2;
-
-            _entity1 = World.Get(id1);
-            _entity2 = World.Get(id2);
-
-            _entity1.Items.Added += ItemsOnAdded1;
-            _entity2.Items.Added += ItemsOnAdded2;
 
             BuildGump();
         }
@@ -113,10 +108,11 @@ namespace ClassicUO.Game.UI.Gumps
             TextContainer.Update();
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
             TextContainer.Draw(batcher, x, y);
+
             return true;
         }
 
@@ -126,15 +122,18 @@ namespace ClassicUO.Game.UI.Gumps
             _lastClick.Y = y;
         }
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Serial> e)
+        public void UpdateContent()
         {
-            foreach (Serial s in e)
+            Entity container = World.Get(ID1);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
             {
-                var item = World.Items.Get(s);
-
-                if (item == null)
-                    continue;
-
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true
@@ -161,17 +160,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _myBox.Add(g);
             }
-        }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Serial> e)
-        {
-            foreach (Serial s in e)
+
+            container = World.Get(ID2);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
             {
-                var item = World.Items.Get(s);
-
-                if (item == null)
-                    continue;
-
                 ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true
@@ -200,13 +200,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
         public override void Dispose()
         {
             base.Dispose();
-
-            _entity1.Items.Added -= ItemsOnAdded1;
-            _entity2.Items.Added -= ItemsOnAdded2;
-
             GameActions.CancelTrade(ID1);
         }
 
@@ -275,9 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCheckboxes();
 
-            foreach (Item item in _entity1.Items) _myBox.Add(new ItemGump(item));
-
-            foreach (Item item in _entity2.Items) _hisBox.Add(new ItemGump(item));
+            UpdateContent();
 
             _myBox.MouseUp += (sender, e) =>
             {

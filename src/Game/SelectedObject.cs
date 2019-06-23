@@ -1,8 +1,30 @@
-﻿using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -15,12 +37,12 @@ namespace ClassicUO.Game
 {
     internal static class SelectedObject
     {
+        public static Point TranslatedMousePositionByViewport;
         public static IGameEntity Object { get; set; }
         public static IGameEntity LastObject { get; set; }
 
-        public static Point TranslatedMousePositionByViewport;
-        
         public static GameObject HealthbarObject { get; set; }
+        public static GameObject CorpseObject { get; set; }
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
@@ -56,8 +78,10 @@ namespace ClassicUO.Game
                         graphic = item.ItemData.AnimID;
 
                         if (FileManager.Animations.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
                             if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                 graphic = data.Graphic;
+                        }
                     }
                     else
                         continue;
@@ -93,7 +117,7 @@ namespace ClassicUO.Game
                     int drawX;
 
                     int drawCenterY = frame.CenterY;
-                    int yOff = ((int)mobile.Offset.Z >> 2) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+                    int yOff = ((int) mobile.Offset.Z >> 2) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
                     int drawY = drawCenterY + yOff;
 
                     if (mirror)

@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void Create()
         {
-            TopBarGump gump = Engine.UI.GetByLocalSerial<TopBarGump>();
+            TopBarGump gump = Engine.UI.GetControl<TopBarGump>();
 
             if (gump == null)
             {
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Map:
 
-                    MiniMapGump miniMapGump = Engine.UI.GetByLocalSerial<MiniMapGump>();
+                    MiniMapGump miniMapGump = Engine.UI.GetControl<MiniMapGump>();
 
                     if (miniMapGump == null)
                         Engine.UI.Add(new MiniMapGump());
@@ -172,8 +172,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Paperdoll:
-                    PaperDollGump paperdollGump = Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player);
+                    PaperDollGump paperdollGump = Engine.UI.GetControl<PaperDollGump>(World.Player);
 
                     if (paperdollGump == null)
                         GameActions.OpenPaperdoll(World.Player);
@@ -184,10 +185,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Inventory:
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
 
-                    ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+                    ContainerGump backpackGump = Engine.UI.GetControl<ContainerGump>(backpack);
 
                     if (backpackGump == null)
                         GameActions.DoubleClick(backpack);
@@ -198,8 +200,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Journal:
-                    JournalGump journalGump = Engine.UI.GetByLocalSerial<JournalGump>();
+                    JournalGump journalGump = Engine.UI.GetControl<JournalGump>();
 
                     if (journalGump == null)
                     {
@@ -213,17 +216,20 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 case Buttons.Chat:
                     Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
 
                     break;
+
                 case Buttons.Help:
                     GameActions.RequestHelp();
 
                     break;
+
                 case Buttons.Debug:
 
-                    DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
+                    DebugGump debugGump = Engine.UI.GetControl<DebugGump>();
 
                     if (debugGump == null)
                     {

@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -100,11 +101,11 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (ScissorsEnabled)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width, Height);
+                Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
                 if (ScissorStack.PushScissors(scissor))
                 {
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 int oldidx = TxEntry.CaretIndex;
 
-                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
+                if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {
                     if (!IsEditable)
                         return;
@@ -170,7 +171,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
                 }
-                else if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+                else if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
                 {
                     if (!IsEditable)
                         key = SDL.SDL_Keycode.SDLK_c;
@@ -188,6 +189,7 @@ namespace ClassicUO.Game.UI.Controls
                                 Parent?.OnKeyboardReturn(RetrnCommandID, "\n");
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_BACKSPACE:
 
                             if (!IsEditable)
@@ -199,22 +201,27 @@ namespace ClassicUO.Game.UI.Controls
                                 TxEntry.RemoveChar(true);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_UP:
                             TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y - (TxEntry.RenderCaret.Height >> 1), false);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_DOWN:
                             TxEntry.OnMouseClick(TxEntry.CaretPosition.X, TxEntry.CaretPosition.Y + TxEntry.RenderCaret.Height, false);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_LEFT:
                             TxEntry.SeekCaretPosition(-1);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_RIGHT:
                             TxEntry.SeekCaretPosition(1);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_DELETE:
 
                             if (!IsEditable)
@@ -226,6 +233,7 @@ namespace ClassicUO.Game.UI.Controls
                                 TxEntry.RemoveChar(false);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_HOME:
 
                             if (Parent is BookGump hbook)
@@ -234,6 +242,7 @@ namespace ClassicUO.Game.UI.Controls
                                 TxEntry.SetCaretPosition(0);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_END:
 
                             if (Parent is BookGump ebook)
@@ -242,6 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                                 TxEntry.SetCaretPosition(Text.Length - 1);
 
                             break;
+
                         case SDL.SDL_Keycode.SDLK_TAB:
                             Parent.KeyboardTabToNextFocus(this);
 

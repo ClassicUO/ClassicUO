@@ -57,14 +57,18 @@ namespace ClassicUO.Game.Managers
 
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
+                foreach ( Serial s in _toRemoveDamages)
+                {
+                    _damages.Remove(s);
+                }
+
                 _toRemoveDamages.Clear();
             }
         }
 
 
 
-        private void DrawTextOverheads(Batcher2D batcher, int startX, int startY, float scale)
+        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale)
         {
             if (_firstNode != null)
             {
@@ -78,7 +82,10 @@ namespace ClassicUO.Game.Managers
                     float alpha = first.IsOverlap(first.Right);
                     first.Draw(batcher, startX, startY, scale);
                     first.SetAlpha(alpha);
-                    first.Contains(mouseX, mouseY);
+
+                    if (first.Contains(mouseX, mouseY))
+                    {
+                    }
 
                     var temp = first.Right;
                     first.Right = null;
@@ -109,7 +116,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public bool Draw(Batcher2D batcher, int startX, int startY)
+        public bool Draw(UltimaBatcher2D batcher, int startX, int startY)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
@@ -187,7 +194,11 @@ namespace ClassicUO.Game.Managers
         {
             if (_toRemoveDamages.Count > 0)
             {
-                _toRemoveDamages.ForEach(s => { _damages.Remove(s); });
+                foreach (Serial s in _toRemoveDamages)
+                {
+                    _damages.Remove(s);
+                }
+
                 _toRemoveDamages.Clear();
             }
 
@@ -209,7 +220,10 @@ namespace ClassicUO.Game.Managers
 
             _firstNode = null;
 
-            _staticToUpdate.ForEach(s => s.Destroy());
+            foreach (GameObject s in _staticToUpdate)
+            {
+                s.Destroy();
+            }
             _staticToUpdate.Clear();
         }
     }

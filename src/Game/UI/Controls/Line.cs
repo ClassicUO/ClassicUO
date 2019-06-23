@@ -80,12 +80,12 @@ namespace ClassicUO.Game.UI.Controls
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
 
-            return batcher.Draw2D(_texture, x, y, Width, Height, hue);
+            return batcher.Draw2D(_texture, x, y, Width, Height, ref hue);
         }
 
         public override void Dispose()

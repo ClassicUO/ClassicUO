@@ -124,6 +124,7 @@ namespace ClassicUO.Game.Map
                 case Mobile mobile:
 
                     return (mobile.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
+
                 case Land tile:
 
                     return (tile.AverageZ, 0, 0, 0);
@@ -131,12 +132,15 @@ namespace ClassicUO.Game.Map
                 case Multi multi:
 
                     return (multi.Z, 1, (multi.ItemData.Height > 0 ? 1 : 0) + (multi.ItemData.IsBackground ? 0 : 1), 0);
+
                 case Static staticitem:
 
                     return (staticitem.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (staticitem.ItemData.IsBackground ? 0 : 1), staticitem.Index);
+
                 case Item item:
 
                     return (item.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (item.ItemData.IsBackground ? 0 : 1), (int) item.Serial.Value);
+
                 default:
 
                     return (0, 0, 0, 0);

@@ -31,13 +31,13 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(Batcher2D batcher, int posX, int posY);
+        bool Draw(UltimaBatcher2D batcher, int posX, int posY);
     }
 
     internal interface IDrawableUI
     {
         SpriteTexture Texture { get; set; }
 
-        bool Draw(Batcher2D batcher, int x, int y);
+        bool Draw(UltimaBatcher2D batcher, int x, int y);
     }
 }

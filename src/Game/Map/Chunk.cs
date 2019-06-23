@@ -24,12 +24,13 @@
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk
+    internal sealed class Chunk 
     {
         public Chunk(ushort x, ushort y)
         {
@@ -43,19 +44,23 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
-                    Tiles[i, j] = new Tile((ushort) (i + x), (ushort) (j + y));
+                {
+                    Tile t = new Tile((ushort)(i + x), (ushort)(j + y));
+                    Tiles[i, j] = t;
+                }
             }
 
             LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
 
-        public ushort X { get; }
-        public ushort Y { get; }
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
 
         public Tile[,] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)
@@ -76,6 +81,7 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
+
 
                         Land land = new Land(tileID)
                         {
@@ -214,6 +220,7 @@ namespace ClassicUO.Game.Map
                             MinZ = z
                         };
 
+                        
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
@@ -264,6 +271,8 @@ namespace ClassicUO.Game.Map
 
         private ref IndexMap GetIndex(int map)
         {
+            FileManager.Map.SanitizeMapIndex(ref map);
+
             return ref FileManager.Map.GetIndex(map, X, Y);
         }
 

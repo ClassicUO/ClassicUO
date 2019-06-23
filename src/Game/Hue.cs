@@ -35,6 +35,8 @@ namespace ClassicUO.Game
 
         public const ushort INVALID = 0xFFFF;
 
+        public const ushort ZERO = 0;
+
         private readonly ushort _value;
 
         public Hue(ushort hue)

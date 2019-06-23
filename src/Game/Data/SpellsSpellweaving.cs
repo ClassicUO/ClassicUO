@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsSpellweaving
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Spellweaving.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsSpellweaving()
@@ -87,6 +86,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Spellweaving.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

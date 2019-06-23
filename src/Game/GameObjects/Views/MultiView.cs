@@ -1,4 +1,27 @@
-﻿using ClassicUO.Game.Scenes;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -8,8 +31,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Multi
     {
-        private readonly int _canBeTransparent;
-        private readonly bool _isFoliage;
+        private int _canBeTransparent;
+        private bool _isFoliage;
 
         public bool CharacterIsBehindFoliage { get; set; }
 
@@ -25,10 +48,12 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
+
+            ResetHueVector();
 
             if (Texture == null || Texture.IsDisposed)
             {
@@ -63,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -74,9 +99,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-            {
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
-            }
 
             Engine.DebugInfo.MultiRendered++;
 

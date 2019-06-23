@@ -89,8 +89,6 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public int SlotIndex { get; set; }
-
         public Mobile Mobile { get; set; }
 
         public override void Update(double totalMS, double frameMS)
@@ -106,19 +104,20 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Item.Hue & 0x3FFF, _isPartialHue, Alpha);
 
-            return batcher.Draw2D(Texture, x, y, hue);
+            ShaderHuesTraslator.GetHueVector(ref hue, Item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
+
+            return batcher.Draw2D(Texture, x, y, ref hue);
         }
 
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
         }
@@ -147,7 +146,10 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
-                            Game.SelectedObject.Object = Item;
+                        case CursorTarget.Grab:
+                        case CursorTarget.SetGrabBag:
+
+                            SelectedObject.Object = Item;
 
 
                             if (Item != null)
@@ -159,7 +161,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            Game.SelectedObject.Object = Item;
+                            SelectedObject.Object = Item;
 
                             if (Item != null)
                             {

@@ -29,6 +29,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -225,7 +226,9 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_spells[offs])
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
-                            if (spellDone % 2 == 0) topage++;
+
+                            if (spellDone % 2 == 0)
+                                topage++;
 
                             spellDone++;
 
@@ -307,6 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     }
+
                     case SpellBookType.Bardic:
 
                     {
@@ -326,6 +330,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                     }
+
                     default:
 
                     {
@@ -355,11 +360,19 @@ namespace ClassicUO.Game.UI.Gumps
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
 
+                GetSpellToolTip(out int toolTipCliloc);
+
+                if (toolTipCliloc > 0)
+                {
+                    string tooltip = FileManager.Cliloc.GetString(toolTipCliloc + i);
+                    icon.SetTooltip(tooltip, 150);
+                }
+
                 icon.MouseDoubleClick += (sender, e) =>
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        SpellDefinition? def = GetSpellDefinition(sender);
+                        SpellDefinition? def = GetSpellDefinition(sender as Control);
 
                         if (def != null)
                             GameActions.CastSpell(def.Value.ID);
@@ -368,7 +381,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    SpellDefinition? def = GetSpellDefinition(sender);
+                    SpellDefinition? def = GetSpellDefinition(sender as Control);
+
+                    if (!def.HasValue)
+                        return;
 
                     UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
@@ -413,10 +429,15 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
-        private SpellDefinition? GetSpellDefinition(object sender)
+        private SpellDefinition? GetSpellDefinition(Control ctrl)
         {
-            Control ctrl = (Control) sender;
-            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
+            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial.Value) + 1;
+
+            return GetSpellDefinition(idx);
+        }
+
+        private SpellDefinition? GetSpellDefinition(int idx)
+        {
             SpellDefinition? def = null;
 
             switch (_spellBookType)
@@ -460,10 +481,6 @@ namespace ClassicUO.Game.UI.Gumps
                     def = SpellsBardic.GetSpell(idx);
 
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException();
             }
 
             return def;
@@ -536,6 +553,7 @@ namespace ClassicUO.Game.UI.Gumps
                     iconStartGraphic = 0x945;
 
                     break;
+
                 default:
 
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -546,6 +564,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (dictionaryPagesCount % 2 != 0)
                 dictionaryPagesCount++;
+        }
+
+        private void GetSpellToolTip(out int offset)
+        {
+            switch (_spellBookType)
+            {
+                case SpellBookType.Magery:
+                    offset = 1061290;
+                    break;
+                case SpellBookType.Necromancy:
+                    offset = 1061390;
+                    break;
+                case SpellBookType.Chivalry:
+                    offset = 1061490;
+                    break;
+                case SpellBookType.Bushido:
+                    offset = 1063263;
+                    break;
+                case SpellBookType.Ninjitsu:
+                    offset = 1063279;
+                    break;
+                case SpellBookType.Spellweaving:
+                    offset = 1072042;
+                    break;
+                case SpellBookType.Mysticism:
+                    offset = 0; //TODO
+                    break;
+                case SpellBookType.Bardic:
+                    offset = 0; //TODO
+                    break;
+                default:
+                    offset = 0;
+                    break;
+            }
+
         }
 
         private void GetSpellNames(int offset, out string name, out string abbreviature, out string reagents)
@@ -771,7 +824,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (_lastPressed != null && e.Button == MouseButton.Left)
             {
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                GameActions.CastSpell((int) _lastPressed.Tag);
+                var def = GetSpellDefinition((int) _lastPressed.Tag);
+
+                if (def.HasValue) GameActions.CastSpell(def.Value.ID);
+
                 _lastPressed = null;
             }
         }

@@ -68,6 +68,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Graphic Graphic { get; }
 
+        public TextContainer TextContainer { get; } = new TextContainer();
+
         private void BuildGump()
         {
             CanMove = true;
@@ -98,9 +100,65 @@ namespace ClassicUO.Game.UI.Gumps
                     Location = location;
                 else
                 {
-                    ContainerManager.CalculateContainerPosition(g);
-                    X = ContainerManager.X;
-                    Y = ContainerManager.Y;
+                    if (Engine.Profile.Current.OpenContainersNearRealPosition)
+                    {
+                        if (World.Player.Equipment[(int)Layer.Bank] != null && _item.Serial == World.Player.Equipment[(int) Layer.Bank])
+                        {
+                            // open bank near player
+                            X = World.Player.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                            Y = World.Player.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+                        }
+                        else if (_item.OnGround)
+                        {
+                            // item is in world
+                            X = _item.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                            Y = _item.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+                        }
+                        else if (_item.Container.IsMobile)
+                        {
+                            // pack animal, snooped player, npc vendor
+                            Mobile mobile = World.Mobiles.Get(_item.Container);
+                            if (mobile != null)
+                            {
+                                X = mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                                Y = mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+                            }
+                        }
+                        else
+                        {
+                            // in a container, open near the container
+                            ContainerGump parentContainer = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == _item.Container);
+                            if (parentContainer != null)
+                            {
+                                X = parentContainer.X + (Width >> 1);
+                                Y = parentContainer.Y;
+                            }
+                            else
+                            {
+                                // I don't think we ever get here?
+                                ContainerManager.CalculateContainerPosition(g);
+                                X = ContainerManager.X;
+                                Y = ContainerManager.Y;
+                            }
+                        }
+
+                        if ((X + Width) > Engine.WindowWidth)
+                        {
+                            X -= Width;
+                        }
+
+                        if ((Y + Height) > Engine.WindowHeight)
+                        {
+                            Y -= Height;
+                        }
+                    }
+                    else
+                    {
+                        ContainerManager.CalculateContainerPosition(g);
+                        X = ContainerManager.X;
+                        Y = ContainerManager.Y;
+                    }
+
                 }
             }
             else
@@ -141,8 +199,6 @@ namespace ClassicUO.Game.UI.Gumps
             TextContainer.Update();
         }
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
         public void AddLabel(string text, ushort hue, byte font, bool isunicode)
         {
             if (World.ClientFlags.TooltipsEnabled)
@@ -152,10 +208,11 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
             TextContainer.Draw(batcher, x, y);
+
             return true;
         }
 
@@ -235,6 +292,12 @@ namespace ClassicUO.Game.UI.Gumps
                 y = _data.Bounds.Y;
             }
 
+            if (x < 0)
+                x = 0;
+
+            if (y < 0)
+                y = 0;
+
             if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
         }
 
@@ -252,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
                 foreach (Item child in _item.Items)
                 {
                     if (child.Container == _item)
-                        Engine.UI.GetByLocalSerial<ContainerGump>(child)?.Dispose();
+                        Engine.UI.GetControl<ContainerGump>(child)?.Dispose();
                 }
 
                 if (_data.ClosedSound != 0)

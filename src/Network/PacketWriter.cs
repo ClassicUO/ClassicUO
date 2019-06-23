@@ -57,14 +57,14 @@ namespace ClassicUO.Network
             Position = IsDynamic ? 3 : 1;
         }
 
-        public override byte[] ToArray()
+        public override ref byte[] ToArray()
         {
             if (IsDynamic && Length != Position)
                 Array.Resize(ref _data, Position);
 
             WriteSize();
 
-            return _data;
+            return ref _data;
         }
 
         public void WriteSize()

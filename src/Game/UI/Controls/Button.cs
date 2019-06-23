@@ -40,6 +40,8 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class Button : Control
     {
+        public override bool CanUseAlpha => false;
+
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
@@ -113,6 +115,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
+            WantUpdateSize = false;
         }
 
         public bool IsClicked { get; private set; }
@@ -170,8 +173,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            foreach (SpriteTexture t in _textures)
+            for (int i = 0; i < _textures.Length; i++)
             {
+                SpriteTexture t = _textures[i];
+
                 if (t != null)
                     t.Ticks = Engine.Ticks;
             }
@@ -187,18 +192,16 @@ namespace ClassicUO.Game.UI.Controls
             _entered = false;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             SpriteTexture texture = GetTextureByState();
 
             Vector3 hue = Vector3.Zero;
 
             if (IsTransparent)
-                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, Alpha);
+                hue.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, hue);
-
-            //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            batcher.Draw2D(texture, x, y, Width, Height, ref hue);
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -266,6 +269,7 @@ namespace ClassicUO.Game.UI.Controls
                         ChangePage(ToPage);
 
                         break;
+
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);
 
@@ -277,9 +281,12 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
-            return ContainsByBounds || IsDisposed ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
+            if (IsDisposed)
+                return false;
+
+            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x, y);
         }
 
         public sealed override void Dispose()

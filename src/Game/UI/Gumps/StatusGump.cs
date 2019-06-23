@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected StatusGumpBase() : base(0, 0)
         {
             // sanity check
-            Engine.UI.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
+            Engine.UI.GetControl<HealthBarGump>(World.Player)?.Dispose();
 
             CanMove = true;
             CanBeSaved = true;
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    BuffGump gump = Engine.UI.GetByLocalSerial<BuffGump>();
+                    BuffGump gump = Engine.UI.GetControl<BuffGump>();
 
                     if (gump == null)
                         Engine.UI.Add(new BuffGump(100, 100));
@@ -71,6 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
+
                 default:
 
                     throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
@@ -112,19 +113,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0: // modern
 
-                    gump = Engine.UI.GetByLocalSerial<StatusGumpModern>();
+                    gump = Engine.UI.GetControl<StatusGumpModern>();
 
                     break;
+
                 case 1: // old
 
-                    gump = Engine.UI.GetByLocalSerial<StatusGumpOld>();
+                    gump = Engine.UI.GetControl<StatusGumpOld>();
 
                     break;
+
                 case 2: // outlands
 
-                    gump = Engine.UI.GetByLocalSerial<StatusGumpOutlands>();
+                    gump = Engine.UI.GetControl<StatusGumpOutlands>();
 
                     break;
+
                 default:
 
                     gump = Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
@@ -147,18 +151,21 @@ namespace ClassicUO.Game.UI.Gumps
                                       {X = x, Y = y});
 
                     break;
+
                 case 1: // old
 
                     Engine.UI.Add(new StatusGumpOld
                                       {X = x, Y = y});
 
                     break;
+
                 case 2: // outlands
 
                     Engine.UI.Add(new StatusGumpOutlands
                                       {X = x, Y = y});
 
                     break;
+
                 default:
 
                     throw new NotImplementedException();
@@ -172,15 +179,34 @@ namespace ClassicUO.Game.UI.Gumps
                 case Lock.Up:
 
                     return 0x0984;
+
                 case Lock.Down:
 
                     return 0x0986;
+
                 case Lock.Locked:
 
                     return 0x082C;
+
                 default:
 
                     return Graphic.INVALID;
+            }
+        }
+
+        public void UpdateLocksAfterPacket()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Lock status = i == 0 ? World.Player.StrLock : i == 1 ? World.Player.DexLock : World.Player.IntLock;
+
+                ushort gumpID = 0x0984; //Up
+
+                if (status == Lock.Down)
+                    gumpID = 0x0986; //Down
+                else if (status == Lock.Locked)
+                    gumpID = 0x082C; //Lock
+                _lockers[i].Graphic = gumpID;
             }
         }
 

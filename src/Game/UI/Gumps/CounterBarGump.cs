@@ -1,4 +1,27 @@
-﻿using System.IO;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.IO;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -10,6 +33,7 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -80,6 +104,12 @@ namespace ClassicUO.Game.UI.Gumps
             //    _columns = temp;
             //    ok = true;
             //}
+
+            if (rows > 30)
+                rows = 30;
+
+            if (columns > 30)
+                columns = 30;
 
             if (size < 30)
                 size = 30;
@@ -165,13 +195,15 @@ namespace ClassicUO.Game.UI.Gumps
                     items[i].Dispose();
                 }
             }
+
+            SetInScreen();
         }
 
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
 
-            writer.Write((byte) 1);
+            writer.Write((byte) 2);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -180,7 +212,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(controls.Length);
 
-            foreach (CounterItem c in controls) writer.Write(c.Graphic);
+            foreach (CounterItem c in controls)
+            {
+                writer.Write(c.Graphic);
+                writer.Write(c.Hue);
+            }
         }
 
         public override void Restore(BinaryReader reader)
@@ -198,7 +234,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             CounterItem[] items = GetControls<CounterItem>();
 
-            for (int i = 0; i < count; i++) items[i].SetGraphic(reader.ReadUInt16());
+            for (int i = 0; i < count; i++)
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
 
             IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
         }
@@ -210,6 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
             private int _amount;
             private TextureControl _controlPic;
             private Graphic _graphic;
+            private Hue _hue;
             private uint _time;
 
 
@@ -226,14 +264,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             public ushort Graphic => _graphic;
+            public ushort Hue => _hue;
 
-
-            public void SetGraphic(ushort graphic)
+            public void SetGraphic(ushort graphic, ushort hue)
             {
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
+                _hue = hue;
 
                 _controlPic?.Dispose();
 
@@ -241,6 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ScaleTexture = true,
                     Texture = FileManager.Art.GetTexture(_graphic),
+                    Hue = hue,
                     //Hue = gs.HeldItem.Hue,
                     //IsPartial = gs.HeldItem.IsPartialHue,
                     Width = Width,
@@ -264,11 +304,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (item == null)
                         return;
 
-                    SetGraphic(gs.HeldItem.Graphic);
+                    SetGraphic(gs.HeldItem.Graphic, gs.HeldItem.Hue);
 
                     gs.DropHeldItemToContainer(item, gs.HeldItem.Position.X, gs.HeldItem.Position.Y);
                 }
-                else if (button == MouseButton.Right && Input.Keyboard.Alt && _graphic != 0)
+                else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
                 {
                     _controlPic?.Dispose();
                     _amount = 0;
@@ -281,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (button == MouseButton.Left)
                 {
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
-                    Item item = backpack.FindItem(_graphic);
+                    Item item = backpack.FindItem(_graphic, _hue);
 
                     if (item != null)
                         GameActions.DoubleClick(item);
@@ -297,28 +337,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_time < Engine.Ticks)
                 {
-                    _time = (uint) Engine.Ticks + 100;
+                    _time = Engine.Ticks + 100;
 
                     _amount = 0;
-                    GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, ref _amount);
+                    GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, _hue, ref _amount);
                 }
             }
 
-            private static void GetAmount(Item parent, Graphic graphic, ref int amount)
+            private static void GetAmount(Item parent, Graphic graphic, Hue hue, ref int amount)
             {
                 if (parent == null)
                     return;
 
                 foreach (Item item in parent.Items)
                 {
-                    GetAmount(item, graphic, ref amount);
+                    GetAmount(item, graphic, hue, ref amount);
 
-                    if (item.Graphic == graphic)
+                    if (item.Graphic == graphic && item.Hue == hue)
                         amount += item.Amount;
                 }
             }
 
-            public override bool Draw(Batcher2D batcher, int x, int y)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
 
@@ -337,15 +377,22 @@ namespace ClassicUO.Game.UI.Gumps
                         text = $"{text[0]}K+";
                 }
 
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
+                Texture2D color = Textures.GetTexture(Color.Gray);
+
+                if (Engine.Profile.Current.CounterBarHighlightOnAmount &&
+                    _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0)
+                    color = Textures.GetTexture(Color.Red);
+
+                Vector3 hue = Vector3.Zero;
+                batcher.DrawRectangle(color, x, y, Width, Height, ref hue);
 
                 if (_graphic != 0)
                 {
-                    Vector3 hue = Vector3.Zero;
                     hue.X = 59;
                     hue.Y = 1;
+                    hue.Z = 0;
 
-                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, hue);
+                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, ref hue);
                 }
 
 

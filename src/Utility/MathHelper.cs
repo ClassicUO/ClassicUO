@@ -65,5 +65,11 @@ namespace ClassicUO.Utility
         {
             return current / max * 100;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Hypotenuse(float a, float b)
+        {
+            return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
+        }
     }
 }

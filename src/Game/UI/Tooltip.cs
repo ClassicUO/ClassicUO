@@ -26,7 +26,6 @@ using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -53,7 +52,7 @@ namespace ClassicUO.Game.UI
 
         public GameObject Object => _gameObject;
 
-        public bool Draw(Batcher2D batcher, int x, int y)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -119,9 +118,9 @@ namespace ClassicUO.Game.UI
                 y = Engine.WindowHeight - (_renderedText.Height + 8);
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f);
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
-            batcher.Draw2D(CheckerTrans.TransparentTexture, x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, hue);
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
 
             return _renderedText.Draw(batcher, x, y);
         }
@@ -163,9 +162,8 @@ namespace ClassicUO.Game.UI
 
                 if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
                 {
-                    if (obj.Serial.IsMobile)
+                    if (obj is Mobile mobile)
                     {
-                        Mobile mobile = (Mobile) obj;
                         //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
                         _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
                     }

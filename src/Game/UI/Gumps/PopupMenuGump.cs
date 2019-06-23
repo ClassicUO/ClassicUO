@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
                     FileManager.Fonts.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
                 }
 
-                Label label = new Label(text, true, 0xFFFF, font: 1, ishtml: false)
+                Label label = new Label(text, true, 0xFFFF, font: 1)
                 {
                     X = 10, Y = offsetY
                 };

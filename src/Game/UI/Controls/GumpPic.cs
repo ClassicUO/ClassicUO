@@ -21,10 +21,8 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -48,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public Hue Hue { get; set; }
 
-        public bool IsPaperdoll { get; set; }
+        //public bool IsPaperdoll { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -73,9 +71,20 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+            if (Texture.Contains(x, y))
+                return true;
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var c = Children[i];
+
+                if (c.Contains(x, y))
+                    return true;
+            }
+
+            return false;
         }
     }
 
@@ -102,7 +111,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
-            
+        }
+
+        public GumpPic(int x, int y, SpriteTexture texture, Hue hue)
+        {
+            X = x;
+            Y = y;
+            Graphic = Graphic.INVALID;
+
+            Hue = hue;
+
+            Texture = texture;
+            Width = Texture.Width;
+            Height = Texture.Height;
         }
 
         public bool IsPartialHue { get; set; }
@@ -114,12 +135,14 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVirtue)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
+
                 return false;
             }
+
             return base.OnMouseDoubleClick(x, y, button);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return ContainsByBounds || base.Contains(x, y);
         }
@@ -134,15 +157,15 @@ namespace ClassicUO.Game.UI.Controls
             return hue;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha);
+            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, hue);
+            batcher.Draw2D(Texture, x, y, ref hue);
 
             return base.Draw(batcher, x, y);
         }

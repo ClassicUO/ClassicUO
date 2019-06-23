@@ -37,8 +37,10 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _displayed = Graphic.INVALID;
 
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
+            ResetHueVector();
+
             if (AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
                 _displayed = AnimationGraphic;
@@ -51,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;

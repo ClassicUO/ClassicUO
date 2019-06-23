@@ -1,4 +1,27 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -8,8 +31,8 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 using CUO_API;
 
@@ -20,9 +43,10 @@ namespace ClassicUO.Network
     internal unsafe class Plugin
     {
         private static readonly List<Plugin> _plugins = new List<Plugin>();
-
-
+        public static List<Plugin> Plugins => _plugins;
         private readonly string _path;
+        public string PluginPath => _path;
+
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnCastSpell _castSpell;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPacketLength _getPacketLength;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPlayerPosition _getPlayerPosition;
@@ -43,7 +67,6 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
 
-        public PluginHeader header;
 
 
         private Plugin(string path)
@@ -83,6 +106,7 @@ namespace ClassicUO.Network
             return p;
         }
 
+
         public void Load()
         {
             _recv = OnPluginRecv;
@@ -94,17 +118,6 @@ namespace ClassicUO.Network
             _getUoFilePath = GetUOFilePath;
             _requestMove = RequestMove;
             _setTitle = SetWindowTitle;
-
-            //IntPtr headerPtr = Marshal.AllocHGlobal(4 + 8 * 18); // 256 ?
-            //Marshal.WriteInt32(headerPtr, (int)FileManager.ClientVersion);
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_recv));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_send));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPacketLength));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getPlayerPosition));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_castSpell));
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getStaticImage));
-            //Marshal.WriteIntPtr(headerPtr, SDL.SDL_GL_GetCurrentWindow());
-            //Marshal.WriteIntPtr(headerPtr, Marshal.GetFunctionPointerForDelegate(_getUoFilePath));
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
@@ -134,7 +147,7 @@ namespace ClassicUO.Network
 
             try
             {
-                IntPtr assptr = SDL2EX.SDL_LoadObject(_path);
+                IntPtr assptr = Native.LoadLibrary(_path);
 
                 Log.Message(LogTypes.Trace, $"assembly: {assptr}");
 
@@ -142,13 +155,15 @@ namespace ClassicUO.Network
 
                 Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
 
-                IntPtr installPtr = SDL2EX.SDL_LoadFunction(assptr, "Install");
+                IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
 
                 Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
 
                 if (installPtr == IntPtr.Zero) throw new Exception("Invalid Entry Point, Attempting managed load.");
 
-                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(ref func);
+                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(func);
+
+                Console.WriteLine(">>> ADDRESS {0}", header.OnInitialize);
             }
             catch
             {
@@ -223,7 +238,6 @@ namespace ClassicUO.Network
                 _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
             IsValid = true;
 
-            //Marshal.FreeHGlobal(headerPtr);
 
             _onInitialize?.Invoke();
         }
@@ -275,22 +289,18 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._tick?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._tick?.Invoke();
         }
 
 
-        internal static bool ProcessRecvPacket(Packet p)
+        internal static bool ProcessRecvPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 
-            if (p.IsAssistPacket)
-                return result;
-
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
-                if (plugin._onRecv != null && !plugin._onRecv(p.ToArray(), p.Length))
+                if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
                     result = false;
             }
 
@@ -310,34 +320,36 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onFocusGained?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onFocusGained?.Invoke();
         }
 
         internal static void OnFocusLost()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onFocusLost?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onFocusLost?.Invoke();
         }
 
 
         internal static void OnConnected()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onConnected?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onConnected?.Invoke();
         }
 
         internal static void OnDisconnected()
         {
-            for (int i = 0; i < _plugins.Count; i++) _plugins[i]._onDisconnected?.Invoke();
+            foreach (Plugin t in _plugins)
+                t._onDisconnected?.Invoke();
         }
 
-        internal static bool ProcessSendPacket(byte[] data, int length)
+        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
-                if (plugin._onSend != null && !plugin._onSend(data, length))
+                if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
                     result = false;
             }
 
@@ -357,10 +369,8 @@ namespace ClassicUO.Network
                 Engine.SceneManager.CurrentScene is GameScene gs)
                 return true;
 
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 if (plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed))
                     result = false;
             }
@@ -370,19 +380,13 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
-            for (int i = 0; i < _plugins.Count; i++)
-            {
-                Plugin plugin = _plugins[i];
-                plugin._onMouse?.Invoke(button, wheel);
-            }
+            foreach (Plugin plugin in _plugins) plugin._onMouse?.Invoke(button, wheel);
         }
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
-            for (int i = 0; i < _plugins.Count; i++)
+            foreach (Plugin plugin in _plugins)
             {
-                Plugin plugin = _plugins[i];
-
                 try
                 {
                     // TODO: need fixed on razor side
@@ -397,24 +401,23 @@ namespace ClassicUO.Network
             }
         }
 
-        private static bool OnPluginRecv(byte[] data, int length)
+        private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            Packet p = new Packet(data, length) {IsAssistPacket = true};
-            NetClient.EnqueuePacketFromPlugin(p);
+            NetClient.EnqueuePacketFromPlugin(data, length);
 
             return true;
         }
 
-        private static bool OnPluginSend(byte[] data, int length)
+        private static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
                 NetClient.Socket.Send(data);
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected) NetClient.LoginSocket.Send(data);
+            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                NetClient.LoginSocket.Send(data);
 
             return true;
         }
 
-
-        private delegate void OnInstall(ref void* header);
+        private delegate void OnInstall(void* header);
     }
 }

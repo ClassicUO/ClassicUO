@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     X = Width - 19, Height = h
                 };
-                Width = Width + 15;
+                Width += 15;
             }
 
             if (scrollbarHeight < 0)
@@ -85,6 +85,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void ForceUpdate()
+        {
+            _needUpdate = true;
+        }
+
         protected override void OnInitialize()
         {
             _needUpdate = true;
@@ -99,12 +104,12 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.Value += _scrollBar.ScrollStep;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             var scrollbar = Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, x, y, Width - 14, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width - 14, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
@@ -156,6 +161,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -256,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void OnPageChanged()
         {
-            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Height : 0) : 0;
+            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Y < 0 ? o.Height + o.Y : o.Height : 0) : 0;
             IsVisible = maxheight > 0;
             Height = maxheight;
             Parent?.OnPageChanged();

@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -135,6 +135,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     charCreationGump.StepBack();
 
                     break;
+
                 case Buttons.Next:
 
                     if (ValidateValues())
@@ -149,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Dexterity = (ushort) _attributeSliders[1].Value;
                         _character.Intelligence = (ushort) _attributeSliders[2].Value;
 
-                        charCreationGump.SetAttributes();
+                        charCreationGump.SetAttributes(true);
                     }
 
                     break;
@@ -166,14 +167,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                    Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                Engine.UI.GetByLocalSerial<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                 return false;
             }

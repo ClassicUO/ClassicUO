@@ -23,6 +23,7 @@
 
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -32,6 +33,7 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Multi : GameObject
     {
         private StaticTiles? _itemData;
+
 
         public Multi(Graphic graphic)
         {

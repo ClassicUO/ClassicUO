@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsChivalry
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Chivalry.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsChivalry()
@@ -69,6 +68,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Chivalry.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

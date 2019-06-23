@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -47,9 +48,11 @@ namespace ClassicUO.Game.UI.Controls
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
+            Unicode = isunicode;
+            Font = font;
         }
 
-        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
+        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: (Hue)(Hue.Parse(parts[5]) + 1))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -130,7 +133,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            if (IsDisposed || TxEntry == null)
                 return;
 
             int h = Math.Max(Height, TxEntry.Height);
@@ -147,7 +150,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
@@ -177,7 +180,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 string s;
 
-                if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
+                if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {
                     if (!IsEditable)
                         return;
@@ -194,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
                 }
-                else if (!TxEntry.IsPassword && Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
+                else if (!TxEntry.IsPassword && Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
                 {
                     if (!IsEditable)
                         key = SDL.SDL_Keycode.SDLK_c;
@@ -270,9 +273,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            base.Dispose();
             TxEntry?.Destroy();
             TxEntry = null;
-            base.Dispose();
         }
     }
 }

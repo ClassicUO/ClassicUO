@@ -1,4 +1,27 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -190,6 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Backwards:
 
                     return;
+
                 case Buttons.Forward:
 
                     return;
@@ -529,9 +553,24 @@ namespace ClassicUO.Game.UI.Gumps
             if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
             {
                 text = text.Replace("\r", string.Empty);
-                int curpage = ActiveInternalPage, oldcaretpos = m_Pages[curpage].TxEntry.CaretIndex, oldpage = curpage;
-                string original = textID == MultiLineBox.PasteCommandID ? text : m_Pages[curpage].Text;
-                text = m_Pages[curpage].TxEntry.InsertString(text);
+                int curpage = ActiveInternalPage;
+                MultiLineBox page;
+
+                if (curpage < 0)
+                {
+                    if (BookTitle.HasKeyboardFocus)
+                        page = BookTitle;
+                    else if (BookAuthor.HasKeyboardFocus)
+                        page = BookAuthor;
+                    else
+                        return;
+                }
+                else
+                    page = m_Pages[curpage];
+
+                int oldcaretpos = page.TxEntry.CaretIndex, oldpage = curpage;
+                string original = textID == MultiLineBox.PasteCommandID ? text : page.Text;
+                text = page.TxEntry.InsertString(text);
 
                 if (curpage >= 0)
                 {
@@ -659,8 +698,11 @@ namespace ClassicUO.Game.UI.Gumps
                 List<int> changed = new List<int>();
 
                 for (int i = 1; i < gump.PageChanged.Length; i++)
+                {
                     if (gump.PageChanged[i])
                         changed.Add(i);
+                }
+
                 WriteUShort((ushort) changed.Count);
 
                 for (int i = changed.Count - 1; i >= 0; --i)

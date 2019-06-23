@@ -21,9 +21,9 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -31,7 +31,6 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -139,7 +138,6 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 70, Y = 350
             });
             //======================================================
-            World.Party.PartyMemberChanged += OnPartyMemberChanged;
 
             Add(new Line(30, 50, 260, 1, Color.White.PackedValue));
             Add(new Line(95, 50, 1, 200, Color.White.PackedValue));
@@ -163,53 +161,52 @@ namespace ClassicUO.Game.UI.Gumps
             _messagePartyLabel.IsVisible = false;
         }
 
-        private void OnPartyMemberChanged(object sender, EventArgs e)
+
+        public void Update()
         {
             OnInitialize();
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-            World.Party.PartyMemberChanged -= OnPartyMemberChanged;
-        }
 
         protected override void OnInitialize()
         {
             _scrollArea.Clear();
 
-            foreach (PartyListEntry entry in _partyListEntries)
-            {
-                entry.Dispose();
-            }
+            foreach (PartyListEntry entry in _partyListEntries) entry.Dispose();
             _partyListEntries.Clear();
 
-            foreach (PartyMember member in World.Party.Members)
+            for (int i = 0; i < World.Party.Members.Length; i++)
             {
-                PartyListEntry p = new PartyListEntry(member);
+                var m = World.Party.Members[i];
+
+                if (m == null)
+                    continue;
+
+                PartyListEntry p = new PartyListEntry(i);
                 _partyListEntries.Add(p);
                 _scrollArea.Add(p);
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
 
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, .5f);
+            hue.Z = 0.5f;
 
-
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, Vector3.Zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref hue);
 
             return true;
         }
 
         private void UpdateGumpStatus()
         {
-            if (prevStatus != World.Party.IsInParty)
+            bool hasParty = World.Party.Leader != 0;
+
+            if (prevStatus != hasParty)
             {
-                prevStatus = World.Party.IsInParty;
+                prevStatus = hasParty;
 
                 if (prevStatus)
                 {
@@ -224,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _leaveLabel.IsVisible = true;
                     _lootMeButton.IsVisible = true;
                     _lootMeLabel.IsVisible = true;
-                    _lootMeLabel.Text = !World.Party.AllowPartyLoot ? "Party CANNOT loot me" : "Party ALLOWED looting me";
+                    _lootMeLabel.Text = !World.Party.CanLoot ? "Party CANNOT loot me" : "Party ALLOWED looting me";
                     _messagePartyButton.IsVisible = true;
                     _messagePartyLabel.IsVisible = true;
                 }
@@ -260,17 +257,39 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Add:
-                    World.Party.TriggerAddPartyMember();
+                    //World.Party.TriggerAddPartyMember();
+
+                    if (World.Party.Leader == 0 || World.Party.Leader == World.Player) GameActions.RequestPartyInviteByTarget();
 
                     break;
+
                 case Buttons.Leave:
-                    World.Party.QuitParty();
+                    //World.Party.QuitParty();
+
+                    if (World.Party.Leader == 0)
+                        Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                    else
+                    {
+                        for (int i = 0; i < World.Party.Members.Length; i++)
+                        {
+                            if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                                GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
+                        }
+                    }
 
                     break;
+
                 case Buttons.Loot:
-                    World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
+                    //World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
+
+                    if (World.Party.Leader != 0)
+                    {
+                        World.Party.CanLoot = !World.Party.CanLoot;
+                        GameActions.RequestPartyLootState(World.Party.CanLoot);
+                    }
 
                     break;
+
                 case Buttons.Message:
 
                     //
@@ -292,10 +311,19 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly GumpPic _status;
 
-        public PartyListEntry(PartyMember member)
+        public PartyListEntry(int memeberIndex)
         {
             Height = 20;
-            Member = member;
+            PartyMemeberIndex = memeberIndex;
+
+            PartyMember member = World.Party.Members[memeberIndex];
+
+            if (member == null || member.Serial == 0)
+            {
+                Dispose();
+
+                return;
+            }
 
             //======================================================
             //Name = new Label(member.Name, true, 1153, font:3);
@@ -303,18 +331,20 @@ namespace ClassicUO.Game.UI.Gumps
             string name = string.IsNullOrEmpty(member.Name) ? "<Not seen>" : member.Name;
 
             Label name1 = World.Party.Leader == member.Serial
-                ? new Label(name + "(L)", true, 1161, font: 3)
-                {
-                    X = 80
-                }
-                : new Label(name, true, 1153, font: 3)
-                {
-                    X = 80
-                };
+                              ? new Label(name + "(L)", true, 1161, font: 3)
+                              {
+                                  X = 80
+                              }
+                              : new Label(name, true, 1153, font: 3)
+                              {
+                                  X = 80
+                              };
             Add(name1);
 
+            Mobile mobile = member.Mobile;
+
             //======================================================
-            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (Member.Mobile != null && Member.Mobile.IsDead ? 0 : 0x43)));
+            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (mobile != null && mobile.IsDead ? 0 : 0x43)));
 
             //======================================================
             Button pmButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
@@ -332,14 +362,23 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public PartyMember Member { get; }
-
+        public int PartyMemeberIndex { get; }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (Member.Mobile != null && Member.Mobile.IsDead)
+            PartyMember member = World.Party.Members[PartyMemeberIndex];
+
+            if (member == null || member.Serial == 0)
+                Dispose();
+
+            if (IsDisposed)
+                return;
+
+            Mobile mobile = member.Mobile;
+
+            if (mobile != null && mobile.IsDead)
             {
                 if (_status.Hue != 0)
                     _status.Hue = 0;
@@ -350,22 +389,30 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
+            PartyMember member = World.Party.Members[PartyMemeberIndex];
+
+            if (member == null)
+                return;
+
             switch ((Buttons) buttonID)
             {
                 case Buttons.Kick:
                     //
-                    World.Party.RemovePartyMember(Member.Serial);
+
+                    GameActions.RequestPartyRemoveMember(member.Serial);
+
 
                     break;
+
                 case Buttons.GetBar:
 
-                    Engine.UI.GetByLocalSerial<HealthBarGump>(Member.Mobile)?.Dispose();
+                    Engine.UI.GetControl<HealthBarGump>(member.Serial)?.Dispose();
 
-                    if (Member.Mobile == World.Player)
+                    if (member.Serial == World.Player)
                         StatusGumpBase.GetStatusGump()?.Dispose();
 
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(new HealthBarGump(Member.Mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                    Engine.UI.Add(new HealthBarGump(member.Serial) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
 
                     break;
             }

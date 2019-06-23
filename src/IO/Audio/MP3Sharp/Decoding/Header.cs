@@ -626,6 +626,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                         return "16 kHz";
 
                     return "8 kHz";
+
                 case FOURTYFOUR_POINT_ONE:
 
                     if (h_version == MPEG1)
@@ -635,6 +636,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                         return "22.05 kHz";
 
                     return "11.025 kHz";
+
                 case FOURTYEIGHT:
 
                     if (h_version == MPEG1)

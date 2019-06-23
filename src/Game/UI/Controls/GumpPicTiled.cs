@@ -58,6 +58,18 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
+        internal GumpPicTiled(int x, int y, int width, int heigth, SpriteTexture texture)
+        {
+            CanMove = true;
+            AcceptMouseInput = true;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = heigth;
+            Graphic = _lastGraphic = Graphic.INVALID;
+            Texture = texture;
+        }
+
         public Graphic Graphic { get; set; }
 
         public override void Update(double totalMS, double frameMS)
@@ -72,14 +84,44 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0, true);
 
-            batcher.Draw2DTiled(Texture, x, y, Width, Height, hue);
+            batcher.Draw2DTiled(Texture, x, y, Width, Height, ref hue);
 
             return base.Draw(batcher, x, y);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            int width = Width;
+            int height = Height;
+
+            if (width == 0)
+                width = Texture.Width;
+
+            if (height == 0)
+                height = Texture.Height;
+
+            while (x > Texture.Width && width > Texture.Width)
+            {
+                x -= Texture.Width;
+                width -= Texture.Width;
+            }
+
+            while (y > Texture.Height && height > Texture.Height)
+            {
+                y -= Texture.Height;
+                height -= Texture.Height;
+            }
+
+
+            if (x > width || y > height) return false;
+
+
+            return Texture.Contains(x, y);
         }
     }
 }

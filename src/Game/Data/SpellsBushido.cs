@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsBushido
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Bushido.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsBushido()
@@ -57,6 +56,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Bushido.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

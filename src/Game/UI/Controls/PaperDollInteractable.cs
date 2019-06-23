@@ -33,14 +33,14 @@ namespace ClassicUO.Game.UI.Controls
     {
         private static readonly Layer[] _layerOrder =
         {
-            Layer.Cloak, Layer.Ring, Layer.Shirt, Layer.Arms, Layer.Pants, Layer.Shoes, Layer.Legs,
-            Layer.Torso, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Tunic, Layer.Skirt, Layer.Necklace,
-            Layer.Hair, Layer.Robe, Layer.Earrings, Layer.Beard, Layer.Helmet, Layer.Waist, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+            Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
-
-        private ItemGumpPaperdoll _backpackGump;
         private Item _fakeItem;
         private Mobile _mobile;
+
+        private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
 
         public PaperDollInteractable(int x, int y, Mobile mobile)
         {
@@ -73,12 +73,11 @@ namespace ClassicUO.Game.UI.Controls
                 Dispose();
         }
 
-
         public override void Dispose()
         {
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
-            if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
+            if (_pgumps[(int) Layer.Backpack] != null) _pgumps[(int) Layer.Backpack].MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
 
@@ -164,14 +163,14 @@ namespace ClassicUO.Game.UI.Controls
                 Add(new GumpPic(0, 0, body, 0x03EA)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
 
                 Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
             }
@@ -180,12 +179,14 @@ namespace ClassicUO.Game.UI.Controls
                 Add(new GumpPic(0, 0, body, _mobile.Hue)
                 {
                     AcceptMouseInput = true,
-                    IsPaperdoll = true,
+                    //IsPaperdoll = true,
                     IsPartialHue = true
                 });
 
                 if (Mobile.HasEquipment)
                 {
+                    ItemGumpPaperdoll g = null;
+
                     for (int i = 0; i < _layerOrder.Length; i++)
                     {
                         int layerIndex = (int) _layerOrder[i];
@@ -199,25 +200,35 @@ namespace ClassicUO.Game.UI.Controls
                             isfake = true;
                             canPickUp = false;
                         }
-                        else if (item == null || item.IsDestroyed /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
+                        else if (item == null || item.IsDestroyed || Mobile.IsCovered(_mobile, (Layer) layerIndex))
                             continue;
 
                         switch (_layerOrder[i])
                         {
-                            case Layer.Beard:
                             case Layer.Hair:
+                            case Layer.Beard:
                                 canPickUp = false;
 
                                 break;
 
-                            case Layer.Arms:
                             case Layer.Torso:
+                                g = _pgumps[(int) Layer.Arms];
+
+                                if (g != null && !g.IsDisposed)
+                                {
+                                    if (item.Graphic != 0x13BF && item.Graphic != 0x13C4 && //chainmail tunic
+                                        g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417) //platemail arms
+                                        g = null;
+                                }
+
+                                goto case Layer.Arms;
+
+                            case Layer.Arms:
                                 var robe = _mobile.Equipment[(int) Layer.Robe];
 
                                 if (robe != null) continue;
 
                                 break;
-
 
                             case Layer.Helmet:
                                 robe = _mobile.Equipment[(int) Layer.Robe];
@@ -234,9 +245,8 @@ namespace ClassicUO.Game.UI.Controls
                                         if (robe.Graphic <= 0x2687)
                                         {
                                             if (robe.Graphic < 0x2683)
-                                            {
-                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F) break;
-                                            }
+                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
+                                                    break;
 
                                             continue;
                                         }
@@ -249,10 +259,17 @@ namespace ClassicUO.Game.UI.Controls
                                 break;
                         }
 
-                        Add(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                        Add(_pgumps[layerIndex] = new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                         {
-                            SlotIndex = i, CanPickUp = canPickUp
+                            CanPickUp = canPickUp
                         });
+
+                        if (g != null)
+                        {
+                            Children.Remove(g);
+                            Children.Add(g); //move to top
+                            g = null;
+                        }
                     }
                 }
             }
@@ -263,14 +280,31 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (backpack != null)
                 {
-                    Add(_backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                    Add(_pgumps[(int) Layer.Backpack] = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
                     {
                         AcceptMouseInput = true,
                         CanPickUp = false
                     });
-                    _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
+                    _pgumps[(int) Layer.Backpack].MouseDoubleClick += OnDoubleclickBackpackGump;
                 }
             }
+        }
+
+        public bool Fix(int itemID)
+        {
+            if (itemID == 0x1410 || itemID == 0x1417) // platemail arms
+                return true;
+
+            if (itemID == 0x13BF || itemID == 0x13C4) // chainmail tunic
+                return true;
+
+            if (itemID == 0x1C08 || itemID == 0x1C09) // leather skirt
+                return true;
+
+            if (itemID == 0x1C00 || itemID == 0x1C01) // leather shorts
+                return true;
+
+            return false;
         }
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
@@ -279,7 +313,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int) Layer.Backpack];
 
-                ContainerGump backpackGump = Engine.UI.GetByLocalSerial<ContainerGump>(backpack);
+                ContainerGump backpackGump = Engine.UI.GetControl<ContainerGump>(backpack);
 
                 if (backpackGump == null)
                     GameActions.DoubleClick(backpack);

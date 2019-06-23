@@ -27,6 +27,10 @@ namespace ClassicUO.Utility
 {
     internal static class StringHelper
     {
+        private static readonly char[] _dots = {'.', ',', ';', '!'};
+        private static readonly StringBuilder _sb = new StringBuilder();
+
+
         public static string CapitalizeFirstCharacter(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -46,16 +50,27 @@ namespace ClassicUO.Utility
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
 
-            StringBuilder sb = new StringBuilder();
+            _sb.Clear();
+
             bool capitalizeNext = true;
 
             for (int i = 0; i < str.Length; i++)
             {
-                sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
-                capitalizeNext = " .,;!".Contains(str[i].ToString());
+                _sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
+                capitalizeNext = false;
+
+                for (int j = 0; j < _dots.Length; j++)
+                {
+                    if (str[i] == _dots[j])
+                    {
+                        capitalizeNext = true;
+
+                        break;
+                    }
+                }
             }
 
-            return sb.ToString();
+            return _sb.ToString();
         }
 
         public static unsafe string ReadUTF8(byte* data)
@@ -83,8 +98,8 @@ namespace ClassicUO.Utility
             if (string.IsNullOrWhiteSpace(str))
                 return "";
 
-            StringBuilder sb = new StringBuilder(str.Length * 2);
-            sb.Append(str[0]);
+            _sb.Clear();
+            _sb.Append(str[0]);
 
             for (int i = 1, len = str.Length - 1; i <= len; i++)
             {
@@ -92,13 +107,13 @@ namespace ClassicUO.Utility
                 {
                     if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) ||
                         checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
-                        sb.Append(' ');
+                        _sb.Append(' ');
                 }
 
-                sb.Append(str[i]);
+                _sb.Append(str[i]);
             }
 
-            return sb.ToString();
+            return _sb.ToString();
         }
 
         public static string RemoveUpperLowerChars(string str, bool removelower = true)
@@ -106,15 +121,15 @@ namespace ClassicUO.Utility
             if (string.IsNullOrWhiteSpace(str))
                 return "";
 
-            StringBuilder sb = new StringBuilder(str.Length);
+            _sb.Clear();
 
             for (int i = 0; i < str.Length; i++)
             {
                 if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
-                    sb.Append(str[i]);
+                    _sb.Append(str[i]);
             }
 
-            return sb.ToString();
+            return _sb.ToString();
         }
     }
 }

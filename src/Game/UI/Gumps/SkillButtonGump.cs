@@ -33,9 +33,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SkillButtonGump : AnchorableGump
     {
-        private ResizePic _buttonBackgroundNormal;
-        private ResizePic _buttonBackgroundOver;
-        private HoveredLabel _label;
         private Skill _skill;
 
         public SkillButtonGump(Skill skill, int x, int y) : this()
@@ -67,45 +64,41 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 88;
             Height = 44;
 
-            Add(_buttonBackgroundNormal = new ResizePic(0x24B8)
+            Add(new ResizePic(0x24B8)
             {
                 Width = Width,
-                Height = Height
+                Height = Height,
+                AcceptMouseInput = true,
+                CanMove = true
             });
 
-            Add(_buttonBackgroundOver = new ResizePic(0x24EA)
-            {
-                Width = Width,
-                Height = Height
-            });
+            HoveredLabel label;
 
-            Add(_label = new HoveredLabel(_skill.Name, true, 0, 1151, Width - 10, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new HoveredLabel(_skill.Name, true, 0, 1151, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 5,
-                Y = 5,
+                X = 0,
+                Y = 0,
                 Width = Width - 10,
                 AcceptMouseInput = true,
                 CanMove = true
             });
-            _label.Y = (Height >> 1) - (_label.Height >> 1);
+            label.Y = (Height >> 1) - (label.Height >> 1);
         }
 
-        protected override void OnMouseEnter(int x, int y)
-        {
-            _buttonBackgroundNormal.IsVisible = false;
-            _buttonBackgroundOver.IsVisible = true;
-        }
 
-        protected override void OnMouseExit(int x, int y)
-        {
-            _buttonBackgroundNormal.IsVisible = true;
-            _buttonBackgroundOver.IsVisible = false;
-        }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left && !Input.Keyboard.Alt)
+            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
+                GameActions.UseSkill(_skill.Index);
+
+            return true;
         }
 
         public override void Save(BinaryWriter writer)

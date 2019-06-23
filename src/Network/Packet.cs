@@ -34,8 +34,7 @@ namespace ClassicUO.Network
     internal sealed class Packet : PacketBase
     {
         private static readonly byte[] _emtpyBytes = { };
-        private readonly byte[] _data;
-        public bool IsAssistPacket = false;
+        private byte[] _data;
 
         public Packet(byte[] data, int length)
         {
@@ -69,9 +68,9 @@ namespace ClassicUO.Network
 
         public bool Filter { get; set; }
 
-        public override byte[] ToArray()
+        public override ref byte[] ToArray()
         {
-            return _data;
+            return ref _data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -179,9 +178,8 @@ namespace ClassicUO.Network
             StringBuilder sb = new StringBuilder(s.Length);
 
             for (int i = 0; i < s.Length; ++i)
-            {
-                if (StringHelper.IsSafeChar(s[i])) sb.Append(s[i]);
-            }
+                if (StringHelper.IsSafeChar(s[i]))
+                    sb.Append(s[i]);
 
             return sb.ToString();
         }

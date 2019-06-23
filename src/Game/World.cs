@@ -21,17 +21,11 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Threading;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -41,10 +35,9 @@ namespace ClassicUO.Game
     internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
-        private static readonly List<Entity> _toRemove = new List<Entity>();
+        private static readonly List<Serial> _toRemove = new List<Serial>();
 
         public static Point RangeSize;
-
 
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
@@ -60,7 +53,7 @@ namespace ClassicUO.Game
 
         public static Map.Map Map { get; private set; }
 
-        public static byte ViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
+        public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static bool SkillsRequested { get; set; }
 
@@ -136,7 +129,7 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (mob.Distance > ViewRange)
+                    if (mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -146,21 +139,21 @@ namespace ClassicUO.Game
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
-                    {
                         Mobiles.Remove(_toRemove[i]);
-                        _toRemove.RemoveAt(i--);
-                    }
+
+                    Mobiles.ProcessDelta();
+                    _toRemove.Clear();
                 }
 
                 foreach (Item item in Items)
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.OnGround && item.Distance > ViewRange)
+                    if (item.OnGround && item.Distance > ClientViewRange)
                     {
                         if (item.IsMulti)
                         {
-                            if (HouseManager.TryToRemove(item, ViewRange))
+                            if (HouseManager.TryToRemove(item, ClientViewRange))
                                 RemoveItem(item);
                         }
                         else
@@ -174,10 +167,10 @@ namespace ClassicUO.Game
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
-                    {
                         Items.Remove(_toRemove[i]);
-                        _toRemove.RemoveAt(i--);
-                    }
+
+                    Items.ProcessDelta();
+                    _toRemove.Clear();
                 }
 
                 _effectManager.Update(totalMS, frameMS);
@@ -202,9 +195,9 @@ namespace ClassicUO.Game
         {
             Item item = Items.Get(serial);
 
-            if (item == null || item.IsDestroyed)
+            if (item == null /*|| item.IsDestroyed*/)
             {
-                Items.Remove(serial);
+                //Items.Remove(serial);
                 item = new Item(serial);
             }
 
@@ -215,11 +208,10 @@ namespace ClassicUO.Game
         {
             Mobile mob = Mobiles.Get(serial);
 
-            if (mob == null || mob.IsDestroyed)
+            if (mob == null /*|| mob.IsDestroyed*/)
             {
-                Mobiles.Remove(serial);
+                //Mobiles.Remove(serial);
                 mob = new Mobile(serial);
-                GameActions.RequestMobileStatus(mob);
             }
 
             return mob;
@@ -238,7 +230,7 @@ namespace ClassicUO.Game
 
                 if (e != null && e.HasEquipment)
                 {
-                    int index = (int)item.Layer;
+                    int index = (int) item.Layer;
 
                     if (index >= 0 && index < e.Equipment.Length)
                         e.Equipment[index] = null;
@@ -250,6 +242,7 @@ namespace ClassicUO.Game
 
             item.Items.Clear();
             item.Destroy();
+
             return true;
         }
 
@@ -293,7 +286,7 @@ namespace ClassicUO.Game
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
-            Party.Members.Clear();
+            Party.Clear();
             ServerName = string.Empty;
             TargetManager.LastAttack = 0;
             Chat.PromptData = default;

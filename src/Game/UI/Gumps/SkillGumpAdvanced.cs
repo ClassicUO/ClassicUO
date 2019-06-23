@@ -32,7 +32,6 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -53,7 +52,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
         private readonly GumpPic _sortOrderIndicator;
 
-        private Texture2D _edge;
 
         private bool _sortAsc;
         private string _sortField;
@@ -204,15 +202,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_edge == null)
-            {
-                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                _edge.SetData(new[] {Color.Gray});
-            }
+            Vector3 zero = Vector3.Zero;
 
-            batcher.DrawRectangle(_edge, x, y, Width, Height, Vector3.Zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref zero);
 
             return base.Draw(batcher, x, y);
         }
@@ -220,7 +214,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _edge?.Dispose();
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
@@ -314,7 +307,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 uint serial = (uint) (World.Player + _skill.Index + 1);
 
-                if (Engine.UI.GetByLocalSerial<SkillButtonGump>(serial) != null)
+                if (Engine.UI.GetControl<SkillButtonGump>(serial) != null)
                     Engine.UI.Remove<SkillButtonGump>(serial);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);

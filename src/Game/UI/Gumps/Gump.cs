@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             return IsVisible && base.Draw(batcher, x, y);
         }
@@ -126,6 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                             switches.Add(control.LocalSerial);
 
                             break;
+
                         case TextBox textBox:
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 

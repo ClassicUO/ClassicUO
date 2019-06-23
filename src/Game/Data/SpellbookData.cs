@@ -38,22 +38,27 @@ namespace ClassicUO.Game.Data
                     bookType = SpellBookType.Magery;
 
                     break;
+
                 case 0x2252: // paladin spellbook
                     bookType = SpellBookType.Chivalry;
 
                     break;
+
                 case 0x2253: // necromancer book
                     bookType = SpellBookType.Necromancy;
 
                     break;
+
                 case 0x238C: // book of bushido
                     bookType = SpellBookType.Bushido;
 
                     break;
+
                 case 0x23A0: // book of ninjitsu
                     bookType = SpellBookType.Ninjitsu;
 
                     break;
+
                 case 0x2D50: // spell weaving book
                     bookType = SpellBookType.Spellweaving;
 
@@ -70,21 +75,27 @@ namespace ClassicUO.Game.Data
                 case SpellBookType.Magery:
 
                     return 1;
+
                 case SpellBookType.Necromancy:
 
                     return 101;
+
                 case SpellBookType.Chivalry:
 
                     return 201;
+
                 case SpellBookType.Bushido:
 
                     return 401;
+
                 case SpellBookType.Ninjitsu:
 
                     return 501;
+
                 case SpellBookType.Spellweaving:
 
                     return 601;
+
                 default:
 
                     return 1;

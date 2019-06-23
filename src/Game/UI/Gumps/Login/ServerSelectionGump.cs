@@ -159,6 +159,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
             AcceptKeyboardInput = true;
+            CanCloseWithRightClick = false;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -178,7 +179,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     case Buttons.Earth:
 
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer((byte) loginScene.Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
+                        {
+                            int index = Engine.GlobalSettings.LastServerNum;
+
+                            if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+
+                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                        }
 
                         break;
 
@@ -197,7 +204,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte) loginScene.Servers[Engine.GlobalSettings.LastServerNum - 1].Index);
+                {
+                    int index = Engine.GlobalSettings.LastServerNum;
+
+                    if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                }
             }
         }
 
@@ -254,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 };
             }
 
-            public override bool Draw(Batcher2D batcher, int x, int y)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 if (IsDisposed)
                     return false;

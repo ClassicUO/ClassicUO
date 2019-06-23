@@ -28,6 +28,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -83,7 +84,8 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="cuoapi, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="cuoapi, Version=1.3.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
     <Reference Include="FNA, Version=18.12.0.0, Culture=neutral, processorArchitecture=AMD64">
@@ -142,13 +144,15 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\PoolsManager.cs" />
+    <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
-    <Compile Include="Game\UI\Controls\FadeOutLabel.cs" />
+    <Compile Include="Game\UI\Controls\EditableLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
@@ -158,9 +162,17 @@
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
+    <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="Game\UI\TextContainer.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
+    <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Renderer\UI\UIControl.cs" />
+    <Compile Include="Renderer\UI\UISystemManager.cs" />
+    <Compile Include="Utility\GraphicHelper.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
@@ -461,7 +473,6 @@
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
-    <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Utility\Bag.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
@@ -520,6 +531,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="README.md" />
+    <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -535,6 +547,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cuoicon.ico" />
+    <None Include="shaders\xBR.fx" />
     <EmbeddedResource Include="cuologo.png" />
     <Content Include="libs\api\cuoapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -21,12 +21,9 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 using IDrawable = ClassicUO.Interfaces.IDrawable;
 
@@ -34,22 +31,9 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract partial class GameObject : IDrawable
     {
-        protected static float PI = (float) Math.PI;
-
-        //private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>(() =>
-        //{
-        //    BlendState state = new BlendState
-        //    {
-        //        ColorSourceBlend = Blend.SourceAlpha, ColorDestinationBlend = Blend.InverseSourceAlpha
-        //    };
-
-        //    return state;
-        //});
-
+        protected static Vector3 HueVector;
         public Rectangle Bounds;
         public Rectangle FrameInfo;
-        public Vector3 HueVector;
-
 
         protected bool IsFlipped { get; set; }
 
@@ -71,73 +55,8 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-        public virtual bool Draw(Batcher2D batcher, int posX, int posY)
+        public virtual bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            SpriteVertex[] vertex;
-
-
-            if (Rotation != 0.0f)
-            {
-                float w = Bounds.Width / 2f;
-                float h = Bounds.Height / 2f;
-                Vector3 center = Vector3.Zero;
-                center.X = posX;
-                center.Y = posY;
-                center.X -= Bounds.X - 44 + w;
-                center.Y -= Bounds.Y + h;
-                float sinx = (float) Math.Sin(Rotation) * w;
-                float cosx = (float) Math.Cos(Rotation) * w;
-                float siny = (float) Math.Sin(Rotation) * h;
-                float cosy = (float) Math.Cos(Rotation) * h;
-
-                vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position = center;
-                vertex[0].Position.X += cosx - -siny;
-                vertex[0].Position.Y -= sinx + -cosy;
-                vertex[1].Position = center;
-                vertex[1].Position.X += cosx - siny;
-                vertex[1].Position.Y += -sinx + -cosy;
-                vertex[2].Position = center;
-                vertex[2].Position.X += -cosx - -siny;
-                vertex[2].Position.Y += sinx + cosy;
-                vertex[3].Position = center;
-                vertex[3].Position.X += -cosx - siny;
-                vertex[3].Position.Y += sinx + -cosy;
-            }
-            else if (IsFlipped)
-            {
-                vertex = SpriteVertex.PolyBufferFlipped;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X += Bounds.X + 44f;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.Y += Bounds.Height;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.X -= Bounds.Width;
-                vertex[2].TextureCoordinate.Y = 0;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.X -= Bounds.Width;
-            }
-            else
-            {
-                vertex = SpriteVertex.PolyBuffer;
-                vertex[0].Position.X = posX;
-                vertex[0].Position.Y = posY;
-                vertex[0].Position.X -= Bounds.X;
-                vertex[0].Position.Y -= Bounds.Y;
-                vertex[0].TextureCoordinate.Y = 0;
-                vertex[1].Position = vertex[0].Position;
-                vertex[1].Position.X += Bounds.Width;
-                vertex[1].TextureCoordinate.Y = 0;
-                vertex[2].Position = vertex[0].Position;
-                vertex[2].Position.Y += Bounds.Height;
-                vertex[3].Position = vertex[1].Position;
-                vertex[3].Position.Y += Bounds.Height;
-            }
-
-
             if (DrawTransparent)
             {
                 int dist = Distance;
@@ -151,37 +70,26 @@ namespace ClassicUO.Game.GameObjects
                 else
                     HueVector.Z = 1f - AlphaHue / 255f;
             }
-            else
+            else if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
 
-            vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
-
-
-            //if (DrawTransparent)
-            //{
-            //batcher.SetBlendState(_blend.Value);
-            //SDL2EX.glColor4f(1, 1, 1, 0.25f);
-
-            //}
-
-
-            if (!batcher.DrawSprite(Texture, ref vertex))
+            if (Rotation != 0.0f)
             {
-                //if (DrawTransparent)
-                //    batcher.SetBlendState(null);
-                return false;
+                if (!batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector, Rotation))
+                    return false;
+            }
+            else if (IsFlipped)
+            {
+                if (!batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
+                    return false;
+            }
+            else
+            {
+                if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
+                    return false;
             }
 
-            //if (DrawTransparent)
-            //{
-            //    batcher.SetBlendState(null);
-
-
-            //    batcher.Stencil.StencilEnable = true;
-            //    batcher.DrawSprite(Texture, vertex);
-            //    batcher.Stencil.StencilEnable = false;
-            //}         
 
             Select(posX, posY);
 
@@ -190,7 +98,12 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        //public bool IsSelected { get; set; }
+        protected static void ResetHueVector()
+        {
+            HueVector.X = 0;
+            HueVector.Y = 0;
+            HueVector.Z = 0;
+        }
 
         public Rectangle GetOnScreenRectangle()
         {

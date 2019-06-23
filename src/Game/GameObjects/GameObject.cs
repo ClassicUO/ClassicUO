@@ -38,18 +38,17 @@ namespace ClassicUO.Game.GameObjects
         //bool IsSelected { get; set; }
     }
 
+
     internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
-        private Tile _tile;
-
 
 
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        public OverheadMessage OverheadMessageContainer { get; private set; }
+        public OverheadMessage OverheadMessageContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
@@ -154,6 +153,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public Tile Tile { get; private set; }
+
         public GameObject Left { get; set; }
         public GameObject Right { get; set; }
 
@@ -167,10 +168,13 @@ namespace ClassicUO.Game.GameObjects
             if (World.Map != null)
             {
                 if (Position != Position.INVALID)
-                    _tile?.RemoveGameObject(this);
+                    Tile?.RemoveGameObject(this);
 
-                _tile = World.Map.GetTile(x, y);
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    Tile = World.Map.GetTile(x, y);
+                    Tile?.AddGameObject(this);
+                }
             }
         }
 
@@ -184,19 +188,22 @@ namespace ClassicUO.Game.GameObjects
             if (World.Map != null)
             {
                 if (Position != Position.INVALID)
-                    _tile?.RemoveGameObject(this);
+                    Tile?.RemoveGameObject(this);
 
-                _tile = tile;
-                _tile?.AddGameObject(this);
+                if (!IsDestroyed)
+                {
+                    Tile = tile;
+                    Tile?.AddGameObject(this);
+                }
             }
         }
 
         public void RemoveFromTile()
         {
-            if (World.Map != null && _tile != null)
+            if (World.Map != null && Tile != null)
             {
-                _tile?.RemoveGameObject(this);
-                _tile = null;
+                Tile.RemoveGameObject(this);
+                Tile = null;
             }
         }
 
@@ -235,6 +242,9 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+        protected virtual void OnDirectionChanged()
+        {
+        }
 
         public virtual void Destroy()
         {
@@ -243,8 +253,8 @@ namespace ClassicUO.Game.GameObjects
 
             IsDestroyed = true;
 
-            _tile?.RemoveGameObject(this);
-            _tile = null;
+            Tile?.RemoveGameObject(this);
+            Tile = null;
 
             OverheadMessageContainer?.Destroy();
 

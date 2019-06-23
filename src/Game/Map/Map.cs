@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -51,7 +52,6 @@ namespace ClassicUO.Game.Map
 
         public int Index { get; }
 
-
         public Chunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
@@ -71,23 +71,23 @@ namespace ClassicUO.Game.Map
             if (block >= Chunks.Length)
                 return null;
 
-            ref Chunk chuck = ref Chunks[block];
+            ref Chunk chunk = ref Chunks[block];
 
-            if (chuck == null)
+            if (chunk == null)
             {
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = new Chunk((ushort) cellX, (ushort) cellY);
-                    chuck.Load(Index);
+                    chunk = new Chunk((ushort) cellX, (ushort) cellY);
+                    chunk.Load(Index);
                 }
                 else
                     return null;
             }
 
-            chuck.LastAccessTime = Engine.Ticks;
+            chunk.LastAccessTime = Engine.Ticks;
 
-            return chuck.Tiles[x % 8, y % 8];
+            return chunk.Tiles[x % 8, y % 8];
         }
 
         public Tile GetTile(int x, int y, bool load = true)
@@ -117,6 +117,30 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
+        {
+            Tile tile = GetTile(x, y);
+
+            var obj = tile.FirstNode;
+
+            groundZ = staticZ = 0;
+
+            while (obj != null)
+            {
+                switch (obj)
+                {
+                    case Land land:
+                        groundZ = land.Z;
+                        break;
+                    case Static stat:
+                        staticZ = stat.Z;
+                        break;
+                }
+
+                obj = obj.Right;
+            }
+        }
+
         public void ClearBockAccess()
         {
             Array.Clear(_blockAccessList, 0, _blockAccessList.Length);
@@ -135,6 +159,9 @@ namespace ClassicUO.Game.Map
             if (tile != null)
             {
                 GameObject obj = tile.FirstNode;
+
+                while (obj.Left != null)
+                    obj = obj.Left;
 
                 for (; obj != null; obj = obj.Right)
                 {
@@ -169,7 +196,9 @@ namespace ClassicUO.Game.Map
         public IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
-            ref IndexMap[] list = ref FileManager.Map.BlockData[Index];
+            int map = Index;
+            FileManager.Map.SanitizeMapIndex(ref map);
+            ref IndexMap[] list = ref FileManager.Map.BlockData[map];
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
@@ -178,6 +207,7 @@ namespace ClassicUO.Game.Map
         {
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
         }
+
 
         public void ClearUnusedBlocks()
         {

@@ -1,4 +1,27 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -37,7 +60,6 @@ namespace ClassicUO.IO.Resources
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -46,51 +68,46 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < split.Length; i++)
             {
-                if (split[i].Length > 0 && split[i].Length <= input.Length)
+                if (split[i].Length > input.Length || split[i].Length == 0)
+                    continue;
+
+                if (!entry.CheckStart)
                 {
-                    if (!entry.CheckStart)
-                    {
-                        if (input.IndexOf(split[i], 0) < 0)
-                            continue;
-                    }
-
-                    if (!entry.CheckEnd)
-                    {
-                        if (input.IndexOf(split[i], input.Length - split[i].Length) < 0)
-                            continue;
-                    }
-
-                    if (input.IndexOf(split[i]) >= 0)
-                        return true;
+                    if (input.IndexOf(split[i], 0, split[i].Length) == -1)
+                        continue;
                 }
+
+                if (!entry.CheckEnd)
+                {
+                    if (input.IndexOf(split[i], input.Length - split[i].Length) == -1)
+                        continue;
+                }
+
+                if (input.IndexOf(split[i]) != -1)
+                    return true;
             }
 
             return false;
         }
 
-        public SpeechEntry[] GetKeywords(string text)
+        public List<SpeechEntry> GetKeywords(string text)
         {
-            if (FileManager.ClientVersion < ClientVersions.CV_305D)
-            {
-                return new SpeechEntry[0]
-                {
-                };
-            }
-
-            text = text.ToLower();
             List<SpeechEntry> list = new List<SpeechEntry>();
+
+            if (FileManager.ClientVersion < ClientVersions.CV_305D) return list;
+
+            text = text.ToLower().TrimStart(' ').TrimEnd(' ');
 
             for (int i = 0; i < _speech.Length; i++)
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, entry))
-                    list.Add(entry);
+                if (IsMatch(text, entry)) list.Add(entry);
             }
 
             list.Sort();
 
-            return list.ToArray();
+            return list;
         }
     }
 

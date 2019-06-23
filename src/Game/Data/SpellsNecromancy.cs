@@ -29,7 +29,6 @@ namespace ClassicUO.Game.Data
 {
     internal static class SpellsNecromancy
     {
-        public static string SpellBookName { get; set; } = SpellBookType.Necromancy.ToString();
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
         static SpellsNecromancy()
@@ -90,6 +89,8 @@ namespace ClassicUO.Game.Data
                 }
             };
         }
+
+        public static string SpellBookName { get; set; } = SpellBookType.Necromancy.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;

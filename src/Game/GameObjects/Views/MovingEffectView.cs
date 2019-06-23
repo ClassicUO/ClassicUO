@@ -26,8 +26,6 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
@@ -35,23 +33,28 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _displayedGraphic = Graphic.INVALID;
 
 
-        public override bool Draw(Batcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
+
+            ResetHueVector();
 
             if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-                Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
+                Bounds.X = 0;
+                Bounds.Y = 0;
+                Bounds.Width = Texture.Width;
+                Bounds.Height = Texture.Height;
             }
 
             Bounds.X = (int) -Offset.X;
             Bounds.Y = (int) (Offset.Z - Offset.Y);
             Rotation = AngleToTarget;
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ViewRange)
+            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;

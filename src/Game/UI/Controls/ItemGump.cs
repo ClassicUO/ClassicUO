@@ -22,8 +22,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -31,7 +29,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -89,10 +86,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                if (!World.ClientFlags.TooltipsEnabled)
-                {
-                    GameActions.SingleClick(Item);
-                }
+                if (!World.ClientFlags.TooltipsEnabled) GameActions.SingleClick(Item);
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }
@@ -100,20 +94,20 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0);
+            ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-            batcher.Draw2D(Texture, x, y, hue);
+            batcher.Draw2D(Texture, x, y, ref hue);
 
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, hue);
+                batcher.Draw2D(Texture, x + 5, y + 5, ref hue);
 
             return base.Draw(batcher, x, y);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             if (Texture.Contains(x, y))
                 return true;
@@ -157,7 +151,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                        Game.SelectedObject.Object = Item;
+                        SelectedObject.Object = Item;
 
                         if (Item.ItemData.IsContainer)
                             gs.DropHeldItemToContainer(Item);
@@ -176,7 +170,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
-                            Game.SelectedObject.Object = Item;
+                        case CursorTarget.Grab:
+                        case CursorTarget.SetGrabBag:
+                            SelectedObject.Object = Item;
 
 
                             if (Item != null)
@@ -188,7 +184,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            Game.SelectedObject.Object = Item;
+                            SelectedObject.Object = Item;
 
                             if (Item != null)
                             {
@@ -204,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                    Game.SelectedObject.Object = Item;
+                    SelectedObject.Object = Item;
 
                     if (Item.ItemData.IsContainer)
                         gs.DropHeldItemToContainer(Item);
@@ -236,6 +232,7 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             base.OnMouseClick(x, y, button);
+
             if (button != MouseButton.Left)
                 return;
 
@@ -246,7 +243,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (TargetManager.IsTargeting)
             {
-                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object)
+                if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object || TargetManager.TargetingState == CursorTarget.Grab || TargetManager.TargetingState == CursorTarget.SetGrabBag)
                 {
                     TargetManager.TargetGameObject(Item);
                     Mouse.LastLeftButtonClickTime = 0;

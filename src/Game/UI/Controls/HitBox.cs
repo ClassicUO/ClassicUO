@@ -29,6 +29,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
+        public override bool CanUseAlpha => false;
+
         protected readonly SpriteTexture _texture;
 
         public HitBox(int x, int y, int w, int h)
@@ -62,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, int x, int y)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
@@ -70,9 +72,9 @@ namespace ClassicUO.Game.UI.Controls
             if (MouseIsOver)
             {
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0);
+                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0, true);
 
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, hue);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref hue);
             }
 
             return base.Draw(batcher, x, y);

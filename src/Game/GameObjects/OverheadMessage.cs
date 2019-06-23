@@ -1,4 +1,27 @@
-﻿using ClassicUO.IO;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -64,6 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (a.RenderedText.Hue != hue || ishealthmessage)
                     {
+                        a.Hue = hue;
                         a.RenderedText.Hue = hue;
 
                         if (ishealthmessage)
@@ -112,6 +136,7 @@ namespace ClassicUO.Game.GameObjects
                 RenderedText = rtext,
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
+                Hue = hue,
                 Parent = this,
                 IsHealthMessage = ishealthmessage
             };
@@ -210,7 +235,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y, float scale)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, float scale)
         {
             if (IsDestroyed || _messages.Count == 0)
                 return;
@@ -274,17 +299,35 @@ namespace ClassicUO.Game.GameObjects
 
 
             //int startY = offY;
+
             foreach (var item in _messages)
             {
                 ushort hue = 0;
+                float alpha = _alpha;
 
                 if (Engine.Profile.Current.HighlightGameObjects)
-                    if (item.IsSelected)
+                {
+                    if (SelectedObject.LastObject == item)
                         hue = 23;
+                }
+                else if (SelectedObject.LastObject == item)
+                {
+                    if (item.RenderedText.Hue != 0xFF)
+                    {
+                        item.RenderedText.Hue = 0xFF;
+                        item.RenderedText.CreateTexture();
+                        alpha = 0;
+                    }
+                }
+                else if (item.RenderedText.Hue != item.Hue)
+                {
+                    item.RenderedText.Hue = item.Hue;
+                    item.RenderedText.CreateTexture();
+                }
 
                 item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height;
-                item.RenderedText.Draw(batcher, item.X, item.Y, _alpha != 0.0f ? _alpha : item.Alpha, hue);
+                item.RenderedText.Draw(batcher, item.X, item.Y, alpha != 0.0f ? alpha : item.Alpha, hue);
                 offY += item.RenderedText.Height;
             }
 
@@ -421,7 +464,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(Batcher2D batcher, int x, int y, float scale)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, float scale)
         {
             if (IsDestroyed || _messages.Count == 0)
                 return;
@@ -492,9 +535,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = 0;
 
-                if (Engine.Profile.Current.HighlightGameObjects)
-                    if (item.IsSelected)
-                        hue = 23;
+                //if (Engine.Profile.Current.HighlightGameObjects)
+                //{
+                //    if (SelectedObject.LastObject == item)
+                //        hue = 23;
+                //}
+                //else if (SelectedObject.LastObject == item)
+                //    hue = 23;
 
                 item.X = x - (item.RenderedText.Width >> 1);
                 item.Y = y - offY - item.RenderedText.Height - item.OffsetY;
@@ -535,6 +582,7 @@ namespace ClassicUO.Game.GameObjects
     internal class MessageInfo : IGameEntity
     {
         public float Alpha;
+        public ushort Hue;
         public bool IsHealthMessage;
 
         public OverheadMessage Parent;
@@ -542,7 +590,5 @@ namespace ClassicUO.Game.GameObjects
         public float Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
-
-        public bool IsSelected { get; set; }
     }
 }

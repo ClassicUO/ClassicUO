@@ -31,14 +31,14 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class GameEffect : GameObject
     {
-        private readonly List<GameEffect> _children;
+        protected AnimDataFrame2 AnimDataFrame;
 
         protected GameEffect()
         {
-            _children = new List<GameEffect>();
+            Children = new List<GameEffect>();
         }
 
-        public List<GameEffect> Children => _children;
+        public List<GameEffect> Children { get; }
 
         public GameObject Source { get; set; }
 
@@ -55,8 +55,6 @@ namespace ClassicUO.Game.GameObjects
         protected int TargetY { get; set; }
 
         protected int TargetZ { get; set; }
-
-        protected AnimDataFrame2 AnimDataFrame;
 
         public int Speed { get; set; }
 
@@ -107,8 +105,9 @@ namespace ClassicUO.Game.GameObjects
                     {
                         unsafe
                         {
-                            AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         }
+
                         AnimIndex++;
 
                         if (AnimIndex >= AnimDataFrame.FrameCount)
@@ -129,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddChildEffect(GameEffect effect)
         {
-            _children.Add(effect);
+            Children.Add(effect);
         }
 
         protected (int x, int y, int z) GetSource()
