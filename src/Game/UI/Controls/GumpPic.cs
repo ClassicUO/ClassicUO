@@ -73,8 +73,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+           
+            x = Mouse.Position.X - ScreenCoordinateX;
+            y = Mouse.Position.Y - ScreenCoordinateY;
+
             if (Texture.Contains(x, y))
                 return true;
+
 
             for (int i = 0; i < Children.Count; i++)
             {

@@ -486,15 +486,14 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 string subname = $"{itemName} at {item.Price}gp";
-                int height = FileManager.Fonts.GetHeightUnicode(1, subname, 110, TEXT_ALIGN_TYPE.TS_LEFT, 0);
 
-                Add(_name = new Label($"{itemName} at {item.Price}gp", true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     Y = 0,
                     X = 55
                 });
 
-                height = Math.Max(height, control.Height) + 10;
+                int height = Math.Max(_name.Height, control.Height) + 10;
 
                 Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
@@ -757,7 +756,10 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update(double totalMS, double frameMS)
             {
                 foreach (SpriteTexture t in _gumpTexture)
-                    t.Ticks = (long) totalMS;
+                {
+                    if (t != null)
+                        t.Ticks = (long) totalMS;
+                }
 
                 base.Update(totalMS, frameMS);
             }

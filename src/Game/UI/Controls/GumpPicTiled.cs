@@ -118,7 +118,8 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            if (x > width || y > height) return false;
+            if (x > width || y > height)
+                return false;
 
 
             return Texture.Contains(x, y);
