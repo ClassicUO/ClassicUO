@@ -206,6 +206,7 @@ namespace ClassicUO
                     else if (_fpsLimit > MAX_FPS)
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
+                    FrameDelay[1] = FrameDelay[1] >> 1;
 
                     _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
 
@@ -720,10 +721,11 @@ namespace ClassicUO
                 _totalElapsed -= IntervalFixedUpdate;
                 _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
 
-                //if (_isRunningSlowly)
-                //{
-                //    _totalElapsed %= IntervalFixedUpdate;
-                //}
+
+                if (_isRunningSlowly && _totalElapsed > IntervalFixedUpdate * 2)
+                {
+                    _totalElapsed %= IntervalFixedUpdate;
+                }
             }
 
             if (!_isRunningSlowly)
@@ -732,11 +734,13 @@ namespace ClassicUO
 
                 if (sleep < IntervalFixedUpdate)
                 {
-                    SDL.SDL_Delay(1);
+                    Thread.Sleep(IntervalFixedUpdate - sleep >= FrameDelay[1] >> 1 ? 1 : 0);
                 }
                 else
                     Thread.Yield();
             }
+            else
+                Thread.Yield();
         }
 
 
