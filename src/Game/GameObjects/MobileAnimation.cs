@@ -101,7 +101,14 @@ namespace ClassicUO.Game.GameObjects
                         if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && FileManager.Animations.AnimationExists(graphic, 8))
                             result = 8;
                         else
-                            result = 1;
+                        {
+                            if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                            {
+                                result = 25;
+                            }
+                            else
+                                result = 1;
+                        }
                     }
                 }
                 else if (isrun)
@@ -109,10 +116,22 @@ namespace ClassicUO.Game.GameObjects
                     if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
                         result = 19;
                     else
-                        result = 0;
+                    {
+                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                            result = 24;
+                        else
+                            result = 0;
+                    }
                 }
                 else
-                    result = 0;
+                {
+                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    {
+                        result = 22;
+                    }
+                    else
+                        result = 0;
+                }
             }
         }
 

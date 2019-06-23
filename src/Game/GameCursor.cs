@@ -293,6 +293,7 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
+        private static Vector3 _vec = Vector3.Zero;
         public void Draw(UltimaBatcher2D sb)
         {
             if (TargetManager.IsTargeting && Engine.Profile.Current != null && Engine.Profile.Current.AuraOnMouse)
@@ -327,6 +328,18 @@ namespace ClassicUO.Game
 
                 sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
             }
+
+            /*ushort graphic = Graphic = AssignGraphicByState();
+            if (graphic < 0x206A)
+                graphic -= 0x2053;
+            else
+                graphic -= 0x206A;
+
+            int offX = _cursorOffset[0, graphic];
+            int offY = _cursorOffset[1, graphic];
+
+            sb.Draw2D(FileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+            */
 
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
