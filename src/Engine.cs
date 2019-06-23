@@ -684,13 +684,16 @@ namespace ClassicUO
             // This should be the right order
             OnNetworkUpdate(current, elapsed);
             Mouse.Update();
+            _uiManager.Update(current, elapsed);
             Plugin.Tick();
-            OnUIUpdate(current, elapsed);
             // ###############################
+
 
             Profiler.EnterContext("Update");
 
-            OnUpdate(current, elapsed);
+            Scene scene = _sceneManager.CurrentScene;
+            if (scene != null && scene.IsLoaded)
+                scene.Update(current, elapsed);
             FrameworkDispatcher.Update();
 
             Profiler.ExitContext("Update");
@@ -825,24 +828,6 @@ namespace ClassicUO
             {
                 socket.Statistics.Update();
                 _statisticsTimer = totalMS + 500;
-            }
-        }
-
-        private void OnUIUpdate(double totalMS, double frameMS)
-        {
-            UI.Update(totalMS, frameMS);
-        }
-
-        private void OnUpdate(double totalMS, double frameMS)
-        {
-            Scene scene = _sceneManager.CurrentScene;
-
-            if (scene != null && scene.IsLoaded)
-            {
-                if (scene.IsDestroyed)
-                    _sceneManager.Switch();
-                else
-                    scene.Update(totalMS, frameMS);
             }
         }
     }
