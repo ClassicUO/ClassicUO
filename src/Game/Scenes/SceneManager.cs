@@ -31,18 +31,10 @@ namespace ClassicUO.Game.Scenes
 
     internal sealed class SceneManager
     {
-        private ScenesType _nextScene, _currentScene;
         public Scene CurrentScene { get; private set; }
 
         public void ChangeScene(ScenesType type)
         {
-            //_nextScene = type;
-
-            //if (CurrentScene == null)
-            //    Switch();
-            //else
-            //    CurrentScene.Dispose();
-
             CurrentScene?.Destroy();
             CurrentScene = null;
 
@@ -76,37 +68,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             CurrentScene?.Load();
-        }
-
-        public void Switch()
-        {
-            //if (_currentScene != ScenesType.None && _nextScene != ScenesType.None && _currentScene == _nextScene)
-            //{
-            //    throw new Exception("Trying to change the same scene");
-            //}
-
-            //_currentScene = _nextScene;
-
-            //CurrentScene = null;
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-
-            //switch (_currentScene)
-            //{
-            //    case ScenesType.Login:
-            //        Engine.IsFullScreen = false;
-            //        Engine.WindowWidth = 640;
-            //        Engine.WindowHeight = 480;
-            //        CurrentScene = new LoginScene();
-            //        break;
-
-            //    case ScenesType.Game:
-            //        Engine.IsFullScreen = true;
-            //        CurrentScene = new GameScene();
-            //        break;
-            //}
-
-            //CurrentScene.Load();
         }
 
         public T GetScene<T>() where T : Scene

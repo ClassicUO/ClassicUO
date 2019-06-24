@@ -168,27 +168,6 @@ namespace ClassicUO.Game.Scenes
             GameActions.Initialize(PickupItemBegin);
 
 
-            // LEFT
-            Engine.Input.LeftMouseButtonDown += OnLeftMouseDown;
-            Engine.Input.LeftMouseButtonUp += OnLeftMouseUp;
-            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-
-            // RIGHT
-            Engine.Input.RightMouseButtonDown += OnRightMouseDown;
-            Engine.Input.RightMouseButtonUp += OnRightMouseUp;
-            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-
-            // MOUSE WHEEL
-            Engine.Input.MouseWheel += OnMouseWheel;
-
-            // MOUSE DRAG
-            Engine.Input.MouseDragging += OnMouseDragging;
-
-            // KEYBOARD
-            Engine.Input.KeyDown += OnKeyDown;
-            Engine.Input.KeyUp += OnKeyUp;
-
-
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
@@ -315,25 +294,6 @@ namespace ClassicUO.Game.Scenes
 
             Engine.UI?.Clear();
             World.Clear();
-
-            // LEFT
-            Engine.Input.LeftMouseButtonDown -= OnLeftMouseDown;
-            Engine.Input.LeftMouseButtonUp -= OnLeftMouseUp;
-            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-
-            // RIGHT
-            Engine.Input.RightMouseButtonDown -= OnRightMouseDown;
-            Engine.Input.RightMouseButtonUp -= OnRightMouseUp;
-            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-
-            // MOUSE WHEEL
-            Engine.Input.MouseWheel -= OnMouseWheel;
-
-            // MOUSE DRAG
-            Engine.Input.MouseDragging -= OnMouseDragging;
-
-            Engine.Input.KeyDown -= OnKeyDown;
-            Engine.Input.KeyUp -= OnKeyUp;
 
             Overheads?.Clear();
             Overheads = null;

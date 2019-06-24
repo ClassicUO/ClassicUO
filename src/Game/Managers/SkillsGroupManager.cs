@@ -189,7 +189,7 @@ namespace ClassicUO.Game.Managers
                         {
                             int grp = bin.ReadInt32();
 
-                            if (grp < groups.Count)
+                            if (grp < groups.Count && skillidx + 1 < FileManager.Skills.SkillsCount)
                                 Groups[groups[grp]].Add(skillidx++);
                         }
                     }
@@ -274,7 +274,8 @@ namespace ClassicUO.Game.Managers
                 for (int j = 0; j < entriesCount; j++)
                 {
                     int skillIndex = reader.ReadInt32();
-                    list.Add(skillIndex);
+                    if (skillIndex < FileManager.Skills.SkillsCount)
+                        list.Add(skillIndex);
                 }
             }
         }

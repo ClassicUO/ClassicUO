@@ -91,7 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _allSkillControls = new SkillControl[FileManager.Skills.SkillsCount];
 
-            foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups) AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
+            foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
+                AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
         }
 
         public override void OnButtonClick(int buttonID)
@@ -209,6 +210,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public int Compare(int x, int y)
             {
+                if (x >= FileManager.Skills.SkillNames.Length || y >= FileManager.Skills.SkillNames.Length)
+                    return 0;
+
                 return FileManager.Skills.SkillNames[x].CompareTo(FileManager.Skills.SkillNames[y]);
             }
         }

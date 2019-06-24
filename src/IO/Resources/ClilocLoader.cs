@@ -82,14 +82,7 @@ namespace ClassicUO.IO.Resources
 
         public string GetString(int number)
         {
-            string s = GetEntry(number).Text;
-
-            if (string.IsNullOrEmpty(s))
-            {
-                s = $"Unknown Cliloc #{number}";
-            }
-
-            return s;
+            return GetEntry(number).Text;
         }
 
         public StringEntry GetEntry(int number)

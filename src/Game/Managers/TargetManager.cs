@@ -101,10 +101,16 @@ namespace ClassicUO.Game.Managers
             TargetingState = targeting;
             _targetCursorId = cursorID;
             TargeringType = cursorType;
+
+            bool lastTargetting = IsTargeting;
             IsTargeting = cursorType < TargetType.Cancel;
 
             if (IsTargeting)
                 Engine.UI.RemoveTargetLineGump(LastTarget);
+            else if (lastTargetting)
+            {
+                CancelTarget();
+            }
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)

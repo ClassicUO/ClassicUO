@@ -220,6 +220,7 @@ namespace ClassicUO.Game.Managers
             Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
+
         public AnchorManager AnchorManager { get; }
 
         public List<Control> Gumps { get; } = new List<Control>();
@@ -772,12 +773,17 @@ namespace ClassicUO.Game.Managers
             if (_isDraggingControl)
                 return DraggingControl;
 
-            var controls = IsModalControlOpen ? Gumps.Where(s => s.ControlInfo.IsModal) : Gumps;
-
             Control[] mouseOverControls = null;
 
-            foreach (Control c in controls)
+            bool ismodal = IsModalControlOpen;
+
+            foreach (Control c in Gumps)
             {
+                if (ismodal && !c.ControlInfo.IsModal)
+                {
+                    continue;
+                }
+
                 Control[] ctrls = c.HitTest(position);
 
                 if (ctrls != null)
@@ -916,14 +922,14 @@ namespace ClassicUO.Game.Managers
 
                 if (DraggingControl == dragTarget)
                 {
-                    var p = Mouse.LDroppedOffset;
-                    //int deltaX = mousePosition.X - _dragOriginX;
-                    //int deltaY = mousePosition.Y - _dragOriginY;
+                    //var p = Mouse.LDroppedOffset;
+                    int deltaX = mousePosition.X - _dragOriginX;
+                    int deltaY = mousePosition.Y - _dragOriginY;
 
-                    if (attemptAlwaysSuccessful || Math.Abs(p.X) + Math.Abs(p.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
                     {
                         _isDraggingControl = true;
-                        dragTarget.InvokeDragBegin(p);
+                        dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
                     }
                 }
                 else
