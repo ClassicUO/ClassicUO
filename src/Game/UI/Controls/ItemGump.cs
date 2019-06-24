@@ -220,9 +220,11 @@ namespace ClassicUO.Game.UI.Controls
             if (_clickedCanDrag)
             {
                 Point offset = Mouse.LDroppedOffset;
+                var split = Engine.UI.GetControl<SplitMenuGump>(Item);
 
-                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (split != null || Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
+                    split?.Dispose();
                     _clickedCanDrag = false;
                     AttempPickUp();
                 }
