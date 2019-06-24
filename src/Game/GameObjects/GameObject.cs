@@ -207,6 +207,10 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public virtual void UpdateGraphicBySeason()
+        {
+
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)

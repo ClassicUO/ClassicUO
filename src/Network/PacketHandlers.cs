@@ -622,6 +622,9 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+            if (World.Player.IsDead)
+                World.ChangeSeason(Seasons.Desolation, 42);
         }
 
         private static void Talk(Packet p)
@@ -783,7 +786,11 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
 
-            if (p.ReadUInt() != World.Player) throw new Exception("OnMobileStatus");
+            if (p.ReadUInt() != World.Player)
+                throw new Exception("OnMobileStatus");
+
+            bool oldDead = World.Player.IsDead;
+            ushort oldGraphic = World.Player.Graphic;
 
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             World.Player.Hue = p.ReadUShort();
@@ -821,6 +828,23 @@ namespace ClassicUO.Network
             World.RangeSize.Y = y;
             World.Player.Direction = dir;
             World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
+
+            if (oldGraphic != 0 && oldGraphic != World.Player.Graphic)
+            {
+                if (World.Player.IsDead)
+                {
+                    TargetManager.Reset();
+                }
+            }
+
+            if (oldDead != World.Player.IsDead)
+            {
+                if (World.Player.IsDead)
+                    World.ChangeSeason(Seasons.Desolation, 42);
+                else 
+                    World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
+            }
+
             World.Player.Walker.ResendPacketSended = false;
             World.Player.AddToTile();
 #endif
@@ -2017,6 +2041,17 @@ namespace ClassicUO.Network
                 GameActions.SingleClick(mobile);
 
             Engine.UI.GetControl<PaperDollGump>(mobile)?.Update();
+
+
+            if (mobile == World.Player)
+            {
+                if (World.Player.IsDead)
+                    World.ChangeSeason(Seasons.Desolation, 42);
+                else
+                {
+                    World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
+                }
+            }
         }
 
         private static void OpenMenu(Packet p)
@@ -2706,8 +2741,22 @@ namespace ClassicUO.Network
             byte season = p.ReadByte();
             byte music = p.ReadByte();
 
-            if (Engine.Profile.Current.EnableCombatMusic)
-                Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
+            if (season > 4)
+                season = 0;
+
+
+            if (World.Player.IsDead && season != 4)
+                return;
+
+            World.OldSeason = (Seasons) season;
+            World.OldMusicIndex = music;
+
+            if (World.Season == Seasons.Desolation)
+            {
+                World.OldMusicIndex = 42;
+            }
+
+            World.ChangeSeason((Seasons) season, music);
         }
 
         private static void ClientVersion(Packet p)

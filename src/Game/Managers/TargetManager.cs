@@ -93,6 +93,16 @@ namespace ClassicUO.Game.Managers
             IsTargeting = false;
         }
 
+        public static void Reset()
+        {
+            ClearTargetingWithoutTargetCancelPacket();
+
+            TargetingState = 0;
+            _targetCursorId = 0;
+            MultiTargetInfo = null;
+            TargeringType = 0;
+        }
+
         public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)

@@ -668,8 +668,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
                     }
-
-                    _renderList[i] = null;
                 }
 
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)

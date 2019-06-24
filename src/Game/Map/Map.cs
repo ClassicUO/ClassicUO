@@ -209,6 +209,13 @@ namespace ClassicUO.Game.Map
         }
 
 
+        public IEnumerable<int> GetUsedChunks()
+        {
+            foreach (int i in _usedIndices)
+                yield return i;
+        }
+
+
         public void ClearUnusedBlocks()
         {
             int count = 0;

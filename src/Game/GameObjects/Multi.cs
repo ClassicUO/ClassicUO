@@ -23,6 +23,7 @@
 
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -34,10 +35,12 @@ namespace ClassicUO.Game.GameObjects
     {
         private StaticTiles? _itemData;
 
+        private readonly ushort _originalGraphic;
 
         public Multi(Graphic graphic)
         {
-            Graphic = graphic;
+            Graphic = _originalGraphic = graphic;
+            UpdateGraphicBySeason();
             _isFoliage = ItemData.IsFoliage;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
@@ -67,6 +70,11 @@ namespace ClassicUO.Game.GameObjects
 
                 return _itemData.Value;
             }
+        }
+
+        public override void UpdateGraphicBySeason()
+        {
+            Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
         }
     }
 }
