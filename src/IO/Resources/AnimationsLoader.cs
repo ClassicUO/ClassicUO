@@ -774,7 +774,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if (! (DataIndex[newGraphic].HasBodyConversion & index.HasBodyConversion))
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -814,7 +814,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if (!(DataIndex[newGraphic].HasBodyConversion & index.HasBodyConversion))
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
