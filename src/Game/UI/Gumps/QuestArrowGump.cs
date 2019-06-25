@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -80,8 +82,13 @@ namespace ClassicUO.Game.UI.Gumps
             int gox = _mx - World.Player.X;
             int goy = _my - World.Player.Y;
 
-            int x = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1) + ((gox - goy) * 22 - _arrow.Width);
-            int y = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1) + (gox + goy) * 22 + _arrow.Height * 2;
+
+            int x = (Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) + ((gox - goy) * 22) - _arrow.Width / 2;
+            int y = (Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + ((gox + goy) * 22) - _arrow.Height / 2;
+
+            x -= (int) World.Player.Offset.X;
+            y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+            y += World.Player.Z * 4;
 
             if (x < Engine.Profile.Current.GameWindowPosition.X)
                 x = Engine.Profile.Current.GameWindowPosition.X;
