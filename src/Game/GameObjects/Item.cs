@@ -290,6 +290,7 @@ namespace ClassicUO.Game.GameObjects
                         MultiOffsetX = x,
                         MultiOffsetY = y,
                         MultiOffsetZ = z,
+                        Hue = Hue,
                         AlphaHue = 0xFF
                     });
                 }
