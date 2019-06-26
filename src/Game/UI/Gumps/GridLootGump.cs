@@ -251,8 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount.Value));
-                        GameActions.DropItem(_serial, Position.INVALID, World.Player.Equipment[(int) Layer.Backpack]);
+                        GameActions.GrabItem(item, (ushort)amount.Value);
                     }
                 };
 

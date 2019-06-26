@@ -372,5 +372,23 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PClickQuestArrow(rightClick));
         }
+
+        public static void GrabItem(Item item, ushort amount, Serial bag = default(Serial))
+        {
+            Socket.Send(new PPickUpRequest(item, amount));
+
+            if(bag == default(Serial))
+                bag = Engine.Profile.Current.GrabBagSerial == 0
+                    ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                    : (Serial) Engine.Profile.Current.GrabBagSerial;
+
+            if (!World.Items.Contains(bag))
+            {
+                GameActions.Print("Grab Bag not found, setting to Backpack.");
+                Engine.Profile.Current.GrabBagSerial = 0;
+                bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
+            }
+            DropItem(item.Serial, Position.INVALID, World.Player.Equipment[(int) Layer.Backpack]);
+        }
     }
 }
