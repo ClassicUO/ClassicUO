@@ -473,7 +473,6 @@ namespace ClassicUO.Game.Scenes
                 _renderIndex = 1;
             UpdateDrawPosition = false;
 
-
             //if (_renderList.Length - _renderListCount != 0)
             //{
             //    if (_renderList[_renderListCount] != null)

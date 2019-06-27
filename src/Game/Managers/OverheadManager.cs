@@ -72,27 +72,22 @@ namespace ClassicUO.Game.Managers
         {
             if (_firstNode != null)
             {
-                var first = _firstNode;
-
                 int mouseX = Mouse.Position.X;
                 int mouseY = Mouse.Position.Y;
 
-                while (first != null)
+                while (_firstNode != null)
                 {
-                    float alpha = first.IsOverlap(first.Right);
-                    first.Draw(batcher, startX, startY, scale);
-                    first.SetAlpha(alpha);
+                    float alpha = _firstNode.IsOverlap(_firstNode.Right);
+                    _firstNode.Draw(batcher, startX, startY, scale);
+                    _firstNode.SetAlpha(alpha);
 
-                    if (first.Contains(mouseX, mouseY))
+                    if (_firstNode.Contains(mouseX, mouseY))
                     {
+                      
                     }
 
-                    var temp = first.Right;
-                    first.Right = null;
-                    first = temp;
+                    _firstNode = _firstNode.Right;
                 }
-
-                _firstNode = null;
             }
         }
 

@@ -280,7 +280,7 @@ namespace ClassicUO.Game.Scenes
                     Land t = obj as Land;
 
                     if (t.IsStretched)
-                        testMinZ -= t.MinZ * 4;
+                        testMinZ -= t.MinZ >> 2;
                     else
                         testMinZ = testMaxZ;
                 }

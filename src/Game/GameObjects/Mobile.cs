@@ -26,6 +26,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -593,10 +594,6 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out dir, evalutate);
 
             ProcessFootstepsSound();
-
-            if ((Serial & 0x80000000) != 0)
-            {
-            }
 
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {
