@@ -737,7 +737,7 @@ namespace ClassicUO
 
                 if (sleep < IntervalFixedUpdate)
                 {
-                    Thread.Sleep(IntervalFixedUpdate - sleep >= FrameDelay[1] >> 1 ? 1 : 0);
+                    Thread.Sleep(IntervalFixedUpdate - sleep >= FrameDelay[1] ? 1 : 0);
                 }
                 else
                     Thread.Yield();
