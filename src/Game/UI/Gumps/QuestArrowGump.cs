@@ -47,6 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
 
             SetRelativePosition(mx, my);
+            WantUpdateSize = false;
         }
 
         public void SetRelativePosition(int x, int y)
@@ -77,19 +78,25 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_arrow = new GumpPic(0, 0, gumpID, 0));
                 else
                     _arrow.Graphic = gumpID;
+
+                Width = _arrow.Width;
+                Height = _arrow.Height;
             }
+
+            var scale = scene.Scale;
+
 
             int gox = _mx - World.Player.X;
             int goy = _my - World.Player.Y;
 
 
-            int x = (Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) + ((gox - goy) * 22) - _arrow.Width / 2;
-            int y = (Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + ((gox + goy) * 22) - _arrow.Height / 2;
+            int x = (Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) + 6 + ((gox - goy) * (int) (22 / scale)) - (int) ((_arrow.Width / 2f) / scale);
+            int y = (Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + 6 + ((gox + goy) * (int) (22 / scale)) + (int) ((_arrow.Height) / scale);
 
-            x -= (int) World.Player.Offset.X;
-            y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            y += World.Player.Z * 4;
+            x -= (int) (World.Player.Offset.X / scale);
+            y -= (int) (((World.Player.Offset.Y - World.Player.Offset.Z) + (World.Player.Z >> 2)) / scale);
 
+         
             if (x < Engine.Profile.Current.GameWindowPosition.X)
                 x = Engine.Profile.Current.GameWindowPosition.X;
             else if (x > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width)
@@ -100,9 +107,9 @@ namespace ClassicUO.Game.UI.Gumps
                 y = Engine.Profile.Current.GameWindowPosition.Y;
             else if (y > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height)
                 y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height;
-            var scale = scene.Scale;
-            X = (int) (x / scale);
-            Y = (int) (y / scale);
+
+            X = x;
+            Y = y;
 
             if (_timer < Engine.Ticks)
             {
@@ -113,7 +120,8 @@ namespace ClassicUO.Game.UI.Gumps
             _arrow.Hue = (Hue) (_needHue ? 0 : 0x21);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             var leftClick = button == MouseButton.Left;
             var rightClick = button == MouseButton.Right;
