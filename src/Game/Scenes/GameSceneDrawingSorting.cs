@@ -191,7 +191,6 @@ namespace ClassicUO.Game.Scenes
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
 
-                int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
                 bool ismobile = false;
@@ -258,6 +257,8 @@ namespace ClassicUO.Game.Scenes
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
 
+                int z = obj.Z;
+
                 if (!island && z >= _maxZ)
                 {
                     if (!changinAlpha)
@@ -272,7 +273,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                int testMinZ = drawY + z * 4;
+                int testMinZ = drawY + (z >> 2);
                 int testMaxZ = drawY;
 
                 if (island)
@@ -302,7 +303,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (!check)
                     {
-                        check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
+                        check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
 
                         if (!check)
                             check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
