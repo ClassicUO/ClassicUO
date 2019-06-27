@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Network;
@@ -463,6 +464,8 @@ namespace ClassicUO.IO.Resources
 
             return mb;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public ref IndexMap GetIndex(int map, int x, int y)
         {

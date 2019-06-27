@@ -58,6 +58,7 @@ namespace ClassicUO.Game.Map
 
         public Point Center { get; set; }
 
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
@@ -119,7 +120,7 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            Tile tile = GetTile(x, y);
+            var tile = GetTile(x, y);
 
             var obj = tile.FirstNode;
 
@@ -154,7 +155,7 @@ namespace ClassicUO.Game.Map
                 return defaultZ;
 
             access = true;
-            Tile tile = GetTile(x, y, false);
+            var tile = GetTile(x, y, false);
 
             if (tile != null)
             {
@@ -202,6 +203,8 @@ namespace ClassicUO.Game.Map
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         private int GetBlock(int blockX, int blockY)
         {
