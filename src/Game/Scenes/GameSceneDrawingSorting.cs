@@ -395,34 +395,54 @@ namespace ClassicUO.Game.Scenes
             int charY = entity.Y;
             int dropMaxZIndex = -1;
 
-
-            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2) dropMaxZIndex = 0;
-
-            int[,] coordinates = new int[8, 2];
-            coordinates[0, 0] = charX + 1;
-            coordinates[0, 1] = charY - 1;
-            coordinates[1, 0] = charX + 1;
-            coordinates[1, 1] = charY - 2;
-            coordinates[2, 0] = charX + 2;
-            coordinates[2, 1] = charY - 2;
-            coordinates[3, 0] = charX - 1;
-            coordinates[3, 1] = charY + 2;
-            coordinates[4, 0] = charX;
-            coordinates[4, 1] = charY + 1;
-            coordinates[5, 0] = charX + 1;
-            coordinates[5, 1] = charY;
-            coordinates[6, 0] = charX + 2;
-            coordinates[6, 1] = charY - 1;
-            coordinates[7, 0] = charX + 1;
-            coordinates[7, 1] = charY + 1;
+            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
+                dropMaxZIndex = 0;
 
             int maxZ = entity.PriorityZ;
 
             for (int i = 0; i < 8; i++)
             {
-                int x = coordinates[i, 0];
-                int y = coordinates[i, 1];
+                int x, y;
 
+                switch (i)
+                {
+                    case 0:
+                        x = charX + 1;
+                        y = charY - 1;
+                        break;
+                    case 1:
+                        x = charX + 1;
+                        y = charY - 2;
+                        break;
+                    case 2:
+                        x = charX + 2;
+                        y = charY - 2;
+                        break;
+                    case 3:
+                        x = charX - 1;
+                        y = charY + 2;
+                        break;
+                    case 4:
+                        x = charX;
+                        y = charY + 1;
+                        break;
+                    case 5:
+                        x = charX + 1;
+                        y = charY;
+                        break;
+                    case 6:
+                        x = charX + 2;
+                        y = charY - 1;
+                        break;
+                    case 7:
+                        x = charX + 1;
+                        y = charY + 1;
+                        break;
+                    default:
+                        continue;
+                }
+
+             
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
 
