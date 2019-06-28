@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -317,29 +317,28 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (textBox.Text[0])
                     {
+                        case ':':
+                            Mode = ChatMode.Emote;
+                            break;
+
                         case ';':
                             Mode = ChatMode.Whisper;
-
                             break;
 
                         case '/':
                             Mode = ChatMode.Party;
-
                             break;
 
                         case '\\':
                             Mode = ChatMode.Guild;
-
                             break;
 
                         case '|':
                             Mode = ChatMode.Alliance;
-
                             break;
 
                         case '-':
                             Mode = ChatMode.ClientCommand;
-
                             break;
                     }
                 }
@@ -374,6 +373,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            Debug.WriteLine(key);
+
             switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !Engine.Profile.Current.DisableCtrlQWBtn:
@@ -441,7 +442,6 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
                 case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
                 case SDL.SDL_Keycode.SDLK_COLON: // :
-                case SDL.SDL_Keycode.SDLK_QUESTION: // ?
                 case SDL.SDL_Keycode.SDLK_SLASH: // /
                 case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
                 case SDL.SDL_Keycode.SDLK_PERIOD: // .
@@ -450,10 +450,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
                 case SDL.SDL_Keycode.SDLK_MINUS: // -
                 case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
-
-                    if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
-                        IsActive = true;
-
+                    if (Engine.Profile.Current.ActivateChatAfterEnter &&
+                        Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                    {
+                        if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE))
+                            IsActive = true;
+                        else if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && key == SDL.SDL_Keycode.SDLK_SEMICOLON)
+                            IsActive = true;
+                    }
                     break;
 
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
@@ -504,17 +508,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case ChatMode.Default:
                         GameActions.Say(text, Engine.Profile.Current.SpeechHue);
-
                         break;
 
                     case ChatMode.Whisper:
-                        GameActions.Say(text, 33, MessageType.Whisper);
-
+                        GameActions.Say(text, Engine.Profile.Current.WhisperHue, MessageType.Whisper);
                         break;
 
                     case ChatMode.Emote:
                         GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
-
                         break;
 
                     case ChatMode.Party:
