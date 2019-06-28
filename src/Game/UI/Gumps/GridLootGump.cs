@@ -14,7 +14,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridLootGump : Gump
     {
-        private static Vector3 _vec = Vector3.Zero;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext;
         private readonly Item _corpse;
@@ -159,8 +158,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
             base.Draw(batcher, x, y);
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _vec);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return true;
         }
@@ -197,7 +197,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GridLootItem : Control
         {
-            private static Vector3 _vec = Vector3.Zero;
             private readonly Serial _serial;
 
             private readonly TextureControl _texture;
@@ -263,14 +262,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                ResetHueVector();
                 base.Draw(batcher, x, y);
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _vec);
+                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
 
                 if (_texture.MouseIsOver)
                 {
-                    _vec.Z = 0.7f;
-                    batcher.Draw2D(Textures.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _vec);
-                    _vec.Z = 0;
+                    _hueVector.Z = 0.7f;
+                    batcher.Draw2D(Textures.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
+                    _hueVector.Z = 0;
                 }
 
                 return true;

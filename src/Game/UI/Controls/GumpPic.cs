@@ -167,10 +167,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha, true);
+            ResetHueVector();
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, ref hue);
+            batcher.Draw2D(Texture, x, y, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

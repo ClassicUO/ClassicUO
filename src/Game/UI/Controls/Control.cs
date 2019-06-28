@@ -60,6 +60,15 @@ namespace ClassicUO.Game.UI.Controls
         private bool _handlesKeyboardFocus;
         private Control _parent;
 
+        protected static Vector3 _hueVector = Vector3.Zero;
+
+        protected static void ResetHueVector()
+        {
+            _hueVector.X = 0;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
+        }
+
         protected Control(Control parent = null)
         {
             Parent = parent;
@@ -378,11 +387,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {
-                Vector3 zero = Vector3.Zero;
+                ResetHueVector();
 
                 if (Engine.DebugFocus && HasKeyboardFocus)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref zero);
-                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref _hueVector);
+                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 

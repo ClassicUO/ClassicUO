@@ -383,16 +383,16 @@ namespace ClassicUO.Game.UI.Gumps
                     _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0)
                     color = Textures.GetTexture(Color.Red);
 
-                Vector3 hue = Vector3.Zero;
-                batcher.DrawRectangle(color, x, y, Width, Height, ref hue);
+                ResetHueVector();
+                batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
                 if (_graphic != 0)
                 {
-                    hue.X = 59;
-                    hue.Y = 1;
-                    hue.Z = 0;
+                    _hueVector.X = 59;
+                    _hueVector.Y = 1;
+                    _hueVector.Z = 0;
 
-                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, ref hue);
+                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, ref _hueVector);
                 }
 
 

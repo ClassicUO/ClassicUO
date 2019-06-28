@@ -242,18 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
                     data[block] = (ushort) color;
             }
         }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            //batcher.Draw2D(_mapTexture, Bounds, position);
-
-            //batcher.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
-
-            //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
-
-            return base.Draw(batcher, x, y);
-        }
-
+        
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
         {
             float cosRadians = (float) Math.Cos(radians);
@@ -306,9 +295,9 @@ namespace ClassicUO.Game.UI.Gumps
             //dst.X = (int)rotDest.X;
             //dst.Y = (int)rotDest.Y;
 
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
-            return batcher.Draw2D(_mapTexture, dst.X, dst.Y, dst.Width, dst.Height, sx, sy, sw, sh, ref zero);
+            return batcher.Draw2D(_mapTexture, dst.X, dst.Y, dst.Width, dst.Height, sx, sy, sw, sh, ref _hueVector);
         }
     }
 }

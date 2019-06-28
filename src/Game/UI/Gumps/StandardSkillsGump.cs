@@ -219,7 +219,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class SkillControl : Control
         {
-            private static Vector3 _hueVec = Vector3.Zero;
             private readonly Label _labelValue;
             private readonly int _skillIndex;
             private readonly GumpPic _lock;
@@ -376,7 +375,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                if (!CanMove) batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVec);
+                ResetHueVector();
+
+                if (!CanMove) batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
 
                 return base.Draw(batcher, x, y);
             }

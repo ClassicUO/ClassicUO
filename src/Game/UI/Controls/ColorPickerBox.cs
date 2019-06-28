@@ -161,9 +161,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hues.Length > 1)
             {
-                Vector3 zero = Vector3.Zero;
+                ResetHueVector();
 
-                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref zero);
+                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);

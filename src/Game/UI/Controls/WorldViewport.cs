@@ -45,8 +45,6 @@ namespace ClassicUO.Game.UI.Controls
 
         private MatrixEffect _xBR;
 
-        private Vector3 _zero = Vector3.Zero;
-
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
             X = x;
@@ -59,6 +57,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
+
             if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
             {
                 // draw regular world
@@ -74,20 +74,20 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.End();
 
                 batcher.Begin(_xBR);
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
                 batcher.End();
 
                 batcher.Begin();
             }
             else
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _zero);
+                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
 
 
             // draw lights
             if (_scene.UseLights)
             {
                 batcher.SetBlendState(_blend);
-                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _zero);
+                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _hueVector);
                 batcher.SetBlendState(null);
             }
 

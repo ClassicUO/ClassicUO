@@ -76,7 +76,6 @@ namespace ClassicUO.Renderer.UI
 
     internal class Button : Control
     {
-        private static Vector3 _zero = Vector3.Zero;
         private bool _adaptSizeToText;
 
         private StateType _state;
@@ -183,9 +182,10 @@ namespace ClassicUO.Renderer.UI
                     break;
             }
 
-            batcher.Draw2D(texture, x, y, Width, Height, ref _zero);
+            ResetHueVector();
+            batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
 
-            batcher.DrawString(Fonts.Regular, Text, x - (((int) _textSize.X - Width) >> 1), y - (((int) _textSize.Y - Height) >> 1), ref _zero);
+            batcher.DrawString(Fonts.Regular, Text, x - (((int) _textSize.X - Width) >> 1), y - (((int) _textSize.Y - Height) >> 1), ref _hueVector);
 
             return true; // base.Draw(batcher, position, hue);
         }

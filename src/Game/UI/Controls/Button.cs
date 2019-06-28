@@ -196,12 +196,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             SpriteTexture texture = GetTextureByState();
 
-            Vector3 hue = Vector3.Zero;
+            ResetHueVector();
 
             if (IsTransparent)
-                hue.Z = Alpha;
+                _hueVector.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, ref hue);
+            batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
 
             if (!string.IsNullOrEmpty(_caption))
             {

@@ -31,7 +31,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class EditableLabel : Control
     {
-        private static Vector3 _hue = Vector3.Zero;
         private readonly TextBox _label;
 
         public EditableLabel(string text, byte font, ushort hue, bool unicode, int width, FontStyle style)
@@ -136,8 +135,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
+
             if (_label.IsEditable)
-                batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hue);
+                batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

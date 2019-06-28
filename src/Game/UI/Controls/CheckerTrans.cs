@@ -113,10 +113,10 @@ namespace ClassicUO.Game.UI.Controls
 
             //return true;
 
-            Vector3 hue = Vector3.Zero;
-            hue.Z = 0.5f;
+            ResetHueVector();
+            _hueVector.Z = 0.5f;
 
-            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref hue);
+            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
         }
     }
 }

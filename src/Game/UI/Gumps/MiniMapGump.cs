@@ -109,11 +109,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
                 return false;
 
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
-            batcher.Draw2D(_gumpTexture, x, y, ref zero);
+            batcher.Draw2D(_gumpTexture, x, y, ref _hueVector);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, ref zero);
+            batcher.Draw2D(_mapTexture, x, y, ref _hueVector);
 
             if (_draw)
             {
@@ -141,16 +141,16 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    zero.Z = 0;
+                    _hueVector.Z = 0;
 
-                    ShaderHuesTraslator.GetHueVector(ref zero, Notoriety.GetHue(mob.NotorietyFlag));
+                    ShaderHuesTraslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref zero);
+                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
                 }
 
                 //DRAW DOT OF PLAYER
-                zero.X = zero.Y = zero.Z = 0;
-                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, ref zero);
+                ResetHueVector();
+                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);

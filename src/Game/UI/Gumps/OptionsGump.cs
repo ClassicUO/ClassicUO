@@ -1650,9 +1650,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
@@ -1758,8 +1758,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private const int CELL = 12;
 
-            private static Vector3 _zero = Vector3.Zero;
-
             private readonly SpriteTexture _background;
 
             public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
@@ -1780,7 +1778,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                batcher.Draw2D(_background, x - 3, y - 3, ref _zero);
+                ResetHueVector();
+                batcher.Draw2D(_background, x - 3, y - 3, ref _hueVector);
 
                 return base.Draw(batcher, x, y);
             }

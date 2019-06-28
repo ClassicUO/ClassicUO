@@ -178,10 +178,10 @@ namespace ClassicUO.Game.UI.Controls
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
+                ResetHueVector();
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, ref hue);
+                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, ref _hueVector);
             }
 
             //protected override void OnMouseClick(int x, int y, MouseButton button)

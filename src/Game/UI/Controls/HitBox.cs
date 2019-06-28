@@ -71,10 +71,10 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MouseIsOver)
             {
-                Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, 0, false, IsTransparent ? Alpha : 0, true);
+                ResetHueVector();
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
 
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref hue);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);
