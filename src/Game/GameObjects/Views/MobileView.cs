@@ -274,7 +274,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                ref var frame = ref direction.Frames[frameIndex];
+                var frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
                     return 0;
