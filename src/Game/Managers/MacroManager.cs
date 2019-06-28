@@ -629,8 +629,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.LastTarget:
 
-                    if (WaitForTargetTimer == 0)
-                        WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                    //if (WaitForTargetTimer == 0)
+                    //    WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                     if (TargetManager.IsTargeting)
                     {
@@ -641,28 +641,28 @@ namespace ClassicUO.Game.Managers
                         //else 
                         TargetManager.TargetGameObject(World.Get(TargetManager.LastTarget));
 
-                        WaitForTargetTimer = 0;
+                        //WaitForTargetTimer = 0;
                     }
-                    else if (WaitForTargetTimer < Engine.Ticks)
-                        WaitForTargetTimer = 0;
-                    else result = 1;
+                    //else if (WaitForTargetTimer < Engine.Ticks)
+                    //    WaitForTargetTimer = 0;
+                    //else result = 1;
 
                     break;
 
                 case MacroType.TargetSelf:
 
-                    if (WaitForTargetTimer == 0)
-                        WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                    //if (WaitForTargetTimer == 0)
+                    //    WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                     if (TargetManager.IsTargeting)
                     {
                         TargetManager.TargetGameObject(World.Player);
-                        WaitForTargetTimer = 0;
+                        //WaitForTargetTimer = 0;
                     }
-                    else if (WaitForTargetTimer < Engine.Ticks)
-                        WaitForTargetTimer = 0;
-                    else
-                        result = 1;
+                    //else if (WaitForTargetTimer < Engine.Ticks)
+                    //    WaitForTargetTimer = 0;
+                    //else
+                    //    result = 1;
 
                     break;
 
