@@ -198,7 +198,7 @@ namespace ClassicUO.IO.Resources
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = (length >> 2) - lookuplist[y];
-                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*) (dataStart + (lookuplist[y] << 2));
                 int pos = y * width;
 
                 for (int i = 0; i < gsize; i++)
