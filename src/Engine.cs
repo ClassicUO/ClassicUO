@@ -645,31 +645,7 @@ namespace ClassicUO
             _previous = SDL.SDL_GetTicks();
         }
 
-        //protected override void Update(GameTime gameTime)
-        //{
-        //    Profiler.EnterContext("Update");
-
-        //    OnUpdate(Ticks, gameTime.ElapsedGameTime.TotalMilliseconds);
-
-        //    base.Update(gameTime);
-
-
-        //    _time += gameTime.ElapsedGameTime.TotalMilliseconds;
-
-        //    if (_time > IntervalFixedUpdate)
-        //        _time %= IntervalFixedUpdate;
-        //    else
-        //        SuppressDraw();
-
-        //    Profiler.ExitContext("Update");
-        //}
-
-        //protected override void Draw(GameTime gameTime)
-        //{
-        //    Render();
-        //    base.Draw(gameTime);
-        //}
-
+  
         public override void Tick()
         {
             if (Profiler.InContext("OutOfContext"))
