@@ -44,6 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         Default,
         Whisper,
         Emote,
+        Yell,
         Party,
         PartyPrivate,
         Guild,
@@ -165,6 +166,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         case ChatMode.Emote:
                             AppendChatModePrefix("[Emote]: ", Engine.Profile.Current.EmoteHue);
+
+                            break;
+
+                        case ChatMode.Yell:
+                            AppendChatModePrefix("[Yell]: ", Engine.Profile.Current.YellHue);
 
                             break;
 
@@ -322,6 +328,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         case ';':
                             Mode = ChatMode.Whisper;
+                            break;
+
+                        case '!':
+                            Mode = ChatMode.Yell;
                             break;
 
                         case '/':
@@ -513,6 +523,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case ChatMode.Emote:
                         GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
+                        break;
+
+                    case ChatMode.Yell:
+                        GameActions.Say(text, Engine.Profile.Current.YellHue, MessageType.Yell);
                         break;
 
                     case ChatMode.Party:

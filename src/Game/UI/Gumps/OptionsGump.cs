@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext;
@@ -814,6 +814,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 20);
             _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote Color", 20, 0);
+            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.YellHue, "Yell Color", 20, 0);
             _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.WhisperHue, "Whisper Color", 20, 0);
             _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
@@ -1214,6 +1215,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sliderSpeechDelay.Value = 100;
                     _speechColorPickerBox.SetColor(0x02B2, FileManager.Hues.GetPolygoneColor(12, 0x02B2));
                     _emoteColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
+                    _yellColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
                     _whisperColorPickerBox.SetColor(0x0033, FileManager.Hues.GetPolygoneColor(12, 0x0033));
                     _partyMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _guildMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
@@ -1379,6 +1381,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.SpeechDelay = _sliderSpeechDelay.Value;
             Engine.Profile.Current.SpeechHue = _speechColorPickerBox.Hue;
             Engine.Profile.Current.EmoteHue = _emoteColorPickerBox.Hue;
+            Engine.Profile.Current.YellHue = _yellColorPickerBox.Hue;
             Engine.Profile.Current.WhisperHue = _whisperColorPickerBox.Hue;
             Engine.Profile.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
             Engine.Profile.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
