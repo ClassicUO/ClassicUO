@@ -643,7 +643,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < animSeq.Entries.Length; i++)
             {
-                UOFileIndex3D entry = animSeq.Entries[i];
+               ref readonly  UOFileIndex3D entry = ref animSeq.Entries[i];
 
                 if (entry.Offset == 0)
                     continue;
