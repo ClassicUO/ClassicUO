@@ -163,6 +163,11 @@ namespace ClassicUO.Game.Scenes
         {
             SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
 
+            if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
+                Scale = 1f;
+            else
+                Scale = Engine.Profile.Current.ScaleZoom;
+
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
@@ -170,6 +175,9 @@ namespace ClassicUO.Game.Scenes
 
                 int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int) mobile.Offset.X + 22 + 5;
                 int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int) mobile.Offset.Z) + 22 + 5;
+
+                x = (int)(x * (1 / Scale));
+                y = (int)(y * (1 / Scale));
 
                 if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
                 {
