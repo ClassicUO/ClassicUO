@@ -21,10 +21,18 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+
+using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -44,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new ResizePic(0x1432)
             {
-                Width = width + 44, Height = height + 61
+                Width = width + 44, Height = height + 61,
             });
 
 
@@ -63,12 +71,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height
             });
 
+            _textureControl.MouseUp += TextureControlOnMouseUp;
+
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
-
-
-            //WantUpdateSize = false;
         }
 
+      
         public int PlotState { get; private set; }
 
         public void SetMapTexture(SpriteTexture texture)
@@ -82,13 +90,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddToContainer(Control c)
         {
+            int x = c.X + c.Width + 5;
+            int y = c.Y + c.Height;
+
+            c.X = x;
+            c.Y = y;
+
             _container.Add(c);
             Add(c);
         }
 
         public void ClearContainer()
         {
-            _container.ForEach(s => s.Dispose());
+            foreach (Control s in _container)
+            {
+                s.Dispose();
+            }
+
             _container.Clear();
         }
 
@@ -101,11 +119,126 @@ namespace ClassicUO.Game.UI.Gumps
             _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
         }
 
+        public override void OnButtonClick(int buttonID)
+        {
+            ButtonType b = (ButtonType) buttonID;
+
+            switch (b)
+            {
+                case ButtonType.PlotCourse:
+                case ButtonType.StopPlotting:
+                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 6, (byte) PlotState, unchecked((ushort)(-24)), unchecked((ushort)(-31))));
+                    SetPlotState(PlotState == 0 ? 1 : 0);
+                    break;
+                case ButtonType.ClearCourse:
+                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 5, 0, unchecked((ushort)(-24)), unchecked((ushort)(-31))));
+                    ClearContainer();
+                    break;
+            }
+        }
+
+        private void TextureControlOnMouseUp(object sender, MouseEventArgs e)
+        {
+            if (_container.Count != 0)
+            {
+
+            }
+        }
+
+
+        private int LineUnderMouse(ref int x1, ref int y1, ref int x2, ref int y2)
+        {
+            int tempX = x2 - x1;
+            int tempY = y2 - y1;
+
+            float testOfsX = tempX;
+
+            if (testOfsX == 0.0f)
+                testOfsX = 1.0f;
+
+            float pi = (float) Math.PI;
+
+            float a = -(float) (Math.Atan(tempY / testOfsX) * 180f / pi);
+
+            bool inverseCheck = false;
+
+            if (x1 >= x2 && y1 <= y2)
+                inverseCheck = true;
+            else if (x1 >= x2 && y1 >= y2)
+                inverseCheck = true;
+
+            float sinA = (float) Math.Sin(a * pi / 180f);
+            float cosA = (float) Math.Sin(a * pi / 180f);
+
+            int offsetX = (int) ((tempX * cosA) - (tempY * sinA));
+            int offsetY = (int) ((tempX * sinA) + (tempY * cosA));
+
+            int endX2 = x1 + offsetX;
+            int endY2 = y1 + offsetY;
+
+            tempX = Mouse.Position.X - x1; // TODO: must be position relative to the gump
+            tempY = Mouse.Position.Y - y1;
+
+            offsetX = (int)((tempX * cosA) - (tempY * sinA));
+            offsetY = (int)((tempX * sinA) + (tempY * cosA));
+
+            Point mousePoint = new Point(x1 + offsetX, y1 + offsetY);
+
+            const int POLY_OFFSET = 5;
+
+            int result = 0;
+
+
+            if (!inverseCheck)
+            {
+                Rectangle rect = new Rectangle()
+                {
+                    X = x1 - POLY_OFFSET,
+                    Y = y1 - POLY_OFFSET,
+                    Width = endX2 + POLY_OFFSET,
+                    Height = endY2 + POLY_OFFSET
+                };
+
+                if (rect.Contains(mousePoint))
+                {
+                    x1 = x1 + ((x2 - x1) / 2);
+                    y1 = y1 + ((y2 - y1) / 2);
+                    result = 1;
+                }
+            }
+            else
+            {
+                Rectangle rect = new Rectangle()
+                {
+                    X = endX2 - POLY_OFFSET,
+                    Y = endY2 - POLY_OFFSET,
+                    Width = x1 + POLY_OFFSET,
+                    Height = x2 + POLY_OFFSET
+                };
+
+                if (rect.Contains(mousePoint))
+                {
+                    x1 = x2 + ((x1 - x2) / 2);
+                    y1 = y2 + ((y1 - y2) / 2);
+                    result = 2;
+                }
+            }
+
+            return result;
+        }
+
         private enum ButtonType
         {
             PlotCourse,
             StopPlotting,
             ClearCourse
+        }
+
+        public override void Dispose()
+        {
+            _textureControl.MouseUp -= TextureControlOnMouseUp;
+
+            base.Dispose();
         }
     }
 }

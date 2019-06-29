@@ -1579,7 +1579,7 @@ namespace ClassicUO.Network
                         ushort x = p.ReadUShort();
                         ushort y = p.ReadUShort();
 
-                        gump.AddToContainer(new GumpPic(x + 24, y + 31, 0x139B, 0));
+                        gump.AddToContainer(new GumpPic(x, y, 0x139B, 0));
 
                         break;
                     case MapMessageType.Insert: break;
