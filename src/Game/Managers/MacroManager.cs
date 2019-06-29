@@ -641,11 +641,11 @@ namespace ClassicUO.Game.Managers
                         //else 
                         TargetManager.TargetGameObject(World.Get(TargetManager.LastTarget));
 
-                        //WaitForTargetTimer = 0;
+                        WaitForTargetTimer = 0;
                     }
-                    //else if (WaitForTargetTimer < Engine.Ticks)
-                    //    WaitForTargetTimer = 0;
-                    //else result = 1;
+                    else if (WaitForTargetTimer < Engine.Ticks)
+                        WaitForTargetTimer = 0;
+                    else result = 1;
 
                     break;
 
@@ -657,12 +657,12 @@ namespace ClassicUO.Game.Managers
                     if (TargetManager.IsTargeting)
                     {
                         TargetManager.TargetGameObject(World.Player);
-                        //WaitForTargetTimer = 0;
+                        WaitForTargetTimer = 0;
                     }
-                    //else if (WaitForTargetTimer < Engine.Ticks)
-                    //    WaitForTargetTimer = 0;
-                    //else
-                    //    result = 1;
+                    else if (WaitForTargetTimer < Engine.Ticks)
+                        WaitForTargetTimer = 0;
+                    else
+                        result = 1;
 
                     break;
 
