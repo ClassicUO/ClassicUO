@@ -169,12 +169,14 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             int row = x / (Width / _columns);
             int column = y / (Height / _rows);
             SelectedIndex = row + column * _columns;
         }
+
 
         private unsafe void CreateTexture()
         {

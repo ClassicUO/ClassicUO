@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
 
 
-            _label.MouseClick += (sender, e) => { InvokeMouseClick(e.Location, e.Button); };
+            _label.MouseUp += (sender, e) => { InvokeMouseUp(e.Location, e.Button); };
 
 
             Add(_label);

@@ -206,12 +206,11 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             _clicked = false;
-        }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
             if (button == MouseButton.Left) CalculateNew(x);
         }
+
+       
 
         protected override void OnMouseWheel(MouseEvent delta)
         {

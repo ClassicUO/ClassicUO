@@ -228,7 +228,25 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 IsClicked = false;
+
+                switch (ButtonAction)
+                {
+                    case ButtonAction.SwitchPage:
+                        ChangePage(ToPage);
+
+                        break;
+
+                    case ButtonAction.Activate:
+                        OnButtonClick(ButtonID);
+
+                        break;
+                }
+
+                Mouse.LastLeftButtonClickTime = 0;
+                Mouse.CancelDoubleClick = true;
+            }
         }
 
         private SpriteTexture GetTextureByState()
@@ -259,28 +277,8 @@ namespace ClassicUO.Game.UI.Controls
             return _gumpGraphics[NORMAL];
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                switch (ButtonAction)
-                {
-                    case ButtonAction.SwitchPage:
-                        ChangePage(ToPage);
 
-                        break;
-
-                    case ButtonAction.Activate:
-                        OnButtonClick(ButtonID);
-
-                        break;
-                }
-
-                Mouse.LastLeftButtonClickTime = 0;
-                Mouse.CancelDoubleClick = true;
-            }
-        }
-
+      
         public override bool Contains(int x, int y)
         {
             if (IsDisposed)

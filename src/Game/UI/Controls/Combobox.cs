@@ -92,17 +92,19 @@ namespace ClassicUO.Game.UI.Controls
         public event EventHandler<int> OnOptionSelected;
         public event EventHandler OnBeforeContextMenu;
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             OnBeforeContextMenu?.Invoke(this, null);
 
             var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
-                X = ScreenCoordinateX, Y = ScreenCoordinateY
+                X = ScreenCoordinateX,
+                Y = ScreenCoordinateY
             };
             if (contextMenu.Height + ScreenCoordinateY > Engine.WindowHeight) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.WindowHeight;
             Engine.UI.Add(contextMenu);
-            base.OnMouseClick(x, y, button);
+            base.OnMouseUp(x, y, button);
         }
 
         private class ComboboxContextMenu : Control
@@ -125,7 +127,7 @@ namespace ClassicUO.Game.UI.Controls
                         Y = index * 15,
                         Tag = index
                     };
-                    label.MouseClick += Label_MouseClick;
+                    label.MouseUp += Label_MouseUp;
                     labels[index] = label;
                     index++;
                 }
@@ -165,9 +167,10 @@ namespace ClassicUO.Game.UI.Controls
                 ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
             }
 
-            private void Label_MouseClick(object sender, MouseEventArgs e)
+            private void Label_MouseUp(object sender, MouseEventArgs e)
             {
-                _box.SelectedIndex = (int) ((Label) sender).Tag;
+                if (e.Button == MouseButton.Left)
+                    _box.SelectedIndex = (int) ((Label) sender).Tag;
             }
         }
     }

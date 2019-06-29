@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler Disposed;
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -613,13 +613,13 @@ namespace ClassicUO.Game.UI.Controls
             MouseExit.Raise(new MouseEventArgs(x, y), this);
         }
 
-        public void InvokeMouseClick(Point position, MouseButton button)
-        {
-            int x = position.X - X - ParentX;
-            int y = position.Y - Y - ParentY;
-            OnMouseClick(x, y, button);
-            MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-        }
+        //public void InvokeMouseClick(Point position, MouseButton button)
+        //{
+        //    int x = position.X - X - ParentX;
+        //    int y = position.Y - Y - ParentY;
+        //    OnMouseClick(x, y, button);
+        //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+        //}
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)
         {
@@ -728,10 +728,10 @@ namespace ClassicUO.Game.UI.Controls
             _attempToDrag = false;
         }
 
-        protected virtual void OnMouseClick(int x, int y, MouseButton button)
-        {
-            Parent?.OnMouseClick(X + x, Y + y, button);
-        }
+        //protected virtual void OnMouseClick(int x, int y, MouseButton button)
+        //{
+        //    Parent?.OnMouseClick(X + x, Y + y, button);
+        //}
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {

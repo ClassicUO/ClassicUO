@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = 18
             };
 
-            _label.MouseClick += (senderr, e) =>
+            _label.MouseUp += (senderr, e) =>
             {
                 if (!IsEditable)
                     return;

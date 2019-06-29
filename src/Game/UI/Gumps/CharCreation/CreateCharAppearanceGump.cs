@@ -548,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
 
-                _colorPicker.MouseClick += ColorPicker_MouseClick;
+                _colorPicker.MouseUp += ColorPicker_MouseClick;
 
                 _colorPickerBox = new ColorPickerBox(489, 141, _rows, _columns, _cellW, _cellH, _pallet)
                 {

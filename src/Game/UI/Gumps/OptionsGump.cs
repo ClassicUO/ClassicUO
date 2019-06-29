@@ -594,7 +594,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
             NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
 
-            addButton.MouseClick += (sender, e) =>
+            addButton.MouseUp += (sender, e) =>
             {
                 EntryDialog dialog = new EntryDialog(250, 150, "Macro name:", name =>
                 {
@@ -626,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_macroControl, PAGE);
 
-                    nb.MouseClick += (sss, eee) =>
+                    nb.MouseUp += (sss, eee) =>
                     {
                         _macroControl?.Dispose();
 
@@ -648,7 +648,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
 
-            delButton.MouseClick += (ss, ee) =>
+            delButton.MouseUp += (ss, ee) =>
             {
                 NiceButton nb = rightArea.FindControls<ScrollAreaItem>()
                                          .SelectMany(s => s.Children.OfType<NiceButton>())
@@ -695,7 +695,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 nb.IsSelected = true;
 
-                nb.MouseClick += (sss, eee) =>
+                nb.MouseUp += (sss, eee) =>
                 {
                     _macroControl?.Dispose();
 
@@ -1790,7 +1790,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return base.Draw(batcher, x, y);
             }
 
-            protected override void OnMouseClick(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 if (button == MouseButton.Left)
                 {

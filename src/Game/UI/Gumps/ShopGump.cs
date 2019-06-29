@@ -95,8 +95,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 1
             };
 
-            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
-            boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
+            boxAccept.MouseUp += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
+            boxClear.MouseUp += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
             Add(boxAccept);
             Add(boxClear);
 
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 10,
                 Width = 190
             });
-            shopItem.MouseClick += ShopItem_MouseClick;
+            shopItem.MouseUp += ShopItem_MouseClick;
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(item, shopItem);
         }

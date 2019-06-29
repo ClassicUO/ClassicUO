@@ -64,12 +64,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
-            _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
+            _pageCornerLeft.MouseUp += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
             Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
-            _pageCornerRight.MouseClick += PageCornerOnMouseClick;
+            _pageCornerRight.MouseUp += PageCornerOnMouseClick;
             _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
 
             int offs = 0;

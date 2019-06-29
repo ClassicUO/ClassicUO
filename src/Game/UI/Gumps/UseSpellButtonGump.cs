@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
                 GameActions.CastSpell(_spell.ID);

@@ -123,66 +123,66 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            base.OnMouseUp(x, y, MouseButton.None); // workaround to avoid clickeddrag
+        //protected override void OnMouseUp(int x, int y, MouseButton button)
+        //{
+        //    base.OnMouseUp(x, y, MouseButton.None); // workaround to avoid clickeddrag
 
-            if (button == MouseButton.Left)
-            {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+        //    if (button == MouseButton.Left)
+        //    {
+        //        GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-                if (TargetManager.IsTargeting)
-                {
-                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
-                    {
-                        if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+        //        if (TargetManager.IsTargeting)
+        //        {
+        //            if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+        //            {
+        //                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                        gs.WearHeldItem(Mobile);
+        //                gs.WearHeldItem(Mobile);
 
-                        return;
-                    }
+        //                return;
+        //            }
 
-                    switch (TargetManager.TargetingState)
-                    {
-                        case CursorTarget.Position:
-                        case CursorTarget.Object:
-                        case CursorTarget.Grab:
-                        case CursorTarget.SetGrabBag:
+        //            switch (TargetManager.TargetingState)
+        //            {
+        //                case CursorTarget.Position:
+        //                case CursorTarget.Object:
+        //                case CursorTarget.Grab:
+        //                case CursorTarget.SetGrabBag:
 
-                            SelectedObject.Object = Item;
+        //                    SelectedObject.Object = Item;
 
 
-                            if (Item != null)
-                            {
-                                TargetManager.TargetGameObject(Item);
-                                Mouse.LastLeftButtonClickTime = 0;
-                            }
+        //                    if (Item != null)
+        //                    {
+        //                        TargetManager.TargetGameObject(Item);
+        //                        Mouse.LastLeftButtonClickTime = 0;
+        //                    }
 
-                            break;
+        //                    break;
 
-                        case CursorTarget.SetTargetClientSide:
-                            SelectedObject.Object = Item;
+        //                case CursorTarget.SetTargetClientSide:
+        //                    SelectedObject.Object = Item;
 
-                            if (Item != null)
-                            {
-                                TargetManager.TargetGameObject(Item);
-                                Mouse.LastLeftButtonClickTime = 0;
-                                Engine.UI.Add(new InfoGump(Item));
-                            }
+        //                    if (Item != null)
+        //                    {
+        //                        TargetManager.TargetGameObject(Item);
+        //                        Mouse.LastLeftButtonClickTime = 0;
+        //                        Engine.UI.Add(new InfoGump(Item));
+        //                    }
 
-                            break;
-                    }
-                }
-                else
-                {
-                    if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+        //                    break;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
-                    if (Item == Mobile.Equipment[(int) Layer.Backpack])
-                        gs.DropHeldItemToContainer(Item);
-                    else
-                        gs.WearHeldItem(Mobile);
-                }
-            }
-        }
+        //            if (Item == Mobile.Equipment[(int) Layer.Backpack])
+        //                gs.DropHeldItemToContainer(Item);
+        //            else
+        //                gs.WearHeldItem(Mobile);
+        //        }
+        //    }
+        //}
     }
 }

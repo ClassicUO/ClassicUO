@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 102, Y = 37
             });
 
-            _okButton.MouseClick += OkButtonOnMouseClick;
+            _okButton.MouseUp += OkButtonOnMouseClick;
 
             Add(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
             {
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _okButton.MouseClick -= OkButtonOnMouseClick;
+            _okButton.MouseUp -= OkButtonOnMouseClick;
 
             if (_itemGump != null && _itemGump.IsAlive)
                 if (_itemGump.Target is ItemGump gump)

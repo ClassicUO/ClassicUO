@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _textBox.Hue = textColor;
 
                         if (_canChangeName)
-                            _textBox.MouseClick -= TextBoxOnMouseUp;
+                            _textBox.MouseUp -= TextBoxOnMouseUp;
                     }
 
                     if (_background.Hue != 0)
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-                            _textBox.MouseClick += TextBoxOnMouseUp;
+                            _textBox.MouseUp += TextBoxOnMouseUp;
                         }
                     }
 

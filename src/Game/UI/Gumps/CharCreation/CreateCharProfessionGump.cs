@@ -160,10 +160,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(121, -12, info.Graphic, 0));
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            base.OnMouseClick(x, y, button);
-
+            base.OnMouseUp(x, y, button);
             if (button == MouseButton.Left) Selected?.Invoke(_info);
         }
     }

@@ -116,10 +116,13 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            _lastClick.X = x;
-            _lastClick.Y = y;
+            if (button == MouseButton.Left)
+            {
+                _lastClick.X = x;
+                _lastClick.Y = y;
+            }
         }
 
         public void UpdateContent()

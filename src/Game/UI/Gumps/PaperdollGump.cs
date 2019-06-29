@@ -256,14 +256,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            _lastClick.X = x;
-            _lastClick.Y = y;
-        }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
+            if (button == MouseButton.Left)
+            {
+                _lastClick.X = x;
+                _lastClick.Y = y;
+            }
+
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
