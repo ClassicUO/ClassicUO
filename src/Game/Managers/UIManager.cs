@@ -62,9 +62,9 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.MouseDragging += (sender, e) =>
             {
-                //HandleMouseInput();
+                HandleMouseInput();
 
-                if (_mouseDownControls[0] == MouseOverControl)
+                if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
                     AttemptDragControl(MouseOverControl, Mouse.Position, true);
 
                 if (_isDraggingControl)
@@ -123,13 +123,13 @@ namespace ClassicUO.Game.Managers
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                         MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
-                    //if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
-                    //    _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                        _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                     lastLeftUp = MouseOverControl;
                 }
-                //else
-                //    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                else
+                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                 CloseIfClickOutGumps();
                 _mouseDownControls[btn] = null;
