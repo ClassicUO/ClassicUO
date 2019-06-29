@@ -226,7 +226,14 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (!IsMouseOverViewport)
+            {
+                if (IsHoldingItem && Engine.UI.MouseOverControl is GumpPicContainer container)
+                {
+                    container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                }
+
                 return;
+            }
 
             if (_rightMousePressed) _continueRunning = true;
 

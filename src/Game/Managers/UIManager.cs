@@ -62,18 +62,23 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.MouseDragging += (sender, e) =>
             {
-                HandleMouseInput();
+                //HandleMouseInput();
 
-                //if (_mouseDownControls[0] == MouseOverControl)
-                //    AttemptDragControl(MouseOverControl, Mouse.Position);
+                if (_mouseDownControls[0] == MouseOverControl)
+                    AttemptDragControl(MouseOverControl, Mouse.Position, true);
+
                 if (_isDraggingControl)
+                {
                     DoDragControl(Mouse.Position);
+                }
             };
 
             Engine.Input.LeftMouseButtonDown += (sender, e) =>
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
+
+                HandleMouseInput();
 
                 if (MouseOverControl != null)
                 {
@@ -723,17 +728,16 @@ namespace ClassicUO.Game.Managers
 
         private void HandleMouseInput()
         {
-            Point position = Mouse.Position;
-            Control gump = GetMouseOverControl(position);
+            Control gump = GetMouseOverControl(Mouse.Position);
 
             if (MouseOverControl != null && gump != MouseOverControl)
             {
-                MouseOverControl.InvokeMouseExit(position);
+                MouseOverControl.InvokeMouseExit(Mouse.Position);
 
                 if (MouseOverControl.RootParent != null)
                 {
                     if (gump == null || gump.RootParent != MouseOverControl.RootParent)
-                        MouseOverControl.RootParent.InvokeMouseExit(position);
+                        MouseOverControl.RootParent.InvokeMouseExit(Mouse.Position);
                 }
             }
 
@@ -741,19 +745,19 @@ namespace ClassicUO.Game.Managers
             {
                 if (gump != MouseOverControl)
                 {
-                    gump.InvokeMouseEnter(position);
+                    gump.InvokeMouseEnter(Mouse.Position);
 
-                    if (gump?.RootParent != null)
+                    if (gump.RootParent != null)
                     {
                         if (MouseOverControl == null || gump.RootParent != MouseOverControl.RootParent)
-                            gump.RootParent.InvokeMouseEnter(position);
+                            gump.RootParent.InvokeMouseEnter(Mouse.Position);
                     }
                 }
 
-                gump.InvokeMouseOver(position);
+                gump.InvokeMouseOver(Mouse.Position);
 
                 if (_mouseDownControls[0] == gump)
-                    AttemptDragControl(gump, position);
+                    AttemptDragControl(gump, Mouse.Position);
             }
 
             MouseOverControl = gump;
@@ -761,7 +765,7 @@ namespace ClassicUO.Game.Managers
             for (int i = 0; i < 5; i++)
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
-                    _mouseDownControls[i].InvokeMouseOver(position);
+                    _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
             }
         }
 
