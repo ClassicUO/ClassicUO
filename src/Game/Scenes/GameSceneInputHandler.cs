@@ -163,11 +163,6 @@ namespace ClassicUO.Game.Scenes
         {
             SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
 
-            if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
-                Scale = 1f;
-            else
-                Scale = Engine.Profile.Current.ScaleZoom;
-
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
@@ -175,9 +170,6 @@ namespace ClassicUO.Game.Scenes
 
                 int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int) mobile.Offset.X + 22 + 5;
                 int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int) mobile.Offset.Z) + 22 + 5;
-
-                x = (int)(x * (1 / Scale));
-                y = (int)(y * (1 / Scale));
 
                 if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
                 {
@@ -202,8 +194,8 @@ namespace ClassicUO.Game.Scenes
             _isSelectionActive = false;
         }
 
-
-        internal override void OnLeftMouseDown()
+        // LEFT
+        private void OnLeftMouseDown(object sender, EventArgs e)
         {
             if (!IsMouseOverViewport)
                 return;
@@ -221,7 +213,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        internal override void OnLeftMouseUp()
+        private void OnLeftMouseUp(object sender, EventArgs e)
         {
             //  drag-select code comes first to allow selection finish on mouseup outside of viewport
             if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y) _isSelectionActive = false;
@@ -234,22 +226,20 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (!IsMouseOverViewport)
-            {
-                if (IsHoldingItem && Engine.UI.MouseOverControl is GumpPicContainer container)
-                {
-                    container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                }
-
                 return;
-            }
 
             if (_rightMousePressed) _continueRunning = true;
 
             if (_dragginObject != null)
                 _dragginObject = null;
 
-            if (Engine.UI.IsDragging)
+            if (Engine.UI.IsDragging /*&& Mouse.LDroppedOffset != Point.Zero*/)
                 return;
+
+            //for (byte b = 0; b < 255; b++)
+            //FileManager.Fonts.GenerateUnicode(0xFF, "AAA", 23, 31, 200, TEXT_ALIGN_TYPE.TS_CENTER, 0, false);
+
+            //Chat.HandleMessage(null, "AAA", World.Player.Name, 123, MessageType.Party, (MessageFont)i, true);
 
             if (TargetManager.IsTargeting)
             {
@@ -310,6 +300,7 @@ namespace ClassicUO.Game.Scenes
                     switch (obj)
                     {
                         case Mobile mobile:
+                            // DropHeldItemToContainer(mobile.Equipment[(int) Layer.Backpack]);
                             MergeHeldItem(mobile);
 
                             break;
@@ -325,18 +316,18 @@ namespace ClassicUO.Game.Scenes
                                 if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                     MergeHeldItem(item);
                                 else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + item.ItemData.Height));
                             }
 
                             break;
 
                         case Multi multi:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + multi.ItemData.Height));
 
                             break;
 
                         case Static st:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + st.ItemData.Height));
 
                             break;
 
@@ -406,26 +397,23 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-        internal override bool OnLeftMouseDoubleClick()
+        private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            bool result = false;
-
             if (!IsMouseOverViewport)
-                return result;
+                return;
 
             IGameEntity obj = SelectedObject.Object;
 
             switch (obj)
             {
                 case Item item:
-                    result = true;
+                    e.Result = true;
                     GameActions.DoubleClick(item);
 
                     break;
 
                 case Mobile mob:
-                    result = true;
+                    e.Result = true;
 
                     if (World.Player.InWarMode && World.Player != mob)
                         GameActions.Attack(mob);
@@ -435,19 +423,17 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageInfo msg when msg.Parent.Parent is Entity entity:
-                    result = true;
+                    e.Result = true;
                     GameActions.DoubleClick(entity);
 
                     break;
             }
 
             ClearDequeued();
-
-            return result;
         }
 
-
-        internal override void OnRightMouseDown()
+        // RIGHT
+        private void OnRightMouseDown(object sender, EventArgs e)
         {
             if (!IsMouseOverViewport)
                 return;
@@ -456,7 +442,6 @@ namespace ClassicUO.Game.Scenes
             _continueRunning = false;
             StopFollowing();
         }
-
 
         private void StopFollowing()
         {
@@ -469,17 +454,15 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-        internal override void OnRightMouseUp()
+        private void OnRightMouseUp(object sender, EventArgs e)
         {
             _rightMousePressed = false;
         }
 
-
-        internal override bool OnRightMouseDoubleClick()
+        private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             if (!IsMouseOverViewport)
-                return false;
+                return;
 
             if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
@@ -488,18 +471,16 @@ namespace ClassicUO.Game.Scenes
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
                         World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
-
-                        return true;
+                        e.Result = true;
                     }
                 }
             }
-
-            return false;
         }
 
 
 
-        internal override void OnMouseWheel(bool up)
+        // MOUSE WHEEL
+        private void OnMouseWheel(object sender, bool e)
         {
             if (!IsMouseOverViewport)
                 return;
@@ -507,7 +488,7 @@ namespace ClassicUO.Game.Scenes
             if (!Engine.Profile.Current.EnableScaleZoom || !Keyboard.Ctrl)
                 return;
 
-            if (!up)
+            if (!e)
                 ScalePos++;
             else
                 ScalePos--;
@@ -516,8 +497,8 @@ namespace ClassicUO.Game.Scenes
                 Engine.Profile.Current.ScaleZoom = Scale;
         }
 
-
-        internal override void OnMouseDragging()
+        // MOUSE DRAG
+        private void OnMouseDragging(object sender, EventArgs e)
         {
             if (!IsMouseOverViewport)
                 return;
@@ -535,14 +516,17 @@ namespace ClassicUO.Game.Scenes
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
 
-                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+                            if(Engine.UI.GetControl<HealthBarGump>(mobile)?.IsInitialized ?? false)
+                            {
+                                continue;
+                            }
 
                             if (mobile == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
 
                             break;
@@ -558,9 +542,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-
-        internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
+        private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
@@ -628,9 +610,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-
-        internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
+        private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
             bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
