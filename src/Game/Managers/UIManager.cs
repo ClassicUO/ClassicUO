@@ -946,17 +946,17 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            if (_isDraggingControl)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    if (_mouseDownControls[i] != null && _mouseDownControls[i] != DraggingControl)
-                    {
-                        //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
-                        _mouseDownControls[i] = null;
-                    }
-                }
-            }
+            //if (_isDraggingControl)
+            //{
+            //    for (int i = 0; i < 5; i++)
+            //    {
+            //        if (_mouseDownControls[i] != null && _mouseDownControls[i] != DraggingControl)
+            //        {
+            //            //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
+            //            _mouseDownControls[i] = null;
+            //        }
+            //    }
+            //}
         }
 
         private void DoDragControl(Point mousePosition)

@@ -1370,6 +1370,122 @@ namespace ClassicUO.Renderer
         }
 
 
+        public bool DrawLine(Texture2D texture, int startX, int startY, int endX, int endY, ref Vector3 hue)
+        {
+            //const int WIDTH = 1;
+            //Vector2 begin = new Vector2(startX, startY);
+            //Vector2 end = new Vector2(endX, endY);
+
+            //Rectangle r = new Rectangle((int)begin.X, (int)begin.Y, (int)(end - begin).Length() + WIDTH, WIDTH);
+
+            //float angle = (float)(Math.Atan2(end.Y - begin.Y, end.X - begin.X) * 57.295780);
+            //angle = -(float)(angle * Math.PI) / 180.0f;
+
+
+            //DrawSpriteRotated(texture, r.X, r.Y, r.Width, r.Height, 44, 0, ref hue, angle);
+
+
+            return true;
+        }
+
+
+        public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
+        {
+            EnsureSize();
+
+            int idx = NumSprites << 2;
+            ref var vertex0 = ref VertexInfo[idx];
+            ref var vertex1 = ref VertexInfo[idx + 1];
+            ref var vertex2 = ref VertexInfo[idx + 2];
+            ref var vertex3 = ref VertexInfo[idx + 3];
+
+
+            const int WIDTH = 1;
+            Vector2 begin = new Vector2(startX, startY);
+            Vector2 end = new Vector2(endX, endY);
+
+            Rectangle r = new Rectangle((int)begin.X, (int)begin.Y, (int)(end - begin).Length() + WIDTH, WIDTH);
+
+            float angle = (float)(Math.Atan2(end.Y - begin.Y, end.X - begin.X) * 57.295780);
+            angle = -(float)(angle * Math.PI) / 180.0f;
+
+
+            float ww = r.Width / 2f;
+            float hh = r.Height / 2f;
+
+            Vector3 center = new Vector3
+            {
+                X = originX,
+                Y = originY
+            };
+
+
+            float rotSin = (float) Math.Sin(angle);
+            float rotCos = (float) Math.Cos(angle);
+
+
+            float sinx = rotSin * ww;
+            float cosx = rotCos * ww;
+            float siny = rotSin * hh;
+            float cosy = rotCos * hh;
+
+
+            vertex0.Position = center;
+            vertex0.Position.X += cosx - -siny;
+            vertex0.Position.Y -= sinx + -cosy;
+            vertex0.Normal.X = 0;
+            vertex0.Normal.Y = 0;
+            vertex0.Normal.Z = 1;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
+
+            vertex1.Position = center;
+            vertex1.Position.X += cosx - siny;
+            vertex1.Position.Y += -sinx + -cosy;
+            vertex1.Normal.X = 0;
+            vertex1.Normal.Y = 0;
+            vertex1.Normal.Z = 1;
+            vertex1.TextureCoordinate.X = 0;
+            vertex1.TextureCoordinate.Y = 1;
+            vertex1.TextureCoordinate.Z = 0;
+
+            vertex2.Position = center;
+            vertex2.Position.X += -cosx - -siny;
+            vertex2.Position.Y += sinx + cosy;
+            vertex2.Normal.X = 0;
+            vertex2.Normal.Y = 0;
+            vertex2.Normal.Z = 1;
+            vertex2.TextureCoordinate.X = 1;
+            vertex2.TextureCoordinate.Y = 0;
+            vertex2.TextureCoordinate.Z = 0;
+
+            vertex3.Position = center;
+            vertex3.Position.X += -cosx - siny;
+            vertex3.Position.Y += sinx + -cosy;
+            vertex3.Normal.X = 0;
+            vertex3.Normal.Y = 0;
+            vertex3.Normal.Z = 1;
+            vertex3.TextureCoordinate.X = 1;
+            vertex3.TextureCoordinate.Y = 1;
+            vertex3.TextureCoordinate.Z = 0;
+
+
+            vertex0.Hue =
+                vertex1.Hue =
+                    vertex2.Hue =
+                        vertex3.Hue = Vector3.Zero;
+
+            if (CheckInScreen(idx))
+            {
+                PushSprite(texture);
+
+                return true;
+            }
+
+            return false;
+        }
+
         protected override bool CheckInScreen(int index)
         {
             for (byte i = 0; i < 4; i++)

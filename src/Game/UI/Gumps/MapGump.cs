@@ -30,6 +30,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using Mouse = ClassicUO.Input.Mouse;
@@ -41,6 +42,11 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button[] _buttons = new Button[3];
         private readonly List<Control> _container = new List<Control>();
         private readonly TextureControl _textureControl;
+
+        private uint _pinTimer;
+        private PinControl _currentPin;
+        private Point _lastPoint;
+
 
         public MapGump(Serial serial, ushort gumpid, int width, int height) : base(serial, 0)
         {
@@ -68,7 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 24, Y = 31,
                 Width = width,
-                Height = height
+                Height = height,
+                CanMove = true
             });
 
             _textureControl.MouseUp += TextureControlOnMouseUp;
@@ -88,14 +95,12 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
         }
 
-        public void AddToContainer(Control c)
+        public void AddPin(int x, int y)
         {
-            int x = c.X + c.Width + 5;
-            int y = c.Y + c.Height;
-
-            c.X = x;
-            c.Y = y;
-
+            PinControl c = new PinControl(x, y);
+            c.X += c.Width + 5;
+            c.Y += c.Height;
+            c.NumberText = (_container.Count + 1).ToString();
             _container.Add(c);
             Add(c);
         }
@@ -137,11 +142,97 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_currentPin != null)
+            {
+                if (Mouse.LDroppedOffset != Point.Zero && Mouse.LDroppedOffset != _lastPoint)
+                {
+                    _currentPin.Location += Mouse.LDroppedOffset - _lastPoint;
+
+                    if (_currentPin.X < _textureControl.X)
+                        _currentPin.X = _textureControl.X;
+                    else if (_currentPin.X >= _textureControl.Width)
+                        _currentPin.X = _textureControl.Width;
+
+                    if (_currentPin.Y < _textureControl.Y)
+                        _currentPin.Y = _textureControl.Y;
+                    else if (_currentPin.Y >= _textureControl.Height)
+                        _currentPin.Y = _textureControl.Height;
+
+
+                    _lastPoint = Mouse.LDroppedOffset;
+                }
+            }
+        }
+
+
         private void TextureControlOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (_container.Count != 0)
-            {
+            Point offset = Mouse.LDroppedOffset;
 
+            if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            {
+                if (PlotState != 0 && _currentPin == null /*&& _pinTimer > Engine.Ticks*/)
+                {
+                    ushort x = (ushort) (e.X + 5);
+                    ushort y = (ushort) (e.Y);
+
+                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 1, 0, x, y));
+
+                    AddPin(x, y);
+                }
+            }
+
+            _currentPin = null;
+            _lastPoint = Point.Zero;
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            ResetHueVector();
+
+            for (int i = 0; i < _container.Count; i++)
+            {
+                if (i + 1 >= _container.Count)
+                    break;
+
+                var c0 = _container[i];
+                var c1 = _container[i + 1];
+
+                //batcher.DrawLine(Textures.GetTexture(Color.White), c0.ScreenCoordinateX, c0.ScreenCoordinateY, c1.ScreenCoordinateX, c1.ScreenCoordinateY, ref _hueVector);
+
+                batcher.Draw2DRotated(Textures.GetTexture(Color.White), 
+                                      c0.ScreenCoordinateX, c0.ScreenCoordinateY, 
+                                      c1.ScreenCoordinateX, c1.ScreenCoordinateY,
+                                      c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2);
+
+            }
+
+            return true;
+        }
+
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            base.OnMouseUp(x, y, button);
+            _currentPin = null;
+            _lastPoint = Point.Zero;
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            _pinTimer = Engine.Ticks + 300;
+
+            if (Engine.UI.MouseOverControl is PinControl pin)
+            {
+                _currentPin = pin;
             }
         }
 
@@ -239,6 +330,74 @@ namespace ClassicUO.Game.UI.Gumps
             _textureControl.MouseUp -= TextureControlOnMouseUp;
 
             base.Dispose();
+        }
+
+        class PinControl : Control
+        {
+            private readonly RenderedText _text;
+            private readonly GumpPic _pic;
+
+            public PinControl(int x, int y)
+            {
+                X = x;
+                Y = y;
+
+
+                _text = new RenderedText()
+                {
+                    Font = 0,
+                    IsUnicode = false,
+                };
+
+                _pic = new GumpPic(0, 0, 0x139B, 0);
+                Add(_pic);
+
+                WantUpdateSize = false;
+                Width = _pic.Width;
+                Height = _pic.Height;
+
+                AcceptMouseInput = true;
+                CanMove = false;
+
+                _pic.AcceptMouseInput = true;
+            }
+
+
+            //public override bool Contains(int x, int y)
+            //{
+            //    //x = Mouse.Position.X - ScreenCoordinateX;
+            //    //y = Mouse.Position.Y - ScreenCoordinateY;
+
+            //    return _pic.Contains(x, y);
+            //}
+
+            public string NumberText
+            {
+                get => _text.Text;
+                set => _text.Text = value;
+            }
+
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (MouseIsOver)
+                {
+                    _pic.Hue = 0x35;
+                }
+                else if (_pic.Hue != 0)
+                    _pic.Hue = 0;
+
+                base.Draw(batcher, x, y);
+                _text.Draw(batcher, x - _text.Width - 1, y);
+                return true;
+            }
+
+            public override void Dispose()
+            {
+                _text?.Destroy();
+
+                base.Dispose();
+            }
         }
     }
 }
