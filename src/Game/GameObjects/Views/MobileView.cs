@@ -263,6 +263,9 @@ namespace ClassicUO.Game.GameObjects
 
             FileManager.Animations.AnimID = id;
 
+            if (direction == null)
+                return 0;
+
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return 0;
 

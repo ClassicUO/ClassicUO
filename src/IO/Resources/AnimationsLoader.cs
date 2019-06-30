@@ -789,9 +789,14 @@ namespace ClassicUO.IO.Resources
 
 
                 if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
+                {
                     return DataIndex[graphic].BodyConvGroups[group] ?? _empty;
+                }
 
-                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] ?? _empty : _empty;
+                if (DataIndex[graphic].Groups != null && DataIndex[graphic].Groups[group] != null)
+                {
+                    return DataIndex[graphic].Groups[group];
+                }
             }
 
             return _empty;

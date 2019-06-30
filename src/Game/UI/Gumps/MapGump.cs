@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
-                if (PlotState != 0 && _currentPin == null /*&& _pinTimer > Engine.Ticks*/)
+                if (PlotState != 0 && _currentPin == null && _pinTimer > Engine.Ticks)
                 {
                     ushort x = (ushort) (e.X + 5);
                     ushort y = (ushort) (e.Y);

@@ -1370,25 +1370,6 @@ namespace ClassicUO.Renderer
         }
 
 
-        public bool DrawLine(Texture2D texture, int startX, int startY, int endX, int endY, ref Vector3 hue)
-        {
-            //const int WIDTH = 1;
-            //Vector2 begin = new Vector2(startX, startY);
-            //Vector2 end = new Vector2(endX, endY);
-
-            //Rectangle r = new Rectangle((int)begin.X, (int)begin.Y, (int)(end - begin).Length() + WIDTH, WIDTH);
-
-            //float angle = (float)(Math.Atan2(end.Y - begin.Y, end.X - begin.X) * 57.295780);
-            //angle = -(float)(angle * Math.PI) / 180.0f;
-
-
-            //DrawSpriteRotated(texture, r.X, r.Y, r.Width, r.Height, 44, 0, ref hue, angle);
-
-
-            return true;
-        }
-
-
         public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
         {
             EnsureSize();
