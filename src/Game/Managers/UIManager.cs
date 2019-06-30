@@ -952,7 +952,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_mouseDownControls[i] != null && _mouseDownControls[i] != DraggingControl)
                     {
-                        _mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
+                        //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
                         _mouseDownControls[i] = null;
                     }
                 }
