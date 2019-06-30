@@ -534,6 +534,10 @@ namespace ClassicUO.Game.Scenes
                     {
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
+                            if (Engine.UI.GetControl<HealthBarGump>(mobile)?.IsInitialized ?? false)
+                            {
+                                continue;
+                            }
 
                             Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
 
