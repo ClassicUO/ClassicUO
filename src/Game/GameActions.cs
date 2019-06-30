@@ -388,7 +388,7 @@ namespace ClassicUO.Game
                 Engine.Profile.Current.GrabBagSerial = 0;
                 bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
             }
-            DropItem(item.Serial, Position.INVALID, World.Player.Equipment[(int) Layer.Backpack]);
+            DropItem(item.Serial, Position.INVALID, bag);
         }
     }
 }
