@@ -229,7 +229,7 @@ namespace ClassicUO.IO
 
                         _UL._ULMap.ReloadBlock(mapID, block);
                         chunk?.LoadStatics(mapID);
-                        Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+                        Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapID][block] = ushort.MaxValue;
@@ -400,7 +400,7 @@ namespace ClassicUO.IO
                     }
                 }
 
-                Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+                Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
             }
         }
 

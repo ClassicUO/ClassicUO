@@ -172,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.RequestMobileStatus(mob);
 
-                Engine.UI.GetControl<HealthBarGump>(mob)?.Dispose();
+                Engine.UI.GetGump<HealthBarGump>(mob)?.Dispose();
 
                 if (mob == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();

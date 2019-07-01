@@ -41,12 +41,9 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class UIManager
     {
-        private static readonly char[] _splitchar = {' '};
-
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new[] {'{', '}'});
         private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new char[] { });
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
-        //private readonly List<object> _inputBlockingObjects = new List<object>();
         private readonly Control[] _mouseDownControls = new Control[5];
 
 
@@ -643,19 +640,22 @@ namespace ClassicUO.Game.Managers
             where ParentType : Control
             where ChildType : Control
         {
-            ParentType parent = GetControl<ParentType>(parentSerial);
+            ParentType parent = GetGump<ParentType>(parentSerial);
 
             return parent?.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
         }
 
-        public T GetControl<T>(Serial? serial = null) where T : Control
+        public T GetGump<T>(Serial? serial = null) where T : Control
         {
-            return Gumps.OfType<T>().FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
-        }
+            foreach (Control c in Gumps)
+            {
+                if (!c.IsDisposed && (!serial.HasValue || c.LocalSerial == serial) && c is T t)
+                {
+                    return t;
+                }
+            }
 
-        public Gump GetControl(Serial serial)
-        {
-            return Gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == serial);
+            return null;
         }
 
 

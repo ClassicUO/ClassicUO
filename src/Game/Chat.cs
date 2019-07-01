@@ -131,7 +131,7 @@ namespace ClassicUO.Game
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        Gump gump = Engine.UI.GetControl<Gump>(it.Container);
+                        Gump gump = Engine.UI.GetGump<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
                             paperDoll.AddLabel(text, hue, font, unicode);
@@ -144,7 +144,7 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            var trade = Engine.UI.GetControl<TradingGump>(ent);
+                            var trade = Engine.UI.GetGump<TradingGump>(ent);
 
                             if (trade == null)
                             {

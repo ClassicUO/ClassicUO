@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
-                            if (Engine.UI.GetControl<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            if (Engine.UI.GetGump<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
                         };
                         profileX += SCROLLS_STEP;
                     }
@@ -301,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButton.Left)
             {
-                var party = Engine.UI.GetControl<PartyGumpAdvanced>();
+                var party = Engine.UI.GetGump<PartyGumpAdvanced>();
 
                 if (party == null)
                     Engine.UI.Add(new PartyGumpAdvanced());
@@ -377,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Options:
 
-                    OptionsGump gump = Engine.UI.GetControl<OptionsGump>();
+                    OptionsGump gump = Engine.UI.GetGump<OptionsGump>();
 
                     if (gump == null)
                     {
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetControl<HealthBarGump>(Mobile)?.Dispose();
+                        Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetControl<HealthBarGump>(Mobile) != null)
+                        if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
                             break;
 
                         GameActions.RequestMobileStatus(Mobile);

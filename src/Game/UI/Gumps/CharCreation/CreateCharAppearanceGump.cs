@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -437,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
+                Engine.UI.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
 
                 return false;
             }

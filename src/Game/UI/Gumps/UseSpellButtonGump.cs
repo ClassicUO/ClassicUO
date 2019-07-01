@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            Engine.UI.GetControl<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
+            Engine.UI.GetGump<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
             _spell = spell;
             BuildGump();
         }

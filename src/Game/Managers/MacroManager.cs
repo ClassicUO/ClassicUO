@@ -288,7 +288,7 @@ namespace ClassicUO.Game.Managers
                             switch (macro.SubCode)
                             {
                                 case MacroSubType.Configuration:
-                                    OptionsGump opt = Engine.UI.GetControl<OptionsGump>();
+                                    OptionsGump opt = Engine.UI.GetGump<OptionsGump>();
 
                                     if (opt == null)
                                     {
@@ -316,7 +316,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Journal:
-                                    JournalGump journalGump = Engine.UI.GetControl<JournalGump>();
+                                    JournalGump journalGump = Engine.UI.GetGump<JournalGump>();
 
                                     if (journalGump == null)
                                     {
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Owerview:
-                                    MiniMapGump miniMapGump = Engine.UI.GetControl<MiniMapGump>();
+                                    MiniMapGump miniMapGump = Engine.UI.GetGump<MiniMapGump>();
 
                                     if (miniMapGump == null)
                                         Engine.UI.Add(new MiniMapGump());
@@ -422,7 +422,7 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Mail:
                                 case MacroSubType.PartyManifest:
-                                    var party = Engine.UI.GetControl<PartyGumpAdvanced>();
+                                    var party = Engine.UI.GetGump<PartyGumpAdvanced>();
 
                                     if (party == null)
                                         Engine.UI.Add(new PartyGumpAdvanced());
@@ -461,14 +461,14 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Configuration:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<OptionsGump>()?.Dispose();
+                                        Engine.UI.GetGump<OptionsGump>()?.Dispose();
 
                                     break;
 
                                 case MacroSubType.Paperdoll:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<PaperDollGump>()?.Dispose();
+                                        Engine.UI.GetGump<PaperDollGump>()?.Dispose();
 
                                     break;
 
@@ -482,14 +482,14 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Journal:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<JournalGump>()?.Dispose();
+                                        Engine.UI.GetGump<JournalGump>()?.Dispose();
 
                                     break;
 
                                 case MacroSubType.Skills:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<SkillGumpAdvanced>()?.Dispose();
+                                        Engine.UI.GetGump<SkillGumpAdvanced>()?.Dispose();
 
                                     break;
 
@@ -502,7 +502,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.MysticismSpellbook:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<SpellbookGump>()?.Dispose();
+                                        Engine.UI.GetGump<SpellbookGump>()?.Dispose();
 
                                     break;
 
@@ -514,7 +514,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Owerview:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<MiniMapGump>()?.Dispose();
+                                        Engine.UI.GetGump<MiniMapGump>()?.Dispose();
 
                                     break;
 
@@ -526,7 +526,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.PartyManifest:
 
                                     if (macro.Code == MacroType.Close)
-                                        Engine.UI.GetControl<PartyGumpAdvanced>()?.Dispose();
+                                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Dispose();
 
                                     break;
 
@@ -937,7 +937,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuffIconGump:
-                    BuffGump buff = Engine.UI.GetControl<BuffGump>();
+                    BuffGump buff = Engine.UI.GetGump<BuffGump>();
 
                     if (buff != null)
                         buff.Dispose();

@@ -169,13 +169,13 @@ namespace ClassicUO.Game.UI.Gumps
         public void Update(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetControl<StandardSkillsGump>());
+                _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetGump<StandardSkillsGump>());
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
         private void UpdateGump(object sender, EventArgs e)
         {
-            StandardSkillsGump skg = Engine.UI.GetControl<StandardSkillsGump>();
+            StandardSkillsGump skg = Engine.UI.GetGump<StandardSkillsGump>();
             for (int i = 0; i < _allSkillControls.Length; i++) _allSkillControls[i]?.UpdateSkillValue(skg);
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
@@ -356,7 +356,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint serial = (uint) (World.Player + _skillIndex + 1);
 
-                    if (Engine.UI.GetControl<SkillButtonGump>(serial) != null)
+                    if (Engine.UI.GetGump<SkillButtonGump>(serial) != null)
                         Engine.UI.Remove<SkillButtonGump>(serial);
 
                     SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);

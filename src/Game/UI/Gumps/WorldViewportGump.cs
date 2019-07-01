@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeWindow(_lastSize);
 
-                    OptionsGump options = Engine.UI.GetControl<OptionsGump>();
+                    OptionsGump options = Engine.UI.GetGump<OptionsGump>();
                     options?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            OptionsGump options = Engine.UI.GetControl<OptionsGump>();
+            OptionsGump options = Engine.UI.GetGump<OptionsGump>();
             options?.UpdateVideo();
         }
 

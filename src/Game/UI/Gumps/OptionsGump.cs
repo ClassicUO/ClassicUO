@@ -1283,7 +1283,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
-            WorldViewportGump vp = Engine.UI.GetControl<WorldViewportGump>();
+            WorldViewportGump vp = Engine.UI.GetGump<WorldViewportGump>();
 
             // general
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
@@ -1309,7 +1309,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
-                    Engine.UI.GetControl<TopBarGump>()?.Dispose();
+                    Engine.UI.GetGump<TopBarGump>()?.Dispose();
                 else
                     TopBarGump.Create();
 
@@ -1334,7 +1334,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_useStandardSkillsGump.IsChecked)
             {
-                var newGump = Engine.UI.GetControl<SkillGumpAdvanced>();
+                var newGump = Engine.UI.GetGump<SkillGumpAdvanced>();
 
                 if (newGump != null)
                 {
@@ -1345,7 +1345,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                var standardGump = Engine.UI.GetControl<StandardSkillsGump>();
+                var standardGump = Engine.UI.GetGump<StandardSkillsGump>();
 
                 if (standardGump != null)
                 {
@@ -1523,7 +1523,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;
-                WorldViewportGump viewport = Engine.UI.GetControl<WorldViewportGump>();
+                WorldViewportGump viewport = Engine.UI.GetGump<WorldViewportGump>();
                 viewport?.ReloadChatControl(new SystemChatControl(5, 5, Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y));
             }
 
@@ -1559,7 +1559,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
             Engine.Profile.Current.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
 
-            CounterBarGump counterGump = Engine.UI.GetControl<CounterBarGump>();
+            CounterBarGump counterGump = Engine.UI.GetGump<CounterBarGump>();
 
             counterGump?.SetLayout(Engine.Profile.Current.CounterBarCellSize,
                                    Engine.Profile.Current.CounterBarRows,
@@ -1599,7 +1599,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
-                DebugGump debugGump = Engine.UI.GetControl<DebugGump>();
+                DebugGump debugGump = Engine.UI.GetGump<DebugGump>();
 
                 if (_debugGumpIsDisabled.IsChecked)
                 {
@@ -1647,7 +1647,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            WorldViewportGump gump = Engine.UI.GetControl<WorldViewportGump>();
+            WorldViewportGump gump = Engine.UI.GetGump<WorldViewportGump>();
             _gameWindowWidth.Text = gump.Width.ToString();
             _gameWindowHeight.Text = gump.Height.ToString();
             _gameWindowPositionX.Text = gump.X.ToString();

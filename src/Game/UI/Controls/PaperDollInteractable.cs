@@ -313,7 +313,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int) Layer.Backpack];
 
-                ContainerGump backpackGump = Engine.UI.GetControl<ContainerGump>(backpack);
+                ContainerGump backpackGump = Engine.UI.GetGump<ContainerGump>(backpack);
 
                 if (backpackGump == null)
                     GameActions.DoubleClick(backpack);

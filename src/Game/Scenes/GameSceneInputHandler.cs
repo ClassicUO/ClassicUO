@@ -185,7 +185,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (mobile != World.Player)
                     {
-                        Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+                        Engine.UI.GetGump<HealthBarGump>(mobile)?.Dispose();
                         GameActions.RequestMobileStatus(mobile);
                         HealthBarGump hbg = new HealthBarGump(mobile);
                         // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
@@ -535,7 +535,7 @@ namespace ClassicUO.Game.Scenes
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
 
-                            Engine.UI.GetControl<HealthBarGump>(mobile)?.Dispose();
+                            Engine.UI.GetGump<HealthBarGump>(mobile)?.Dispose();
 
                             if (mobile == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();

@@ -312,7 +312,7 @@ namespace ClassicUO.Game.GameObjects
 
             house.Generate();
 
-            Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+            Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
         }
 
 

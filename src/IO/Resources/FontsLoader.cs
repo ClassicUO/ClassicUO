@@ -1046,8 +1046,10 @@ namespace ClassicUO.IO.Resources
 
         private unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
+#if !DEBUG
             try
             {
+#endif
                 if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                     return null;
 
@@ -1543,6 +1545,7 @@ namespace ClassicUO.IO.Resources
                     ftexture.SetData(pData);
 
                 return ftexture;
+#if !DEBUG
             }
             catch (Exception ex)
             {
@@ -1559,6 +1562,7 @@ namespace ClassicUO.IO.Resources
 
                 return null;
             }
+#endif
         }
 
         private unsafe MultilinesFontInfo GetInfoHTML(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width)

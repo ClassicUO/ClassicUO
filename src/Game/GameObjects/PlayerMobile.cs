@@ -793,7 +793,7 @@ namespace ClassicUO.Game.GameObjects
                 skill.CapFixed = cap;
                 _delta |= Delta.Skills;
 
-                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -805,7 +805,7 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
 
-                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
             }
         }
 

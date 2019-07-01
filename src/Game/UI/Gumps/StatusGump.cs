@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected StatusGumpBase() : base(0, 0)
         {
             // sanity check
-            Engine.UI.GetControl<HealthBarGump>(World.Player)?.Dispose();
+            Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
             CanMove = true;
             CanBeSaved = true;
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    BuffGump gump = Engine.UI.GetControl<BuffGump>();
+                    BuffGump gump = Engine.UI.GetGump<BuffGump>();
 
                     if (gump == null)
                         Engine.UI.Add(new BuffGump(100, 100));
@@ -115,19 +115,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0: // modern
 
-                    gump = Engine.UI.GetControl<StatusGumpModern>();
+                    gump = Engine.UI.GetGump<StatusGumpModern>();
 
                     break;
 
                 case 1: // old
 
-                    gump = Engine.UI.GetControl<StatusGumpOld>();
+                    gump = Engine.UI.GetGump<StatusGumpOld>();
 
                     break;
 
                 case 2: // outlands
 
-                    gump = Engine.UI.GetControl<StatusGumpOutlands>();
+                    gump = Engine.UI.GetGump<StatusGumpOutlands>();
 
                     break;
 

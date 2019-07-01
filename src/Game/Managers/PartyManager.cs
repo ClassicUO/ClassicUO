@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
                             if (Members[i] == null || Members[i].Serial == 0)
                                 break;
 
-                            HealthBarGump gump = Engine.UI.GetControl<HealthBarGump>(Members[i].Serial);
+                            HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(Members[i].Serial);
 
 
                             if (gump != null)
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Managers
                         }
 
                         Clear();
-                        Engine.UI.GetControl<PartyGumpAdvanced>()?.Update();
+                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
 
                         break;
                     }
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Managers
                             Leader = serial;
 
 
-                        HealthBarGump gump = Engine.UI.GetControl<HealthBarGump>(serial);
+                        HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
 
                         if (gump != null)
                         {
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    Engine.UI.GetControl<PartyGumpAdvanced>()?.Update();
+                    Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
 
                     break;
 
