@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -166,6 +167,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Entity is Mobile mob)
             {
+                if (Engine.UI.IsDragging)
+                    return;
+
                 GameActions.RequestMobileStatus(mob);
 
                 Engine.UI.GetControl<HealthBarGump>(mob)?.Dispose();
