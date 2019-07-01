@@ -381,6 +381,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
+                    if (Engine.UI.IsDragging)
+                        return;
+
                     SpellDefinition? def = GetSpellDefinition(sender as Control);
 
                     if (!def.HasValue)
