@@ -237,15 +237,21 @@ namespace ClassicUO.Game.Scenes
             {
                 if (IsHoldingItem)
                 {
-                    switch (Engine.UI.MouseOverControl.RootParent)
-                    {
-                        case ContainerGump container:
-                            container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                            break;
-                        case PaperDollGump paperdoll:
-                            paperdoll.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                            break;
-                    }
+                    //Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+
+                    //if (Engine.UI.MouseOverControl is ItemGump g)
+                    //{
+                    //    g.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    //}
+                    //else switch (Engine.UI.MouseOverControl.RootParent)
+                    //{
+                    //    case ContainerGump container:
+                    //        container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    //        break;
+                    //    case PaperDollGump paperdoll:
+                    //        paperdoll.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    //        break;
+                    //}
 
                 }
 
