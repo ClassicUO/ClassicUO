@@ -235,9 +235,18 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                if (IsHoldingItem && Engine.UI.MouseOverControl is GumpPicContainer container)
+                if (IsHoldingItem)
                 {
-                    container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    switch (Engine.UI.MouseOverControl.RootParent)
+                    {
+                        case ContainerGump container:
+                            container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                            break;
+                        case PaperDollGump paperdoll:
+                            paperdoll.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                            break;
+                    }
+
                 }
 
                 return;

@@ -224,6 +224,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             _lastClick.X = x;
             _lastClick.Y = y;
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                return;
+
+            if (_item.Layer == Layer.Backpack || !_item.OnGround || _item.Distance < Constants.DRAG_ITEMS_DISTANCE)
+            {
+                SelectedObject.Object = _item;
+                gs.DropHeldItemToContainer(_item, x, y);
+            }
+            else
+                gs.Audio.PlaySound(0x0051);
         }
 
 
