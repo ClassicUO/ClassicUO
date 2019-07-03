@@ -273,7 +273,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                int testMinZ = drawY + (z >> 2);
+                int testMinZ = drawY + (z << 2);
                 int testMaxZ = drawY;
 
                 if (island)
@@ -281,7 +281,7 @@ namespace ClassicUO.Game.Scenes
                     Land t = obj as Land;
 
                     if (t.IsStretched)
-                        testMinZ -= t.MinZ >> 2;
+                        testMinZ -= t.MinZ << 2;
                     else
                         testMinZ = testMaxZ;
                 }
@@ -393,14 +393,55 @@ namespace ClassicUO.Game.Scenes
         {
             int charX = entity.X;
             int charY = entity.Y;
-            int dropMaxZIndex = -1;
+            int maxZ = entity.PriorityZ;
+
+            if (entity is Mobile mob)
+            {
+                if (mob.IsMoving)
+                {
+                    byte dir = mob.Steps.Back().Direction;
+                    if (dir > 0 && dir < 6)
+                        maxZ += 20;
+                }
+            }
+
+            for(int i = 0; i < 3; i++)
+            {
+                int x, y;
+                switch (i)
+                {
+                    case 0:
+                        x = charX + 1;
+                        y = charY - 1;
+                        break;
+                    case 1:
+                        x = charX;
+                        y = charY + 1;
+                        break;
+                    case 2:
+                        x = charX + 1;
+                        y = charY;
+                        break;
+                    default:
+                        continue;
+                }
+                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+                    continue;
+
+                Tile tile = World.Map.GetTile(x, y);
+
+                AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, maxZ);
+            }
+
+            /*int dropMaxZIndex = -1;
 
             if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
                 dropMaxZIndex = 0;
 
             int maxZ = entity.PriorityZ;
 
-            for (int i = 0; i < 8; i++)
+
+            for (int i = 5; i >= 0; --i)
             {
                 int x, y;
 
@@ -454,7 +495,7 @@ namespace ClassicUO.Game.Scenes
                     currentMaxZ += 20;
 
                 AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
-            }
+            }*/
         }
 
         private void GetViewPort()
