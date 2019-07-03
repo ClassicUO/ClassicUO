@@ -59,7 +59,6 @@ namespace ClassicUO.Game.Map
         public Point Center { get; set; }
 
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0)
@@ -205,7 +204,6 @@ namespace ClassicUO.Game.Map
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
         private int GetBlock(int blockX, int blockY)
         {
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
