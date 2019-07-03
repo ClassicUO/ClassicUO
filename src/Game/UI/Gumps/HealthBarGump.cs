@@ -203,15 +203,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!mobile.IsDead && _isDead) _isDead = false;
 
+                if (_name != mobile.Name && !string.IsNullOrEmpty(mobile.Name))
+                    _textBox.Text = _name = mobile.Name;
+
                 if (_outOfRange)
                 {
                     if (mobile.HitsMax == 0)
                         GameActions.RequestMobileStatus(mobile);
 
                     _outOfRange = false;
-
-                    if (_name != mobile.Name && !string.IsNullOrEmpty(mobile.Name))
-                        _name = mobile.Name;
 
                     hitsColor = 0;
 
@@ -228,23 +228,15 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
+                    if (_textBox.Hue != textColor)
+                        _textBox.Hue = textColor;
+
                     if (inparty)
                     {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
-
                         _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = true;
 
                         _bars[1].IsVisible = true;
                         _bars[2].IsVisible = true;
-                    }
-                    else
-                    {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
-
-                        if (_textBox.Text != _name)
-                            _textBox.Text = _name;
                     }
 
                     if (_hpLineRed.Hue != hitsColor)
