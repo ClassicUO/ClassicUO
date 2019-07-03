@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Game.Managers;
@@ -42,14 +43,14 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanBeSaved = true;
 
-            Add(_background = new ExpandableScroll(0, 0, Height, 0x0820)
+            Add(_background = new ExpandableScroll(0, 0, Height, 0x1F40)
             {
                 TitleGumpID = 0x82A
             });
 
-            _scrollBar = new ScrollFlag(-25, 0, Height, true);
+            _scrollBar = new ScrollFlag(-25, 36, Height, true);
 
-            Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
+            Add(_journalEntries = new RenderedTextList(25, 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
         }
