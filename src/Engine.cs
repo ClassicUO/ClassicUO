@@ -93,7 +93,6 @@ namespace ClassicUO
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private double _statisticsTimer;
-        private double _time;
         private double _totalElapsed;
         private int _totalFrames;
         private UIManager _uiManager;
@@ -646,6 +645,8 @@ namespace ClassicUO
         protected override void BeginRun()
         {
             base.BeginRun();
+            //SDL.SDL_GetWindowBordersSize(Window.Handle, out int top, out _, out _, out _);
+            //SDL.SDL_SetWindowPosition(Window.Handle, 0, top);
             _previous = SDL.SDL_GetTicks();
         }
 
