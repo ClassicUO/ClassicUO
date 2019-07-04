@@ -806,5 +806,27 @@ namespace ClassicUO
                 _statisticsTimer = totalMS + 500;
             }
         }
+
+        private static int _previousHour = -1;
+        private static int _Differential;
+
+        public static int Differential //to use in all cases where you rectify normal clocks obtained with utctimer!
+        {
+            get
+            {
+                if (_previousHour != DateTime.UtcNow.Hour)
+                {
+                    _previousHour = DateTime.UtcNow.Hour;
+                    _Differential = Engine.CurrDateTime.Subtract(DateTime.UtcNow).Hours;
+                }
+
+                return _Differential;
+            }
+        }
+
+        public static DateTime CurrDateTime
+        {
+            get { return DateTime.UtcNow.AddHours(Differential); }
+        }
     }
 }

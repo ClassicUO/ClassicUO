@@ -67,7 +67,7 @@ namespace ClassicUO.Utility
                         using (StreamWriter txt = new StreamWriter("crash.log", true))
                         {
                             txt.AutoFlush = true;
-                            txt.WriteLine("Exception @ {0}", DateTime.Now.ToString("MM-dd-yy HH:mm:ss.ffff"));
+                            txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
                             txt.WriteLine(e.ToString());
                             txt.WriteLine("");
                             txt.WriteLine("");

@@ -137,7 +137,7 @@ namespace ClassicUO.Utility.Logging
                 }
                 else
                 {
-                    Console.Write($"{DateTime.Now:T} |");
+                    Console.Write($"{Engine.CurrDateTime:T} |");
                     Console.ForegroundColor = LogTypeInfo[type].Item1;
                     Console.Write(LogTypeInfo[type].Item2);
                     Console.ForegroundColor = _foreGroundsColors[highlightColor];

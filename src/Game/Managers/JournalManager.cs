@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    FileInfo info = new FileInfo($"{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
+                    FileInfo info = new FileInfo($"{Engine.CurrDateTime.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
                     _fileWriter = info.CreateText();
                     _fileWriter.AutoFlush = true;
                 }

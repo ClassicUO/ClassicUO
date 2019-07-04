@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Controls
                 FontStyle = FontStyle.BlackBorder,
                 Hue = 1150,
                 Font = 1,
-                Text = $"{DateTime.Now:t} "
+                Text = $"{Engine.CurrDateTime:t} "
             };
 
             _hours.AddToBack(h);
