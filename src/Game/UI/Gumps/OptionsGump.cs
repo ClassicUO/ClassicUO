@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext;
+        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -232,8 +232,10 @@ namespace ClassicUO.Game.UI.Gumps
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
-            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
+            _reduceFPSWhenInactive = CreateCheckBox(rightArea, "Reduce FPS when game is inactive", Engine.Profile.Current.ReduceFPSWhenInactive, 0, 5);
+
+            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 20);
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
@@ -1128,6 +1130,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 1: // general
                     _sliderFPS.Value = 60;
                     _sliderFPSLogin.Value = 60;
+                    _reduceFPSWhenInactive.IsChecked = false;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
@@ -1289,6 +1292,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Engine.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
+            Engine.Profile.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;

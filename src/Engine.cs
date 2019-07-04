@@ -72,6 +72,8 @@ namespace ClassicUO
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
         private const int LOGIN_SCREEN_FPS = 60;
+        private const int INACTIVE_FPS_DELAY = 217; // 5 fps
+
         private static GameWindow _window;
         private static int _fpsLimit = 30;
         private static Engine _engine;
@@ -208,8 +210,8 @@ namespace ClassicUO
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
                     FrameDelay[1] = FrameDelay[1] >> 1;
 
-                    _engine.IntervalFixedUpdate = 1000.0 / _fpsLimit;
-
+                    _engine.IntervalFixedUpdate[0] = 1000.0 / _fpsLimit;
+                    _engine.IntervalFixedUpdate[1] = INACTIVE_FPS_DELAY;
                     //_engine.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / _fpsLimit);
                 }
             }
@@ -218,7 +220,7 @@ namespace ClassicUO
         public static Version Version { get; } = Assembly.GetExecutingAssembly().GetName().Version;
 
         public static int CurrentFPS { get; private set; }
-        public static int FPSMin { get; private set; } = Int32.MaxValue;
+        public static int FPSMin { get; private set; } = int.MaxValue;
         public static int FPSMax { get; private set; }
         public static bool AllowWindowResizing
         {
@@ -292,7 +294,9 @@ namespace ClassicUO
 
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
-        public double IntervalFixedUpdate { get; private set; }
+        public double[] IntervalFixedUpdate { get; } = new double[2];
+
+        public double FPSTime => IntervalFixedUpdate[!IsActive && _profileManager?.Current != null && _profileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
 
         public static void SetPreferredBackBufferSize(int width, int height)
         {
@@ -304,7 +308,7 @@ namespace ClassicUO
         public static void DropFpsMinMaxValues()
         {
             FPSMax = 0;
-            FPSMin = Int32.MaxValue;
+            FPSMin = int.MaxValue;
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -368,7 +372,7 @@ namespace ClassicUO
                             break;
 
                         case "port":
-                            settings.Port = UInt16.Parse(value);
+                            settings.Port = ushort.Parse(value);
 
                             break;
 
@@ -390,66 +394,66 @@ namespace ClassicUO
                             break;
 
                         case "lastservernum":
-                            settings.LastServerNum = UInt16.Parse(value);
+                            settings.LastServerNum = ushort.Parse(value);
 
                             break;
 
                         case "login_fps":
                         case "fps":
-                            settings.MaxLoginFPS = Int32.Parse(value);
+                            settings.MaxLoginFPS = int.Parse(value);
 
                             break;
 
                         case "debug":
-                            settings.Debug = Boolean.Parse(value);
+                            settings.Debug = bool.Parse(value);
 
                             break;
 
                         case "profiler":
-                            settings.Profiler = Boolean.Parse(value);
+                            settings.Profiler = bool.Parse(value);
 
                             break;
                         
                         case "saveaccount":
-                            settings.SaveAccount = Boolean.Parse(value);
+                            settings.SaveAccount = bool.Parse(value);
 
                             break;
 
                         case "autologin":
-                            settings.AutoLogin = Boolean.Parse(value);
+                            settings.AutoLogin = bool.Parse(value);
 
                             break;
 
                         case "reconnect":
-                            settings.Reconnect = Boolean.Parse(value);
+                            settings.Reconnect = bool.Parse(value);
 
                             break;
 
                         case "reconnect_time":
-                            settings.ReconnectTime = Int32.Parse(value);
+                            settings.ReconnectTime = int.Parse(value);
 
                             break;
 
                         case "login_music":
                         case "music":
-                            settings.LoginMusic = Boolean.Parse(value);
+                            settings.LoginMusic = bool.Parse(value);
 
                             break;
 
                         case "login_music_volume":
                         case "music_volume":
-                            settings.LoginMusicVolume = Int32.Parse(value);
+                            settings.LoginMusicVolume = int.Parse(value);
 
                             break;
 
                         case "shard_type":
                         case "shard":
-                            settings.ShardType = Int32.Parse(value);
+                            settings.ShardType = int.Parse(value);
 
                             break;
 
                         case "fixed_time_step":
-                            settings.FixedTimeStep = Boolean.Parse(value);
+                            settings.FixedTimeStep = bool.Parse(value);
 
                             break;
 
@@ -693,17 +697,19 @@ namespace ClassicUO
 
             _totalElapsed += elapsed;
 
-            if (_totalElapsed > IntervalFixedUpdate)
+            double fpsTime = FPSTime;
+
+            if (_totalElapsed > fpsTime)
             {
                 Render();
                 GraphicsDevice?.Present();
-                _totalElapsed -= IntervalFixedUpdate;
-                _isRunningSlowly = _totalElapsed > IntervalFixedUpdate;
+                _totalElapsed -= fpsTime;
+                _isRunningSlowly = _totalElapsed > fpsTime;
 
 
-                if (_isRunningSlowly && _totalElapsed > IntervalFixedUpdate * 2)
+                if (_isRunningSlowly && _totalElapsed > fpsTime * 2)
                 {
-                    _totalElapsed %= IntervalFixedUpdate;
+                    _totalElapsed %= fpsTime;
                 }
             }
 
@@ -711,9 +717,9 @@ namespace ClassicUO
             {
                 uint sleep = SDL.SDL_GetTicks() - Ticks;
 
-                if (sleep < IntervalFixedUpdate)
+                if (sleep < fpsTime)
                 {
-                    Thread.Sleep(IntervalFixedUpdate - sleep >= FrameDelay[1] ? 1 : 0);
+                    Thread.Sleep(fpsTime - sleep >= FrameDelay[1] ? 1 : 0);
                 }
                 else
                     Thread.Yield();
@@ -775,7 +781,7 @@ namespace ClassicUO
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
 #if DEV_BUILD
-            Window.Title = String.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : String.Empty, CurrentFPS, Version);
+            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
 #else
             Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, _isRunningSlowly ? "*" : string.Empty, CurrentFPS, Version);
 #endif

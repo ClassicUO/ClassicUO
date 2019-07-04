@@ -256,6 +256,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public int GridLootType { get; set; } // 0 = none, 1 = only grid, 2 = both
 
+        [JsonProperty] public bool ReduceFPSWhenInactive { get; set; }
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
