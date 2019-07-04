@@ -44,6 +44,14 @@ namespace ClassicUO.Game.Managers
             });
 
             Register("focus", s => { Engine.DebugFocus = !Engine.DebugFocus; });
+            Register("datetime", s =>
+            {
+                if(World.Player != null)
+                {
+                    GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
+                    GameActions.Print($"Current CurrDateTime is {Engine.CurrDateTime}");
+                }
+            });
         }
 
 

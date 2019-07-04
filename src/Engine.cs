@@ -824,8 +824,7 @@ namespace ClassicUO
                 if (_previousHour != DateTime.UtcNow.Hour)
                 {
                     _previousHour = DateTime.UtcNow.Hour;
-                    TimeSpan ts = (DateTime.Now - DateTime.UtcNow);
-                    _Differential = (int)(ts.TotalHours + 0.05);
+                    _Differential = -DateTime.UtcNow.Subtract(DateTime.Now).Hours;
                 }
 
                 return _Differential;
