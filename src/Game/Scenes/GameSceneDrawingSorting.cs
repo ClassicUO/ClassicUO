@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -173,6 +174,7 @@ namespace ClassicUO.Game.Scenes
 
         private static readonly StaticTiles _emptyStaticTiles = default;
 
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
@@ -215,6 +217,12 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
+
+                            if (itemData.IsFoliage && World.Season >= Seasons.Winter)
+                            {
+                                continue;
+                            }
+
                             if (obj is Static st)
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
