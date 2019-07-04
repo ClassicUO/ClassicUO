@@ -394,18 +394,19 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.X;
             int charY = entity.Y;
             int maxZ = entity.PriorityZ;
+            byte dir = byte.MaxValue;
 
             if (entity is Mobile mob)
             {
                 if (mob.IsMoving)
                 {
-                    byte dir = mob.Steps.Back().Direction;
+                    dir = mob.Steps.Back().Direction;
                     if (dir > 0 && dir < 6)
                         maxZ += 20;
                 }
             }
 
-            for(int i = 0; i < 3; i++)
+            for(int i = 0, max = (dir == 3 ? 4 : 3); i < max; i++)
             {
                 int x, y;
                 switch (i)
@@ -421,6 +422,10 @@ namespace ClassicUO.Game.Scenes
                     case 2:
                         x = charX + 1;
                         y = charY;
+                        break;
+                    case 3:
+                        x = charX + 1;
+                        y = charY + 1;
                         break;
                     default:
                         continue;
@@ -441,7 +446,7 @@ namespace ClassicUO.Game.Scenes
             int maxZ = entity.PriorityZ;
 
 
-            for (int i = 5; i >= 0; --i)
+            for (int i = 0; i < 8; i++)
             {
                 int x, y;
 
