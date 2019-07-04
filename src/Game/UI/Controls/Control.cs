@@ -668,7 +668,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnDragEnd(x, y);
-            DragBegin.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
+            DragEnd.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
         }
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
