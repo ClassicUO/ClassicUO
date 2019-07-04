@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!mobile.IsDead && _isDead) _isDead = false;
 
-                if (_name != mobile.Name && !string.IsNullOrEmpty(mobile.Name))
+                if (!string.IsNullOrEmpty(mobile.Name) && _name != mobile.Name)
                     _textBox.Text = _name = mobile.Name;
 
                 if (_outOfRange)
