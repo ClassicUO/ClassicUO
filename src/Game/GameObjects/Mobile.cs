@@ -81,20 +81,25 @@ namespace ClassicUO.Game.GameObjects
 
         public long DeathScreenTimer { get; set; }
 
-        private bool _isFemale;
+        private bool _isMale;
 
-        public bool IsFemale
+        public bool IsMale
         {
-            get => _isFemale || (Flags & Flags.Female) != 0 || Graphic == 0x0191 || Graphic == 0x0193 || Graphic == 0x025E || Graphic == 0x029B;
+            get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale);
             set
             {
-                if (_isFemale != value)
+                if (_isMale != value)
                 {
-                    _isFemale = value;
+                    _isMale = value;
                     _delta |= Delta.Appearance;
                 }
             }
         }
+
+        public bool IsOtherMale => Graphic == 183 || Graphic == 185;
+        public bool IsElfMale => Graphic == 605 || Graphic == 607;
+        public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
+        public bool IsElfFemale => Graphic == 606 || Graphic == 608;
 
         public RaceType Race
         {

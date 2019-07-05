@@ -280,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
             _labels[(int) MobileStats.Intelligence] = text;
             Add(text);
 
-            text = new Label(World.Player.IsFemale ? "F" : "M", false, 0x0386, font: 1)
+            text = new Label(!World.Player.IsMale ? "F" : "M", false, 0x0386, font: 1)
             {
                 X = 86,
                 Y = 97
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int) MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int) MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
-                _labels[(int) MobileStats.Sex].Text = World.Player.IsFemale ? "F" : "M";
+                _labels[(int) MobileStats.Sex].Text = !World.Player.IsMale ? "F" : "M";
                 _labels[(int) MobileStats.AR].Text = World.Player.PhysicalResistence.ToString();
                 _labels[(int) MobileStats.HealthCurrent].Text = $"{World.Player.Hits}/{World.Player.HitsMax}";
                 _labels[(int) MobileStats.ManaCurrent].Text = $"{World.Player.Mana}/{World.Player.ManaMax}";
