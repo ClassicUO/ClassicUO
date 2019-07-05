@@ -173,6 +173,8 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                if (gs == null)
+                    return;
 
                 if (TargetManager.IsTargeting)
                 {

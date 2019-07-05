@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 case RaceType.ELF when isFemale:
                     character.Graphic = 0x025E;
                     character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
-                    character.Equipment[(int) Layer.Pants] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
+                    character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
                     character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
 
                     break;
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         character.Graphic = 0x0191;
                         character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
-                        character.Equipment[(int) Layer.Pants] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
+                        character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
                         character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
                     }
                     else
