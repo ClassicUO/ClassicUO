@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
 
             _isPartialHue = item.ItemData.IsPartialHue;
 
-            int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
+            int offset = !owner.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
 
             ushort id = Item.ItemData.AnimID;
 
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Texture = FileManager.Gumps.GetTexture((ushort) (id + offset));
 
-            if (owner.IsFemale && Texture == null)
+            if (!owner.IsMale && Texture == null)
                 Texture = FileManager.Gumps.GetTexture((ushort) (id + MALE_OFFSET));
 
             if (Texture == null)

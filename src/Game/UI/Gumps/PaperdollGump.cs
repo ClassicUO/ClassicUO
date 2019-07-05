@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
 
             gs.WearHeldItem(Mobile);

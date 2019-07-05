@@ -316,7 +316,7 @@ namespace ClassicUO.Network
 
             if (type > 0 && p.Position + 1 <= p.Length)
             {
-                mobile.IsFemale = p.ReadBool();
+                mobile.IsMale = !p.ReadBool();
 
                 if (mobile == World.Player)
                 {
