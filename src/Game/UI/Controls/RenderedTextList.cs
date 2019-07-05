@@ -26,6 +26,7 @@ using System;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var h = new RenderedText()
             {
-                IsUnicode = isUnicode,
+                IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 FontStyle = FontStyle.BlackBorder,
                 Hue = 1150,

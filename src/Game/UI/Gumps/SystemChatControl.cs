@@ -33,6 +33,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;

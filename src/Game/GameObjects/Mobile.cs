@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 

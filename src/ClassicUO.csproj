@@ -173,8 +173,10 @@
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Renderer\UI\UIControl.cs" />
     <Compile Include="Renderer\UI\UISystemManager.cs" />
+    <Compile Include="Utility\Collections\RawList.cs" />
+    <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
-    <Compile Include="Utility\OrderedDictionary.cs" />
+    <Compile Include="Utility\Collections\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
@@ -286,7 +288,7 @@
     <Compile Include="Renderer\Textures.cs" />
     <Compile Include="Renderer\UI\Button.cs" />
     <Compile Include="Renderer\UI\Panel.cs" />
-    <Compile Include="Utility\CollectionHelper.cs" />
+    <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
     <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
@@ -474,8 +476,8 @@
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
-    <Compile Include="Utility\Bag.cs" />
-    <Compile Include="Utility\Deque.cs" />
+    <Compile Include="Utility\Collections\Bag.cs" />
+    <Compile Include="Utility\Collections\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
     <Compile Include="Utility\Logging\Log.cs" />
     <Compile Include="Utility\Logging\LogFile.cs" />
