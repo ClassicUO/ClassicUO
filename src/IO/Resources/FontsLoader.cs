@@ -1455,7 +1455,7 @@ namespace ClassicUO.IO.Resources
                                                 {
                                                     int testBlock = (testY + y) * width + nowX;
 
-                                                    if (pData[testBlock] != 0 && pData[testBlock] != blackColor)
+                                                    if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
                                                     {
                                                         pData[block] = blackColor;
                                                         passed = true;
