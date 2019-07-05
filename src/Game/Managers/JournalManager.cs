@@ -25,6 +25,7 @@ using System;
 using System.IO;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
