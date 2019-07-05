@@ -153,7 +153,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var h = new RenderedText()
             {
-                IsUnicode = isUnicode,
+                IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 FontStyle = FontStyle.BlackBorder,
                 Hue = 1150,

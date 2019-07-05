@@ -173,6 +173,8 @@
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Renderer\UI\UIControl.cs" />
     <Compile Include="Renderer\UI\UISystemManager.cs" />
+    <Compile Include="Utility\Collections\RawList.cs" />
+    <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
     <Compile Include="Utility\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
