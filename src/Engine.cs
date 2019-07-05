@@ -182,7 +182,7 @@ namespace ClassicUO
             };
 
             Window.AllowUserResizing = true;
-            IsMouseVisible = true;
+            IsMouseVisible = _settings.RunMouseInASeparateThread;
 
             Window.Title = $"ClassicUO - {Version}";
         }

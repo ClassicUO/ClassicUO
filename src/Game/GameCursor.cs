@@ -262,30 +262,33 @@ namespace ClassicUO.Game
             {
                 _needGraphicUpdate = false;
 
-                if (_cursor != IntPtr.Zero)
-                    SDL.SDL_FreeCursor(_cursor);
-
-                ushort id = Graphic;
-
-                if (id < 0x206A)
-                    id -= 0x2053;
-                else
-                    id -= 0x206A;
-                int war = World.InGame && World.Player.InWarMode ? 1 : 0;
-
-                ref readonly CursorInfo info = ref _cursorPixels[war, id];
-
-                fixed (ushort* ptr = info.Pixels)
-                    _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
-
-                if (_surface != IntPtr.Zero)
+                if (Engine.GlobalSettings.RunMouseInASeparateThread)
                 {
-                    int hotX = -_cursorOffset[0, id];
-                    int hotY = -_cursorOffset[1, id];
+                    if (_cursor != IntPtr.Zero)
+                        SDL.SDL_FreeCursor(_cursor);
 
-                    _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
-                    SDL.SDL_SetCursor(_cursor);
-                    SDL.SDL_FreeSurface(_surface);
+                    ushort id = Graphic;
+
+                    if (id < 0x206A)
+                        id -= 0x2053;
+                    else
+                        id -= 0x206A;
+                    int war = World.InGame && World.Player.InWarMode ? 1 : 0;
+
+                    ref readonly CursorInfo info = ref _cursorPixels[war, id];
+
+                    fixed (ushort* ptr = info.Pixels)
+                        _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
+
+                    if (_surface != IntPtr.Zero)
+                    {
+                        int hotX = -_cursorOffset[0, id];
+                        int hotY = -_cursorOffset[1, id];
+
+                        _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
+                        SDL.SDL_SetCursor(_cursor);
+                        SDL.SDL_FreeSurface(_surface);
+                    }
                 }
             }
 
@@ -329,18 +332,7 @@ namespace ClassicUO.Game
                 sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
             }
 
-            /*ushort graphic = Graphic = AssignGraphicByState();
-            if (graphic < 0x206A)
-                graphic -= 0x2053;
-            else
-                graphic -= 0x206A;
-
-            int offX = _cursorOffset[0, graphic];
-            int offY = _cursorOffset[1, graphic];
-
-            sb.Draw2D(FileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
-            */
-
+           
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
                 int x = Mouse.Position.X - _offset.X;
@@ -360,6 +352,22 @@ namespace ClassicUO.Game
             }
 
             DrawToolTip(sb, Mouse.Position);
+
+            if (!Engine.GlobalSettings.RunMouseInASeparateThread)
+            {
+                ushort graphic = Graphic;
+
+                if (graphic < 0x206A)
+                    graphic -= 0x2053;
+                else
+                    graphic -= 0x206A;
+
+                int offX = _cursorOffset[0, graphic];
+                int offY = _cursorOffset[1, graphic];
+
+                sb.Draw2D(FileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+            }
+
         }
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position)

@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
 
@@ -582,8 +582,8 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
 
+            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 0);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
-
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
 
             Add(rightArea, PAGE);
@@ -1194,6 +1194,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
+                    _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _xBR.IsChecked = true;
 
@@ -1517,6 +1518,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
+            Engine.Instance.IsMouseVisible = Engine.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
             Engine.Profile.Current.AuraOnMouse = _auraMouse.IsChecked;
             Engine.Profile.Current.UseXBR = _xBR.IsChecked;
 
