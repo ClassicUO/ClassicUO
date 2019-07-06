@@ -70,6 +70,8 @@ namespace ClassicUO.Game.UI.Gumps
         // fonts
         private FontSelector _fontSelectorChat;
         private TextBox _gameWindowHeight;
+        private Checkbox _overrideAllFonts;
+        private Combobox _overrideAllFontsIsUnicodeCheckbox;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
@@ -724,8 +726,25 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            Label text = new Label("Speech font:", true, HUE_FONT);
 
+            ScrollAreaItem item = new ScrollAreaItem();
+
+            _overrideAllFonts = new Checkbox(0x00D2, 0x00D3, "Override game font", FONT, HUE_FONT)
+            {
+                IsChecked = Engine.Profile.Current.OverrideAllFonts
+            };
+            _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[] { "ASCII", "Unicode" }, Engine.Profile.Current.OverrideAllFontsIsUnicode ? 1 : 0);
+
+            item.Add(_overrideAllFonts);
+            item.Add(_overrideAllFontsIsUnicodeCheckbox);
+            rightArea.Add(item);
+
+
+
+            Label text = new Label("Speech font:", true, HUE_FONT)
+            {
+                Y = 20,
+            };
             rightArea.Add(text);
 
             _fontSelectorChat = new FontSelector
@@ -1211,7 +1230,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 6: // fonts
                     _fontSelectorChat.SetSelectedFont(0);
-
+                    _overrideAllFonts.IsChecked = false;
+                    _overrideAllFontsIsUnicodeCheckbox.SelectedIndex = 1;
                     break;
 
                 case 7: // speech
@@ -1525,7 +1545,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();
-
+            Engine.Profile.Current.OverrideAllFonts = _overrideAllFonts.IsChecked;
+            Engine.Profile.Current.OverrideAllFontsIsUnicode = _overrideAllFontsIsUnicodeCheckbox.SelectedIndex == 1;
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;

@@ -41,7 +41,15 @@ namespace ClassicUO.Game.Managers
             if (Entries.Count >= 100)
                 Entries.RemoveFromFront();
 
-            JournalEntry entry = new JournalEntry(text, (byte) (isunicode ? 0 : 9), hue, name, isunicode);
+            byte font = (byte) (isunicode ? 0 : 9);
+
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
+            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
             _fileWriter?.WriteLine($"{name}: {text}");

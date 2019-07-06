@@ -89,6 +89,12 @@ namespace ClassicUO.Game
 
         public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                unicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
             switch (type)
             {
                 case MessageType.Spell:

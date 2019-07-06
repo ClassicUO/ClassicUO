@@ -80,6 +80,12 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type, bool ishealthmessage = false)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
             for (int i = 0; i < _messages.Count; i++)
             {
                 var a = _messages[i];

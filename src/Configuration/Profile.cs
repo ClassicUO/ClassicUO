@@ -258,6 +258,9 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ReduceFPSWhenInactive { get; set; }
 
+        [JsonProperty] public bool OverrideAllFonts { get; set; }
+        [JsonProperty] public bool OverrideAllFontsIsUnicode { get; set; } = true;
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
