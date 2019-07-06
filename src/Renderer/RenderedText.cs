@@ -137,6 +137,8 @@ namespace ClassicUO.Renderer
             return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
+        private static Vector3 _hueVector = Vector3.Zero;
+
         public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
@@ -172,14 +174,15 @@ namespace ClassicUO.Renderer
             if (Texture == null)
                 return false;
 
-            Vector3 huev = Vector3.Zero;
-            huev.X = hue;
+            _hueVector.X = hue;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
 
             if (hue != 0)
-                huev.Y = 1;
-            huev.Z = alpha;
+                _hueVector.Y = 1;
+            _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref huev);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref _hueVector);
         }
 
         public void CreateTexture()
