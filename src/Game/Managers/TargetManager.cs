@@ -241,7 +241,7 @@ namespace ClassicUO.Game.Managers
                 {
                     modelNumber = st.OriginalGraphic;
 
-                    if (st.ItemData.IsSurface && !st.ItemData.IsBridge)
+                    if (st.ItemData.IsSurface && !st.ItemData.IsBridge && !st.ItemData.IsBackground)
                         z += st.ItemData.Height;
                 }
                 else if (gobj is Multi m)
