@@ -243,14 +243,15 @@ namespace ClassicUO.Game.Managers
                     var data = st.ItemData;
 
                     if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
-                        z += st.ItemData.Height;
+                        z += data.Height;
                 }
                 else if (gobj is Multi m)
                 {
                     modelNumber = m.Graphic;
+                    var data = m.ItemData;
 
-                    if (m.ItemData.IsSurface)
-                        z += m.ItemData.Height;
+                    if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
+                        z += data.Height;
                 }
 
                 NetClient.Socket.Send(new PTargetXYZ(gobj.X, gobj.Y, z, modelNumber, _targetCursorId, (byte) TargeringType));
