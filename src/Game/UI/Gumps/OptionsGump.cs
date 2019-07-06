@@ -733,7 +733,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsChecked = Engine.Profile.Current.OverrideAllFonts
             };
-            _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[] { "ASCII", "Unicode" }, Engine.Profile.Current.OverrideAllFontsIsUnicode ? 1 : 0);
+
+            _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[]
+            {
+                "ASCII", "Unicode"
+            }, Engine.Profile.Current.OverrideAllFontsIsUnicode ? 1 : 0)
+            {
+                IsVisible = _overrideAllFonts.IsChecked
+            };
+            _overrideAllFonts.ValueChanged += (ss, ee) => { _overrideAllFontsIsUnicodeCheckbox.IsVisible = _overrideAllFonts.IsChecked; };
 
             item.Add(_overrideAllFonts);
             item.Add(_overrideAllFontsIsUnicodeCheckbox);
