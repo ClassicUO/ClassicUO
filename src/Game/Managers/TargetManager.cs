@@ -240,8 +240,9 @@ namespace ClassicUO.Game.Managers
                 if (gobj is Static st)
                 {
                     modelNumber = st.OriginalGraphic;
+                    var data = st.ItemData;
 
-                    if (st.ItemData.IsSurface && !st.ItemData.IsBridge && !st.ItemData.IsBackground)
+                    if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
                         z += st.ItemData.Height;
                 }
                 else if (gobj is Multi m)

@@ -356,6 +356,7 @@ namespace ClassicUO.IO.Resources
             IsDoor = (Flags & TileFlag.Door) != 0;
             IsWall = (Flags & TileFlag.Wall) != 0;
             IsLight = (Flags & TileFlag.LightSource) != 0;
+            IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
         }
 
         public readonly TileFlag Flags;
@@ -387,6 +388,7 @@ namespace ClassicUO.IO.Resources
         public readonly bool IsDoor;
         public readonly bool IsWall;
         public readonly bool IsLight;
+        public readonly bool IsNoShoot;
     }
 
     // old
