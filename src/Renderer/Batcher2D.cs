@@ -1725,16 +1725,19 @@ namespace ClassicUO.Renderer
         public GraphicsDevice GraphicsDevice { get; }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
             Begin(null, Matrix.Identity);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect customEffect, Matrix projection)
         {
             EnsureNotStarted();
@@ -1748,6 +1751,7 @@ namespace ClassicUO.Renderer
             _customEffect = customEffect;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
             EnsureStarted();
@@ -1756,11 +1760,13 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual bool CheckInScreen(int index)
         {
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual void EnsureSize()
         {
             EnsureStarted();
@@ -1769,6 +1775,7 @@ namespace ClassicUO.Renderer
                 Flush();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected bool PushSprite(Texture2D texture)
         {
             EnsureSize();
@@ -1852,6 +1859,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
