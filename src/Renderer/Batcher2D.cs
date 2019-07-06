@@ -1480,6 +1480,9 @@ namespace ClassicUO.Renderer
 
         private class IsometricEffect : MatrixEffect
         {
+            private Vector2 _viewPort;
+            private Matrix _matrix = Matrix.Identity;
+
             public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
                 WorldMatrix = Parameters["WorldMatrix"];
@@ -1497,8 +1500,11 @@ namespace ClassicUO.Renderer
 
             public override void ApplyStates()
             {
-                WorldMatrix.SetValue(Matrix.Identity);
-                Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                WorldMatrix.SetValueRef(ref _matrix);
+
+                _viewPort.X = GraphicsDevice.Viewport.Width;
+                _viewPort.Y = GraphicsDevice.Viewport.Height;
+                Viewport.SetValue(_viewPort);
 
                 base.ApplyStates();
             }
