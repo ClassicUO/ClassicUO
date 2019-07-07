@@ -751,7 +751,13 @@ namespace ClassicUO.Game.Scenes
             _healthLinesManager.Draw(batcher, Scale);
 
             //batcher.SetBlendState(_blendText);
-            Overheads.Draw(batcher, x, y);
+
+            int renderIndex = _renderIndex - 1;
+
+            if (renderIndex < 1)
+                renderIndex = 99;
+
+            Overheads.Draw(batcher, x, y, renderIndex);
             SelectedObject.LastObject = SelectedObject.Object;
 
             // batcher.SetBlendState(null);

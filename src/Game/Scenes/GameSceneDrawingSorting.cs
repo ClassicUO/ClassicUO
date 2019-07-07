@@ -185,7 +185,7 @@ namespace ClassicUO.Game.Scenes
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
 
-                //obj.UseInRender = 0xFF;
+                obj.UseInRender = 0xFF;
 
                 int drawX = obj.RealScreenPosition.X;
                 int drawY = obj.RealScreenPosition.Y;
@@ -357,7 +357,6 @@ namespace ClassicUO.Game.Scenes
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
-                    //_renderList.Resize(newsize);
                     Array.Resize(ref _renderList, newsize);
                 }
 
@@ -381,16 +380,8 @@ namespace ClassicUO.Game.Scenes
                     obj.UseObjectHandles = false;
                 }
 
-                //ref var weak = ref _renderList[_renderListCount];
-
-                //if (weak == null)
-                //    weak = new WeakReference<GameObject>(obj);
-                //else
-                //    weak.SetTarget(obj);
-
                 _renderList[_renderListCount] = obj;
-                //_renderList.Enqueue(obj);
-                //obj.UseInRender = (byte) _renderIndex;
+                obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
         }

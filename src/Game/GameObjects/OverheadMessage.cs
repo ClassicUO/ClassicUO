@@ -45,8 +45,8 @@ namespace ClassicUO.Game.GameObjects
             _messages = new Deque<MessageInfo>();
         }
 
-        public OverheadMessage Left { get; set; }
-        public OverheadMessage Right { get; set; }
+        //public OverheadMessage Left { get; set; }
+        //public OverheadMessage Right { get; set; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
@@ -186,25 +186,51 @@ namespace ClassicUO.Game.GameObjects
             _rectangle.Height += rtext.Height;
         }
 
-        public float IsOverlap(OverheadMessage firstNode)
+        //public float IsOverlap(OverheadMessage firstNode)
+        //{
+        //    int count = 0;
+
+        //    for (var ov = firstNode; ov != null; ov = ov.Right)
+        //    {
+        //        if (ov != this && ov._rectangle.Intersects(_rectangle))
+        //        {
+        //            count++;
+        //            ov._alpha = 0.3f;
+        //            _alpha = 0.3f;
+        //        }
+        //    }
+
+        //    float alpha = _alpha;
+        //    _alpha = alpha * count;
+
+        //    return alpha;
+        //}
+
+        public float IsOverlap(RawList<OverheadMessage> list, uint startIndex)
         {
             int count = 0;
 
-            for (var ov = firstNode; ov != null; ov = ov.Right)
+            var current = list[startIndex++];
+
+            for (; startIndex < list.Count; startIndex++)
             {
-                if (ov != this && ov._rectangle.Intersects(_rectangle))
+                var m = list[startIndex];
+
+                if (m._rectangle.Intersects(_rectangle))
                 {
                     count++;
-                    ov._alpha = 0.3f;
+                    m._alpha = 0.3f;
                     _alpha = 0.3f;
                 }
             }
 
+           
             float alpha = _alpha;
             _alpha = alpha * count;
 
             return alpha;
         }
+
 
         public void SetAlpha(float alpha)
         {

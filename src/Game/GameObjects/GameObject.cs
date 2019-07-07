@@ -95,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int CurrentRenderIndex { get; set; }
 
-        //public byte UseInRender { get; set; }
+        public byte UseInRender { get; set; }
 
         public short PriorityZ { get; set; }
 

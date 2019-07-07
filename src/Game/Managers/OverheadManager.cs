@@ -81,53 +81,42 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale)
+        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale, int renderIndex)
         {
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            for (int i = 0; i < _messages.Count; i++)
+            uint lastIndex = uint.MaxValue;
+
+            for (uint i = 0; i < _messages.Count; i++)
             {
                 var m = _messages[i];
+
+                if (m.Parent.UseInRender != renderIndex)
+                    continue;
 
                 float alpha = 0;
                 if (i + 1 < _messages.Count)
                 {
-                    alpha = m.IsOverlap(_messages[i + 1]);
+                    alpha = m.IsOverlap(_messages, i);
                 }
 
                 m.Draw(batcher, startX, startY, scale);
                 m.SetAlpha(alpha);
 
-                if ( i < _messages.Count - 1)
+                if (m.Contains(mouseX, mouseY))
                 {
-                //    OverheadMessage last = _messages[_messages.Count - 1];
-
-                //    bool cont = false;
-
-                //    if ((SelectedObject.LastObject is MessageInfo x))
-                //    {
-                //        var parent = x.Parent;
-
-                //        for (var o = parent; o != null; o = o.Right)
-                //        {
-                //            if (o == last)
-                //            {
-                //                cont = true;
-                //                break;
-                //            }
-                //        }
-
-                //        if (cont)
-                //            continue;
-                //    }
-
-                //    if (m.Contains(mouseX, mouseY))
-                //    {
-                //        _messages[i] = last;
-                //        _messages[_messages.Count - 1] = m;
-                //    }
+                    lastIndex = i;
                 }
+            }
+
+            if (lastIndex != uint.MaxValue)
+            {
+                var x = _messages[lastIndex];
+                var last = _messages[_messages.Count - 1];
+
+                _messages[lastIndex] = last;
+                _messages[_messages.Count - 1] = x;
             }
 
             //if (_firstNode != null)
@@ -173,11 +162,11 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public bool Draw(UltimaBatcher2D batcher, int startX, int startY)
+        public bool Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            DrawTextOverheads(batcher, startX, startY, scale);
+            DrawTextOverheads(batcher, startX, startY, scale, renderIndex);
 
             foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
             {
