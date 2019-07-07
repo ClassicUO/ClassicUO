@@ -29,6 +29,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
@@ -39,7 +40,9 @@ namespace ClassicUO.Game.Managers
         private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
         private readonly List<Serial> _toRemoveDamages = new List<Serial>();
 
-        private OverheadMessage _firstNode;
+        //private OverheadMessage _firstNode;
+
+        private readonly RawList<OverheadMessage> _messages = new RawList<OverheadMessage>(1000);
 
 
         public void Update(double totalMS, double frameMS)
@@ -51,6 +54,16 @@ namespace ClassicUO.Game.Managers
 
                 if (st.IsDestroyed || st.OverheadMessageContainer == null || st.OverheadMessageContainer.IsEmpty)
                     _staticToUpdate.RemoveAt(i--);
+            }
+
+            for (uint i = 0; i < _messages.Count; i++)
+            {
+                var m = _messages[i];
+
+                if (m == null || m.IsDestroyed || m.IsEmpty || m.Parent == null || m.Parent.IsDestroyed)
+                {
+                    _messages.RemoveAt(i--);
+                }
             }
 
             UpdateDamageOverhead(totalMS, frameMS);
@@ -70,25 +83,72 @@ namespace ClassicUO.Game.Managers
 
         private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale)
         {
-            if (_firstNode != null)
+            int mouseX = Mouse.Position.X;
+            int mouseY = Mouse.Position.Y;
+
+            for (int i = 0; i < _messages.Count; i++)
             {
-                int mouseX = Mouse.Position.X;
-                int mouseY = Mouse.Position.Y;
+                var m = _messages[i];
 
-                while (_firstNode != null)
+                float alpha = 0;
+                if (i + 1 < _messages.Count)
                 {
-                    float alpha = _firstNode.IsOverlap(_firstNode.Right);
-                    _firstNode.Draw(batcher, startX, startY, scale);
-                    _firstNode.SetAlpha(alpha);
+                    alpha = m.IsOverlap(_messages[i + 1]);
+                }
 
-                    if (_firstNode.Contains(mouseX, mouseY))
-                    {
-                      
-                    }
+                m.Draw(batcher, startX, startY, scale);
+                m.SetAlpha(alpha);
 
-                    _firstNode = _firstNode.Right;
+                if ( i < _messages.Count - 1)
+                {
+                //    OverheadMessage last = _messages[_messages.Count - 1];
+
+                //    bool cont = false;
+
+                //    if ((SelectedObject.LastObject is MessageInfo x))
+                //    {
+                //        var parent = x.Parent;
+
+                //        for (var o = parent; o != null; o = o.Right)
+                //        {
+                //            if (o == last)
+                //            {
+                //                cont = true;
+                //                break;
+                //            }
+                //        }
+
+                //        if (cont)
+                //            continue;
+                //    }
+
+                //    if (m.Contains(mouseX, mouseY))
+                //    {
+                //        _messages[i] = last;
+                //        _messages[_messages.Count - 1] = m;
+                //    }
                 }
             }
+
+            //if (_firstNode != null)
+            //{
+            //    int mouseX = Mouse.Position.X;
+            //    int mouseY = Mouse.Position.Y;
+
+            //    while (_firstNode != null)
+            //    {
+            //        float alpha = _firstNode.IsOverlap(_firstNode.Right);
+            //        _firstNode.Draw(batcher, startX, startY, scale);
+            //        _firstNode.SetAlpha(alpha);
+
+            //        if (_firstNode.Contains(mouseX, mouseY))
+            //        {
+                      
+            //        }
+
+            //        _firstNode = _firstNode.Right;
+            //    }
+            //}
         }
 
         public void AddOverhead(OverheadMessage overhead)
@@ -96,18 +156,20 @@ namespace ClassicUO.Game.Managers
             if ((overhead.Parent is Static || overhead.Parent is Multi) && !_staticToUpdate.Contains(overhead.Parent))
                 _staticToUpdate.Add(overhead.Parent);
 
-            if (_firstNode == null)
-                _firstNode = overhead;
-            else
-            {
-                var last = _firstNode;
+            _messages.Add(overhead);
 
-                while (last.Right != null)
-                    last = last.Right;
+            //if (_firstNode == null)
+            //    _firstNode = overhead;
+            //else
+            //{
+            //    var last = _firstNode;
 
-                last.Right = overhead;
-                overhead.Right = null;
-            }
+            //    while (last.Right != null)
+            //        last = last.Right;
+
+            //    last.Right = overhead;
+            //    overhead.Right = null;
+            //}
         }
 
 
@@ -199,21 +261,28 @@ namespace ClassicUO.Game.Managers
 
             _subst.Clear();
 
-            var last = _firstNode;
+            //var last = _firstNode;
 
-            while (last != null)
+            //while (last != null)
+            //{
+            //    var temp = last.Right;
+
+            //    last.Destroy();
+
+            //    last.Left = null;
+            //    last.Right = null;
+
+            //    last = temp;
+            //}
+
+            //_firstNode = null;
+
+            foreach (OverheadMessage message in _messages)
             {
-                var temp = last.Right;
-
-                last.Destroy();
-
-                last.Left = null;
-                last.Right = null;
-
-                last = temp;
+                message.Destroy();
             }
 
-            _firstNode = null;
+            _messages.Clear();
 
             foreach (GameObject s in _staticToUpdate)
             {

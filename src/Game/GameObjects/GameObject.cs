@@ -25,6 +25,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 
 using Microsoft.Xna.Framework;
@@ -239,6 +240,8 @@ namespace ClassicUO.Game.GameObjects
                 OverheadMessageContainer = new OverheadMessage(this);
 
             OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
+
+            Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(OverheadMessageContainer);
         }
 
 
