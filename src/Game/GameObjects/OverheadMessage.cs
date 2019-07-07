@@ -196,6 +196,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     count++;
                     ov._alpha = 0.3f;
+                    _alpha = 0.3f;
                 }
             }
 
@@ -304,8 +305,7 @@ namespace ClassicUO.Game.GameObjects
             _rectangle.X = x - (_rectangle.Width >> 1);
             _rectangle.Y = y - offY - _rectangle.Height;
 
-
-            //int startY = offY;
+            int startY = offY;
 
             foreach (var item in _messages)
             {
@@ -338,13 +338,15 @@ namespace ClassicUO.Game.GameObjects
                 offY += item.RenderedText.Height;
             }
 
-            /* batcher.DrawRectangle(Textures.GetTexture(Color.Green),
+            Vector3 zero = Vector3.Zero;
+
+             batcher.DrawRectangle(Textures.GetTexture(Color.Green),
                                   x - (_rectangle.Width >> 1),
                                   y - startY - _rectangle.Height, 
                                   _rectangle.Width, 
                                   _rectangle.Height,
-                                  Vector3.Zero); 
-            */
+                                  ref zero); 
+            
         }
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)

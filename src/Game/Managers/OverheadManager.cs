@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
                 var st = _staticToUpdate[i];
                 st.Update(totalMS, frameMS);
 
-                if (st.IsDestroyed)
+                if (st.IsDestroyed || st.OverheadMessageContainer == null || st.OverheadMessageContainer.IsEmpty)
                     _staticToUpdate.RemoveAt(i--);
             }
 
