@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Managers
                 float alpha = 0;
                 if (i + 1 < _messages.Count)
                 {
-                    alpha = m.IsOverlap(_messages, i);
+                    alpha = m.IsOverlap(_messages, i + 1);
                 }
 
                 m.Draw(batcher, startX, startY, scale);

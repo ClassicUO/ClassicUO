@@ -210,8 +210,6 @@ namespace ClassicUO.Game.GameObjects
         {
             int count = 0;
 
-            var current = list[startIndex++];
-
             for (; startIndex < list.Count; startIndex++)
             {
                 var m = list[startIndex];
@@ -219,7 +217,7 @@ namespace ClassicUO.Game.GameObjects
                 if (m._rectangle.Intersects(_rectangle))
                 {
                     count++;
-                    m._alpha = 0.3f;
+                    //m._alpha = 0.3f;
                     _alpha = 0.3f;
                 }
             }
