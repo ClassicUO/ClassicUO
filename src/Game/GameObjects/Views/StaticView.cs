@@ -105,16 +105,19 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
             Engine.DebugInfo.StaticsRendered++;
-            base.Draw(batcher, posX, posY);
-            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
 
-            if (ItemData.IsLight)
+            if (base.Draw(batcher, posX, posY))
             {
-                Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(this, this, posX + 22, posY + 22);
+                if (ItemData.IsLight)
+                {
+                    Engine.SceneManager.GetScene<GameScene>()
+                          .AddLight(this, this, posX + 22, posY + 22);
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
 

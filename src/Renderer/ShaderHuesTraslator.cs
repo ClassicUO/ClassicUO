@@ -83,13 +83,5 @@ namespace ClassicUO.Renderer
             hueVector.Y = type;
             hueVector.Z = alpha;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, byte type)
-        {
-            hueVector.X = hue;
-            hueVector.Y = type;
-            hueVector.Z = 0;
-        }
     }
 }

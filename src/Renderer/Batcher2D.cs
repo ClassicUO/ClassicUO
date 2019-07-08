@@ -330,19 +330,21 @@ namespace ClassicUO.Renderer
             float ww = w / 2f;
             float hh = h / 2f;
 
-            Vector3 center = new Vector3
-            {
-                X = x - (destX - 44 + ww),
-                Y = y - (destY + hh)
-            };
 
-            float sinx = (float) Math.Sin(angle) * ww;
-            float cosx = (float) Math.Cos(angle) * ww;
-            float siny = (float) Math.Sin(angle) * hh;
-            float cosy = (float) Math.Cos(angle) * hh;
+            float startX = x - (destX - 44 + ww);
+            float startY = y - (destY + hh);
+
+            float sin = (float) Math.Sin(angle);
+            float cos = (float) Math.Cos(angle);
+
+            float sinx = sin * ww;
+            float cosx = cos * ww;
+            float siny = sin * hh;
+            float cosy = cos * hh;
 
 
-            vertex0.Position = center;
+            vertex0.Position.X = startX;
+            vertex0.Position.Y = startY;
             vertex0.Position.X += cosx - -siny;
             vertex0.Position.Y -= sinx + -cosy;
             vertex0.Normal.X = 0;
@@ -352,7 +354,8 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.Y = 0;
             vertex0.TextureCoordinate.Z = 0;
 
-            vertex1.Position = center;
+            vertex1.Position.X = startX;
+            vertex1.Position.Y = startY;
             vertex1.Position.X += cosx - siny;
             vertex1.Position.Y += -sinx + -cosy;
             vertex1.Normal.X = 0;
@@ -362,7 +365,8 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.Y = 1;
             vertex1.TextureCoordinate.Z = 0;
 
-            vertex2.Position = center;
+            vertex2.Position.X = startX;
+            vertex2.Position.Y = startY;
             vertex2.Position.X += -cosx - -siny;
             vertex2.Position.Y += sinx + cosy;
             vertex2.Normal.X = 0;
@@ -372,7 +376,8 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.Y = 0;
             vertex2.TextureCoordinate.Z = 0;
 
-            vertex3.Position = center;
+            vertex3.Position.X = startX;
+            vertex3.Position.Y = startY;
             vertex3.Position.X += -cosx - siny;
             vertex3.Position.Y += sinx + -cosy;
             vertex3.Normal.X = 0;
