@@ -71,10 +71,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
             }
         }
 
