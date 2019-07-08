@@ -90,8 +90,15 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
-                    Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
-                    Dispose();
+                    var offset = Mouse.LDroppedOffset;
+
+                    if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+                    {
+                        Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        Dispose();
+                    }
+                   
                 }
             }
         }
