@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive;
+        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
             _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
-
+            _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
 
             fpsItem = new ScrollAreaItem();
 
@@ -1182,6 +1182,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
+                    _sallosEasyGrab.IsChecked = false;
 
                     break;
 
@@ -1391,6 +1392,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
             Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
+            Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
 
 
             // sounds

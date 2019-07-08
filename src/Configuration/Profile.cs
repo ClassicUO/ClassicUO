@@ -261,6 +261,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool OverrideAllFonts { get; set; }
         [JsonProperty] public bool OverrideAllFontsIsUnicode { get; set; } = true;
 
+        [JsonProperty] public bool SallosEasyGrab { get; set; }
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
