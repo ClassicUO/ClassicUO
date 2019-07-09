@@ -2,6 +2,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -46,6 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
+            NiceButton setLootBag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
+            Add(setLootBag);
 
             _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
             _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
@@ -91,6 +94,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ChangePage(_currentPage);
+            }
+            else if (buttonID == 2)
+            {
+                GameActions.Print("Target the container to Grab items into.");
+                TargetManager.SetTargeting(CursorTarget.SetGrabBag, Serial.INVALID, TargetType.Neutral);
             }
             else
                 base.OnButtonClick(buttonID);
