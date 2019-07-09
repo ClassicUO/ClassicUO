@@ -330,7 +330,10 @@ namespace ClassicUO.Game.UI.Controls
                 if (backpackGump == null)
                     GameActions.DoubleClick(backpack);
                 else
+                {
+                    backpackGump.SetInScreen();
                     backpackGump.BringOnTop();
+                }
             }
         }
     }
