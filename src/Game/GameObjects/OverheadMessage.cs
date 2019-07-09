@@ -53,9 +53,9 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsEmpty => _messages.Count == 0;
 
-        private static float CalculateTimeToLive(RenderedText rtext)
+        private static long CalculateTimeToLive(RenderedText rtext)
         {
-            float timeToLive;
+            long timeToLive;
 
             if (Engine.Profile.Current.ScaleSpeechDelay)
             {
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
                 if (delay < 10)
                     delay = 10;
 
-                timeToLive = 4000 * rtext.LinesCount * delay / 100.0f;
+                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
             }
             else
             {
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Update()
         {
-            if (Parent == null)
+            if (Parent == null || Parent.IsDestroyed)
                 Destroy();
 
             if (IsDestroyed)
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var c = _messages[i];
 
-                float delta = c.Time - Engine.Ticks;
+                long delta = c.Time - Engine.Ticks;
 
                 if (delta <= 0)
                 {
@@ -404,6 +404,14 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return false;
+        }
+
+        public void Clear()
+        {
+            foreach (var item in _messages)
+                item.RenderedText.Destroy();
+
+            _messages.Clear();
         }
 
         public void Destroy()
@@ -622,7 +630,7 @@ namespace ClassicUO.Game.GameObjects
 
         public OverheadMessage Parent;
         public RenderedText RenderedText;
-        public float Time, SecondTime;
+        public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
     }

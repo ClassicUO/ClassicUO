@@ -63,7 +63,10 @@ namespace ClassicUO.Game.Managers
                 if (m == null || m.IsDestroyed || m.IsEmpty || m.Parent == null || m.Parent.IsDestroyed)
                 {
                     _messages.RemoveAt(i--);
+                    continue;
                 }
+
+                m.Update();
             }
 
             UpdateDamageOverhead(totalMS, frameMS);

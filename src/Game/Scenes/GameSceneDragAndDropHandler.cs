@@ -100,7 +100,10 @@ namespace ClassicUO.Game.Scenes
                 entity.Items.ProcessDelta();
             }
             else
+            {
+                item.OverheadMessageContainer?.Clear();
                 item.RemoveFromTile();
+            }
 
             World.Items.Remove(item);
             World.Items.ProcessDelta();
