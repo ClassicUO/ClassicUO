@@ -532,33 +532,35 @@ namespace ClassicUO.Game.GameObjects
                             if (IsReplacedObjectAnimation(0, v13))
                                 originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-
-                            switch (v13)
+                            if (v13 > 12)
                             {
-                                case 23:
-                                    v13 = 0;
+                                switch (v13)
+                                {
+                                    case 23:
+                                        v13 = 0;
 
-                                    break;
+                                        break;
 
-                                case 24:
-                                    v13 = 1;
+                                    case 24:
+                                        v13 = 1;
 
-                                    break;
+                                        break;
 
-                                case 26:
-                                    v13 = 9;
+                                    case 26:
+                                        v13 = 9;
 
-                                    break;
+                                        break;
 
-                                case 28:
-                                    v13 = 10;
+                                    case 28:
+                                        v13 = 10;
 
-                                    break;
+                                        break;
 
-                                default:
-                                    v13 = 2;
+                                    default:
+                                        v13 = 2;
 
-                                    break;
+                                        break;
+                                }
                             }
 
                             //if (v13 > 12)
