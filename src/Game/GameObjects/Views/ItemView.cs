@@ -241,6 +241,8 @@ namespace ClassicUO.Game.GameObjects
 
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
+            if (direction == null)
+                return;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
