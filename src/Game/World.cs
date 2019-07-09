@@ -232,7 +232,7 @@ namespace ClassicUO.Game
             if (item == null /*|| item.IsDestroyed*/)
             {
                 //Items.Remove(serial);
-                item = new Item(serial);
+                item = Item.Create(serial);
             }
 
             return item;

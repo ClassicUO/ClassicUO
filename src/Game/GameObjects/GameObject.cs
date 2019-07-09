@@ -258,6 +258,12 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
+            Tile?.RemoveGameObject(this);
+            Tile = null;
+
+            OverheadMessageContainer?.Destroy();
+            OverheadMessageContainer = null;
+
             IsDestroyed = true;
             PriorityZ = 0;
             IsPositionChanged = false;
@@ -269,14 +275,12 @@ namespace ClassicUO.Game.GameObjects
             RealScreenPosition = Point.Zero;
             IsFlipped = false;
             Rotation = 0;
+            Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
             DrawTransparent = false;
-            Tile?.RemoveGameObject(this);
-            Tile = null;
-
-            OverheadMessageContainer?.Destroy();
+           
 
             Texture = null;
         }

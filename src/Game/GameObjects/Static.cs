@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
@@ -36,6 +37,8 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Static : GameObject
     {
         private StaticTiles? _itemData;
+
+        private static readonly Queue<Static> _pool = new Queue<Static>();
 
         public Static(Graphic graphic, Hue hue, int index)
         {
@@ -55,11 +58,41 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
         }
 
-        public int Index { get; }
+        public static Static Create(Graphic graphic, Hue hue, int index)
+        {
+            if (_pool.Count != 0)
+            {
+                var s = _pool.Dequeue();
+                s.Graphic = s.OriginalGraphic = graphic;
+                s.Hue = hue;
+                s.Index = index;
+                s.IsDestroyed = false;
+                s._itemData = null;
+                s.AlphaHue = 0;
+                s._oldGraphic = 0;
+                s.CharacterIsBehindFoliage = false;
+                s.UpdateGraphicBySeason();
+
+                if (s.ItemData.Height > 5)
+                    s._canBeTransparent = 1;
+                else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
+                    s._canBeTransparent = 1;
+                else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
+                    s._canBeTransparent = 1;
+                else
+                    s._canBeTransparent = 0;
+
+                return s;
+            }
+
+            return new Static(graphic, hue, index);
+        }
+
+        public int Index { get; private set; }
 
         public string Name => ItemData.Name;
 
-        public Graphic OriginalGraphic { get; }
+        public Graphic OriginalGraphic { get; private set; }
 
         public StaticTiles ItemData
         {
@@ -90,6 +123,14 @@ namespace ClassicUO.Game.GameObjects
             Graphic = Season.GetSeasonGraphic(World.Season, OriginalGraphic);
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+            base.Destroy();
+            _pool.Enqueue(this);
         }
     }
 }

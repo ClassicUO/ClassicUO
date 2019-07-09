@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
@@ -35,7 +36,9 @@ namespace ClassicUO.Game.GameObjects
     {
         private StaticTiles? _itemData;
 
-        private readonly ushort _originalGraphic;
+        private ushort _originalGraphic;
+
+        private static readonly Queue<Multi> _pool = new Queue<Multi>();
 
         public Multi(Graphic graphic)
         {
@@ -52,6 +55,38 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 1;
             else
                 _canBeTransparent = 0;
+        }
+
+        public static Multi Create(Graphic graphic)
+        {
+            if (_pool.Count != 0)
+            {
+                var m = _pool.Dequeue();
+
+                m.Graphic = m._originalGraphic = graphic;
+                m.IsDestroyed = false;
+                m._itemData = null;
+                m.UpdateGraphicBySeason();
+                m._isFoliage = m.ItemData.IsFoliage;
+                m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
+                m.AlphaHue = 0;
+
+                if (m.ItemData.Height > 5)
+                    m._canBeTransparent = 1;
+                else if (m.ItemData.IsRoof || m.ItemData.IsSurface && m.ItemData.IsBackground || m.ItemData.IsWall)
+                    m._canBeTransparent = 1;
+                else if (m.ItemData.Height == 5 && m.ItemData.IsSurface && !m.ItemData.IsBackground)
+                    m._canBeTransparent = 1;
+                else
+                    m._canBeTransparent = 0;
+
+                m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
+                m.CharacterIsBehindFoliage = false;
+
+                return m;
+            }
+
+            return new Multi(graphic);
         }
 
         public string Name => ItemData.Name;
@@ -75,6 +110,14 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+            base.Destroy();
+            _pool.Enqueue(this);
         }
     }
 }
