@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Managers;
@@ -34,6 +35,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
+        private static readonly Queue<Land> _pool = new Queue<Land>();
+
         public Land(Graphic graphic)
         {
             Graphic = graphic;
@@ -42,6 +45,34 @@ namespace ClassicUO.Game.GameObjects
             AllowedToDraw = Graphic > 2;
 
             AlphaHue = 255;
+        }
+
+        public static Land Create(Graphic graphic)
+        {
+            if (_pool.Count != 0)
+            {
+                var l = _pool.Dequeue();
+                l.Graphic = graphic;
+                l.IsDestroyed = false;
+                l._tileData = null;
+                l.AlphaHue = 255;
+                l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
+                l.AllowedToDraw = l.Graphic > 2;
+                l.Normals = null;
+                l.Rectangle = Rectangle.Empty;
+                l.MinZ = l.AverageZ = 0;
+                return l;
+            }
+            return new Land(graphic);
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+
+            base.Destroy();
+            _pool.Enqueue(this);
         }
 
         private LandTiles? _tileData;

@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile t = new Tile((ushort)(i + x), (ushort)(j + y));
+                    Tile t = Tile.Create((ushort)(i + x), (ushort)(j + y));
                     Tiles[i, j] = t;
                 }
             }
@@ -53,6 +54,32 @@ namespace ClassicUO.Game.Map
             LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
+        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
+        public static Chunk Create(ushort x, ushort y)
+        {
+            if (_pool.Count != 0)
+            {
+                var c = _pool.Dequeue();
+                c.X = x;
+                c.Y = y;
+                c.LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+
+                x *= 8;
+                y *= 8;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        var t = Tile.Create((ushort) (i + x), (ushort) (j + y));
+                        c.Tiles[i, j] = t;
+                    }
+                }
+
+                return c;
+            }
+            return new Chunk(x, y);
+        }
 
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
@@ -83,12 +110,15 @@ namespace ClassicUO.Game.Map
                         sbyte z = cells[pos].Z;
 
 
-                        Land land = new Land(tileID)
-                        {
-                            Graphic = tileID,
-                            AverageZ = z,
-                            MinZ = z
-                        };
+                        //Land land = new Land(tileID)
+                        //{
+                        //    AverageZ = z,
+                        //    MinZ = z
+                        //};
+
+                        Land land = Land.Create(tileID);
+                        land.AverageZ = z;
+                        land.MinZ = z;
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
@@ -293,11 +323,13 @@ namespace ClassicUO.Game.Map
                             obj.Destroy();
                     }
 
+                    Tiles[i, j].Destroy();
                     Tiles[i, j] = null;
                 }
             }
 
-            Tiles = null;
+            _pool.Enqueue(this);
+            //Tiles = null;
         }
 
         public bool HasNoExternalData()

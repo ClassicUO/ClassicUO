@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool IsDestroyed { get; private set; }
+        public bool IsDestroyed { get; protected set; }
 
         public int Distance
         {
@@ -259,7 +259,20 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             IsDestroyed = true;
-
+            PriorityZ = 0;
+            IsPositionChanged = false;
+            Hue = 0;
+            AnimIndex = 0;
+            Offset = Vector3.Zero;
+            CurrentRenderIndex = 0;
+            UseInRender = 0;
+            RealScreenPosition = Point.Zero;
+            IsFlipped = false;
+            Rotation = 0;
+            UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
+            Bounds = Rectangle.Empty;
+            FrameInfo = Rectangle.Empty;
+            DrawTransparent = false;
             Tile?.RemoveGameObject(this);
             Tile = null;
 

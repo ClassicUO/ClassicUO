@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chunk = new Chunk((ushort) cellX, (ushort) cellY);
+                    chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                     chunk.Load(Index);
                 }
                 else
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Map
                             return;
 
                         _usedIndices.Add(cellindex);
-                        chunk = new Chunk((ushort) i, (ushort) j);
+                        chunk = Chunk.Create((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }
 
