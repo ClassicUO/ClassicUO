@@ -273,6 +273,7 @@ namespace ClassicUO.Game.GameObjects
             CurrentRenderIndex = 0;
             UseInRender = 0;
             RealScreenPosition = Point.Zero;
+            _position = Position.INVALID;
             IsFlipped = false;
             Rotation = 0;
             Graphic = 0;
