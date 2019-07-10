@@ -256,7 +256,7 @@ namespace ClassicUO.Game.GameObjects
                     _messages.RemoveAt(i--);
                 }
                 else if (delta < 250)
-                    c.Alpha = 1f - delta / 250;
+                    c.Alpha = 1f - delta / 250f;
                 else
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
@@ -548,7 +548,7 @@ namespace ClassicUO.Game.GameObjects
                             offY = -22;
                         else if (it.ItemData.IsAnimated)
                         {
-                            Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
+                            ArtTexture texture = FileManager.Art.GetTexture(it.Graphic);
 
                             if (texture != null)
                                 yValue = texture.Height >> 1;
