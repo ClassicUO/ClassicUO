@@ -45,8 +45,6 @@ namespace ClassicUO.Game.GameObjects
             _messages = new Deque<MessageInfo>();
         }
 
-        //public OverheadMessage Left { get; set; }
-        //public OverheadMessage Right { get; set; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
