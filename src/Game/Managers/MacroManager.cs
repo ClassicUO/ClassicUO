@@ -1355,7 +1355,7 @@ namespace ClassicUO.Game.Managers
         MageSpellbook,
         Chat,
         Backpack,
-        Owerview,
+        Overview,
         WorldMap,
         Mail,
         PartyManifest,
