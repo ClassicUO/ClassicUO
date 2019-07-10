@@ -402,7 +402,7 @@ namespace ClassicUO.Game.Managers
 
                                     break;
 
-                                case MacroSubType.Owerview:
+                                case MacroSubType.Overview:
                                     MiniMapGump miniMapGump = Engine.UI.GetGump<MiniMapGump>();
 
                                     if (miniMapGump == null)
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.Managers
 
                                     break;
 
-                                case MacroSubType.Owerview:
+                                case MacroSubType.Overview:
 
                                     if (macro.Code == MacroType.Close)
                                         Engine.UI.GetGump<MiniMapGump>()?.Dispose();
