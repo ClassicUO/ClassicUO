@@ -156,7 +156,7 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void TargetGameObject(IGameEntity selectedEntity)
+        public static void TargetGameObject(BaseGameObject selectedEntity)
         {
             if (selectedEntity == null || !IsTargeting)
                 return;

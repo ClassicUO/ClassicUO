@@ -50,7 +50,7 @@ namespace ClassicUO.Renderer
             GetHueVector(ref hueVector, hue, false, 0);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false)
         {
             byte type;

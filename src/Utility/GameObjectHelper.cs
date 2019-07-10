@@ -9,7 +9,7 @@ namespace ClassicUO.Utility
 {
     internal static class GameObjectHelper
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
         {
             switch (obj)
@@ -41,7 +41,7 @@ namespace ClassicUO.Utility
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsNoDrawable(ushort g)
         {
             switch (g)

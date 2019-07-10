@@ -34,13 +34,13 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal interface IGameEntity
+    internal abstract class BaseGameObject
     {
         //bool IsSelected { get; set; }
     }
 
 
-    internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
+    internal abstract partial class GameObject : BaseGameObject, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
@@ -56,6 +56,7 @@ namespace ClassicUO.Game.GameObjects
         public Position Position
         {
             get => _position;
+            [MethodImpl(256)]
             set
             {
                 if (_position != value)
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (World.Player == null)
@@ -164,6 +165,7 @@ namespace ClassicUO.Game.GameObjects
             OverheadMessageContainer?.Update();
         }
 
+        [MethodImpl(256)]
         public void AddToTile(int x, int y)
         {
             if (World.Map != null)
@@ -179,11 +181,13 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        [MethodImpl(256)]
         public void AddToTile()
         {
             AddToTile(X, Y);
         }
 
+        [MethodImpl(256)]
         public void AddToTile(Tile tile)
         {
             if (World.Map != null)
@@ -199,6 +203,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        [MethodImpl(256)]
         public void RemoveFromTile()
         {
             if (World.Map != null && Tile != null)
@@ -213,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void UpdateRealScreenPosition(Point offset)
         {
             RealScreenPosition.X = _screenPosition.X - offset.X - 22;
@@ -273,6 +278,7 @@ namespace ClassicUO.Game.GameObjects
             CurrentRenderIndex = 0;
             UseInRender = 0;
             RealScreenPosition = Point.Zero;
+            _screenPosition = Point.Zero;
             _position = Position.INVALID;
             IsFlipped = false;
             Rotation = 0;

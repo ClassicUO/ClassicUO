@@ -1730,19 +1730,19 @@ namespace ClassicUO.Renderer
         public GraphicsDevice GraphicsDevice { get; }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void Begin()
         {
             Begin(null, Matrix.Identity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void Begin(Effect effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void Begin(Effect customEffect, Matrix projection)
         {
             EnsureNotStarted();
@@ -1756,7 +1756,7 @@ namespace ClassicUO.Renderer
             _customEffect = customEffect;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void End()
         {
             EnsureStarted();
@@ -1765,13 +1765,13 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         protected virtual bool CheckInScreen(int index)
         {
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         protected virtual void EnsureSize()
         {
             EnsureStarted();
@@ -1780,7 +1780,7 @@ namespace ClassicUO.Renderer
                 Flush();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         protected bool PushSprite(Texture2D texture)
         {
             EnsureSize();
@@ -1857,14 +1857,14 @@ namespace ClassicUO.Renderer
             NumSprites = 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
@@ -1877,7 +1877,7 @@ namespace ClassicUO.Renderer
             _useScissor = enable;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void SetBlendState(BlendState blend, bool noflush = false)
         {
             if (!noflush)
@@ -1886,7 +1886,7 @@ namespace ClassicUO.Renderer
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void SetStencil(DepthStencilState stencil, bool noflush = false)
         {
             if (!noflush)

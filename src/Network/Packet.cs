@@ -45,14 +45,14 @@ namespace ClassicUO.Network
 
         protected override byte this[int index]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
 
                 return _data[index];
             }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             set
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
@@ -73,19 +73,19 @@ namespace ClassicUO.Network
             return ref _data;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void MoveToData()
         {
             Seek(IsDynamic ? 3 : 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         protected override bool EnsureSize(int length)
         {
             return length < 0 || Position + length > Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public byte ReadByte()
         {
             if (EnsureSize(1))

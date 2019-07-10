@@ -622,7 +622,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    internal class MessageInfo : IGameEntity
+    internal class MessageInfo : BaseGameObject
     {
         public float Alpha;
         public ushort Hue;

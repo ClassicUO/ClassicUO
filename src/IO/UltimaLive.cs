@@ -342,7 +342,7 @@ namespace ClassicUO.IO
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private static void OnUpdateTerrainPacket(Packet p)
         {
             int block = (int) p.ReadUInt();

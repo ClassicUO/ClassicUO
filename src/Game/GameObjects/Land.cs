@@ -83,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
         public LandTiles TileData
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (!_tileData.HasValue)
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             return (result + GetDirectionZ(direction >> 1)) >> 1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private int GetDirectionZ(int direction)
         {
             switch (direction)

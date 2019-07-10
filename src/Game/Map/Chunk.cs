@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Map
         public long LastAccessTime { get; set; }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public unsafe void Load(int map)
         {
             ref readonly IndexMap im = ref GetIndex(map);
@@ -176,7 +176,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public unsafe void LoadStatics(int map)
         {
             ref readonly IndexMap im = ref GetIndex(map);
@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public unsafe void LoadLand(int map)
         {
             ref readonly IndexMap im = ref GetIndex(map);
