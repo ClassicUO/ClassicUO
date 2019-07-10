@@ -85,7 +85,7 @@ namespace ClassicUO.Game.GameObjects
                 i.MultiDistanceBonus = 0;
                 i.BookType = SpellBookType.Unknown;
                 i.Flags = 0;
-                i.WantUpdateMulti = false;
+                i.WantUpdateMulti = true;
                 i._force = false;
                 i.MultiInfo = null;
 
