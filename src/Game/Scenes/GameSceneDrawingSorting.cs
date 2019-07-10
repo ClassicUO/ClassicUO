@@ -195,11 +195,13 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-                bool ismobile = false;
 
                 StaticTiles itemData = _emptyStaticTiles;
+
                 bool changinAlpha = false;
                 bool island = false;
+                bool iscorpse =false;
+                bool ismobile = false;
 
                 switch (obj)
                 {
@@ -212,6 +214,10 @@ namespace ClassicUO.Game.Scenes
                     case Land _:
                         island = true;
                         break;
+
+                    case Item it when it.IsCorpse:
+                        iscorpse = true;
+                        goto default;
 
                     default:
 
@@ -255,12 +261,32 @@ namespace ClassicUO.Game.Scenes
                         break;
                 }
 
+
+                if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
+                {
+                    obj.UseObjectHandles = (ismobile ||
+                                            iscorpse ||
+                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
+                                           !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
+                    _objectHandlesCount++;
+                }
+                else if (obj.ClosedObjectHandles)
+                {
+                    obj.ClosedObjectHandles = false;
+                    obj.ObjectHandlesOpened = false;
+                }
+                else if (obj.UseObjectHandles)
+                {
+                    obj.ObjectHandlesOpened = false;
+                    obj.UseObjectHandles = false;
+                }
+
+
                 if (maxObjectZ > maxZ)
                     break;
 
                 obj.CurrentRenderIndex = _renderIndex;
 
-                bool iscorpse = !ismobile && !island && obj is Item item && item.IsCorpse;
 
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
@@ -361,24 +387,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
 
-                if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
-                {
-                    obj.UseObjectHandles = (ismobile ||
-                                            iscorpse ||
-                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
-                                           !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
-                    _objectHandlesCount++;
-                }
-                else if (obj.ClosedObjectHandles)
-                {
-                    obj.ClosedObjectHandles = false;
-                    obj.ObjectHandlesOpened = false;
-                }
-                else if (obj.UseObjectHandles)
-                {
-                    obj.ObjectHandlesOpened = false;
-                    obj.UseObjectHandles = false;
-                }
+               
 
                 _renderList[_renderListCount] = obj;
                 obj.UseInRender = (byte) _renderIndex;
