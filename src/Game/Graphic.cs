@@ -104,7 +104,7 @@ namespace ClassicUO.Game
                 return (ushort) short.Parse(str);
 
 
-            return ushort.Parse(str);
+            return (ushort) uint.Parse(str); // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
         }
     }
 }
