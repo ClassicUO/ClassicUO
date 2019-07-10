@@ -105,6 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab;
@@ -245,7 +246,10 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _holdShiftForContext = CreateCheckBox(rightArea, "Hold Shift for Context Menus", Engine.Profile.Current.HoldShiftForContext, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
-            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
+            _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, "Poisoned Color", 40, 5);
+            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
+            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.InvulnerableHue, "Invulnerable Color", 40, 0);
+            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 5);
             _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
@@ -1168,6 +1172,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
+                    _poisonColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _paralyzedColorPickerBox.SetColor(0x014C, FileManager.Hues.GetPolygoneColor(12, 0x014C));
+                    _invulnerableColorPickerBox.SetColor(0x0030, FileManager.Hues.GetPolygoneColor(12, 0x0030));
                     _drawRoofs.IsChecked = true;
                     _enableCaveBorder.IsChecked = false;
                     _treeToStumps.IsChecked = false;
@@ -1328,6 +1335,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
+            Engine.Profile.Current.PoisonHue = _poisonColorPickerBox.Hue;
+            Engine.Profile.Current.ParalyzedHue = _paralyzedColorPickerBox.Hue;
+            Engine.Profile.Current.InvulnerableHue = _invulnerableColorPickerBox.Hue;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
