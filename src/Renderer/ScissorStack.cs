@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -40,11 +43,13 @@ namespace ClassicUO.Renderer
 
                 if (maxX - minX < 1)
                     return false;
+
                 int minY = Math.Max(parent.Y, scissor.Y);
                 int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
 
                 if (maxY - minY < 1)
                     return false;
+
                 scissor.X = minX;
                 scissor.Y = minY;
                 scissor.Width = maxX - minX;
@@ -70,17 +75,17 @@ namespace ClassicUO.Renderer
             return scissors;
         }
 
-        public static Rectangle CalculateScissors(Matrix batchTransform, Rectangle scissors)
+        public static Rectangle CalculateScissors(Matrix batchTransform, int sx, int sy, int sw, int sh)
         {
-            Vector2 tmp = new Vector2(scissors.X, scissors.Y);
+            Vector2 tmp = new Vector2(sx, sy);
             tmp = Vector2.Transform(tmp, batchTransform);
 
             Rectangle newScissor = new Rectangle
             {
                 X = (int) tmp.X, Y = (int) tmp.Y
             };
-            tmp.X = scissors.X + scissors.Width;
-            tmp.Y = scissors.Y + scissors.Height;
+            tmp.X = sx + sw;
+            tmp.Y = sy + sh;
             tmp = Vector2.Transform(tmp, batchTransform);
             newScissor.Width = (int) tmp.X - newScissor.X;
             newScissor.Height = (int) tmp.Y - newScissor.Y;

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Data
@@ -45,8 +48,8 @@ namespace ClassicUO.Game.Data
             PopupMenuItem[] items = new PopupMenuItem[count];
 
             for (int i = 0; i < count; i++)
-            {             
-                Hue hue = 0xFFFF, replacedHue = 0;
+            {
+                Hue hue = 0xFFFF, replaced = 0;
                 int cliloc;
                 ushort index, flags;
 
@@ -69,13 +72,13 @@ namespace ClassicUO.Game.Data
                         p.Skip(2);
 
                     if ((flags & 0x20) != 0)
-                        replacedHue = (Hue) (p.ReadUShort() & 0x3FFF);
+                        replaced = (Hue) (p.ReadUShort() & 0x3FFF);
                 }
 
                 if ((flags & 0x01) != 0)
                     hue = 0x0386;
 
-                items[i] = new PopupMenuItem(cliloc, index, hue, replacedHue, flags);
+                items[i] = new PopupMenuItem(cliloc, index, hue, replaced, flags);
             }
 
             return new PopupMenuData(serial, items);

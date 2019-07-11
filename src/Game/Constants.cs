@@ -1,22 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
 
-using ClassicUO.Utility;
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 
 namespace ClassicUO.Game
 {
-    static class Constants
+    internal static class Constants
     {
+        [Flags]
+        public enum RULES : uint
+        {
+            NUMERIC = 0x00000001,
+            SYMBOL = 0x00000002,
+            LETTER = 0x00000004,
+            SPACE = 0x00000008,
+            UNUMERIC = 0x00000010 // unsigned
+        }
+
+        public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
+
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100;
         public const int TURN_DELAY_FAST = 45;
-        public const int WALKING_DELAY = 750;
+        public const int WALKING_DELAY = 150; // 750
         public const int PLAYER_WALKING_DELAY = 150;
         public const int DEFAULT_CHARACTER_HEIGHT = 16;
         public const int DEFAULT_BLOCK_HEIGHT = 16;
@@ -24,7 +53,7 @@ namespace ClassicUO.Game
         public const float TIME_FADEOUT_TEXT = 1000;
         public const float TIME_DISPLAY_SYSTEM_MESSAGE_TEXT = 10000;
 
-        public const int USED_LAYER_COUNT = 25;
+        public const int USED_LAYER_COUNT = 23;
 
         public const int CLEAR_TEXTURES_DELAY = 3000;
         public const int MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR = 20;
@@ -77,7 +106,7 @@ namespace ClassicUO.Game
 
         public const int DRAG_ITEMS_DISTANCE = 3;
         public const int MIN_GUMP_DRAG_DISTANCE = 0;
-        public const int MIN_PICKUP_DRAG_DISTANCE = 5;
+        public const int MIN_PICKUP_DRAG_DISTANCE_PIXELS = 5;
 
         public const int MIN_VIEW_RANGE = 5;
         public const int MAX_VIEW_RANGE = 24;
@@ -87,14 +116,6 @@ namespace ClassicUO.Game
 
         public const int DEATH_SCREEN_TIMER = 1500;
 
-        [Flags]
-        public enum RULES : uint
-        {
-            NUMERIC = 0x00000001,
-            SYMBOL = 0x00000002,
-            LETTER = 0x00000004,
-            SPACE = 0x00000008
-        }
-
+        public const float SOUND_DELTA = 1000f;
     }
 }

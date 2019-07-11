@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,33 +18,26 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
-using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
 
-using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IUpdateable
     {
-        private AudioManager _audio;
-
-        protected Scene()
-        {
-        }
-
-
-        public bool IsDisposed { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
         public bool IsLoaded { get; private set; }
 
@@ -51,22 +45,29 @@ namespace ClassicUO.Game.Scenes
 
         public CoroutineManager Coroutines { get; } = new CoroutineManager();
 
-        public AudioManager Audio => _audio;
+        public AudioManager Audio { get; private set; }
 
-        public virtual void Dispose()
+        public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            Audio?.Update();
+            Coroutines.Update();
+        }
+
+        public virtual void Destroy()
+        {
+            if (IsDestroyed)
                 return;
-            IsDisposed = true;
+
+            IsDestroyed = true;
             Unload();
         }
 
-      
+
         public virtual void Load()
         {
             if (this is GameScene || this is LoginScene)
             {
-                _audio = new AudioManager();
+                Audio = new AudioManager();
                 Coroutine.Start(this, CleaningResources(), "cleaning resources");
             }
 
@@ -75,29 +76,43 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Unload()
         {
-            _audio?.StopMusic();
+            Audio?.StopMusic();
             Coroutines.Clear();
         }
-
-        public virtual void Update(double totalMS, double frameMS)
-        {
-            _audio?.Update();
-            Coroutines.Update();            
-        }
-
-        public virtual void FixedUpdate(double totalMS, double frameMS)
-        {
-        }
-
-        public virtual bool Draw(Batcher2D batcher)
+        
+        public virtual bool Draw(UltimaBatcher2D batcher)
         {
             return true;
         }
 
+
+        internal virtual void OnLeftMouseUp() { }
+        internal virtual void OnLeftMouseDown() { }
+
+        internal virtual void OnRightMouseUp() { }
+        internal virtual void OnRightMouseDown() { }
+
+        internal virtual void OnMiddleMouseUp() { }
+        internal virtual void OnMiddleMouseDown() { }
+
+
+        internal virtual bool OnLeftMouseDoubleClick() => false;
+        internal virtual bool OnRightMouseDoubleClick() => false;
+        internal virtual bool OnMiddleMouseDoubleClick() => false;
+        internal virtual void OnMouseWheel(bool up) { }
+        internal virtual void OnMouseDragging() { }
+        internal virtual void OnTextInput(string text) { }
+        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
+        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
+
+
         private IEnumerable<IWaitCondition> CleaningResources()
         {
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
-            while (!IsDisposed)
+
+            yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
+
+            while (!IsDestroyed)
             {
                 FileManager.Art.CleaUnusedResources();
 
@@ -119,6 +134,7 @@ namespace ClassicUO.Game.Scenes
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }
+
             Log.Message(LogTypes.Trace, "Cleaning routine finished");
         }
     }

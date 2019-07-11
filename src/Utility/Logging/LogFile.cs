@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.IO;
 using System.Text;
@@ -31,7 +34,7 @@ namespace ClassicUO.Utility.Logging
 
         public LogFile(string directory, string file)
         {
-            logStream = new FileStream($"{directory}/{DateTime.Now:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, true);
+            logStream = new FileStream($"{directory}/{Engine.CurrDateTime:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, true);
         }
 
         public void Dispose()
@@ -44,6 +47,18 @@ namespace ClassicUO.Utility.Logging
             byte[] logBytes = Encoding.UTF8.GetBytes($"{logMessage}\n");
             await logStream.WriteAsync(logBytes, 0, logBytes.Length);
             await logStream.FlushAsync();
+        }
+
+        public void Write(string message)
+        {
+            byte[] logBytes = Encoding.UTF8.GetBytes($"{message}\n");
+            logStream.Write(logBytes, 0, logBytes.Length);
+            logStream.Flush();
+        }
+
+        public override string ToString()
+        {
+            return logStream.Name;
         }
     }
 }

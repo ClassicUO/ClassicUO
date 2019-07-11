@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -36,67 +42,66 @@ namespace ClassicUO.Game.GameObjects
     internal class PlayerMobile : Mobile
     {
         private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
-        private readonly Skill[] _sklls;
         private ushort _damageIncrease;
         private ushort _damageMax;
         private ushort _damageMin;
-        private ushort _defenseChanceInc;
+        private ushort _defenseChanceIncrease;
         private ushort _dexterity;
-        private ushort _dexterityInc;
+        private ushort _dexterityIncrease;
         private ushort _enhancePotions;
         private ushort _fasterCasting;
         private ushort _fasterCastRecovery;
         private byte _followers;
         private byte _followersMax;
         private uint _gold;
-        private ushort _hitChanceInc;
-        private ushort _hitPointsInc;
-        private ushort _hitPointsRegen;
+        private ushort _hitChanceIncrease;
+        private ushort _hitPointsIncrease;
+        private ushort _hitPointsRegeneration;
         private ushort _intelligence;
-        private ushort _intelligenceInc;
+        private ushort _intelligenceIncrease;
         private ushort _lowerManaCost;
         private ushort _lowerReagentCost;
         private ushort _luck;
-        private ushort _manaInc;
-        private ushort _manaRegen;
-        private ushort _maxColdcRes;
-        private ushort _maxDefChance;
-        private ushort _maxEnergRes;
-        private ushort _maxFireRes;
-        private ushort _maximumHitPointsInc;
-        private ushort _maximumManaInc;
-        private ushort _maximumStaminaInc;
-        private ushort _maxPhysicRes;
-        private ushort _maxPoisResUshort;
+        private ushort _manaIncrease;
+        private ushort _manaRegeneration;
+        private ushort _maxColdcResistence;
+        private ushort _maxDefenseChanceIncrease;
+        private ushort _maxEnergResistence;
+        private ushort _maxFireResistence;
+        private ushort _maxHitPointsIncrease;
+        private ushort _maxManaIncrease;
+        private ushort _maxStaminaIncrease;
+        private ushort _maxPhysicResistence;
+        private ushort _maxPoisResistenceUshort;
         private ushort _reflectPhysicalDamage;
-        private ushort _resistCold;
-        private ushort _resistEnergy;
-        private ushort _resistFire;
-        private ushort _resistPhysical;
-        private ushort _resistPoison;
-        private ushort _spellDamageInc;
-        private ushort _staminaInc;
-        private ushort _staminaRegen;
+        private ushort _coldResistance;
+        private ushort _energyResistance;
+        private ushort _fireResistance;
+        private ushort _physicalResistence;
+        private ushort _poisonResistance;
+        private ushort _spellDamageIncrease;
+        private ushort _staminaIncrease;
+        private ushort _staminaRegeneration;
         private ushort _statscap;
         private ushort _strength;
-        private ushort _strengthInc;
-        private ushort _swingSpeedInc;
+        private ushort _strengthIncrease;
+        private ushort _swingSpeedIncrease;
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-        
+
         public PlayerMobile(Serial serial) : base(serial)
         {
-            _sklls = new Skill[FileManager.Skills.SkillsCount];
+            Skills = new Skill[FileManager.Skills.SkillsCount];
 
-            for (int i = 0; i < _sklls.Length; i++)
+            for (int i = 0; i < Skills.Length; i++)
             {
                 SkillEntry skill = FileManager.Skills.GetSkill(i);
-                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
-            }                
+                Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
+            }
         }
 
-        public IReadOnlyList<Skill> Skills => _sklls;
+        public Skill[] Skills { get; }
 
         public override bool InWarMode { get; set; }
 
@@ -182,66 +187,66 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort ResistPhysical
+        public ushort PhysicalResistence
         {
-            get => _resistPhysical;
+            get => _physicalResistence;
             set
             {
-                if (_resistPhysical != value)
+                if (_physicalResistence != value)
                 {
-                    _resistPhysical = value;
+                    _physicalResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistFire
+        public ushort FireResistance
         {
-            get => _resistFire;
+            get => _fireResistance;
             set
             {
-                if (_resistFire != value)
+                if (_fireResistance != value)
                 {
-                    _resistFire = value;
+                    _fireResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistCold
+        public ushort ColdResistance
         {
-            get => _resistCold;
+            get => _coldResistance;
             set
             {
-                if (_resistCold != value)
+                if (_coldResistance != value)
                 {
-                    _resistCold = value;
+                    _coldResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistPoison
+        public ushort PoisonResistance
         {
-            get => _resistPoison;
+            get => _poisonResistance;
             set
             {
-                if (_resistPoison != value)
+                if (_poisonResistance != value)
                 {
-                    _resistPoison = value;
+                    _poisonResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ResistEnergy
+        public ushort EnergyResistance
         {
-            get => _resistEnergy;
+            get => _energyResistance;
             set
             {
-                if (_resistEnergy != value)
+                if (_energyResistance != value)
                 {
-                    _resistEnergy = value;
+                    _energyResistance = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -338,27 +343,27 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort HitChanceInc
+        public ushort HitChanceIncrease
         {
-            get => _hitChanceInc;
+            get => _hitChanceIncrease;
             set
             {
-                if (_hitChanceInc != value)
+                if (_hitChanceIncrease != value)
                 {
-                    _hitChanceInc = value;
+                    _hitChanceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort SwingSpeedInc
+        public ushort SwingSpeedIncrease
         {
-            get => _swingSpeedInc;
+            get => _swingSpeedIncrease;
             set
             {
-                if (_swingSpeedInc != value)
+                if (_swingSpeedIncrease != value)
                 {
-                    _swingSpeedInc = value;
+                    _swingSpeedIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -390,118 +395,118 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort HitPointsRegen
+        public ushort HitPointsRegeneration
         {
-            get => _hitPointsRegen;
+            get => _hitPointsRegeneration;
             set
             {
-                if (_hitPointsRegen != value)
+                if (_hitPointsRegeneration != value)
                 {
-                    _hitPointsRegen = value;
+                    _hitPointsRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort StaminaRegen
+        public ushort StaminaRegeneration
         {
-            get => _staminaRegen;
+            get => _staminaRegeneration;
             set
             {
-                if (_staminaRegen != value)
+                if (_staminaRegeneration != value)
                 {
-                    _staminaRegen = value;
+                    _staminaRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ManaRegen
+        public ushort ManaRegeneration
         {
-            get => _manaRegen;
+            get => _manaRegeneration;
             set
             {
-                if (_manaRegen != value)
+                if (_manaRegeneration != value)
                 {
-                    _manaRegen = value;
+                    _manaRegeneration = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxPhysicRes
+        public ushort MaxPhysicResistence
         {
-            get => _maxPhysicRes;
+            get => _maxPhysicResistence;
             set
             {
-                if (_maxPhysicRes != value)
+                if (_maxPhysicResistence != value)
                 {
-                    _maxPhysicRes = value;
+                    _maxPhysicResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxFireRes
+        public ushort MaxFireResistence
         {
-            get => _maxFireRes;
+            get => _maxFireResistence;
             set
             {
-                if (_maxFireRes != value)
+                if (_maxFireResistence != value)
                 {
-                    _maxFireRes = value;
+                    _maxFireResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxColdRes
+        public ushort MaxColdResistence
         {
-            get => _maxColdcRes;
+            get => _maxColdcResistence;
             set
             {
-                if (_maxColdcRes != value)
+                if (_maxColdcResistence != value)
                 {
-                    _maxColdcRes = value;
+                    _maxColdcResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxPoisonRes
+        public ushort MaxPoisonResistence
         {
-            get => _maxPoisResUshort;
+            get => _maxPoisResistenceUshort;
             set
             {
-                if (_maxPoisResUshort != value)
+                if (_maxPoisResistenceUshort != value)
                 {
-                    _maxPoisResUshort = value;
+                    _maxPoisResistenceUshort = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxEnergyRes
+        public ushort MaxEnergyResistence
         {
-            get => _maxEnergRes;
+            get => _maxEnergResistence;
             set
             {
-                if (_maxEnergRes != value)
+                if (_maxEnergResistence != value)
                 {
-                    _maxEnergRes = value;
+                    _maxEnergResistence = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaxDefChance
+        public ushort MaxDefenseChanceIncrease
         {
-            get => _maxDefChance;
+            get => _maxDefenseChanceIncrease;
             set
             {
-                if (_maxDefChance != value)
+                if (_maxDefenseChanceIncrease != value)
                 {
-                    _maxDefChance = value;
+                    _maxDefenseChanceIncrease = value;
                     _delta |= Delta.Attributes;
                 }
             }
@@ -533,27 +538,27 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort DefenseChanceInc
+        public ushort DefenseChanceIncrease
         {
-            get => _defenseChanceInc;
+            get => _defenseChanceIncrease;
             set
             {
-                if (_defenseChanceInc != value)
+                if (_defenseChanceIncrease != value)
                 {
-                    _defenseChanceInc = value;
+                    _defenseChanceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort SpellDamageInc
+        public ushort SpellDamageIncrease
         {
-            get => _spellDamageInc;
+            get => _spellDamageIncrease;
             set
             {
-                if (_spellDamageInc != value)
+                if (_spellDamageIncrease != value)
                 {
-                    _spellDamageInc = value;
+                    _spellDamageIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -598,118 +603,118 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort StrengthInc
+        public ushort StrengthIncrease
         {
-            get => _strengthInc;
+            get => _strengthIncrease;
             set
             {
-                if (_strengthInc != value)
+                if (_strengthIncrease != value)
                 {
-                    _strengthInc = value;
+                    _strengthIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort DexterityInc
+        public ushort DexterityIncrease
         {
-            get => _dexterityInc;
+            get => _dexterityIncrease;
             set
             {
-                if (_dexterityInc != value)
+                if (_dexterityIncrease != value)
                 {
-                    _dexterityInc = value;
+                    _dexterityIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort IntelligenceInc
+        public ushort IntelligenceIncrease
         {
-            get => _intelligenceInc;
+            get => _intelligenceIncrease;
             set
             {
-                if (_intelligenceInc != value)
+                if (_intelligenceIncrease != value)
                 {
-                    _intelligenceInc = value;
+                    _intelligenceIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort HitPointsInc
+        public ushort HitPointsIncrease
         {
-            get => _hitPointsInc;
+            get => _hitPointsIncrease;
             set
             {
-                if (_hitPointsInc != value)
+                if (_hitPointsIncrease != value)
                 {
-                    _hitPointsInc = value;
+                    _hitPointsIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort StaminaInc
+        public ushort StaminaIncrease
         {
-            get => _staminaInc;
+            get => _staminaIncrease;
             set
             {
-                if (_staminaInc != value)
+                if (_staminaIncrease != value)
                 {
-                    _staminaInc = value;
+                    _staminaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort ManaInc
+        public ushort ManaIncrease
         {
-            get => _manaInc;
+            get => _manaIncrease;
             set
             {
-                if (_manaInc != value)
+                if (_manaIncrease != value)
                 {
-                    _manaInc = value;
+                    _manaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumHitPointsInc
+        public ushort MaxHitPointsIncrease
         {
-            get => _maximumHitPointsInc;
+            get => _maxHitPointsIncrease;
             set
             {
-                if (_maximumHitPointsInc != value)
+                if (_maxHitPointsIncrease != value)
                 {
-                    _maximumHitPointsInc = value;
+                    _maxHitPointsIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumStaminaInc
+        public ushort MaxStaminaIncrease
         {
-            get => _maximumStaminaInc;
+            get => _maxStaminaIncrease;
             set
             {
-                if (_maximumStaminaInc != value)
+                if (_maxStaminaIncrease != value)
                 {
-                    _maximumStaminaInc = value;
+                    _maxStaminaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
         }
 
-        public ushort MaximumManaInc
+        public ushort MaxManaIncrease
         {
-            get => _maximumManaInc;
+            get => _maxManaIncrease;
             set
             {
-                if (_maximumManaInc != value)
+                if (_maxManaIncrease != value)
                 {
-                    _maximumManaInc = value;
+                    _maxManaIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }
@@ -742,7 +747,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item FindBandage()
         {
-            Item backpack = Equipment[(int)Layer.Backpack];
+            Item backpack = Equipment[(int) Layer.Backpack];
             Item item = null;
 
             if (backpack != null)
@@ -756,6 +761,12 @@ namespace ClassicUO.Game.GameObjects
             _buffIcons[graphic] = new BuffIcon(graphic, time, text);
         }
 
+
+        public bool IsBuffIconExists(Graphic graphic)
+        {
+            return _buffIcons.ContainsKey(graphic);
+        }
+
         public void RemoveBuff(Graphic graphic)
         {
             _buffIcons.Remove(graphic);
@@ -765,34 +776,37 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
         {
-			if (id < _sklls.Length)
-			{
-			    Skill skill = _sklls[id];
-			
-			    if (displayMessage && skill.ValueFixed != realValue)
-			    {
-			        var delta = (realValue - skill.ValueFixed);
-			        var direction = (delta < 0 ? "decreased" : "increased");
-			
-			        if (displayMessage)
-                        Chat.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, MessageFont.Normal, false);
-			    }
-			
-			    skill.ValueFixed = realValue;
-			    skill.BaseFixed = baseValue;
-			    skill.Lock = @lock;
-			    skill.CapFixed = cap;
-			    _delta |= Delta.Skills;
-			}
-		}
+            if (id < Skills.Length)
+            {
+                Skill skill = Skills[id];
+
+                if (displayMessage && skill.ValueFixed != realValue)
+                {
+                    var delta = realValue - skill.ValueFixed;
+                    var direction = delta < 0 ? "decreased" : "increased";
+
+                    GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, 3, false);
+                }
+
+                skill.ValueFixed = realValue;
+                skill.BaseFixed = baseValue;
+                skill.Lock = @lock;
+                skill.CapFixed = cap;
+                _delta |= Delta.Skills;
+
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
+            }
+        }
 
         public void UpdateSkillLock(int id, Lock @lock)
         {
-            if (id < _sklls.Length)
+            if (id < Skills.Length)
             {
-                Skill skill = _sklls[id];
+                Skill skill = Skills[id];
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
+
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -818,801 +832,948 @@ namespace ClassicUO.Game.GameObjects
             if (equippedGraphic != 0)
             {
                 ushort[] graphics = {equippedGraphic, 0};
-                ushort imageID = layerObject.ItemData.AnimID;
 
-                int count = 1;
-
-                ushort testGraphic = (ushort) (equippedGraphic - 1);
-
-                if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                if (layerObject != null)
                 {
-                    graphics[1] = testGraphic;
-                    count = 2;
-                }
-                else
-                {
-                    testGraphic = (ushort) ( equippedGraphic + 1 );
+                    ushort imageID = layerObject.ItemData.AnimID;
+
+                    int count = 1;
+
+                    ushort testGraphic = (ushort) (equippedGraphic - 1);
 
                     if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
                     }
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    Graphic g = graphics[i];
-
-                    switch (g)
+                    else
                     {
-                        case 0x0901: // Gargish Cyclone
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.InfusedThrow;
-
-                            goto done;
-                        case 0x0902: // Gargish Dagger
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x0905: // Glass Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0906: // serpentstone staff
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x090C: // Glass Sword
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0DF0:
-                        case 0x0DF1: // Black Staves
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x0DF2:
-                        case 0x0DF3:
-                        case 0x0DF4:
-                        case 0x0DF5: // Wands BookType A-D
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E81:
-                        case 0x0E82: // Shepherd's Crooks
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E85:
-                        case 0x0E86: // Pickaxes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0E87:
-                        case 0x0E88: // Pitchforks
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0E89:
-                        case 0x0E8A: // Quarter Staves
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0EC2:
-                        case 0x0EC3: // Cleavers
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x0EC4:
-                        case 0x0EC5: // Skinning Knives
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F43:
-                        case 0x0F44: // Hatchets
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F45:
-                        case 0x0F46: // Double Axes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0F47:
-                        case 0x0F48: // Battle Axes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0F49:
-                        case 0x0F4A: // Axes
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0F4B:
-                        case 0x0F4C:
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.WhirlwindAttack;
-
-                            goto done;
-                        case 0x0F4D:
-                        case 0x0F4E: // Bardiches
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x0F4F:
-                        case 0x0F50: // Crossbows
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x0F51:
-                        case 0x0F52: // Daggers
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x0F5C:
-                        case 0x0F5D: // Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x0F5E:
-                        case 0x0F5F: // Broadswords
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x0F60:
-                        case 0x0F61: // Longswords
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x0F62:
-                        case 0x0F63: // Spears
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x0FB5:
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x13AF:
-                        case 0x13B0: // War Axes
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x13B1:
-                        case 0x13B2: // Bows
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x13B3:
-                        case 0x13B4: // Clubs
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x13B7:
-                        case 0x13B8: // Scimitars
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x13B9:
-                        case 0x13BA: // Viking Swords
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x13FD: // Heavy Crossbows
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x13E3: // Smith's Hammers
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x13F6: // Butcher Knives
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x13F8: // Gnarled Staves
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x13FB: // Large Battle Axes
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x13FF: // Katana
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x1401: // Kryss
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x1402:
-                        case 0x1403: // Short Spears
-                            Abilities[0] = Ability.ShadowStrike;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x1404:
-                        case 0x1405: // War Forks
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x1406:
-                        case 0x1407: // War Maces
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x1438:
-                        case 0x1439: // War Hammers
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x143A:
-                        case 0x143B: // Mauls
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x143C:
-                        case 0x143D: // Hammer Picks
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x143E:
-                        case 0x143F: // Halberds
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x1440:
-                        case 0x1441: // Cutlasses
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x1442:
-                        case 0x1443: // Two Handed Axes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x26BA: // Scythes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x26BB: // Bone Harvesters
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26BC: // Scepters
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26BD: // Bladed Staves
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x26BE: // Pikes
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26BF: // Double Bladed Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26C0: // Lances
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x26C1: // Crescent Blades
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C2: // Composite Bows
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26C3: // Repeating Crossbows
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26C4: // also Scythes
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x26C5: // also Bone Harvesters
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C6: // also Scepters
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26C7: // also Bladed Staves
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x26C8: // also Pikes
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26C9: // also Double Bladed Staff
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x26CA: // also Lances
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x26CB: // also Crescent Blades
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x26CC: // also Composite Bows
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x26CD: // also Repeating Crossbows
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.MovingShot;
-
-                            goto done;
-                        case 0x27A2: // No-Dachi
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.RidingSwipe;
-
-                            goto done;
-                        case 0x27A3: // Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x27A4: // Wakizashi
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27A5: // Yumi
-                            Abilities[0] = Ability.ArmorPierce;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27A6: // Tetsubo
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x27A7: // Lajatang
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.FrenziedWhirlwind;
-
-                            goto done;
-                        case 0x27A8: // Bokuto
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.NerveStrike;
-
-                            goto done;
-                        case 0x27A9: // Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27AA: // Fukya
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x27AB: // Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x27AD: // Kama
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.DefenseMastery;
-
-                            goto done;
-                        case 0x27AE: // Nunchaku
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.Feint;
-
-                            goto done;
-                        case 0x27AF: // Sai
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ArmorPierce;
-
-                            goto done;
-                        case 0x27ED: // also No-Dachi
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.RidingSwipe;
-
-                            goto done;
-                        case 0x27EE: // also Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x27EF: // also Wakizashi
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F0: // also Yumi
-                            Abilities[0] = Ability.ArmorPierce;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F1: // also Tetsubo
-                            Abilities[0] = Ability.FrenziedWhirlwind;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x27F2: // also Lajatang
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.FrenziedWhirlwind;
-
-                            goto done;
-                        case 0x27F3: // also Bokuto
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.NerveStrike;
-
-                            goto done;
-                        case 0x27F4: // also Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
-                        case 0x27F5: // also Fukya
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x27F6: // also Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x27F8: // Kama
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.DefenseMastery;
-
-                            goto done;
-                        case 0x27F9: // Nunchaku
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.Feint;
-
-                            goto done;
-                        case 0x27FA: // Sai
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ArmorPierce;
-
-                            goto done;
-                        case 0x2D1E: // Elven Composite Longbows
-                            Abilities[0] = Ability.ForceArrow;
-                            Abilities[1] = Ability.SerpentArrow;
-
-                            goto done;
-                        case 0x2D1F: // Magical Shortbows
-                            Abilities[0] = Ability.LightningArrow;
-                            Abilities[1] = Ability.PsychicAttack;
-
-                            goto done;
-                        case 0x2D20: // Elven Spellblades
-                            Abilities[0] = Ability.PsychicAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x2D21: // Assassin Spikes
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x2D22: // Leafblades
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x2D23: // War Cleavers
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D24: // Diamond Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D25: // Wild Staves
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ForceOfNature;
-
-                            goto done;
-                        case 0x2D26: // Rune Blades
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D27: // Radiant Scimitars
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D28: // Ornate Axes
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D29: // Elven Machetes
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D2A: // also Elven Composite Longbows
-                            Abilities[0] = Ability.ForceArrow;
-                            Abilities[1] = Ability.SerpentArrow;
-
-                            goto done;
-                        case 0x2D2B: // also Magical Shortbows
-                            Abilities[0] = Ability.LightningArrow;
-                            Abilities[1] = Ability.PsychicAttack;
-
-                            goto done;
-                        case 0x2D2C: // also Elven Spellblades
-                            Abilities[0] = Ability.PsychicAttack;
-                            Abilities[1] = Ability.BleedAttack;
-
-                            goto done;
-                        case 0x2D2D: // also Assassin Spikes
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.ShadowStrike;
-
-                            goto done;
-                        case 0x2D2E: // also Leafblades
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x2D2F: // also War Cleavers
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D30: // also Diamond Maces
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D31: // also Wild Staves
-                            Abilities[0] = Ability.Block;
-                            Abilities[1] = Ability.ForceOfNature;
-
-                            goto done;
-                        case 0x2D32: // also Rune Blades
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D33: // also Radiant Scimitars
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x2D34: // also Ornate Axes
-                            Abilities[0] = Ability.Disarm;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x2D35: // also Elven Machetes
-                            Abilities[0] = Ability.DefenseMastery;
-                            Abilities[1] = Ability.Bladeweave;
-
-                            goto done;
-                        case 0x4067: // Boomerang
-                            Abilities[0] = Ability.MysticArc;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x4068: // Dual Short Axes
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x406B: // Soul Glaive
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x406C: // Cyclone
-                            Abilities[0] = Ability.MovingShot;
-                            Abilities[1] = Ability.InfusedThrow;
-
-                            goto done;
-                        case 0x406D: // Dual Pointed Spear
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x406E: // Disc Mace
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x4072: // Blood Blade
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x4074: // Dread Sword
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x4075: // Gargish Talwar
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x4076: // Shortblade
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x48AE: // Gargish Cleaver
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48B0: // Gargish Battle Axe
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48B2: // Gargish Axe
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x48B4: // Gargish Bardiche
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.Dismount;
-
-                            goto done;
-                        case 0x48B6: // Gargish Butcher Knife
-                            Abilities[0] = Ability.InfectiousStrike;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x48B8: // Gargish Gnarled Staff
-                            Abilities[0] = Ability.ConcussionBlow;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x48BA: // Gargish Katana
-                            Abilities[0] = Ability.DoubleShot;
-                            Abilities[1] = Ability.ArmorIgnore;
-
-                            goto done;
-                        case 0x48BC: // Gargish Kryss
-                            Abilities[0] = Ability.ArmorIgnore;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48BE: // Gargish War Fork
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.Disarm;
-
-                            goto done;
-                        case 0x48CA: // Gargish Lance
-                            Abilities[0] = Ability.Dismount;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48C0: // Gargish War Hammer
-                            Abilities[0] = Ability.WhirlwindAttack;
-                            Abilities[1] = Ability.CrushingBlow;
-
-                            goto done;
-                        case 0x48C2: // Gargish Maul
-                            Abilities[0] = Ability.CrushingBlow;
-                            Abilities[1] = Ability.ConcussionBlow;
-
-                            goto done;
-                        case 0x48C4: // Gargish Scyte
-                            Abilities[0] = Ability.BleedAttack;
-                            Abilities[1] = Ability.ParalyzingBlow;
-
-                            goto done;
-                        case 0x48C6: // Gargish Bone Harvester
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.MortalStrike;
-
-                            goto done;
-                        case 0x48C8: // Gargish Pike
-                            Abilities[0] = Ability.ParalyzingBlow;
-                            Abilities[1] = Ability.InfectiousStrike;
-
-                            goto done;
-                        case 0x48CD: // Gargish Tessen
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.Block;
-
-                            goto done;
-                        case 0x48CE: // Gargish Tekagi
-                            Abilities[0] = Ability.DualWield;
-                            Abilities[1] = Ability.TalonStrike;
-
-                            goto done;
-                        case 0x48D0: // Gargish Daisho
-                            Abilities[0] = Ability.Feint;
-                            Abilities[1] = Ability.DoubleShot;
-
-                            goto done;
+                        testGraphic = (ushort) (equippedGraphic + 1);
+
+                        if (FileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                        {
+                            graphics[1] = testGraphic;
+                            count = 2;
+                        }
+                    }
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        Graphic g = graphics[i];
+
+                        switch (g)
+                        {
+                            case 0x0901: // Gargish Cyclone
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.InfusedThrow;
+
+                                goto done;
+
+                            case 0x0902: // Gargish Dagger
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x0905: // Glass Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x0906: // serpentstone staff
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x090C: // Glass Sword
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x0DF0:
+                            case 0x0DF1: // Black Staves
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x0DF2:
+                            case 0x0DF3:
+                            case 0x0DF4:
+                            case 0x0DF5: // Wands BookType A-D
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0E81:
+                            case 0x0E82: // Shepherd's Crooks
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0E85:
+                            case 0x0E86: // Pickaxes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0E87:
+                            case 0x0E88: // Pitchforks
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x0E89:
+                            case 0x0E8A: // Quarter Staves
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x0EC2:
+                            case 0x0EC3: // Cleavers
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x0EC4:
+                            case 0x0EC5: // Skinning Knives
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0F43:
+                            case 0x0F44: // Hatchets
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0F45:
+                            case 0x0F46: // Double Axes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x0F47:
+                            case 0x0F48: // Battle Axes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x0F49:
+                            case 0x0F4A: // Axes
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x0F4B:
+                            case 0x0F4C:
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.WhirlwindAttack;
+
+                                goto done;
+
+                            case 0x0F4D:
+                            case 0x0F4E: // Bardiches
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x0F4F:
+                            case 0x0F50: // Crossbows
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x0F51:
+                            case 0x0F52: // Daggers
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x0F5C:
+                            case 0x0F5D: // Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x0F5E:
+                            case 0x0F5F: // Broadswords
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+
+                            case 0x0F60:
+                            case 0x0F61: // Longswords
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x0F62:
+                            case 0x0F63: // Spears
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x0FB5:
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x13AF:
+                            case 0x13B0: // War Axes
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+
+                            case 0x13B1:
+                            case 0x13B2: // Bows
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x13B3:
+                            case 0x13B4: // Clubs
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x13B7:
+                            case 0x13B8: // Scimitars
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x13B9:
+                            case 0x13BA: // Viking Swords
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x13FD: // Heavy Crossbows
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x13E3: // Smith's Hammers
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x13F6: // Butcher Knives
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x13F8: // Gnarled Staves
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x13FB: // Large Battle Axes
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+
+                            case 0x13FF: // Katana
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+
+                            case 0x1401: // Kryss
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x1402:
+                            case 0x1403: // Short Spears
+                                Abilities[0] = Ability.ShadowStrike;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x1404:
+                            case 0x1405: // War Forks
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x1406:
+                            case 0x1407: // War Maces
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+
+                            case 0x1438:
+                            case 0x1439: // War Hammers
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x143A:
+                            case 0x143B: // Mauls
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x143C:
+                            case 0x143D: // Hammer Picks
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x143E:
+                            case 0x143F: // Halberds
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x1440:
+                            case 0x1441: // Cutlasses
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x1442:
+                            case 0x1443: // Two Handed Axes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x26BA: // Scythes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x26BB: // Bone Harvesters
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26BC: // Scepters
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26BD: // Bladed Staves
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x26BE: // Pikes
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x26BF: // Double Bladed Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x26C0: // Lances
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x26C1: // Crescent Blades
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26C2: // Composite Bows
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x26C3: // Repeating Crossbows
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x26C4: // also Scythes
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x26C5: // also Bone Harvesters
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26C6: // also Scepters
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26C7: // also Bladed Staves
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x26C8: // also Pikes
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x26C9: // also Double Bladed Staff
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x26CA: // also Lances
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x26CB: // also Crescent Blades
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x26CC: // also Composite Bows
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x26CD: // also Repeating Crossbows
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x27A2: // No-Dachi
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.RidingSwipe;
+
+                                goto done;
+
+                            case 0x27A3: // Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+
+                            case 0x27A4: // Wakizashi
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27A5: // Yumi
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27A6: // Tetsubo
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x27A7: // Lajatang
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.FrenziedWhirlwind;
+
+                                goto done;
+
+                            case 0x27A8: // Bokuto
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.NerveStrike;
+
+                                goto done;
+
+                            case 0x27A9: // Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27AA: // Fukya
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x27AB: // Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+
+                            case 0x27AD: // Kama
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.DefenseMastery;
+
+                                goto done;
+
+                            case 0x27AE: // Nunchaku
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.Feint;
+
+                                goto done;
+
+                            case 0x27AF: // Sai
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ArmorPierce;
+
+                                goto done;
+
+                            case 0x27ED: // also No-Dachi
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.RidingSwipe;
+
+                                goto done;
+
+                            case 0x27EE: // also Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+
+                            case 0x27EF: // also Wakizashi
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27F0: // also Yumi
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27F1: // also Tetsubo
+                                Abilities[0] = Ability.FrenziedWhirlwind;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x27F2: // also Lajatang
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.FrenziedWhirlwind;
+
+                                goto done;
+
+                            case 0x27F3: // also Bokuto
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.NerveStrike;
+
+                                goto done;
+
+                            case 0x27F4: // also Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+
+                            case 0x27F5: // also Fukya
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x27F6: // also Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+
+                            case 0x27F8: // Kama
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.DefenseMastery;
+
+                                goto done;
+
+                            case 0x27F9: // Nunchaku
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.Feint;
+
+                                goto done;
+
+                            case 0x27FA: // Sai
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ArmorPierce;
+
+                                goto done;
+
+                            case 0x2D1E: // Elven Composite Longbows
+                                Abilities[0] = Ability.ForceArrow;
+                                Abilities[1] = Ability.SerpentArrow;
+
+                                goto done;
+
+                            case 0x2D1F: // Magical Shortbows
+                                Abilities[0] = Ability.LightningArrow;
+                                Abilities[1] = Ability.PsychicAttack;
+
+                                goto done;
+
+                            case 0x2D20: // Elven Spellblades
+                                Abilities[0] = Ability.PsychicAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+
+                            case 0x2D21: // Assassin Spikes
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x2D22: // Leafblades
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+
+                            case 0x2D23: // War Cleavers
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D24: // Diamond Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x2D25: // Wild Staves
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ForceOfNature;
+
+                                goto done;
+
+                            case 0x2D26: // Rune Blades
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D27: // Radiant Scimitars
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D28: // Ornate Axes
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x2D29: // Elven Machetes
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D2A: // also Elven Composite Longbows
+                                Abilities[0] = Ability.ForceArrow;
+                                Abilities[1] = Ability.SerpentArrow;
+
+                                goto done;
+
+                            case 0x2D2B: // also Magical Shortbows
+                                Abilities[0] = Ability.LightningArrow;
+                                Abilities[1] = Ability.PsychicAttack;
+
+                                goto done;
+
+                            case 0x2D2C: // also Elven Spellblades
+                                Abilities[0] = Ability.PsychicAttack;
+                                Abilities[1] = Ability.BleedAttack;
+
+                                goto done;
+
+                            case 0x2D2D: // also Assassin Spikes
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.ShadowStrike;
+
+                                goto done;
+
+                            case 0x2D2E: // also Leafblades
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+
+                            case 0x2D2F: // also War Cleavers
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D30: // also Diamond Maces
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x2D31: // also Wild Staves
+                                Abilities[0] = Ability.Block;
+                                Abilities[1] = Ability.ForceOfNature;
+
+                                goto done;
+
+                            case 0x2D32: // also Rune Blades
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D33: // also Radiant Scimitars
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x2D34: // also Ornate Axes
+                                Abilities[0] = Ability.Disarm;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x2D35: // also Elven Machetes
+                                Abilities[0] = Ability.DefenseMastery;
+                                Abilities[1] = Ability.Bladeweave;
+
+                                goto done;
+
+                            case 0x4067: // Boomerang
+                                Abilities[0] = Ability.MysticArc;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x4068: // Dual Short Axes
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x406B: // Soul Glaive
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x406C: // Cyclone
+                                Abilities[0] = Ability.MovingShot;
+                                Abilities[1] = Ability.InfusedThrow;
+
+                                goto done;
+
+                            case 0x406D: // Dual Pointed Spear
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x406E: // Disc Mace
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x4072: // Blood Blade
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x4074: // Dread Sword
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x4075: // Gargish Talwar
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x4076: // Shortblade
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x48AE: // Gargish Cleaver
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x48B0: // Gargish Battle Axe
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x48B2: // Gargish Axe
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x48B4: // Gargish Bardiche
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.Dismount;
+
+                                goto done;
+
+                            case 0x48B6: // Gargish Butcher Knife
+                                Abilities[0] = Ability.InfectiousStrike;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x48B8: // Gargish Gnarled Staff
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x48BA: // Gargish Katana
+                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[1] = Ability.ArmorIgnore;
+
+                                goto done;
+
+                            case 0x48BC: // Gargish Kryss
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x48BE: // Gargish War Fork
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.Disarm;
+
+                                goto done;
+
+                            case 0x48CA: // Gargish Lance
+                                Abilities[0] = Ability.Dismount;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x48C0: // Gargish War Hammer
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.CrushingBlow;
+
+                                goto done;
+
+                            case 0x48C2: // Gargish Maul
+                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[1] = Ability.ConcussionBlow;
+
+                                goto done;
+
+                            case 0x48C4: // Gargish Scyte
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
+                            case 0x48C6: // Gargish Bone Harvester
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.MortalStrike;
+
+                                goto done;
+
+                            case 0x48C8: // Gargish Pike
+                                Abilities[0] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.InfectiousStrike;
+
+                                goto done;
+
+                            case 0x48CD: // Gargish Tessen
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.Block;
+
+                                goto done;
+
+                            case 0x48CE: // Gargish Tekagi
+                                Abilities[0] = Ability.DualWield;
+                                Abilities[1] = Ability.TalonStrike;
+
+                                goto done;
+
+                            case 0x48D0: // Gargish Daisho
+                                Abilities[0] = Ability.Feint;
+                                Abilities[1] = Ability.DoubleShot;
+
+                                goto done;
+                        }
                     }
                 }
 
-            done:;
+                done: ;
             }
-
 
 
             if (Abilities[0] == Ability.Invalid)
@@ -1620,7 +1781,6 @@ namespace ClassicUO.Game.GameObjects
                 Abilities[0] = Ability.Disarm;
                 Abilities[1] = Ability.ParalyzingBlow;
             }
-        
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -1637,30 +1797,99 @@ namespace ClassicUO.Game.GameObjects
             if (World.Map != null && World.Map.Index >= 0)
                 World.Map.Center = new Point(X, Y);
 
-            Plugin.UpdatePlayerPosition(X, Y , Z);
+            Plugin.UpdatePlayerPosition(X, Y, Z);
+
+            TryOpenDoors();
+            TryOpenCorpses();
         }
 
-        public override void Dispose()
+        public void TryOpenCorpses()
+        {
+            if (Engine.Profile.Current.AutoOpenCorpses)
+            {
+                if ((Engine.Profile.Current.CorpseOpenOptions == 1 || Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                    return;
+
+                if ((Engine.Profile.Current.CorpseOpenOptions == 2 || Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden)
+                    return;
+
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                {
+                    OpenedCorpses.Add(c.Serial);
+                    GameActions.DoubleClickQueued(c.Serial);
+                }
+            }
+        }
+
+
+        protected override void OnDirectionChanged()
+        {
+            base.OnDirectionChanged();
+            TryOpenDoors();
+        }
+
+        private void TryOpenDoors()
+        {
+            if (Engine.Profile.Current.AutoOpenDoors)
+            {
+                int x = X, y = Y, z = Z;
+                Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
+
+                if (World.Items.Any(s =>
+                                        IsDoor(s.Graphic) && s.X == x && s.Y == y && s.Z - 15 <= z &&
+                                        s.Position.Z + 15 >= z))
+                    GameActions.OpenDoor();
+            }
+        }
+
+        public override void Destroy()
         {
             Log.Message(LogTypes.Warning, "PlayerMobile disposed!");
-            base.Dispose();
+            base.Destroy();
         }
 
         public void CloseBank()
         {
-            Equipment[(int)Layer.Bank]?.Dispose();
+            Equipment[(int) Layer.Bank]?.Destroy();
         }
 
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
         internal WalkerManager Walker { get; } = new WalkerManager();
 
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            /*const int TIME_TURN_TO_LASTTARGET = 2000;
+
+            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Engine.Ticks)
+            {
+                Mobile enemy = World.Mobiles.Get(World.LastAttack);
+
+                if (enemy != null)
+                {
+                    Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point(enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
+
+                    if (Direction != direction)
+                        Walk(direction, false);
+                }
+            }*/
+        }
+
+        protected override bool NoIterateAnimIndex()
+        {
+            return false;
+        }
+
         public bool Walk(Direction direction, bool run)
         {
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || (Stamina <= 1 && !IsDead))
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
                 run = Engine.Profile.Current.AlwaysRun;
@@ -1678,12 +1907,11 @@ namespace ClassicUO.Game.GameObjects
                 x = walkStep.X;
                 y = walkStep.Y;
                 z = walkStep.Z;
-                oldDirection = (Direction)walkStep.Direction;
+                oldDirection = (Direction) walkStep.Direction;
             }
 
             sbyte oldZ = z;
             ushort walkTime = Constants.TURN_DELAY;
-
 
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
@@ -1703,7 +1931,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
             else
@@ -1724,7 +1952,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
 
                 direction = newDir;
@@ -1740,33 +1968,30 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
-        
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;
-            step.OldDirection = (byte)(oldDirection & Direction.Mask);
-            step.Direction = (byte)direction;
+            step.OldDirection = (byte) (oldDirection & Direction.Mask);
+            step.Direction = (byte) direction;
             step.Timer = Engine.Ticks;
-            step.X = (ushort)x;
-            step.Y = (ushort)y;
+            step.X = (ushort) x;
+            step.Y = (ushort) y;
             step.Z = z;
-            step.NoRotation = ((step.OldDirection == (byte)direction) && (oldZ - z >= 11));
+            step.NoRotation = step.OldDirection == (byte) direction && oldZ - z >= 11;
 
             Walker.StepsCount++;
 
-            Steps.AddToBack(new Step()
+            Steps.AddToBack(new Step
             {
                 X = x,
                 Y = y,
                 Z = z,
-                Direction = (byte)direction,
+                Direction = (byte) direction,
                 Run = run
             });
 
-            //EnqueueStep(x, y, z, direction, run);
+            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
-            byte sequence = Walker.WalkSequence;
-            NetClient.Socket.Send(new PWalkRequest(direction, sequence, run, Walker.FastWalkStack.GetValue()));
 
             if (Walker.WalkSequence == 0xFF)
                 Walker.WalkSequence = 1;
@@ -1778,33 +2003,31 @@ namespace ClassicUO.Game.GameObjects
 
             int nowDelta = 0;
 
-            if (_lastDir == (int)direction && _lastMount == IsMounted && _lastRun == run)
+            if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
             {
-                nowDelta = (int)((Engine.Ticks - _lastStepTime) - walkTime + _lastDelta);
+                nowDelta = (int) (Engine.Ticks - _lastStepTime - walkTime + _lastDelta);
 
                 if (Math.Abs(nowDelta) > 70)
                     nowDelta = 0;
                 _lastDelta = nowDelta;
             }
             else
-            {
                 _lastDelta = 0;
-            }
 
-            _lastStepTime = (int)Engine.Ticks;
+            _lastStepTime = (int) Engine.Ticks;
             _lastRun = run;
             _lastMount = IsMounted;
-            _lastDir = (int)direction;
+            _lastDir = (int) direction;
 
 
             Walker.LastStepRequestTime = Engine.Ticks + walkTime - nowDelta;
-            GetGroupForAnimation(this);
+            GetGroupForAnimation(this, 0, true);
 
             return true;
         }
 
         private bool _lastRun, _lastMount;
-        private int _lastDir, _lastDelta, _lastStepTime;
+        private int _lastDir = -1, _lastDelta, _lastStepTime;
 
 #elif !MOVEMENT2
         private int _movementX, _movementY;
@@ -2042,7 +2265,6 @@ namespace ClassicUO.Game.GameObjects
         public void ConfirmWalk(byte seq)
         {
 #if MOVEMENT2
-
             if (RequestedSteps.Count == 0)
             {
                 NetClient.Socket.Send(new PResend());
@@ -2073,7 +2295,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
 #elif JAEDAN_MOVEMENT_PATCH
-
             if (_stepsOutstanding == 0)
             {
                 Log.Message(LogTypes.Warning, $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
@@ -2085,12 +2306,36 @@ namespace ClassicUO.Game.GameObjects
                 _stepsOutstanding--;
             }
 #else
-     Walker.ConfirmWalk(seq);
+            Walker.ConfirmWalk(seq);
 #endif
         }
 
-#if JAEDAN_MOVEMENT_PATCH
+        private bool IsDoor(ushort type)
+        {
+            return type >= 0x0675 && type <= 0x06F6
+                   || type >= 0x0824 && type <= 0x0833
+                   || type >= 0x0839 && type <= 0x0848
+                   || type >= 0x084C && type <= 0x085B
+                   || type >= 0x0866 && type <= 0x0875
+                   || type >= 0x1FED && type <= 0x1FFC
+                   || type >= 0x241F && type <= 0x2424
+                   || type >= 0x2A05 && type <= 0x2A1C
+                   || type >= 0x2D46 && type <= 0x2D49
+                   || type >= 0x2D63 && type <= 0x2D6E
+                   || type >= 0x319C && type <= 0x31AF
+                   || type >= 0x367B && type <= 0x369A
+                   || type >= 0x410C && type <= 0x4113
+                   || type >= 0x41C2 && type <= 0x41C9
+                   || type >= 0x41CF && type <= 0x41D6
+                   || type >= 0x46DD && type <= 0x46E4
+                   || type >= 0x4D1A && type <= 0x4D29
+                   || type >= 0x50C8 && type <= 0x50D7
+                   || type >= 0x9AD7 && type <= 0x9AE6
+                   || type >= 0x9B3C && type <= 0x9B4B;
+        }
 
+        private readonly HashSet<Serial> OpenedCorpses = new HashSet<Serial>();
+#if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
 

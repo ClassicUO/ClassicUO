@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -27,17 +30,18 @@ namespace ClassicUO.Game
     {
         public bool Equals(Graphic other)
         {
-            return _value == other._value;
+            return Value == other.Value;
         }
 
         public const ushort INVARIANT = ushort.MaxValue;
         public const ushort INVALID = 0xFFFF;
-        private readonly ushort _value;
 
         public Graphic(ushort graphic)
         {
-            _value = graphic;
+            Value = graphic;
         }
+
+        public ushort Value { get; }
 
         public static implicit operator Graphic(ushort value)
         {
@@ -46,27 +50,27 @@ namespace ClassicUO.Game
 
         public static implicit operator ushort(Graphic color)
         {
-            return color._value;
+            return color.Value;
         }
 
         public static bool operator ==(Graphic g1, Graphic g2)
         {
-            return g1._value == g2._value;
+            return g1.Value == g2.Value;
         }
 
         public static bool operator !=(Graphic g1, Graphic g2)
         {
-            return g1._value != g2._value;
+            return g1.Value != g2.Value;
         }
 
         public static bool operator <(Graphic g1, Graphic g2)
         {
-            return g1._value < g2._value;
+            return g1.Value < g2.Value;
         }
 
         public static bool operator >(Graphic g1, Graphic g2)
         {
-            return g1._value > g2._value;
+            return g1.Value > g2.Value;
         }
 
         public override bool Equals(object obj)
@@ -78,24 +82,29 @@ namespace ClassicUO.Game
 
         public int CompareTo(ushort other)
         {
-            return _value.CompareTo(other);
+            return Value.CompareTo(other);
         }
 
         public override string ToString()
         {
-            return $"0x{_value:X4}";
+            return $"0x{Value:X4}";
         }
 
         public override int GetHashCode()
         {
-            return _value.GetHashCode();
+            return Value.GetHashCode();
         }
 
         public static Graphic Parse(string str)
         {
-            if (str.StartsWith("0x")) return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            if (str.StartsWith("0x"))
+                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
 
-            return ushort.Parse(str);
+            if (str.Length > 1 && str[0] == '-')
+                return (ushort) short.Parse(str);
+
+
+            return (ushort) uint.Parse(str); // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
         }
     }
 }

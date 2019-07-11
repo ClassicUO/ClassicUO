@@ -39,21 +39,21 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
+            if (button != MouseButton.Left)
+                return;
+
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                return;
+
+            if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
             {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                    return;
-
-                if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
-                {
-                    gs.SelectedObject = Item;
-                    gs.DropHeldItemToContainer(Item, x, y);
-                }
-                else 
-                    gs.Audio.PlaySound(0x0051);                       
+                SelectedObject.Object = Item;
+                gs.DropHeldItemToContainer(Item, x, y);
             }
+            else
+                gs.Audio.PlaySound(0x0051);
         }
     }
 }

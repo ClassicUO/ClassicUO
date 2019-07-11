@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
@@ -31,10 +33,9 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollArea : Control
     {
         private readonly IScrollBar _scrollBar;
-        private bool _needUpdate = true;
-        private Rectangle _rect;
-        private bool _isNormalScroll;
         private readonly int _scrollbarHeight;
+        private bool _isNormalScroll;
+        private bool _needUpdate = true;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
@@ -44,15 +45,16 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
             _isNormalScroll = normalScrollbar;
             _scrollbarHeight = scrollbarHeight;
+
             if (normalScrollbar)
-                _scrollBar = new ScrollBar( Width - 14, 0, Height);
+                _scrollBar = new ScrollBar(Width - 14, 0, Height);
             else
             {
-                _scrollBar = new ScrollFlag()
+                _scrollBar = new ScrollFlag
                 {
                     X = Width - 19, Height = h
                 };
-                Width = Width + 15;
+                Width += 15;
             }
 
             if (scrollbarHeight < 0)
@@ -83,6 +85,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void ForceUpdate()
+        {
+            _needUpdate = true;
+        }
+
         protected override void OnInitialize()
         {
             _needUpdate = true;
@@ -97,14 +104,12 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.Value += _scrollBar.ScrollStep;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
-            _rect.X = position.X;
-            _rect.Y = position.Y;
-            _rect.Width = Width - 14;
-            _rect.Height = Height;
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
+            var scrollbar = Children[0];
+            scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
+
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width - 14, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
@@ -113,7 +118,6 @@ namespace ClassicUO.Game.UI.Controls
                 int maxheight = _scrollBar.Value + Height;
                 bool drawOnly1 = true;
 
-                position = _rect.Location;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -129,12 +133,12 @@ namespace ClassicUO.Game.UI.Controls
                         // do nothing
                     }
                     else if (height + child.Height <= maxheight)
-                        child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                        child.Draw(batcher, x + child.X, y + child.Y);
                     else
                     {
                         if (drawOnly1)
                         {
-                            child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
+                            child.Draw(batcher, x + child.X, y + child.Y);
                             drawOnly1 = false;
                         }
                     }
@@ -157,6 +161,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -170,6 +175,11 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected override void OnChildRemoved()
+        {
+            _needUpdate = true;
+        }
+
+        public override void OnPageChanged()
         {
             _needUpdate = true;
         }
@@ -188,7 +198,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
-            ScrollAreaItem item = new ScrollAreaItem()
+            ScrollAreaItem item = new ScrollAreaItem
             {
                 CanMove = true
             };
@@ -211,10 +221,14 @@ namespace ClassicUO.Game.UI.Controls
         private void CalculateScrollBarMaxValue()
         {
             _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
-            bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
+            bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
             int height = 0;
+
             for (int i = 1; i < Children.Count; i++)
-                height += Children[i].Height;
+            {
+                if (Children[i].IsVisible)
+                    height += Children[i].Height;
+            }
 
             height -= _scrollBar.Height;
 
@@ -223,7 +237,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (height > 0)
             {
-                _scrollBar.MaxValue =  height;
+                _scrollBar.MaxValue = height;
 
                 if (maxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;
@@ -244,6 +258,14 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Children.Count == 0)
                 Dispose();
+        }
+
+        public override void OnPageChanged()
+        {
+            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Y < 0 ? o.Height + o.Y : o.Height : 0) : 0;
+            IsVisible = maxheight > 0;
+            Height = maxheight;
+            Parent?.OnPageChanged();
         }
     }
 }

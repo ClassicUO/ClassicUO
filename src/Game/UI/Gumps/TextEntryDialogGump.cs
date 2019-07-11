@@ -1,15 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TextEntryDialogGump : Gump
+    internal class TextEntryDialogGump : Gump
     {
         private readonly TextBox _textBox;
 
@@ -46,14 +63,14 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_textBox);
 
-            Add(new Button((int)ButtonType.Ok, 0x047B, 0x047C, 0x047D)
+            Add(new Button((int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
             {
                 X = 117,
                 Y = 190,
                 ButtonAction = ButtonAction.Activate
             });
 
-            Add(new Button((int)ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
+            Add(new Button((int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
             {
                 X = 204,
                 Y = 190,
@@ -69,15 +86,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((ButtonType)buttonID)
+            switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
                     NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ButtonID, _textBox.Text, true));
                     Dispose();
+
                     break;
+
                 case ButtonType.Cancel:
                     NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ButtonID, _textBox.Text, false));
                     Dispose();
+
                     break;
             }
         }

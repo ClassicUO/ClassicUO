@@ -21,11 +21,11 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -38,11 +38,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump
     {
-        private readonly bool _isPartialHue;
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
-
-        private Point _clickedPoint;
+        private readonly bool _isPartialHue;
 
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
@@ -56,26 +54,32 @@ namespace ClassicUO.Game.UI.Controls
 
             _isPartialHue = item.ItemData.IsPartialHue;
 
-            int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
+            int offset = !owner.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
 
             ushort id = Item.ItemData.AnimID;
 
             if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {
                 if (dict.TryGetValue(id, out EquipConvData data))
-                    id = (ushort)(data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
+                {
+                    if (data.Gump > MALE_OFFSET)
+                        id = (ushort) (data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
+                    else
+                        id = data.Gump;
+                }
             }
 
-            Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
+            Texture = FileManager.Gumps.GetTexture((ushort) (id + offset));
 
-            if (owner.IsFemale && Texture == null)
-                Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
+            if (!owner.IsMale && Texture == null)
+                Texture = FileManager.Gumps.GetTexture((ushort) (id + MALE_OFFSET));
 
             if (Texture == null)
             {
                 if (item.Layer != Layer.Face)
-                    Log.Message(LogTypes.Error, $"No texture founded for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
+                    Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
+
                 return;
             }
 
@@ -85,13 +89,14 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public int SlotIndex { get; set; }
-
         public Mobile Mobile { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (Mobile == null || Mobile.IsDestroyed)
+                Dispose();
 
             if (IsDisposed)
                 return;
@@ -99,73 +104,84 @@ namespace ClassicUO.Game.UI.Controls
             Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, _isPartialHue, Alpha, false));
+            ResetHueVector();
+
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
+
+            return batcher.Draw2D(Texture, x, y, ref _hueVector);
         }
 
-        protected override void UpdateLabel()
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
 
-            if (!Item.IsDisposed && Item.Overheads.Count > 0)
-            {
-                LabelContainer container = Engine.UI.GetByLocalSerial<LabelContainer>(Item);
-
-                if (container == null)
-                {
-                    container = new LabelContainer(Item);
-                    Engine.UI.Add(container);
-                }
-
-                container.X = ScreenCoordinateX + _clickedPoint.X /*- (container.Width >> 1)*/;
-                container.Y = ScreenCoordinateY + _clickedPoint.Y - (container.Height >> 1);
-
-                Engine.UI.MakeTopMostGumpOverAnother(container, this);
-            }
-        }
-
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            base.OnMouseClick(x, y, button);
-
-            if (button != MouseButton.Left)
-                return;
-
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
-
-            if (gs == null || gs.IsHoldingItem)
-                return;
-
-            if (!_clickedCanDrag)
-            {
-                _clickedPoint = new Point(x, y);
-            }
-        }
 
         //protected override void OnMouseUp(int x, int y, MouseButton button)
         //{
+        //    base.OnMouseUp(x, y, MouseButton.None); // workaround to avoid clickeddrag
+
         //    if (button == MouseButton.Left)
         //    {
-        //        //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+        //        GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-        //        //if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI)
-        //        //{
-        //        //    return;
-        //        //}
+        //        if (TargetManager.IsTargeting)
+        //        {
+        //            if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+        //            {
+        //                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+
+        //                gs.WearHeldItem(Mobile);
+
+        //                return;
+        //            }
+
+        //            switch (TargetManager.TargetingState)
+        //            {
+        //                case CursorTarget.Position:
+        //                case CursorTarget.Object:
+        //                case CursorTarget.Grab:
+        //                case CursorTarget.SetGrabBag:
+
+        //                    SelectedObject.Object = Item;
 
 
-        //        //gs.WearHeldItem(Mobile);                   
-                   
+        //                    if (Item != null)
+        //                    {
+        //                        TargetManager.TargetGameObject(Item);
+        //                        Mouse.LastLeftButtonClickTime = 0;
+        //                    }
+
+        //                    break;
+
+        //                case CursorTarget.SetTargetClientSide:
+        //                    SelectedObject.Object = Item;
+
+        //                    if (Item != null)
+        //                    {
+        //                        TargetManager.TargetGameObject(Item);
+        //                        Mouse.LastLeftButtonClickTime = 0;
+        //                        Engine.UI.Add(new InfoGump(Item));
+        //                    }
+
+        //                    break;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+
+        //            if (Item == Mobile.Equipment[(int) Layer.Backpack])
+        //                gs.DropHeldItemToContainer(Item);
+        //            else
+        //                gs.WearHeldItem(Mobile);
+        //        }
         //    }
         //}
     }

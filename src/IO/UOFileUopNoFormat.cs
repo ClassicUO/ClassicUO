@@ -1,8 +1,28 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.IO.Resources;
 
@@ -32,6 +52,7 @@ namespace ClassicUO.IO
 
             if (ReadInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
+
             Skip(8);
             long nextblock = ReadLong();
             Skip(4);
@@ -39,6 +60,7 @@ namespace ClassicUO.IO
             Entries = new UOFileIndex3D[ReadInt()];
 
             int idx = 0;
+
             do
             {
                 Seek(nextblock);
@@ -57,7 +79,7 @@ namespace ClassicUO.IO
                     if (offset == 0)
                         continue;
 
-                    Entries[idx++] = new UOFileIndex3D((uint)(offset + headerLength), compressedLength, decompressedLength);
+                    Entries[idx++] = new UOFileIndex3D((uint) (offset + headerLength), compressedLength, decompressedLength);
                 }
             } while (nextblock != 0);
         }
@@ -69,6 +91,7 @@ namespace ClassicUO.IO
 
             if (ReadInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
+
             Skip(8);
             long nextblock = ReadLong();
             Skip(4);
@@ -91,10 +114,9 @@ namespace ClassicUO.IO
                     if (offset == 0)
                         continue;
 
-                    hashes.Add(hash, new UopFileData((uint)(offset + headerLength), (uint)compressedLength, (uint)decompressedLength, _indexFile));
+                    hashes.Add(hash, new UopFileData((uint) (offset + headerLength), (uint) compressedLength, (uint) decompressedLength, _indexFile));
                 }
             } while (nextblock != 0);
         }
     }
-
 }

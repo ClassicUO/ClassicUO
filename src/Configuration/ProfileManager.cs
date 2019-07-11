@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using ClassicUO.Game.UI.Gumps;
+#endregion
+
+using System.IO;
+
 using ClassicUO.Utility;
-using ClassicUO.Utility.Coroutines;
 
 using Newtonsoft.Json;
 
@@ -42,21 +37,22 @@ namespace ClassicUO.Configuration
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
-            if (!File.Exists(Path.Combine(path, "settings.json")))
-            {
+            if (!File.Exists(Path.Combine(path, Engine.SettingsFile)))
                 Current = new Profile(username, servername, charactername);
-            }
             else
             {
-                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json"), 
-                new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All,
-                    MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead                
-                }) ?? new Profile(username, servername, charactername);
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, Engine.SettingsFile),
+                                                              new JsonSerializerSettings
+                                                              {
+                                                                  TypeNameHandling = TypeNameHandling.All,
+                                                                  MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+                                                              }) ?? new Profile(username, servername, charactername);
             }
         }
 
-        public void UnLoadProfile() => Current = null;
+        public void UnLoadProfile()
+        {
+            Current = null;
+        }
     }
 }

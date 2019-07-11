@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
@@ -41,14 +42,23 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private readonly Label _totalLabel, _playerGoldLabel;
+        private static SpriteTexture[] _shopGumpParts;
+        private readonly GumpPicTiled _middleGumpLeft, _middleGumpRight;
         private readonly Dictionary<Item, ShopItem> _shopItems;
-        private readonly Dictionary<Item, TransactionItem> _transactionItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
+        private readonly Label _totalLabel, _playerGoldLabel;
+        private readonly Dictionary<Item, TransactionItem> _transactionItems;
+
+        private bool _isUpDOWN, _isDownDOWN;
+        private bool _isUpDOWN_T, _isDownDOWN_T;
+
+        private bool _shiftPressed;
         private bool _updateTotal;
-        
-        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0)
+
+        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
         {
+            int height = Engine.Profile.Current.VendorGumpHeight;
+            if (_shopGumpParts == null) GenerateVirtualTextures();
             X = x;
             Y = y;
             AcceptMouseInput = false;
@@ -60,122 +70,101 @@ namespace ClassicUO.Game.UI.Gumps
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
             _updateTotal = false;
+            int add = isBuyGump ? 0 : 6;
+            GumpPic pic = new GumpPic(0, 0, _shopGumpParts[0 + add], 0);
+            pic.Add(_middleGumpLeft = new GumpPicTiled(0, 64, pic.Width, height, _shopGumpParts[1 + add]));
+            pic.Add(new GumpPic(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add], 0));
+            Add(pic);
+            _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
 
+            Add(_shopScrollArea);
 
-            if (isBuyGump)
-                Add(new GumpPic(0, 0, 0x0870, 0));
-            else
-                Add(new GumpPic(0, 0, 0x0872, 0));
+            pic = new GumpPic(250, 144, _shopGumpParts[3 + add], 0);
+            pic.Add(_middleGumpRight = new GumpPicTiled(0, 64, pic.Width, _middleGumpLeft.Height >> 1, _shopGumpParts[4 + add]));
+            pic.Add(new GumpPic(0, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add], 0));
+            Add(pic);
+            //Add(isBuyGump ? new GumpPic(250, 214, 0x0871, 0) : new GumpPic(250, 214, 0x0873, 0));
 
-
-           
-               
-            Add(_shopScrollArea = new ScrollArea(30, 60, 225, 180, false, 130));
-
-
-
-
-
-            if (isBuyGump)
-                Add(new GumpPic(170, 214, 0x0871, 0));
-            else
-                Add(new GumpPic(170, 214, 0x0873, 0));
-
-            HitBox boxAccept = new HitBox(200, 406, 34, 30)
+            HitBox boxAccept = new HitBox(280, 306 + _middleGumpRight.Height, 34, 30)
             {
                 Alpha = 1
             };
 
-            HitBox boxClear = new HitBox(372, 410, 24, 24)
+            HitBox boxClear = new HitBox(452, 310 + _middleGumpRight.Height, 24, 24)
             {
                 Alpha = 1
             };
 
-            boxAccept.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Accept); };
-            boxClear.MouseClick += (sender, e) => { OnButtonClick((int)Buttons.Clear); };
+            boxAccept.MouseUp += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
+            boxClear.MouseUp += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
             Add(boxAccept);
             Add(boxClear);
 
 
             if (isBuyGump)
             {
-                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
+                Add(_totalLabel = new Label("0", true, 0x0386, 0, 1)
                 {
-                    X = 240,
-                    Y = 385
+                    X = 318,
+                    Y = 281 + _middleGumpRight.Height
                 });
 
-                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9)
+                Add(_playerGoldLabel = new Label(World.Player.Gold.ToString(), true, 0x0386, 0, 1)
                 {
-                    X = 358,
-                    Y = 385
+                    X = 436,
+                    Y = 281 + _middleGumpRight.Height
                 });
             }
             else
-                Add(_totalLabel = new Label("0", false, 0x0386, font: 9)
+            {
+                Add(_totalLabel = new Label("0", true, 0x0386, 0, 1)
                 {
-                    X = 358,
-                    Y = 386
+                    X = 436,
+                    Y = 281 + _middleGumpRight.Height
                 });
+            }
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 5)
             {
-                X = 242,
-                Y = 408
+                X = 322,
+                Y = 308 + _middleGumpRight.Height
             });
 
-
-            Add(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+            Add(_transactionScrollArea = new ScrollArea(260, 215, 245, 53 + _middleGumpRight.Height, false));
 
 
             HitBox upButton = new HitBox(233, 50, 18, 16)
             {
                 Alpha = 1
             };
-            upButton.MouseDown += (sender, e) =>
-            {
-                _isUpDOWN = true;
-            };
+            upButton.MouseDown += (sender, e) => { _isUpDOWN = true; };
             upButton.MouseUp += (sender, e) => { _isUpDOWN = false; };
 
             Add(upButton);
 
-            HitBox downButton = new HitBox(233, 190, 18, 16)
+            HitBox downButton = new HitBox(233, 130 + _middleGumpLeft.Height, 18, 16)
             {
                 Alpha = 1
             };
-            downButton.MouseDown += (sender, e) =>
-            {
-                _isDownDOWN = true;
-            };
+            downButton.MouseDown += (sender, e) => { _isDownDOWN = true; };
             downButton.MouseUp += (sender, e) => { _isDownDOWN = false; };
             Add(downButton);
 
 
-
-
-
-
-            HitBox upButtonT = new HitBox(403, 265, 18, 16)
+            HitBox upButtonT = new HitBox(483, 195, 18, 16)
             {
                 Alpha = 1
             };
-            upButtonT.MouseDown += (sender, e) =>
-            {
-                _isUpDOWN_T = true;
-            };
+            upButtonT.MouseDown += (sender, e) => { _isUpDOWN_T = true; };
             upButtonT.MouseUp += (sender, e) => { _isUpDOWN_T = false; };
 
             Add(upButtonT);
 
-            HitBox downButtonT = new HitBox(403, 370, 18, 16)
+            HitBox downButtonT = new HitBox(483, 270 + _middleGumpRight.Height, 18, 16)
             {
                 Alpha = 1
             };
-            downButtonT.MouseDown += (sender, e) =>
-            {
-                _isDownDOWN_T = true;
-            };
+            downButtonT.MouseDown += (sender, e) => { _isDownDOWN_T = true; };
             downButtonT.MouseUp += (sender, e) => { _isDownDOWN_T = false; };
             Add(downButtonT);
 
@@ -183,10 +172,54 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Input.KeyUp += InputOnKeyUp;
         }
 
-        private bool _isUpDOWN, _isDownDOWN;
-        private bool _isUpDOWN_T, _isDownDOWN_T;
+        public bool IsBuyGump { get; }
 
-        private bool _shiftPressed;
+        private void GenerateVirtualTextures()
+        {
+            _shopGumpParts = new SpriteTexture[12];
+            SpriteTexture t = FileManager.Gumps.GetTexture(0x0870);
+            SpriteTexture[][] splits = new SpriteTexture[4][];
+
+            splits[0] = GraphicHelper.SplitTexture16(t,
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 124},
+                                                         {0, 124, t.Width, t.Height - 124}
+                                                     });
+            t = FileManager.Gumps.GetTexture(0x0871);
+
+            splits[1] = GraphicHelper.SplitTexture16(t,
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 94},
+                                                         {0, 94, t.Width, t.Height - 94}
+                                                     });
+            t = FileManager.Gumps.GetTexture(0x0872);
+
+            splits[2] = GraphicHelper.SplitTexture16(t,
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 124},
+                                                         {0, 124, t.Width, t.Height - 124}
+                                                     });
+            t = FileManager.Gumps.GetTexture(0x0873);
+
+            splits[3] = GraphicHelper.SplitTexture16(t,
+                                                     new int[3, 4]
+                                                     {
+                                                         {0, 0, t.Width, 64},
+                                                         {0, 64, t.Width, 94},
+                                                         {0, 94, t.Width, t.Height - 94}
+                                                     });
+
+            for (int i = 0, idx = 0; i < splits.Length; i++)
+            {
+                for (int ii = 0; ii < splits[i].Length; ii++) _shopGumpParts[idx++] = splits[i][ii];
+            }
+        }
 
         private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
@@ -196,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (Input.Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
+            if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
                 _shiftPressed = true;
         }
 
@@ -207,15 +240,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-
-        public bool IsBuyGump { get; }
-
         public void SetIfNameIsFromCliloc(Item it, bool fromcliloc)
         {
-            if (_shopItems.TryGetValue(it, out var shopItem))
-            {
-                shopItem.NameFromCliloc = fromcliloc;
-            }
+            if (_shopItems.TryGetValue(it, out var shopItem)) shopItem.NameFromCliloc = fromcliloc;
         }
 
         public void AddItem(Item item, bool fromcliloc)
@@ -234,17 +261,14 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 10,
                 Width = 190
             });
-            shopItem.MouseClick += ShopItem_MouseClick;
+            shopItem.MouseUp += ShopItem_MouseClick;
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(item, shopItem);
         }
 
         public void SetNameTo(Item item, string name)
         {
-            if (_shopItems.TryGetValue(item, out ShopItem shopItem))
-            {
-                shopItem.SetName(name);
-            }
+            if (!string.IsNullOrEmpty(name) && _shopItems.TryGetValue(item, out ShopItem shopItem)) shopItem.SetName(name);
         }
 
 
@@ -261,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _shopScrollArea.Scroll(true);
                 else if (_isDownDOWN_T)
                     _transactionScrollArea.Scroll(false);
-                else 
+                else
                     _transactionScrollArea.Scroll(true);
             }
 
@@ -291,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
                 transactionItem.Amount += total;
             else
             {
-                transactionItem = new TransactionItem(shopItem.Item, total);
+                transactionItem = new TransactionItem(shopItem.Item, total, shopItem.ShopItemName);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
                 _transactionScrollArea.Add(transactionItem);
@@ -353,6 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case Buttons.Accept:
                     var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
+
                     if (IsBuyGump)
                         NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
                     else
@@ -361,6 +386,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     break;
+
                 case Buttons.Clear:
 
                     foreach (var t in _transactionItems.Values.ToList())
@@ -376,11 +402,10 @@ namespace ClassicUO.Game.UI.Gumps
             Clear
         }
 
-        class ShopItem : Control
+        private class ShopItem : Control
         {
             private readonly Label _amountLabel, _name;
 
-           
             public ShopItem(Item item)
             {
                 Item = item;
@@ -395,19 +420,25 @@ namespace ClassicUO.Game.UI.Gumps
                     switch (FileManager.Animations.GetGroupIndex(item.Graphic))
                     {
                         case ANIMATION_GROUPS.AG_LOW:
-                            group = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                            group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
 
                             break;
+
                         case ANIMATION_GROUPS.AG_HIGHT:
                             group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+
                             break;
+
                         case ANIMATION_GROUPS.AG_PEOPLE:
-                            group = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                            group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
 
                             break;
                     }
 
-                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[item.Graphic].Groups[group].Direction[1];
+                    ushort graphic = item.Graphic;
+                    ushort hue2 = item.Hue;
+
+                    ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
                     FileManager.Animations.AnimID = item.Graphic;
                     FileManager.Animations.AnimGroup = group;
                     FileManager.Animations.Direction = 1;
@@ -415,12 +446,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (direction.FrameCount == 0)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
-                    Add(control = new TextureControl()
+                    Add(control = new TextureControl
                     {
-                        Texture = FileManager.Animations.GetTexture(direction.FramesHashes[0]),
-                        X = 5, Y = 5,
+                        Texture = direction.Frames[0], //FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        X = 5,
+                        Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue,
+                        Hue = item.Hue == 0 ? (Hue) hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
@@ -436,40 +468,49 @@ namespace ClassicUO.Game.UI.Gumps
                 else if (item.Serial.IsItem)
                 {
                     var texture = FileManager.Art.GetTexture(item.Graphic);
-                    Add(control = new TextureControl()
+
+                    Add(control = new TextureControl
                     {
                         Texture = texture,
-                        X = 5,
-                        Y = 5,
+                        X = 10 - texture.ImageRectangle.X,
+                        Y = 10 + texture.ImageRectangle.Y,
                         Width = texture.ImageRectangle.Width,
                         Height = texture.ImageRectangle.Height,
                         AcceptMouseInput = false,
                         ScaleTexture = false,
                         Hue = item.Hue,
-                        IsPartial = item.ItemData.IsPartialHue,
+                        IsPartial = item.ItemData.IsPartialHue
                     });
                 }
-                else 
+                else
                     return;
 
-             
+                string subname = $"{itemName} at {item.Price}gp";
 
-                Add(_name = new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9)
+                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
-                    Y = 5, X = 65
+                    Y = 0,
+                    X = 55
                 });
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9)
+                int height = Math.Max(_name.Height, control.Height) + 10;
+
+                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
-                    X = 180, Y = 20
+                    X = 168,
+                    Y = height >> 2
                 });
 
                 Width = 220;
 
 
-                Height = Math.Max(_name.Height, control.Height) + 10;
+                Height = height;
                 WantUpdateSize = false;
+
+                if (World.ClientFlags.TooltipsEnabled) SetTooltip(item);
             }
+
+            internal string ShopItemName => _name.Text;
 
 
             public Item Item { get; }
@@ -493,8 +534,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetName(string s)
             {
-                if (NameFromCliloc)
-                    _name.Text = $"{s} at {Item.Price}gp";
+                _name.Text = $"{s} at {Item.Price}gp";
+                WantUpdateSize = true;
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -518,50 +559,61 @@ namespace ClassicUO.Game.UI.Gumps
                                 group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
 
                                 break;
+
                             case ANIMATION_GROUPS.AG_HIGHT:
                                 group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
 
                                 break;
+
                             case ANIMATION_GROUPS.AG_PEOPLE:
                                 group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
 
                                 break;
                         }
 
-                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[Item.Graphic].Groups[group].Direction[1];
+                        ushort graphic = Item.Graphic;
+                        ushort hue2 = Item.Hue;
+
+                        ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
                         direction.LastAccessTime = Engine.Ticks;
                     }
                 }
             }
-
         }
 
         private class TransactionItem : Control
         {
             private readonly Label _amountLabel;
 
-            public TransactionItem(Item item, int amount)
+            public TransactionItem(Item item, int amount, string realname)
             {
                 Item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
+                Label l;
 
-                Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, font: 9)
+                Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
-                    X = 5, Y = 5
+                    X = 50,
+                    Y = 0
                 });
 
-                Add(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
+                Add(_amountLabel = new Label(amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
-                    X = 30, Y = 5
+                    X = 10,
+                    Y = 0
                 });
 
                 Button buttonAdd;
+
                 Add(buttonAdd = new Button(0, 0x37, 0x37)
                 {
-                    X = 170, Y = 5, ButtonAction = ButtonAction.Activate, ContainsByBounds = true
+                    X = 190,
+                    Y = 5,
+                    ButtonAction = ButtonAction.Activate,
+                    ContainsByBounds = true
                 }); // Plus
 
                 int status = 0;
+                const int increm = 50;
 
                 float t0 = Engine.Ticks;
 
@@ -571,8 +623,12 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t0)
                         {
-                            t0 = Engine.Ticks + 50;
+                            t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(0);
+                            _StepsDone++;
+
+                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
+                                _StepChanger++;
                         }
                     }
                     else if (Engine.Ticks > t0)
@@ -584,16 +640,25 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonAdd.MouseDown += (sender, e) =>
                 {
+                    _StepChanger = 0;
                     status = 1;
                     t0 = Engine.Ticks + 200;
                 };
-                buttonAdd.MouseUp += (sender, e) => { status = 0; };
+
+                buttonAdd.MouseUp += (sender, e) =>
+                {
+                    status = 0;
+                    _StepsDone = _StepChanger = 1;
+                };
 
 
                 Button buttonRemove;
+
                 Add(buttonRemove = new Button(1, 0x38, 0x38)
                 {
-                    X = 190, Y = 5, ButtonAction = ButtonAction.Activate,
+                    X = 210,
+                    Y = 5,
+                    ButtonAction = ButtonAction.Activate,
                     ContainsByBounds = true
                 }); // Minus
 
@@ -605,8 +670,12 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Mouse.LButtonPressed && Engine.Ticks > t1)
                         {
-                            t1 = Engine.Ticks + 50;
+                            t1 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
+                            _StepsDone++;
+
+                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
+                                _StepChanger++;
                         }
                     }
                     else if (Engine.Ticks > t1)
@@ -618,14 +687,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonRemove.MouseDown += (sender, e) =>
                 {
+                    _StepChanger = 0;
                     status = 1;
-                    t1 = Engine.Ticks + 500;
+                    t1 = Engine.Ticks + 200;
                 };
-                buttonRemove.MouseUp += (sender, e) => { status = 0; };
+
+                buttonRemove.MouseUp += (sender, e) =>
+                {
+                    status = 0;
+                    _StepsDone = _StepChanger = 1;
+                };
 
 
-                Width = 220;
-                Height = 30;
+                Width = 245;
+                Height = l.Height;
                 WantUpdateSize = false;
             }
 
@@ -649,6 +724,7 @@ namespace ClassicUO.Game.UI.Gumps
                         OnIncreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
                         break;
+
                     case 1:
                         OnDecreaseButtomClicked?.Invoke(this, EventArgs.Empty);
 
@@ -679,20 +755,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update(double totalMS, double frameMS)
             {
-                for (int i = 0; i < _gumpTexture.Length; i++)
-                    _gumpTexture[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpTexture)
+                {
+                    if (t != null)
+                        t.Ticks = (long) totalMS;
+                }
+
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-                int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                batcher.Draw2D(_gumpTexture[0], position, color);
-                batcher.Draw2DTiled(_gumpTexture[1], new Rectangle(position.X + _gumpTexture[0].Width, position.Y, middleWidth, _gumpTexture[1].Height), color);
-                batcher.Draw2D(_gumpTexture[2], new Point(position.X + Width - _gumpTexture[2].Width, position.Y), color);
+                ResetHueVector();
 
-                return base.Draw(batcher, position, hue);
+                if (IsTransparent)
+                    ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+
+                int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
+                batcher.Draw2D(_gumpTexture[0], x, y, ref _hueVector);
+                batcher.Draw2DTiled(_gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, ref _hueVector);
+                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref _hueVector);
+
+                return base.Draw(batcher, x, y);
             }
         }
     }

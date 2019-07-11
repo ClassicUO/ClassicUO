@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -70,14 +72,20 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-             Tile tile =  World.Map.GetTile(x, y, false);
+            Tile tile = World.Map.GetTile(x, y, false);
 
             if (tile == null)
                 return false;
+
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
-            for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+            GameObject obj = tile.FirstNode;
+
+            while (obj.Left != null)
+                obj = obj.Left;
+
+            for (; obj != null; obj = obj.Right)
             {
                 // TODO: custom house gump
                 Graphic graphic = obj.Graphic;
@@ -111,6 +119,7 @@ namespace ClassicUO.Game
                         }
 
                         break;
+
                     default:
                         bool canBeAdd = true;
                         bool dropFlags = false;
@@ -120,11 +129,13 @@ namespace ClassicUO.Game
                             case Mobile mobile:
 
                             {
-                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters) list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
+                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters)
+                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
                                 canBeAdd = false;
 
                                 break;
                             }
+
                             case Item item when item.IsMulti || item.ItemData.IsInternal:
 
                             {
@@ -132,11 +143,12 @@ namespace ClassicUO.Game
 
                                 break;
                             }
+
                             case Item item2:
 
-                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || (isGM && !item2.IsLocked)))
+                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                     dropFlags = true;
-                                else 
+                                else
                                     dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
 
                                 break;
@@ -202,7 +214,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            return list.Count > 0;
+            return list.Count != 0;
         }
 
         private static int CalculateMinMaxZ(ref int minZ, ref int maxZ, int newX, int newY, int currentZ, int newDirection, int stepState)
@@ -215,12 +227,11 @@ namespace ClassicUO.Game
             newY += _offsetY[direction];
             List<PathObject> list = new List<PathObject>();
 
-            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
+            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count == 0)
                 return 0;
 
-            for (int i = 0; i < list.Count; i++)
+            foreach (PathObject obj in list)
             {
-                PathObject obj = list[i];
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
@@ -284,7 +295,7 @@ namespace ClassicUO.Game
 
             // TODO: custom house gump
 
-            if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
+            if (!CreateItemList(ref list, x, y, stepState) || list.Count == 0)
                 return false;
 
             list.Sort((a, b) =>
@@ -370,7 +381,7 @@ namespace ClassicUO.Game
             return resultZ != -128;
         }
 
-        private static void GetNewXY(byte direction, ref int x, ref int y)
+        public static void GetNewXY(byte direction, ref int x, ref int y)
         {
             switch (direction & 7)
             {
@@ -381,6 +392,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 1:
 
                 {
@@ -389,6 +401,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 2:
 
                 {
@@ -396,6 +409,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 3:
 
                 {
@@ -404,6 +418,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 4:
 
                 {
@@ -411,6 +426,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 5:
 
                 {
@@ -419,6 +435,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 6:
 
                 {
@@ -426,6 +443,7 @@ namespace ClassicUO.Game
 
                     break;
                 }
+
                 case 7:
 
                 {
@@ -488,7 +506,7 @@ namespace ClassicUO.Game
 
         private static int GetGoalDistCost(Point point, int cost)
         {
-            return (Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
+            return Math.Max(Math.Abs(_endPoint.X - point.X), Math.Abs(_endPoint.Y - point.Y));
         }
 
         private static bool DoesNotExistOnOpenList(int x, int y, int z)
@@ -626,6 +644,7 @@ namespace ClassicUO.Game
                 {
                     if (direction != oldDirection)
                         continue;
+
                     int diagonal = i % 2;
 
                     if (diagonal != 0)
@@ -635,11 +654,11 @@ namespace ClassicUO.Game
                         int wantY = node.Y;
                         GetNewXY((byte) wantDirection, ref wantX, ref wantY);
 
-                        if (x != wantY || y != wantY)
+                        if (x != wantX || y != wantY)
                             diagonal = -1;
                     }
 
-                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1 + diagonal) != -1)
+                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1) != -1)
                         found = true;
                 }
             }
@@ -779,7 +798,7 @@ namespace ClassicUO.Game
 #elif JAEDAN_MOVEMENT_PATCH
             if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
 #else
-            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
+            if (AutoWalking && World.InGame && World.Player.Walker.StepsCount < Constants.MAX_STEP_COUNT && World.Player.Walker.LastStepRequestTime <= Engine.Ticks)
 #endif
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
@@ -788,10 +807,10 @@ namespace ClassicUO.Game
 
                     World.Player.GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
 
-                    if (dir == (Direction)p.Direction)
+                    if (dir == (Direction) p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction)p.Direction, Engine.Profile.Current.AlwaysRun))
+                    if (!World.Player.Walk((Direction) p.Direction, Engine.Profile.Current.AlwaysRun))
                         StopAutoWalk();
                 }
                 else

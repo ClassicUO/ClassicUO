@@ -1,8 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 
 using ClassicUO.IO.Audio.MP3Sharp;
 
@@ -10,23 +29,23 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
 {
-    class UOMusic : Sound
+    internal class UOMusic : Sound
     {
-        MP3Stream m_Stream;
-        const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
-        readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
-        bool m_Repeat;
-        bool m_Playing;
-
-        string Path => System.IO.Path.Combine(FileManager.UoFolderPath, $"Music/Digital/{Name}.mp3");
+        private const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
+        private readonly bool m_Repeat;
+        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
+        private bool m_Playing;
+        private MP3Stream m_Stream;
 
         public UOMusic(int index, string name, bool loop)
-            : base(name)
+            : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
         }
+
+        private string Path => System.IO.Path.Combine(FileManager.UoFolderPath, FileManager.ClientVersion <= ClientVersions.CV_5090 ? $"music/{Name}.mp3" : $"Music/Digital/{Name}.mp3");
 
         public void Update()
         {
@@ -39,6 +58,7 @@ namespace ClassicUO.IO.Audio
             if (m_Playing)
             {
                 int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
+
                 if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
                 {
                     if (m_Repeat)
@@ -48,15 +68,15 @@ namespace ClassicUO.IO.Audio
                     }
                     else
                     {
-                        if (bytesReturned == 0)
-                        {
-                            Stop();
-                        }
+                        if (bytesReturned == 0) Stop();
                     }
                 }
+
                 return m_WaveBuffer;
             }
+
             Stop();
+
             return null;
         }
 
@@ -67,8 +87,10 @@ namespace ClassicUO.IO.Audio
                 while (m_ThisInstance.PendingBufferCount < 3)
                 {
                     byte[] buffer = GetBuffer();
+
                     if (m_ThisInstance.IsDisposed)
                         return;
+
                     m_ThisInstance.SubmitBuffer(buffer);
                 }
             }
@@ -76,10 +98,7 @@ namespace ClassicUO.IO.Audio
 
         protected override void BeforePlay()
         {
-            if (m_Playing)
-            {
-                Stop();
-            }
+            if (m_Playing) Stop();
 
             try
             {

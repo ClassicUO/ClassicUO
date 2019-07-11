@@ -3,7 +3,7 @@
     /// <summary>
     ///     Class for layer I subbands in joint stereo mode.
     /// </summary>
-    class SubbandLayer1IntensityStereo : SubbandLayer1
+    internal class SubbandLayer1IntensityStereo : SubbandLayer1
     {
         protected internal float channel2_scalefactor;
 
@@ -51,6 +51,7 @@
             if (allocation != 0)
             {
                 sample = sample * factor + offset; // requantization
+
                 if (channels == OutputChannels.BOTH_CHANNELS)
                 {
                     float sample1 = sample * scalefactor, sample2 = sample * channel2_scalefactor;
@@ -68,6 +69,7 @@
                     filter1.input_sample(sample2, subbandnumber);
                 }
             }
+
             return true;
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -32,32 +34,32 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollFlag : Control, IScrollBar
     {
-        private const int TIME_BETWEEN_CLICKS = 500;
+        private const int TIME_BETWEEN_CLICKS = 150;
+        private readonly SpriteTexture _downButton;
+
+        private readonly bool _showButtons;
+        private readonly SpriteTexture _upButton;
+        private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Point _clickPosition;
         private int _max, _min;
-        private float _sliderPosition;
-        private float _value;
-        private float _timeUntilNextClick;
-        private readonly SpriteTexture _upButton;
-        private SpriteTexture _downButton;
-        private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Rectangle _rectUpButton, _rectDownButton;
-
-        private bool _showButtons;
+        private float _sliderPosition;
+        private float _timeUntilNextClick;
+        private float _value;
 
         public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
             X = x;
             Y = y;
             Height = height;
-            
+
             //TODO:
             _showButtons = false; // showbuttons;
         }
 
-        public ScrollFlag() : base()
+        public ScrollFlag()
         {
             AcceptMouseInput = true;
 
@@ -139,32 +141,39 @@ namespace ClassicUO.Game.UI.Controls
                 if (_timeUntilNextClick <= 0f)
                 {
                     _timeUntilNextClick += TIME_BETWEEN_CLICKS;
+
                     if (_btUpClicked)
-                        Value -= ScrollStep;
+                        Value -= ScrollStep + _StepChanger;
 
                     if (_btDownClicked)
-                        Value += ScrollStep;
+                        Value += ScrollStep + _StepChanger;
+                    _StepsDone++;
+
+                    if (_StepsDone % 4 == 0)
+                        _StepChanger++;
                 }
-                _timeUntilNextClick -= (float)totalMS;
+
+                _timeUntilNextClick -= (float) frameMS;
             }
 
 
             Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Point p = new Point(position.X, (int) (position.Y + _sliderPosition));
+            ResetHueVector();
+
             if (MaxValue != MinValue)
-                batcher.Draw2D(Texture, p, Vector3.Zero);
+                batcher.Draw2D(Texture, x, (int) (y + _sliderPosition), ref _hueVector);
 
             if (_showButtons)
             {
-                batcher.Draw2D(_upButton, position, Vector3.Zero);
-                batcher.Draw2D(_downButton, new Point(position.X, position.Y + Height), Vector3.Zero);
+                batcher.Draw2D(_upButton, x, y, ref _hueVector);
+                batcher.Draw2D(_downButton, x, y + Height, ref _hueVector);
             }
 
-            return base.Draw(batcher, p, hue);
+            return base.Draw(batcher, x, y);
         }
 
         private float GetSliderYPosition()
@@ -188,13 +197,9 @@ namespace ClassicUO.Game.UI.Controls
             _timeUntilNextClick = 0f;
 
             if (_showButtons && _rectDownButton.Contains(x, y))
-            {
                 _btDownClicked = true;
-            }
             else if (_showButtons && _rectUpButton.Contains(x, y))
-            {
                 _btUpClicked = true;
-            }
             else if (Contains(x, y))
             {
                 _btnSliderClicked = true;
@@ -210,6 +215,7 @@ namespace ClassicUO.Game.UI.Controls
             _btDownClicked = false;
             _btUpClicked = false;
             _btnSliderClicked = false;
+            _StepChanger = _StepsDone = 1;
         }
 
         protected override void OnMouseOver(int x, int y)
@@ -241,6 +247,7 @@ namespace ClassicUO.Game.UI.Controls
                     Value -= ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     Value += ScrollStep;
 
@@ -248,9 +255,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
-            y -= (int)_sliderPosition;
+            y -= (int) _sliderPosition;
 
             return Texture.Contains(x, y);
         }

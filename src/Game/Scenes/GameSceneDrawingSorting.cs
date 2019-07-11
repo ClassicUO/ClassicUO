@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,31 +18,41 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
-using Multi = ClassicUO.Game.GameObjects.Multi;
-
 namespace ClassicUO.Game.Scenes
 {
-    partial class GameScene
+    internal partial class GameScene
     {
-        private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private sbyte _maxGroundZ;
+        private int _maxZ;
+        private Vector2 _minPixel, _maxPixel;
         private bool _noDrawRoofs;
+        private int _objectHandlesCount;
+        //private WeakReference<GameObject>[] _renderList = new WeakReference<GameObject>[2000];
+
+
+        private Point _offset, _maxTile, _minTile;
+        private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
+
+        private int _renderIndex = 1;
+
+        private GameObject[] _renderList = new GameObject[2000];
+        private int _renderListCount;
 
         public void UpdateMaxDrawZ(bool force = false)
         {
@@ -69,7 +80,12 @@ namespace ClassicUO.Game.Scenes
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                GameObject obj = tile.FirstNode;
+
+                while (obj.Left != null)
+                    obj = obj.Left;
+
+                for (; obj != null; obj = obj.Right)
                 {
                     sbyte tileZ = obj.Z;
 
@@ -96,7 +112,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong)itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
+                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -112,21 +128,26 @@ namespace ClassicUO.Game.Scenes
                 by = playerY;
                 tile = World.Map.GetTile(bx, by, false);
 
-                if (tile !=null)
+                if (tile != null)
                 {
-                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    GameObject obj2 = tile.FirstNode;
+
+                    while (obj2.Left != null)
+                        obj2 = obj2.Left;
+
+                    for (; obj2 != null; obj2 = obj2.Right)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;
 
-                        if (obj is Mobile)
+                        if (obj2 is Mobile)
                             continue;
 
-                        sbyte tileZ = obj.Z;
+                        sbyte tileZ = obj2.Z;
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong)itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                            if (GameObjectHelper.TryGetStaticData(obj2, out var itemdata) && ((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();
@@ -151,139 +172,150 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private int _renderIndex = 1;
-        private int _renderListCount;
-        private int _objectHandlesCount;
-        private GameObject[] _renderList = new GameObject[2000];
-        private Point _offset, _maxTile, _minTile;
-        private Vector2 _minPixel, _maxPixel;
-        private int _maxZ;
-        private bool _updateDrawPosition;
+        private static readonly StaticTiles _emptyStaticTiles = default;
+
 
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (; obj != null; obj = obj.Right)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
-                {
+                if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
                     continue;
-                }
 
-                if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
 
-                //obj.UseInRender = 0xFF;
+                obj.UseInRender = 0xFF;
 
-                float drawX = obj.RealScreenPosition.X;
-                float drawY = obj.RealScreenPosition.Y;
+                int drawX = obj.RealScreenPosition.X;
+                int drawY = obj.RealScreenPosition.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
 
-                int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
-                bool mounted = false;
-                bool ismobile = false;
 
-                StaticTiles itemData = default;
+                StaticTiles itemData = _emptyStaticTiles;
+
                 bool changinAlpha = false;
+                bool island = false;
+                bool iscorpse =false;
+                bool ismobile = false;
 
                 switch (obj)
                 {
-                    case Mobile mob:
+                    case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
-                        mounted = mob.IsMounted;
+
                         break;
+
+                    case Land _:
+                        island = true;
+                        break;
+
+                    case Item it when it.IsCorpse:
+                        iscorpse = true;
+                        goto default;
+
                     default:
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
+
+                            if (itemData.IsFoliage && World.Season >= Seasons.Winter)
+                            {
+                                continue;
+                            }
+
                             if (obj is Static st)
                             {
-                                if (StaticFilters.IsCave(st.OriginalGraphic))
-                                {
-                                    if (Engine.Profile.Current.EnableCaveBorder && !st.IsBordered())
-                                        st.SetBorder(true);
-                                    else if (!Engine.Profile.Current.EnableCaveBorder && st.IsBordered())
-                                        st.SetBorder(false);
-                                }
-                                else if (StaticFilters.IsTree(st.OriginalGraphic))
+                                if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
                                     if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
                                     else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();
-                                }                               
+                                }
                             }
 
                             if (_noDrawRoofs && itemData.IsRoof)
                             {
                                 if (_alphaChanged)
-                                {
                                     changinAlpha = obj.ProcessAlpha(0);
-                                }
                                 else
-                                {
                                     changinAlpha = obj.AlphaHue != 0;
-                                }
 
 
                                 if (!changinAlpha)
-                                    continue;                                                  
+                                    continue;
                             }
-                        
-                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic)))
+
+                            if (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage || Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic))
                                 continue;
 
                             maxObjectZ += itemData.Height;
                         }
+
                         break;
                 }
 
-                if (maxObjectZ > maxZ)
+
+                if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
-                    break;
+                    obj.UseObjectHandles = (ismobile ||
+                                            iscorpse ||
+                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
+                                           !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
+                    _objectHandlesCount++;
                 }
+                else if (obj.ClosedObjectHandles)
+                {
+                    obj.ClosedObjectHandles = false;
+                    obj.ObjectHandlesOpened = false;
+                }
+                else if (obj.UseObjectHandles)
+                {
+                    obj.ObjectHandlesOpened = false;
+                    obj.UseObjectHandles = false;
+                }
+
+
+                if (maxObjectZ > maxZ)
+                    break;
 
                 obj.CurrentRenderIndex = _renderIndex;
 
-                bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
-                if (!ismobile && !iscorpse && itemData.IsInternal)
-                {
+                if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
-                }
 
-                bool island = !ismobile && !iscorpse && obj is Land;
+                int z = obj.Z;
 
                 if (!island && z >= _maxZ)
                 {
                     if (!changinAlpha)
                     {
                         if (_alphaChanged)
-                        {
                             changinAlpha = obj.ProcessAlpha(0);
-                        }
                         else
-                        {
                             changinAlpha = obj.AlphaHue != 0;
-                        }
 
                         if (!changinAlpha)
                             continue;
-                    } 
+                    }
                 }
 
-                int testMinZ = (int) drawY + z * 4;
-                int testMaxZ = (int) drawY;
+                int testMinZ = drawY + (z << 2);
+                int testMaxZ = drawY;
 
                 if (island)
                 {
                     Land t = obj as Land;
+
                     if (t.IsStretched)
-                        testMinZ -= t.MinZ * 4;
+                        testMinZ -= t.MinZ << 2;
                     else
                         testMinZ = testMaxZ;
                 }
@@ -293,112 +325,51 @@ namespace ClassicUO.Game.Scenes
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
-                
-                if (obj.Overheads != null && obj.Overheads.Count != 0)
-                {
-                    int offY;
 
-                    if (ismobile && !mounted || iscorpse)
-                        offY = -22;
-                    else switch (obj)
-                    {
-                        case Multi _:
-                        case Static _: offY = -44;
-
-                            break;
-                        //case Item _:
-                        //    offY = 44;
-
-                            //break;
-                        default: offY = 0;
-
-                            break;
-                    }
-
-                    for (int i = 0; i < obj.Overheads.Count; i++)
-                    {
-                        TextOverhead v = obj.Overheads[i];
-                        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                        v.Bounds.Y = offY + v.Texture.Height;
-                        v.Bounds.Width = v.Texture.Width;
-                        v.Bounds.Height = v.Texture.Height;
-                        Overheads.AddOverhead(v);
-                        offY += v.Texture.Height;
-
-                        if (_alphaChanged)
-                        {
-                            if (v.TimeToLive > 0 && v.TimeToLive <= Constants.TIME_FADEOUT_TEXT)
-                            {
-                                if (!v.IsOverlapped)
-                                    v.ProcessAlpha(0);
-                            }
-                            else if (!v.IsOverlapped && v.AlphaHue != 0xFF)
-                            {
-                                v.ProcessAlpha(0xFF);
-                            }
-                        }
-                    }
-                }
-                
+                //if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty)
+                //    Overheads.AddOverhead(obj.OverheadMessageContainer);
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (itemData.IsFoliage)
+                else if (!island && itemData.IsFoliage)
                 {
+                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
-                    if (obj is Static st)
+                    if (!check)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+                        check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
 
                         if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
-
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
-
-                        if (check)
-                        {
-
-                            Rectangle rect = new Rectangle((int)drawX - st.FrameInfo.X,
-                                                           (int)drawY - st.FrameInfo.Y,
-                                                           st.FrameInfo.Width,
-                                                           st.FrameInfo.Height);
-
-
-                            check = rect.InRect(World.Player.GetOnScreenRectangle());
-                        }
-
-                        st.CharacterIsBehindFoliage = check;
+                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
                     }
-                    else if (obj is Multi m)
+
+                    if (check)
                     {
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
+                        _rectangleObj.X = drawX - obj.FrameInfo.X;
+                        _rectangleObj.Y = drawY - obj.FrameInfo.Y;
+                        _rectangleObj.Width = obj.FrameInfo.Width;
+                        _rectangleObj.Height = obj.FrameInfo.Height;
 
-                        if (!check)
-                        {
-                            check = World.Player.Y <= worldY && World.Player.Position.X <= worldX + 1;
-
-                            if (!check)
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                        }
-
-                        if (check)
-                        {
-
-                            Rectangle rect = new Rectangle((int)drawX - m.FrameInfo.X,
-                                                           (int)drawY - m.FrameInfo.Y,
-                                                           m.FrameInfo.Width,
-                                                           m.FrameInfo.Height);
-
-
-                            check = rect.InRect(World.Player.GetOnScreenRectangle());
-                        }
-
-                        m.CharacterIsBehindFoliage = check;
+                        check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
                     }
 
+                    switch (obj)
+                    {
+                        case Static st:
+                            st.CharacterIsBehindFoliage = check;
+
+                            break;
+
+                        case Multi m:
+                            m.CharacterIsBehindFoliage = check;
+
+                            break;
+
+                        case Item it:
+                            it.CharacterIsBehindFoliage = check;
+
+                            break;
+                    }
                 }
 
                 if (_alphaChanged && !changinAlpha)
@@ -415,65 +386,117 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
-                if (useObjectHandles)
-                {
-                    obj.UseObjectHandles = (ismobile || iscorpse || obj is Item it && !it.IsLocked && !it.IsMulti) && !obj.ClosedObjectHandles;
-                    _objectHandlesCount++;
-                }
-                else if (obj.ClosedObjectHandles)
-                {
-                    obj.ClosedObjectHandles = false;
-                    obj.ObjectHandlesOpened = false;
-                }
-                else if (obj.UseObjectHandles)
-                {
-                    obj.ObjectHandlesOpened = false;
-                    obj.UseObjectHandles = false;
-                }
-                
+
+               
 
                 _renderList[_renderListCount] = obj;
-                //obj.UseInRender = (byte) _renderIndex;
+                obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
         }
+
 
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {
             int charX = entity.X;
             int charY = entity.Y;
-            int dropMaxZIndex = -1;
+            int maxZ = entity.PriorityZ;
+            byte dir = byte.MaxValue;
 
+            if (entity is Mobile mob)
+            {
+                if (mob.IsMoving)
+                {
+                    dir = mob.Steps.Back().Direction;
+                    if (dir > 0 && dir < 6)
+                        maxZ += 20;
+                }
+            }
+
+            for(int i = 0, max = (dir == 3 ? 4 : 3); i < max; i++)
+            {
+                int x, y;
+                switch (i)
+                {
+                    case 0:
+                        x = charX + 1;
+                        y = charY - 1;
+                        break;
+                    case 1:
+                        x = charX;
+                        y = charY + 1;
+                        break;
+                    case 2:
+                        x = charX + 1;
+                        y = charY;
+                        break;
+                    case 3:
+                        x = charX + 1;
+                        y = charY + 1;
+                        break;
+                    default:
+                        continue;
+                }
+                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+                    continue;
+
+                Tile tile = World.Map.GetTile(x, y);
+
+                AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, maxZ);
+            }
+
+            /*int dropMaxZIndex = -1;
 
             if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
                 dropMaxZIndex = 0;
 
-            int[,] coordinates = new int[8, 2];
-            coordinates[0, 0] = charX + 1;
-            coordinates[0, 1] = charY - 1;
-            coordinates[1, 0] = charX + 1;
-            coordinates[1, 1] = charY - 2;
-            coordinates[2, 0] = charX + 2;
-            coordinates[2, 1] = charY - 2;
-            coordinates[3, 0] = charX - 1;
-            coordinates[3, 1] = charY + 2;
-            coordinates[4, 0] = charX;
-            coordinates[4, 1] = charY + 1;
-            coordinates[5, 0] = charX + 1;
-            coordinates[5, 1] = charY;
-            coordinates[6, 0] = charX + 2;
-            coordinates[6, 1] = charY - 1;
-            coordinates[7, 0] = charX + 1;
-            coordinates[7, 1] = charY + 1;
-
             int maxZ = entity.PriorityZ;
+
 
             for (int i = 0; i < 8; i++)
             {
-                int x = coordinates[i, 0];
-                int y = coordinates[i, 1];
+                int x, y;
 
+                switch (i)
+                {
+                    case 0:
+                        x = charX + 1;
+                        y = charY - 1;
+                        break;
+                    case 1:
+                        x = charX + 1;
+                        y = charY - 2;
+                        break;
+                    case 2:
+                        x = charX + 2;
+                        y = charY - 2;
+                        break;
+                    case 3:
+                        x = charX - 1;
+                        y = charY + 2;
+                        break;
+                    case 4:
+                        x = charX;
+                        y = charY + 1;
+                        break;
+                    case 5:
+                        x = charX + 1;
+                        y = charY;
+                        break;
+                    case 6:
+                        x = charX + 2;
+                        y = charY - 1;
+                        break;
+                    case 7:
+                        x = charX + 1;
+                        y = charY + 1;
+                        break;
+                    default:
+                        continue;
+                }
+
+             
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
 
@@ -485,7 +508,7 @@ namespace ClassicUO.Game.Scenes
                     currentMaxZ += 20;
 
                 AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
-            }
+            }*/
         }
 
         private void GetViewPort()
@@ -515,8 +538,8 @@ namespace ClassicUO.Game.Scenes
             int width = (int) ((winGameWidth / 44 + 1) * Scale);
             int height = (int) ((winGameHeight / 44 + 1) * Scale);
 
-            winDrawOffsetX += (winGameScaledOffsetX >> 1);
-            winDrawOffsetY += (winGameScaledOffsetY >> 1);
+            winDrawOffsetX += winGameScaledOffsetX >> 1;
+            winDrawOffsetY += winGameScaledOffsetY >> 1;
 
             const int MAX = 70;
 
@@ -528,19 +551,19 @@ namespace ClassicUO.Game.Scenes
 
             int size = Math.Max(width, height);
 
-            int realMinRangeX = World.Player.Position.X - size;
+            int realMinRangeX = World.Player.X - size;
 
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = World.Player.Position.X + size;
+            int realMaxRangeX = World.Player.X + size;
 
             //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
             //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
-            int realMinRangeY = World.Player.Position.Y - size;
+            int realMinRangeY = World.Player.Y - size;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Position.Y + size;
+            int realMaxRangeY = World.Player.Y + size;
 
             //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
@@ -569,8 +592,8 @@ namespace ClassicUO.Game.Scenes
             int maxPixelsX = (int) newMaxX;
             int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY + maxY));
             int maxPixlesY = (int) newMaxY;
-            if (_updateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) _updateDrawPosition = true;
 
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) UpdateDrawPosition = true;
 
             _minTile.X = realMinRangeX;
             _minTile.Y = realMinRangeY;
@@ -584,6 +607,9 @@ namespace ClassicUO.Game.Scenes
 
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
+
+
+            UpdateMaxDrawZ();
         }
     }
 }

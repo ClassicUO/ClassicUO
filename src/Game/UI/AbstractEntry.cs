@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -28,21 +29,19 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    abstract class AbstractEntry : IDisposable
+    internal abstract class AbstractEntry
     {
+        private int? _height;
+        private bool _isChanged;
+        private bool _isSelection;
+
+        private (int, int) _selectionArea;
+
         protected AbstractEntry(int maxcharlength, int width, int maxWidth)
         {
-            MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
+            MaxCharCount = maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
-        }
-
-        public void Dispose()
-        {
-            RenderText?.Dispose();
-            RenderText = null;
-            RenderCaret?.Dispose();
-            RenderCaret = null;
         }
 
         public RenderedText RenderText { get; protected set; }
@@ -52,37 +51,105 @@ namespace ClassicUO.Game.UI
         public Point CaretPosition { get; set; }
         public int CaretIndex { get; protected set; }
 
-        public abstract string Text { get; set; }
+        public ushort Hue
+        {
+            get => RenderText.Hue;
+            set
+            {
+                if (RenderText.Hue != value)
+                {
+                    RenderCaret.Hue = RenderText.Hue = value;
+                    RenderText.CreateTexture();
+                    RenderCaret.CreateTexture();
+                }
+            }
+        }
 
-        public bool IsChanged { get; protected set; }
+        public virtual string Text
+        {
+            get => RenderText.Text;
+            set
+            {
+                RenderText.Text = value;
+                IsChanged = true;
+            }
+        }
+
+        public bool IsChanged
+        {
+            get => _isChanged;
+            protected set
+            {
+                _selectionArea = (0, 0);
+                _isChanged = value;
+            }
+        }
 
         public int MaxCharCount { get; }
 
         public int Width { get; }
-        public int Height => RenderText.Height < 25 ? 25 : RenderText.Height;
+        public int Height => _height.HasValue && _height.Value > RenderText.Height ? _height.Value : RenderText.Height < 15 ? 15 : RenderText.Height;
 
         public int MaxWidth { get; }
 
         public int Offset { get; set; }
 
-        public void RemoveChar(bool fromleft)
+        public void SetHeight(int h)
         {
-            if (fromleft)
+            _height = h;
+        }
+
+        public void Destroy()
+        {
+            RenderText?.Destroy();
+            RenderText = null;
+            RenderCaret?.Destroy();
+            RenderCaret = null;
+        }
+
+        public bool RemoveChar(bool fromleft)
+        {
+            int start = -1, end = CaretIndex;
+
+            if (_selectionArea != (0, 0))
+            {
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
+                if (start != -1)
+                {
+                    if (start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+
+                    CaretIndex = start;
+                }
+                else
+                    return false;
+            }
+            else if (fromleft)
             {
                 if (CaretIndex < 1)
-                    return;
+                    return false;
+
                 CaretIndex--;
             }
             else
             {
                 if (CaretIndex >= Text.Length)
-                    return;
+                    return false;
             }
 
-            if (CaretIndex < Text.Length)
+            if (start != -1)
+                Text = Text.Remove(start, end - start);
+            else if (CaretIndex < Text.Length)
                 Text = Text.Remove(CaretIndex, 1);
             else if (CaretIndex > Text.Length)
                 Text = Text.Remove(Text.Length - 1);
+
+            return true;
         }
 
         public void SeekCaretPosition(int value)
@@ -114,9 +181,9 @@ namespace ClassicUO.Game.UI
             int x, y;
 
             if (RenderText.IsUnicode)
-                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             CaretPosition = new Point(x, y);
 
             if (Offset > 0)
@@ -135,17 +202,127 @@ namespace ClassicUO.Game.UI
                 IsChanged = false;
         }
 
-        public void OnMouseClick(int x, int y)
+        public void OnDraw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (_isSelection)
+            {
+                Vector3 hue = Vector3.Zero;
+                ShaderHuesTraslator.GetHueVector(ref hue, 222, false, 0.5f);
+
+                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionArea.Item1 + x, _selectionArea.Item2 + y, Mouse.Position.X - (_selectionArea.Item1 + x), Mouse.Position.Y - (_selectionArea.Item2 + y), ref hue);
+            }
+            else if (_selectionArea != (0, 0))
+            {
+                int start = -1, end = CaretIndex;
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
+                if (start != -1)
+                {
+                    if (start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+
+                    for (int i = start; i <= end; i++)
+                    {
+                        int rx;
+                        int ry;
+
+                        if (RenderText.IsUnicode)
+                            (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                        else
+                            (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                        RenderCaret.Draw(batcher, x + rx, y + ry);
+                    }
+                }
+            }
+        }
+
+        public void OnMouseClick(int x, int y, bool mouseclick = true)
         {
             int oldPos = CaretIndex;
 
-            if (RenderText.IsUnicode)
-                CaretIndex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
-            else
-                CaretIndex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort)RenderText.FontStyle);
+            CaretIndex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
+
+            if (mouseclick && World.InGame && Engine.Profile.Current.EnableSelectionArea)
+            {
+                _selectionArea = (x, y);
+                _isSelection = true;
+            }
+        }
+
+        internal void OnSelectionEnd(int x, int y)
+        {
+            int endindex = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+            _isSelection = false;
+
+            if (endindex == CaretIndex)
+            {
+                _selectionArea = (0, 0);
+
+                return;
+            }
+
+            CaretIndex = endindex;
+            UpdateCaretPosition();
+        }
+
+        internal (int, int) GetSelectionArea()
+        {
+            int start = -1, end = CaretIndex;
+
+            if (_selectionArea != (0, 0))
+            {
+                start = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
+                if (start != -1)
+                {
+                    if (start > end)
+                    {
+                        int copy = start;
+                        start = end;
+                        end = copy;
+                    }
+
+                    CaretIndex = start;
+                }
+            }
+
+            return (start, end);
+        }
+
+        internal string GetSelectionText(bool remove)
+        {
+            if (_selectionArea == (0, 0))
+                return string.Empty;
+
+            int endidx = CaretIndex;
+            int startidx = RenderText.IsUnicode ? FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle) : FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, _selectionArea.Item1, _selectionArea.Item2, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+
+            if (startidx > CaretIndex)
+            {
+                int copy = startidx;
+                startidx = endidx;
+                endidx = copy;
+            }
+            else if (startidx == endidx || endidx == 0) return string.Empty;
+
+            string str = Text.Substring(startidx, endidx - startidx);
+
+            if (remove)
+            {
+                Text = Text.Remove(startidx, endidx - startidx);
+
+                if (CaretIndex > startidx)
+                    CaretIndex -= endidx - startidx;
+            }
+
+            return str;
         }
 
         public void Clear()

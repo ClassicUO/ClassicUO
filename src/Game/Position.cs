@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 namespace ClassicUO.Game
 {
-    internal struct Position
+    internal readonly struct Position
     {
         public static readonly Position INVALID = new Position(0xFFFF, 0xFFFF);
 
@@ -33,9 +36,9 @@ namespace ClassicUO.Game
             Z = z;
         }
 
-        public ushort X;
-        public ushort Y;
-        public sbyte Z;
+        public readonly ushort X;
+        public readonly ushort Y;
+        public readonly sbyte Z;
 
         public static bool operator ==(Position p1, Position p2)
         {

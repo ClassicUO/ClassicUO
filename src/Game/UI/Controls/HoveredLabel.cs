@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Resources;
@@ -36,7 +38,6 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-
         public override void Update(double totalMS, double frameMS)
         {
             if (MouseIsOver)
@@ -50,6 +51,5 @@ namespace ClassicUO.Game.UI.Controls
 
             base.Update(totalMS, frameMS);
         }
-
     }
 }

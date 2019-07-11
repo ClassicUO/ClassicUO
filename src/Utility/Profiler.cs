@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,22 +59,22 @@ namespace ClassicUO.Utility
 
             if (m_ThisFrameData.Count > 0)
             {
-                for (int i = 0; i < m_ThisFrameData.Count; i++)
+                foreach (Tuple<string[], double> t in m_ThisFrameData)
                 {
                     bool added = false;
 
-                    for (int j = 0; j < m_AllFrameData.Count; j++)
+                    foreach (ProfileData t1 in m_AllFrameData)
                     {
-                        if (m_AllFrameData[j].MatchesContext(m_ThisFrameData[i].Item1))
+                        if (t1.MatchesContext(t.Item1))
                         {
-                            m_AllFrameData[j].AddNewHitLength(m_ThisFrameData[i].Item2);
+                            t1.AddNewHitLength(t.Item2);
                             added = true;
 
                             break;
                         }
                     }
 
-                    if (!added) m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
+                    if (!added) m_AllFrameData.Add(new ProfileData(t.Item1, t.Item2));
                 }
 
                 m_ThisFrameData.Clear();
@@ -84,6 +87,7 @@ namespace ClassicUO.Utility
         {
             if (!Engine.GlobalSettings.Profiler)
                 return;
+
             LastFrameTimeMS = (_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d / Stopwatch.Frequency;
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
         }
@@ -92,6 +96,7 @@ namespace ClassicUO.Utility
         {
             if (!Engine.GlobalSettings.Profiler)
                 return;
+
             m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
         }
 
@@ -99,6 +104,7 @@ namespace ClassicUO.Utility
         {
             if (!Engine.GlobalSettings.Profiler)
                 return;
+
             if (m_Context[m_Context.Count - 1].Name != context_name)
                 Log.Message(LogTypes.Error, "Profiler.ExitProfiledContext: context_name does not match current context.");
             string[] context = new string[m_Context.Count];
@@ -125,6 +131,7 @@ namespace ClassicUO.Utility
         {
             if (!Engine.GlobalSettings.Profiler)
                 return ProfileData.Empty;
+
             for (int i = 0; i < m_AllFrameData.Count; i++)
             {
                 if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
@@ -198,7 +205,7 @@ namespace ClassicUO.Utility
             }
         }
 
-        private struct ContextAndTick
+        private readonly struct ContextAndTick
         {
             public readonly string Name;
             public readonly long Tick;

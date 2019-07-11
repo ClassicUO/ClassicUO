@@ -1,52 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
-using Multi = ClassicUO.Game.GameObjects.Multi;
-
 namespace ClassicUO.Utility
 {
     internal static class GameObjectHelper
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
-        {           
+        {
             switch (obj)
             {
                 case Static st:
-                    if (st.OriginalGraphic != st.Graphic)
-                        itemdata = FileManager.TileData.StaticData[st.OriginalGraphic];
-                    else
-                        itemdata = st.ItemData;
+                    itemdata = st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] : st.ItemData;
+
                     return true;
+
                 case Item item:
                     itemdata = item.ItemData;
+
                     return true;
+
                 case Multi multi:
                     itemdata = multi.ItemData;
+
                     return true;
-                //case AnimatedItemEffect ef when ef.Source is Static s:
-                //    itemdata = s.ItemData;
-                //    return true;
+
+                case AnimatedItemEffect ef when ef.Source is Static s:
+                    itemdata = s.ItemData;
+
+                    return true;
+
                 default:
                     itemdata = default;
+
                     return false;
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsStaticItem(GameObject obj) => obj is Static || obj is Item;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsNoDrawable(ushort g)
         {
             switch (g)
@@ -65,7 +60,7 @@ namespace ClassicUO.Utility
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
 
-                ref StaticTiles data = ref FileManager.TileData.StaticData[g];
+                ref readonly StaticTiles data = ref FileManager.TileData.StaticData[g];
 
                 if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }

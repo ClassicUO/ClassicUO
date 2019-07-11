@@ -1,21 +1,41 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using SDL2;
 
 namespace ClassicUO.Game.Managers
 {
-    class HotKeyCombination
+    internal class HotKeyCombination
     {
-        public SDL2.SDL.SDL_Keycode Key { get; set; }
-        public SDL2.SDL.SDL_Keymod Mod { get; set; }
+        public SDL.SDL_Keycode Key { get; set; }
+        public SDL.SDL_Keymod Mod { get; set; }
         public HotkeyAction KeyAction { get; set; }
     }
 
-    class HotkeysManager
+    internal class HotkeysManager
     {
         private readonly Dictionary<HotkeyAction, Action> _actions = new Dictionary<HotkeyAction, Action>();
 
@@ -23,7 +43,6 @@ namespace ClassicUO.Game.Managers
 
         public HotkeysManager()
         {
-
             Add(HotkeyAction.CastClumsy, () => GameActions.CastSpell(1));
             Add(HotkeyAction.CastCreateFood, () => GameActions.CastSpell(2));
             Add(HotkeyAction.CastFeeblemind, () => GameActions.CastSpell(3));
@@ -173,23 +192,23 @@ namespace ClassicUO.Game.Managers
             Add(HotkeyAction.CastNetherCyclone, () => GameActions.CastSpell(692));
             Add(HotkeyAction.CastRisingColossus, () => GameActions.CastSpell(693));
 
+
+            Add(HotkeyAction.CastInspire, () => GameActions.CastSpell(701));
+            Add(HotkeyAction.CastInvigorate, () => GameActions.CastSpell(702));
+            Add(HotkeyAction.CastResilience, () => GameActions.CastSpell(703));
+            Add(HotkeyAction.CastPerseverance, () => GameActions.CastSpell(704));
+            Add(HotkeyAction.CastTribulation, () => GameActions.CastSpell(705));
+            Add(HotkeyAction.CastDespair, () => GameActions.CastSpell(706));
         }
 
 
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-
-            for (int i = 0; i < _hotkeys.Count; i++)
-            {
-                var h = _hotkeys[i];
-
+            foreach (HotKeyCombination h in _hotkeys)
                 if (h.Key == key && h.Mod == mod)
-                {
                     return false;
-                }
-            }
 
-            _hotkeys.Add(new HotKeyCombination()
+            _hotkeys.Add(new HotKeyCombination
             {
                 Key = key,
                 Mod = mod,
@@ -208,6 +227,7 @@ namespace ClassicUO.Game.Managers
                 if (h.KeyAction == action)
                 {
                     _hotkeys.RemoveAt(i);
+
                     break;
                 }
             }
@@ -215,7 +235,6 @@ namespace ClassicUO.Game.Managers
 
         public bool TryExecuteIfBinded(SDL.SDL_Keycode key, SDL.SDL_Keymod mod, out Action action)
         {
-
             for (int i = 0; i < _hotkeys.Count; i++)
             {
                 var h = _hotkeys[i];
@@ -225,11 +244,12 @@ namespace ClassicUO.Game.Managers
                     if (_actions.TryGetValue(h.KeyAction, out action))
                         return true;
 
-                   break;
+                    break;
                 }
             }
 
             action = null;
+
             return false;
         }
 
@@ -242,7 +262,6 @@ namespace ClassicUO.Game.Managers
         {
             _actions.Add(action, handler);
         }
-
     }
 
     internal enum HotkeyAction
@@ -421,6 +440,17 @@ namespace ClassicUO.Game.Managers
 
         #endregion
 
+        #region Bardic
+
+        CastInspire,
+        CastInvigorate,
+        CastResilience,
+        CastPerseverance,
+        CastTribulation,
+        CastDespair,
+
+        #endregion
+
         #region Skills
 
         UseSkillAnatomy,
@@ -559,6 +589,5 @@ namespace ClassicUO.Game.Managers
         EquipLastWeapon,
 
         #endregion
-
     }
 }

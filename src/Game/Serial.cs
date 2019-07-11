@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -25,11 +28,6 @@ namespace ClassicUO.Game
 {
     internal readonly struct Serial : IComparable<uint>
     {
-        public bool Equals(Serial other)
-        {
-            return Value == other.Value;
-        }
-
         public const uint INVALID = 0;
         public const uint MINUS_ONE = 0xFFFF_FFFF;
 
@@ -93,14 +91,23 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj == null) return false;
 
             return obj is Serial other && Equals(other);
         }
 
+        public bool Equals(Serial other)
+        {
+            return Value == other.Value;
+        }
+
         public static Serial Parse(string str)
         {
-            if (str.StartsWith("0x")) return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            if (str.StartsWith("0x"))
+                return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+
+            if (str.Length > 1 && str[0] == '-')
+                return (uint) int.Parse(str);
 
             return uint.Parse(str);
         }

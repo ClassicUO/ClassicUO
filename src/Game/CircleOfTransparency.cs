@@ -1,21 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
 {
-    class CircleOfTransparency
+    internal class CircleOfTransparency
     {
+        private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState
+            {
+                DepthBufferEnable = false,
+                StencilEnable = true,
+                StencilFunction = CompareFunction.Always,
+                ReferenceStencil = 0,
+                StencilFail = StencilOperation.Keep,
+                StencilDepthBufferFail = StencilOperation.Keep,
+                StencilPass = StencilOperation.Replace
+            };
+
+
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState blend = BlendState.AlphaBlend;
+            blend.ColorWriteChannels = ColorWriteChannels.Alpha;
+
+            return blend;
+        });
+
+
         private Texture2D _texture;
         private short _width, _height;
+
+        private DepthStencilState s1 = new DepthStencilState
+        {
+            StencilEnable = true,
+            StencilFunction = CompareFunction.Always,
+            StencilPass = StencilOperation.Replace,
+            ReferenceStencil = 0,
+            DepthBufferEnable = true
+        };
 
         private CircleOfTransparency(int radius)
         {
@@ -28,11 +80,11 @@ namespace ClassicUO.Game
         public short Width => _width;
         public short Height => _height;
 
+        public static CircleOfTransparency Circle { get; private set; }
 
-        private uint[] CreateTexture(int radius, ref short width, ref short height)
+
+        public static uint[] CreateTexture(int radius, ref short width, ref short height)
         {
-            _texture?.Dispose();
-
             int fixRadius = radius + 1;
             int mulRadius = fixRadius * 2;
 
@@ -44,87 +96,80 @@ namespace ClassicUO.Game
             for (int x = -fixRadius; x < fixRadius; x++)
             {
                 int mulX = x * x;
-                int posX = ((x + fixRadius) * mulRadius) + fixRadius;
+                int posX = (x + fixRadius) * mulRadius + fixRadius;
 
                 for (int y = -fixRadius; y < fixRadius; y++)
                 {
-                    int r = (int) Math.Sqrt(mulX + (y * y));
+                    int r = (int) Math.Sqrt(mulX + y * y);
 
-                    uint pic = (uint)((r <= radius) ? ((radius - r) & 0xFF) : 0);
+                    uint pic = (uint) (r <= radius ? (radius - r) & 0xFF : 0);
 
                     int pos = posX + y;
 
-                    pixels[pos] = HuesHelper.RgbaToArgb(pic);
+                    pixels[pos] = pic;
                 }
             }
 
             return pixels;
         }
 
-        private readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState();
-
-            state.DepthBufferEnable = true;
-            state.StencilEnable = true;
-            state.StencilFunction = CompareFunction.Always;
-            state.ReferenceStencil = 1;
-            state.StencilMask = 1;
-
-            state.StencilFail = StencilOperation.Keep;
-            state.StencilDepthBufferFail = StencilOperation.Keep;
-            state.StencilPass = StencilOperation.Replace;
-
-            return state;
-        });
-
-        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState blend = new BlendState();
-            blend.ColorWriteChannels = ColorWriteChannels.Alpha;
-            return blend;
-        });
-        public void Draw(Batcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
             {
-                X = x - Width / 2;
-                Y = y - Height / 2;
+                X = x - (Width >> 1);
+                Y = y - (Height >> 1);
 
-                batcher.SetBlendState(_checkerBlend.Value);
+                batcher.Begin();
                 batcher.SetStencil(_stencil.Value);
+                //batcher.SetBlendState(_checkerBlend.Value);
 
-                batcher.Draw2D(_texture, new Point(X, Y), new Vector3(20, 1, 0));
+                BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
+                //batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
+                BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
 
-                batcher.SetBlendState(null);
+
+                //batcher.SetBlendState(null);
                 batcher.SetStencil(null);
 
+                batcher.End();
             }
         }
 
-
-        private static CircleOfTransparency _circle;
-
-        public static CircleOfTransparency Circle=> _circle;
-
         public static CircleOfTransparency Create(int radius)
         {
-            if (_circle == null)
-                _circle = new CircleOfTransparency(radius);
+            if (Circle == null)
+                Circle = new CircleOfTransparency(radius);
             else
             {
-                _circle._texture.Dispose();
-                _circle._texture = null;
+                Circle._texture.Dispose();
+                Circle._texture = null;
             }
 
-            uint[] pixels = _circle.CreateTexture(radius, ref _circle._width, ref _circle._height);
+            uint[] pixels = CreateTexture(radius, ref Circle._width, ref Circle._height);
 
-            _circle.Radius = radius;
+            //for (int i = 0; i < pixels.Length; i++)
+            //{
+            //    ref uint pixel = ref pixels[i];
 
-            _circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, _circle._width, _circle.Height, false, SurfaceFormat.Color);
-            _circle._texture.SetData(pixels);
+            //    if (pixel != 0)
+            //    {
+            //        ushort value = (ushort)(pixel << 3);
 
-            return _circle;
+            //        if (value > 0xFF)
+            //            value = 0xFF;
+
+            //        pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+            //    }
+            //}
+
+
+            Circle.Radius = radius;
+
+            Circle._texture = new Texture2D(Engine.Batcher.GraphicsDevice, Circle._width, Circle.Height);
+            Circle._texture.SetData(pixels);
+
+            return Circle;
         }
     }
 }

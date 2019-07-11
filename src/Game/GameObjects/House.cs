@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
+
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -38,24 +42,42 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom { get; set; }
 
+
+        public bool Equals(Serial other)
+        {
+            return Serial == other;
+        }
+
         public void Generate(bool recalculate = false)
         {
             Item item = World.Items.Get(Serial);
 
-            Components.ForEach(s =>
+            foreach (Multi s in Components)
             {
-                if (recalculate && item != null)
-                    s.Position = item.Position + s.MultiOffset;
+                if (item != null)
+                {
+                    if (recalculate)
+                        s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
+                    s.Hue = item.Hue;
+                }
+
                 s.AddToTile();
-            });
+            }
         }
-
-
-        public bool Equals(Serial other) => Serial == other;
 
         public void ClearComponents()
         {
-            Components.ForEach(s => s.Dispose());
+            Item item = World.Items.Get(Serial);
+
+            if (item != null && !item.IsDestroyed)
+                item.WantUpdateMulti = true;
+
+
+            foreach (Multi s in Components)
+            {
+                s.Destroy();
+            }
+
             Components.Clear();
         }
     }

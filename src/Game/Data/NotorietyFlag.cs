@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
 
 namespace ClassicUO.Game.Data
 {
@@ -46,22 +47,28 @@ namespace ClassicUO.Game.Data
                 case NotorietyFlag.Innocent:
 
                     return Engine.Profile.Current.InnocentHue;
+
                 case NotorietyFlag.Ally:
 
                     return Engine.Profile.Current.FriendHue;
+
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
 
                     return Engine.Profile.Current.CriminalHue;
+
                 case NotorietyFlag.Enemy:
 
                     return Engine.Profile.Current.EnemyHue;
+
                 case NotorietyFlag.Murderer:
 
                     return Engine.Profile.Current.MurdererHue;
+
                 case NotorietyFlag.Invulnerable:
 
                     return 0x0034;
+
                 default:
 
                     return 0;
@@ -75,22 +82,28 @@ namespace ClassicUO.Game.Data
                 case NotorietyFlag.Innocent:
 
                     return "<basefont color=\"cyan\">";
+
                 case NotorietyFlag.Ally:
 
                     return "<basefont color=\"lime\">";
+
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
 
                     return "<basefont color=\"gray\">";
+
                 case NotorietyFlag.Enemy:
 
                     return "<basefont color=\"orange\">";
+
                 case NotorietyFlag.Murderer:
 
                     return "<basefont color=\"red\">";
+
                 case NotorietyFlag.Invulnerable:
 
                     return "<basefont color=\"yellow\">";
+
                 default:
 
                     return string.Empty;

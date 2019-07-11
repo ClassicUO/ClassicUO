@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
-using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -33,8 +33,8 @@ namespace ClassicUO.Renderer
 {
     internal class SpriteTexture : Texture2D
     {
-        private bool[] _hitMap;
         private readonly bool _is32Bit;
+        private bool[] _hitMap;
 
         public SpriteTexture(int width, int height, bool is32bit = true) : base(Engine.Batcher.GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
@@ -50,17 +50,21 @@ namespace ClassicUO.Renderer
             int size = Width * Height;
             _hitMap = new bool[size];
 
-            int pos = 0;
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    _hitMap[pos] = data[pos] != 0;
-                    pos++;
-                }
-            }
+            for (int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
 
             SetData(data);
+        }
+
+        public unsafe void SetDataHitMap16(ushort* data)
+        {
+            int size = Width * Height;
+            _hitMap = new bool[size];
+
+            for (int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
+
+            SetDataPointerEXT(0, new Rectangle(0, 0, Width, Height), (IntPtr) data, size);
         }
 
         public void SetDataHitMap32(uint[] data)
@@ -68,15 +72,8 @@ namespace ClassicUO.Renderer
             int size = Width * Height;
             _hitMap = new bool[size];
 
-            int pos = 0;
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    _hitMap[pos] = data[pos] != 0;
-                    pos++;
-                }
-            }
+            for (int i = size - 1; i >= 0; --i)
+                _hitMap[i] = data[i] != 0;
 
             SetData(data);
         }
@@ -88,11 +85,12 @@ namespace ClassicUO.Renderer
                 if (!pixelCheck)
                     return true;
 
-                int pos = (y * Width) + x;
+                int pos = y * Width + x;
 
                 if (pos < _hitMap.Length)
                     return _hitMap[pos];
             }
+
             return false;
         }
 

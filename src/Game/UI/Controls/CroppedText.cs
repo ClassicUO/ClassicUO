@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System.Collections.Generic;
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -44,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
         }
 
-        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))
+        public CroppedText(List<string> parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -52,17 +54,17 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            _gameText.Draw(batcher, position);
+            _gameText.Draw(batcher, x, y);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            _gameText?.Dispose();
+            _gameText?.Destroy();
         }
     }
 }

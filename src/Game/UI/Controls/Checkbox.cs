@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -47,12 +49,12 @@ namespace ClassicUO.Game.UI.Controls
             if (_textures[0] == null || _textures[1] == null)
             {
                 Dispose();
+
                 return;
             }
 
-            ref SpriteTexture t = ref _textures[INACTIVE];
+            SpriteTexture t = _textures[INACTIVE];
             Width = t.Width;
-            //Height = t.Height;
 
             _text = new RenderedText
             {
@@ -60,13 +62,12 @@ namespace ClassicUO.Game.UI.Controls
             };
             Width += _text.Width;
 
-            
             Height = Math.Max(t.Width, _text.Height);
             CanMove = false;
             AcceptMouseInput = true;
         }
 
-        public Checkbox(string[] parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Checkbox(List<string> parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -95,20 +96,25 @@ namespace ClassicUO.Game.UI.Controls
         {
             for (int i = 0; i < _textures.Length; i++)
             {
-                if (_textures[i] != null)
-                    _textures[i].Ticks = (long) totalMS;
+                SpriteTexture t = _textures[i];
+
+                if (t != null)
+                    t.Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
-            bool ok = base.Draw(batcher, position);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
-            _text.Draw(batcher, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));
+
+            ResetHueVector();
+
+            bool ok = base.Draw(batcher, x, y);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref _hueVector);
+            _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
             return ok;
         }
@@ -118,18 +124,16 @@ namespace ClassicUO.Game.UI.Controls
             ValueChanged.Raise(this);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
-            {
                 IsChecked = !IsChecked;
-            }
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            _text?.Dispose();
+            _text?.Destroy();
         }
     }
 }

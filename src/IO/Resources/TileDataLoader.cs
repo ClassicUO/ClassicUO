@@ -1,20 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class TileDataLoader : ResourceLoader
+    internal class TileDataLoader : ResourceLoader
     {
-        public LandTiles[] LandData { get; private set; }
-        public StaticTiles[] StaticData { get; private set; }
+        private static StaticTiles[] _staticData;
+        private static LandTiles[] _landData;
+
+        public ref readonly LandTiles[] LandData => ref _landData;
+        public ref readonly StaticTiles[] StaticData => ref _staticData;
 
         public override void Load()
         {
@@ -22,15 +45,16 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-            UOFileMul tiledata = new UOFileMul(path, false);
+
+            UOFileMul tiledata = new UOFileMul(path);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-            int staticscount = !isold ? (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
             tiledata.Seek(0);
-            LandData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
-            StaticData = new StaticTiles[staticscount * 32];
+            _landData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _staticData = new StaticTiles[staticscount * 32];
             byte[] bufferString = new byte[20];
 
             for (int i = 0; i < 512; i++)
@@ -41,6 +65,7 @@ namespace ClassicUO.IO.Resources
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
                         goto END;
+
                     int idx = i * 32 + j;
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     ushort textId = tiledata.ReadUShort();
@@ -50,18 +75,20 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-        END:
+            END:
 
             for (int i = 0; i < staticscount; i++)
             {
                 if (tiledata.Position >= tiledata.Length)
-                    goto END_2;
+                    break;
+
                 tiledata.Skip(4);
 
                 for (int j = 0; j < 32; j++)
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
                         goto END_2;
+
                     int idx = i * 32 + j;
 
                     ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
@@ -78,10 +105,6 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
                 }
             }
-
-        END_2:
-            tiledata.Dispose();
-
 
 
             //path = Path.Combine(FileManager.UoFolderPath, "tileart.uop");
@@ -201,82 +224,72 @@ namespace ClassicUO.IO.Resources
             //        }
 
 
-
             //        if (StaticData[tileID].AnimID == 0)
             //        {
             //            //StaticData[tileID] = new StaticTiles(flags, 0, 0, 0, );
             //        }
-                   
-                  
+
+
             //    }
 
             //    uop.Dispose();
             //    reader.ReleaseData();
             //}
 
-            //string pathdef = Path.Combine(FileManager.UoFolderPath, "FileManager.Art.def");
-            //if (!File.Exists(pathdef))
-            //    return;
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
 
-            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-            //{
-            //    string line;
-            //    while ((line = reader.ReadLine()) != null)
-            //    {
-            //        line = line.Trim();
-            //        if (line.Length <= 0 || line[0] == '#')
-            //            continue;
-            //        string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
-            //        if (defs.Length < 2)
-            //            continue;
+            if (File.Exists(pathdef))
+            {
+                using (DefReader reader = new DefReader(pathdef, 1))
+                {
+                    while (reader.Next())
+                    {
+                        int index = reader.ReadInt();
 
-            //        int index = int.Parse(defs[0]);
+                        if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                            continue;
 
-            //        if (index < 0 || index >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-            //            continue;
+                        int[] group = reader.ReadGroup();
 
-            //        int first = defs[1].IndexOf("{");
-            //        int last = defs[1].IndexOf("}");
+                        for (int i = 0; i < group.Length; i++)
+                        {
+                            int checkIndex = group[i];
 
-            //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                                continue;
 
-            //        foreach (string s in newdef)
-            //        {
-            //            int checkindex = int.Parse(s);
+                            if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < LandData.Length && index < LandData.Length && !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
+                            {
+                                LandData[index] = LandData[checkIndex];
 
-            //            if (checkindex < 0 || checkindex >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-            //                continue;
+                                break;
+                            }
 
-            //            //_file.Entries[index] = _file.Entries[checkindex];
+                            if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                            {
+                                checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
+                                checkIndex &= 0x3FFF;
+                                index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
 
-            //            if (index < MAX_LAND_DATA_INDEX_COUNT && checkindex < MAX_LAND_DATA_INDEX_COUNT && LandData.Length > checkindex && !LandData[checkindex].Equals(default) && (LandData.Length <= index  || LandData[index].Equals(default)))
-            //            {
-            //                LandData[index] = LandData[checkindex];
-            //            }
-            //            else if (index >= MAX_LAND_DATA_INDEX_COUNT && checkindex >= MAX_LAND_DATA_INDEX_COUNT)
-            //            {
-            //                checkindex -= MAX_LAND_DATA_INDEX_COUNT;
-            //                checkindex &= 0x3FFF;
-            //                index -= MAX_LAND_DATA_INDEX_COUNT;
+                                if (StaticData[index].Equals(default) && !StaticData[checkIndex].Equals(default))
+                                {
+                                    StaticData[index] = StaticData[checkIndex];
 
-            //                if ( (StaticData.Length <= index || StaticData[index].Equals(default)) &&
-            //                    StaticData.Length > checkindex && !StaticData[checkindex].Equals(default))
-            //                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-            //                    StaticData[index] = StaticData[checkindex];
-
-            //                    break;
-            //                }
-
-            //            }
-            //        }
-            //    }
-            //}
+            END_2:
+            tiledata.Dispose();
         }
 
         protected override void CleanResources()
         {
-            throw new NotImplementedException();
+            // nothing
         }
     }
 
@@ -284,19 +297,22 @@ namespace ClassicUO.IO.Resources
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
-            Flags = (TileFlag)flags;
+            Flags = (TileFlag) flags;
             TexID = textId;
             Name = name;
+
+            IsWet = (Flags & TileFlag.Wet) != 0;
+            IsImpassable = (Flags & TileFlag.Impassable) != 0;
+            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
         }
 
         public readonly TileFlag Flags;
         public readonly ushort TexID;
         public readonly string Name;
 
-        public bool IsWet => (Flags & TileFlag.Wet) != 0;
-        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
-        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
-
+        public readonly bool IsWet;
+        public readonly bool IsImpassable;
+        public readonly bool IsNoDiagonal;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -309,11 +325,9 @@ namespace ClassicUO.IO.Resources
 
     internal readonly struct StaticTiles
     {
-        public static readonly StaticTiles Empty = default;
-
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
-            Flags = (TileFlag)flags;
+            Flags = (TileFlag) flags;
             Weight = weight;
             Layer = layer;
             Count = count;
@@ -322,6 +336,27 @@ namespace ClassicUO.IO.Resources
             LightIndex = lightIndex;
             Height = height;
             Name = name;
+
+            IsAnimated = (Flags & TileFlag.Animation) != 0;
+            IsBridge = (Flags & TileFlag.Bridge) != 0;
+            IsImpassable = (Flags & TileFlag.Impassable) != 0;
+            IsSurface = (Flags & TileFlag.Surface) != 0;
+            IsWearable = (Flags & TileFlag.Wearable) != 0;
+            IsInternal = (Flags & TileFlag.Internal) != 0;
+            IsBackground = (Flags & TileFlag.Background) != 0;
+            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
+            IsWet = (Flags & TileFlag.Wet) != 0;
+            IsFoliage = (Flags & TileFlag.Foliage) != 0;
+            IsRoof = (Flags & TileFlag.Roof) != 0;
+            IsTranslucent = (Flags & TileFlag.Translucent) != 0;
+            IsPartialHue = (Flags & TileFlag.PartialHue) != 0;
+            IsStackable = (Flags & TileFlag.Generic) != 0;
+            IsTransparent = (Flags & TileFlag.Transparent) != 0;
+            IsContainer = (Flags & TileFlag.Container) != 0;
+            IsDoor = (Flags & TileFlag.Door) != 0;
+            IsWall = (Flags & TileFlag.Wall) != 0;
+            IsLight = (Flags & TileFlag.LightSource) != 0;
+            IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
         }
 
         public readonly TileFlag Flags;
@@ -334,24 +369,26 @@ namespace ClassicUO.IO.Resources
         public readonly byte Height;
         public readonly string Name;
 
-        public bool IsAnimated => (Flags & TileFlag.Animation) != 0;
-        public bool IsBridge => (Flags & TileFlag.Bridge) != 0;
-        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
-        public bool IsSurface => (Flags & TileFlag.Surface) != 0;
-        public bool IsWearable => (Flags & TileFlag.Wearable) != 0;
-        public bool IsInternal => (Flags & TileFlag.Internal) != 0;
-        public bool IsBackground => (Flags & TileFlag.Background) != 0;
-        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
-        public bool IsWet => (Flags & TileFlag.Wet) != 0;
-        public bool IsFoliage => (Flags & TileFlag.Foliage) != 0;
-        public bool IsRoof => (Flags & TileFlag.Roof) != 0;
-        public bool IsTranslucent => (Flags & TileFlag.Translucent) != 0;
-        public bool IsPartialHue => (Flags & TileFlag.PartialHue) != 0;
-        public bool IsStackable => (Flags & TileFlag.Generic) != 0;
-        public bool IsTransparent => (Flags & TileFlag.Transparent) != 0;
-        public bool IsContainer => (Flags & TileFlag.Container) != 0;
-        public bool IsDoor => (Flags & TileFlag.Door) != 0;
-        public bool IsWall => (Flags & TileFlag.Wall) != 0;
+        public readonly bool IsAnimated;
+        public readonly bool IsBridge;
+        public readonly bool IsImpassable;
+        public readonly bool IsSurface;
+        public readonly bool IsWearable;
+        public readonly bool IsInternal;
+        public readonly bool IsBackground;
+        public readonly bool IsNoDiagonal;
+        public readonly bool IsWet;
+        public readonly bool IsFoliage;
+        public readonly bool IsRoof;
+        public readonly bool IsTranslucent;
+        public readonly bool IsPartialHue;
+        public readonly bool IsStackable;
+        public readonly bool IsTransparent;
+        public readonly bool IsContainer;
+        public readonly bool IsDoor;
+        public readonly bool IsWall;
+        public readonly bool IsLight;
+        public readonly bool IsNoShoot;
     }
 
     // old

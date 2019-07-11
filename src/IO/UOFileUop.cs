@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ClassicUO.IO
 {
@@ -45,6 +49,7 @@ namespace ClassicUO.IO
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
+
             int version = ReadInt();
             Skip(4);
             long nextBlock = ReadLong();
@@ -55,7 +60,7 @@ namespace ClassicUO.IO
                 _count = count;
             Entries = new UOFileIndex3D[_count];
             Dictionary<ulong, int> hashes = new Dictionary<ulong, int>();
-            string pattern = System.IO.Path.GetFileNameWithoutExtension(FilePath).ToLowerInvariant();
+            string pattern = Path.GetFileNameWithoutExtension(FilePath).ToLowerInvariant();
 
             for (int i = 0; i < _count; i++)
             {
@@ -93,6 +98,7 @@ namespace ClassicUO.IO
                     {
                         if (idx < 0 || idx > Entries.Length)
                             throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
+
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
 
                         // extra?
@@ -104,11 +110,12 @@ namespace ClassicUO.IO
                             int extra2 = ReadInt();
 
                             ref UOFileIndex3D index3D = ref Entries[idx];
-                            index3D = new UOFileIndex3D(index3D.Offset + 8, (int) (index3D.Length - 8), decompressedLength, (extra1 << 16) | extra2);
-                         
+                            index3D = new UOFileIndex3D(index3D.Offset + 8, index3D.Length - 8, decompressedLength, (extra1 << 16) | extra2);
+
                             Seek(curpos);
                         }
                     }
+
                     //else
                     //    throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
                 }
@@ -150,36 +157,47 @@ namespace ClassicUO.IO
                     case 12:
                         esi += (uint) s[i + 11] << 24;
                         goto case 11;
+
                     case 11:
                         esi += (uint) s[i + 10] << 16;
                         goto case 10;
+
                     case 10:
                         esi += (uint) s[i + 9] << 8;
                         goto case 9;
+
                     case 9:
                         esi += s[i + 8];
                         goto case 8;
+
                     case 8:
                         edi += (uint) s[i + 7] << 24;
                         goto case 7;
+
                     case 7:
                         edi += (uint) s[i + 6] << 16;
                         goto case 6;
+
                     case 6:
                         edi += (uint) s[i + 5] << 8;
                         goto case 5;
+
                     case 5:
                         edi += s[i + 4];
                         goto case 4;
+
                     case 4:
                         ebx += (uint) s[i + 3] << 24;
                         goto case 3;
+
                     case 3:
                         ebx += (uint) s[i + 2] << 16;
                         goto case 2;
+
                     case 2:
                         ebx += (uint) s[i + 1] << 8;
                         goto case 1;
+
                     case 1:
                         ebx += s[i];
 

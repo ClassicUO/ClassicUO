@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
 
-using ClassicUO.Game.UI.Gumps;
-using Microsoft.Xna.Framework;
+#endregion
 
 namespace ClassicUO.Game.Scenes
 {
@@ -35,73 +33,41 @@ namespace ClassicUO.Game.Scenes
     {
         public Scene CurrentScene { get; private set; }
 
-        private ScenesType _nextScene, _currentScene;
-
         public void ChangeScene(ScenesType type)
         {
-            //_nextScene = type;
-
-            //if (CurrentScene == null)
-            //    Switch();
-            //else
-            //    CurrentScene.Dispose();
-
-            CurrentScene?.Dispose();
+            CurrentScene?.Destroy();
             CurrentScene = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             switch (type)
             {
                 case ScenesType.Login:
-                    Engine.IsFullScreen = false;
+                    Engine.IsMaximized = false;
                     Engine.WindowWidth = 640;
                     Engine.WindowHeight = 480;
                     Engine.AllowWindowResizing = false;
                     CurrentScene = new LoginScene();
+
                     break;
 
                 case ScenesType.Game:
+
                     Engine.AllowWindowResizing = true;
-                    Engine.IsFullScreen = true;
+                    Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
+
+                    if (!Engine.Profile.Current.RestoreLastGameSize)
+                        Engine.IsMaximized = true;
+                    else
+                    {
+                        Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
+                        Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                    }
+
                     CurrentScene = new GameScene();
+
                     break;
             }
 
-            CurrentScene.Load();
-
-
-        }
-
-        public void Switch()
-        {
-            //if (_currentScene != ScenesType.None && _nextScene != ScenesType.None && _currentScene == _nextScene)
-            //{
-            //    throw new Exception("Trying to change the same scene");
-            //}
-
-            //_currentScene = _nextScene;
-
-            //CurrentScene = null;
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-
-            //switch (_currentScene)
-            //{
-            //    case ScenesType.Login:
-            //        Engine.IsFullScreen = false;
-            //        Engine.WindowWidth = 640;
-            //        Engine.WindowHeight = 480;
-            //        CurrentScene = new LoginScene();
-            //        break;
-
-            //    case ScenesType.Game:
-            //        Engine.IsFullScreen = true;
-            //        CurrentScene = new GameScene();
-            //        break;
-            //}
-
-            //CurrentScene.Load();
+            CurrentScene?.Load();
         }
 
         public T GetScene<T>() where T : Scene

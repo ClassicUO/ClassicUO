@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+using System.Collections.Generic;
+
+using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -40,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public Hue Hue { get; set; }
 
-        public bool IsPaperdoll { get; set; }
+        //public bool IsPaperdoll { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -65,9 +71,25 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+           
+            x = Mouse.Position.X - ScreenCoordinateX;
+            y = Mouse.Position.Y - ScreenCoordinateY;
+
+            if (Texture.Contains(x, y))
+                return true;
+
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var c = Children[i];
+
+                if (c.Contains(x, y))
+                    return true;
+            }
+
+            return false;
         }
     }
 
@@ -85,11 +107,53 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Texture == null)
                 Dispose();
+            else
+            {
+                Width = Texture.Width;
+                Height = Texture.Height;
+            }
+        }
+
+        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
+        {
+        }
+
+        public GumpPic(int x, int y, SpriteTexture texture, Hue hue)
+        {
+            X = x;
+            Y = y;
+            Graphic = Graphic.INVALID;
+
+            Hue = hue;
+
+            Texture = texture;
+            Width = Texture.Width;
+            Height = Texture.Height;
+        }
+
+        public bool IsPartialHue { get; set; }
+        public bool ContainsByBounds { get; set; }
+        public bool IsVirtue { get; set; }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (IsVirtue)
+            {
+                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
+
+                return false;
+            }
+
+            return base.OnMouseDoubleClick(x, y, button);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            return ContainsByBounds || base.Contains(x, y);
         }
 
         private static ushort TransformHue(ushort hue)
         {
-            
             if (hue <= 2)
                 hue = 0;
 
@@ -98,21 +162,17 @@ namespace ClassicUO.Game.UI.Controls
             return hue;
         }
 
-        public bool IsPartialHue { get; set; }
-
-        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Length > 4 ? TransformHue( (ushort )( Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
-        {
-
-        }
-
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
-            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, Alpha, true));
+            ResetHueVector();
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            return base.Draw(batcher, position, hue);
+            batcher.Draw2D(Texture, x, y, ref _hueVector);
+
+            return base.Draw(batcher, x, y);
         }
     }
 }

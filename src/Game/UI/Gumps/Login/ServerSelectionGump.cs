@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
@@ -28,8 +30,6 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private const ushort SELECTED_COLOR = 0x0021;
         private const ushort NORMAL_COLOR = 0x034F;
 
-        public ServerSelectionGump() : base(0,0)
+        public ServerSelectionGump() : base(0, 0)
         {
             //AddChildren(new LoginBackground(true));
 
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Earth
             Add(new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
             {
-                X = 160, Y = 400
+                X = 160, Y = 400, ButtonAction = ButtonAction.Activate
             });
 
             // Sever Scroll Area Bg
@@ -159,6 +159,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
             AcceptKeyboardInput = true;
+            CanCloseWithRightClick = false;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -175,11 +176,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 switch ((Buttons) buttonID)
                 {
                     case Buttons.Next:
+                    case Buttons.Earth:
+
                         if (loginScene.Servers.Any())
-                            loginScene.SelectServer((byte) loginScene.Servers[(Engine.GlobalSettings.LastServerNum-1)].Index);
+                        {
+                            int index = Engine.GlobalSettings.LastServerNum;
+
+                            if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+
+                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                        }
+
                         break;
+
                     case Buttons.Prev:
                         loginScene.StepBack();
+
                         break;
                 }
             }
@@ -190,8 +202,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
                 LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+
                 if (loginScene.Servers.Any())
-                    loginScene.SelectServer((byte)loginScene.Servers[(Engine.GlobalSettings.LastServerNum - 1)].Index);
+                {
+                    int index = Engine.GlobalSettings.LastServerNum;
+
+                    if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                }
             }
         }
 
@@ -248,15 +267,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 };
             }
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 if (IsDisposed)
                     return false;
-                _labelName.Draw(batcher, position + new Point(74, 0));
-                _labelPing.Draw(batcher, position + new Point(250, 0));
-                _labelPacketLoss.Draw(batcher, position + new Point(310, 0));
 
-                return base.Draw(batcher, position, hue);
+                _labelName.Draw(batcher, x + 74, y);
+                _labelPing.Draw(batcher, x + 250, y);
+                _labelPacketLoss.Draw(batcher, x + 310, y);
+
+                return base.Draw(batcher, x, y);
             }
 
             protected override void OnMouseOver(int x, int y)
@@ -281,17 +301,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 base.OnMouseExit(x, y);
             }
 
-            protected override void OnMouseClick(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButton button)
             {
-                if (button == MouseButton.Left) OnButtonClick((int) Buttons.Server + _buttonId);
+                if (button == MouseButton.Left) OnButtonClick((int)Buttons.Server + _buttonId);
             }
 
             public override void Dispose()
             {
                 base.Dispose();
-                _labelName.Dispose();
-                _labelPing.Dispose();
-                _labelPacketLoss.Dispose();
+                _labelName.Destroy();
+                _labelPing.Destroy();
+                _labelPacketLoss.Destroy();
             }
         }
     }

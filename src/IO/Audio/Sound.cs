@@ -1,44 +1,49 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework.Audio;
 
+using static System.String;
+
 namespace ClassicUO.IO.Audio
 {
-    abstract class Sound : IDisposable
+    internal abstract class Sound : IComparable<Sound>, IDisposable
     {
-        string m_Name;
-        public string Name
-        {
-            get { return m_Name; }
-            private set
-            {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    m_Name = value.Replace(".mp3", "");
-                }
-                else
-                {
-                    m_Name = string.Empty;
-                }
-            }
-        }
-        public DateTime LastPlayed = DateTime.MinValue;
-        public static TimeSpan MinimumDelay = TimeSpan.FromSeconds(1d);
+        public static TimeSpan MinimumDelay = TimeSpan.FromMilliseconds(250d);
 
-        abstract protected byte[] GetBuffer();
-        abstract protected void OnBufferNeeded(object sender, EventArgs e);
-        virtual protected void AfterStop() { }
-        virtual protected void BeforePlay() { }
-
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
-        static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
-        protected DynamicSoundEffectInstance m_ThisInstance;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_EffectInstances;
+        private static readonly List<Tuple<DynamicSoundEffectInstance, double>> m_MusicInstances;
+        protected AudioChannels Channels = AudioChannels.Mono;
 
         protected int Frequency = 22050;
-        protected AudioChannels Channels = AudioChannels.Mono;
+        public DateTime LastPlayed = DateTime.MinValue;
+        private string m_Name;
+        protected DynamicSoundEffectInstance m_ThisInstance;
 
         static Sound()
         {
@@ -46,9 +51,43 @@ namespace ClassicUO.IO.Audio
             m_MusicInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
         }
 
-        public Sound(string name)
+        public Sound(string name, int index)
         {
-            Name = name;         
+            Name = name;
+            Index = index;
+        }
+
+        public string Name
+        {
+            get => m_Name;
+            private set
+            {
+                if (!IsNullOrEmpty(value))
+                    m_Name = value.Replace(".mp3", "");
+                else
+                    m_Name = Empty;
+            }
+        }
+
+        public int Index { get; }
+
+        public float Volume
+        {
+            get => m_ThisInstance.Volume;
+            set
+            {
+                if (value < 0.0f)
+                    value = 0f;
+                else if (value > 1f)
+                    value = 1f;
+
+                m_ThisInstance.Volume = value;
+            }
+        }
+
+        public int CompareTo(Sound other)
+        {
+            return other == null ? -1 : Index.CompareTo(other.Index);
         }
 
         public void Dispose()
@@ -56,17 +95,30 @@ namespace ClassicUO.IO.Audio
             if (m_ThisInstance != null)
             {
                 m_ThisInstance.BufferNeeded -= OnBufferNeeded;
+
                 if (!m_ThisInstance.IsDisposed)
                 {
                     m_ThisInstance.Stop();
                     m_ThisInstance.Dispose();
                 }
+
                 m_ThisInstance = null;
             }
         }
 
+        protected abstract byte[] GetBuffer();
+        protected abstract void OnBufferNeeded(object sender, EventArgs e);
+
+        protected virtual void AfterStop()
+        {
+        }
+
+        protected virtual void BeforePlay()
+        {
+        }
+
         /// <summary>
-        /// Plays the effect.
+        ///     Plays the effect.
         /// </summary>
         /// <param name="asEffect">Set to false for music, true for sound effects.</param>
         public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, bool spamCheck = false)
@@ -74,35 +126,39 @@ namespace ClassicUO.IO.Audio
             double now = Engine.Ticks;
             CullExpiredEffects(now);
 
-            if (spamCheck && (LastPlayed + MinimumDelay > DateTime.Now))
+            if (spamCheck && LastPlayed + MinimumDelay > Engine.CurrDateTime)
                 return;
 
             BeforePlay();
             m_ThisInstance = GetNewInstance(asEffect);
+
             if (m_ThisInstance == null)
             {
                 Dispose();
+
                 return;
             }
 
             switch (effect)
             {
                 case AudioEffects.PitchVariation:
-                    float pitch =RandomHelper.GetValue(-5, 5) * .025f;
+                    float pitch = RandomHelper.GetValue(-5, 5) * .025f;
                     m_ThisInstance.Pitch = pitch;
+
                     break;
             }
-            
-            LastPlayed = DateTime.Now;
+
+            LastPlayed = Engine.CurrDateTime;
 
             byte[] buffer = GetBuffer();
+
             if (buffer != null && buffer.Length > 0)
             {
                 m_ThisInstance.BufferNeeded += OnBufferNeeded;
                 m_ThisInstance.SubmitBuffer(buffer);
                 m_ThisInstance.Volume = volume;
                 m_ThisInstance.Play();
-                List<Tuple<DynamicSoundEffectInstance, double>> list = (asEffect) ? m_EffectInstances : m_MusicInstances;
+                List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
                 double ms = m_ThisInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
                 list.Add(new Tuple<DynamicSoundEffectInstance, double>(m_ThisInstance, now + ms));
             }
@@ -111,16 +167,6 @@ namespace ClassicUO.IO.Audio
         public void Stop()
         {
             AfterStop();
-        }
-
-        public void SetVolume(float v)
-        {
-            if (v < 0.0f)
-                v = 0f;
-            else if (v > 1f)
-                v = 1f;
-
-            m_ThisInstance.Volume = v;
         }
 
         private void CullExpiredEffects(double now)
@@ -150,12 +196,10 @@ namespace ClassicUO.IO.Audio
 
         private DynamicSoundEffectInstance GetNewInstance(bool asEffect)
         {
-            List<Tuple<DynamicSoundEffectInstance, double>> list = (asEffect) ? m_EffectInstances : m_MusicInstances;
-            int maxInstances = (asEffect) ? 32 : 2;
-            if (list.Count >= maxInstances)
-                return null;
-            else
-                return new DynamicSoundEffectInstance(Frequency, Channels); // shouldn't we be recycling these?
+            List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
+            int maxInstances = asEffect ? 32 : 2;
+
+            return list.Count >= maxInstances ? null : new DynamicSoundEffectInstance(Frequency, Channels);
         }
     }
 }

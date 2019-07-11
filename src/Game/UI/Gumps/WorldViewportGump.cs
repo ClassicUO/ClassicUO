@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.Scenes;
@@ -36,12 +38,12 @@ namespace ClassicUO.Game.UI.Gumps
         private const int BORDER_HEIGHT = 5;
         private readonly GameBorder _border;
         private readonly Button _button;
-        private readonly SystemChatControl _systemChatControl;
         private readonly WorldViewport _viewport;
         private bool _clicked;
+        private Point _lastSize, _savedSize;
+        private SystemChatControl _systemChatControl;
         private int _worldHeight;
         private int _worldWidth;
-        private Point _lastSize, _savedSize;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -68,12 +70,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeWindow(_lastSize);
 
-                    OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
-                    if (options != null)
-                        options.UpdateVideo();
+                    OptionsGump options = Engine.UI.GetGump<OptionsGump>();
+                    options?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
-                        NetClient.Socket.Send(new PGameWindowSize((uint)n.X, (uint)n.Y));
+                        NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
 
                     _clicked = false;
                 }
@@ -84,7 +85,9 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
-            _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+
+            Engine.UI.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+
             Add(_border);
             Add(_button);
             Add(_viewport);
@@ -146,6 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
+
             Location = position;
 
             Engine.Profile.Current.GameWindowPosition = position;
@@ -153,17 +157,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            OptionsGump options = Engine.UI.GetByLocalSerial<OptionsGump>();
-            if (options != null)
-                options.UpdateVideo();
+            OptionsGump options = Engine.UI.GetGump<OptionsGump>();
+            options?.UpdateVideo();
         }
 
         private void Resize()
         {
             _border.Width = Width;
             _border.Height = Height;
-            _button.X = Width - _button.Width / 2;
-            _button.Y = Height - _button.Height / 2;
+            _button.X = Width - (_button.Width >> 1);
+            _button.Y = Height - (_button.Height >> 1);
+            _worldWidth = Width - BORDER_WIDTH * 2;
+            _worldHeight = Height - BORDER_WIDTH * 2;
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
             _systemChatControl.Width = _worldWidth;
@@ -180,9 +185,19 @@ namespace ClassicUO.Game.UI.Gumps
             if (newSize.Y < 480)
                 newSize.Y = 480;
 
-            return _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            //Resize();
+            _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+
+            return newSize;
         }
 
+        public void ReloadChatControl(SystemChatControl chat)
+        {
+            _systemChatControl.Dispose();
+            Engine.UI.SystemChat = _systemChatControl = chat;
+            Add(_systemChatControl);
+            Resize();
+        }
     }
 
     internal class GameBorder : Control
@@ -205,22 +220,26 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _borders.Length; i++)
-                _borders[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _borders)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
+
             // sopra
-            batcher.Draw2DTiled(_borders[0], new Rectangle(position.X, position.Y, Width, _borderSize), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, ref _hueVector);
             // sotto
-            batcher.Draw2DTiled(_borders[0], new Rectangle(position.X, position.Y + Height - _borderSize, Width, _borderSize), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, ref _hueVector);
             //sx
-            batcher.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
+            batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, ref _hueVector);
             //dx
-            batcher.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
-            return base.Draw(batcher, position, hue);
+            batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, ref _hueVector);
+
+            return base.Draw(batcher, x, y);
         }
     }
 }

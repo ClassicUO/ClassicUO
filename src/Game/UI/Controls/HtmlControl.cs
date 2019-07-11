@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -38,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlControl(string[] parts, string[] lines) : this()
+        public HtmlControl(List<string> parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -149,7 +151,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (UseFlagScrollbar)
                 {
-                    _scrollBar = new ScrollFlag()
+                    _scrollBar = new ScrollFlag
                     {
                         Location = new Point(Width - 14, 0)
                     };
@@ -159,10 +161,10 @@ namespace ClassicUO.Game.UI.Controls
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = /* _gameText.Height*//* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
 
-                Add((Control)_scrollBar);
+                Add((Control) _scrollBar);
             }
 
             //if (Width != _gameText.Width)
@@ -180,6 +182,7 @@ namespace ClassicUO.Game.UI.Controls
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
@@ -195,7 +198,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _scrollBar.Height = Height;
                     _scrollBar.MinValue = 0;
-                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height +(HasBackground ? 8 : 0);
+                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */_gameText.Height - Height + (HasBackground ? 8 : 0);
                     //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                     WantUpdateSize = false;
                 }
@@ -206,17 +209,18 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
-            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
+
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
-                base.Draw(batcher, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
-                _gameText.Draw(batcher, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+                base.Draw(batcher, x, y);
+                _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
@@ -224,32 +228,35 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
-                for (int i = 0; i < _gameText.Links.Count; i++)
+                if (_gameText != null)
                 {
-                    WebLinkRect link = _gameText.Links[i];
-                    Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, _scrollBar.Value + y);
-
-                    if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                    foreach (WebLinkRect link in _gameText.Links)
                     {
-                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
-                        Process.Start(result.Link);
+                        Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
+                        bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        break;
+                        if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        {
+                            Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                            Process.Start(result.Link);
+
+                            break;
+                        }
                     }
                 }
             }
 
-            base.OnMouseClick(x, y, button);
+            base.OnMouseUp(x, y, button);
         }
 
         public override void Dispose()
         {
-            _gameText?.Dispose();
+            _gameText?.Destroy();
             _gameText = null;
             base.Dispose();
         }

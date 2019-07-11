@@ -5,28 +5,28 @@
     ///     Used for single channel mode
     ///     and in derived class for intensity stereo mode
     /// </summary>
-    class SubbandLayer1 : ASubband
+    internal class SubbandLayer1 : ASubband
     {
         // Factors and offsets for sample requantization
         public static readonly float[] TableFactor =
-            {
-                0.0f, (1.0f/2.0f)*(4.0f/3.0f), (1.0f/4.0f)*(8.0f/7.0f), (1.0f/8.0f)*(16.0f/15.0f),
-                (1.0f/16.0f)*(32.0f/31.0f), (1.0f/32.0f)*(64.0f/63.0f), (1.0f/64.0f)*(128.0f/127.0f),
-                (1.0f/128.0f)*(256.0f/255.0f), (1.0f/256.0f)*(512.0f/511.0f), (1.0f/512.0f)*(1024.0f/1023.0f),
-                (1.0f/1024.0f)*(2048.0f/2047.0f), (1.0f/2048.0f)*(4096.0f/4095.0f), (1.0f/4096.0f)*(8192.0f/8191.0f),
-                (1.0f/8192.0f)*(16384.0f/16383.0f), (1.0f/16384.0f)*(32768.0f/32767.0f)
-            };
+        {
+            0.0f, 1.0f / 2.0f * (4.0f / 3.0f), 1.0f / 4.0f * (8.0f / 7.0f), 1.0f / 8.0f * (16.0f / 15.0f),
+            1.0f / 16.0f * (32.0f / 31.0f), 1.0f / 32.0f * (64.0f / 63.0f), 1.0f / 64.0f * (128.0f / 127.0f),
+            1.0f / 128.0f * (256.0f / 255.0f), 1.0f / 256.0f * (512.0f / 511.0f), 1.0f / 512.0f * (1024.0f / 1023.0f),
+            1.0f / 1024.0f * (2048.0f / 2047.0f), 1.0f / 2048.0f * (4096.0f / 4095.0f), 1.0f / 4096.0f * (8192.0f / 8191.0f),
+            1.0f / 8192.0f * (16384.0f / 16383.0f), 1.0f / 16384.0f * (32768.0f / 32767.0f)
+        };
 
         public static readonly float[] TableOffset =
-            {
-                0.0f, ((1.0f/2.0f) - 1.0f)*(4.0f/3.0f), ((1.0f/4.0f) - 1.0f)*(8.0f/7.0f),
-                ((1.0f/8.0f) - 1.0f)*(16.0f/15.0f), ((1.0f/16.0f) - 1.0f)*(32.0f/31.0f),
-                ((1.0f/32.0f) - 1.0f)*(64.0f/63.0f), ((1.0f/64.0f) - 1.0f)*(128.0f/127.0f),
-                ((1.0f/128.0f) - 1.0f)*(256.0f/255.0f), ((1.0f/256.0f) - 1.0f)*(512.0f/511.0f),
-                ((1.0f/512.0f) - 1.0f)*(1024.0f/1023.0f), ((1.0f/1024.0f) - 1.0f)*(2048.0f/2047.0f),
-                ((1.0f/2048.0f) - 1.0f)*(4096.0f/4095.0f), ((1.0f/4096.0f) - 1.0f)*(8192.0f/8191.0f),
-                ((1.0f/8192.0f) - 1.0f)*(16384.0f/16383.0f), ((1.0f/16384.0f) - 1.0f)*(32768.0f/32767.0f)
-            };
+        {
+            0.0f, (1.0f / 2.0f - 1.0f) * (4.0f / 3.0f), (1.0f / 4.0f - 1.0f) * (8.0f / 7.0f),
+            (1.0f / 8.0f - 1.0f) * (16.0f / 15.0f), (1.0f / 16.0f - 1.0f) * (32.0f / 31.0f),
+            (1.0f / 32.0f - 1.0f) * (64.0f / 63.0f), (1.0f / 64.0f - 1.0f) * (128.0f / 127.0f),
+            (1.0f / 128.0f - 1.0f) * (256.0f / 255.0f), (1.0f / 256.0f - 1.0f) * (512.0f / 511.0f),
+            (1.0f / 512.0f - 1.0f) * (1024.0f / 1023.0f), (1.0f / 1024.0f - 1.0f) * (2048.0f / 2047.0f),
+            (1.0f / 2048.0f - 1.0f) * (4096.0f / 4095.0f), (1.0f / 4096.0f - 1.0f) * (8192.0f / 8191.0f),
+            (1.0f / 8192.0f - 1.0f) * (16384.0f / 16383.0f), (1.0f / 16384.0f - 1.0f) * (32768.0f / 32767.0f)
+        };
 
         protected int allocation;
         protected float factor, offset;
@@ -53,10 +53,12 @@
             if ((allocation = stream.GetBitsFromBuffer(4)) == 15)
             {
             }
+
             // cerr << "WARNING: stream contains an illegal allocation!\n";
             // MPEG-stream is corrupted!
             if (crc != null)
                 crc.add_bits(allocation, 4);
+
             if (allocation != 0)
             {
                 samplelength = allocation + 1;
@@ -79,15 +81,15 @@
         /// </summary>
         public override bool read_sampledata(Bitstream stream)
         {
-            if (allocation != 0)
-            {
-                sample = stream.GetBitsFromBuffer(samplelength);
-            }
+            if (allocation != 0) sample = stream.GetBitsFromBuffer(samplelength);
+
             if (++samplenumber == 12)
             {
                 samplenumber = 0;
+
                 return true;
             }
+
             return false;
         }
 
@@ -96,11 +98,12 @@
         /// </summary>
         public override bool put_next_sample(int channels, SynthesisFilter filter1, SynthesisFilter filter2)
         {
-            if ((allocation != 0) && (channels != OutputChannels.RIGHT_CHANNEL))
+            if (allocation != 0 && channels != OutputChannels.RIGHT_CHANNEL)
             {
                 float scaled_sample = (sample * factor + offset) * scalefactor;
                 filter1.input_sample(scaled_sample, subbandnumber);
             }
+
             return true;
         }
     }

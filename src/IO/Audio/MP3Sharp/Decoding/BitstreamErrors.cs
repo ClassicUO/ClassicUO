@@ -4,7 +4,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     This struct describes all error codes that can be thrown
     ///     in BistreamExceptions.
     /// </summary>
-    struct BitstreamErrors
+    internal readonly struct BitstreamErrors
     {
         public static readonly int UNKNOWN_ERROR = BITSTREAM_ERROR + 0;
         public static readonly int UNKNOWN_SAMPLE_RATE = BITSTREAM_ERROR + 1;

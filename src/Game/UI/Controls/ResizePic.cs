@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -56,9 +59,11 @@ namespace ClassicUO.Game.UI.Controls
                     _gumpTexture[i - 1] = t;
                 else _gumpTexture[i] = t;
             }
+
+            Graphic = graphic;
         }
 
-        public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic(List<string> parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -66,253 +71,230 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[5]);
         }
 
+        public Graphic Graphic { get; }
+
         public bool OnlyCenterTransparent { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-                _gumpTexture[i].Ticks = (long) totalMS;
+            foreach (SpriteTexture t in _gumpTexture)
+                t.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
+            SpriteTexture[] th = _gumpTexture;
+
+            int offsetTop = Math.Max(th[0].Height, th[2].Height) - th[1].Height;
+            int offsetBottom = Math.Max(th[5].Height, th[7].Height) - th[6].Height;
+            int offsetLeft = Math.Max(th[0].Width, th[5].Width) - th[3].Width;
+            int offsetRight = Math.Max(th[2].Width, th[7].Width) - th[4].Width;
+
+
             for (int i = 0; i < 9; i++)
             {
-                SpriteTexture t = _gumpTexture[i];
-                int drawWidth = t.Width;
-                int drawHeight = t.Height;
-                int drawX = X;
-                int drawY = Y;
-
                 switch (i)
                 {
                     case 0:
-                        if (t.Contains(x, y))
+                        if (PixelsInXY(FileManager.Gumps.GetTexture(Graphic), x, y))
                             return true;
-
                         break;
                     case 1:
-                        drawX += _gumpTexture[0].Width;
+                        int DW = Width - th[0].Width - th[2].Width;
+                        if (DW < 1)
+                            break;
 
-                        int startX = drawX;
-                        int maxW = drawX + (Width - _gumpTexture[0].Width - _gumpTexture[2].Width);
-                        int maxH = drawY + drawHeight;
-
-
-                        while (drawX < maxW)
-                        {
-                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                                return true;
-
-                            drawX += drawWidth;
-
-                            if (drawX > maxW)
-                            {
-                                drawX = startX;
-                                drawY += drawHeight;
-
-                                if (drawY > maxH)
-                                    break;
-                            }
-                        }
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort) (Graphic + 1)), x - th[0].Width, y, DW, 0))
+                            return true;
 
                         break;
                     case 2:
-                        drawX += Width - drawWidth;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                            return true;
 
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 2)), x - (Width - th[i].Width), y - offsetTop))
+                            return true;
+                    
                         break;
                     case 3:
-                        drawY += _gumpTexture[0].Height;
 
-                        startX = drawX;
-                        maxW = drawX + drawWidth;
-                        maxH = drawY + (Height - _gumpTexture[0].Height - _gumpTexture[5].Height);
+                        int DH = Height - th[0].Height - th[5].Height;
+                        if (DH < 1)
+                            break;
 
-                        while (drawX < maxW)
-                        {
-                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                                return true;
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 3)), x - offsetLeft, y - th[0].Height, 0, DH))
+                            return true;
 
-                            drawX += drawWidth;
 
-                            if (drawX > maxW)
-                            {
-                                drawX = startX;
-                                drawY += drawHeight;
-
-                                if (drawY > maxH)
-                                    break;
-                            }
-                        }
                         break;
                     case 4:
-                        drawX += Width - drawWidth /*- offsetRight*/;
-                        drawY += _gumpTexture[2].Height;
 
-                        startX = drawX;
-                        maxW = drawX + drawWidth;
-                        maxH = drawY + (Height - _gumpTexture[2].Height - _gumpTexture[7].Height);
+                        DH = Height - th[2].Height - th[7].Height;
+                        if (DH < 1)
+                            break;
 
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 5)), x - (Width - th[i].Width - offsetRight), y - th[2].Height, 0, DH))
+                            return true;
 
-                        while (drawX < maxW)
-                        {
-                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                                return true;
-
-                            drawX += drawWidth;
-
-                            if (drawX > maxW)
-                            {
-                                drawX = startX;
-                                drawY += drawHeight;
-
-                                if (drawY > maxH)
-                                    break;
-                            }
-                        }
                         break;
                     case 5:
-                        drawY += Height - drawHeight;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 6)), x, y - (Height - th[i].Height)))
                             return true;
+
                         break;
                     case 6:
-                        drawX += _gumpTexture[5].Width;
-                        drawY += Height - drawHeight /*- offsetBottom*/;
 
-                        startX = drawX;
-                        maxW = drawX + (Width - _gumpTexture[5].Width - _gumpTexture[7].Width);
-                        maxH = drawY + drawHeight;
+                        DW = Width - th[5].Width - th[2].Width;
+                        if (DW < 1)
+                            break;
+
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 7)), x - th[5].Width, y - (Height - th[i].Height - offsetBottom), DW, 0))
+                            return true;
 
 
-                        while (drawX < maxW)
-                        {
-                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                                return true;
-
-                            drawX += drawWidth;
-
-                            if (drawX > maxW)
-                            {
-                                drawX = startX;
-                                drawY += drawHeight;
-
-                                if (drawY > maxH)
-                                    break;
-                            }
-                        }
                         break;
                     case 7:
-                        drawX += Width - drawWidth;
-                        drawY += Height - drawHeight;
-                        if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
+
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 8)), x - (Width - th[i].Width), y - (Height - th[i].Height)))
                             return true;
+
                         break;
                     case 8:
-                        drawX += _gumpTexture[0].Width;
-                        drawY += _gumpTexture[0].Height;
 
-                        startX = drawX;
-                        maxW = drawX + (Width - _gumpTexture[0].Width - _gumpTexture[2].Width);
-                        maxH = drawY + (Height - _gumpTexture[2].Height - _gumpTexture[7].Height);
+                        DW = Width - th[0].Width - th[2].Width;
+                        if (DW < 1)
+                            break;
 
+                        DH = Height - th[2].Height - th[7].Height;
+                        if (DH < 1)
+                            break;
 
-                        while (drawX < maxW)
-                        {                     
-                            if (t.Contains(Mouse.Position.X - drawX - ParentX, Mouse.Position.Y - drawY - ParentY))
-                                return true;
+                        if (PixelsInXY(FileManager.Gumps.GetTexture((ushort)(Graphic + 4)), x - th[0].Width, y - th[0].Height, DW, DH))
+                            return true;
 
-                            drawX += drawWidth;
-
-                            if (drawX > maxW)
-                            {
-                                drawX = startX;
-                                drawY += drawHeight;
-
-                                if (drawY > maxH)
-                                    break;
-                            }
-
-
-                        }
 
                         break;
                 }
             }
 
-
             return false;
         }
 
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        private static bool PixelsInXY(SpriteTexture texture, int x, int y, int width = 0, int height = 0)
         {
-            Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
-            DrawInternal(batcher, position, color);
-            return base.Draw(batcher, position, hue);
+            if (x < 0 || y < 0 || (width > 0 && x >= width) || (height > 0 && y >= height))
+                return false;
+
+            int textureWidth = texture.Width;
+            int textureHeight = texture.Height;
+
+            if (width == 0)
+                width = textureWidth;
+
+            if (height == 0)
+                height = textureHeight;
+
+
+            while (x > textureWidth && width > textureWidth)
+            {
+                x -= textureWidth;
+                width -= textureWidth;
+            }
+
+            if (x < 0 || x > width)
+                return false;
+
+            while (y > textureHeight && height > textureHeight)
+            {
+                y -= textureHeight;
+                height -= textureHeight;
+            }
+
+            if (y < 0 || y > height)
+                return false;
+            
+            return texture.Contains(x, y);
         }
 
-        private void DrawInternal(Batcher2D batcher, Point position, Vector3 color)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            ResetHueVector();
+
+            if (IsTransparent)
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+            DrawInternal(batcher, x, y, _hueVector);
+
+            return base.Draw(batcher, x, y);
+        }
+
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
         {
             for (int i = 0; i < 9; i++)
             {
                 SpriteTexture t = _gumpTexture[i];
                 int drawWidth = t.Width;
                 int drawHeight = t.Height;
-                int drawX = position.X;
-                int drawY = position.Y;
+                int drawX = x;
+                int drawY = y;
 
                 switch (i)
                 {
                     case 0:
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 1:
                         drawX += _gumpTexture[0].Width;
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 2:
                         drawX += Width - drawWidth;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 3:
                         drawY += _gumpTexture[0].Height;
                         drawHeight = Height - _gumpTexture[0].Height - _gumpTexture[5].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 4:
                         drawX += Width - drawWidth /*- offsetRight*/;
                         drawY += _gumpTexture[2].Height;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 5:
                         drawY += Height - drawHeight;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 6:
                         drawX += _gumpTexture[5].Width;
                         drawY += Height - drawHeight /*- offsetBottom*/;
                         drawWidth = Width - _gumpTexture[5].Width - _gumpTexture[7].Width;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 7:
                         drawX += Width - drawWidth;
                         drawY += Height - drawHeight;
-                        batcher.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+                        batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
+
                     case 8:
                         drawX += _gumpTexture[0].Width;
                         drawY += _gumpTexture[0].Height;
@@ -325,7 +307,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (OnlyCenterTransparent)
                             c.Z = 1;
 
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), c);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref c);
 
                         break;
                 }

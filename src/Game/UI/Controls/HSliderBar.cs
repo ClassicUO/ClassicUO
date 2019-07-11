@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -41,19 +43,20 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private readonly HSliderBarStyle _style;
+        private readonly RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
+
+        private readonly bool _drawUp;
         private SpriteTexture[] _gumpSpliderBackground;
         private SpriteTexture _gumpWidget;
         private Rectangle _rect;
 
         //private int _newValue;
         private int _sliderX;
-        private readonly RenderedText _text;
         private int _value = -1;
-        public EventHandler ValueChanged;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true)
+        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
         {
             X = x;
             Y = y;
@@ -64,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Font = font, Hue = color, IsUnicode = unicode
                 };
+                _drawUp = drawUp;
             }
 
             MinValue = min;
@@ -105,13 +109,17 @@ namespace ClassicUO.Game.UI.Controls
                     if (_value != oldValue)
                     {
                         ModifyPairedValues(_value - oldValue);
+
                         if (IsInitialized)
                             CalculateOffset();
                     }
+
                     ValueChanged.Raise();
                 }
             }
         }
+
+        public event EventHandler ValueChanged;
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -128,6 +136,7 @@ namespace ClassicUO.Game.UI.Controls
                         _gumpWidget = FileManager.Gumps.GetTexture(216);
 
                         break;
+
                     case HSliderBarStyle.BlueWidgetNoBar:
                         _gumpWidget = FileManager.Gumps.GetTexture(0x845);
 
@@ -135,15 +144,15 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 Width = BarWidth;
-                Height = _gumpWidget.Height;
+                if (_gumpWidget != null) Height = _gumpWidget.Height;
                 //RecalculateSliderX();
                 CalculateOffset();
             }
 
             if (_gumpSpliderBackground != null)
             {
-                for (int i = 0; i < _gumpSpliderBackground.Length; i++)
-                    _gumpSpliderBackground[i].Ticks = (long) totalMS;
+                foreach (SpriteTexture t in _gumpSpliderBackground)
+                    t.Ticks = (long) totalMS;
             }
 
             //ModifyPairedValues(_newValue - Value);
@@ -154,19 +163,28 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
+
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
-                batcher.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle(position.X + _gumpSpliderBackground[0].Width, position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
-                batcher.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref _hueVector);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, ref _hueVector);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref _hueVector);
             }
 
-            batcher.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
-            _text?.Draw(batcher, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref _hueVector);
 
-            return base.Draw(batcher, position, hue);
+            if (_text != null)
+            {
+                if (_drawUp)
+                    _text.Draw(batcher, x, y - _text.Height);
+                else
+                    _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+            }
+
+            return base.Draw(batcher, x, y);
         }
 
         private void InternalSetValue(int value)
@@ -188,12 +206,11 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             _clicked = false;
-        }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
             if (button == MouseButton.Left) CalculateNew(x);
         }
+
+       
 
         protected override void OnMouseWheel(MouseEvent delta)
         {
@@ -203,6 +220,7 @@ namespace ClassicUO.Game.UI.Controls
                     Value--;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     Value++;
 
@@ -248,7 +266,7 @@ namespace ClassicUO.Game.UI.Controls
                 _sliderX = 0;
         }
 
-        protected override bool Contains(int x, int y)
+        public override bool Contains(int x, int y)
         {
             _rect.X = 0;
             _rect.Y = 0;
@@ -272,6 +290,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_pairedSliders.Count == 0)
                 return;
+
             bool updateSinceLastCycle = true;
             int d = delta > 0 ? -1 : 1;
             int points = Math.Abs(delta);
@@ -304,6 +323,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!updateSinceLastCycle)
                         return;
+
                     updateSinceLastCycle = false;
                     sliderIndex = 0;
                 }
@@ -312,7 +332,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            _text?.Dispose();
+            _text?.Destroy();
             base.Dispose();
         }
     }

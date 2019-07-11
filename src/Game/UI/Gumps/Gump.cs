@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class Gump : Control           
+    internal class Gump : Control
     {
         public Gump(Serial local, Serial server)
         {
@@ -71,9 +73,17 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(Y);
         }
 
+        public void SetInScreen()
+        {
+            if (X >= Engine.Instance.Window.ClientBounds.Width || X < 0)
+                X = 0;
+
+            if (Y >= Engine.Instance.Window.ClientBounds.Height || Y < 0)
+                Y = 0;
+        }
+
         public virtual void Restore(BinaryReader reader)
         {
-
         }
 
         protected override void OnDragEnd(int x, int y)
@@ -96,9 +106,9 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            return IsVisible && base.Draw(batcher, position, hue);
+            return IsVisible && base.Draw(batcher, x, y);
         }
 
         public override void OnButtonClick(int buttonID)
@@ -112,10 +122,13 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (control)
                     {
-                        case Checkbox checkbox when checkbox.IsChecked: switches.Add(control.LocalSerial);
+                        case Checkbox checkbox when checkbox.IsChecked:
+                            switches.Add(control.LocalSerial);
 
                             break;
-                        case TextBox textBox: entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+
+                        case TextBox textBox:
+                            entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
                             break;
                     }

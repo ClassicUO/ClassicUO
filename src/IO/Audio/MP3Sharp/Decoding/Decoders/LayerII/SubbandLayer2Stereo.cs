@@ -3,15 +3,15 @@
     /// <summary>
     ///     Class for layer II subbands in stereo mode.
     /// </summary>
-    class SubbandLayer2Stereo : SubbandLayer2
+    internal class SubbandLayer2Stereo : SubbandLayer2
     {
         protected internal int channel2_allocation;
-        protected internal float[] channel2_c = { 0 };
+        protected internal float[] channel2_c = {0};
         //protected boolean channel2_grouping;  ???? Never used!
-        protected internal int[] channel2_codelength = { 0 };
-        protected internal float[] channel2_d = { 0 };
+        protected internal int[] channel2_codelength = {0};
+        protected internal float[] channel2_d = {0};
         //protected float[][] channel2_groupingtable = {{0},{0}};
-        protected internal float[] channel2_factor = { 0 };
+        protected internal float[] channel2_factor = {0};
         protected internal float[] channel2_samples;
         protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
         protected internal int channel2_scfsi;
@@ -33,6 +33,7 @@
             int length = get_allocationlength(header);
             allocation = stream.GetBitsFromBuffer(length);
             channel2_allocation = stream.GetBitsFromBuffer(length);
+
             if (crc != null)
             {
                 crc.add_bits(allocation, length);
@@ -48,12 +49,15 @@
             if (allocation != 0)
             {
                 scfsi = stream.GetBitsFromBuffer(2);
+
                 if (crc != null)
                     crc.add_bits(scfsi, 2);
             }
+
             if (channel2_allocation != 0)
             {
                 channel2_scfsi = stream.GetBitsFromBuffer(2);
+
                 if (crc != null)
                     crc.add_bits(channel2_scfsi, 2);
             }
@@ -65,6 +69,7 @@
         public override void read_scalefactor(Bitstream stream, Header header)
         {
             base.read_scalefactor(stream, header);
+
             if (channel2_allocation != 0)
             {
                 switch (channel2_scfsi)
@@ -73,25 +78,31 @@
                         channel2_scalefactor1 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor2 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 1:
                         channel2_scalefactor1 = channel2_scalefactor2 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 2:
+
                         channel2_scalefactor1 =
                             channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
 
                     case 3:
                         channel2_scalefactor1 = ScaleFactors[stream.GetBitsFromBuffer(6)];
                         channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+
                         break;
                 }
+
                 prepare_sample_reading(header, channel2_allocation, 1, channel2_factor, channel2_codelength,
-                    channel2_c, channel2_d);
+                                       channel2_c, channel2_d);
             }
         }
 
@@ -103,6 +114,7 @@
             bool returnvalue = base.read_sampledata(stream);
 
             if (channel2_allocation != 0)
+            {
                 if (groupingtable[1] != null)
                 {
                     int samplecode = stream.GetBitsFromBuffer(channel2_codelength[0]);
@@ -135,12 +147,16 @@
                 else
                 {
                     channel2_samples[0] =
-                        (float)((stream.GetBitsFromBuffer(channel2_codelength[0])) * channel2_factor[0] - 1.0);
+                        (float) (stream.GetBitsFromBuffer(channel2_codelength[0]) * channel2_factor[0] - 1.0);
+
                     channel2_samples[1] =
-                        (float)((stream.GetBitsFromBuffer(channel2_codelength[0])) * channel2_factor[0] - 1.0);
+                        (float) (stream.GetBitsFromBuffer(channel2_codelength[0]) * channel2_factor[0] - 1.0);
+
                     channel2_samples[2] =
-                        (float)((stream.GetBitsFromBuffer(channel2_codelength[0])) * channel2_factor[0] - 1.0);
+                        (float) (stream.GetBitsFromBuffer(channel2_codelength[0]) * channel2_factor[0] - 1.0);
                 }
+            }
+
             return returnvalue;
         }
 
@@ -150,7 +166,8 @@
         public override bool put_next_sample(int channels, SynthesisFilter filter1, SynthesisFilter filter2)
         {
             bool returnvalue = base.put_next_sample(channels, filter1, filter2);
-            if ((channel2_allocation != 0) && (channels != OutputChannels.LEFT_CHANNEL))
+
+            if (channel2_allocation != 0 && channels != OutputChannels.LEFT_CHANNEL)
             {
                 float sample = channel2_samples[samplenumber - 1];
 
@@ -163,11 +180,13 @@
                     sample *= channel2_scalefactor2;
                 else
                     sample *= channel2_scalefactor3;
+
                 if (channels == OutputChannels.BOTH_CHANNELS)
                     filter2.input_sample(sample, subbandnumber);
                 else
                     filter1.input_sample(sample, subbandnumber);
             }
+
             return returnvalue;
         }
     }

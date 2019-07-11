@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -36,6 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 500;
         private const int HEIGHT = 600;
         private readonly ScrollArea _scrollArea;
+
         public InfoGump(GameObject obj) : base(0, 0)
         {
             X = 200;
@@ -47,16 +50,17 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
                 IsTransparent = true,
-                Alpha = 0.5f,
+                Alpha = 0.5f
             });
 
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
                 IsTransparent = true,
-                Alpha = 0.5f,
+                Alpha = 0.5f
             });
-            Add(new Label("Object Information", true, 1153, font: 3) { X = 20, Y = 20 });
+            Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 20});
             Add(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));
+
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 510, true)
             {
                 AcceptMouseInput = true
@@ -67,8 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (dict != null)
             {
-               
-                foreach (KeyValuePair<string, string> item in dict.OrderBy( s => s.Key))
+                foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
                 {
                     ScrollAreaItem areaItem = new ScrollAreaItem();
 
@@ -94,7 +97,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollArea.Add(areaItem);
                 }
             }
-
         }
     }
 
@@ -107,7 +109,6 @@ namespace ClassicUO.Game.UI.Gumps
             Entry = entry;
             Entry.X = 20;
             Add(Entry);
-
         }
 
 
@@ -115,6 +116,5 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
         }
-
     }
 }

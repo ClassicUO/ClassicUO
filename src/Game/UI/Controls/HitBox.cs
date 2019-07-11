@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Renderer;
@@ -27,6 +29,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
+        public override bool CanUseAlpha => false;
+
         protected readonly SpriteTexture _texture;
 
         public HitBox(int x, int y, int w, int h)
@@ -55,19 +59,25 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed)
                 return;
+
             base.Update(totalMS, frameMS);
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
                 return false;
 
             if (MouseIsOver)
-                batcher.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
-            
-            return base.Draw(batcher, position, hue);
+            {
+                ResetHueVector();
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
+            }
+
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()

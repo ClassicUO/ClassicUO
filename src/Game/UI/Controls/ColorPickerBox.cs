@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -35,17 +37,19 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ColorPickerBox : Control
     {
+        private readonly int _cellHeight;
+        private readonly int _cellWidth;
         private readonly int _columns;
+        private readonly ushort[] _customPallete;
         private readonly int _rows;
-        private int _cellHeight;
-        private int _cellWidth;
+        private ColorBox[,] _colorBoxes;
         private int _graduation, _selectedIndex;
         private ushort[] _hues;
-        private readonly ushort[] _customPallete;
-        private Texture2D _pointer;
-        public EventHandler ColorSelectedIndex;
-        private ColorBox[,] _colorBoxes;
         private bool _needToFileeBoxes = true;
+        private Texture2D _pointer;
+
+        private bool _selected;
+        public EventHandler ColorSelectedIndex;
 
         public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8, ushort[] customPallete = null)
         {
@@ -111,12 +115,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ushort SelectedHue
-        {
-            get => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
-        }
-
-        private bool _selected;
+        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
 
         public void SetHue(ushort hue)
         {
@@ -136,14 +135,11 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int y = 0; y < _rows; y++)
             {
-                for (int x = 0; x < _columns; x++)
-                {
-                    _colorBoxes[y, x].Update(totalMS, frameMS);
-                }
+                for (int x = 0; x < _columns; x++) _colorBoxes[y, x].Update(totalMS, frameMS);
             }
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_pointer == null)
             {
@@ -158,26 +154,29 @@ namespace ClassicUO.Game.UI.Controls
                     SelectedIndex = 0;
             }
 
-            for (int y = 0; y < _rows; y++)
+            for (int i = 0; i < _rows; i++)
             {
-                for (int x = 0; x < _columns; x++)
-                {
-                    _colorBoxes[y, x].Draw(batcher, new Point(position.X + (x * _cellWidth), position.Y + (y * _cellHeight)), hue);
-                }
+                for (int j = 0; j < _columns; j++) _colorBoxes[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
             }
 
             if (_hues.Length > 1)
-                batcher.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);
+            {
+                ResetHueVector();
 
-            return base.Draw(batcher, position, hue);
+                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector);
+            }
+
+            return base.Draw(batcher, x, y);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             int row = x / (Width / _columns);
             int column = y / (Height / _rows);
             SelectedIndex = row + column * _columns;
         }
+
 
         private unsafe void CreateTexture()
         {
@@ -191,6 +190,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 CreateTextureFromCustomPallet();
                 _selected = false;
+
                 return;
             }
 
@@ -199,6 +199,7 @@ namespace ClassicUO.Game.UI.Controls
             _hues = new ushort[_rows * _columns];
             int size = Marshal.SizeOf<HuesGroup>();
             IntPtr ptr = Marshal.AllocHGlobal(size * FileManager.Hues.HuesRange.Length);
+
             for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
                 Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.UI.Controls
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
-                {                   
+                {
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
                     colorIndex += (colorIndex / offset) << 2;
                     ushort color = *(ushort*) ((IntPtr) huesData + colorIndex);
@@ -228,9 +229,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             int size = Marshal.SizeOf<HuesGroup>();
             IntPtr ptr = Marshal.AllocHGlobal(size * FileManager.Hues.HuesRange.Length);
+
             for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
                 Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * size, false);
-            byte* huesData = (byte*)(ptr + (32 + 4));
+            byte* huesData = (byte*) (ptr + (32 + 4));
 
             _hues = new ushort[_rows * _columns];
             int offset = Marshal.SizeOf<HuesGroup>() - 4;
@@ -242,7 +244,7 @@ namespace ClassicUO.Game.UI.Controls
                     ushort startColor = _customPallete[y * _columns + x];
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
                     colorIndex += (colorIndex / offset) << 2;
-                    ushort color = *(ushort*)((IntPtr)huesData + colorIndex);
+                    ushort color = *(ushort*) ((IntPtr) huesData + colorIndex);
                     _hues[y * _columns + x] = startColor;
 
                     ColorBox box = new ColorBox(_cellWidth, _cellHeight, startColor, HuesHelper.Color16To32(color));

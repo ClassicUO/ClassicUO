@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 using ClassicUO.Network;
 using ClassicUO.Utility;
-
-using SDL2;
 
 using static SDL2.SDL;
 
@@ -31,14 +32,10 @@ namespace ClassicUO.Input
 {
     internal sealed class InputManager : IDisposable
     {
+        //private readonly SDL_EventFilter _hookDel;
         private bool _dragStarted;
-        private readonly SDL_EventFilter _hookDel;
 
-        public InputManager()
-        {
-            _hookDel = HookFunc;
-            SDL_AddEventWatch(_hookDel, IntPtr.Zero);
-        }
+        private bool _ignoreNextTextInput;
 
         public bool IsDisposed { get; private set; }
 
@@ -49,8 +46,8 @@ namespace ClassicUO.Input
                 return;
 
             IsDisposed = true;
-           
-            SDL_DelEventWatch(_hookDel, IntPtr.Zero);
+
+            //SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
 
@@ -60,87 +57,122 @@ namespace ClassicUO.Input
 
         public event EventHandler<bool> MouseWheel;
 
-        public event EventHandler MouseMoving, MouseDragging, DragBegin, DragEnd;
+        public event EventHandler MouseDragging, DragBegin, DragEnd;
 
         public event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
 
         public event EventHandler<string> TextInput;
 
-        private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
+        //private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
+        public unsafe void EventHandler(ref SDL_Event e)
         {
-            SDL_Event* e = (SDL_Event*) ev;
+            // SDL_Event* e = (SDL_Event*) ev;
 
-            switch (e->type)
+            switch (e.type)
             {
+                case SDL_EventType.SDL_AUDIODEVICEADDED:
+                    Console.WriteLine("AUDIO ADDED: {0}", e.adevice.which);
+
+                    break;
+
+                case SDL_EventType.SDL_AUDIODEVICEREMOVED:
+                    Console.WriteLine("AUDIO REMOVED: {0}", e.adevice.which);
+
+                    break;
+
+
                 case SDL_EventType.SDL_WINDOWEVENT:
 
-                    switch (e->window.windowEvent)
+                    switch (e.window.windowEvent)
                     {
                         case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
 
                             break;
+
                         case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
                             Mouse.MouseInWindow = false;
 
                             break;
+
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
+
                             // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
                             //Log.Message(LogTypes.Debug, "FOCUS");
                             break;
+
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
                             //Log.Message(LogTypes.Debug, "NO FOCUS");
                             //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
 
                             break;
+
                         case SDL_WindowEventID.SDL_WINDOWEVENT_TAKE_FOCUS:
 
                             //Log.Message(LogTypes.Debug, "TAKE FOCUS");
                             break;
+
                         case SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
-
-                        
                     }
 
                     break;
+
                 case SDL_EventType.SDL_SYSWMEVENT:
 
                     break;
+
                 case SDL_EventType.SDL_KEYDOWN:
 
-                    if (Plugin.ProcessHotkeys((int) e->key.keysym.sym, (int) e->key.keysym.mod, true))
+                    if (Plugin.ProcessHotkeys((int) e.key.keysym.sym, (int) e.key.keysym.mod, true))
                     {
-                        Keyboard.IgnoreNextTextInput = false;
-                        KeyDown?.Raise(e->key);
+                        _ignoreNextTextInput = false;
+                        Engine.SceneManager.CurrentScene.OnKeyDown(e.key);
+
+                        KeyDown?.Raise(e.key);
                     }
                     else
-                        Keyboard.IgnoreNextTextInput = true;
+                        _ignoreNextTextInput = true;
 
                     break;
+
                 case SDL_EventType.SDL_KEYUP:
-                    //if (Plugin.ProcessHotkeys((int)e->key.keysym.sym, (int)e->key.keysym.mod, false))
-                        KeyUp.Raise(e->key);
+
+                    Engine.SceneManager.CurrentScene.OnKeyUp(e.key);
+                    KeyUp.Raise(e.key);
 
                     break;
+
                 case SDL_EventType.SDL_TEXTINPUT:
 
-                    if (Keyboard.IgnoreNextTextInput)
+                    if (_ignoreNextTextInput)
                         break;
 
-                    string s = StringHelper.ReadUTF8(e->text.text);
+                    fixed (SDL_Event* ev = &e)
+                    {
+                        string s = StringHelper.ReadUTF8(ev->text.text);
 
-                    if (!string.IsNullOrEmpty(s))
-                        TextInput.Raise(s);
+                        if (!string.IsNullOrEmpty(s))
+                        {
+                            Engine.SceneManager.CurrentScene.OnTextInput(s);
+                            TextInput.Raise(s);
+                        }
+
+                    }
 
                     break;
+
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
-                    MouseMoving.Raise();
-                    if (Mouse.IsDragging) MouseDragging.Raise();
+
+                    if (Mouse.IsDragging)
+                    {
+                        Engine.SceneManager.CurrentScene.OnMouseDragging();
+                        MouseDragging.Raise();
+                    }
 
                     if (Mouse.IsDragging && !_dragStarted)
                     {
@@ -149,18 +181,21 @@ namespace ClassicUO.Input
                     }
 
                     break;
+
                 case SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
-                    bool isup = e->wheel.y > 0;
+                    bool isup = e.wheel.y > 0;
 
-                    Plugin.ProcessMouse(0, e->wheel.y);
+                    Plugin.ProcessMouse(0, e.wheel.y);
+                    Engine.SceneManager.CurrentScene.OnMouseWheel(isup);
                     MouseWheel.Raise(isup);
 
                     break;
+
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
-                    bool isDown = e->type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                    bool isDown = e.type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
 
                     if (_dragStarted && !isDown)
                     {
@@ -168,11 +203,12 @@ namespace ClassicUO.Input
                         _dragStarted = false;
                     }
 
-                    SDL_MouseButtonEvent mouse = e->button;
+                    SDL_MouseButtonEvent mouse = e.button;
 
                     switch ((uint) mouse.button)
                     {
                         case SDL_BUTTON_LEFT:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -185,31 +221,42 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
+                                    var res = Engine.SceneManager.CurrentScene.OnLeftMouseDoubleClick();
+
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
 
                                     LeftMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnLeftMouseDown();
                                         LeftMouseButtonDown.Raise();
+                                    }
                                     else
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
 
                                     break;
                                 }
 
+                                Engine.SceneManager.CurrentScene.OnLeftMouseDown();
                                 LeftMouseButtonDown.Raise();
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    Engine.SceneManager.CurrentScene.OnLeftMouseUp();
                                     LeftMouseButtonUp.Raise();
+                                }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
                             }
 
                             break;
+
                         case SDL_BUTTON_MIDDLE:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -219,20 +266,27 @@ namespace ClassicUO.Input
                                 uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {                                  
+                                {
+                                    Mouse.LastMidButtonClickTime = 0;
+                                    var res = Engine.SceneManager.CurrentScene.OnMiddleMouseDoubleClick();
+
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
 
                                     MidMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnMiddleMouseDown();
+
                                         MidMouseButtonDown.Raise();
-                                    Mouse.LastMidButtonClickTime = 0;
+                                    }
 
                                     break;
                                 }
 
-                                Plugin.ProcessMouse(e->button.button, 0);
+                                Plugin.ProcessMouse(e.button.button, 0);
 
+                                Engine.SceneManager.CurrentScene.OnMiddleMouseDown();
                                 MidMouseButtonDown.Raise();
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -244,7 +298,9 @@ namespace ClassicUO.Input
                             }
 
                             break;
+
                         case SDL_BUTTON_RIGHT:
+
                             if (isDown)
                             {
                                 Mouse.Begin();
@@ -257,43 +313,57 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
+                                    var res = Engine.SceneManager.CurrentScene.OnRightMouseDoubleClick();
+
+                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
 
                                     RightMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnRightMouseDown();
                                         RightMouseButtonDown.Raise();
+                                    }
                                     else
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
 
                                     break;
                                 }
 
+                                Engine.SceneManager.CurrentScene.OnRightMouseDown();
                                 RightMouseButtonDown.Raise();
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    Engine.SceneManager.CurrentScene.OnRightMouseUp();
                                     RightMouseButtonUp.Raise();
+                                }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
                             }
 
                             break;
+
                         case SDL_BUTTON_X1:
+
                             if (isDown)
-                                Plugin.ProcessMouse(e->button.button, 0);
+                                Plugin.ProcessMouse(e.button.button, 0);
+
                             break;
+
                         case SDL_BUTTON_X2:
+
                             if (isDown)
-                                Plugin.ProcessMouse(e->button.button, 0);
+                                Plugin.ProcessMouse(e.button.button, 0);
+
                             break;
                     }
 
                     break;
-            }      
-            return 1;
+            }
         }
     }
 }

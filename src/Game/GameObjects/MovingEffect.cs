@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
 
-using ClassicUO.Configuration;
+#endregion
+
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal partial class MovingEffect : GameEffect
+    internal sealed partial class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
 
@@ -66,10 +67,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
-                    {
-                        mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                    }
+                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0) mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else if (source is Item)
                 {
@@ -113,13 +111,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Explode { get; set; }
 
-        public byte MovingDelay { get; set; } = 20;
+        public int MovingDelay { get; set; } = 20;
 
 
         public override void Update(double totalMS, double frameMS)
         {
             if (_lastMoveTime > totalMS)
                 return;
+
             _lastMoveTime = (uint) (totalMS + MovingDelay);
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
@@ -219,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
                     //Tile = World.Map.GetTile(tx, ty);
                 }
 
-                Dispose();
+                Destroy();
             }
             else
             {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -40,7 +42,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public CharacterSelectionGump() : base(0, 0)
         {
-            bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
+            CanCloseWithRightClick = false;
+
             int posInList = 0;
             int yOffset = 150;
             int yBonus = 0;
@@ -77,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (!string.IsNullOrEmpty(character))
                 {
-                    Add(new CharacterEntryGump((uint)i, character, SelectCharacter, LoginCharacter)
+                    Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                     {
                         X = 224,
                         Y = yOffset + posInList * 40,
@@ -130,14 +133,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     DeleteCharacter(loginScene);
 
                     break;
+
                 case Buttons.New:
                     loginScene.StartCharCreation();
 
                     break;
+
                 case Buttons.Next:
                     LoginCharacter(_selectedCharacter);
 
                     break;
+
                 case Buttons.Prev:
                     loginScene.StepBack();
 
@@ -157,9 +163,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (existing != null)
                     Remove(existing);
-                var text = FileManager.Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
 
-                Add(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
+                Add(new LoadingGump($"Permanently delete {charName}", LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {
                     if (buttonID == (int) LoadingGump.Buttons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);
@@ -174,13 +179,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             _selectedCharacter = index;
 
-            foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
-            {
-                if (characterGump.CharacterIndex == index)
-                    characterGump.Hue = SELECTED_COLOR;
-                else
-                    characterGump.Hue = NORMAL_COLOR;
-            }
+            foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>()) characterGump.Hue = characterGump.CharacterIndex == index ? SELECTED_COLOR : NORMAL_COLOR;
         }
 
         private void LoginCharacter(uint index)
@@ -245,7 +244,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 return false;
             }
 
-            protected override void OnMouseClick(int x, int y, MouseButton button)
+
+            protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 if (button == MouseButton.Left) _selectedFn(CharacterIndex);
             }

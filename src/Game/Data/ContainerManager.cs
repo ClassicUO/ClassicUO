@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.IO;
@@ -80,10 +83,10 @@ namespace ClassicUO.Game.Data
                 0x4D, new ContainerData(0x004D, 0x002F, 0x002E, 76, 12, 140, 68)
             },
             {
-                0x4E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 96, 140, 152)
+                0x4E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 18, 100, 152)
             },
             {
-                0x4F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 96, 140, 152)
+                0x4F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 18, 100, 152)
             },
             {
                 0x51, new ContainerData(0x0051, 0x002F, 0x002E, 16, 10, 154, 94)
@@ -165,7 +168,7 @@ namespace ClassicUO.Game.Data
             return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
         }
 
-     
+
         public static void CalculateContainerPosition(Graphic g)
         {
             SpriteTexture texture = FileManager.Gumps.GetTexture(g);
@@ -179,18 +182,14 @@ namespace ClassicUO.Game.Data
                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                     if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowHeight)
-                    {
                         Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    }
                     else
                         Y += Constants.CONTAINER_RECT_LINESTEP;
                 }
                 else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Engine.WindowHeight)
                 {
                     if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Engine.WindowWidth)
-                    {
                         X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    }
                     else
                         X += Constants.CONTAINER_RECT_LINESTEP;
 
@@ -211,9 +210,17 @@ namespace ClassicUO.Game.Data
                 Y += Constants.CONTAINER_RECT_STEP;
             }
         }
+
+        public static void DoStepBack()
+        {
+            if (X == DefaultX || Y == DefaultY)
+
+                X = X;
+                Y = Y;
+        }
     }
 
-    internal struct ContainerData
+    internal readonly struct ContainerData
     {
         public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h)
         {

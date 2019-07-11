@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,7 +28,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class MessageBoxGump : Gump
+    internal class MessageBoxGump : Gump
     {
         private readonly Action<bool> _action;
 
@@ -61,10 +63,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             // OK
             Button b;
+
             Add(b = new Button(0, 0x0481, 0x0482, 0x0483)
-            {               
+            {
                 Y = Height - 45,
-                ButtonAction = ButtonAction.Activate,
+                ButtonAction = ButtonAction.Activate
             });
 
             b.X = (Width - b.Width) >> 1;
@@ -79,13 +82,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case 0:
                     _action?.Invoke(true);
                     Dispose();
+
                     break;
             }
         }
     }
 
 
-    class EntryDialog : Gump
+    internal class EntryDialog : Gump
     {
         private readonly Action<string> _action;
         private readonly TextBox _textBox;
@@ -112,7 +116,8 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
             Label l;
-            Add( l = new Label(message, false, 0x0386, Width - 90, 1)
+
+            Add(l = new Label(message, false, 0x0386, Width - 90, 1)
             {
                 X = 40,
                 Y = 45
@@ -123,16 +128,17 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 40,
                 Y = 45 + l.Height + 5,
                 Width = w - 90,
-                Height = 25,
+                Height = 25
             });
 
             int ww = w - 94;
-            _textBox = new TextBox(0xFF, ww, ww, ww, true, FontStyle.BlackBorder | FontStyle.Fixed, 0)
+
+            _textBox = new TextBox(0xFF, ww, ww, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
             {
                 X = 42,
                 Y = 45 + l.Height + 7,
                 Width = ww,
-                Height = 25,
+                Height = 25
             };
 
             Add(_textBox);
@@ -143,10 +149,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             // OK
             Button b;
+
             Add(b = new Button(0, 0x0481, 0x0482, 0x0483)
             {
                 Y = Height - 45,
-                ButtonAction = ButtonAction.Activate,
+                ButtonAction = ButtonAction.Activate
             });
 
             b.X = (Width - b.Width) >> 1;
@@ -159,6 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 0:
                     _action?.Invoke(_textBox.Text);
                     Dispose();
+
                     break;
             }
         }

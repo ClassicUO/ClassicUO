@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 using Microsoft.Xna.Framework;
@@ -69,6 +72,35 @@ namespace ClassicUO.Game.Data
 
             if (direction == int.MaxValue) direction = 0;
             direction = direction >= 7 ? direction - 7 : direction + 1;
+
+            return (Direction) direction;
+        }
+
+        public static Direction DirectionFromKeyboardArrows(bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
+        {
+            int direction = 0;
+
+            if (upPressed)
+            {
+                if (leftPressed)
+                    direction = 6;
+                else if (rightPressed)
+                    direction = 0;
+                else
+                    direction = 7;
+            }
+            else if (downPressed)
+            {
+                if (leftPressed)
+                    direction = 4;
+                else if (rightPressed)
+                    direction = 2;
+                else
+                    direction = 3;
+            }
+            else if (leftPressed)
+                direction = 5;
+            else if (rightPressed) direction = 1;
 
             return (Direction) direction;
         }

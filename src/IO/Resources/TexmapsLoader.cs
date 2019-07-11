@@ -1,20 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    class TexmapsLoader : ResourceLoader<SpriteTexture>
+    internal class TexmapsLoader : ResourceLoader<SpriteTexture>
     {
-        private UOFile _file;
-        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
+        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
 
 
@@ -25,17 +44,19 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
+
             _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
             if (!File.Exists(pathdef))
                 return;
 
-            using (DefReader defReader = new DefReader(pathdef, 2))
+            using (DefReader defReader = new DefReader(pathdef))
             {
                 while (defReader.Next())
                 {
                     int index = defReader.ReadInt();
+
                     if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                         continue;
 
@@ -47,6 +68,7 @@ namespace ClassicUO.IO.Resources
 
                         if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                             continue;
+
                         _file.Entries[index] = _file.Entries[checkindex];
                     }
                 }
@@ -98,15 +120,18 @@ namespace ClassicUO.IO.Resources
         {
             if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = GetTextmapTexture( (ushort) g, out int size);
+                ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
+
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
                 //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
+            //else
+            //    texture.Ticks = Engine.Ticks + 3000;
 
             return texture;
         }
@@ -179,7 +204,7 @@ namespace ClassicUO.IO.Resources
                 int pos = i * size;
 
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
+                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }
 
             return pixels;

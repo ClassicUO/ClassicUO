@@ -1,17 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    class MultiLoader : ResourceLoader
+    internal class MultiLoader : ResourceLoader
     {
         private UOFileMul _file;
         private UOFileUopNoFormat _fileUop;
@@ -61,7 +79,7 @@ namespace ClassicUO.IO.Resources
                         ref UOFileIndex3D index = ref _file.Entries[id];
                         int count = _reader.ReadInt();
 
-                        index = new UOFileIndex3D(offset, csize, dsize, (int)MathHelper.Combine(count, index.Extra));
+                        index = new UOFileIndex3D(offset, csize, dsize, (int) MathHelper.Combine(count, index.Extra));
                     }
                 }
 
@@ -77,24 +95,24 @@ namespace ClassicUO.IO.Resources
         public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out bool add)
         {
             if (_fileUop != null && uopValid)
-            {             
+            {
                 graphic = _reader.ReadUShort();
 
                 x = _reader.ReadShort();
                 y = _reader.ReadShort();
                 z = _reader.ReadShort();
                 ushort flags = _reader.ReadUShort();
-              
+
                 uint clilocsCount = _reader.ReadUInt();
 
                 if (clilocsCount != 0)
-                    _reader.Skip( (int) (clilocsCount * 4));
+                    _reader.Skip((int) (clilocsCount * 4));
 
                 add = flags == 0;
             }
             else
             {
-                MultiBlock* block = (MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+                MultiBlock* block = (MultiBlock*) (_file.PositionAddress + index * _itemOffset);
 
                 graphic = block->ID;
                 x = block->X;
@@ -106,16 +124,19 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public void ReleaseLastMultiDataRead() => _reader?.ReleaseData();
+        public void ReleaseLastMultiDataRead()
+        {
+            _reader?.ReleaseData();
+        }
 
-    
+
         public int GetCount(int graphic, out bool uopValid)
         {
             int count;
 
             if (graphic < _file.Entries.Length)
             {
-                ref UOFileIndex3D index = ref _file.Entries[graphic];
+                ref readonly UOFileIndex3D index = ref _file.Entries[graphic];
 
                 MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 

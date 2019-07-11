@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
+using System.IO;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -37,14 +42,15 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300;
             CanMove = true;
             CanBeSaved = true;
-            Add(_background = new ExpandableScroll(0, 0, Height)
+
+            Add(_background = new ExpandableScroll(0, 0, Height, 0x1F40)
             {
                 TitleGumpID = 0x82A
             });
 
-            _scrollBar = new ScrollFlag(-25, 0, Height, true);
-            
-            Add(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
+            _scrollBar = new ScrollFlag(-25, 36, Height, true);
+
+            Add(_journalEntries = new RenderedTextList(25, 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
         }
@@ -57,6 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.Value -= 5;
 
                     break;
+
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += 5;
 
@@ -86,28 +93,39 @@ namespace ClassicUO.Game.UI.Gumps
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
-            byte font = (byte) entry.Font;
-            bool asUnicode = entry.IsUnicode;
-            TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, font, entry.Hue);
+            //TransformFont(ref font, ref asUnicode);
+            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode);
         }
 
-        private void TransformFont(ref byte font, ref bool asUnicode)
+        //private void TransformFont(ref byte font, ref bool asUnicode)
+        //{
+        //    if (asUnicode)
+        //        return;
+
+        //    switch (font)
+        //    {
+        //        case 3:
+
+        //        {
+        //            font = 1;
+        //            asUnicode = true;
+
+        //            break;
+        //        }
+        //    }
+        //}
+
+        public override void Save(BinaryWriter writer)
         {
-            if (asUnicode)
-                return;
+            base.Save(writer);
+            writer.Write(_background.SpecialHeight);
+        }
 
-            switch (font)
-            {
-                case 3:
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
 
-                {
-                    font = 1;
-                    asUnicode = true;
-
-                    break;
-                }
-            }
+            _background.Height = _background.SpecialHeight = reader.ReadInt32();
         }
 
         private void InitializeJournalEntries()

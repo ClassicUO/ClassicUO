@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -29,6 +31,8 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -45,6 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
             //    _mapTexture = Texture2D.FromStream(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, stream);
+
+            Load();
         }
 
         private unsafe void Load()
@@ -55,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
             {
-                int mapX = bx * 8;
+                int mapX = bx << 3;
 
                 for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
                 {
@@ -63,7 +69,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (indexMap.MapAddress == 0)
                         continue;
-                    int mapY = by * 8;
+
+                    int mapY = by << 3;
                     MapBlock info = new MapBlock();
                     MapCells* infoCells = (MapCells*) &info.Cells;
                     MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
@@ -90,11 +97,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int c = 0; c < count; c++)
                         {
-                            StaticsBlock staticBlock = sb[c];
+                            ref readonly StaticsBlock staticBlock = ref sb[c];
 
-                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                            if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                             {
-                                pos = staticBlock.Y * 8 + staticBlock.X;
+                                pos = (staticBlock.Y << 3) + staticBlock.X;
                                 ref MapCells cell = ref infoCells[pos];
 
                                 if (cell.Z <= staticBlock.Z)
@@ -115,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
                         for (int x = 0; x < 8; x++)
                         {
                             ushort color = (ushort) (0x8000 | FileManager.Hues.GetRadarColorData(infoCells[pos].TileID));
+
                             buffer[block] = color;
 
                             if (y < 7 && x < 7 && block < maxBlock)
@@ -165,10 +173,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (blockIndex >= maxBlockIndex)
                         break;
+
                     RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
 
                     if (!mbbv.HasValue)
                         break;
+
                     RadarMapBlock mb = mbbv.Value;
                     Chunk block = World.Map.Chunks[blockIndex];
                     int realBlockX = i * 8;
@@ -225,79 +235,66 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (gx < 0 || gx >= w)
                     continue;
+
                 int gy = py;
 
                 if (gy < 0 || gy >= h)
                     break;
+
                 int block = gy * w + gx;
 
                 if (data[block] == 0x8421)
                     data[block] = (ushort) color;
             }
         }
-
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
-        {
-            //batcher.Draw2D(_mapTexture, Bounds, position);
-
-            //batcher.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
-
-            //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
-
-            return base.Draw(batcher, position, hue);
-        }
-
+        
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
         {
             float cosRadians = (float) Math.Cos(radians);
             float sinRadians = (float) Math.Sin(radians);
-            Vector2 translatedPoint = new Vector2();
-            translatedPoint.X = point.X - pivot.X;
-            translatedPoint.Y = point.Y - pivot.Y;
-            Vector2 rotatedPoint = new Vector2();
-            rotatedPoint.X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X;
-            rotatedPoint.Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y;
+
+            Vector2 translatedPoint = new Vector2
+            {
+                X = point.X - pivot.X, Y = point.Y - pivot.Y
+            };
+
+            Vector2 rotatedPoint = new Vector2
+            {
+                X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X, Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y
+            };
 
             return rotatedPoint;
         }
 
-        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Rectangle src = new Rectangle();
+            int sx = World.Player.X;
+            int sy = World.Player.Y;
+            int sw = Width >> 1;
+            int sh = Height >> 1;
 
-            //if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
-            //    return false;
-            src.X = offsetX;
-            src.Y = offsetY;
-            int maxX = src.X + dst.Width;
+            ResetHueVector();
 
-            if (maxX <= Width)
-                src.Width = dst.Width;
-            else
-            {
-                src.Width = Width - src.X;
-                dst.Width = src.Width;
-            }
+            //var v = RotateVector2(new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1))),
+            //                      45,
+            //                      new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1)) / 2));
 
-            int maxY = src.Y + dst.Height;
+            //batcher.Draw2DRotated(_mapTexture, 
+            //                      x + (sx - (sw >> 1)),
+            //                      y + (sy - (sh >> 1)), 
+            //                      x + sw,
+            //                      y + sh, 
+            //                      x + (sx - (sw >> 1)),
+            //                      y + (sy - (sh >> 1)));
 
-            if (maxY <= Height)
-                src.Height = dst.Height;
-            else
-            {
-                src.Height = Height - src.Y;
-                dst.Height = src.Height;
-            }
+            batcher.Draw2D(_mapTexture, x, y, Width, Height, sx - (sw >> 1), sy - (sh >> 1), sw, sh, ref _hueVector);
+            return base.Draw(batcher, x, y);
+        }
 
-            //src.X = World.Player.Position.X - src.Width / 2;
-            //src.Y = World.Player.Position.Y - src.Height / 2;
-
-            //var rotDest = RotateVector2(new Vector2(dst.X, dst.Y), 45, new Vector2(dst.Width / 2, dst.Height / 2));
-
-            //dst.X = (int)rotDest.X;
-            //dst.Y = (int)rotDest.Y;
-
-            return batcher.Draw2D(_mapTexture, dst, src, Vector3.Zero);
+        public override void Dispose()
+        {
+            _mapTexture?.Dispose();
+            base.Dispose();
         }
     }
 }

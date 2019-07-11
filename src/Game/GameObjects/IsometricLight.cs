@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
@@ -77,6 +80,7 @@ namespace ClassicUO.Game.GameObjects
                 Recalculate();
             }
         }
+
         public float IsometricLevel { get; private set; }
 
         public Vector3 IsometricDirection { get; } = new Vector3(-1.0f, -1.0f, .5f);

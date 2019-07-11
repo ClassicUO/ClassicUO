@@ -1,42 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
-    class MultiMapLoader : ResourceLoader
+    internal class MultiMapLoader : ResourceLoader
     {
-        private UOFile _file;
         private readonly UOFileMul[] _facets = new UOFileMul[6];
+        private UOFile _file;
+
+        internal bool HasFacet(int map)
+        {
+            return map >= 0 && map < _facets.Length && _facets[map] != null;
+        }
 
         public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "Multimap.rle");
 
             if (File.Exists(path))
-                _file = new UOFile(path);
+                _file = new UOFile(path, true);
 
             for (int i = 0; i < 6; i++)
             {
                 path = Path.Combine(FileManager.UoFolderPath, $"facet0{i}.mul");
 
-                if (File.Exists(path))
-                {
-                    _facets[i] = new UOFileMul(path, false);
-                }
+                if (File.Exists(path)) _facets[i] = new UOFileMul(path, false);
             }
         }
 
         public unsafe SpriteTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
-            if (_file == null)
+            if (_file == null || _file.Length == 0)
+            {
+                Log.Message(LogTypes.Warning, "MultiMap.rle is not loaded!");
+
                 return null;
+            }
 
             _file.Seek(0);
 
@@ -45,54 +71,53 @@ namespace ClassicUO.IO.Resources
 
             if (w < 1 || h < 1)
             {
+                Log.Message(LogTypes.Warning, "Failed to load bounds from MultiMap.rle");
+
                 return null;
             }
 
-
             int mapSize = width * height;
-            byte[] data = new byte[mapSize];
 
-            int startX = startx / 2;
-            int endX = endx / 2;
+            startx = startx >> 1;
+            endx = endx >> 1;
 
-            int widthDivisor = endX - startX;
+            int widthDivisor = endx - startx;
 
             if (widthDivisor == 0)
                 widthDivisor++;
 
-            int startY = starty / 2;
-            int endY = endy / 2;
+            starty = starty >> 1;
+            endy = endy >> 1;
 
-            int heightDivisor = endY - startY;
+            int heightDivisor = endy - starty;
 
             if (heightDivisor == 0)
                 heightDivisor++;
 
-
             int pwidth = (width << 8) / widthDivisor;
             int pheight = (height << 8) / heightDivisor;
+
+            byte[] data = new byte[mapSize];
 
             int x = 0, y = 0;
 
             int maxPixelValue = 1;
-
+            int startHeight = starty * pheight;
 
             while (_file.Position < _file.Length)
             {
                 byte pic = _file.ReadByte();
-                byte size = (byte)(pic & 0x7F);
-
+                byte size = (byte) (pic & 0x7F);
                 bool colored = (pic & 0x80) != 0;
 
-                int startHeight = startY * pheight;
                 int currentHeight = y * pheight;
                 int posY = width * ((currentHeight - startHeight) >> 8);
 
                 for (int i = 0; i < size; i++)
                 {
-                    if (colored && x >= startX && x < endX && y >= startY && y < endY)
+                    if (colored && x >= startx && x < endx && y >= starty && y < endy)
                     {
-                        int position = posY + ((width * (x - startX)) >> 8);
+                        int position = posY + ((pwidth * (x - startx)) >> 8);
 
                         ref byte pixel = ref data[position];
 
@@ -111,52 +136,53 @@ namespace ClassicUO.IO.Resources
                     {
                         x = 0;
                         y++;
-                        currentHeight += height;
+                        currentHeight += pheight;
                         posY = width * ((currentHeight - startHeight) >> 8);
                     }
                 }
+            }
 
-                if (maxPixelValue >= 1)
+            if (maxPixelValue >= 1)
+            {
+                int s = Marshal.SizeOf<HuesGroup>();
+                IntPtr ptr = Marshal.AllocHGlobal(s * FileManager.Hues.HuesRange.Length);
+
+                for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
+                    Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * s, false);
+
+                ushort* huesData = (ushort*) (byte*) (ptr + 30800);
+
+                ushort[] colorTable = new ushort[maxPixelValue];
+
+                int colorOffset = 31 * maxPixelValue;
+
+                for (int i = 0; i < maxPixelValue; i++)
                 {
-                    int s = Marshal.SizeOf<HuesGroup>();
-                    IntPtr ptr = Marshal.AllocHGlobal(s * FileManager.Hues.HuesRange.Length);
-                    for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
-                        Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * s, false);
-
-                    ushort* huesData = (ushort*)(byte*)(ptr + 30800);
-
-                    ushort[] colorTable = new ushort[maxPixelValue];
-
-                    int colorOffset = 31 * maxPixelValue;
-
-                    for (int i = 0; i < maxPixelValue; i++)
-                    {
-                        colorOffset -= 31;
-                        colorTable[i] = (ushort) (0x8000 | huesData[colorOffset / maxPixelValue]);
-                    }
-
-                    ushort[] worldMap = new ushort[mapSize];
-
-                    for (int i = 0; i < mapSize; i++)
-                    {
-                        byte bytepic = data[i];
-
-                        worldMap[i] = (ushort) (pic != 0 ? colorTable[pic - 1] : 0);
-                    }
-
-                    Marshal.FreeHGlobal(ptr);
-
-                    SpriteTexture texture = new SpriteTexture(width, height, false);
-                    texture.SetData(worldMap);
-
-                    return texture;
+                    colorOffset -= 31;
+                    colorTable[i] = (ushort) (0x8000 | huesData[colorOffset / maxPixelValue]);
                 }
+
+                ushort[] worldMap = new ushort[mapSize];
+
+                for (int i = 0; i < mapSize; i++)
+                {
+                    byte bytepic = data[i];
+
+                    worldMap[i] = (ushort) (bytepic != 0 ? colorTable[bytepic - 1] : 0);
+                }
+
+                Marshal.FreeHGlobal(ptr);
+
+                SpriteTexture texture = new SpriteTexture(width, height, false);
+                texture.SetData(worldMap);
+
+                return texture;
             }
 
             return null;
         }
 
-        public unsafe SpriteTexture LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public SpriteTexture LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
                 return null;
@@ -166,10 +192,7 @@ namespace ClassicUO.IO.Resources
             int w = _facets[facet].ReadShort();
             int h = _facets[facet].ReadShort();
 
-            if (w < 1 || h < 1)
-            {
-                return null;
-            }
+            if (w < 1 || h < 1) return null;
 
             int startX = startx;
             int endX = endx;
@@ -195,8 +218,8 @@ namespace ClassicUO.IO.Resources
 
                     for (int j = 0; j < size; j++)
                     {
-                        if ((x >= startX && x < endX) && (y >= startY && y < endY))
-                            map[((y - startY) * pwidth) + (x - startX)] = color;
+                        if (x >= startX && x < endX && y >= startY && y < endY)
+                            map[(y - startY) * pwidth + (x - startX)] = color;
                         x++;
                     }
                 }

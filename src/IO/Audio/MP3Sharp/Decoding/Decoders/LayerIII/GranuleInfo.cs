@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
-    class GranuleInfo
+    internal class GranuleInfo
     {
         public int BigValues;
         public int BlockType;

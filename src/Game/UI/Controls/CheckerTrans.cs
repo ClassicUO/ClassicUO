@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Renderer;
 
@@ -30,42 +33,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class CheckerTrans : Control
     {
-        private static SpriteTexture _transparentTexture/*, _transparentTexture2*/;
-
-        //public CheckerTrans(float alpha = 0.5f)
-        //{
-        //    _alpha = alpha;
-        //    AcceptMouseInput = false;
-        //}
-
-        public CheckerTrans(string[] parts)
-        {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
-            AcceptMouseInput = false;
-        }
-
-        public static SpriteTexture TransparentTexture
-        {
-            get
-            {
-                if (_transparentTexture == null || _transparentTexture.IsDisposed)
-                {
-                    _transparentTexture = new SpriteTexture(1, 1);
-
-                    _transparentTexture.SetData(new Color[1]
-                    {
-                        Color.Black
-                    });
-                }
-
-                _transparentTexture.Ticks = Engine.Ticks;
-
-                return _transparentTexture;
-            }
-        }
+        private static SpriteTexture _transparentTexture /*, _transparentTexture2*/;
 
         //public static SpriteTexture TransparentTexture2
         //{
@@ -89,20 +57,19 @@ namespace ClassicUO.Game.UI.Controls
 
         private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
         {
-            DepthStencilState state = new DepthStencilState();
+            DepthStencilState state = new DepthStencilState
+            {
+                DepthBufferEnable = false,
+                StencilEnable = false,
+                StencilFunction = CompareFunction.Always,
+                ReferenceStencil = 1,
+                StencilMask = 1,
+                StencilFail = StencilOperation.Keep,
+                StencilDepthBufferFail = StencilOperation.Keep,
+                StencilPass = StencilOperation.Replace,
+                TwoSidedStencilMode = false
+            };
 
-            state.DepthBufferEnable = false;
-            state.StencilEnable = false;
-
-            state.StencilFunction = CompareFunction.Always;
-            state.ReferenceStencil = 1;
-            state.StencilMask = 1;
-
-            state.StencilFail = StencilOperation.Keep;
-            state.StencilDepthBufferFail = StencilOperation.Keep;
-            state.StencilPass = StencilOperation.Replace;
-
-            state.TwoSidedStencilMode = false;
 
             return state;
         });
@@ -110,12 +77,31 @@ namespace ClassicUO.Game.UI.Controls
 
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
-            BlendState blend = new BlendState();
-            blend.ColorWriteChannels = ColorWriteChannels.None;
+            BlendState blend = new BlendState
+            {
+                ColorWriteChannels = ColorWriteChannels.None
+            };
+
             return blend;
         });
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        //public CheckerTrans(float alpha = 0.5f)
+        //{
+        //    _alpha = alpha;
+        //    AcceptMouseInput = false;
+        //}
+
+        public CheckerTrans(List<string> parts)
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Width = int.Parse(parts[3]);
+            Height = int.Parse(parts[4]);
+            AcceptMouseInput = false;
+        }
+
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);
@@ -127,7 +113,10 @@ namespace ClassicUO.Game.UI.Controls
 
             //return true;
 
-            return batcher.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            ResetHueVector();
+            _hueVector.Z = 0.5f;
+
+            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
         }
     }
 }

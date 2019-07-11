@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -35,11 +33,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly Layer _layer;
         private readonly Mobile _mobile;
-        private bool _canDrag, _sendClickIfNotDClick;
-        private Point _clickPoint;
         private ItemGumpFixed _itemGump;
-        private float _pickupTime, _singleClickTime;
-        
+        private Point _lastClickPosition;
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -66,15 +61,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public Item Item { get; private set; }
 
-        public Mobile Mobile
-        {
-            get => _mobile;
-            set { }
-        }
+
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Item != null && Item.IsDisposed)
+            if (Item != null && Item.IsDestroyed)
             {
                 Item = null;
                 _itemGump.Dispose();
@@ -95,8 +86,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Add(_itemGump = new ItemGumpFixed(Item, 18, 18)
                     {
-                        HighlightOnMouseOver = false,
-                        ShowLabel = false,
+                        HighlightOnMouseOver = false
                     });
 
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
@@ -140,11 +130,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Item != null)
             {
-                if (_canDrag && totalMS >= _pickupTime)
-                {
-                    _canDrag = false;
-                    AttempPickUp();
-                }
+                //    if (_canDrag && totalMS >= _pickupTime)
+                //    {
+                //        _canDrag = false;
+                //        AttempPickUp();
+                //    }
+
+                //    if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+                //    {
+                //        if (!World.ClientFlags.TooltipsEnabled)
+                //            GameActions.SingleClick(Item);
+                //        GameActions.OpenPopupMenu(Item);
+                //        _sendClickIfNotDClick = false;
+                //    }
 
                 //if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
                 //{
@@ -156,70 +154,18 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+
+
+        private class ItemGumpFixed : ItemGump
         {
-            if (Item == null)
-                return;
-            _canDrag = true;
-            float totalMS = Engine.Ticks;
-            _pickupTime = totalMS + 800;
-            _clickPoint.X = x;
-            _clickPoint.Y = y;
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (Item == null)
-                return;
-
-            if (_canDrag && Math.Abs(_clickPoint.X - x) + Math.Abs(_clickPoint.Y - y) > 3)
-            {
-                _canDrag = false;
-                AttempPickUp();
-            }
-        }
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (Item == null)
-                return;
-
-            if (_canDrag)
-            {
-                _canDrag = false;
-                _sendClickIfNotDClick = true;
-                float totalMS = Engine.Ticks;
-                _singleClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-            }
-        }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
-        {
-            if (Item == null)
-                return false;
-            GameActions.DoubleClick(Item);
-            _sendClickIfNotDClick = false;
-
-            return true;
-        }
-
-        private void AttempPickUp()
-        {
-            Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
-            GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
-        }
-
-
-        class ItemGumpFixed : ItemGump
-        {
-            private Point _originalSize, _point;
+            private readonly Point _originalSize;
+            private readonly Point _point;
 
             public ItemGumpFixed(Item item, int w, int h) : base(item)
             {
                 Width = w;
                 Height = h;
                 WantUpdateSize = false;
-
 
                 ArtTexture texture = (ArtTexture) Texture;
 
@@ -230,11 +176,29 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
+                ResetHueVector();
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-                return batcher.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), new Rectangle(_point.X, _point.Y, _originalSize.X, _originalSize.Y), huev);
+                return batcher.Draw2D(Texture, x, y, Width, Height, _point.X, _point.Y, _originalSize.X, _originalSize.Y, ref _hueVector);
+            }
+
+            //protected override void OnMouseClick(int x, int y, MouseButton button)
+            //{
+            //    Point p = new Point()
+            //    {
+            //        X = Mouse.Position.X + ParentX,
+            //        Y = Mouse.Position.Y + ParentY
+            //    };
+            //    Parent.InvokeMouseClick(p, button);
+            //}
+
+
+
+            public override bool Contains(int x, int y)
+            {
+                return true;
             }
         }
     }

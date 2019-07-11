@@ -1,15 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Utility.Coroutines
 {
     internal sealed class Coroutine : IDisposable
     {
+        private IEnumerator<IWaitCondition> _enumerator;
+        private string _name;
+
+        public CoroutineStatus Status { get; private set; }
+
+        public void Dispose()
+        {
+            _enumerator.Dispose();
+            Status = CoroutineStatus.Disposed;
+        }
+
         public static Coroutine Start(Scene scene, IEnumerable<IWaitCondition> method, string name = null)
         {
             return scene.Coroutines.StartNew(method.GetEnumerator(), name);
@@ -19,11 +28,6 @@ namespace ClassicUO.Utility.Coroutines
         {
             return scene.Coroutines.StartNew(enumerator, name);
         }
-
-        private IEnumerator<IWaitCondition> _enumerator;
-        private string _name;
-
-        public CoroutineStatus Status { get; private set; }
 
         internal void Setup(IEnumerator<IWaitCondition> values, string name)
         {
@@ -40,6 +44,7 @@ namespace ClassicUO.Utility.Coroutines
         {
             if (Status != CoroutineStatus.Running)
                 return;
+
             IWaitCondition currentYield = _enumerator.Current;
 
             if (currentYield == null || currentYield.Update())
@@ -71,12 +76,6 @@ namespace ClassicUO.Utility.Coroutines
         {
             _enumerator.Dispose();
             Status = CoroutineStatus.Cancelled;
-        }
-
-        public void Dispose()
-        {
-            _enumerator.Dispose();
-            Status = CoroutineStatus.Disposed;
         }
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.IO;
+using System.Collections.Generic;
+
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -31,10 +32,11 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly RenderedText _gText;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, bool ishtml = false)
         {
             _gText = new RenderedText
             {
+                IsHTML = ishtml,
                 IsUnicode = isunicode,
                 Font = font,
                 FontStyle = style,
@@ -48,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = _gText.Height;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
+        public Label(List<string> parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -80,19 +82,21 @@ namespace ClassicUO.Game.UI.Controls
 
         public byte Font => _gText.Font;
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public bool Unicode => _gText.IsUnicode;
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed) return false;
 
-            _gText.Draw(batcher, position, hue);
+            _gText.Draw(batcher, x, y, Alpha);
 
-            return base.Draw(batcher, position, hue);
+            return base.Draw(batcher, x, y);
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            _gText.Dispose();
+            _gText.Destroy();
         }
     }
 }

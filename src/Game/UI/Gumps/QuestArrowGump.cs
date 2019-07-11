@@ -1,103 +1,141 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-	internal class QuestArrowGump : Gump
-	{
-		private static double[] _offsetTableX = new[] { -0.5, -0.75, -0.5, 0.0, 0.5, 0.75, 0.5, 0.0 };
-		private static double[] _offsetTableY = new[] { 0.5, 0.0, -0.5, -0.75, -0.5, 0.0, 0.5, 0.75 };
+    internal class QuestArrowGump : Gump
+    {
+        private GumpPic _arrow;
+        private Direction _direction;
+        private int _mx;
+        private int _my;
+        private bool _needHue;
+        private float _timer;
 
-		private int _mx;
-		private int _my;
+        public QuestArrowGump(Serial serial, int mx, int my) : base(serial, serial)
+        {
+            CanMove = false;
+            CanCloseWithRightClick = false;
 
-		private Direction _direction;
+            AcceptMouseInput = true;
 
-		private GumpPic _arrow;
-		private Rectangle _arrowBounds;
+            SetRelativePosition(mx, my);
+            WantUpdateSize = false;
+        }
 
-		public QuestArrowGump(Serial serial, int mx, int my) : base(serial, serial)
-		{
-			CanMove = false;
-			CanCloseWithRightClick = false;
-			
-			AcceptMouseInput = true;
+        public void SetRelativePosition(int x, int y)
+        {
+            _mx = x;
+            _my = y;
+        }
 
-			_mx = mx;
-			_my = my;
-		}
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
 
-		private void UpdateArrow(Direction direction)
-		{
-			_direction = direction;
+            if (!World.InGame) Dispose();
 
-			if (_arrow != null)
-				Remove(_arrow);
+            var scene = Engine.SceneManager.GetScene<GameScene>();
 
-			var graphic = (uint)0x1194;
+            if (IsDisposed || Engine.Profile.Current == null || scene == null)
+                return;
 
-			if (_direction >= Direction.North && _direction <= Direction.West)
-				graphic = 0x1195 + (uint)_direction;
+            Direction dir = (Direction) GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
+            ushort gumpID = (ushort) (0x1194 + ((int) dir + 1) % 8);
 
-			_arrowBounds = FileManager.Gumps.GetTexture(graphic).Bounds;
+            if (_direction != dir || _arrow == null)
+            {
+                _direction = dir;
 
-			Add(_arrow = new GumpPic(0, 0, (Graphic)graphic, 0));
-		}
+                if (_arrow == null)
+                    Add(_arrow = new GumpPic(0, 0, gumpID, 0));
+                else
+                    _arrow.Graphic = gumpID;
 
-		public override void Update(double totalMS, double frameMS)
-		{
-			base.Update(totalMS, frameMS);
+                Width = _arrow.Width;
+                Height = _arrow.Height;
+            }
 
-			var screenLeft = Engine.Profile.Current.GameWindowPosition.X;
-			var screenTop = Engine.Profile.Current.GameWindowPosition.Y;
+            var scale = scene.Scale;
 
-			int screenRight = screenLeft + Engine.Profile.Current.GameWindowSize.X;
-			int screenBottom = screenTop + Engine.Profile.Current.GameWindowSize.Y;
 
-			int screenCenterX = (screenRight - screenLeft) / 2;
-			int screenCenterY = (screenBottom - screenTop) / 2;
+            int gox = _mx - World.Player.X;
+            int goy = _my - World.Player.Y;
 
-			int offsetX = _mx - World.Player.X;
-			int offsetY = _my - World.Player.Y;
 
-			int drawX = screenLeft + (int)(screenCenterX + (offsetX - offsetY) * 22) + 3;
-			int drawY = screenTop + (int)(screenCenterY + (offsetX + offsetY) * 22) + 3;
+            int x = (Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) + 6 + ((gox - goy) * (int) (22 / scale)) - (int) ((_arrow.Width / 2f) / scale);
+            int y = (Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + 6 + ((gox + goy) * (int) (22 / scale)) + (int) ((_arrow.Height) / scale);
 
-			var direction = DirectionHelper.DirectionFromPoints(
-				new Point(screenCenterX, screenCenterY),
-				new Point(drawX, drawY));
+            x -= (int) (World.Player.Offset.X / scale);
+            y -= (int) (((World.Player.Offset.Y - World.Player.Offset.Z) + (World.Player.Z >> 2)) / scale);
 
-			if (_direction != direction || _arrow == null)
-				UpdateArrow(direction);
+         
+            if (x < Engine.Profile.Current.GameWindowPosition.X)
+                x = Engine.Profile.Current.GameWindowPosition.X;
+            else if (x > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width)
+                x = Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width;
 
-			var arrowWidth = _arrowBounds.Width;
-			var arrowHeight = _arrowBounds.Height;
 
-			drawX += (int)(_offsetTableX[(int)direction] * (arrowWidth + 22)) - (arrowWidth / 2);
-			drawY += (int)(_offsetTableY[(int)direction] * (arrowHeight + 22)) - (arrowHeight / 2);
+            if (y < Engine.Profile.Current.GameWindowPosition.Y)
+                y = Engine.Profile.Current.GameWindowPosition.Y;
+            else if (y > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height)
+                y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height;
 
-			if (drawX < screenLeft) drawX = screenLeft;
-			if (drawY < screenTop) drawY = screenTop;
+            X = x;
+            Y = y;
 
-			if (drawX + arrowWidth > screenRight) drawX = (screenRight - arrowWidth);
-			if (drawY + arrowHeight > screenBottom) drawY = (screenBottom - arrowHeight);
+            if (_timer < Engine.Ticks)
+            {
+                _timer = Engine.Ticks + 1000;
+                _needHue = !_needHue;
+            }
 
-			X = drawX;
-			Y = drawY;
-		}
+            _arrow.Hue = (Hue) (_needHue ? 0 : 0x21);
+        }
 
-		protected override void OnMouseClick(int x, int y, MouseButton button)
-		{
-			var leftClick = button == MouseButton.Left;
-			var rightClick = button == MouseButton.Right;
 
-			if (leftClick || rightClick)
-				GameActions.QuestArrow(rightClick);
-		}
-	}
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            var leftClick = button == MouseButton.Left;
+            var rightClick = button == MouseButton.Right;
+
+            if (leftClick || rightClick)
+                GameActions.QuestArrow(rightClick);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            if (_arrow == null)
+                return true;
+
+            return _arrow.Texture.Contains(x, y);
+        }
+    }
 }

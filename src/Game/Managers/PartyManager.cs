@@ -21,195 +21,320 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
     internal class PartyManager
     {
-        private bool _allowPartyLoot;
+        public Serial Leader { get; set; }
+        public Serial Inviter { get; set; }
+        public bool CanLoot { get; set; }
 
-        public bool IsInParty => Members.Count > 1;
+        public PartyMember[] Members { get; } = new PartyMember[10];
 
-        public bool IsPlayerLeader => IsInParty && Leader == World.Player;
-
-        public Serial Leader { get; private set; }
-
-        public string LeaderName => Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
-
-        public List<PartyMember> Members { get; } = new List<PartyMember>();
-
-        public bool AllowPartyLoot
-        {
-            get => _allowPartyLoot;
-            set
-            {
-                _allowPartyLoot = value;
-                GameActions.RequestPartyLootState(_allowPartyLoot);
-            }
-        }
 
         public long PartyHealTimer { get; set; }
-
         public Serial PartyHealTarget { get; set; }
 
-        public event EventHandler PartyMemberChanged;
 
-        public static void HandlePartyPacket(Packet p)
+        public void ParsePacket(Packet p)
         {
-            const byte CommandPartyList = 0x01;
-            const byte CommandRemoveMember = 0x02;
-            const byte CommandPrivateMessage = 0x03;
-            const byte CommandPublicMessage = 0x04;
-            const byte CommandInvitation = 0x07;
-            byte SubCommand = p.ReadByte();
+            byte code = p.ReadByte();
 
-            switch (SubCommand)
+            switch (code)
             {
-                case CommandPartyList:
-                    int count = p.ReadByte();
-                    Serial[] serials = new Serial[count];
-                    for (int i = 0; i < serials.Length; i++) serials[i] = p.ReadUInt();
-                    World.Party.ReceivePartyMemberList(serials);
-
-                    break;
-                case CommandRemoveMember:
-                    count = p.ReadByte();
+                case 1:
+                case 2:
+                    byte count = p.ReadByte();
 
                     if (count <= 1)
-                        p.Skip(4);
+                    {
+                        Leader = 0;
+                        Inviter = 0;
 
-                    serials = new Serial[count];
-                    for (int i = 0; i < serials.Length; i++)
-                        serials[i] = p.ReadUInt();
-                    World.Party.ReceiveRemovePartyMember(serials);
+                        for (int i = 0; i < Members.Length; i++)
+                        {
+                            if (Members[i] == null || Members[i].Serial == 0)
+                                break;
+
+                            HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(Members[i].Serial);
+
+
+                            if (gump != null)
+                            {
+                                if (code == 2)
+                                    Members[i].Serial = 0;
+
+                                gump.Update();
+                            }
+                        }
+
+                        Clear();
+                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                        break;
+                    }
+
+                    Clear();
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        Serial serial = p.ReadUInt();
+                        Members[i] = new PartyMember(serial);
+
+                        if (i == 0)
+                            Leader = serial;
+
+
+                        HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
+
+                        if (gump != null)
+                        {
+                            GameActions.RequestMobileStatus(serial);
+                            gump.Update();
+                        }
+                        else
+                        {
+                            if (serial == World.Player)
+                            {
+                            }
+                        }
+                    }
+
+                    Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
 
                     break;
-                case CommandPrivateMessage:
-                case CommandPublicMessage:
-                    PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
 
-                    if (partyMember != null)
+                case 3:
+                case 4:
+                    Serial ser = p.ReadUInt();
+                    string name = p.ReadUnicode();
+
+                    for (int i = 0; i < Members.Length; i++)
                     {
-                        Chat.OnMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, MessageFont.Normal);
+                        if (Members[i] == null)
+                            break;
+
+                        if (Members[i].Serial == ser)
+                        {
+                            Mobile m = Members[i].Mobile;
+
+                            if (m != null)
+                                Chat.HandleMessage(null, name, m.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
+
+                            break;
+                        }
                     }
 
                     break;
-                case CommandInvitation:
-                    //The packet that arrives in PacketHandlers.DisplayClilocString(Packet p) for party invite does not have the party leader's serial
-                    //and therefor it is not handled by Chat.OnMessage because we have no entity and also the packet message type is incorrectly set to .Label
-                    //we handle the party invite here because we have the partyLeader's serial and we can appropriately set the MesageType.System
-                    Serial serial = p.ReadUInt();
-                    Mobile partyLeaderEntity = World.Mobiles.Get(serial);
 
-                    if (partyLeaderEntity != null)
-                    {
-                        Chat.OnMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, MessageFont.Normal, true);
-                    }
-
-                    World.Party.SetPartyLeader(serial);
+                case 7:
+                    Inviter = p.ReadUInt();
 
                     break;
             }
         }
 
-        private void SetPartyLeader(Serial s)
-            => Leader = s;
-
-        public void ReceivePartyMemberList(Serial[] mobileSerials)
+        public bool Contains(Serial serial)
         {
-            Members.Clear();
-            foreach (Serial serial in mobileSerials) AddPartyMember(serial);
-            PartyMemberChanged.Raise();
-        }
-
-        public void ReceiveRemovePartyMember(Serial[] mobileSerials)
-        {
-            var list = new List<PartyMember>(Members);
-            Members.Clear();
-            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
-            foreach (Serial serial in mobileSerials)
-                AddPartyMember(serial);
-            PartyMemberChanged.Raise();
-        }
-
-        public void TriggerAddPartyMember()
-        {
-            if (!IsInParty)
+            for (int i = 0; i < Members.Length; i++)
             {
-                Leader = World.Player;
-                GameActions.RequestPartyInviteByTarget();
+                if (Members[i] != null && Members[i].Serial == serial)
+                    return true;
             }
-            else if (IsInParty && IsPlayerLeader)
-                GameActions.RequestPartyInviteByTarget();
-            else if (IsInParty && !IsPlayerLeader)
-            {
-                //"You may only add members to the party if you are the leader."
-            }
+
+            return false;
         }
 
-        private void AddPartyMember(Serial mobileSerial)
+        public void Clear()
         {
-            if (Members.All(p => p.Serial != mobileSerial))
-            {
-                Members.Add(new PartyMember(mobileSerial));
-                GameActions.RequestMobileStatus(mobileSerial);
-
-                Engine.UI.GetByLocalSerial<HealthBarGump>(mobileSerial)?.Update();
-            }
-        }
-
-        public PartyMember GetPartyMember(Serial mobileSerial)
-        {
-            return Members.FirstOrDefault(s => s.Serial == mobileSerial);
-        }
-
-        public void RemovePartyMember(Serial mobileSerial)
-        {
-            if (Members.Any(p => p.Serial == mobileSerial))
-            {
-                Members.RemoveAt(Members.FindIndex(p => p.Serial == mobileSerial));
-                GameActions.RequestPartyRemoveMember(mobileSerial);
-            }
-        }
-
-        public void AcceptPartyInvite()
-        {
-            GameActions.RequestPartyAccept(Leader);
-        }
-
-        public void DeclinePartyInvite()
-        {
-            //Do nothing, let party invite expire
-        }
-
-        public void QuitParty()
-        {
-            GameActions.RequestPartyQuit();
-            var list = new List<PartyMember>(Members);
-            Members.Clear();
-            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
-        }
-
-        public void PartyMessage(string message)
-        {
-            GameActions.SayParty(message);
+            for (int i = 0; i < Members.Length; i++) Members[i] = null;
         }
     }
 
+    //internal class PartyManager
+    //{
+    //    private bool _allowPartyLoot;
+
+    //    public bool IsInParty => Members.Count > 1;
+
+    //    public bool IsPlayerLeader => IsInParty && Leader == World.Player;
+
+    //    public Serial Leader { get; private set; }
+
+    //    public string LeaderName => Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
+
+    //    public List<PartyMember> Members { get; } = new List<PartyMember>();
+
+    //    public bool AllowPartyLoot
+    //    {
+    //        get => _allowPartyLoot;
+    //        set
+    //        {
+    //            _allowPartyLoot = value;
+    //            GameActions.RequestPartyLootState(_allowPartyLoot);
+    //        }
+    //    }
+
+    //    public long PartyHealTimer { get; set; }
+
+    //    public Serial PartyHealTarget { get; set; }
+
+    //    public event EventHandler PartyMemberChanged;
+
+    //    public static void HandlePartyPacket(Packet p)
+    //    {
+    //        const byte CommandPartyList = 0x01;
+    //        const byte CommandRemoveMember = 0x02;
+    //        const byte CommandPrivateMessage = 0x03;
+    //        const byte CommandPublicMessage = 0x04;
+    //        const byte CommandInvitation = 0x07;
+    //        byte SubCommand = p.ReadByte();
+
+    //        switch (SubCommand)
+    //        {
+    //            case CommandPartyList:
+    //                int count = p.ReadByte();
+    //                Serial[] serials = new Serial[count];
+    //                for (int i = 0; i < serials.Length; i++) serials[i] = p.ReadUInt();
+    //                World.Party.ReceivePartyMemberList(serials);
+
+    //                break;
+    //            case CommandRemoveMember:
+    //                count = p.ReadByte();
+
+    //                if (count <= 1)
+    //                    p.Skip(4);
+
+    //                serials = new Serial[count];
+
+    //                for (int i = 0; i < serials.Length; i++)
+    //                    serials[i] = p.ReadUInt();
+    //                World.Party.ReceiveRemovePartyMember(serials);
+
+    //                break;
+    //            case CommandPrivateMessage:
+    //            case CommandPublicMessage:
+    //                PartyMember partyMember = World.Party.GetPartyMember(p.ReadUInt());
+
+    //                if (partyMember != null)
+    //                    Chat.HandleMessage(null, p.ReadUnicode(), partyMember.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
+
+    //                break;
+    //            case CommandInvitation:
+    //                //The packet that arrives in PacketHandlers.DisplayClilocString(Packet p) for party invite does not have the party leader's serial
+    //                //and therefor it is not handled by Chat.OnMessage because we have no entity and also the packet message type is incorrectly set to .Label
+    //                //we handle the party invite here because we have the partyLeader's serial and we can appropriately set the MesageType.System
+    //                Serial serial = p.ReadUInt();
+    //                Mobile partyLeaderEntity = World.Mobiles.Get(serial);
+
+    //                if (partyLeaderEntity != null) Chat.HandleMessage(partyLeaderEntity, partyLeaderEntity.Name + FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(1008089)), partyLeaderEntity.Name, 0x03B2, MessageType.System, 3, true);
+
+    //                World.Party.SetPartyLeader(serial);
+
+    //                break;
+    //        }
+    //    }
+
+    //    private void SetPartyLeader(Serial s)
+    //    {
+    //        Leader = s;
+    //    }
+
+    //    public void ReceivePartyMemberList(Serial[] mobileSerials)
+    //    {
+    //        Members.Clear();
+    //        foreach (Serial serial in mobileSerials) AddPartyMember(serial);
+    //        PartyMemberChanged.Raise();
+    //    }
+
+    //    public void ReceiveRemovePartyMember(Serial[] mobileSerials)
+    //    {
+    //        //var list = new List<PartyMember>(Members);
+    //        Members.ForEach(s => Engine.UI.GetControl<HealthBarGump>(s.Serial)?.Update());
+    //        Members.Clear();
+
+    //        foreach (Serial serial in mobileSerials)
+    //            AddPartyMember(serial);
+    //        PartyMemberChanged.Raise();
+    //    }
+
+    //    public void TriggerAddPartyMember()
+    //    {
+    //        if (!IsInParty)
+    //        {
+    //            Leader = World.Player;
+    //            GameActions.RequestPartyInviteByTarget();
+    //        }
+    //        else if (IsInParty && IsPlayerLeader)
+    //            GameActions.RequestPartyInviteByTarget();
+    //        else if (IsInParty && !IsPlayerLeader)
+    //        {
+    //            //"You may only add members to the party if you are the leader."
+    //        }
+    //    }
+
+    //    private void AddPartyMember(Serial mobileSerial)
+    //    {
+    //        if (Members.All(p => p.Serial != mobileSerial))
+    //        {
+    //            Members.Add(new PartyMember(mobileSerial));
+    //            GameActions.RequestMobileStatus(mobileSerial);
+
+    //            Engine.UI.GetControl<HealthBarGump>(mobileSerial)?.Update();
+    //        }
+    //    }
+
+    //    public PartyMember GetPartyMember(Serial mobileSerial)
+    //    {
+    //        return Members.FirstOrDefault(s => s.Serial == mobileSerial);
+    //    }
+
+    //    public void RemovePartyMember(Serial mobileSerial)
+    //    {
+    //        for (int i = 0; i < Members.Count; i++)
+    //        {
+    //            var m = Members[i];
+
+    //            if (m != null && m.Serial == mobileSerial)
+    //            {
+    //                Members.RemoveAt(i--);
+    //                GameActions.RequestPartyRemoveMember(mobileSerial);
+    //            }
+    //        }
+    //    }
+
+    //    public void AcceptPartyInvite()
+    //    {
+    //        GameActions.RequestPartyAccept(Leader);
+    //    }
+
+    //    public void DeclinePartyInvite()
+    //    {
+    //        //Do nothing, let party invite expire
+    //    }
+
+    //    public void QuitParty()
+    //    {
+    //        GameActions.RequestPartyQuit();
+    //        var list = new List<PartyMember>(Members);
+    //        Members.Clear();
+    //        list.ForEach(s => Engine.UI.GetControl<HealthBarGump>(s.Serial)?.Update());
+    //    }
+
+    //    public void PartyMessage(string message)
+    //    {
+    //        GameActions.SayParty(message);
+    //    }
+    //}
+
     internal class PartyMember
     {
-        public readonly Serial Serial;
         private string _name;
+        public Serial Serial;
 
         public PartyMember(Serial serial)
         {

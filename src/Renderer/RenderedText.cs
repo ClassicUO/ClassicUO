@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -44,16 +48,17 @@ namespace ClassicUO.Renderer
         ExtraHeight = 0x0100
     }
 
-    internal sealed class RenderedText : IDisposable
+    internal sealed class RenderedText
     {
-        private string _text;
         private byte _font;
+        private string _text;
 
         public RenderedText()
         {
             Hue = 0xFFFF;
             Cell = 30;
         }
+
 
         public bool IsUnicode { get; set; }
 
@@ -62,14 +67,12 @@ namespace ClassicUO.Renderer
             get => _font;
             set
             {
-                if (_font != value)
-                {
-                    if (value == 0xFF)
-                        value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
-                    _font = value;
-                }
+                if (value == 0xFF)
+                    value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                _font = value;
             }
         }
+
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }
@@ -123,7 +126,7 @@ namespace ClassicUO.Renderer
 
         public bool SaveHitMap { get; set; }
 
-        public bool IsDisposed { get; private set; }
+        public bool IsDestroyed { get; private set; }
 
         public int Width { get; private set; }
 
@@ -131,45 +134,59 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
-            return Draw(batcher, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
+            return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
-        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        private static Vector3 _hueVector = Vector3.Zero;
+
+        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
-            Rectangle src = Rectangle.Empty;
+
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
-            src.X = offsetX;
-            src.Y = offsetY;
-            int maxX = src.X + dst.Width;
+
+            int srcX = offsetX;
+            int srcY = offsetY;
+            int maxX = srcX + dwidth;
+
+            int srcWidth;
+            int srcHeight;
 
             if (maxX <= Width)
-                src.Width = dst.Width;
+                srcWidth = dwidth;
             else
             {
-                src.Width = Width - src.X;
-                dst.Width = src.Width;
+                srcWidth = Width - srcX;
+                dwidth = srcWidth;
             }
 
-            int maxY = src.Y + dst.Height;
+            int maxY = srcY + dheight;
 
             if (maxY <= Height)
-                src.Height = dst.Height;
+                srcHeight = dheight;
             else
             {
-                src.Height = Height - src.Y;
-                dst.Height = src.Height;
+                srcHeight = Height - srcY;
+                dheight = srcHeight;
             }
 
             if (Texture == null)
                 return false;
 
-            return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
+            _hueVector.X = hue;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
+
+            if (hue != 0)
+                _hueVector.Y = 1;
+            _hueVector.Z = alpha;
+
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
         public void CreateTexture()
@@ -205,11 +222,12 @@ namespace ClassicUO.Renderer
             FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
-        public void Dispose()
+        public void Destroy()
         {
-            if (IsDisposed)
+            if (IsDestroyed)
                 return;
-            IsDisposed = true;
+
+            IsDestroyed = true;
 
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Dispose();

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System.Collections.Generic;
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -46,12 +50,24 @@ namespace ClassicUO.Game.UI.Controls
             Height = heigth;
         }
 
-        public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
+        public GumpPicTiled(List<string> parts) : this(Graphic.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
+        }
+
+        internal GumpPicTiled(int x, int y, int width, int heigth, SpriteTexture texture)
+        {
+            CanMove = true;
+            AcceptMouseInput = true;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = heigth;
+            Graphic = _lastGraphic = Graphic.INVALID;
+            Texture = texture;
         }
 
         public Graphic Graphic { get; set; }
@@ -68,11 +84,45 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            batcher.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+            ResetHueVector();
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
 
-            return base.Draw(batcher, position, hue);
+            batcher.Draw2DTiled(Texture, x, y, Width, Height, ref _hueVector);
+
+            return base.Draw(batcher, x, y);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            int width = Width;
+            int height = Height;
+
+            if (width == 0)
+                width = Texture.Width;
+
+            if (height == 0)
+                height = Texture.Height;
+
+            while (x > Texture.Width && width > Texture.Width)
+            {
+                x -= Texture.Width;
+                width -= Texture.Width;
+            }
+
+            while (y > Texture.Height && height > Texture.Height)
+            {
+                y -= Texture.Height;
+                height -= Texture.Height;
+            }
+
+
+            if (x > width || y > height)
+                return false;
+
+
+            return Texture.Contains(x, y);
         }
     }
 }

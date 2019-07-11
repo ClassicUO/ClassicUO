@@ -1,11 +1,30 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers
 {
@@ -29,11 +48,20 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                _houses[serial].ClearComponents();
-                _houses.Remove(serial);
+                if (_houses.TryGetValue(serial, out var house))
+                {
+                    house.ClearComponents();
+                    _houses.Remove(serial);
+                }
+                else
+                {
+
+                }
+            
 
                 return true;
             }
+
             return false;
         }
 
@@ -41,21 +69,21 @@ namespace ClassicUO.Game.Managers
         {
             if (TryGetHouse(serial, out _))
             {
-                int currX;
-                int currY;
+                int currX = World.RangeSize.X;
+                int currY = World.RangeSize.Y;
 
-                if (World.Player.IsMoving)
-                {
-                    Mobile.Step step = World.Player.Steps.Back();
+                //if (World.Player.IsMoving)
+                //{
+                //    Mobile.Step step = World.Player.Steps.Back();
 
-                    currX = step.X;
-                    currY = step.Y;
-                }
-                else
-                {
-                    currX = World.Player.X;
-                    currY = World.Player.Y;
-                }
+                //    currX = step.X;
+                //    currY = step.Y;
+                //}
+                //else
+                //{
+                //    currX = World.Player.X;
+                //    currY = World.Player.Y;
+                //}
 
                 Item found = World.Items.Get(serial);
 
@@ -76,16 +104,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Exists(Serial serial) => _houses.ContainsKey(serial);
+        public bool Exists(Serial serial)
+        {
+            return _houses.ContainsKey(serial);
+        }
 
         public void Clear()
         {
-            foreach (KeyValuePair<Serial, House> house in _houses)
-            {
-                house.Value.ClearComponents();
-            }
+            foreach (KeyValuePair<Serial, House> house in _houses) house.Value.ClearComponents();
             _houses.Clear();
         }
     }
-
 }

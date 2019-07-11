@@ -1,31 +1,40 @@
-﻿using ClassicUO.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
+using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Utility
 {
     internal class QueuedPool<T> where T : class, new()
     {
-        private readonly Queue<T> _pool = new Queue<T>();
+        private readonly Stack<T> _pool;
+
+        private int _maxSize;
+
+        public QueuedPool(int size = 0)
+        {
+            _maxSize = size;
+            _pool = new Stack<T>(size);
+
+            for (int i = 0; i < size; i++)
+                _pool.Push(new T());
+        }
 
         public T GetOne()
         {
-            T result = null;
-            result = _pool.Count > 0 ? _pool.Dequeue() : new T();
-            if (result is IPoolable poolable)
-                poolable.OnPickup();
+            T result = _pool.Count > 0 ? _pool.Pop() : _maxSize == 0 ? new T() : null;
+
+            //if (result is IPoolable poolable)
+            //    poolable.OnPickup();
+
             return result;
         }
 
         public void ReturnOne(T obj)
         {
-            if (obj is IPoolable poolable)
-                poolable.OnReturn();
             if (obj != null)
-                _pool.Enqueue(obj);
+            {
+                _pool.Push(obj);
+            }
         }
 
         public void Clear()

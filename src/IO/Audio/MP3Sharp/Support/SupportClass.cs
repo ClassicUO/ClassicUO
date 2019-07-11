@@ -3,12 +3,13 @@ using System.IO;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Support
 {
-    class SupportClass
+    internal class SupportClass
     {
         public static int URShift(int number, int bits)
         {
             if (number >= 0)
                 return number >> bits;
+
             return (number >> bits) + (2 << ~bits);
         }
 
@@ -21,6 +22,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         {
             if (number >= 0)
                 return number >> bits;
+
             return (number >> bits) + (2L << ~bits);
         }
 
@@ -114,8 +116,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static byte[] ToByteArray(sbyte[] sbyteArray)
         {
             byte[] byteArray = new byte[sbyteArray.Length];
+
             for (int index = 0; index < sbyteArray.Length; index++)
                 byteArray[index] = (byte) sbyteArray[index];
+
             return byteArray;
         }
 
@@ -127,8 +131,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static byte[] ToByteArray(string sourceString)
         {
             byte[] byteArray = new byte[sourceString.Length];
+
             for (int index = 0; index < sourceString.Length; index++)
                 byteArray[index] = (byte) sourceString[index];
+
             return byteArray;
         }
 
@@ -142,12 +148,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         /// <param name="destinationStart">Position in the destination array to start storing the sbytes.</param>
         /// <returns>An array of sbytes</returns>
         public static void GetSBytesFromString(string sourceString, int sourceStart, int sourceEnd,
-            ref sbyte[] destinationArray, int destinationStart)
+                                               ref sbyte[] destinationArray, int destinationStart)
         {
             int sourceCounter;
             int destinationCounter;
             sourceCounter = sourceStart;
             destinationCounter = destinationStart;
+
             while (sourceCounter < sourceEnd)
             {
                 destinationArray[destinationCounter] = (sbyte) sourceString[sourceCounter];

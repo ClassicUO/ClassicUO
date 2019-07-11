@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO.Resources;
 
 namespace ClassicUO.IO
 {
@@ -46,26 +47,28 @@ namespace ClassicUO.IO
         {
             base.Load(loadentries);
 
-            if (loadentries && _idxFile != null)
+            if (loadentries)
             {
-                int count = (int) _idxFile.Length / 12;
+                UOFile file = _idxFile ?? (UOFile) this;
+
+                int count = (int) file.Length / 12;
                 Entries = new UOFileIndex3D[count];
 
                 for (int i = 0; i < count; i++)
-                    Entries[i] = new UOFileIndex3D(_idxFile.ReadInt(), _idxFile.ReadInt(), 0, _idxFile.ReadInt());
+                    Entries[i] = new UOFileIndex3D(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
 
-                UOFileIndex5D[] patches = Verdata.Patches;
+                //UOFileIndex5D[] patches = Verdata.Patches;
 
-                for (int i = 0; i < patches.Length; i++)
-                {
-                    UOFileIndex5D patch = patches[i];
+                //for (int i = 0; i < patches.Length; i++)
+                //{
+                //    UOFileIndex5D patch = patches[i];
 
-                    if (patch.FileID == _patch && patch.BlockID >= 0 && patch.BlockID < Entries.Length)
-                    {
-                        ref UOFileIndex3D entry = ref Entries[patch.BlockID];
-                        entry = new UOFileIndex3D(patch.Position, patch.Length | (1 << 31), 0, patch.GumpData);
-                    }
-                }
+                //    if (patch.FileID == _patch && patch.BlockID >= 0 && patch.BlockID < Entries.Length)
+                //    {
+                //        ref UOFileIndex3D entry = ref Entries[patch.BlockID];
+                //        entry = new UOFileIndex3D(patch.Position, patch.Length | (1 << 31), 0, patch.GumpData);
+                //    }
+                //}
             }
         }
 

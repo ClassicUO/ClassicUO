@@ -8,7 +8,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     ///     errors that can occur when decoding MPEG audio.
     /// </summary>
     [Serializable]
-class DecoderException : MP3SharpException
+    internal class DecoderException : MP3SharpException
     {
         private int m_ErrorCode;
 
@@ -28,17 +28,11 @@ class DecoderException : MP3SharpException
             m_ErrorCode = info.GetInt32("ErrorCode");
         }
 
-        public virtual int ErrorCode
-        {
-            get { return m_ErrorCode; }
-        }
+        public virtual int ErrorCode => m_ErrorCode;
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            if (info == null) throw new ArgumentNullException(nameof(info));
 
             info.AddValue("ErrorCode", m_ErrorCode);
             base.GetObjectData(info, context);

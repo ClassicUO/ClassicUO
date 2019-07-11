@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -28,26 +30,32 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action> _commands = new Dictionary<string, Action>();
+        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
 
         public static void Initialize()
         {
-            Register("info", () =>
+            Register("info", s =>
             {
                 if (!TargetManager.IsTargeting)
-                {
                     TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, 6983686, 0);
-                }
                 else
-                {
                     TargetManager.CancelTarget();
+            });
+
+            Register("focus", s => { Engine.DebugFocus = !Engine.DebugFocus; });
+            Register("datetime", s =>
+            {
+                if(World.Player != null)
+                {
+                    GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
+                    GameActions.Print($"Current CurrDateTime is {Engine.CurrDateTime}");
                 }
             });
         }
 
 
-        public static void Register(string name, Action callback)
+        public static void Register(string name, Action<string[]> callback)
         {
             name = name.ToLower();
 
@@ -65,21 +73,19 @@ namespace ClassicUO.Game.Managers
                 _commands.Remove(name);
         }
 
-        public static void UnRegisterAll() => _commands.Clear();        
+        public static void UnRegisterAll()
+        {
+            _commands.Clear();
+        }
 
-        public static void Execute(string name)
+        public static void Execute(string name, params string[] args)
         {
             name = name.ToLower();
 
             if (_commands.TryGetValue(name, out var action))
-            {
-                action.Invoke();
-            }
+                action.Invoke(args);
             else
-            {
                 Log.Message(LogTypes.Warning, $"Commad: '{name}' not exists");
-            }
         }
-
     }
 }

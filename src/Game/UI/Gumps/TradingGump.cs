@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -28,19 +31,20 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
-    class TradingGump : Gump
+    internal sealed class TradingGump : Gump
     {
-        private Checkbox _myCheckbox;
+        private readonly string _name;
         private GumpPic _hisPic;
 
         private bool _imAccepting, _heIsAccepting;
-
-        private readonly Entity _entity1, _entity2;
+        private Point _lastClick;
 
         private DataBox _myBox, _hisBox;
-        private readonly string _name;
+        private Checkbox _myCheckbox;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -53,18 +57,12 @@ namespace ClassicUO.Game.UI.Gumps
             ID1 = id1;
             ID2 = id2;
 
-            _entity1 = World.Get(id1);
-            _entity2 = World.Get(id2);
-
-            _entity1.Items.Added += ItemsOnAdded1;
-            _entity2.Items.Added += ItemsOnAdded2;
-
             BuildGump();
         }
 
         public Serial ID1 { get; }
         public Serial ID2 { get; }
-      
+
         public bool ImAccepting
         {
             get => _imAccepting;
@@ -93,54 +91,122 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public TextContainer TextContainer { get; } = new TextContainer();
 
-        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
         {
-            foreach (Item item in e)
+            if (World.ClientFlags.TooltipsEnabled)
+                return;
+
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            TextContainer.Update();
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+            TextContainer.Draw(batcher, x, y);
+
+            return true;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
             {
-                ItemGump g = new ItemGump(item)
-                {
-                    HighlightOnMouseOver = true,
-                };
-
-
-                //if (g.X >= 155)
-                //    g.X = 125;
-
-                //if (g.Y >= 150)
-                //    g.Y = 120;
-
-                _myBox.Add(g);
+                _lastClick.X = x;
+                _lastClick.Y = y;
             }
         }
 
-        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
+        public void UpdateContent()
         {
-            foreach (Item item in e)
+            Entity container = World.Get(ID1);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
             {
                 ItemGump g = new ItemGump(item)
                 {
-                    HighlightOnMouseOver = true,
+                    HighlightOnMouseOver = true
                 };
 
+                int x = g.X;
+                int y = g.Y;
 
-                //if (g.X >= 155)
-                //    g.X = 125;
+                if (x + g.Texture.Width > 110)
+                    x = 110 - g.Texture.Width;
 
-                //if (g.Y >= 150)
-                //    g.Y = 120;
+                if (y + g.Texture.Height > 80)
+                    y = 80 - g.Texture.Height;
+
+                if (x < 0)
+                    x = 0;
+
+                if (y < 0)
+                    y = 0;
+
+
+                g.X = x;
+                g.Y = y;
+
+                _myBox.Add(g);
+            }
+
+
+            container = World.Get(ID2);
+
+            if (container == null)
+                return;
+
+            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
+                v.Dispose();
+
+            foreach (Item item in container.Items)
+            {
+                ItemGump g = new ItemGump(item)
+                {
+                    HighlightOnMouseOver = true
+                };
+
+                int x = g.X;
+                int y = g.Y;
+
+                if (x + g.Texture.Width > 110)
+                    x = 110 - g.Texture.Width;
+
+                if (y + g.Texture.Height > 80)
+                    y = 80 - g.Texture.Height;
+
+                if (x < 0)
+                    x = 0;
+
+                if (y < 0)
+                    y = 0;
+
+
+                g.X = x;
+                g.Y = y;
 
                 _hisBox.Add(g);
             }
         }
 
+
         public override void Dispose()
         {
             base.Dispose();
-
-            _entity1.Items.Added -= ItemsOnAdded1;
-            _entity2.Items.Added -= ItemsOnAdded2;
-
             GameActions.CancelTrade(ID1);
         }
 
@@ -172,18 +238,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
 
-            if (HeIsAccepting)
-            {
-                _hisPic = new GumpPic(266, 160, 0x0869, 0);
-            }
-            else
-            {
-                _hisPic = new GumpPic(266, 160, 0x0867, 0);
-            }
+            _hisPic = HeIsAccepting ? new GumpPic(266, 160, 0x0869, 0) : new GumpPic(266, 160, 0x0867, 0);
 
             Add(_hisPic);
-
-
         }
 
 
@@ -199,27 +256,26 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(new Label(World.Player.Name, false, 0x0386, font: 1)
-                            { X = 84, Y = 40 });
+                    {X = 84, Y = 40});
 
             int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
 
             Add(new Label(_name, false, 0x0386, font: 1)
-                            { X = fontWidth, Y = 170 });
+                    {X = fontWidth, Y = 170});
 
-            Add(_myBox = new DataBox(45, 70, 110, 80));
-            Add(_hisBox = new DataBox(192, 70, 110, 80));
+            Add(_myBox = new DataBox(45, 70, 110, 80)
+            {
+                WantUpdateSize = false
+            });
+
+            Add(_hisBox = new DataBox(192, 70, 110, 80)
+            {
+                WantUpdateSize = false
+            });
 
             SetCheckboxes();
 
-            foreach (Item item in _entity1.Items)
-            {
-                _myBox.Add(new ItemGump(item));
-            }
-
-            foreach (Item item in _entity2.Items)
-            {
-                _hisBox.Add(new ItemGump(item));
-            }
+            UpdateContent();
 
             _myBox.MouseUp += (sender, e) =>
             {
@@ -237,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (texture != null)
                     {
-                        x -= (texture.Width >> 1);
+                        x -= texture.Width >> 1;
                         y -= texture.Height >> 1;
 
                         if (x + texture.Width > 110)

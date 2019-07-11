@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -35,16 +34,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    internal class Tooltip 
+    internal class Tooltip
     {
-        private Entity _gameObject;
-        private uint _hash;
-        private RenderedText _renderedText;
-        private string _textHTML;
-        private float _lastHoverTime;
+        private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
+        private Entity _gameObject;
+        private uint _hash;
+        private float _lastHoverTime;
         private int _maxWidth;
+        private RenderedText _renderedText;
+        private string _textHTML;
 
         public string Text { get; protected set; }
 
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI
 
         public GameObject Object => _gameObject;
 
-        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI
                     IsHTML = true,
                     RecalculateWidthByInfo = true,
                     Cell = 5,
-                    FontStyle = FontStyle.BlackBorder,
+                    FontStyle = FontStyle.BlackBorder
                 };
             }
             else if (_renderedText.Text != Text)
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI
                         width = 600;
 
                     width = FileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
-                   
+
                     if (width > 600)
                         width = 600;
 
@@ -107,18 +107,22 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            if (position.X < 0)
-                position.X = 0;
-            else if (position.X > Engine.WindowWidth - (_renderedText.Width + 8))
-                position.X = Engine.WindowWidth - (_renderedText.Width + 8);
+            if (x < 0)
+                x = 0;
+            else if (x > Engine.WindowWidth - (_renderedText.Width + 8))
+                x = Engine.WindowWidth - (_renderedText.Width + 8);
 
-            if (position.Y < 0)
-                position.Y = 0;
-            else if (position.Y > Engine.WindowHeight - (_renderedText.Height + 8))
-                position.Y = Engine.WindowHeight - (_renderedText.Height + 8);
-            batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+            if (y < 0)
+                y = 0;
+            else if (y > Engine.WindowHeight - (_renderedText.Height + 8))
+                y = Engine.WindowHeight - (_renderedText.Height + 8);
 
-            return _renderedText.Draw(batcher, position);
+            Vector3 hue = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
+
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+
+            return _renderedText.Draw(batcher, x, y);
         }
 
         public void Clear()
@@ -141,7 +145,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-       
+
         private string ReadProperties(Entity obj, out string htmltext)
         {
             _sb.Clear();
@@ -158,9 +162,8 @@ namespace ClassicUO.Game.UI
 
                 if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
                 {
-                    if (obj.Serial.IsMobile)
+                    if (obj is Mobile mobile)
                     {
-                        Mobile mobile = (Mobile) obj;
                         //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
                         _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
                     }
@@ -173,6 +176,7 @@ namespace ClassicUO.Game.UI
                 string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
 
                 if (string.IsNullOrEmpty(text)) continue;
+
                 _sb.Append(text);
                 _sbHTML.Append(text);
 
@@ -195,25 +199,28 @@ namespace ClassicUO.Game.UI
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-		private static char[] _titleFormatChars = new[] { ' ', '-', '\n', '[' };
+        public unsafe string FormatTitle(string text)
+        {
+            if (text != null)
+            {
+                int index = 0;
 
-		public unsafe string FormatTitle(string text)
-		{
-			var index = 0;
+                fixed (char* value = text)
+                {
+                    while (index < text.Length)
+                    {
+                        if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
+                            value[index] = char.ToUpper(value[index]);
 
-			fixed (char* value = text)
-			{
-				while (index < text.Length)
-				{
-					if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-						value[index] = Char.ToUpper(value[index]);
+                        index++;
+                    }
 
-					index++;
-				}
+                    return new string(value);
+                }
+            }
 
-				return new string(value);
-			}
-		}
+            return text;
+        }
 
         public void SetText(string text, int maxWidth = 0)
         {

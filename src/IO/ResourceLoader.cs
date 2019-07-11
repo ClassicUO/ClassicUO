@@ -1,34 +1,52 @@
-﻿using System;
+﻿#region license
+
+//  Copyright (C) 2019 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO
 {
-    abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
+    internal abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
     {
         private readonly string[] _paths;
 
-        protected ResourceLoader(string path) : this(new [] { path })
+        protected ResourceLoader(string path) : this(new[] {path})
         {
-
         }
 
         protected ResourceLoader(string[] paths)
         {
             _paths = paths;
         }
-        
 
-        protected ResourceLoader() { }
+
+        protected ResourceLoader()
+        {
+        }
 
         protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
 
@@ -74,13 +92,12 @@ namespace ClassicUO.IO
         }
     }
 
-    abstract class ResourceLoader :  IDisposable
+    internal abstract class ResourceLoader : IDisposable
     {
         private readonly string[] _paths;
 
-        protected ResourceLoader(string path) : this(new[] { path })
+        protected ResourceLoader(string path) : this(new[] {path})
         {
-
         }
 
         protected ResourceLoader(string[] paths)
@@ -89,13 +106,11 @@ namespace ClassicUO.IO
         }
 
 
-        protected ResourceLoader() { }
+        protected ResourceLoader()
+        {
+        }
 
         public bool IsDisposed { get; private set; }
-
-        public abstract void Load();
-
-        protected abstract void CleanResources();
 
 
         public void Dispose()
@@ -107,5 +122,9 @@ namespace ClassicUO.IO
 
             CleanResources();
         }
+
+        public abstract void Load();
+
+        protected abstract void CleanResources();
     }
 }

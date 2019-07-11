@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,19 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
+using System.Linq;
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
 {
@@ -33,7 +40,7 @@ namespace ClassicUO.Game
         Regular = 0,
         System = 1,
         Emote = 2,
-        Party = 3,
+        Limit3Spell = 3, // Sphere style shards use this to limit to 3 of these message types showing overhead.
         Label = 6,
         Focus = 7,
         Whisper = 8,
@@ -43,22 +50,23 @@ namespace ClassicUO.Game
         Alliance = 14,
         Command = 15,
         Encoded = 0xC0,
+        Party = 0xFF // This is a CUO assigned type, value is unimportant
     }
 
-    public enum MessageFont : ushort
-    {
-        INVALID = 0xFFFF,
-        Bold = 0,
-        Shadow = 1,
-        BoldShadow = 2,
-        Normal = 3,
-        Gothic = 4,
-        Italic = 5,
-        SmallDark = 6,
-        Colorful = 7,
-        Rune = 8,
-        SmallLight = 9
-    }
+    //public enum MessageFont : byte
+    //{
+    //    INVALID = 0xFF,
+    //    Bold = 0,
+    //    Shadow = 1,
+    //    BoldShadow = 2,
+    //    Normal = 3,
+    //    Gothic = 4,
+    //    Italic = 5,
+    //    SmallDark = 6,
+    //    Colorful = 7,
+    //    Rune = 8,
+    //    SmallLight = 9
+    //}
 
     public enum AffixType : byte
     {
@@ -68,69 +76,136 @@ namespace ClassicUO.Game
         None = 0xFF
     }
 
-   
+
 
     internal static class Chat
     {
-        private const ushort defaultHue = 0x0017;
-        private static readonly Mobile _system = new Mobile(Serial.INVALID)
-        {
-            Graphic = Graphic.INVARIANT, Name = "System"
-        };
-
         public static PromptData PromptData { get; set; }
 
-        public static event EventHandler<UOMessageEventArgs> Message;
+        public static event EventHandler<UOMessageEventArgs> MessageReceived;
 
-        public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
+        public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => Print(_system, message, hue, type, font, unicode);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal, bool unicode = true) => OnMessage(entity, message, entity.Name, hue, type, font, unicode, "ENU");
 
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
-    
-        public static void OnMessage(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
-			switch (type)
-			{
-			    case MessageType.Focus:
-			    case MessageType.Whisper:
-			    case MessageType.Yell:
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                unicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
+            switch (type)
+            {
                 case MessageType.Spell:
-				case MessageType.Regular:
-			    case MessageType.Label:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
-					break;
-				case MessageType.Emote:
-				    parent?.AddOverhead(type, $"*{text}*", (byte)font, hue, unicode);
-					break;
+
+                {
+                    //server hue color per default
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
+                    {
+                        if (Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        {
+                            StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
+                            sb.Replace("{power}", spell.PowerWords);
+                            sb.Replace("{spell}", spell.Name);
+                            text = sb.ToString().Trim();
+                        }
+
+                        //server hue color per default if not enabled
+                        if (Engine.Profile.Current.EnabledSpellHue)
+                        {
+                            if (spell.TargetType == TargetType.Beneficial)
+                                hue = Engine.Profile.Current.BeneficHue;
+                            else if (spell.TargetType == TargetType.Harmful)
+                                hue = Engine.Profile.Current.HarmfulHue;
+                            else
+                                hue = Engine.Profile.Current.NeutralHue;
+                        }
+                    }
+
+                    goto case MessageType.Label;
+                }
+
+                case MessageType.Focus:
+                case MessageType.Whisper:
+                case MessageType.Yell:
+                case MessageType.Regular:
+                case MessageType.Label:
+
+                    if (parent == null)
+                        break;
+
+                    if (parent is Item it && !it.OnGround)
+                    {
+                        Gump gump = Engine.UI.GetGump<Gump>(it.Container);
+
+                        if (gump is PaperDollGump paperDoll)
+                            paperDoll.AddLabel(text, hue, font, unicode, it);
+                        else if (gump is ContainerGump container)
+                            container.AddLabel(text, hue, font, unicode, it);
+                        else
+                        {
+                            Entity ent = World.Get(it.RootContainer);
+
+                            if (ent == null || ent.IsDestroyed)
+                                break;
+
+                            var trade = Engine.UI.GetGump<TradingGump>(ent);
+
+                            if (trade == null)
+                            {
+                                Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
+
+                                if (item == null)
+                                    break;
+
+                                trade = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
+                            }
+
+                            if (trade != null)
+                                trade.AddLabel(text, hue, font, unicode, it);
+                            else
+                                Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                        }
+                    }
+                    else
+                        parent.AddOverhead(type, text, font, hue, unicode);
+
+                    break;
+
+                case MessageType.Emote:
+                    parent?.AddOverhead(type, $"*{text}*", font, hue, unicode);
+
+                    break;
 
                 case MessageType.Command:
 
-				case MessageType.Encoded:
+                case MessageType.Encoded:
                 case MessageType.System:
-				case MessageType.Party:
-				case MessageType.Guild:
+                case MessageType.Party:
+                case MessageType.Guild:
                 case MessageType.Alliance:
+
                     break;
+
                 default:
-                    parent?.AddOverhead(type, text, (byte)font, hue, unicode);
+                    parent?.AddOverhead(type, text, font, hue, unicode);
+
                     break;
-			}
+            }
 
-			Message.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent ?? _system);
-		}
-
-		public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
-        {
-            LocalizedMessage.Raise(args, entity ?? _system);
+            MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, unicode, lang), parent);
         }
 
-	}
+        public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
+        {
+            LocalizedMessageReceived.Raise(args, entity);
+        }
+    }
 
-	internal class UOMessageEventArgs : EventArgs
+    internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
@@ -143,7 +218,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Parent = parent;
             Text = text;
@@ -166,7 +241,7 @@ namespace ClassicUO.Game
 
         public MessageType Type { get; }
 
-        public MessageFont Font { get; }
+        public byte Font { get; }
 
         public string Language { get; }
 
