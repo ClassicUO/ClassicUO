@@ -62,7 +62,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _openContainersNearRealPosition;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation;
+        private Combobox _overrideContainerLocationSetting;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -1096,7 +1097,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_dragSelectArea);
 
-            _openContainersNearRealPosition = CreateCheckBox(rightArea, "Containers open near their point of origin", Engine.Profile.Current.OpenContainersNearRealPosition, 0, 0);
+
+            ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
+
+            _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.OverrideContainerLocation,
+            };
+
+            _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position" }, Engine.Profile.Current.OverrideContainerLocationSetting);
+
+            _containerGumpLocation.Add(_overrideContainerLocation);
+            _containerGumpLocation.Add(_overrideContainerLocationSetting);
+
+            rightArea.Add(_containerGumpLocation);
+
 
             Add(rightArea, PAGE);
 
@@ -1309,7 +1324,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
-                    _openContainersNearRealPosition.IsChecked = false;
+                    _overrideContainerLocation.IsChecked = false;
+                    _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
 
                     break;
@@ -1683,7 +1699,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             Engine.Profile.Current.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
 
-            Engine.Profile.Current.OpenContainersNearRealPosition = _openContainersNearRealPosition.IsChecked;
+            Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
+            Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
