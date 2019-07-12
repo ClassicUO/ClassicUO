@@ -140,9 +140,9 @@ namespace ClassicUO.Game
                         Gump gump = Engine.UI.GetGump<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
-                            paperDoll.AddLabel(text, hue, font, unicode);
+                            paperDoll.AddLabel(text, hue, font, unicode, it);
                         else if (gump is ContainerGump container)
-                            container.AddLabel(text, hue, font, unicode);
+                            container.AddLabel(text, hue, font, unicode, it);
                         else
                         {
                             Entity ent = World.Get(it.RootContainer);
@@ -163,7 +163,7 @@ namespace ClassicUO.Game
                             }
 
                             if (trade != null)
-                                trade.AddLabel(text, hue, font, unicode);
+                                trade.AddLabel(text, hue, font, unicode, it);
                             else
                                 Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }

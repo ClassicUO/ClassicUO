@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class StaticFilters
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsTree(ushort g)
         {
             switch (g)
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Data
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsVegetation(ushort g)
         {
             switch (g)
@@ -283,13 +283,13 @@ namespace ClassicUO.Game.Data
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsCave(ushort g)
         {
             return g >= 0x053B && g <= 0x0554 && g != 0x0550;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsField(ushort g)
         {
             return g >= 0x398C && g <= 0x399F ||
@@ -298,31 +298,31 @@ namespace ClassicUO.Game.Data
                    g >= 0x3914 && g <= 0x3929;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsFireField(ushort g)
         {
             return g >= 0x398C && g <= 0x399F;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsParalyzeField(ushort g)
         {
             return g >= 0x3967 && g <= 0x397A;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsEnergyField(ushort g)
         {
             return g >= 0x3946 && g <= 0x3964;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsPoisonField(ushort g)
         {
             return g >= 0x3914 && g <= 0x3929;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool IsWallOfStone(ushort g)
         {
             return g == 0x038A;

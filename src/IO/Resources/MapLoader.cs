@@ -465,7 +465,7 @@ namespace ClassicUO.IO.Resources
             return mb;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
 
         public ref IndexMap GetIndex(int map, int x, int y)
         {

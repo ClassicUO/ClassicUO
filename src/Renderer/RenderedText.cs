@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -57,6 +58,7 @@ namespace ClassicUO.Renderer
             Hue = 0xFFFF;
             Cell = 30;
         }
+
 
         public bool IsUnicode { get; set; }
 
@@ -144,31 +146,33 @@ namespace ClassicUO.Renderer
             if (string.IsNullOrEmpty(Text))
                 return false;
 
-            Rectangle src = Rectangle.Empty;
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
 
-            src.X = offsetX;
-            src.Y = offsetY;
-            int maxX = src.X + dwidth;
+            int srcX = offsetX;
+            int srcY = offsetY;
+            int maxX = srcX + dwidth;
+
+            int srcWidth;
+            int srcHeight;
 
             if (maxX <= Width)
-                src.Width = dwidth;
+                srcWidth = dwidth;
             else
             {
-                src.Width = Width - src.X;
-                dwidth = src.Width;
+                srcWidth = Width - srcX;
+                dwidth = srcWidth;
             }
 
-            int maxY = src.Y + dheight;
+            int maxY = srcY + dheight;
 
             if (maxY <= Height)
-                src.Height = dheight;
+                srcHeight = dheight;
             else
             {
-                src.Height = Height - src.Y;
-                dheight = src.Height;
+                srcHeight = Height - srcY;
+                dheight = srcHeight;
             }
 
             if (Texture == null)
@@ -182,7 +186,7 @@ namespace ClassicUO.Renderer
                 _hueVector.Y = 1;
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref _hueVector);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
         public void CreateTexture()

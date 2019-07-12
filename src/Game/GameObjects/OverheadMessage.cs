@@ -45,8 +45,6 @@ namespace ClassicUO.Game.GameObjects
             _messages = new Deque<MessageInfo>();
         }
 
-        //public OverheadMessage Left { get; set; }
-        //public OverheadMessage Right { get; set; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
@@ -258,7 +256,7 @@ namespace ClassicUO.Game.GameObjects
                     _messages.RemoveAt(i--);
                 }
                 else if (delta < 250)
-                    c.Alpha = 1f - delta / 250;
+                    c.Alpha = 1f - delta / 250f;
                 else
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
@@ -550,7 +548,7 @@ namespace ClassicUO.Game.GameObjects
                             offY = -22;
                         else if (it.ItemData.IsAnimated)
                         {
-                            Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
+                            ArtTexture texture = FileManager.Art.GetTexture(it.Graphic);
 
                             if (texture != null)
                                 yValue = texture.Height >> 1;
@@ -622,7 +620,7 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    internal class MessageInfo : IGameEntity
+    internal class MessageInfo : BaseGameObject
     {
         public float Alpha;
         public ushort Hue;

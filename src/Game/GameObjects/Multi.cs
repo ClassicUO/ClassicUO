@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (!_itemData.HasValue)

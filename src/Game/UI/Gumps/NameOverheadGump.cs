@@ -46,6 +46,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly RenderedText _renderedText;
         private float _clickTiming;
         private bool _isPressed;
+        private const int MIN_WIDTH = 60;
+        private bool _positionLocked;
+        private Point _lockedPosition;
 
         public NameOverheadGump(Entity entity) : base(entity.Serial, 0)
         {
@@ -126,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
                     _renderedText.Text = Entity.Name;
-                    Width = _background.Width = _renderedText.Width + 4;
+                    Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
                     Height = _background.Height = _renderedText.Height + 4;
 
                     WantUpdateSize = false;
@@ -206,8 +209,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (Engine.UI.IsDragging)
+                if (Engine.UI.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                {
+                    _positionLocked = false;
                     return;
+                }
 
                 if (TargetManager.IsTargeting)
                 {
@@ -259,6 +265,32 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
         }
 
+        protected override void OnMouseOver(int x, int y)
+        {
+            if (_positionLocked)
+                return;
+
+            float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
+
+            if (Entity is Mobile m)
+            {
+                _positionLocked = true;
+                GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
+
+                _lockedPosition.X = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
+                _lockedPosition.Y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) / scale);
+            }
+
+            base.OnMouseOver(x, y);
+
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _positionLocked = false;
+            base.OnMouseExit(x, y);
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -301,13 +333,20 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-
             if (Entity is Mobile m)
             {
-                GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
+                if (_positionLocked)
+                {
+                    x = _lockedPosition.X;
+                    y = _lockedPosition.Y;
+                }
+                else
+                {
+                    GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
-                x = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) / scale);
+                    x = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
+                    y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) / scale);
+                }
             }
             else if (Entity.Texture != null)
             {
@@ -340,7 +379,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Draw(batcher, x, y);
 
-            return _renderedText.Draw(batcher, x + 2, y + 2, Width, Height, 0, 0);
+            int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
+
+            return _renderedText.Draw(batcher, x + 2 + renderedTextOffset, y + 2, Width, Height, 0, 0);
         }
 
 

@@ -32,18 +32,26 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
+    sealed class TextContainerEntry
+    {
+        public RenderedText RenderedText;
+        public long Time;
+        public int X, Y, OffsetY;
+        public Serial ItemSerial;
+        public float Alpha;
+    }
     internal sealed class TextContainer
     {
-        private readonly List<MessageInfo> _messages = new List<MessageInfo>();
+        private readonly List<TextContainerEntry> _messages = new List<TextContainerEntry>();
         private readonly Rectangle[] _rects = new Rectangle[2];
 
 
-        public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y)
+        public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y, Serial itemSerial)
         {
             int offset = _messages.Where(s => s.X /*+ (s.RenderedText.Width >> 1)*/ == x && s.Y == y)
                                   .Sum(s => s.RenderedText.Height);
 
-            MessageInfo msg = new MessageInfo
+            TextContainerEntry msg = new TextContainerEntry
             {
                 RenderedText = new RenderedText
                 {
@@ -58,7 +66,8 @@ namespace ClassicUO.Game.UI
                 Time = Engine.Ticks + 4000,
                 X = x,
                 Y = y,
-                OffsetY = offset
+                OffsetY = offset,
+                ItemSerial = itemSerial
             };
 
             //msg.X -= msg.RenderedText.Width >> 1;
@@ -74,6 +83,18 @@ namespace ClassicUO.Game.UI
             for (int i = 0; i < _messages.Count; i++)
             {
                 var msg = _messages[i];
+
+                if (msg.ItemSerial.IsValid)
+                {
+                    var entity = World.Get(msg.ItemSerial);
+                    if (entity == null || entity.IsDestroyed)
+                    {
+                        msg.RenderedText.Destroy();
+                        _messages.RemoveAt(i--);
+                        continue;
+                    }
+                }
+
                 var time = msg.Time - t_delta;
 
                 if (time > 0 && time < 1000)

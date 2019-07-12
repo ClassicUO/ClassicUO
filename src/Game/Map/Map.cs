@@ -203,7 +203,7 @@ namespace ClassicUO.Game.Map
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private int GetBlock(int blockX, int blockY)
         {
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;

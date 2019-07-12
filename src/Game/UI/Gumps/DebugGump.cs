@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private string ReadObject(IGameEntity obj)
+        private string ReadObject(BaseGameObject obj)
         {
             if (obj != null && FullDisplayMode)
             {

@@ -108,13 +108,13 @@ namespace ClassicUO.Game.GameObjects
                 else if (Engine.Profile.Current.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
-                        _viewHue = 0x0044;
+                        _viewHue = Engine.Profile.Current.PoisonHue;
 
                     if (IsParalyzed)
-                        _viewHue = 0x014C;
+                        _viewHue = Engine.Profile.Current.ParalyzedHue;
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
-                        _viewHue = 0x0030;
+                        _viewHue = Engine.Profile.Current.InvulnerableHue;
                 }
             }
 

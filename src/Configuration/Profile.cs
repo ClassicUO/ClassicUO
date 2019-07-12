@@ -87,6 +87,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnabledSpellHue { get; set; }
         [JsonProperty] public bool EnabledSpellFormat { get; set; }
         [JsonProperty] public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
+        [JsonProperty] public ushort PoisonHue { get; set; } = 0x0044;
+        [JsonProperty] public ushort ParalyzedHue { get; set; } = 0x014C;
+        [JsonProperty] public ushort InvulnerableHue { get; set; } = 0x0030;
 
         // visual
         [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;

@@ -226,7 +226,7 @@ namespace ClassicUO.Utility.Collections
             return new ReadOnlyArrayView<T>(_items, start, count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private void CoreRemoveAt(uint index)
         {
             _count -= 1;
@@ -234,7 +234,7 @@ namespace ClassicUO.Utility.Collections
             _items[_count] = default(T);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private void ValidateIndex(uint index)
         {
 #if VALIDATE
@@ -247,7 +247,7 @@ namespace ClassicUO.Utility.Collections
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private void ValidateIndex(int index)
         {
 #if VALIDATE

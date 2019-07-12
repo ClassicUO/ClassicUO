@@ -429,7 +429,7 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return result;
 
-            IGameEntity obj = SelectedObject.Object;
+            BaseGameObject obj = SelectedObject.Object;
 
             switch (obj)
             {

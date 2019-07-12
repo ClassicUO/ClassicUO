@@ -38,8 +38,8 @@ namespace ClassicUO.Game
     internal static class SelectedObject
     {
         public static Point TranslatedMousePositionByViewport;
-        public static IGameEntity Object { get; set; }
-        public static IGameEntity LastObject { get; set; }
+        public static BaseGameObject Object { get; set; }
+        public static BaseGameObject LastObject { get; set; }
 
         public static GameObject HealthbarObject { get; set; }
         public static GameObject CorpseObject { get; set; }
