@@ -100,46 +100,19 @@ namespace ClassicUO.Game.UI.Gumps
                     Location = location;
                 else
                 {
-                    if (Engine.Profile.Current.OpenContainersNearRealPosition)
+                    if (Engine.Profile.Current.OverrideContainerLocation)
                     {
-                        if (World.Player.Equipment[(int)Layer.Bank] != null && _item.Serial == World.Player.Equipment[(int) Layer.Bank])
+                        switch (Engine.Profile.Current.OverrideContainerLocationSetting)
                         {
-                            // open bank near player
-                            X = World.Player.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
-                            Y = World.Player.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
-                        }
-                        else if (_item.OnGround)
-                        {
-                            // item is in world
-                            X = _item.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
-                            Y = _item.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
-                        }
-                        else if (_item.Container.IsMobile)
-                        {
-                            // pack animal, snooped player, npc vendor
-                            Mobile mobile = World.Mobiles.Get(_item.Container);
-                            if (mobile != null)
-                            {
-                                X = mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
-                                Y = mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
-                            }
-                        }
-                        else
-                        {
-                            // in a container, open near the container
-                            ContainerGump parentContainer = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == _item.Container);
-                            if (parentContainer != null)
-                            {
-                                X = parentContainer.X + (Width >> 1);
-                                Y = parentContainer.Y;
-                            }
-                            else
-                            {
-                                // I don't think we ever get here?
-                                ContainerManager.CalculateContainerPosition(g);
-                                X = ContainerManager.X;
-                                Y = ContainerManager.Y;
-                            }
+                            case 0:
+                                SetPositionNearGameObject(g);
+                                break;
+                            case 1:
+                                SetPositionTopRight();
+                                break;
+                            case 2:
+                                SetPositionByLastDragged();
+                                break;
                         }
 
                         if ((X + Width) > Engine.WindowWidth)
@@ -158,7 +131,6 @@ namespace ClassicUO.Game.UI.Gumps
                         X = ContainerManager.X;
                         Y = ContainerManager.Y;
                     }
-
                 }
             }
             else
@@ -305,6 +277,61 @@ namespace ClassicUO.Game.UI.Gumps
             if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
         }
 
+        private void SetPositionNearGameObject(Graphic g)
+        {
+            if (World.Player.Equipment[(int)Layer.Bank] != null && _item.Serial == World.Player.Equipment[(int)Layer.Bank])
+            {
+                // open bank near player
+                X = World.Player.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                Y = World.Player.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+            }
+            else if (_item.OnGround)
+            {
+                // item is in world
+                X = _item.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                Y = _item.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+            }
+            else if (_item.Container.IsMobile)
+            {
+                // pack animal, snooped player, npc vendor
+                Mobile mobile = World.Mobiles.Get(_item.Container);
+                if (mobile != null)
+                {
+                    X = mobile.RealScreenPosition.X + Engine.Profile.Current.GameWindowPosition.X + 40;
+                    Y = mobile.RealScreenPosition.Y + Engine.Profile.Current.GameWindowPosition.Y - (Height >> 1);
+                }
+            }
+            else
+            {
+                // in a container, open near the container
+                ContainerGump parentContainer = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == _item.Container);
+                if (parentContainer != null)
+                {
+                    X = parentContainer.X + (Width >> 1);
+                    Y = parentContainer.Y;
+                }
+                else
+                {
+                    // I don't think we ever get here?
+                    ContainerManager.CalculateContainerPosition(g);
+                    X = ContainerManager.X;
+                    Y = ContainerManager.Y;
+                }
+            }
+        }
+
+        private void SetPositionTopRight()
+        {
+            X = Engine.WindowWidth - Width;
+            Y = 0;
+        }
+
+        private void SetPositionByLastDragged()
+        {
+            X = Engine.Profile.Current.OverrideContainerLocationPosition.X - (Width >> 1);
+            Y = Engine.Profile.Current.OverrideContainerLocationPosition.Y - (Height >> 1);
+        }
+
         public override void Dispose()
         {
             TextContainer.Clear();
@@ -327,6 +354,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.Dispose();
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (Engine.Profile.Current.OverrideContainerLocation && Engine.Profile.Current.OverrideContainerLocationSetting == 2)
+            {
+                Point gumpCenter = new Point(X + (Width >> 1), Y + (Height >> 1));
+                Engine.Profile.Current.OverrideContainerLocationPosition = gumpCenter;
+            }
+
+            base.OnDragEnd(x, y);
         }
     }
 }
