@@ -11,6 +11,7 @@
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
+float Brightlight;
 
 const static int HUES_DELTA = 3000;
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
@@ -64,7 +65,7 @@ float3 get_light(float3 norm)
 {
 	float3 light = normalize(LIGHT_DIRECTION);
 	float3 normal = normalize(norm);
-	return max((dot(normal, light) + 0.5f), 0.0f);
+	return max((dot(normal, light) + 0.5f), Brightlight);
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0

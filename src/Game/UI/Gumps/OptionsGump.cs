@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
+        private HSliderBar _brighlight;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
@@ -552,13 +553,22 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
+            text = new Label("- Brighlight:", true, HUE_FONT)
+            {
+                Y = 30
+            };
+            _brighlight = new HSliderBar(text.Width + 10, text.Y + 5, 250, 0, 100, (int) (Engine.Profile.Current.Brighlight * 100f), HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
+            item.Add(text);
+            item.Add(_brighlight);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
             {
-                Y = 20,
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
-            _lightBar = new HSliderBar(_enableLight.Width + 10, 20, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
             item.Add(_enableLight);
             item.Add(_lightBar);
@@ -586,7 +596,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
             item.Add(_auraType);
             rightArea.Add(item);
-
 
             _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 0);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
@@ -1226,7 +1235,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
-
+                    _brighlight.Value = 0;
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
                     _runMouseInSeparateThread.IsChecked = true;
@@ -1555,6 +1564,8 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
+
+            Engine.Profile.Current.Brighlight = _brighlight.Value / 100f;
 
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;

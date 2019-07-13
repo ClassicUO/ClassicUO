@@ -642,6 +642,7 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
 
+            batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
 
             batcher.Begin();
 
