@@ -723,7 +723,8 @@ namespace ClassicUO.Game.Managers
 
         private void HandleKeyboardInput()
         {
-            if (KeyboardFocusControl != null && _keyboardFocusControl.IsDisposed) _keyboardFocusControl = null;
+            if (KeyboardFocusControl != null && _keyboardFocusControl.IsDisposed)
+                _keyboardFocusControl = null;
         }
 
         private void HandleMouseInput()
