@@ -52,14 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool CanMove
         {
-            get
-            {
-                switch (Engine.SceneManager.CurrentScene)
-                {
-                    case GameScene gs: return !BlockMovement && base.CanMove && !gs.IsHoldingItem;
-                    default: return !BlockMovement && base.CanMove;
-                }
-            }
+            get => !BlockMovement && base.CanMove;
             set => base.CanMove = value;
         }
 
