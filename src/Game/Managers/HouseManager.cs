@@ -98,6 +98,29 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        public bool EntityIntoHouse(Serial house, GameObject obj)
+        {
+            if (obj != null && TryGetHouse(house, out _))
+            {
+                Item found = World.Items.Get(house);
+
+                if (found == null)
+                    return false;
+
+                int minX = found.X + found.MultiInfo.MinX;
+                int maxX = found.X + found.MultiInfo.MaxX;
+                int minY = found.Y + found.MultiInfo.MinY;
+                int maxY = found.Y + found.MultiInfo.MaxY;
+
+                return obj.X >= minX &&
+                       obj.X <= maxX &&
+                       obj.Y >= minY &&
+                       obj.Y <= maxY;
+            }
+
+            return false;
+        }
+
         public void Remove(Serial serial)
         {
             if (TryGetHouse(serial, out House house))

@@ -3083,6 +3083,8 @@ namespace ClassicUO.Network
                     {
                         house.Generate();
                         Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+                        if (World.HouseManager.EntityIntoHouse(serial, World.Player))
+                            Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                     }
 
                     break;
@@ -3438,6 +3440,9 @@ namespace ClassicUO.Network
 
                     house.Generate();
                     Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+
+                    if (World.HouseManager.EntityIntoHouse(serial, World.Player))
+                        Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
             }
         }
