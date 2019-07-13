@@ -122,7 +122,7 @@ namespace ClassicUO.Game.Managers
                 int x = startX + parent.RealScreenPosition.X;
                 int y = startY + parent.RealScreenPosition.Y;
 
-                int offY = o.OffsetY;
+                int offY = 0;
 
                 if (parent is Mobile m)
                 {
@@ -136,13 +136,25 @@ namespace ClassicUO.Game.Managers
                 }
                 else if (parent.Texture != null)
                 {
-                    if (parent is Item it && it.IsCorpse)
-                        offY = -22;
-                    else if (parent is Static || parent is Multi)
-                        offY = -44;
+                    switch (parent)
+                    {
+                        case Item _: offY = -22;
+                            y -= ((ArtTexture)(parent.Texture)).ImageRectangle.Height >> 1;
+
+                            break;
+
+                        case Static _:
+                        case Multi _: offY = -44;
+                            y -= ((ArtTexture)(parent.Texture)).ImageRectangle.Height >> 1;
+
+                            break;
+
+                        default:
+                            y -= parent.Texture.Height >> 1;
+                            break;
+                    }
 
                     x += 22;
-                    y -= parent.Texture.Height >> 1;
                 }
 
                 x = (int)(x / scale);
@@ -155,6 +167,8 @@ namespace ClassicUO.Game.Managers
                 y += screenY;
 
                 var p = o.Parent;
+
+                offY += o.OffsetY;
 
                 if (x - (p._rectangle.Width >> 1) + 6 < screenX)
                     x = screenX + (p._rectangle.Width >> 1) + 6;
