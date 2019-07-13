@@ -87,6 +87,9 @@ namespace ClassicUO.Game.Managers
 
                 Item found = World.Items.Get(serial);
 
+                if (found == null)
+                    return true;
+
                 distance += found.MultiDistanceBonus;
 
                 return Math.Abs(found.X - currX) <= distance && Math.Abs(found.Y - currY) <= distance;
