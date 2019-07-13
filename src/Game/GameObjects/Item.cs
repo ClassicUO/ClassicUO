@@ -836,7 +836,7 @@ namespace ClassicUO.Game.GameObjects
                         if (ItemData.AnimID != 0)
                             graphic = ItemData.AnimID;
                         else
-                            graphic = 0x00C8;
+                            graphic = 0xFFFF;
 
                         break;
                     }

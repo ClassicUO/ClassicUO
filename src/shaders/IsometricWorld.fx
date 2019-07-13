@@ -65,7 +65,7 @@ float3 get_light(float3 norm)
 {
 	float3 light = normalize(LIGHT_DIRECTION);
 	float3 normal = normalize(norm);
-	return max((dot(normal, light) + 0.5f), Brightlight);
+	return max((dot(normal, light) + 0.5f), 0.0f);
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0

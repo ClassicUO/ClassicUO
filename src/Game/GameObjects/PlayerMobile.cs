@@ -1990,6 +1990,7 @@ namespace ClassicUO.Game.GameObjects
                 Run = run
             });
 
+           
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 

@@ -86,7 +86,8 @@ namespace ClassicUO.Game.Scenes
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
-
+        private Direction _lastBoatDirection;
+        private bool _boatRun, _boatIsMoving;
 
         private void MoveCharacterByMouseInput()
         {
@@ -105,7 +106,20 @@ namespace ClassicUO.Game.Scenes
 
                 bool run = mouseRange >= 190;
 
-                World.Player.Walk(facing - 1, run);
+                if (World.Player.IsDrivingBoat)
+                {
+
+                    if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
+                    {
+                        _boatRun = run;
+                        _lastBoatDirection = facing - 1;
+                        _boatIsMoving = true;
+
+                        NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, facing - 1, (byte)(run ? 2 : 1)));
+                    }
+                }
+                else
+                    World.Player.Walk(facing - 1, run);
             }
         }
 
@@ -468,6 +482,13 @@ namespace ClassicUO.Game.Scenes
         internal override void OnRightMouseUp()
         {
             _rightMousePressed = false;
+
+
+            if (_boatIsMoving)
+            {
+                _boatIsMoving = false;
+                NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, World.Player.Direction, 0x00));
+            }
         }
 
 
