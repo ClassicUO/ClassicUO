@@ -114,6 +114,8 @@ namespace ClassicUO.Game.UI.Controls
             set => SetText(value);
         }
 
+        public bool AllowDeleteKey { get; set; } = true;
+
         public override AbstractEntry EntryValue => TxEntry;
 
         public event EventHandler TextChanged;
@@ -243,6 +245,8 @@ namespace ClassicUO.Game.UI.Controls
 
                         case SDL.SDL_Keycode.SDLK_DELETE:
 
+                            if (!AllowDeleteKey)
+                                break;
                             if (!IsEditable)
                                 return;
 
