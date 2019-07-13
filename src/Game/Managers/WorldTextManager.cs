@@ -139,13 +139,21 @@ namespace ClassicUO.Game.Managers
                     switch (parent)
                     {
                         case Item _: offY = -22;
-                            y -= ((ArtTexture)(parent.Texture)).ImageRectangle.Height >> 1;
+
+                            if (parent.Texture is ArtTexture t)
+                                y -= t.ImageRectangle.Height >> 1;
+                            else
+                                y -= parent.Texture.Height >> 1;
 
                             break;
 
                         case Static _:
                         case Multi _: offY = -44;
-                            y -= ((ArtTexture)(parent.Texture)).ImageRectangle.Height >> 1;
+
+                            if (parent.Texture is ArtTexture t1)
+                                y -= t1.ImageRectangle.Height >> 1;
+                            else
+                                y -= parent.Texture.Height >> 1;
 
                             break;
 
