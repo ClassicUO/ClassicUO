@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (!Engine.UI.IsMouseOverWorld)
+            if (!Engine.UI.IsMouseOverWorld && Engine.UI.MouseOverControl != null)
             {
                 var p = Engine.UI.MouseOverControl.GetFirstControlAcceptKeyboardInput();
                 p?.SetKeyboardFocus();
