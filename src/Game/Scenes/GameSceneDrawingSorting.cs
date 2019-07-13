@@ -281,7 +281,6 @@ namespace ClassicUO.Game.Scenes
                     obj.UseObjectHandles = false;
                 }
 
-
                 if (maxObjectZ > maxZ)
                     break;
 
@@ -324,10 +323,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
-
-
-                //if (obj.OverheadMessageContainer != null && !obj.OverheadMessageContainer.IsEmpty)
-                //    Overheads.AddOverhead(obj.OverheadMessageContainer);
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);

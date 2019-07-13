@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                item.OverheadMessageContainer?.Clear();
+                item.EntityTextContainerContainer?.Clear();
                 item.RemoveFromTile();
             }
 

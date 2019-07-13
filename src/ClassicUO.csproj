@@ -135,7 +135,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\OverheadMessage.cs" />
+    <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
@@ -471,7 +471,7 @@
     <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
-    <Compile Include="Game\Managers\OverheadManager.cs" />
+    <Compile Include="Game\Managers\WorldTextManager.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        public OverheadMessage OverheadMessageContainer { get; protected set; }
+        public EntityTextContainer EntityTextContainerContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            OverheadMessageContainer?.Update();
+            EntityTextContainerContainer?.Update();
         }
 
         [MethodImpl(256)]
@@ -241,12 +241,12 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (OverheadMessageContainer == null)
-                OverheadMessageContainer = new OverheadMessage(this);
+            if (EntityTextContainerContainer == null)
+                EntityTextContainerContainer = new EntityTextContainer(this);
 
-            OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
+            var msg = EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
 
-            Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(OverheadMessageContainer);
+            Engine.SceneManager.GetScene<GameScene>().Overheads.AddMessage(msg);
         }
 
 
@@ -266,8 +266,8 @@ namespace ClassicUO.Game.GameObjects
             Tile?.RemoveGameObject(this);
             Tile = null;
 
-            OverheadMessageContainer?.Destroy();
-            OverheadMessageContainer = null;
+            EntityTextContainerContainer?.Destroy();
+            EntityTextContainerContainer = null;
 
             IsDestroyed = true;
             PriorityZ = 0;
