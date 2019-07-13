@@ -50,6 +50,8 @@ using Newtonsoft.Json;
 
 using SDL2;
 
+using GameWindow = Microsoft.Xna.Framework.Game;
+
 namespace ClassicUO
 {
     internal class DebugInfo
@@ -67,7 +69,7 @@ namespace ClassicUO
         }
     }
 
-    internal class Engine : Microsoft.Xna.Framework.Game
+    internal class Engine : GameWindow
     {
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
