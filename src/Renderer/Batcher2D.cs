@@ -39,6 +39,11 @@ namespace ClassicUO.Renderer
         {
         }
 
+        public void SetBrightlight(float f)
+        {
+            ((IsometricEffect)DefaultEffect).Brighlight.SetValue(f);
+        }
+
 
         public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
         {
@@ -1492,6 +1497,8 @@ namespace ClassicUO.Renderer
             {
                 WorldMatrix = Parameters["WorldMatrix"];
                 Viewport = Parameters["Viewport"];
+                Brighlight = Parameters["Brightlight"];
+
                 CurrentTechnique = Techniques["HueTechnique"];
             }
 
@@ -1502,6 +1509,8 @@ namespace ClassicUO.Renderer
 
             public EffectParameter WorldMatrix { get; }
             public EffectParameter Viewport { get; }
+            public EffectParameter Brighlight { get; }
+
 
             public override void ApplyStates()
             {
@@ -1713,7 +1722,7 @@ namespace ClassicUO.Renderer
             _defaultEffect = defaultEffect;
         }
 
-
+        public MatrixEffect DefaultEffect => _defaultEffect;
 
         public DepthStencilState Stencil { get; } = new DepthStencilState
         {

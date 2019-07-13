@@ -160,16 +160,19 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                if (hasShadow)
+                if (mountGraphic != 0xFFFF) 
                 {
-                    DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                    DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
-                }
-                else
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                    if (hasShadow)
+                    {
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
+                    }
+                    else
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                }
             }
             else
             {

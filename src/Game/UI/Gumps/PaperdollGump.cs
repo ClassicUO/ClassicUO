@@ -180,12 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
                 });
 
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
-                });
-
+                
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
@@ -217,15 +212,17 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 Add(new GumpPic(0, 0, 0x07d1, 0));
-
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 7,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add(_profilePic = new GumpPic(25, 196, 0x07D2, 0));
+                _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
             }
+
+            // STATUS BUTTON
+            Add(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+            {
+                X = 185,
+                Y = 44 + 27 * 7,
+                ButtonAction = ButtonAction.Activate
+            });
 
             // Virtue menu
             Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));

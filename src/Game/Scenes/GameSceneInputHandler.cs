@@ -86,7 +86,8 @@ namespace ClassicUO.Game.Scenes
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
 
-
+        private Direction _lastBoatDirection;
+        private bool _boatRun, _boatIsMoving;
 
         private void MoveCharacterByMouseInput()
         {
@@ -105,7 +106,20 @@ namespace ClassicUO.Game.Scenes
 
                 bool run = mouseRange >= 190;
 
-                World.Player.Walk(facing - 1, run);
+                if (World.Player.IsDrivingBoat)
+                {
+
+                    if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
+                    {
+                        _boatRun = run;
+                        _lastBoatDirection = facing - 1;
+                        _boatIsMoving = true;
+
+                        NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, facing - 1, (byte)(run ? 2 : 1)));
+                    }
+                }
+                else
+                    World.Player.Walk(facing - 1, run);
             }
         }
 
@@ -235,26 +249,6 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                if (IsHoldingItem)
-                {
-                    //Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-
-                    //if (Engine.UI.MouseOverControl is ItemGump g)
-                    //{
-                    //    g.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                    //}
-                    //else switch (Engine.UI.MouseOverControl.RootParent)
-                    //{
-                    //    case ContainerGump container:
-                    //        container.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                    //        break;
-                    //    case PaperDollGump paperdoll:
-                    //        paperdoll.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                    //        break;
-                    //}
-
-                }
-
                 return;
             }
 
@@ -266,7 +260,58 @@ namespace ClassicUO.Game.Scenes
             if (Engine.UI.IsDragging)
                 return;
 
-            if (TargetManager.IsTargeting)
+            if (IsHoldingItem)
+            {
+                if (SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                {
+                    switch (obj)
+                    {
+                        case Mobile mobile:
+                            MergeHeldItem(mobile);
+
+                            break;
+
+                        case Item item:
+
+                            if (item.IsCorpse)
+                                MergeHeldItem(item);
+                            else
+                            {
+                                SelectedObject.Object = item;
+
+                                if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
+                                    MergeHeldItem(item);
+                                else
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
+                            }
+
+                            break;
+
+                        case Multi multi:
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
+
+                            break;
+
+                        case Static st:
+                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
+
+                            break;
+
+                        case Land _:
+                            DropHeldItemToWorld(obj.Position);
+
+                            break;
+
+                        default:
+                            Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
+
+                            return;
+                    }
+                }
+                else
+                    Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
+            }
+            else if (TargetManager.IsTargeting)
             {
                 switch (TargetManager.TargetingState)
                 {
@@ -317,57 +362,6 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                 }
-            }
-            else if (IsHoldingItem)
-            {
-                if (SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
-                {
-                    switch (obj)
-                    {
-                        case Mobile mobile:
-                            MergeHeldItem(mobile);
-
-                            break;
-
-                        case Item item:
-
-                            if (item.IsCorpse)
-                                MergeHeldItem(item);
-                            else
-                            {
-                                SelectedObject.Object = item;
-
-                                if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
-                                    MergeHeldItem(item);
-                                else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
-                            }
-
-                            break;
-
-                        case Multi multi:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
-
-                            break;
-
-                        case Static st:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
-
-                            break;
-
-                        case Land _:
-                            DropHeldItemToWorld(obj.Position);
-
-                            break;
-
-                        default:
-                            Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
-
-                            return;
-                    }
-                }
-                else
-                    Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
             }
             else
             {
@@ -488,6 +482,13 @@ namespace ClassicUO.Game.Scenes
         internal override void OnRightMouseUp()
         {
             _rightMousePressed = false;
+
+
+            if (_boatIsMoving)
+            {
+                _boatIsMoving = false;
+                NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, World.Player.Direction, 0x00));
+            }
         }
 
 

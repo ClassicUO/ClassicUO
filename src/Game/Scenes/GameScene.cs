@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Scenes
 
         public JournalManager Journal { get; private set; }
 
-        public OverheadManager Overheads { get; private set; }
+        public WorldTextManager Overheads { get; private set; }
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.Scenes
 
             HeldItem = new ItemHold();
             Journal = new JournalManager();
-            Overheads = new OverheadManager();
+            Overheads = new WorldTextManager();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(Engine.Profile.Current.Macros);
             _healthLinesManager = new HealthLinesManager();
@@ -642,6 +642,7 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
 
+            batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
 
             batcher.Begin();
 
@@ -757,6 +758,7 @@ namespace ClassicUO.Game.Scenes
             if (renderIndex < 1)
                 renderIndex = 99;
 
+            Overheads.ProcessWorldText(true);
             Overheads.Draw(batcher, x, y, renderIndex);
             SelectedObject.LastObject = SelectedObject.Object;
 

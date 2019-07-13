@@ -517,9 +517,6 @@ namespace ClassicUO.Game.UI.Controls
             if (_acceptKeyboardInput)
                 return this;
 
-            if (World.InGame && Engine.UI.SystemChat != null)
-                return Engine.UI.SystemChat.textBox;
-
             if (Children == null || Children.Count == 0)
                 return null;
 
@@ -530,6 +527,9 @@ namespace ClassicUO.Game.UI.Controls
                 if (a != null)
                     return a;
             }
+
+            if (World.InGame && Engine.UI.SystemChat != null)
+                return Engine.UI.SystemChat.textBox;
 
             return null;
         }

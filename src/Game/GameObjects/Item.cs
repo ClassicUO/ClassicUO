@@ -27,6 +27,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -374,6 +375,9 @@ namespace ClassicUO.Game.GameObjects
             house.Generate();
 
             Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+
+            if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
+                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
 
@@ -832,7 +836,7 @@ namespace ClassicUO.Game.GameObjects
                         if (ItemData.AnimID != 0)
                             graphic = ItemData.AnimID;
                         else
-                            graphic = 0x00C8;
+                            graphic = 0xFFFF;
 
                         break;
                     }

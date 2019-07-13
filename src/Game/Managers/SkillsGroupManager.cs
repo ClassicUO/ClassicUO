@@ -214,9 +214,9 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static void RemoveGroup(string group)
+        public static bool RemoveGroup(string group)
         {
-            if (Groups.TryGetValue(group, out var list))
+            if (Groups.FirstOrDefault().Key != group && Groups.TryGetValue(group, out var list))
             {
                 Groups.Remove(group);
 
@@ -224,7 +224,11 @@ namespace ClassicUO.Game.Managers
                     Groups.Add("All", list);
                 else
                     Groups.FirstOrDefault().Value.AddRange(list);
+
+                return true;
             }
+
+            return false;
         }
 
         public static List<int> GetSkillsInGroup(string group)

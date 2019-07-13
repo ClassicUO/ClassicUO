@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public MessageBoxGump(int w, int h, string message, Action<bool> action) : base(0, 0)
         {
-            CanMove = false;
+            CanMove = true;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
             AcceptMouseInput = false;

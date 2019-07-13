@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
@@ -245,7 +246,21 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Exists => World.Contains(Serial);
 
-        public bool IsMounted => HasEquipment && Equipment[(int) Layer.Mount] != null;
+        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat;
+
+        public bool IsDrivingBoat
+        {
+            get
+            {
+                if (FileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
+                {
+                    Item m = Equipment[0x19];
+                    return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
+                }
+
+                return false;
+            }
+        }
 
         public bool IsRunning { get; internal set; }
 

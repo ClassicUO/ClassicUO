@@ -1374,6 +1374,19 @@ namespace ClassicUO.IO.Resources
             //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
 
+        public void GetAnimationDimensions(sbyte animIndex, ushort graphic, bool ismounted, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
+        {
+            byte dir = 0 & 0x7F;
+            byte animGroup = 0;
+            bool mirror = false;
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+
+            if (frameIndex == 0xFF)
+                frameIndex = (byte) animIndex;
+            FileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = ismounted ? 100 : 60;
+        }
+
         public unsafe void GetAnimationDimensions(byte frameIndex, ushort id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {
             if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)

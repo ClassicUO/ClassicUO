@@ -28,6 +28,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -35,6 +36,8 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -93,7 +96,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
                 AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
+
         }
+
 
         public override void OnButtonClick(int buttonID)
         {
@@ -146,6 +151,53 @@ namespace ClassicUO.Game.UI.Gumps
             box.SetItemsValue(controls);
 
             _boxes.Add(box);
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_DELETE)
+            {
+                for (int i = 0; i < _boxes.Count; i++)
+                {
+                    var box = _boxes[i];
+
+                    if (box.IsEditing)
+                    {
+                        if (i == 0)
+                        {
+                            Engine.UI.Add(new MessageBoxGump(200, 150, "Cannot delete this group.", null));
+                            break;
+                        }
+
+                        if (SkillsGroupManager.RemoveGroup(box.LabelText))
+                        {
+                            foreach (var child in box.FindControls<SkillControl>())
+                            {
+                                _boxes[0].AddItem(child);
+                            }
+
+                            _boxes[0].Items.Sort((a, b) =>
+                            {
+                                var s0 = (SkillControl)a;
+                                var s1 = (SkillControl)b;
+
+                                var skill0 = World.Player.Skills[s0.SkillIndex];
+                                var skill1 = World.Player.Skills[s1.SkillIndex];
+
+                                return skill0.Name.CompareTo(skill1.Name);
+                            });
+
+                            _boxes[0].GenerateButtons();
+
+                            box.Children.Clear();
+                            _container.Remove(box);
+                            _boxes.RemoveAt(i);
+                        }
+
+                        break;
+                    }
+                }
+            }
         }
 
 
@@ -281,6 +333,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public string Group { get; private set; }
 
+            public int SkillIndex => _skillIndex;
 
             private static ushort GetLockValue(Lock lockStatus)
             {
@@ -304,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
+           
             protected override void OnMouseDown(int x, int y, MouseButton button)
             {
                 CanMove = false;

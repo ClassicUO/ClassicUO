@@ -623,7 +623,9 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.LastObject:
-                    GameActions.DoubleClick(GameActions.LastObject);
+
+                    if (World.Get(GameActions.LastObject) != null)
+                        GameActions.DoubleClick(GameActions.LastObject);
 
                     break;
 
