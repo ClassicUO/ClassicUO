@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Managers
                 Item found = World.Items.Get(house);
 
                 if (found == null)
-                    return false;
+                    return true;
 
                 int minX = found.X + found.MultiInfo.MinX;
                 int maxX = found.X + found.MultiInfo.MaxX;
