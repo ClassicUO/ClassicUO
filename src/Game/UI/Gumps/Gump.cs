@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -51,7 +52,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool CanMove
         {
-            get => !BlockMovement && base.CanMove;
+            get
+            {
+                switch (Engine.SceneManager.CurrentScene)
+                {
+                    case GameScene gs: return !BlockMovement && base.CanMove && !gs.IsHoldingItem;
+                    default: return !BlockMovement && base.CanMove;
+                }
+            }
             set => base.CanMove = value;
         }
 
