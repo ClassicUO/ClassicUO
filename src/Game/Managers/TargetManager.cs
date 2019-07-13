@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -235,23 +236,31 @@ namespace ClassicUO.Game.Managers
             else if (selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
-                short z = gobj.Position.Z;
+                short z = gobj.Z;
 
                 if (gobj is Static st)
                 {
                     modelNumber = st.OriginalGraphic;
                     var data = st.ItemData;
 
-                    if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
+                    {
                         z += data.Height;
+                    }
+
+
+                    //if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
+                    //    z += data.Height;
                 }
                 else if (gobj is Multi m)
                 {
                     modelNumber = m.Graphic;
                     var data = m.ItemData;
 
-                    if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
+                    {
                         z += data.Height;
+                    }
                 }
 
                 NetClient.Socket.Send(new PTargetXYZ(gobj.X, gobj.Y, z, modelNumber, _targetCursorId, (byte) TargeringType));
