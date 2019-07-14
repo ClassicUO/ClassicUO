@@ -209,10 +209,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (Engine.UI.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+
+                if (!scene.IsHoldingItem)
                 {
-                    _positionLocked = false;
-                    return;
+                    if (Engine.UI.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                    {
+                        _positionLocked = false;
+
+                        return;
+                    }
                 }
 
                 if (TargetManager.IsTargeting)
@@ -238,8 +244,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
-
                     if (scene.IsHoldingItem)
                     {
                         if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
