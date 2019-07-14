@@ -97,7 +97,6 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
-            ushort hue = Hue;
 
             if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)
             {
@@ -106,7 +105,9 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Source != null)
                     Source.Texture = Texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+
+                Bounds.Width = Texture.Width;
+                Bounds.Height = Texture.Height;
             }
 
             if (Texture != null)
@@ -116,9 +117,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[Graphic];
-
-            bool isPartial = data.IsPartialHue;
-            bool isTransparent = data.IsTranslucent;
 
 
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
@@ -137,7 +135,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, isTransparent ? .5f : 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
 
             switch (Blend)
             {
