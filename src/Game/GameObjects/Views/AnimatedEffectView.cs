@@ -178,17 +178,17 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 default:
-                    if (Graphic == 0x36BD)
-                    {
-                        ResetHueVector();
-                        HueVector.X = 0;
-                        HueVector.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                        HueVector.Z = 0;
-                        batcher.SetBlendState(BlendState.Additive);
-                        base.Draw(batcher, posX, posY);
-                        batcher.SetBlendState(null);
-                    }
-                    else
+                    //if (Graphic == 0x36BD)
+                    //{
+                    //    ResetHueVector();
+                    //    HueVector.X = 0;
+                    //    HueVector.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                    //    HueVector.Z = 0;
+                    //    batcher.SetBlendState(BlendState.Additive);
+                    //    base.Draw(batcher, posX, posY);
+                    //    batcher.SetBlendState(null);
+                    //}
+                    //else
                         base.Draw(batcher, posX, posY);
 
                     break;
