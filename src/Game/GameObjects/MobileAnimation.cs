@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (isrun)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && FileManager.Animations.AnimationExists(graphic, 19))
                         result = 19;
                     else
                     {
