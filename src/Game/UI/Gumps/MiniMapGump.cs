@@ -54,8 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanBeSaved = true;
         }
-
-
+        
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -103,6 +102,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public bool ToggleSize()
+        {
+            _useLargeMap = !_useLargeMap;
+            CreateMap();
+            return _useLargeMap;
+        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -160,9 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                _useLargeMap = !_useLargeMap;
-                CreateMap();
-
+                ToggleSize();
                 return true;
             }
 

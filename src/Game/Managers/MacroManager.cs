@@ -409,6 +409,7 @@ namespace ClassicUO.Game.Managers
                                         Engine.UI.Add(new MiniMapGump());
                                     else
                                     {
+                                        miniMapGump.ToggleSize();
                                         miniMapGump.SetInScreen();
                                         miniMapGump.BringOnTop();
                                     }
