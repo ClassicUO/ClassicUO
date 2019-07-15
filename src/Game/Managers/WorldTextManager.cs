@@ -129,7 +129,16 @@ namespace ClassicUO.Game.Managers
                     if (!m.IsMounted)
                         offY = -22;
 
-                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex, m.GetGraphicForAnimation(), m.IsMounted, 0, out int centerX, out int centerY, out int width, out int height);
+                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex, 
+                                                                  m.GetGraphicForAnimation(), 
+                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, 
+                                                                  m.IsMounted,
+                                                                  /*(byte) m.AnimIndex*/ 0, 
+                                                                  out int centerX, 
+                                                                  out int centerY,
+                                                                  out int width, 
+                                                                  out int height);
                     x += (int)m.Offset.X;
                     x += 22;
                     y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
