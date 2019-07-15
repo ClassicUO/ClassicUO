@@ -93,12 +93,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public TextContainer TextContainer { get; } = new TextContainer();
 
-        public void AddLabel(string text, ushort hue, byte font, bool isunicode)
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
         {
             if (World.ClientFlags.TooltipsEnabled)
                 return;
 
-            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -116,10 +116,13 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            _lastClick.X = x;
-            _lastClick.Y = y;
+            if (button == MouseButton.Left)
+            {
+                _lastClick.X = x;
+                _lastClick.Y = y;
+            }
         }
 
         public void UpdateContent()

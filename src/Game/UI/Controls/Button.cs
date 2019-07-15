@@ -196,12 +196,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             SpriteTexture texture = GetTextureByState();
 
-            Vector3 hue = Vector3.Zero;
+            ResetHueVector();
 
             if (IsTransparent)
-                hue.Z = Alpha;
+                _hueVector.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, ref hue);
+            batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -228,7 +228,25 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 IsClicked = false;
+
+                switch (ButtonAction)
+                {
+                    case ButtonAction.SwitchPage:
+                        ChangePage(ToPage);
+
+                        break;
+
+                    case ButtonAction.Activate:
+                        OnButtonClick(ButtonID);
+
+                        break;
+                }
+
+                Mouse.LastLeftButtonClickTime = 0;
+                Mouse.CancelDoubleClick = true;
+            }
         }
 
         private SpriteTexture GetTextureByState()
@@ -259,28 +277,8 @@ namespace ClassicUO.Game.UI.Controls
             return _gumpGraphics[NORMAL];
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                switch (ButtonAction)
-                {
-                    case ButtonAction.SwitchPage:
-                        ChangePage(ToPage);
 
-                        break;
-
-                    case ButtonAction.Activate:
-                        OnButtonClick(ButtonID);
-
-                        break;
-                }
-
-                Mouse.LastLeftButtonClickTime = 0;
-                Mouse.CancelDoubleClick = true;
-            }
-        }
-
+      
         public override bool Contains(int x, int y)
         {
             if (IsDisposed)

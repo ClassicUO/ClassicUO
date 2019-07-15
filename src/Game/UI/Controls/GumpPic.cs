@@ -73,8 +73,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+           
+            x = Mouse.Position.X - ScreenCoordinateX;
+            y = Mouse.Position.Y - ScreenCoordinateY;
+
             if (Texture.Contains(x, y))
                 return true;
+
 
             for (int i = 0; i < Children.Count; i++)
             {
@@ -162,10 +167,10 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
-            Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, Hue, IsPartialHue, Alpha, true);
+            ResetHueVector();
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, ref hue);
+            batcher.Draw2D(Texture, x, y, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

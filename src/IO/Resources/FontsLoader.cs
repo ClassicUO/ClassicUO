@@ -31,6 +31,7 @@ using System.Text;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
@@ -432,7 +433,7 @@ namespace ClassicUO.IO.Resources
                         break;
                 }
 
-                int count = ptr.Data.Count;
+                uint count = ptr.Data.Count;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -570,7 +571,7 @@ namespace ClassicUO.IO.Resources
 
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
-                        ptr.Data.Resize(ptr.CharCount - newlineval); // = new List<MultilinesFontData>(ptr.CharCount);
+                        ptr.Data.Resize((uint) (ptr.CharCount - newlineval)); // = new List<MultilinesFontData>(ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -613,14 +614,8 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = flags,
-                                Font = font,
-                                LinkID = 0,
-                                Color = 0xFFFFFFFF
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData(0xFFFFFFFF, flags, font, si, 0);
+
                             ptr.Data.Add(mfd1);
                             readWidth += fcd.Width;
 
@@ -641,7 +636,7 @@ namespace ClassicUO.IO.Resources
 
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
-                        ptr.Data.Resize(ptr.CharCount);
+                        ptr.Data.Resize( (uint) ptr.CharCount);
                         charCount = 0;
 
                         if (isFixed || isCropped)
@@ -661,14 +656,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = flags,
-                    Font = font,
-                    LinkID = 0,
-                    Color = 0xFFFFFFFF
-                };
+                MultilinesFontData mfd = new MultilinesFontData(0xFFFFFFFF, flags, font, si, 0);
                 ptr.Data.Add(mfd);
                 readWidth += fcd.Width;
 
@@ -910,7 +898,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
 
-                        ptr.Data.Resize(ptr.CharCount - newlineval);
+                        ptr.Data.Resize((uint) (ptr.CharCount - newlineval));
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -953,14 +941,7 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = current_flags,
-                                Font = current_font,
-                                LinkID = 0,
-                                Color = current_charcolor
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData(current_charcolor, current_flags, current_font, si, 0);
                             ptr.Data.Add(mfd1);
                             readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
 
@@ -984,7 +965,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
 
-                        ptr.Data.Resize(ptr.CharCount);
+                        ptr.Data.Resize( (uint) ptr.CharCount);
 
                         if (isFixed || isCropped)
                             break;
@@ -1004,14 +985,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = current_flags,
-                    Font = current_font,
-                    LinkID = 0,
-                    Color = current_charcolor
-                };
+                MultilinesFontData mfd = new MultilinesFontData(current_charcolor, current_flags, current_font, si, 0);
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
@@ -1046,8 +1020,10 @@ namespace ClassicUO.IO.Resources
 
         private unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
+#if !DEBUG
             try
             {
+#endif
                 if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                     return null;
 
@@ -1185,11 +1161,11 @@ namespace ClassicUO.IO.Resources
                     }
 
                     ushort oldLink = 0;
-                    int dataSize = ptr.Data.Count;
+                    uint dataSize = ptr.Data.Count;
 
                     for (int i = 0; i < dataSize; i++)
                     {
-                        MultilinesFontData dataPtr = ptr.Data[i];
+                        ref readonly MultilinesFontData dataPtr = ref ptr.Data[i];
                         char si = dataPtr.Item;
                         table = (uint*) _unicodeFontAddress[dataPtr.Font];
 
@@ -1453,7 +1429,7 @@ namespace ClassicUO.IO.Resources
                                                 {
                                                     int testBlock = (testY + y) * width + nowX;
 
-                                                    if (pData[testBlock] != 0 && pData[testBlock] != blackColor)
+                                                    if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
                                                     {
                                                         pData[block] = blackColor;
                                                         passed = true;
@@ -1543,6 +1519,7 @@ namespace ClassicUO.IO.Resources
                     ftexture.SetData(pData);
 
                 return ftexture;
+#if !DEBUG
             }
             catch (Exception ex)
             {
@@ -1559,6 +1536,7 @@ namespace ClassicUO.IO.Resources
 
                 return null;
             }
+#endif
         }
 
         private unsafe MultilinesFontInfo GetInfoHTML(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width)
@@ -1626,7 +1604,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.Width <= 0)
                             ptr.Width = 1;
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Resize(ptr.CharCount);
+                        ptr.Data.Resize( (uint) ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -1667,14 +1645,7 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = htmlData[i].Flags,
-                                Font = htmlData[i].Font,
-                                LinkID = htmlData[i].LinkID,
-                                Color = htmlData[i].Color
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData(htmlData[i].Color, htmlData[i].Flags, htmlData[i].Font, si, htmlData[i].LinkID);
                             ptr.Data.Add(mfd1);
                             readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
@@ -1694,7 +1665,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.Width <= 0)
                             ptr.Width = 1;
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Resize(ptr.CharCount);
+                        ptr.Data.Resize( (uint) ptr.CharCount);
                         charCount = 0;
 
                         if (isFixed || isCropped)
@@ -1714,14 +1685,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = htmlData[i].Flags,
-                    Font = htmlData[i].Font,
-                    LinkID = htmlData[i].LinkID,
-                    Color = htmlData[i].Color
-                };
+                MultilinesFontData mfd = new MultilinesFontData(htmlData[i].Color, htmlData[i].Flags, htmlData[i].Font, si, htmlData[i].LinkID);
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
@@ -1738,14 +1702,14 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
+        private static readonly HTMLChar[] _emptyHTML = { };
+
         private HTMLChar[] GetHTMLData(byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            HTMLChar[] data = new HTMLChar[0];
-
             if (len < 1)
-                return data;
+                return _emptyHTML;
 
-            data = new HTMLChar[len];
+            var data = new HTMLChar[len];
             int newlen = 0;
 
             HTMLDataInfo info = new HTMLDataInfo
@@ -1757,7 +1721,7 @@ namespace ClassicUO.IO.Resources
                 Color = _HTMLColor,
                 Link = 0
             };
-            List<HTMLDataInfo> stack = new List<HTMLDataInfo>();
+            RawList<HTMLDataInfo> stack = new RawList<HTMLDataInfo>();
             stack.Add(info);
             HTMLDataInfo currentInfo = info;
 
@@ -1786,7 +1750,7 @@ namespace ClassicUO.IO.Resources
                     if (!endTag)
                     {
                         if (newInfo.Font == 0xFF)
-                            newInfo.Font = stack.LastOrDefault().Font;
+                            newInfo.Font = stack[stack.Count - 1].Font;
 
                         if (tag != HTML_TAG_TYPE.HTT_BODY)
                             stack.Add(newInfo);
@@ -1804,7 +1768,7 @@ namespace ClassicUO.IO.Resources
                     {
                         //int index = -1;
 
-                        for (int j = stack.Count - 1; j >= 1; j--)
+                        for (uint j = stack.Count - 1; j >= 1; j--)
                         {
                             if (stack[j].Tag == tag)
                             {
@@ -1815,7 +1779,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    currentInfo = GetCurrentHTMLInfo(stack);
+                    currentInfo = GetCurrentHTMLInfo(ref stack);
 
                     switch (tag)
                     {
@@ -1868,7 +1832,7 @@ namespace ClassicUO.IO.Resources
             return data;
         }
 
-        private HTMLDataInfo GetCurrentHTMLInfo(List<HTMLDataInfo> list)
+        private HTMLDataInfo GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list)
         {
             HTMLDataInfo info = new HTMLDataInfo
             {
@@ -1882,7 +1846,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < list.Count; i++)
             {
-                HTMLDataInfo current = list[i];
+                ref readonly HTMLDataInfo current = ref list[i];
 
                 switch (current.Tag)
                 {
@@ -2973,7 +2937,7 @@ namespace ClassicUO.IO.Resources
         public TEXT_ALIGN_TYPE Align;
         public int CharCount;
         public int CharStart;
-        public List<MultilinesFontData> Data = new List<MultilinesFontData>();
+        public RawList<MultilinesFontData> Data = new RawList<MultilinesFontData>();
         public int IndentionOffset;
         public int MaxHeight;
         public MultilinesFontInfo Next;
@@ -2991,13 +2955,22 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    internal class MultilinesFontData
+    internal readonly struct MultilinesFontData
     {
-        public uint Color;
-        public ushort Flags;
-        public byte Font;
-        public char Item;
-        public ushort LinkID;
+        public MultilinesFontData(uint color, ushort flags, byte font, char item, ushort linkid)
+        {
+            Color = color;
+            Flags = flags;
+            Font = font;
+            Item = item;
+            LinkID = linkid;
+        }
+
+        public readonly uint Color;
+        public readonly ushort Flags;
+        public readonly byte Font;
+        public readonly char Item;
+        public readonly ushort LinkID;
         //public MultilinesFontData Next;
     }
 

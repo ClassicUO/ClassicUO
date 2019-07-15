@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
                     IsTransparent = true, Tag = item.Index
                 };
 
-                box.MouseClick += (sender, e) =>
+                box.MouseUp += (sender, e) =>
                 {
                     if (e.Button == MouseButton.Left)
                     {

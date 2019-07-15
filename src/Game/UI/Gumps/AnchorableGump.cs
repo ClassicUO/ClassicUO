@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockGumpPic.AcceptMouseInput = true;
                 _lockGumpPic.X = Width - _lockGumpPic.Width;
                 _lockGumpPic.Y = 0;
-                _lockGumpPic.MouseClick += _lockGumpPic_MouseClick;
+                _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
 
                 Add(_lockGumpPic);
             }

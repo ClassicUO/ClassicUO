@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {

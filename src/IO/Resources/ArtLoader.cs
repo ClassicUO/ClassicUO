@@ -93,7 +93,7 @@ namespace ClassicUO.IO.Resources
 
             if (entry < _file.Length && entry >= 0)
             {
-                UOFileIndex3D e = _file.Entries[entry];
+                ref readonly UOFileIndex3D e = ref _file.Entries[entry];
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;

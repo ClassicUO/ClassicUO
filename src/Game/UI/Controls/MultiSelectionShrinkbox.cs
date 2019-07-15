@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = 18
             };
 
-            _label.MouseClick += (senderr, e) =>
+            _label.MouseUp += (senderr, e) =>
             {
                 if (!IsEditable)
                     return;
@@ -133,6 +133,8 @@ namespace ClassicUO.Game.UI.Controls
 
 
         public string LabelText => _label.Text;
+
+        public bool IsEditing => _label.GetEditable();
 
         internal bool Opened
         {
@@ -306,8 +308,11 @@ namespace ClassicUO.Game.UI.Controls
             _arrow.IsVisible = items.Count > 0 || _nestedBoxes.Count > 0;
         }
 
-        private void GenerateButtons()
+        public void GenerateButtons()
         {
+            if (!_opened)
+                return;
+
             //ClearButtons();
             //_buttons = new NiceButton[_items.Length];
 

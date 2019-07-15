@@ -22,10 +22,12 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -51,10 +53,70 @@ namespace ClassicUO.Game.GameObjects
         private uint _price;
         private ulong _spellsBitFiled;
 
+
+        private static readonly Queue<Item> _pool = new Queue<Item>();
+
         public Item(Serial serial) : base(serial)
         {
         }
 
+
+        public static Item Create(Serial serial)
+        {
+            //if (_pool.Count != 0)
+            //{
+            //    var i = _pool.Dequeue();
+            //    i.IsDestroyed = false;
+            //    i.Serial = serial;
+            //    i._amount = 0;
+            //    i._animDataFrame = default;
+            //    i._animSpeed = 0;
+            //    i._container = 0;
+            //    i._isMulti = false;
+            //    i._layer = 0;
+            //    i._price = 0;
+            //    i._spellsBitFiled = 0;
+            //    i.UsedLayer = false;
+            //    i._originalGraphic = 0;
+            //    i._displayedGraphic = null;
+
+            //    i.LightID = 0;
+            //    i.MultiDistanceBonus = 0;
+            //    i.BookType = 0;
+            //    i.Flags = 0;
+            //    i.WantUpdateMulti = true;
+            //    i._force = false;
+            //    i.MultiInfo = null;
+            //    i.MultiGraphic = 0;
+            //    i.CharacterIsBehindFoliage = false;
+
+            //    i.AlphaHue = 0;
+            //    i.Name = null;
+            //    i.Direction = 0;
+            //    i.Equipment = null;
+            //    i.LastAnimationChangeTime = 0;
+            //    i.Items.Clear();
+            //    i.IsClicked = false;
+            //    i.Properties.Clear();
+            //    i._delta = 0;
+            //    i.PropertiesHash = 0;
+
+            //    i._itemData = null;
+
+            //    return i;
+            //}
+
+            return new Item(serial);
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+
+            base.Destroy();
+            //_pool.Enqueue(this);
+        }
 
         public uint Price
         {
@@ -193,7 +255,7 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (!_itemData.HasValue)
@@ -284,14 +346,15 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    house.Components.Add(new Multi(graphic)
-                    {
-                        Position = new Position((ushort)(X + x), (ushort)(Y + y), (sbyte)(Z + z)),
-                        MultiOffsetX = x,
-                        MultiOffsetY = y,
-                        MultiOffsetZ = z,
-                        AlphaHue = 0xFF
-                    });
+                    Multi m = Multi.Create(graphic);
+                    m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
+                    m.MultiOffsetX = x;
+                    m.MultiOffsetY = y;
+                    m.MultiOffsetZ = z;
+                    m.Hue = Hue;
+                    m.AlphaHue = 0xFF;
+
+                    house.Components.Add(m);
                 }
                 else if (i == 0)
                     MultiGraphic = graphic;
@@ -311,7 +374,10 @@ namespace ClassicUO.Game.GameObjects
 
             house.Generate();
 
-            Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+            Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+
+            if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
+                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
 
@@ -770,7 +836,7 @@ namespace ClassicUO.Game.GameObjects
                         if (ItemData.AnimID != 0)
                             graphic = ItemData.AnimID;
                         else
-                            graphic = 0x00C8;
+                            graphic = 0xFFFF;
 
                         break;
                     }

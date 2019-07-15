@@ -33,7 +33,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SplitMenuGump : Gump
     {
-        private readonly WeakReference _itemGump;
         private readonly Point _offsert;
         private readonly Button _okButton;
         private readonly HSliderBar _slider;
@@ -45,14 +44,6 @@ namespace ClassicUO.Game.UI.Gumps
         public SplitMenuGump(Item item, Point offset) : base(item, 0)
         {
             Item = item;
-
-            ItemGump itemGump = Engine.UI.GetChildByLocalSerial<ContainerGump, ItemGump>(item.Container, item.Serial);
-
-            if (itemGump != null)
-            {
-                _itemGump = new WeakReference(itemGump);
-                itemGump.Disposed += ItemGumpOnDisposed;
-            }
 
             _offsert = offset;
 
@@ -70,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 102, Y = 37
             });
 
-            _okButton.MouseClick += OkButtonOnMouseClick;
+            _okButton.MouseUp += OkButtonOnMouseClick;
 
             Add(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
             {
@@ -83,12 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Item Item { get; }
 
-        private void ItemGumpOnDisposed(object sender, EventArgs e)
-        {
-            Dispose();
-        }
 
-
+     
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
             if (_slider.Value > 0) GameActions.PickUp(Item, _offsert, _slider.Value);
@@ -103,6 +90,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (Item == null || Item.IsDestroyed)
+                Dispose();
+
             if (IsDisposed)
                 return;
 
@@ -144,11 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _okButton.MouseClick -= OkButtonOnMouseClick;
-
-            if (_itemGump != null && _itemGump.IsAlive)
-                if (_itemGump.Target is ItemGump gump)
-                    gump.Disposed -= ItemGumpOnDisposed;
+            _okButton.MouseUp -= OkButtonOnMouseClick;
 
             base.Dispose();
         }

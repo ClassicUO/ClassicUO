@@ -316,7 +316,7 @@ namespace ClassicUO.Network
 
             if (type > 0 && p.Position + 1 <= p.Length)
             {
-                mobile.IsFemale = p.ReadBool();
+                mobile.IsMale = !p.ReadBool();
 
                 if (mobile == World.Player)
                 {
@@ -622,6 +622,9 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+            if (World.Player.IsDead)
+                World.ChangeSeason(Seasons.Desolation, 42);
         }
 
         private static void Talk(Packet p)
@@ -694,7 +697,7 @@ namespace ClassicUO.Network
                         scene.HeldItem.Enabled = false;
 
 
-                    if (it.Layer != Layer.Invalid) Engine.UI.GetControl<PaperDollGump>(cont)?.Update();
+                    if (it.Layer != Layer.Invalid) Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
                 }
             }
 
@@ -730,7 +733,7 @@ namespace ClassicUO.Network
 
                     if (Engine.Profile.Current.GridLootType > 0)
                     {
-                        GridLootGump grid = Engine.UI.GetControl<GridLootGump>(it.Container);
+                        GridLootGump grid = Engine.UI.GetGump<GridLootGump>(it.Container);
 
                         if (grid != null) grid.RedrawItems();
                     }
@@ -783,7 +786,11 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
 
-            if (p.ReadUInt() != World.Player) throw new Exception("OnMobileStatus");
+            if (p.ReadUInt() != World.Player)
+                throw new Exception("OnMobileStatus");
+
+            bool oldDead = World.Player.IsDead;
+            ushort oldGraphic = World.Player.Graphic;
 
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             World.Player.Hue = p.ReadUShort();
@@ -821,6 +828,23 @@ namespace ClassicUO.Network
             World.RangeSize.Y = y;
             World.Player.Direction = dir;
             World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
+
+            if (oldGraphic != 0 && oldGraphic != World.Player.Graphic)
+            {
+                if (World.Player.IsDead)
+                {
+                    TargetManager.Reset();
+                }
+            }
+
+            if (oldDead != World.Player.IsDead)
+            {
+                if (World.Player.IsDead)
+                    World.ChangeSeason(Seasons.Desolation, 42);
+                else 
+                    World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
+            }
+
             World.Player.Walker.ResendPacketSended = false;
             World.Player.AddToTile();
 #endif
@@ -933,7 +957,7 @@ namespace ClassicUO.Network
                 if (vendor == null)
                     return;
 
-                Engine.UI.GetControl<ShopGump>(serial)?.Dispose();
+                Engine.UI.GetGump<ShopGump>(serial)?.Dispose();
                 ShopGump gump = new ShopGump(serial, true, 150, 5);
                 Engine.UI.Add(gump);
 
@@ -975,7 +999,7 @@ namespace ClassicUO.Network
                 {
                     if (item.IsSpellBook)
                     {
-                        Engine.UI.GetControl<SpellbookGump>(serial)?.Dispose();
+                        Engine.UI.GetGump<SpellbookGump>(serial)?.Dispose();
                         SpellbookGump spellbookGump = new SpellbookGump(item);
                         if (!Engine.UI.GetGumpCachePosition(item, out Point location)) location = new Point(64, 64);
 
@@ -989,7 +1013,7 @@ namespace ClassicUO.Network
                 {
                     if (item.IsCorpse && (Engine.Profile.Current.GridLootType == 1 || Engine.Profile.Current.GridLootType == 2))
                     {
-                        Engine.UI.GetControl<GridLootGump>(serial)?.Dispose();
+                        Engine.UI.GetGump<GridLootGump>(serial)?.Dispose();
                         Engine.UI.Add(new GridLootGump(serial));
                         _requestedGridLoot = serial;
 
@@ -997,7 +1021,7 @@ namespace ClassicUO.Network
                             return;
                     }
 
-                    Engine.UI.GetControl<ContainerGump>(serial)?.Dispose();
+                    Engine.UI.GetGump<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
             }
@@ -1286,7 +1310,7 @@ namespace ClassicUO.Network
                 // TODO: make a base class for this gump
                 if (Engine.Profile.Current.StandardSkillsGump)
                 {
-                    var gumpSkills = Engine.UI.GetControl<StandardSkillsGump>();
+                    var gumpSkills = Engine.UI.GetGump<StandardSkillsGump>();
 
                     if (gumpSkills == null)
                     {
@@ -1299,7 +1323,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    var gumpSkills = Engine.UI.GetControl<SkillGumpAdvanced>();
+                    var gumpSkills = Engine.UI.GetGump<SkillGumpAdvanced>();
 
                     if (gumpSkills == null)
                     {
@@ -1422,7 +1446,7 @@ namespace ClassicUO.Network
 
                 if (grid == null && Engine.Profile.Current.GridLootType > 0)
                 {
-                    grid = Engine.UI.GetControl<GridLootGump>(containerSerial);
+                    grid = Engine.UI.GetGump<GridLootGump>(containerSerial);
 
                     if (_requestedGridLoot != 0 && _requestedGridLoot == containerSerial && grid == null)
                     {
@@ -1441,7 +1465,7 @@ namespace ClassicUO.Network
             {
                 SpellbookData.GetData(itemContainer, out ulong field, out SpellBookType type);
 
-                if (itemContainer.FillSpellbook(type, field)) Engine.UI.GetControl<SpellbookGump>(itemContainer)?.Update();
+                if (itemContainer.FillSpellbook(type, field)) Engine.UI.GetGump<SpellbookGump>(itemContainer)?.Update();
             }
 
 
@@ -1543,7 +1567,7 @@ namespace ClassicUO.Network
 
             Serial serial = p.ReadUInt();
 
-            MapGump gump = Engine.UI.GetControl<MapGump>(serial);
+            MapGump gump = Engine.UI.GetGump<MapGump>(serial);
 
             if (gump != null)
             {
@@ -1555,7 +1579,7 @@ namespace ClassicUO.Network
                         ushort x = p.ReadUShort();
                         ushort y = p.ReadUShort();
 
-                        gump.AddToContainer(new GumpPic(x + 24, y + 31, 0x139B, 0));
+                        gump.AddPin(x, y);
 
                         break;
                     case MapMessageType.Insert: break;
@@ -1593,7 +1617,7 @@ namespace ClassicUO.Network
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
             var pages = new string[pageCnt];
-            var gump = ui.GetControl<BookGump>(serial);
+            var gump = ui.GetGump<BookGump>(serial);
 
             if (gump == null) return;
 
@@ -1688,7 +1712,7 @@ namespace ClassicUO.Network
 
                     if (item != null)
                     {
-                        BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(serial);
+                        BulletinBoardGump bulletinBoard = Engine.UI.GetGump<BulletinBoardGump>(serial);
                         bulletinBoard?.Dispose();
 
                         int x = (Engine.WindowWidth >> 1) - 245;
@@ -1705,7 +1729,7 @@ namespace ClassicUO.Network
 
                 {
                     Serial boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(boardSerial);
+                    BulletinBoardGump bulletinBoard = Engine.UI.GetGump<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
@@ -1730,7 +1754,7 @@ namespace ClassicUO.Network
 
                 {
                     Serial boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = Engine.UI.GetControl<BulletinBoardGump>(boardSerial);
+                    BulletinBoardGump bulletinBoard = Engine.UI.GetGump<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
@@ -1806,7 +1830,7 @@ namespace ClassicUO.Network
             if (vendor == null) return;
 
 
-            ShopGump gump = Engine.UI.GetControl<ShopGump>();
+            ShopGump gump = Engine.UI.GetGump<ShopGump>();
 
             if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
             {
@@ -2016,7 +2040,18 @@ namespace ClassicUO.Network
             if (mobile != World.Player && !mobile.IsClicked && Engine.Profile.Current.ShowNewMobileNameIncoming)
                 GameActions.SingleClick(mobile);
 
-            Engine.UI.GetControl<PaperDollGump>(mobile)?.Update();
+            Engine.UI.GetGump<PaperDollGump>(mobile)?.Update();
+
+
+            if (mobile == World.Player)
+            {
+                if (World.Player.IsDead)
+                    World.ChangeSeason(Seasons.Desolation, 42);
+                else
+                {
+                    World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
+                }
+            }
         }
 
         private static void OpenMenu(Packet p)
@@ -2125,7 +2160,7 @@ namespace ClassicUO.Network
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
 
-            var paperdoll = Engine.UI.GetControl<PaperDollGump>(mobile);
+            var paperdoll = Engine.UI.GetGump<PaperDollGump>(mobile);
 
             if (paperdoll == null)
             {
@@ -2204,7 +2239,7 @@ namespace ClassicUO.Network
             else
                 p.Skip(1);
             UIManager ui = Engine.UI;
-            BookGump bgump = ui.GetControl<BookGump>(serial);
+            BookGump bgump = ui.GetGump<BookGump>(serial);
 
             if (bgump == null || bgump.IsDisposed)
             {
@@ -2315,7 +2350,7 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
-            ShopGump gump = Engine.UI.GetControl<ShopGump>(vendor);
+            ShopGump gump = Engine.UI.GetGump<ShopGump>(vendor);
             gump?.Dispose();
             gump = new ShopGump(vendor, false, 100, 0);
 
@@ -2648,7 +2683,7 @@ namespace ClassicUO.Network
 
             string body = p.ReadUnicode();
 
-            Engine.UI.GetControl<ProfileGump>(serial)?.Dispose();
+            Engine.UI.GetGump<ProfileGump>(serial)?.Dispose();
             Engine.UI.Add(new ProfileGump(serial, header, footer, body, serial == World.Player.Serial));
         }
 
@@ -2678,7 +2713,7 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 serial = p.ReadUInt();
 
-            var arrow = ui.GetControl<QuestArrowGump>(serial);
+            var arrow = ui.GetGump<QuestArrowGump>(serial);
 
             if (display)
             {
@@ -2706,8 +2741,22 @@ namespace ClassicUO.Network
             byte season = p.ReadByte();
             byte music = p.ReadByte();
 
-            if (Engine.Profile.Current.EnableCombatMusic)
-                Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
+            if (season > 4)
+                season = 0;
+
+
+            if (World.Player.IsDead && season != 4)
+                return;
+
+            World.OldSeason = (Seasons) season;
+            World.OldMusicIndex = music;
+
+            if (World.Season == Seasons.Desolation)
+            {
+                World.OldMusicIndex = 42;
+            }
+
+            World.ChangeSeason((Seasons) season, music);
         }
 
         private static void ClientVersion(Packet p)
@@ -3016,7 +3065,7 @@ namespace ClassicUO.Network
 
                     if (spellbook.FillSpellbook(sbtype, filed))
                     {
-                        SpellbookGump gump = Engine.UI.GetControl<SpellbookGump>(spellbook);
+                        SpellbookGump gump = Engine.UI.GetGump<SpellbookGump>(spellbook);
                         gump?.Update();
                     }
 
@@ -3033,7 +3082,9 @@ namespace ClassicUO.Network
                     else
                     {
                         house.Generate();
-                        Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+                        Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+                        if (World.HouseManager.EntityIntoHouse(serial, World.Player))
+                            Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                     }
 
                     break;
@@ -3221,7 +3272,7 @@ namespace ClassicUO.Network
 
             if (entity is Item it)
             {
-                ShopGump gump = Engine.UI.GetControl<ShopGump>(it.RootContainer);
+                ShopGump gump = Engine.UI.GetGump<ShopGump>(it.RootContainer);
 
                 if (gump != null)
                 {
@@ -3308,10 +3359,10 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Multi(id)
-                                    {
-                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
-                                    });
+                                    Multi m = Multi.Create(id);
+                                    m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
+
+                                    house.Components.Add(m);
                                 }
                             }
 
@@ -3332,10 +3383,10 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Multi(id)
-                                    {
-                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
-                                    });
+                                    Multi m = Multi.Create(id);
+                                    m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
+
+                                    house.Components.Add(m);
                                 }
                             }
 
@@ -3377,10 +3428,10 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Multi(id)
-                                    {
-                                        Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z))
-                                    });
+                                    Multi m = Multi.Create(id);
+                                    m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
+
+                                    house.Components.Add(m);
                                 }
                             }
 
@@ -3388,7 +3439,10 @@ namespace ClassicUO.Network
                     }
 
                     house.Generate();
-                    Engine.UI.GetControl<MiniMapGump>()?.ForceUpdate();
+                    Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+
+                    if (World.HouseManager.EntityIntoHouse(serial, World.Player))
+                        Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
             }
         }
@@ -3462,7 +3516,7 @@ namespace ClassicUO.Network
             if (iconID < TABLE_COUNT)
             {
                 UIManager ui = Engine.UI;
-                BuffGump gump = ui.GetControl<BuffGump>();
+                BuffGump gump = ui.GetGump<BuffGump>();
                 ushort mode = p.ReadUShort();
 
                 if (mode != 0)

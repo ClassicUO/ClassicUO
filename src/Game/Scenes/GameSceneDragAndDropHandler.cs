@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.UI.GetControl<SplitMenuGump>(item) != null)
+                if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
                     return false;
 
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
@@ -100,7 +100,10 @@ namespace ClassicUO.Game.Scenes
                 entity.Items.ProcessDelta();
             }
             else
+            {
+                item.EntityTextContainerContainer?.Clear();
                 item.RemoveFromTile();
+            }
 
             World.Items.Remove(item);
             World.Items.ProcessDelta();
@@ -153,7 +156,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
-                ContainerGump gump = Engine.UI.GetControl<ContainerGump>(container);
+                ContainerGump gump = Engine.UI.GetGump<ContainerGump>(container);
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {

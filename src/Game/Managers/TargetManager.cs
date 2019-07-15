@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -93,6 +94,16 @@ namespace ClassicUO.Game.Managers
             IsTargeting = false;
         }
 
+        public static void Reset()
+        {
+            ClearTargetingWithoutTargetCancelPacket();
+
+            TargetingState = 0;
+            _targetCursorId = 0;
+            MultiTargetInfo = null;
+            TargeringType = 0;
+        }
+
         public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
@@ -101,10 +112,16 @@ namespace ClassicUO.Game.Managers
             TargetingState = targeting;
             _targetCursorId = cursorID;
             TargeringType = cursorType;
+
+            bool lastTargetting = IsTargeting;
             IsTargeting = cursorType < TargetType.Cancel;
 
             if (IsTargeting)
                 Engine.UI.RemoveTargetLineGump(LastTarget);
+            else if (lastTargetting)
+            {
+                CancelTarget();
+            }
         }
 
         public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
@@ -140,7 +157,7 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void TargetGameObject(IGameEntity selectedEntity)
+        public static void TargetGameObject(BaseGameObject selectedEntity)
         {
             if (selectedEntity == null || !IsTargeting)
                 return;
@@ -167,24 +184,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (selectedEntity is Item item)
                 {
-                    GameActions.PickUp(item, item.Amount);
-
-                    var bag = Engine.Profile.Current.GrabBagSerial == 0
-                                  ? World.Player.Equipment[(int) Layer.Backpack].Serial
-                                  : (Serial) Engine.Profile.Current.GrabBagSerial;
-
-                    if (!World.Items.Contains(bag))
-                    {
-                        GameActions.Print("Grab Bag not found, setting to Backpack.");
-                        Engine.Profile.Current.GrabBagSerial = 0;
-                        bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
-                    }
-
-                    GameActions.DropItem(item.Serial, ushort.MaxValue, ushort.MaxValue, 0, bag);
-                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
-
-                    scene.HeldItem.Enabled = false;
-                    scene.HeldItem.Dropped = false;
+                    GameActions.GrabItem(item,item.Amount);
                 }
 
                 ClearTargetingWithoutTargetCancelPacket();
@@ -236,21 +236,31 @@ namespace ClassicUO.Game.Managers
             else if (selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
-                short z = gobj.Position.Z;
+                short z = gobj.Z;
 
                 if (gobj is Static st)
                 {
                     modelNumber = st.OriginalGraphic;
+                    var data = st.ItemData;
 
-                    if (st.ItemData.IsSurface)
-                        z += st.ItemData.Height;
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
+                    {
+                        z += data.Height;
+                    }
+
+
+                    //if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
+                    //    z += data.Height;
                 }
                 else if (gobj is Multi m)
                 {
                     modelNumber = m.Graphic;
+                    var data = m.ItemData;
 
-                    if (m.ItemData.IsSurface)
-                        z += m.ItemData.Height;
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
+                    {
+                        z += data.Height;
+                    }
                 }
 
                 NetClient.Socket.Send(new PTargetXYZ(gobj.X, gobj.Y, z, modelNumber, _targetCursorId, (byte) TargeringType));

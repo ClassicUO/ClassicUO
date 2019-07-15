@@ -301,9 +301,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 base.OnMouseExit(x, y);
             }
 
-            protected override void OnMouseClick(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButton button)
             {
-                if (button == MouseButton.Left) OnButtonClick((int) Buttons.Server + _buttonId);
+                if (button == MouseButton.Left) OnButtonClick((int)Buttons.Server + _buttonId);
             }
 
             public override void Dispose()

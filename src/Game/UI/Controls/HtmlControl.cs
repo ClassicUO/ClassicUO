@@ -228,26 +228,30 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
-                foreach (WebLinkRect link in _gameText.Links)
+                if (_gameText != null)
                 {
-                    Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
-
-                    if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                    foreach (WebLinkRect link in _gameText.Links)
                     {
-                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
-                        Process.Start(result.Link);
+                        Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
+                        bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        break;
+                        if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        {
+                            Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                            Process.Start(result.Link);
+
+                            break;
+                        }
                     }
                 }
             }
 
-            base.OnMouseClick(x, y, button);
+            base.OnMouseUp(x, y, button);
         }
 
         public override void Dispose()

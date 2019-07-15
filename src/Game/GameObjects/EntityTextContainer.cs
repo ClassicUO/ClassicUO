@@ -21,40 +21,41 @@
 
 #endregion
 
+using System.Collections.Generic;
+
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class OverheadMessage
+    internal class EntityTextContainer
     {
-        private readonly Deque<MessageInfo> _messages;
-        private float _alpha;
-        private Rectangle _rectangle;
+        public Rectangle _rectangle;
+        private readonly Deque<MessageInfo> _messages = new Deque<MessageInfo>();
 
 
-        public OverheadMessage(GameObject parent)
+        public EntityTextContainer(GameObject parent)
         {
             Parent = parent;
-            _messages = new Deque<MessageInfo>();
         }
 
-        public OverheadMessage Left { get; set; }
-        public OverheadMessage Right { get; set; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
 
+        public EntityTextContainer Left, Right;
+
         public bool IsEmpty => _messages.Count == 0;
 
-        private static float CalculateTimeToLive(RenderedText rtext)
+        private static long CalculateTimeToLive(RenderedText rtext)
         {
-            float timeToLive;
+            long timeToLive;
 
             if (Engine.Profile.Current.ScaleSpeechDelay)
             {
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
                 if (delay < 10)
                     delay = 10;
 
-                timeToLive = 4000 * rtext.LinesCount * delay / 100.0f;
+                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
             }
             else
             {
@@ -77,8 +78,14 @@ namespace ClassicUO.Game.GameObjects
             return timeToLive;
         }
 
-        public void AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type, bool ishealthmessage = false)
+        public MessageInfo AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type, bool ishealthmessage = false)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
             for (int i = 0; i < _messages.Count; i++)
             {
                 var a = _messages[i];
@@ -98,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                             a.RenderedText.CreateTexture();
                     }
-
+                    
                     _messages.RemoveAt(i);
 
                     if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
@@ -106,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
                     else
                         _messages.Insert(1, a);
 
-                    return;
+                    return null;
                 }
             }
 
@@ -114,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
             else
                 width = 0;
 
@@ -132,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
 
             var msgInfo = new MessageInfo
             {
-                Alpha = 0,
+                Alpha = 255,
                 RenderedText = rtext,
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
@@ -153,18 +160,32 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (++limit3 > 3)
                         {
-                            _rectangle.Height -= c.RenderedText.Height;
                             c.RenderedText.Destroy();
                             _messages.RemoveAt(i--);
+
+                            if (c.Right != null)
+                                c.Right.Left = c.Left;
+
+                            if (c.Left != null)
+                                c.Left.Right = c.Right;
+
+                            c.Left = c.Right = null;
                         }
                     }
                 }
                 else
                 {
                     var c = _messages[i];
-                    _rectangle.Height -= c.RenderedText.Height;
                     c.RenderedText.Destroy();
                     _messages.RemoveAt(i--);
+
+                    if (c.Right != null)
+                        c.Right.Left = c.Left;
+
+                    if (c.Left != null)
+                        c.Left.Right = c.Right;
+
+                    c.Left = c.Right = null;
                 }
             }
 
@@ -174,201 +195,78 @@ namespace ClassicUO.Game.GameObjects
                 _messages.Insert(1, msgInfo);
 
 
-            if (_rectangle.Width < rtext.Width)
-                _rectangle.Width = rtext.Width;
-            _rectangle.Height += rtext.Height;
+          
+            return msgInfo;
         }
 
-        public float IsOverlap(OverheadMessage firstNode)
-        {
-            int count = 0;
+      
 
-            for (var ov = firstNode; ov != null; ov = ov.Right)
-            {
-                if (ov != this && ov._rectangle.Intersects(_rectangle))
-                {
-                    count++;
-                    ov._alpha = 0.3f;
-                }
-            }
 
-            float alpha = _alpha;
-            _alpha = alpha * count;
-
-            return alpha;
-        }
-
-        public void SetAlpha(float alpha)
-        {
-            _alpha = alpha;
-        }
 
         public void Update()
         {
-            if (Parent == null)
+            if (Parent == null || Parent.IsDestroyed)
                 Destroy();
 
             if (IsDestroyed)
                 return;
 
             _rectangle.Width = 0;
-
-            for (int i = 0; i < _messages.Count; i++)
-            {
-                var c = _messages[i];
-
-                float delta = c.Time - Engine.Ticks;
-
-                if (delta <= 0)
-                {
-                    c.RenderedText.Destroy();
-                    _rectangle.Height -= c.RenderedText.Height;
-                    _messages.RemoveAt(i--);
-                }
-                else if (delta < 250)
-                    c.Alpha = 1f - delta / 250;
-                else
-                {
-                    if (_rectangle.Width < c.RenderedText.Width)
-                        _rectangle.Width = c.RenderedText.Width;
-                }
-            }
-        }
-
-        public void Draw(UltimaBatcher2D batcher, int x, int y, float scale)
-        {
-            if (IsDestroyed || _messages.Count == 0)
-                return;
-
-
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
-
-            x += Parent.RealScreenPosition.X;
-            y += Parent.RealScreenPosition.Y;
+            _rectangle.Height = 0;
 
             int offY = 0;
-
-            if (Parent is Mobile m)
+            
+            for (int i = 0; i < _messages.Count; i++)
             {
-                if (!m.IsMounted)
-                    offY = -22;
+                var obj1 = _messages[i];
 
-                GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
-
-                x += (int) m.Offset.X;
-                x += 22;
-                y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
-            }
-            else if (Parent.Texture != null)
-            {
-                if (Parent is Item it && it.IsCorpse)
-                    offY = -22;
-                else if (Parent is Static || Parent is Multi)
-                    offY = -44;
-
-                x += 22;
-                y -= Parent.Texture.Height >> 1;
-            }
-
-            x = (int) (x / scale);
-            y = (int) (y / scale);
-
-            x -= (int) (screenX / scale);
-            y -= (int) (screenY / scale);
-
-            x += screenX;
-            y += screenY;
-
-
-            if (x - (_rectangle.Width >> 1) + 6 < screenX)
-                x = screenX + (_rectangle.Width >> 1) + 6;
-            else if (x > screenX + screenW - ((_rectangle.Width >> 1) - 3))
-                x = screenX + screenW - ((_rectangle.Width >> 1) - 3);
-
-            if (y < screenY + _rectangle.Height + offY)
-                y = screenY + _rectangle.Height + offY;
-            else if (y > screenY + screenH + offY)
-                y = screenY + screenH + offY;
-
-
-            _rectangle.X = x - (_rectangle.Width >> 1);
-            _rectangle.Y = y - offY - _rectangle.Height;
-
-
-            //int startY = offY;
-
-            foreach (var item in _messages)
-            {
-                ushort hue = 0;
-                float alpha = _alpha;
-
-                if (Engine.Profile.Current.HighlightGameObjects)
+                long delta = obj1.Time - Engine.Ticks;
+                if (delta <= 0)
                 {
-                    if (SelectedObject.LastObject == item)
-                        hue = 23;
-                }
-                else if (SelectedObject.LastObject == item)
-                {
-                    if (item.RenderedText.Hue != 0xFF)
-                    {
-                        item.RenderedText.Hue = 0xFF;
-                        item.RenderedText.CreateTexture();
-                        alpha = 0;
-                    }
-                }
-                else if (item.RenderedText.Hue != item.Hue)
-                {
-                    item.RenderedText.Hue = item.Hue;
-                    item.RenderedText.CreateTexture();
-                }
+                    obj1.RenderedText.Destroy();
 
-                item.X = x - (item.RenderedText.Width >> 1);
-                item.Y = y - offY - item.RenderedText.Height;
-                item.RenderedText.Draw(batcher, item.X, item.Y, alpha != 0.0f ? alpha : item.Alpha, hue);
-                offY += item.RenderedText.Height;
+                    _messages.RemoveAt(i--);
+
+                    if (obj1.Right != null)
+                        obj1.Right.Left = obj1.Left;
+
+                    if (obj1.Left != null)
+                        obj1.Left.Right = obj1.Right;
+
+                    obj1.Left = obj1.Right = null;
+                }
+                else
+                {
+                    if (_rectangle.Width < obj1.RenderedText.Width)
+                        _rectangle.Width = obj1.RenderedText.Width;
+
+                    if (_rectangle.Height < obj1.RenderedText.Height)
+                        _rectangle.Height = obj1.RenderedText.Height;
+
+                    obj1.OffsetY = offY;
+                    offY += obj1.RenderedText.Height;
+                }
+                
             }
-
-            /* batcher.DrawRectangle(Textures.GetTexture(Color.Green),
-                                  x - (_rectangle.Width >> 1),
-                                  y - startY - _rectangle.Height, 
-                                  _rectangle.Width, 
-                                  _rectangle.Height,
-                                  Vector3.Zero); 
-            */
         }
 
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
+
+        public void Clear()
         {
-            byte dir = 0 & 0x7F;
-            byte animGroup = 0;
-            bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-            if (frameIndex == 0xFF)
-                frameIndex = (byte) mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
-            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
-        }
-
-        public bool Contains(int x, int y)
-        {
-            if (IsDestroyed)
-                return false;
-
             foreach (var item in _messages)
             {
-                if (item.RenderedText.Texture.Contains(x - item.X, y - item.Y))
-                {
-                    SelectedObject.Object = item;
+                item.RenderedText.Destroy();
 
-                    return true;
-                }
+                if (item.Right != null)
+                    item.Right.Left = item.Left;
+
+                if (item.Left != null)
+                    item.Left.Right = item.Right;
+
+                item.Left = item.Right = null;
             }
 
-            return false;
+            _messages.Clear();
         }
 
         public void Destroy()
@@ -378,10 +276,7 @@ namespace ClassicUO.Game.GameObjects
 
             IsDestroyed = true;
 
-            foreach (var item in _messages)
-                item.RenderedText.Destroy();
-
-            _messages.Clear();
+            Clear();
         }
     }
 
@@ -454,8 +349,8 @@ namespace ClassicUO.Game.GameObjects
                     _rectangle.Height -= c.RenderedText.Height;
                     _messages.RemoveAt(i--);
                 }
-                else if (delta < 250)
-                    c.Alpha = 1f - delta / 250;
+                //else if (delta < 250)
+                //    c.Alpha = 1f - delta / 250;
                 else
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
@@ -507,7 +402,7 @@ namespace ClassicUO.Game.GameObjects
                             offY = -22;
                         else if (it.ItemData.IsAnimated)
                         {
-                            Texture2D texture = FileManager.Art.GetTexture(it.Graphic);
+                            ArtTexture texture = FileManager.Art.GetTexture(it.Graphic);
 
                             if (texture != null)
                                 yValue = texture.Height >> 1;
@@ -579,16 +474,18 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-    internal class MessageInfo : IGameEntity
+    internal class MessageInfo : BaseGameObject
     {
-        public float Alpha;
+        public byte Alpha;
         public ushort Hue;
-        public bool IsHealthMessage;
+        public bool IsHealthMessage, IsTransparent;
 
-        public OverheadMessage Parent;
+        public EntityTextContainer Parent;
         public RenderedText RenderedText;
-        public float Time, SecondTime;
+        public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
+
+        public MessageInfo Left, Right;
     }
 }

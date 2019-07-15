@@ -30,7 +30,7 @@ namespace ClassicUO.Utility
 {
     internal static class MathHelper
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static bool InRange(int input, int low, int high)
         {
             return input >= low && input <= high;
@@ -47,26 +47,26 @@ namespace ClassicUO.Utility
             return distx;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static ulong Combine(int val1, int val2)
         {
             return (ulong) val1 | ((ulong) val2 << 32);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static void GetNumbersFromCombine(ulong b, out int val1, out int val2)
         {
             val1 = (int) (0xFFFFFFFF & b);
             val2 = (int) (b >> 32);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static int PercetangeOf(int current, int max)
         {
             return current / max * 100;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public static double Hypotenuse(float a, float b)
         {
             return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));

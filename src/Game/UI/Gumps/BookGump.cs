@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(m_Forward = new GumpPic(356, 0, 0x200, 0));
 
-            m_Forward.MouseClick += (sender, e) =>
+            m_Forward.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
             };
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
 
-            m_Backward.MouseClick += (sender, e) =>
+            m_Backward.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
             };
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(tbox, page);
                 m_Pages.Add(tbox);
 
-                tbox.MouseClick += (sender, e) =>
+                tbox.MouseUp += (sender, e) =>
                 {
                     if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
                 };

@@ -155,7 +155,7 @@ namespace ClassicUO.Network
                 if (e.SocketError == SocketError.Success)
                 {
                     Connected.Raise();
-                    Statistics.ConnectedFrom = DateTime.Now;
+                    Statistics.ConnectedFrom = Engine.CurrDateTime;
                     StartRecv();
                 }
                 else

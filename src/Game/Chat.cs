@@ -89,6 +89,12 @@ namespace ClassicUO.Game
 
         public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                unicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
             switch (type)
             {
                 case MessageType.Spell:
@@ -131,12 +137,12 @@ namespace ClassicUO.Game
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        Gump gump = Engine.UI.GetControl<Gump>(it.Container);
+                        Gump gump = Engine.UI.GetGump<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
-                            paperDoll.AddLabel(text, hue, font, unicode);
+                            paperDoll.AddLabel(text, hue, font, unicode, it);
                         else if (gump is ContainerGump container)
-                            container.AddLabel(text, hue, font, unicode);
+                            container.AddLabel(text, hue, font, unicode, it);
                         else
                         {
                             Entity ent = World.Get(it.RootContainer);
@@ -144,7 +150,7 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            var trade = Engine.UI.GetControl<TradingGump>(ent);
+                            var trade = Engine.UI.GetGump<TradingGump>(ent);
 
                             if (trade == null)
                             {
@@ -157,7 +163,7 @@ namespace ClassicUO.Game
                             }
 
                             if (trade != null)
-                                trade.AddLabel(text, hue, font, unicode);
+                                trade.AddLabel(text, hue, font, unicode, it);
                             else
                                 Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }

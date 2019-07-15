@@ -32,6 +32,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -793,7 +794,7 @@ namespace ClassicUO.Game.GameObjects
                 skill.CapFixed = cap;
                 _delta |= Delta.Skills;
 
-                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -805,7 +806,7 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 _delta |= Delta.Skills;
 
-                Engine.UI.GetControl<StandardSkillsGump>()?.Update(id);
+                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
             }
         }
 
@@ -1878,10 +1879,10 @@ namespace ClassicUO.Game.GameObjects
             }*/
         }
 
-        //protected override bool NoIterateAnimIndex()
-        //{
-        //    return false;
-        //}
+        protected override bool NoIterateAnimIndex()
+        {
+            return false;
+        }
 
         public bool Walk(Direction direction, bool run)
         {
@@ -1989,6 +1990,7 @@ namespace ClassicUO.Game.GameObjects
                 Run = run
             });
 
+           
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 

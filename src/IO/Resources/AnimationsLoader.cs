@@ -643,7 +643,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < animSeq.Entries.Length; i++)
             {
-                UOFileIndex3D entry = animSeq.Entries[i];
+               ref readonly  UOFileIndex3D entry = ref animSeq.Entries[i];
 
                 if (entry.Offset == 0)
                     continue;
@@ -774,7 +774,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -789,9 +789,14 @@ namespace ClassicUO.IO.Resources
 
 
                 if (DataIndex[graphic].HasBodyConversion && DataIndex[graphic].BodyConvGroups != null)
-                    return DataIndex[graphic].BodyConvGroups[group];
+                {
+                    return DataIndex[graphic].BodyConvGroups[group] ?? _empty;
+                }
 
-                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
+                if (DataIndex[graphic].Groups != null && DataIndex[graphic].Groups[group] != null)
+                {
+                    return DataIndex[graphic].Groups[group];
+                }
             }
 
             return _empty;
@@ -814,7 +819,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if (DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion)
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -830,7 +835,7 @@ namespace ClassicUO.IO.Resources
                 if (DataIndex[graphic].HasBodyConversion)
                     return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
 
-                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] : _empty;
+                return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] ?? _empty : _empty;
             }
 
             return _empty;
@@ -1367,6 +1372,19 @@ namespace ClassicUO.IO.Resources
 
             _usedTextures.Add(animDir);
             //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
+        }
+
+        public void GetAnimationDimensions(sbyte animIndex, ushort graphic, bool ismounted, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
+        {
+            byte dir = 0 & 0x7F;
+            byte animGroup = 0;
+            bool mirror = false;
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+
+            if (frameIndex == 0xFF)
+                frameIndex = (byte) animIndex;
+            FileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = ismounted ? 100 : 60;
         }
 
         public unsafe void GetAnimationDimensions(byte frameIndex, ushort id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)

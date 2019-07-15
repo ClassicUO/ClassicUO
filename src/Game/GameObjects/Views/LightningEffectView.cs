@@ -21,10 +21,13 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -37,6 +40,16 @@ namespace ClassicUO.Game.GameObjects
         private Graphic _displayed = Graphic.INVALID;
 
 
+        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState
+            {
+                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero,
+                ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+            };
+
+            return state;
+        });
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             ResetHueVector();
@@ -49,8 +62,12 @@ namespace ClassicUO.Game.GameObjects
                     return false;
 
                 Texture = FileManager.Gumps.GetTexture(_displayed);
-                Point offset = _offsets[_displayed - 20000];
-                Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
+                ref Point offset = ref _offsets[_displayed - 20000];
+
+                Bounds.X = offset.X;
+                Bounds.Y = Texture.Height - 33 + offset.Y;
+                Bounds.Width = Texture.Width;
+                Bounds.Height = Texture.Height;
             }
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
@@ -64,11 +81,23 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+            {
+                //ShaderHuesTraslator.GetHueVector(ref HueVector, 1150);
+
+                ResetHueVector();
+                HueVector.X = 1150;
+                HueVector.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                HueVector.Z = 0;
+            }
 
             Engine.DebugInfo.EffectsRendered++;
 
-            return base.Draw(batcher, posX, posY);
+
+            batcher.SetBlendState(BlendState.Additive);
+            base.Draw(batcher, posX, posY);
+            batcher.SetBlendState(null);
+
+            return true;
         }
     }
 }

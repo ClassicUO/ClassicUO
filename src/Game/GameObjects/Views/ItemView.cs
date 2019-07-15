@@ -147,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
-            if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic)
+            if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
             {
                 //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
                 base.Draw(batcher, posX - 5, posY - 5);
@@ -241,6 +241,8 @@ namespace ClassicUO.Game.GameObjects
 
             ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
+            if (direction == null)
+                return;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
@@ -319,7 +321,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(DisplayedGraphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInStatic(_originalGraphic, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

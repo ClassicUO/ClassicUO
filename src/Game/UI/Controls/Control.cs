@@ -60,6 +60,15 @@ namespace ClassicUO.Game.UI.Controls
         private bool _handlesKeyboardFocus;
         private Control _parent;
 
+        protected static Vector3 _hueVector = Vector3.Zero;
+
+        protected static void ResetHueVector()
+        {
+            _hueVector.X = 0;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
+        }
+
         protected Control(Control parent = null)
         {
             Parent = parent;
@@ -378,11 +387,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
             {
-                Vector3 zero = Vector3.Zero;
+                ResetHueVector();
 
                 if (Engine.DebugFocus && HasKeyboardFocus)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref zero);
-                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref zero);
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref _hueVector);
+                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 
@@ -422,7 +431,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler Disposed;
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -508,9 +517,6 @@ namespace ClassicUO.Game.UI.Controls
             if (_acceptKeyboardInput)
                 return this;
 
-            if (World.InGame && Engine.UI.SystemChat != null)
-                return Engine.UI.SystemChat.textBox;
-
             if (Children == null || Children.Count == 0)
                 return null;
 
@@ -521,6 +527,9 @@ namespace ClassicUO.Game.UI.Controls
                 if (a != null)
                     return a;
             }
+
+            if (World.InGame && Engine.UI.SystemChat != null)
+                return Engine.UI.SystemChat.textBox;
 
             return null;
         }
@@ -604,13 +613,13 @@ namespace ClassicUO.Game.UI.Controls
             MouseExit.Raise(new MouseEventArgs(x, y), this);
         }
 
-        public void InvokeMouseClick(Point position, MouseButton button)
-        {
-            int x = position.X - X - ParentX;
-            int y = position.Y - Y - ParentY;
-            OnMouseClick(x, y, button);
-            MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-        }
+        //public void InvokeMouseClick(Point position, MouseButton button)
+        //{
+        //    int x = position.X - X - ParentX;
+        //    int y = position.Y - Y - ParentY;
+        //    OnMouseClick(x, y, button);
+        //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+        //}
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)
         {
@@ -659,7 +668,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnDragEnd(x, y);
-            DragBegin.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
+            DragEnd.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
         }
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
@@ -719,10 +728,10 @@ namespace ClassicUO.Game.UI.Controls
             _attempToDrag = false;
         }
 
-        protected virtual void OnMouseClick(int x, int y, MouseButton button)
-        {
-            Parent?.OnMouseClick(X + x, Y + y, button);
-        }
+        //protected virtual void OnMouseClick(int x, int y, MouseButton button)
+        //{
+        //    Parent?.OnMouseClick(X + x, Y + y, button);
+        //}
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {

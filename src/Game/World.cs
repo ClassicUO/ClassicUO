@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -56,6 +57,12 @@ namespace ClassicUO.Game
         public static byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
         public static bool SkillsRequested { get; set; }
+
+        public static Seasons Season { get; private set; } = Seasons.Summer;
+        public static Seasons OldSeason { get; set; } = Seasons.Summer;
+
+        public static int OldMusicIndex { get; set; }
+
 
         public static int MapIndex
         {
@@ -119,6 +126,33 @@ namespace ClassicUO.Game
         public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
 
         public static string ServerName { get; set; }
+
+
+        public static void ChangeSeason(Seasons season, int music)
+        {
+            Season = season;
+
+            foreach (int i in Map.GetUsedChunks())
+            {
+                Chunk chunk = Map.Chunks[i];
+
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        Tile tile = chunk.Tiles[x, y];
+
+                        for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                        {
+                            obj.UpdateGraphicBySeason();
+                        }
+                    }
+                }
+            }
+
+            if (Engine.Profile.Current.EnableCombatMusic)
+                Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
+        }
 
 
         public static void Update(double totalMS, double frameMS)
@@ -198,7 +232,7 @@ namespace ClassicUO.Game
             if (item == null /*|| item.IsDestroyed*/)
             {
                 //Items.Remove(serial);
-                item = new Item(serial);
+                item = Item.Create(serial);
             }
 
             return item;
@@ -293,6 +327,9 @@ namespace ClassicUO.Game
             _effectManager.Clear();
             _toRemove.Clear();
             CorpseManager.Clear();
+
+            Season = Seasons.Summer;
+            OldSeason = Seasons.Summer;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

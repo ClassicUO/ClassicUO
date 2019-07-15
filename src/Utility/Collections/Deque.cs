@@ -26,7 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ClassicUO.Utility
+namespace ClassicUO.Utility.Collections
 {
     /// <summary>
     ///     A double-ended queue (deque), which provides O(1) indexed access, O(1) removals from the front and back, amortized

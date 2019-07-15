@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -100,6 +101,7 @@ namespace ClassicUO.IO
             if (Entries != null) Entries = null;
         }
 
+        [MethodImpl(256)]
         internal void Fill(ref byte[] buffer, int count)
         {
             fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
@@ -107,6 +109,7 @@ namespace ClassicUO.IO
             Position += count;
         }
 
+        [MethodImpl(256)]
         internal T[] ReadArray<T>(int count) where T : struct
         {
             T[] t = ReadArray<T>(Position, count);
@@ -115,6 +118,7 @@ namespace ClassicUO.IO
             return t;
         }
 
+        [MethodImpl(256)]
         internal T[] ReadArray<T>(long position, int count) where T : struct
         {
             T[] array = new T[count];
@@ -123,6 +127,7 @@ namespace ClassicUO.IO
             return array;
         }
 
+        [MethodImpl(256)]
         internal T ReadStruct<T>(long position) where T : struct
         {
             _accessor.Read(position, out T s);
@@ -130,6 +135,7 @@ namespace ClassicUO.IO
             return s;
         }
 
+        [MethodImpl(256)]
         internal (int, int, bool) SeekByEntryIndex(int entryidx)
         {
             if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)

@@ -81,12 +81,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public TextContainer TextContainer { get; } = new TextContainer();
 
-        public void AddLabel(string text, ushort hue, byte font, bool isunicode)
+        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
         {
             if (World.ClientFlags.TooltipsEnabled)
                 return;
 
-            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y);
+            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
         }
 
         public override void Dispose()
@@ -180,12 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
                 });
 
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
-                });
-
+                
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
@@ -200,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
-                            if (Engine.UI.GetControl<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            if (Engine.UI.GetGump<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
                         };
                         profileX += SCROLLS_STEP;
                     }
@@ -217,15 +212,17 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 Add(new GumpPic(0, 0, 0x07d1, 0));
-
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 7,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add(_profilePic = new GumpPic(25, 196, 0x07D2, 0));
+                _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
             }
+
+            // STATUS BUTTON
+            Add(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+            {
+                X = 185,
+                Y = 44 + 27 * 7,
+                ButtonAction = ButtonAction.Activate
+            });
 
             // Virtue menu
             Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
@@ -256,17 +253,18 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            _lastClick.X = x;
-            _lastClick.Y = y;
-        }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
+            if (button == MouseButton.Left)
+            {
+                _lastClick.X = x;
+                _lastClick.Y = y;
+            }
+
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
 
             gs.WearHeldItem(Mobile);
@@ -300,7 +298,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButton.Left)
             {
-                var party = Engine.UI.GetControl<PartyGumpAdvanced>();
+                var party = Engine.UI.GetGump<PartyGumpAdvanced>();
 
                 if (party == null)
                     Engine.UI.Add(new PartyGumpAdvanced());
@@ -376,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Options:
 
-                    OptionsGump gump = Engine.UI.GetControl<OptionsGump>();
+                    OptionsGump gump = Engine.UI.GetGump<OptionsGump>();
 
                     if (gump == null)
                     {
@@ -426,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetControl<HealthBarGump>(Mobile)?.Dispose();
+                        Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -437,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetControl<HealthBarGump>(Mobile) != null)
+                        if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
                             break;
 
                         GameActions.RequestMobileStatus(Mobile);

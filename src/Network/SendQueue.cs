@@ -39,7 +39,7 @@ namespace ClassicUO.Network
             _pending = new Queue<Gram>();
         }
 
-        public bool IsFlushReady => _pending.Count == 0 && _buffered != null;
+        public bool IsFlushReady => _pending.Count >= 0 && _buffered != null;
 
         public bool IsEmpty => _pending.Count == 0 && _buffered == null;
 

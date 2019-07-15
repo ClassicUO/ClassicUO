@@ -192,10 +192,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            Vector3 hue = Vector3.Zero;
-            hue.Z = 0.5f;
+            ResetHueVector();
+            _hueVector.Z = 0.5f;
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref hue);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return true;
         }
@@ -406,7 +406,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.GetBar:
 
-                    Engine.UI.GetControl<HealthBarGump>(member.Serial)?.Dispose();
+                    Engine.UI.GetGump<HealthBarGump>(member.Serial)?.Dispose();
 
                     if (member.Serial == World.Player)
                         StatusGumpBase.GetStatusGump()?.Dispose();

@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Managers;
@@ -34,6 +35,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
+        private static readonly Queue<Land> _pool = new Queue<Land>();
+
         public Land(Graphic graphic)
         {
             Graphic = graphic;
@@ -44,6 +47,34 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
+        public static Land Create(Graphic graphic)
+        {
+            if (_pool.Count != 0)
+            {
+                var l = _pool.Dequeue();
+                l.Graphic = graphic;
+                l.IsDestroyed = false;
+                l._tileData = null;
+                l.AlphaHue = 255;
+                l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
+                l.AllowedToDraw = l.Graphic > 2;
+                l.Normals = null;
+                l.Rectangle = Rectangle.Empty;
+                l.MinZ = l.AverageZ = 0;
+                return l;
+            }
+            return new Land(graphic);
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+
+            base.Destroy();
+            _pool.Enqueue(this);
+        }
+
         private LandTiles? _tileData;
 
         public Vector3[] Normals;
@@ -52,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
         public LandTiles TileData
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (!_tileData.HasValue)
@@ -115,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             return (result + GetDirectionZ(direction >> 1)) >> 1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private int GetDirectionZ(int direction)
         {
             switch (direction)

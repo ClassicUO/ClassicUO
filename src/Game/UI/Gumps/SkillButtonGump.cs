@@ -86,8 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);

@@ -140,23 +140,21 @@ namespace ClassicUO.Game.UI.Controls
 
             bool isGM = false;
 
-            if (Mobile.Graphic == 0x0191 || Mobile.Graphic == 0x0193)
-                body = 0x000D;
-            else if (Mobile.Graphic == 0x025D)
+            if (Mobile.IsElfMale)
                 body = 0x000E;
-            else if (Mobile.Graphic == 0x025E)
+            else if (Mobile.IsElfFemale)
                 body = 0x000F;
-            else if (Mobile.Graphic == 0x029A)
+            else if (Mobile.Graphic == 0x029A || Mobile.Graphic == 0x02B6)
                 body = 0x029A;
-            else if (Mobile.Graphic == 0x029B)
-                body = 0x299;
-            else if (Mobile.Graphic == 0x03DB)
-            {
+            else if (Mobile.Graphic == 0x029B || Mobile.Graphic == 0x02B7)
+                body = 0x0299;
+            else if (Mobile.IsMale)
                 body = 0x000C;
+            else 
+                body = 0x000D;
+
+            if (Mobile.Graphic == 0x03DB)
                 isGM = true;
-            }
-            else
-                body = 0x000C;
 
             if (isGM)
             {
@@ -290,6 +288,20 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        internal bool IsOverBackpack
+        {
+            get
+            {
+                if (_mobile != null && _mobile.HasEquipment)
+                {
+                    var gump = _pgumps[(int)Layer.Backpack];
+                    if (gump != null && !gump.IsDisposed)
+                        return gump.MouseIsOver;
+                }
+                return false;
+            }
+        }
+
         public bool Fix(int itemID)
         {
             if (itemID == 0x1410 || itemID == 0x1417) // platemail arms
@@ -313,12 +325,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item backpack = _mobile.Equipment[(int) Layer.Backpack];
 
-                ContainerGump backpackGump = Engine.UI.GetControl<ContainerGump>(backpack);
+                ContainerGump backpackGump = Engine.UI.GetGump<ContainerGump>(backpack);
 
                 if (backpackGump == null)
                     GameActions.DoubleClick(backpack);
                 else
+                {
+                    backpackGump.SetInScreen();
                     backpackGump.BringOnTop();
+                }
             }
         }
     }

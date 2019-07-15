@@ -130,6 +130,8 @@ namespace ClassicUO.Input
                     if (Plugin.ProcessHotkeys((int) e.key.keysym.sym, (int) e.key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
+                        Engine.SceneManager.CurrentScene.OnKeyDown(e.key);
+
                         KeyDown?.Raise(e.key);
                     }
                     else
@@ -138,7 +140,8 @@ namespace ClassicUO.Input
                     break;
 
                 case SDL_EventType.SDL_KEYUP:
-                    //if (Plugin.ProcessHotkeys((int)e->key.keysym.sym, (int)e->key.keysym.mod, false))
+
+                    Engine.SceneManager.CurrentScene.OnKeyUp(e.key);
                     KeyUp.Raise(e.key);
 
                     break;
@@ -153,7 +156,11 @@ namespace ClassicUO.Input
                         string s = StringHelper.ReadUTF8(ev->text.text);
 
                         if (!string.IsNullOrEmpty(s))
+                        {
+                            Engine.SceneManager.CurrentScene.OnTextInput(s);
                             TextInput.Raise(s);
+                        }
+
                     }
 
                     break;
@@ -162,7 +169,10 @@ namespace ClassicUO.Input
                     Mouse.Update();
 
                     if (Mouse.IsDragging)
+                    {
+                        Engine.SceneManager.CurrentScene.OnMouseDragging();
                         MouseDragging.Raise();
+                    }
 
                     if (Mouse.IsDragging && !_dragStarted)
                     {
@@ -177,6 +187,7 @@ namespace ClassicUO.Input
                     bool isup = e.wheel.y > 0;
 
                     Plugin.ProcessMouse(0, e.wheel.y);
+                    Engine.SceneManager.CurrentScene.OnMouseWheel(isup);
                     MouseWheel.Raise(isup);
 
                     break;
@@ -210,25 +221,34 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
+                                    var res = Engine.SceneManager.CurrentScene.OnLeftMouseDoubleClick();
+
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
 
                                     LeftMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnLeftMouseDown();
                                         LeftMouseButtonDown.Raise();
+                                    }
                                     else
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
 
                                     break;
                                 }
 
+                                Engine.SceneManager.CurrentScene.OnLeftMouseDown();
                                 LeftMouseButtonDown.Raise();
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    Engine.SceneManager.CurrentScene.OnLeftMouseUp();
                                     LeftMouseButtonUp.Raise();
+                                }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
                             }
@@ -247,19 +267,26 @@ namespace ClassicUO.Input
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
+                                    Mouse.LastMidButtonClickTime = 0;
+                                    var res = Engine.SceneManager.CurrentScene.OnMiddleMouseDoubleClick();
+
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
 
                                     MidMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnMiddleMouseDown();
+
                                         MidMouseButtonDown.Raise();
-                                    Mouse.LastMidButtonClickTime = 0;
+                                    }
 
                                     break;
                                 }
 
                                 Plugin.ProcessMouse(e.button.button, 0);
 
+                                Engine.SceneManager.CurrentScene.OnMiddleMouseDown();
                                 MidMouseButtonDown.Raise();
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -286,25 +313,34 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
+                                    var res = Engine.SceneManager.CurrentScene.OnRightMouseDoubleClick();
+
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
 
                                     RightMouseDoubleClick.Raise(arg);
 
-                                    if (!arg.Result)
+                                    if (!arg.Result && !res)
+                                    {
+                                        Engine.SceneManager.CurrentScene.OnRightMouseDown();
                                         RightMouseButtonDown.Raise();
+                                    }
                                     else
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
 
                                     break;
                                 }
 
+                                Engine.SceneManager.CurrentScene.OnRightMouseDown();
                                 RightMouseButtonDown.Raise();
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    Engine.SceneManager.CurrentScene.OnRightMouseUp();
                                     RightMouseButtonUp.Raise();
+                                }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
                             }

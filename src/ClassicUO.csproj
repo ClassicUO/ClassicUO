@@ -124,6 +124,7 @@
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
+    <Compile Include="Game\Data\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsBardic.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
@@ -134,7 +135,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\OverheadMessage.cs" />
+    <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
@@ -172,8 +173,10 @@
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Renderer\UI\UIControl.cs" />
     <Compile Include="Renderer\UI\UISystemManager.cs" />
+    <Compile Include="Utility\Collections\RawList.cs" />
+    <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
-    <Compile Include="Utility\OrderedDictionary.cs" />
+    <Compile Include="Utility\Collections\OrderedDictionary.cs" />
     <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
@@ -285,7 +288,7 @@
     <Compile Include="Renderer\Textures.cs" />
     <Compile Include="Renderer\UI\Button.cs" />
     <Compile Include="Renderer\UI\Panel.cs" />
-    <Compile Include="Utility\CollectionHelper.cs" />
+    <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
     <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
@@ -468,13 +471,13 @@
     <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
-    <Compile Include="Game\Managers\OverheadManager.cs" />
+    <Compile Include="Game\Managers\WorldTextManager.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
-    <Compile Include="Utility\Bag.cs" />
-    <Compile Include="Utility\Deque.cs" />
+    <Compile Include="Utility\Collections\Bag.cs" />
+    <Compile Include="Utility\Collections\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
     <Compile Include="Utility\Logging\Log.cs" />
     <Compile Include="Utility\Logging\LogFile.cs" />

@@ -216,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override int GetHashCode()
         {
-            return Serial.GetHashCode();
+            return (int) Serial.Value;
         }
 
         public abstract void ProcessAnimation(out byte dir, bool evalutate = false);

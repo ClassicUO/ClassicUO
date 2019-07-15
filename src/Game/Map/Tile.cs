@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -29,14 +30,32 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
+        private bool _isDestroyed;
+
         public Tile(ushort x, ushort y)
         {
             X = x;
             Y = y;
         }
 
-        public ushort X { get; }
-        public ushort Y { get; }
+        private static readonly Queue<Tile> _pool = new Queue<Tile>();
+
+        public static Tile Create(ushort x, ushort y)
+        {
+            if (_pool.Count != 0)
+            {
+                var t = _pool.Dequeue();
+                t.X = x;
+                t.Y = y;
+                t._isDestroyed = false;
+                
+                return t;
+            }
+            return new Tile(x, y);
+        }
+
+        public ushort X { get; private set; }
+        public ushort Y { get; private set;  }
 
         public GameObject FirstNode { get; private set; }
 
@@ -107,7 +126,7 @@ namespace ClassicUO.Game.Map
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && obj is Land && !(o is Land))
+                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi) && !(o is Land))
                     break;
 
                 found = o;
@@ -151,5 +170,13 @@ namespace ClassicUO.Game.Map
             obj.Right = null;
         }
 
+
+        public void Destroy()
+        {
+            if (_isDestroyed)
+                return;
+            _isDestroyed = true;
+            _pool.Enqueue(this);
+        }
     }
 }

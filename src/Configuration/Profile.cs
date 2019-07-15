@@ -71,6 +71,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
         [JsonProperty] public ushort WhisperHue { get; set; } = 0x0033;
         [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
+        [JsonProperty] public ushort YellHue { get; set; } = 0x0021;
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
@@ -86,6 +87,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnabledSpellHue { get; set; }
         [JsonProperty] public bool EnabledSpellFormat { get; set; }
         [JsonProperty] public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
+        [JsonProperty] public ushort PoisonHue { get; set; } = 0x0044;
+        [JsonProperty] public ushort ParalyzedHue { get; set; } = 0x014C;
+        [JsonProperty] public ushort InvulnerableHue { get; set; } = 0x0030;
 
         // visual
         [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
@@ -166,7 +170,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
-        [JsonProperty] public bool OpenContainersNearRealPosition { get; set; }
+        [JsonProperty] public bool OverrideContainerLocation { get; set; }
+        [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position
+        [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
@@ -254,6 +260,15 @@ namespace ClassicUO.Configuration
         [JsonProperty] public uint GrabBagSerial { get; set; }
 
         [JsonProperty] public int GridLootType { get; set; } // 0 = none, 1 = only grid, 2 = both
+
+        [JsonProperty] public bool ReduceFPSWhenInactive { get; set; }
+
+        [JsonProperty] public bool OverrideAllFonts { get; set; }
+        [JsonProperty] public bool OverrideAllFontsIsUnicode { get; set; } = true;
+
+        [JsonProperty] public bool SallosEasyGrab { get; set; }
+
+        [JsonProperty] public float Brighlight { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

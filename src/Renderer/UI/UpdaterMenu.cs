@@ -56,7 +56,7 @@ namespace ClassicUO.Renderer.UI
             Button button;
             Add(button = new Button((Width - 80) >> 1, Height - 30, 80, 20, "Update"));
 
-            button.MouseClick += (s, e) =>
+            button.MouseUp += (s, e) =>
             {
                 if (_isUpdating == 0)
                     Task.Run(DoUpdate);

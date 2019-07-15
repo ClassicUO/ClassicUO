@@ -103,9 +103,11 @@ namespace ClassicUO.Game
         {
             Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
+
         public static void DoubleClick(Serial serial)
         {
-            LastObject = serial;
+            if (serial.IsItem)
+                LastObject = serial;
             Socket.Send(new PDoubleClickRequest(serial));
         }
 
@@ -333,7 +335,7 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook()
         {
-            if (Engine.UI.GetControl<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
+            if (Engine.UI.GetGump<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
         }
 
         public static void UsePrimaryAbility()
@@ -371,6 +373,24 @@ namespace ClassicUO.Game
         public static void QuestArrow(bool rightClick)
         {
             Socket.Send(new PClickQuestArrow(rightClick));
+        }
+
+        public static void GrabItem(Item item, ushort amount, Serial bag = default(Serial))
+        {
+            Socket.Send(new PPickUpRequest(item, amount));
+
+            if(bag == default(Serial))
+                bag = Engine.Profile.Current.GrabBagSerial == 0
+                    ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                    : (Serial) Engine.Profile.Current.GrabBagSerial;
+
+            if (!World.Items.Contains(bag))
+            {
+                GameActions.Print("Grab Bag not found, setting to Backpack.");
+                Engine.Profile.Current.GrabBagSerial = 0;
+                bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
+            }
+            DropItem(item.Serial, Position.INVALID, bag);
         }
     }
 }

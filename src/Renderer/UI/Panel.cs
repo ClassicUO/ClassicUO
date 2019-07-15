@@ -45,8 +45,8 @@ namespace ClassicUO.Renderer.UI
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 zero = Vector3.Zero;
-            batcher.Draw2D(Textures.GetTexture(_color), x, y, Width, Height, ref zero);
+            ResetHueVector();
+            batcher.Draw2D(Textures.GetTexture(_color), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

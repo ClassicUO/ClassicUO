@@ -108,13 +108,13 @@ namespace ClassicUO.Game.GameObjects
                 else if (Engine.Profile.Current.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
-                        _viewHue = 0x0044;
+                        _viewHue = Engine.Profile.Current.PoisonHue;
 
                     if (IsParalyzed)
-                        _viewHue = 0x014C;
+                        _viewHue = Engine.Profile.Current.ParalyzedHue;
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
-                        _viewHue = 0x0030;
+                        _viewHue = Engine.Profile.Current.InvulnerableHue;
                 }
             }
 
@@ -160,16 +160,19 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                if (hasShadow)
+                if (mountGraphic != 0xFFFF) 
                 {
-                    DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                    DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
-                }
-                else
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                    if (hasShadow)
+                    {
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
+                    }
+                    else
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                }
             }
             else
             {
@@ -263,6 +266,9 @@ namespace ClassicUO.Game.GameObjects
 
             FileManager.Animations.AnimID = id;
 
+            if (direction == null)
+                return 0;
+
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return 0;
 
@@ -274,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                ref var frame = ref direction.Frames[frameIndex];
+                var frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
                     return 0;

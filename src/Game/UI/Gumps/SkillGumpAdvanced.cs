@@ -204,9 +204,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
             GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
             Add(loc);
 
-            loc.MouseClick += (sender, e) =>
+            loc.MouseUp += (sender, e) =>
             {
                 switch (_skill.Lock)
                 {
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 uint serial = (uint) (World.Player + _skill.Index + 1);
 
-                if (Engine.UI.GetControl<SkillButtonGump>(serial) != null)
+                if (Engine.UI.GetGump<SkillButtonGump>(serial) != null)
                     Engine.UI.Remove<SkillButtonGump>(serial);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);

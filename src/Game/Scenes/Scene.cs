@@ -31,6 +31,8 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
 
+using SDL2;
+
 namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable
@@ -82,6 +84,27 @@ namespace ClassicUO.Game.Scenes
         {
             return true;
         }
+
+
+        internal virtual void OnLeftMouseUp() { }
+        internal virtual void OnLeftMouseDown() { }
+
+        internal virtual void OnRightMouseUp() { }
+        internal virtual void OnRightMouseDown() { }
+
+        internal virtual void OnMiddleMouseUp() { }
+        internal virtual void OnMiddleMouseDown() { }
+
+
+        internal virtual bool OnLeftMouseDoubleClick() => false;
+        internal virtual bool OnRightMouseDoubleClick() => false;
+        internal virtual bool OnMiddleMouseDoubleClick() => false;
+        internal virtual void OnMouseWheel(bool up) { }
+        internal virtual void OnMouseDragging() { }
+        internal virtual void OnTextInput(string text) { }
+        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
+        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
+
 
         private IEnumerable<IWaitCondition> CleaningResources()
         {

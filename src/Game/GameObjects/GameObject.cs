@@ -25,6 +25,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 
 using Microsoft.Xna.Framework;
@@ -33,13 +34,13 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal interface IGameEntity
+    internal abstract class BaseGameObject
     {
         //bool IsSelected { get; set; }
     }
 
 
-    internal abstract partial class GameObject : IGameEntity, IUpdateable, INode<GameObject>
+    internal abstract partial class GameObject : BaseGameObject, IUpdateable, INode<GameObject>
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
@@ -48,13 +49,14 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        public OverheadMessage OverheadMessageContainer { get; protected set; }
+        public EntityTextContainer EntityTextContainerContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
         public Position Position
         {
             get => _position;
+            [MethodImpl(256)]
             set
             {
                 if (_position != value)
@@ -94,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int CurrentRenderIndex { get; set; }
 
-        //public byte UseInRender { get; set; }
+        public byte UseInRender { get; set; }
 
         public short PriorityZ { get; set; }
 
@@ -119,11 +121,11 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool IsDestroyed { get; private set; }
+        public bool IsDestroyed { get; protected set; }
 
         public int Distance
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(256)]
             get
             {
                 if (World.Player == null)
@@ -160,9 +162,10 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            OverheadMessageContainer?.Update();
+            EntityTextContainerContainer?.Update();
         }
 
+        [MethodImpl(256)]
         public void AddToTile(int x, int y)
         {
             if (World.Map != null)
@@ -178,11 +181,13 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        [MethodImpl(256)]
         public void AddToTile()
         {
             AddToTile(X, Y);
         }
 
+        [MethodImpl(256)]
         public void AddToTile(Tile tile)
         {
             if (World.Map != null)
@@ -198,6 +203,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        [MethodImpl(256)]
         public void RemoveFromTile()
         {
             if (World.Map != null && Tile != null)
@@ -207,8 +213,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public virtual void UpdateGraphicBySeason()
+        {
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        }
+
+        [MethodImpl(256)]
         public void UpdateRealScreenPosition(Point offset)
         {
             RealScreenPosition.X = _screenPosition.X - offset.X - 22;
@@ -231,10 +241,12 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (OverheadMessageContainer == null)
-                OverheadMessageContainer = new OverheadMessage(this);
+            if (EntityTextContainerContainer == null)
+                EntityTextContainerContainer = new EntityTextContainer(this);
 
-            OverheadMessageContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
+            var msg = EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
+
+            Engine.SceneManager.GetScene<GameScene>().Overheads.AddMessage(msg);
         }
 
 
@@ -251,12 +263,31 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            IsDestroyed = true;
-
             Tile?.RemoveGameObject(this);
             Tile = null;
 
-            OverheadMessageContainer?.Destroy();
+            EntityTextContainerContainer?.Destroy();
+            EntityTextContainerContainer = null;
+
+            IsDestroyed = true;
+            PriorityZ = 0;
+            IsPositionChanged = false;
+            Hue = 0;
+            AnimIndex = 0;
+            Offset = Vector3.Zero;
+            CurrentRenderIndex = 0;
+            UseInRender = 0;
+            RealScreenPosition = Point.Zero;
+            _screenPosition = Point.Zero;
+            _position = Position.INVALID;
+            IsFlipped = false;
+            Rotation = 0;
+            Graphic = 0;
+            UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
+            Bounds = Rectangle.Empty;
+            FrameInfo = Rectangle.Empty;
+            DrawTransparent = false;
+           
 
             Texture = null;
         }

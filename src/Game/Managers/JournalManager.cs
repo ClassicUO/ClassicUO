@@ -25,6 +25,7 @@ using System;
 using System.IO;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
@@ -40,7 +41,15 @@ namespace ClassicUO.Game.Managers
             if (Entries.Count >= 100)
                 Entries.RemoveFromFront();
 
-            JournalEntry entry = new JournalEntry(text, (byte) (isunicode ? 0 : 9), hue, name, isunicode);
+            byte font = (byte) (isunicode ? 0 : 9);
+
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
+            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
             _fileWriter?.WriteLine($"{name}: {text}");
@@ -52,7 +61,7 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    FileInfo info = new FileInfo($"{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
+                    FileInfo info = new FileInfo($"{Engine.CurrDateTime.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
                     _fileWriter = info.CreateText();
                     _fileWriter.AutoFlush = true;
                 }

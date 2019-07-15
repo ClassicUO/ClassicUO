@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Map
 
         public Point Center { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0)
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chunk = new Chunk((ushort) cellX, (ushort) cellY);
+                    chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                     chunk.Load(Index);
                 }
                 else
@@ -119,11 +119,15 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            Tile tile = GetTile(x, y);
-
-            var obj = tile.FirstNode;
-
+            var tile = GetTile(x, y);
             groundZ = staticZ = 0;
+
+            if (tile == null)
+            {
+                return;
+            }
+            
+            var obj = tile.FirstNode;
 
             while (obj != null)
             {
@@ -154,7 +158,7 @@ namespace ClassicUO.Game.Map
                 return defaultZ;
 
             access = true;
-            Tile tile = GetTile(x, y, false);
+            var tile = GetTile(x, y, false);
 
             if (tile != null)
             {
@@ -203,9 +207,17 @@ namespace ClassicUO.Game.Map
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
 
+        [MethodImpl(256)]
         private int GetBlock(int blockX, int blockY)
         {
             return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
+        }
+
+
+        public IEnumerable<int> GetUsedChunks()
+        {
+            foreach (int i in _usedIndices)
+                yield return i;
         }
 
 
@@ -282,7 +294,7 @@ namespace ClassicUO.Game.Map
                             return;
 
                         _usedIndices.Add(cellindex);
-                        chunk = new Chunk((ushort) i, (ushort) j);
+                        chunk = Chunk.Create((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }
 

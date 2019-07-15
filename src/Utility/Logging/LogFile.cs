@@ -34,7 +34,7 @@ namespace ClassicUO.Utility.Logging
 
         public LogFile(string directory, string file)
         {
-            logStream = new FileStream($"{directory}/{DateTime.Now:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, true);
+            logStream = new FileStream($"{directory}/{Engine.CurrDateTime:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, true);
         }
 
         public void Dispose()

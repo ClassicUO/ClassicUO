@@ -136,7 +136,7 @@ namespace ClassicUO.IO.Resources
 
             if (graphic < _file.Entries.Length)
             {
-                ref UOFileIndex3D index = ref _file.Entries[graphic];
+                ref readonly UOFileIndex3D index = ref _file.Entries[graphic];
 
                 MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 

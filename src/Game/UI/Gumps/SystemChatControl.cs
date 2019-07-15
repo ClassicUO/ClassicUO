@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -34,6 +33,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;
@@ -45,6 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         Default,
         Whisper,
         Emote,
+        Yell,
         Party,
         PartyPrivate,
         Guild,
@@ -166,6 +167,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         case ChatMode.Emote:
                             AppendChatModePrefix("[Emote]: ", Engine.Profile.Current.EmoteHue);
+
+                            break;
+
+                        case ChatMode.Yell:
+                            AppendChatModePrefix("[Yell]: ", Engine.Profile.Current.YellHue);
 
                             break;
 
@@ -317,29 +323,32 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (textBox.Text[0])
                     {
+                        case ':':
+                            Mode = ChatMode.Emote;
+                            break;
+
                         case ';':
                             Mode = ChatMode.Whisper;
+                            break;
 
+                        case '!':
+                            Mode = ChatMode.Yell;
                             break;
 
                         case '/':
                             Mode = ChatMode.Party;
-
                             break;
 
                         case '\\':
                             Mode = ChatMode.Guild;
-
                             break;
 
                         case '|':
                             Mode = ChatMode.Alliance;
-
                             break;
 
                         case '-':
                             Mode = ChatMode.ClientCommand;
-
                             break;
                     }
                 }
@@ -441,7 +450,6 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
                 case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
                 case SDL.SDL_Keycode.SDLK_COLON: // :
-                case SDL.SDL_Keycode.SDLK_QUESTION: // ?
                 case SDL.SDL_Keycode.SDLK_SLASH: // /
                 case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
                 case SDL.SDL_Keycode.SDLK_PERIOD: // .
@@ -450,10 +458,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
                 case SDL.SDL_Keycode.SDLK_MINUS: // -
                 case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
-
-                    if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
-                        IsActive = true;
-
+                    if (Engine.Profile.Current.ActivateChatAfterEnter &&
+                        Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                    {
+                        if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE))
+                            IsActive = true;
+                        else if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && key == SDL.SDL_Keycode.SDLK_SEMICOLON)
+                            IsActive = true;
+                    }
                     break;
 
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
@@ -504,17 +516,18 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case ChatMode.Default:
                         GameActions.Say(text, Engine.Profile.Current.SpeechHue);
-
                         break;
 
                     case ChatMode.Whisper:
-                        GameActions.Say(text, 33, MessageType.Whisper);
-
+                        GameActions.Say(text, Engine.Profile.Current.WhisperHue, MessageType.Whisper);
                         break;
 
                     case ChatMode.Emote:
                         GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
+                        break;
 
+                    case ChatMode.Yell:
+                        GameActions.Say(text, Engine.Profile.Current.YellHue, MessageType.Yell);
                         break;
 
                     case ChatMode.Party:

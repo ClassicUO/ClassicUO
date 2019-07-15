@@ -2,6 +2,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -14,7 +15,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridLootGump : Gump
     {
-        private static Vector3 _vec = Vector3.Zero;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext;
         private readonly Item _corpse;
@@ -47,6 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
+            NiceButton setLootBag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
+            Add(setLootBag);
 
             _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
             _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
@@ -92,6 +94,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ChangePage(_currentPage);
+            }
+            else if (buttonID == 2)
+            {
+                GameActions.Print("Target the container to Grab items into.");
+                TargetManager.SetTargeting(CursorTarget.SetGrabBag, Serial.INVALID, TargetType.Neutral);
             }
             else
                 base.OnButtonClick(buttonID);
@@ -159,8 +166,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            ResetHueVector();
             base.Draw(batcher, x, y);
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _vec);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return true;
         }
@@ -197,7 +205,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GridLootItem : Control
         {
-            private static Vector3 _vec = Vector3.Zero;
             private readonly Serial _serial;
 
             private readonly TextureControl _texture;
@@ -251,8 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount.Value));
-                        GameActions.DropItem(_serial, Position.INVALID, World.Player.Equipment[(int) Layer.Backpack]);
+                        GameActions.GrabItem(item, (ushort)amount.Value);
                     }
                 };
 
@@ -264,14 +270,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                ResetHueVector();
                 base.Draw(batcher, x, y);
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _vec);
+                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
 
                 if (_texture.MouseIsOver)
                 {
-                    _vec.Z = 0.7f;
-                    batcher.Draw2D(Textures.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _vec);
-                    _vec.Z = 0;
+                    _hueVector.Z = 0.7f;
+                    batcher.Draw2D(Textures.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
+                    _hueVector.Z = 0;
                 }
 
                 return true;

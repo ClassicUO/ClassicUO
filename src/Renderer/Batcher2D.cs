@@ -39,6 +39,11 @@ namespace ClassicUO.Renderer
         {
         }
 
+        public void SetBrightlight(float f)
+        {
+            ((IsometricEffect)DefaultEffect).Brighlight.SetValue(f);
+        }
+
 
         public void DrawString(SpriteFont spriteFont, string text, int x, int y, ref Vector3 color)
         {
@@ -330,19 +335,21 @@ namespace ClassicUO.Renderer
             float ww = w / 2f;
             float hh = h / 2f;
 
-            Vector3 center = new Vector3
-            {
-                X = x - (destX - 44 + ww),
-                Y = y - (destY + hh)
-            };
 
-            float sinx = (float) Math.Sin(angle) * ww;
-            float cosx = (float) Math.Cos(angle) * ww;
-            float siny = (float) Math.Sin(angle) * hh;
-            float cosy = (float) Math.Cos(angle) * hh;
+            float startX = x - (destX - 44 + ww);
+            float startY = y - (destY + hh);
+
+            float sin = (float) Math.Sin(angle);
+            float cos = (float) Math.Cos(angle);
+
+            float sinx = sin * ww;
+            float cosx = cos * ww;
+            float siny = sin * hh;
+            float cosy = cos * hh;
 
 
-            vertex0.Position = center;
+            vertex0.Position.X = startX;
+            vertex0.Position.Y = startY;
             vertex0.Position.X += cosx - -siny;
             vertex0.Position.Y -= sinx + -cosy;
             vertex0.Normal.X = 0;
@@ -352,7 +359,8 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.Y = 0;
             vertex0.TextureCoordinate.Z = 0;
 
-            vertex1.Position = center;
+            vertex1.Position.X = startX;
+            vertex1.Position.Y = startY;
             vertex1.Position.X += cosx - siny;
             vertex1.Position.Y += -sinx + -cosy;
             vertex1.Normal.X = 0;
@@ -362,7 +370,8 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.Y = 1;
             vertex1.TextureCoordinate.Z = 0;
 
-            vertex2.Position = center;
+            vertex2.Position.X = startX;
+            vertex2.Position.Y = startY;
             vertex2.Position.X += -cosx - -siny;
             vertex2.Position.Y += sinx + cosy;
             vertex2.Normal.X = 0;
@@ -372,7 +381,8 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.Y = 0;
             vertex2.TextureCoordinate.Z = 0;
 
-            vertex3.Position = center;
+            vertex3.Position.X = startX;
+            vertex3.Position.Y = startY;
             vertex3.Position.X += -cosx - siny;
             vertex3.Position.Y += sinx + -cosy;
             vertex3.Normal.X = 0;
@@ -1370,6 +1380,103 @@ namespace ClassicUO.Renderer
         }
 
 
+        public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
+        {
+            EnsureSize();
+
+            int idx = NumSprites << 2;
+            ref var vertex0 = ref VertexInfo[idx];
+            ref var vertex1 = ref VertexInfo[idx + 1];
+            ref var vertex2 = ref VertexInfo[idx + 2];
+            ref var vertex3 = ref VertexInfo[idx + 3];
+
+
+            const int WIDTH = 1;
+            Vector2 begin = new Vector2(startX, startY);
+            Vector2 end = new Vector2(endX, endY);
+
+            Rectangle r = new Rectangle((int)begin.X, (int)begin.Y, (int)(end - begin).Length() + WIDTH, WIDTH);
+
+            float angle = (float)(Math.Atan2(end.Y - begin.Y, end.X - begin.X) * 57.295780);
+            angle = -(float)(angle * Math.PI) / 180.0f;
+
+
+            float ww = r.Width / 2f;
+            float hh = r.Height / 2f;
+
+            Vector3 center = new Vector3
+            {
+                X = originX,
+                Y = originY
+            };
+
+
+            float rotSin = (float) Math.Sin(angle);
+            float rotCos = (float) Math.Cos(angle);
+
+
+            float sinx = rotSin * ww;
+            float cosx = rotCos * ww;
+            float siny = rotSin * hh;
+            float cosy = rotCos * hh;
+
+
+            vertex0.Position = center;
+            vertex0.Position.X += cosx - -siny;
+            vertex0.Position.Y -= sinx + -cosy;
+            vertex0.Normal.X = 0;
+            vertex0.Normal.Y = 0;
+            vertex0.Normal.Z = 1;
+            vertex0.TextureCoordinate.X = 0;
+            vertex0.TextureCoordinate.Y = 0;
+            vertex0.TextureCoordinate.Z = 0;
+
+            vertex1.Position = center;
+            vertex1.Position.X += cosx - siny;
+            vertex1.Position.Y += -sinx + -cosy;
+            vertex1.Normal.X = 0;
+            vertex1.Normal.Y = 0;
+            vertex1.Normal.Z = 1;
+            vertex1.TextureCoordinate.X = 0;
+            vertex1.TextureCoordinate.Y = 1;
+            vertex1.TextureCoordinate.Z = 0;
+
+            vertex2.Position = center;
+            vertex2.Position.X += -cosx - -siny;
+            vertex2.Position.Y += sinx + cosy;
+            vertex2.Normal.X = 0;
+            vertex2.Normal.Y = 0;
+            vertex2.Normal.Z = 1;
+            vertex2.TextureCoordinate.X = 1;
+            vertex2.TextureCoordinate.Y = 0;
+            vertex2.TextureCoordinate.Z = 0;
+
+            vertex3.Position = center;
+            vertex3.Position.X += -cosx - siny;
+            vertex3.Position.Y += sinx + -cosy;
+            vertex3.Normal.X = 0;
+            vertex3.Normal.Y = 0;
+            vertex3.Normal.Z = 1;
+            vertex3.TextureCoordinate.X = 1;
+            vertex3.TextureCoordinate.Y = 1;
+            vertex3.TextureCoordinate.Z = 0;
+
+
+            vertex0.Hue =
+                vertex1.Hue =
+                    vertex2.Hue =
+                        vertex3.Hue = Vector3.Zero;
+
+            if (CheckInScreen(idx))
+            {
+                PushSprite(texture);
+
+                return true;
+            }
+
+            return false;
+        }
+
         protected override bool CheckInScreen(int index)
         {
             for (byte i = 0; i < 4; i++)
@@ -1383,10 +1490,15 @@ namespace ClassicUO.Renderer
 
         private class IsometricEffect : MatrixEffect
         {
+            private Vector2 _viewPort;
+            private Matrix _matrix = Matrix.Identity;
+
             public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
                 WorldMatrix = Parameters["WorldMatrix"];
                 Viewport = Parameters["Viewport"];
+                Brighlight = Parameters["Brightlight"];
+
                 CurrentTechnique = Techniques["HueTechnique"];
             }
 
@@ -1397,11 +1509,16 @@ namespace ClassicUO.Renderer
 
             public EffectParameter WorldMatrix { get; }
             public EffectParameter Viewport { get; }
+            public EffectParameter Brighlight { get; }
+
 
             public override void ApplyStates()
             {
-                WorldMatrix.SetValue(Matrix.Identity);
-                Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                WorldMatrix.SetValueRef(ref _matrix);
+
+                _viewPort.X = GraphicsDevice.Viewport.Width;
+                _viewPort.Y = GraphicsDevice.Viewport.Height;
+                Viewport.SetValue(_viewPort);
 
                 base.ApplyStates();
             }
@@ -1605,7 +1722,7 @@ namespace ClassicUO.Renderer
             _defaultEffect = defaultEffect;
         }
 
-
+        public MatrixEffect DefaultEffect => _defaultEffect;
 
         public DepthStencilState Stencil { get; } = new DepthStencilState
         {
@@ -1622,16 +1739,19 @@ namespace ClassicUO.Renderer
         public GraphicsDevice GraphicsDevice { get; }
 
 
+        [MethodImpl(256)]
         public void Begin()
         {
             Begin(null, Matrix.Identity);
         }
 
+        [MethodImpl(256)]
         public void Begin(Effect effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
+        [MethodImpl(256)]
         public void Begin(Effect customEffect, Matrix projection)
         {
             EnsureNotStarted();
@@ -1645,6 +1765,7 @@ namespace ClassicUO.Renderer
             _customEffect = customEffect;
         }
 
+        [MethodImpl(256)]
         public void End()
         {
             EnsureStarted();
@@ -1653,11 +1774,13 @@ namespace ClassicUO.Renderer
             _customEffect = null;
         }
 
+        [MethodImpl(256)]
         protected virtual bool CheckInScreen(int index)
         {
             return true;
         }
 
+        [MethodImpl(256)]
         protected virtual void EnsureSize()
         {
             EnsureStarted();
@@ -1666,6 +1789,7 @@ namespace ClassicUO.Renderer
                 Flush();
         }
 
+        [MethodImpl(256)]
         protected bool PushSprite(Texture2D texture)
         {
             EnsureSize();
@@ -1742,13 +1866,14 @@ namespace ClassicUO.Renderer
             NumSprites = 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
         }
 
+        [MethodImpl(256)]
         public void EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
@@ -1761,7 +1886,7 @@ namespace ClassicUO.Renderer
             _useScissor = enable;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void SetBlendState(BlendState blend, bool noflush = false)
         {
             if (!noflush)
@@ -1770,7 +1895,7 @@ namespace ClassicUO.Renderer
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(256)]
         public void SetStencil(DepthStencilState stencil, bool noflush = false)
         {
             if (!noflush)

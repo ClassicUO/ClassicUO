@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected StatusGumpBase() : base(0, 0)
         {
             // sanity check
-            Engine.UI.GetControl<HealthBarGump>(World.Player)?.Dispose();
+            Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
             CanMove = true;
             CanBeSaved = true;
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    BuffGump gump = Engine.UI.GetControl<BuffGump>();
+                    BuffGump gump = Engine.UI.GetGump<BuffGump>();
 
                     if (gump == null)
                         Engine.UI.Add(new BuffGump(100, 100));
@@ -71,14 +71,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
             }
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
@@ -89,11 +86,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
-                    Engine.UI.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
-                    Dispose();
+                    var offset = Mouse.LDroppedOffset;
+
+                    if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+                    {
+                        Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        Dispose();
+                    }
+                   
                 }
             }
         }
+
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -113,19 +118,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0: // modern
 
-                    gump = Engine.UI.GetControl<StatusGumpModern>();
+                    gump = Engine.UI.GetGump<StatusGumpModern>();
 
                     break;
 
                 case 1: // old
 
-                    gump = Engine.UI.GetControl<StatusGumpOld>();
+                    gump = Engine.UI.GetGump<StatusGumpOld>();
 
                     break;
 
                 case 2: // outlands
 
-                    gump = Engine.UI.GetControl<StatusGumpOutlands>();
+                    gump = Engine.UI.GetGump<StatusGumpOutlands>();
 
                     break;
 
@@ -196,17 +201,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void UpdateLocksAfterPacket()
         {
-            for (int i = 0; i < 3; i++)
+            if (Engine.GlobalSettings.ShardType != 1)
             {
-                Lock status = i == 0 ? World.Player.StrLock : i == 1 ? World.Player.DexLock : World.Player.IntLock;
+                for (int i = 0; i < 3; i++)
+                {
+                    Lock status = i == 0 ? World.Player.StrLock : i == 1 ? World.Player.DexLock : World.Player.IntLock;
 
-                ushort gumpID = 0x0984; //Up
+                    ushort gumpID = 0x0984; //Up
 
-                if (status == Lock.Down)
-                    gumpID = 0x0986; //Down
-                else if (status == Lock.Locked)
-                    gumpID = 0x082C; //Lock
-                _lockers[i].Graphic = gumpID;
+                    if (status == Lock.Down)
+                        gumpID = 0x0986; //Down
+                    else if (status == Lock.Locked)
+                        gumpID = 0x082C; //Lock
+                    _lockers[i].Graphic = gumpID;
+                }
             }
         }
 
@@ -275,7 +283,7 @@ namespace ClassicUO.Game.UI.Gumps
             _labels[(int) MobileStats.Intelligence] = text;
             Add(text);
 
-            text = new Label(World.Player.IsFemale ? "F" : "M", false, 0x0386, font: 1)
+            text = new Label(!World.Player.IsMale ? "F" : "M", false, 0x0386, font: 1)
             {
                 X = 86,
                 Y = 97
@@ -347,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int) MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int) MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
-                _labels[(int) MobileStats.Sex].Text = World.Player.IsFemale ? "F" : "M";
+                _labels[(int) MobileStats.Sex].Text = !World.Player.IsMale ? "F" : "M";
                 _labels[(int) MobileStats.AR].Text = World.Player.PhysicalResistence.ToString();
                 _labels[(int) MobileStats.HealthCurrent].Text = $"{World.Player.Hits}/{World.Player.HitsMax}";
                 _labels[(int) MobileStats.ManaCurrent].Text = $"{World.Player.Mana}/{World.Player.ManaMax}";
@@ -423,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x082C; //Lock
                 Add(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
 
-                _lockers[0].MouseClick += (sender, e) =>
+                _lockers[0].MouseUp += (sender, e) =>
                 {
                     World.Player.StrLock = (Lock) (((byte) World.Player.StrLock + 1) % 3);
                     GameActions.ChangeStatLock(0, World.Player.StrLock);
@@ -454,7 +462,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x082C; //Lock
                 Add(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
 
-                _lockers[1].MouseClick += (sender, e) =>
+                _lockers[1].MouseUp += (sender, e) =>
                 {
                     World.Player.DexLock = (Lock) (((byte) World.Player.DexLock + 1) % 3);
                     GameActions.ChangeStatLock(1, World.Player.DexLock);
@@ -484,7 +492,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gumpID = 0x082C; //Lock
                 Add(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
 
-                _lockers[2].MouseClick += (sender, e) =>
+                _lockers[2].MouseUp += (sender, e) =>
                 {
                     World.Player.IntLock = (Lock) (((byte) World.Player.IntLock + 1) % 3);
                     GameActions.ChangeStatLock(2, World.Player.IntLock);
@@ -824,7 +832,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_lockers[(int) StatType.Int] = new GumpPic(
                                                            10, 130, GetStatLockGraphic(World.Player.IntLock), 0));
 
-            _lockers[(int) StatType.Str].MouseClick += (sender, e) =>
+            _lockers[(int) StatType.Str].MouseUp += (sender, e) =>
             {
                 World.Player.StrLock = (Lock) (((byte) World.Player.StrLock + 1) % 3);
                 GameActions.ChangeStatLock((byte) StatType.Str, World.Player.StrLock);
@@ -832,7 +840,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockers[(int) StatType.Str].Texture = FileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.StrLock));
             };
 
-            _lockers[(int) StatType.Dex].MouseClick += (sender, e) =>
+            _lockers[(int) StatType.Dex].MouseUp += (sender, e) =>
             {
                 World.Player.DexLock = (Lock) (((byte) World.Player.DexLock + 1) % 3);
                 GameActions.ChangeStatLock((byte) StatType.Dex, World.Player.DexLock);
@@ -840,7 +848,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockers[(int) StatType.Dex].Texture = FileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.DexLock));
             };
 
-            _lockers[(int) StatType.Int].MouseClick += (sender, e) =>
+            _lockers[(int) StatType.Int].MouseUp += (sender, e) =>
             {
                 World.Player.IntLock = (Lock) (((byte) World.Player.IntLock + 1) % 3);
                 GameActions.ChangeStatLock((byte) StatType.Int, World.Player.IntLock);
@@ -1017,7 +1025,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
@@ -1033,13 +1041,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Contains(p))
                     {
-                        Engine.UI.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
+                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         Dispose();
                     }
                 }
             }
         }
-
 
         private static int CalculatePercents(int max, int current, int maxValue)
         {

@@ -189,7 +189,7 @@ namespace ClassicUO.Game.Managers
                         {
                             int grp = bin.ReadInt32();
 
-                            if (grp < groups.Count)
+                            if (grp < groups.Count && skillidx + 1 < FileManager.Skills.SkillsCount)
                                 Groups[groups[grp]].Add(skillidx++);
                         }
                     }
@@ -214,9 +214,9 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static void RemoveGroup(string group)
+        public static bool RemoveGroup(string group)
         {
-            if (Groups.TryGetValue(group, out var list))
+            if (Groups.FirstOrDefault().Key != group && Groups.TryGetValue(group, out var list))
             {
                 Groups.Remove(group);
 
@@ -224,7 +224,11 @@ namespace ClassicUO.Game.Managers
                     Groups.Add("All", list);
                 else
                     Groups.FirstOrDefault().Value.AddRange(list);
+
+                return true;
             }
+
+            return false;
         }
 
         public static List<int> GetSkillsInGroup(string group)
@@ -274,7 +278,8 @@ namespace ClassicUO.Game.Managers
                 for (int j = 0; j < entriesCount; j++)
                 {
                     int skillIndex = reader.ReadInt32();
-                    list.Add(skillIndex);
+                    if (skillIndex < FileManager.Skills.SkillsCount)
+                        list.Add(skillIndex);
                 }
             }
         }

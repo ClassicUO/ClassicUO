@@ -1170,6 +1170,19 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PMultiBoatMoveRequest : PacketWriter
+    {
+        public PMultiBoatMoveRequest(Serial playerSerial, Direction dir, byte speed) : base(0xBF)
+        {
+            WriteUShort(0x33);
+            WriteUInt(playerSerial);
+            WriteByte((byte)dir);
+            WriteByte((byte)dir);
+            WriteByte(speed);
+        }
+    }
+
+
     internal sealed class PResend : PacketWriter
     {
         public PResend() : base(0x22)

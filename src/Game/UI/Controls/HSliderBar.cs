@@ -165,16 +165,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref zero);
-                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, ref zero);
-                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref _hueVector);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height, ref _hueVector);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref _hueVector);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref zero);
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref _hueVector);
 
             if (_text != null)
             {
@@ -206,12 +206,11 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             _clicked = false;
-        }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
             if (button == MouseButton.Left) CalculateNew(x);
         }
+
+       
 
         protected override void OnMouseWheel(MouseEvent delta)
         {

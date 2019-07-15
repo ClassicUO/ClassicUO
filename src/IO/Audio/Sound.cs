@@ -126,7 +126,7 @@ namespace ClassicUO.IO.Audio
             double now = Engine.Ticks;
             CullExpiredEffects(now);
 
-            if (spamCheck && LastPlayed + MinimumDelay > DateTime.Now)
+            if (spamCheck && LastPlayed + MinimumDelay > Engine.CurrDateTime)
                 return;
 
             BeforePlay();
@@ -148,7 +148,7 @@ namespace ClassicUO.IO.Audio
                     break;
             }
 
-            LastPlayed = DateTime.Now;
+            LastPlayed = Engine.CurrDateTime;
 
             byte[] buffer = GetBuffer();
 

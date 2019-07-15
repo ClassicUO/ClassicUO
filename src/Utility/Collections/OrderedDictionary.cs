@@ -31,7 +31,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace ClassicUO.Collections
+namespace ClassicUO.Utility.Collections
 {
     /// <summary>
     ///     A dictionary object that allows rapid hash lookups using keys, but also

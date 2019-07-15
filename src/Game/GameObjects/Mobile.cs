@@ -26,9 +26,12 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 
@@ -80,20 +83,25 @@ namespace ClassicUO.Game.GameObjects
 
         public long DeathScreenTimer { get; set; }
 
-        private bool _isFemale;
+        private bool _isMale;
 
-        public bool IsFemale
+        public bool IsMale
         {
-            get => _isFemale || (Flags & Flags.Female) != 0 || Graphic == 0x0191 || Graphic == 0x0193 || Graphic == 0x025E || Graphic == 0x029B;
+            get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale);
             set
             {
-                if (_isFemale != value)
+                if (_isMale != value)
                 {
-                    _isFemale = value;
+                    _isMale = value;
                     _delta |= Delta.Appearance;
                 }
             }
         }
+
+        public bool IsOtherMale => Graphic == 183 || Graphic == 185;
+        public bool IsElfMale => Graphic == 605 || Graphic == 607;
+        public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
+        public bool IsElfFemale => Graphic == 606 || Graphic == 608;
 
         public RaceType Race
         {
@@ -238,7 +246,21 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Exists => World.Contains(Serial);
 
-        public bool IsMounted => HasEquipment && Equipment[(int) Layer.Mount] != null;
+        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat;
+
+        public bool IsDrivingBoat
+        {
+            get
+            {
+                if (FileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
+                {
+                    Item m = Equipment[0x19];
+                    return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
+                }
+
+                return false;
+            }
+        }
 
         public bool IsRunning { get; internal set; }
 
@@ -594,10 +616,6 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessFootstepsSound();
 
-            if ((Serial & 0x80000000) != 0)
-            {
-            }
-
             if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
@@ -758,7 +776,7 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.Instance.IntervalFixedUpdate;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.FrameDelay[1];
                     int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;

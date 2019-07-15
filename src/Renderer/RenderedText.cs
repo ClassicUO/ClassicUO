@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -57,6 +58,7 @@ namespace ClassicUO.Renderer
             Hue = 0xFFFF;
             Cell = 30;
         }
+
 
         public bool IsUnicode { get; set; }
 
@@ -137,49 +139,54 @@ namespace ClassicUO.Renderer
             return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
         }
 
+        private static Vector3 _hueVector = Vector3.Zero;
+
         public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
 
-            Rectangle src = Rectangle.Empty;
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
 
-            src.X = offsetX;
-            src.Y = offsetY;
-            int maxX = src.X + dwidth;
+            int srcX = offsetX;
+            int srcY = offsetY;
+            int maxX = srcX + dwidth;
+
+            int srcWidth;
+            int srcHeight;
 
             if (maxX <= Width)
-                src.Width = dwidth;
+                srcWidth = dwidth;
             else
             {
-                src.Width = Width - src.X;
-                dwidth = src.Width;
+                srcWidth = Width - srcX;
+                dwidth = srcWidth;
             }
 
-            int maxY = src.Y + dheight;
+            int maxY = srcY + dheight;
 
             if (maxY <= Height)
-                src.Height = dheight;
+                srcHeight = dheight;
             else
             {
-                src.Height = Height - src.Y;
-                dheight = src.Height;
+                srcHeight = Height - srcY;
+                dheight = srcHeight;
             }
 
             if (Texture == null)
                 return false;
 
-            Vector3 huev = Vector3.Zero;
-            huev.X = hue;
+            _hueVector.X = hue;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
 
             if (hue != 0)
-                huev.Y = 1;
-            huev.Z = alpha;
+                _hueVector.Y = 1;
+            _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, src.X, src.Y, src.Width, src.Height, ref huev);
+            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
         public void CreateTexture()

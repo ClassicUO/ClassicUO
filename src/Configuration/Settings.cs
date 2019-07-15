@@ -92,6 +92,10 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "fixed_time_step")]
         public bool FixedTimeStep { get; set; } = true;
 
+        [JsonProperty(propertyName: "run_mouse_in_separate_thread")]
+        public bool RunMouseInASeparateThread { get; set; } = true;
+
+
         [JsonProperty(PropertyName = "plugins")]
         public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
 

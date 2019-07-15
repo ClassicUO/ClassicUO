@@ -65,9 +65,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 1
             };
 
-            hitbox.MouseClick += (sender, e) =>
+            hitbox.MouseUp += (sender, e) =>
             {
-                Engine.UI.GetControl<BulletinBoardItem>(LocalSerial)?.Dispose();
+                Engine.UI.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
                 Engine.UI.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, "Date/Time", string.Empty, 0));
             };

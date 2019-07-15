@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 case RaceType.ELF when isFemale:
                     character.Graphic = 0x025E;
                     character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
-                    character.Equipment[(int) Layer.Pants] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
+                    character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
                     character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
 
                     break;
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         character.Graphic = 0x0191;
                         character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384);
-                        character.Equipment[(int) Layer.Pants] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
+                        character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
                         character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2);
                     }
                     else
@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetControl<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -437,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                Engine.UI.GetControl<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
+                Engine.UI.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
 
                 return false;
             }
@@ -548,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
 
-                _colorPicker.MouseClick += ColorPicker_MouseClick;
+                _colorPicker.MouseUp += ColorPicker_MouseClick;
 
                 _colorPickerBox = new ColorPickerBox(489, 141, _rows, _columns, _cellW, _cellH, _pallet)
                 {

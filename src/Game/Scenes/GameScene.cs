@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Scenes
 
         public JournalManager Journal { get; private set; }
 
-        public OverheadManager Overheads { get; private set; }
+        public WorldTextManager Overheads { get; private set; }
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.Scenes
 
             HeldItem = new ItemHold();
             Journal = new JournalManager();
-            Overheads = new OverheadManager();
+            Overheads = new WorldTextManager();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(Engine.Profile.Current.Macros);
             _healthLinesManager = new HealthLinesManager();
@@ -166,27 +166,6 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);
-
-
-            // LEFT
-            Engine.Input.LeftMouseButtonDown += OnLeftMouseDown;
-            Engine.Input.LeftMouseButtonUp += OnLeftMouseUp;
-            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-
-            // RIGHT
-            Engine.Input.RightMouseButtonDown += OnRightMouseDown;
-            Engine.Input.RightMouseButtonUp += OnRightMouseUp;
-            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-
-            // MOUSE WHEEL
-            Engine.Input.MouseWheel += OnMouseWheel;
-
-            // MOUSE DRAG
-            Engine.Input.MouseDragging += OnMouseDragging;
-
-            // KEYBOARD
-            Engine.Input.KeyDown += OnKeyDown;
-            Engine.Input.KeyUp += OnKeyUp;
 
 
             CommandManager.Initialize();
@@ -315,25 +294,6 @@ namespace ClassicUO.Game.Scenes
 
             Engine.UI?.Clear();
             World.Clear();
-
-            // LEFT
-            Engine.Input.LeftMouseButtonDown -= OnLeftMouseDown;
-            Engine.Input.LeftMouseButtonUp -= OnLeftMouseUp;
-            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-
-            // RIGHT
-            Engine.Input.RightMouseButtonDown -= OnRightMouseDown;
-            Engine.Input.RightMouseButtonUp -= OnRightMouseUp;
-            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-
-            // MOUSE WHEEL
-            Engine.Input.MouseWheel -= OnMouseWheel;
-
-            // MOUSE DRAG
-            Engine.Input.MouseDragging -= OnMouseDragging;
-
-            Engine.Input.KeyDown -= OnKeyDown;
-            Engine.Input.KeyUp -= OnKeyUp;
 
             Overheads?.Clear();
             Overheads = null;
@@ -513,7 +473,6 @@ namespace ClassicUO.Game.Scenes
                 _renderIndex = 1;
             UpdateDrawPosition = false;
 
-
             //if (_renderList.Length - _renderListCount != 0)
             //{
             //    if (_renderList[_renderListCount] != null)
@@ -683,6 +642,7 @@ namespace ClassicUO.Game.Scenes
 
             //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
 
+            batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
 
             batcher.Begin();
 
@@ -708,8 +668,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
                     }
-
-                    _renderList[i] = null;
                 }
 
                 if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -794,7 +752,14 @@ namespace ClassicUO.Game.Scenes
             _healthLinesManager.Draw(batcher, Scale);
 
             //batcher.SetBlendState(_blendText);
-            Overheads.Draw(batcher, x, y);
+
+            int renderIndex = _renderIndex - 1;
+
+            if (renderIndex < 1)
+                renderIndex = 99;
+
+            Overheads.ProcessWorldText(true);
+            Overheads.Draw(batcher, x, y, renderIndex);
             SelectedObject.LastObject = SelectedObject.Object;
 
             // batcher.SetBlendState(null);

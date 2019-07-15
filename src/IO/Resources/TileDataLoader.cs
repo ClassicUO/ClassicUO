@@ -300,15 +300,19 @@ namespace ClassicUO.IO.Resources
             Flags = (TileFlag) flags;
             TexID = textId;
             Name = name;
+
+            IsWet = (Flags & TileFlag.Wet) != 0;
+            IsImpassable = (Flags & TileFlag.Impassable) != 0;
+            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
         }
 
         public readonly TileFlag Flags;
         public readonly ushort TexID;
         public readonly string Name;
 
-        public bool IsWet => (Flags & TileFlag.Wet) != 0;
-        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
-        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
+        public readonly bool IsWet;
+        public readonly bool IsImpassable;
+        public readonly bool IsNoDiagonal;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -332,6 +336,27 @@ namespace ClassicUO.IO.Resources
             LightIndex = lightIndex;
             Height = height;
             Name = name;
+
+            IsAnimated = (Flags & TileFlag.Animation) != 0;
+            IsBridge = (Flags & TileFlag.Bridge) != 0;
+            IsImpassable = (Flags & TileFlag.Impassable) != 0;
+            IsSurface = (Flags & TileFlag.Surface) != 0;
+            IsWearable = (Flags & TileFlag.Wearable) != 0;
+            IsInternal = (Flags & TileFlag.Internal) != 0;
+            IsBackground = (Flags & TileFlag.Background) != 0;
+            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
+            IsWet = (Flags & TileFlag.Wet) != 0;
+            IsFoliage = (Flags & TileFlag.Foliage) != 0;
+            IsRoof = (Flags & TileFlag.Roof) != 0;
+            IsTranslucent = (Flags & TileFlag.Translucent) != 0;
+            IsPartialHue = (Flags & TileFlag.PartialHue) != 0;
+            IsStackable = (Flags & TileFlag.Generic) != 0;
+            IsTransparent = (Flags & TileFlag.Transparent) != 0;
+            IsContainer = (Flags & TileFlag.Container) != 0;
+            IsDoor = (Flags & TileFlag.Door) != 0;
+            IsWall = (Flags & TileFlag.Wall) != 0;
+            IsLight = (Flags & TileFlag.LightSource) != 0;
+            IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
         }
 
         public readonly TileFlag Flags;
@@ -344,25 +369,26 @@ namespace ClassicUO.IO.Resources
         public readonly byte Height;
         public readonly string Name;
 
-        public bool IsAnimated => (Flags & TileFlag.Animation) != 0;
-        public bool IsBridge => (Flags & TileFlag.Bridge) != 0;
-        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
-        public bool IsSurface => (Flags & TileFlag.Surface) != 0;
-        public bool IsWearable => (Flags & TileFlag.Wearable) != 0;
-        public bool IsInternal => (Flags & TileFlag.Internal) != 0;
-        public bool IsBackground => (Flags & TileFlag.Background) != 0;
-        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
-        public bool IsWet => (Flags & TileFlag.Wet) != 0;
-        public bool IsFoliage => (Flags & TileFlag.Foliage) != 0;
-        public bool IsRoof => (Flags & TileFlag.Roof) != 0;
-        public bool IsTranslucent => (Flags & TileFlag.Translucent) != 0;
-        public bool IsPartialHue => (Flags & TileFlag.PartialHue) != 0;
-        public bool IsStackable => (Flags & TileFlag.Generic) != 0;
-        public bool IsTransparent => (Flags & TileFlag.Transparent) != 0;
-        public bool IsContainer => (Flags & TileFlag.Container) != 0;
-        public bool IsDoor => (Flags & TileFlag.Door) != 0;
-        public bool IsWall => (Flags & TileFlag.Wall) != 0;
-        public bool IsLight => (Flags & TileFlag.LightSource) != 0;
+        public readonly bool IsAnimated;
+        public readonly bool IsBridge;
+        public readonly bool IsImpassable;
+        public readonly bool IsSurface;
+        public readonly bool IsWearable;
+        public readonly bool IsInternal;
+        public readonly bool IsBackground;
+        public readonly bool IsNoDiagonal;
+        public readonly bool IsWet;
+        public readonly bool IsFoliage;
+        public readonly bool IsRoof;
+        public readonly bool IsTranslucent;
+        public readonly bool IsPartialHue;
+        public readonly bool IsStackable;
+        public readonly bool IsTransparent;
+        public readonly bool IsContainer;
+        public readonly bool IsDoor;
+        public readonly bool IsWall;
+        public readonly bool IsLight;
+        public readonly bool IsNoShoot;
     }
 
     // old

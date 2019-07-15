@@ -21,12 +21,15 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -43,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            Engine.UI.GetControl<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
+            Engine.UI.GetGump<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
             _spell = spell;
             BuildGump();
         }
@@ -61,9 +64,11 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
+            Point offset = Mouse.LDroppedOffset;
+
+            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                 GameActions.CastSpell(_spell.ID);
         }
 

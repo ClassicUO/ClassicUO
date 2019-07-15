@@ -53,16 +53,18 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
+        private HSliderBar _brighlight;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _openContainersNearRealPosition;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation;
+        private Combobox _overrideContainerLocationSetting;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -70,6 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
         // fonts
         private FontSelector _fontSelectorChat;
         private TextBox _gameWindowHeight;
+        private Checkbox _overrideAllFonts;
+        private Combobox _overrideAllFontsIsUnicodeCheckbox;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
@@ -102,10 +106,11 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext;
+        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -232,8 +237,10 @@ namespace ClassicUO.Game.UI.Gumps
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
-            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 10);
 
+            _reduceFPSWhenInactive = CreateCheckBox(rightArea, "Reduce FPS when game is inactive", Engine.Profile.Current.ReduceFPSWhenInactive, 0, 5);
+
+            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 20);
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
@@ -241,11 +248,14 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _holdShiftForContext = CreateCheckBox(rightArea, "Hold Shift for Context Menus", Engine.Profile.Current.HoldShiftForContext, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
-            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 0);
+            _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, "Poisoned Color", 40, 5);
+            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
+            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.InvulnerableHue, "Invulnerable Color", 40, 0);
+            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 5);
             _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
-
+            _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
 
             fpsItem = new ScrollAreaItem();
 
@@ -544,13 +554,22 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
+            text = new Label("- Brighlight:", true, HUE_FONT)
+            {
+                Y = 30
+            };
+            _brighlight = new HSliderBar(text.Width + 10, text.Y + 5, 250, 0, 100, (int) (Engine.Profile.Current.Brighlight * 100f), HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
+            item.Add(text);
+            item.Add(_brighlight);
+            rightArea.Add(item);
+
+            item = new ScrollAreaItem();
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
             {
-                Y = 20,
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
-            _lightBar = new HSliderBar(_enableLight.Width + 10, 20, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
             item.Add(_enableLight);
             item.Add(_lightBar);
@@ -579,9 +598,8 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_auraType);
             rightArea.Add(item);
 
-
+            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 0);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
-
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
 
             Add(rightArea, PAGE);
@@ -594,7 +612,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
             NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
 
-            addButton.MouseClick += (sender, e) =>
+            addButton.MouseUp += (sender, e) =>
             {
                 EntryDialog dialog = new EntryDialog(250, 150, "Macro name:", name =>
                 {
@@ -626,7 +644,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_macroControl, PAGE);
 
-                    nb.MouseClick += (sss, eee) =>
+                    nb.MouseUp += (sss, eee) =>
                     {
                         _macroControl?.Dispose();
 
@@ -648,7 +666,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
 
-            delButton.MouseClick += (ss, ee) =>
+            delButton.MouseUp += (ss, ee) =>
             {
                 NiceButton nb = rightArea.FindControls<ScrollAreaItem>()
                                          .SelectMany(s => s.Children.OfType<NiceButton>())
@@ -695,7 +713,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 nb.IsSelected = true;
 
-                nb.MouseClick += (sss, eee) =>
+                nb.MouseUp += (sss, eee) =>
                 {
                     _macroControl?.Dispose();
 
@@ -722,8 +740,33 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 6;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            Label text = new Label("Speech font:", true, HUE_FONT);
 
+            ScrollAreaItem item = new ScrollAreaItem();
+
+            _overrideAllFonts = new Checkbox(0x00D2, 0x00D3, "Override game font", FONT, HUE_FONT)
+            {
+                IsChecked = Engine.Profile.Current.OverrideAllFonts
+            };
+
+            _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[]
+            {
+                "ASCII", "Unicode"
+            }, Engine.Profile.Current.OverrideAllFontsIsUnicode ? 1 : 0)
+            {
+                IsVisible = _overrideAllFonts.IsChecked
+            };
+            _overrideAllFonts.ValueChanged += (ss, ee) => { _overrideAllFontsIsUnicodeCheckbox.IsVisible = _overrideAllFonts.IsChecked; };
+
+            item.Add(_overrideAllFonts);
+            item.Add(_overrideAllFontsIsUnicodeCheckbox);
+            rightArea.Add(item);
+
+
+
+            Label text = new Label("Speech font:", true, HUE_FONT)
+            {
+                Y = 20,
+            };
             rightArea.Add(text);
 
             _fontSelectorChat = new FontSelector
@@ -767,7 +810,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : ? / \\ , . [ | -", FONT, HUE_FONT)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -814,6 +857,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 20);
             _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote Color", 20, 0);
+            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.YellHue, "Yell Color", 20, 0);
+            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.WhisperHue, "Whisper Color", 20, 0);
             _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
@@ -1061,7 +1106,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_dragSelectArea);
 
-            _openContainersNearRealPosition = CreateCheckBox(rightArea, "Containers open near their point of origin", Engine.Profile.Current.OpenContainersNearRealPosition, 0, 0);
+
+            ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
+
+            _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.OverrideContainerLocation,
+            };
+
+            _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position" }, Engine.Profile.Current.OverrideContainerLocationSetting);
+
+            _containerGumpLocation.Add(_overrideContainerLocation);
+            _containerGumpLocation.Add(_overrideContainerLocationSetting);
+
+            rightArea.Add(_containerGumpLocation);
+
 
             Add(rightArea, PAGE);
 
@@ -1126,6 +1185,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 1: // general
                     _sliderFPS.Value = 60;
                     _sliderFPSLogin.Value = 60;
+                    _reduceFPSWhenInactive.IsChecked = false;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
@@ -1136,6 +1196,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
+                    _poisonColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _paralyzedColorPickerBox.SetColor(0x014C, FileManager.Hues.GetPolygoneColor(12, 0x014C));
+                    _invulnerableColorPickerBox.SetColor(0x0030, FileManager.Hues.GetPolygoneColor(12, 0x0030));
                     _drawRoofs.IsChecked = true;
                     _enableCaveBorder.IsChecked = false;
                     _treeToStumps.IsChecked = false;
@@ -1150,6 +1213,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
+                    _sallosEasyGrab.IsChecked = false;
 
                     break;
 
@@ -1186,9 +1250,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
-
+                    _brighlight.Value = 0;
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
+                    _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _xBR.IsChecked = true;
 
@@ -1205,7 +1270,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 6: // fonts
                     _fontSelectorChat.SetSelectedFont(0);
-
+                    _overrideAllFonts.IsChecked = false;
+                    _overrideAllFontsIsUnicodeCheckbox.SelectedIndex = 1;
                     break;
 
                 case 7: // speech
@@ -1213,6 +1279,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _sliderSpeechDelay.Value = 100;
                     _speechColorPickerBox.SetColor(0x02B2, FileManager.Hues.GetPolygoneColor(12, 0x02B2));
                     _emoteColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
+                    _yellColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
+                    _whisperColorPickerBox.SetColor(0x0033, FileManager.Hues.GetPolygoneColor(12, 0x0033));
                     _partyMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _guildMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
@@ -1265,7 +1333,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
-                    _openContainersNearRealPosition.IsChecked = false;
+                    _overrideContainerLocation.IsChecked = false;
+                    _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
 
                     break;
@@ -1279,17 +1348,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
-            WorldViewportGump vp = Engine.UI.GetControl<WorldViewportGump>();
+            WorldViewportGump vp = Engine.UI.GetGump<WorldViewportGump>();
 
             // general
             Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Engine.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
             Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
+            Engine.Profile.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
+            Engine.Profile.Current.PoisonHue = _poisonColorPickerBox.Hue;
+            Engine.Profile.Current.ParalyzedHue = _paralyzedColorPickerBox.Hue;
+            Engine.Profile.Current.InvulnerableHue = _invulnerableColorPickerBox.Hue;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
@@ -1305,7 +1378,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
-                    Engine.UI.GetControl<TopBarGump>()?.Dispose();
+                    Engine.UI.GetGump<TopBarGump>()?.Dispose();
                 else
                     TopBarGump.Create();
 
@@ -1330,7 +1403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_useStandardSkillsGump.IsChecked)
             {
-                var newGump = Engine.UI.GetControl<SkillGumpAdvanced>();
+                var newGump = Engine.UI.GetGump<SkillGumpAdvanced>();
 
                 if (newGump != null)
                 {
@@ -1341,7 +1414,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                var standardGump = Engine.UI.GetControl<StandardSkillsGump>();
+                var standardGump = Engine.UI.GetGump<StandardSkillsGump>();
 
                 if (standardGump != null)
                 {
@@ -1354,6 +1427,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
             Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
+            Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
 
 
             // sounds
@@ -1377,6 +1451,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.SpeechDelay = _sliderSpeechDelay.Value;
             Engine.Profile.Current.SpeechHue = _speechColorPickerBox.Hue;
             Engine.Profile.Current.EmoteHue = _emoteColorPickerBox.Hue;
+            Engine.Profile.Current.YellHue = _yellColorPickerBox.Hue;
+            Engine.Profile.Current.WhisperHue = _whisperColorPickerBox.Hue;
             Engine.Profile.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
             Engine.Profile.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
             Engine.Profile.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
@@ -1505,19 +1581,23 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Personal = World.Light.RealPersonal;
             }
 
+            Engine.Profile.Current.Brighlight = _brighlight.Value / 100f;
+
             Engine.Profile.Current.ShadowsEnabled = _enableShadows.IsChecked;
             Engine.Profile.Current.AuraUnderFeetType = _auraType.SelectedIndex;
+            Engine.Instance.IsMouseVisible = Engine.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
             Engine.Profile.Current.AuraOnMouse = _auraMouse.IsChecked;
             Engine.Profile.Current.UseXBR = _xBR.IsChecked;
 
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();
-
+            Engine.Profile.Current.OverrideAllFonts = _overrideAllFonts.IsChecked;
+            Engine.Profile.Current.OverrideAllFontsIsUnicode = _overrideAllFontsIsUnicodeCheckbox.SelectedIndex == 1;
             if (Engine.Profile.Current.ChatFont != _fontValue)
             {
                 Engine.Profile.Current.ChatFont = _fontValue;
-                WorldViewportGump viewport = Engine.UI.GetControl<WorldViewportGump>();
+                WorldViewportGump viewport = Engine.UI.GetGump<WorldViewportGump>();
                 viewport?.ReloadChatControl(new SystemChatControl(5, 5, Engine.Profile.Current.GameWindowSize.X, Engine.Profile.Current.GameWindowSize.Y));
             }
 
@@ -1553,7 +1633,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
             Engine.Profile.Current.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
 
-            CounterBarGump counterGump = Engine.UI.GetControl<CounterBarGump>();
+            CounterBarGump counterGump = Engine.UI.GetGump<CounterBarGump>();
 
             counterGump?.SetLayout(Engine.Profile.Current.CounterBarCellSize,
                                    Engine.Profile.Current.CounterBarRows,
@@ -1593,7 +1673,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
-                DebugGump debugGump = Engine.UI.GetControl<DebugGump>();
+                DebugGump debugGump = Engine.UI.GetGump<DebugGump>();
 
                 if (_debugGumpIsDisabled.IsChecked)
                 {
@@ -1630,7 +1710,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             Engine.Profile.Current.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
 
-            Engine.Profile.Current.OpenContainersNearRealPosition = _openContainersNearRealPosition.IsChecked;
+            Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
+            Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
@@ -1641,7 +1722,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            WorldViewportGump gump = Engine.UI.GetControl<WorldViewportGump>();
+            WorldViewportGump gump = Engine.UI.GetGump<WorldViewportGump>();
             _gameWindowWidth.Text = gump.Width.ToString();
             _gameWindowHeight.Text = gump.Height.ToString();
             _gameWindowPositionX.Text = gump.X.ToString();
@@ -1650,9 +1731,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Vector3 zero = Vector3.Zero;
+            ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref zero);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
@@ -1758,8 +1839,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private const int CELL = 12;
 
-            private static Vector3 _zero = Vector3.Zero;
-
             private readonly SpriteTexture _background;
 
             public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
@@ -1780,12 +1859,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                batcher.Draw2D(_background, x - 3, y - 3, ref _zero);
+                ResetHueVector();
+                batcher.Draw2D(_background, x - 3, y - 3, ref _hueVector);
 
                 return base.Draw(batcher, x, y);
             }
 
-            protected override void OnMouseClick(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 if (button == MouseButton.Left)
                 {

@@ -109,12 +109,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
-            _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
+            _pageCornerLeft.MouseUp += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
             Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
-            _pageCornerRight.MouseClick += PageCornerOnMouseClick;
+            _pageCornerRight.MouseUp += PageCornerOnMouseClick;
             _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
             int totalSpells = 0;
 
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = dataX, Y = 52 + y, LocalSerial = (uint) topage, AcceptMouseInput = true, Tag = offs + 1
                             };
 
-                            text.MouseClick += OnClicked;
+                            text.MouseUp += OnClicked;
                             text.MouseDoubleClick += OnDoubleClicked;
                             Add(text, page);
                             y += 15;
@@ -381,6 +381,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
+                    if (Engine.UI.IsDragging)
+                        return;
+
                     SpellDefinition? def = GetSpellDefinition(sender as Control);
 
                     if (!def.HasValue)
