@@ -129,7 +129,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
             }
 
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+            if (SelectedObject.IsPointInStatic(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
     }
