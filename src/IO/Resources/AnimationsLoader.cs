@@ -1230,7 +1230,7 @@ namespace ClassicUO.IO.Resources
                     if (animDirection.Frames[i] != null)
                         continue;
 
-                    UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
+                    ref readonly UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
 
                     if (frameData.DataStart == 0)
                         continue;
@@ -1267,10 +1267,14 @@ namespace ClassicUO.IO.Resources
                             ushort* cur = ptrData + y * imageWidth + x;
                             ushort* end = cur + (header & 0xFFF);
                             int filecounter = 0;
-                            byte[] filedata = reader.ReadArray(header & 0xFFF);
+                            //byte[] filedata = reader.ReadArray(header & 0xFFF);
 
+                            byte* filedata = (byte*)reader.PositionAddress;
+                            reader.Skip(header & 0xFFF);
                             while (cur < end)
+                            {
                                 *cur++ = (ushort) (0x8000 | palette[filedata[filecounter++]]);
+                            }
                         }
                     }
 
