@@ -93,7 +93,11 @@ namespace ClassicUO.Game.UI.Gumps
                         t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
                     }
                     else
-                        t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+                    {
+                        t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize:true);
+
+                        //t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+                    }
 
                     if (string.IsNullOrEmpty(t))
                         return false;
@@ -379,7 +383,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
 
             base.Draw(batcher, x, y);
 
