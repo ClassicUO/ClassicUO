@@ -183,7 +183,7 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
-                    obj.UpdateRealScreenPosition(_offset);
+                    obj.UpdateRealScreenPosition(ref _offset);
 
                 obj.UseInRender = 0xFF;
 
