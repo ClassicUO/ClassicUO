@@ -697,7 +697,8 @@ namespace ClassicUO.Network
                         scene.HeldItem.Enabled = false;
 
 
-                    if (it.Layer != Layer.Invalid) Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
+                    if (it.Layer != Layer.Invalid)
+                        Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
                 }
             }
 
@@ -950,7 +951,22 @@ namespace ClassicUO.Network
             Graphic graphic = p.ReadUShort();
 
 
-            if (graphic == 0x30) // vendor
+            if (graphic == 0xFFFF)
+            {
+                Item spellBookItem = World.Items.Get(serial);
+                if (spellBookItem == null)
+                    return;
+
+                Engine.UI.GetGump<SpellbookGump>(serial)?.Dispose();
+                SpellbookGump spellbookGump = new SpellbookGump(spellBookItem);
+                if (!Engine.UI.GetGumpCachePosition(spellBookItem, out Point location)) location = new Point(64, 64);
+
+                spellbookGump.Location = location;
+                Engine.UI.Add(spellbookGump);
+
+                Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            }
+            else if (graphic == 0x30)
             {
                 Mobile vendor = World.Mobiles.Get(serial);
 
@@ -963,7 +979,7 @@ namespace ClassicUO.Network
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
-                    Item item = vendor.Equipment[(int) layer];
+                    Item item = vendor.Equipment[(int)layer];
 
                     //Item a = item?.Items.FirstOrDefault();
 
@@ -992,24 +1008,7 @@ namespace ClassicUO.Network
             {
                 Item item = World.Items.Get(serial);
 
-                if (item == null)
-                    return;
-
-                if (graphic == 0xFFFF) // spellbook
-                {
-                    if (item.IsSpellBook)
-                    {
-                        Engine.UI.GetGump<SpellbookGump>(serial)?.Dispose();
-                        SpellbookGump spellbookGump = new SpellbookGump(item);
-                        if (!Engine.UI.GetGumpCachePosition(item, out Point location)) location = new Point(64, 64);
-
-                        spellbookGump.Location = location;
-                        Engine.UI.Add(spellbookGump);
-
-                        Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
-                    }
-                }
-                else
+                if (item != null)
                 {
                     if (item.IsCorpse && (Engine.Profile.Current.GridLootType == 1 || Engine.Profile.Current.GridLootType == 2))
                     {
@@ -1024,24 +1023,10 @@ namespace ClassicUO.Network
                     Engine.UI.GetGump<ContainerGump>(serial)?.Dispose();
                     Engine.UI.Add(new ContainerGump(item, graphic));
                 }
+                else 
+                    Log.Message(LogTypes.Error, "[OpenContainer]: item not found");
             }
 
-            //if (graphic != 0x0030)
-            //{
-            //    Item item = World.Items.Get(serial);
-
-            //    if (item != null)
-            //    {
-            //        if (!item.IsCorpse)
-            //        {
-            //            foreach (Item itemItem in item.Items)
-            //            {
-            //                item.Items.Remove(itemItem);
-            //                World.Items.Remove(itemItem);
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -1259,6 +1244,13 @@ namespace ClassicUO.Network
                 {
                     cont.Items.Remove(item);
                     cont.Items.ProcessDelta();
+                    World.Items.Remove(item);
+                    World.Items.ProcessDelta();
+
+                    if (cont.HasEquipment && item.Layer != Layer.Invalid)
+                    {
+                        cont.Equipment[(int) item.Layer] = null;
+                    }
                 }
 
                 item.Container = Serial.INVALID;

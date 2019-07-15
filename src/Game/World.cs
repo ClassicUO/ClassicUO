@@ -227,6 +227,11 @@ namespace ClassicUO.Game
 
         public static Item GetOrCreateItem(Serial serial)
         {
+            if (serial == 0x400008E7)
+            {
+
+            }
+
             Item item = Items.Get(serial);
 
             if (item == null /*|| item.IsDestroyed*/)
@@ -245,6 +250,11 @@ namespace ClassicUO.Game
             if (mob == null /*|| mob.IsDestroyed*/)
             {
                 //Mobiles.Remove(serial);
+                if (serial == 0x00000078)
+                {
+
+                }
+
                 mob = new Mobile(serial);
             }
 
@@ -288,7 +298,12 @@ namespace ClassicUO.Game
                 return false;
 
             foreach (Item i in mobile.Items)
+            {
                 RemoveItem(i);
+
+                World.Items.Remove(i);
+            }
+            World.Items.ProcessDelta();
 
             mobile.Items.Clear();
             mobile.Destroy();
