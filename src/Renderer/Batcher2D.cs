@@ -1705,7 +1705,7 @@ namespace ClassicUO.Renderer
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
             _indexBuffer.SetData(GenerateIndexArray());
             _blendState = BlendState.AlphaBlend;
-            _rasterizerState = RasterizerState.CullCounterClockwise;
+            _rasterizerState = RasterizerState.CullNone;
 
             _rasterizerState = new RasterizerState
             {
@@ -1816,7 +1816,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = _stencil;
-            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullCounterClockwise;
+            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
