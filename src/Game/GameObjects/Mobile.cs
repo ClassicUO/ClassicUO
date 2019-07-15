@@ -1036,6 +1036,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            HitsTexture?.Destroy();
+            HitsTexture = null;
+
             if (HasEquipment)
             {
                 for (int i = 0; i < Equipment.Length; i++)

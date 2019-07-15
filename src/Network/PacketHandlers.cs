@@ -2379,40 +2379,14 @@ namespace ClassicUO.Network
 
             if (mobile == null) return;
 
-            int oldPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
 
             mobile.HitsMax = p.ReadUShort();
             mobile.Hits = p.ReadUShort();
             mobile.ProcessDelta();
 
-            if (mobile == World.Player) UoAssist.SignalHits();
-
-            if (Engine.Profile.Current.ShowMobilesHP)
-            {
-                int type = Engine.Profile.Current.MobileHPType;
-
-                if (type == 0 || type == 2)
-                {
-                    try
-                    {
-                        int newPerc = mobile.Hits * 100 / (mobile.HitsMax == 0 ? 1 : mobile.HitsMax);
-
-                        if (oldPerc != newPerc)
-                        {
-                            Hue[] hues = HealthPercentageHues.Hues;
-
-
-                            int index = (newPerc + 5) / 10 % hues.Length;
-
-                            if (index >= 0 && index < hues.Length)
-                                mobile.AddOverhead(MessageType.Label, $"[{newPerc}%]", 3, hues[index], true, ishealthmessage: true);
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
+            if (mobile == World.Player)
+                UoAssist.SignalHits();
+                UoAssist.SignalHits();
         }
 
         private static void UpdateMana(Packet p)

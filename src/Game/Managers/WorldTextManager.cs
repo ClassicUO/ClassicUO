@@ -112,6 +112,9 @@ namespace ClassicUO.Game.Managers
          
             ProcessWorldText(false);
 
+            bool health = Engine.Profile.Current.ShowMobilesHP;
+            bool alwaysHP = Engine.Profile.Current.MobileHPShowWhen == 0;
+
             for (var o = _drawPointer; o != null; o = o.Left)
             {
                 if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks)
@@ -126,8 +129,13 @@ namespace ClassicUO.Game.Managers
 
                 if (parent is Mobile m)
                 {
+                    if (health && (alwaysHP || m.Hits != m.HitsMax))
+                    {
+                        offY += 22;
+                    }
+
                     if (!m.IsMounted)
-                        offY = -22;
+                        offY -= 22;
 
                     FileManager.Animations.GetAnimationDimensions(m.AnimIndex, 
                                                                   m.GetGraphicForAnimation(), 
@@ -249,7 +257,6 @@ namespace ClassicUO.Game.Managers
                     SelectedObject.Object = o;
                 }
             }
-
         }
 
 
