@@ -49,7 +49,6 @@ namespace ClassicUO.Game.Managers
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
 
-
             Texture2D black = Textures.GetTexture(Color.Black);
             Texture2D red = Textures.GetTexture(Color.Red);
 
@@ -57,9 +56,14 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
+                int current = mobile.Hits;
+                int max = mobile.HitsMax;
+
+                if (Engine.Profile.Current.MobileHPShowWhen == 1 && (current == max))
+                    continue;
+
                 int x = screenX + mobile.RealScreenPosition.X;
                 int y = screenY + mobile.RealScreenPosition.Y;
-
 
                 x += (int) mobile.Offset.X + 22;
                 y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
@@ -76,16 +80,11 @@ namespace ClassicUO.Game.Managers
                 x += screenX;
                 y += screenY;
 
-
                 if (x < screenX || x > screenX + screenW - BAR_WIDTH)
                     continue;
 
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
-
-                int current = mobile.Hits;
-                int max = mobile.HitsMax;
-
 
                 if (max > 0)
                 {
@@ -97,7 +96,6 @@ namespace ClassicUO.Game.Managers
                     if (max > 1)
                         max = BAR_WIDTH * max / 100;
                 }
-
 
                 batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
                 batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
