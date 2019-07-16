@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
             }, mode);
             hpAreaItem.Add(_hpComboBox);
 
-            text = new Label("if ", true, HUE_FONT)
+            text = new Label("mode:", true, HUE_FONT)
             {
                 X = _showHpMobile.Bounds.Right + 170,
                 Y = 20
@@ -319,12 +319,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             mode = Engine.Profile.Current.MobileHPShowWhen;
 
-            if (mode != 0 && mode != 1)
+            if (mode != 0 && mode > 2)
                 mode = 0;
 
-            _hpComboBoxShowWhen = new Combobox(_showHpMobile.Bounds.Right + 190, 20, 100, new[]
+            _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 100, new[]
             {
-                "Always", "Less 100%"
+                "Always", "Less than 100%", "Smart"
             }, mode);
             hpAreaItem.Add(_hpComboBoxShowWhen);
 
