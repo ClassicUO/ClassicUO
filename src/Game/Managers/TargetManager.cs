@@ -45,10 +45,9 @@ namespace ClassicUO.Game.Managers
         HueCommandTarget
     }
 
-    public enum CursorType
+    internal class CursorType
     {
-        Invalid = -1,
-        Target = 6983686
+        public static readonly Serial Target = new Serial(6983686);
     }
 
     public enum TargetType
