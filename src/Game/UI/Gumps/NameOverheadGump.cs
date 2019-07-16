@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsUnicode = true,
                 Font = 0xFF,
                 Hue = hue,
-                MaxWidth = 200,
+                MaxWidth = 100,
                 FontStyle = FontStyle.BlackBorder | FontStyle.Cropped,
                 Align = TEXT_ALIGN_TYPE.TS_CENTER,
                 IsHTML = true
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (string.IsNullOrEmpty(t))
                         return false;
-
+                    
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (width > 200)
                         width = 200;
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder | FontStyle.Cropped));
 
                     if (width > 200)
                         width = 200;
@@ -131,9 +131,23 @@ namespace ClassicUO.Game.UI.Gumps
                     return true;
                 }
 
+
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
+                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+
+                    if (width > 200)
+                        width = 200;
+
+                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder | FontStyle.Cropped));
+
+                    if (width > 200)
+                        width = 200;
+
+                    _renderedText.MaxWidth = width;
+
                     _renderedText.Text = Entity.Name;
+
                     Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
                     Height = _background.Height = _renderedText.Height + 4;
 
