@@ -64,7 +64,8 @@ namespace ClassicUO.Game.UI.Gumps
                 IsUnicode = true,
                 Font = 0xFF,
                 Hue = hue,
-                FontStyle = FontStyle.BlackBorder,
+                MaxWidth = 200,
+                FontStyle = FontStyle.BlackBorder | FontStyle.Cropped,
                 Align = TEXT_ALIGN_TYPE.TS_CENTER,
                 IsHTML = true
             };
