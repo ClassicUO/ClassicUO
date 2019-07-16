@@ -632,7 +632,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.UseItemInHand:
                     Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
-                    if (item != null)
+                    if (itemInLeftHand != null)
                     {
                         GameActions.DoubleClick(itemInLeftHand.Serial);
                     } else

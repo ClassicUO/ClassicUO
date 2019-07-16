@@ -616,12 +616,13 @@ namespace ClassicUO.Game.UI.Gumps
                 const int increm = 50;
 
                 float t0 = Engine.Ticks;
+                bool pressedAdd = false;
 
                 buttonAdd.MouseOver += (sender, e) =>
-                {
+                { 
                     if (status == 2)
                     {
-                        if (Mouse.LButtonPressed && Engine.Ticks > t0)
+                        if (pressedAdd && Engine.Ticks > t0)
                         {
                             t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(0);
@@ -631,22 +632,22 @@ namespace ClassicUO.Game.UI.Gumps
                                 _StepChanger++;
                         }
                     }
-                    else if (Engine.Ticks > t0)
-                    {
-                        status = 2;
-                        t0 = 0;
-                    }
                 };
 
                 buttonAdd.MouseDown += (sender, e) =>
                 {
+                    if (e.Button != MouseButton.Left)
+                        return;
+
+                    pressedAdd = true;
                     _StepChanger = 0;
-                    status = 1;
-                    t0 = Engine.Ticks + 200;
+                    status = 2;
+                    t0 = Engine.Ticks + 500;
                 };
 
                 buttonAdd.MouseUp += (sender, e) =>
                 {
+                    pressedAdd = false;
                     status = 0;
                     _StepsDone = _StepChanger = 1;
                 };
@@ -663,12 +664,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }); // Minus
 
                 float t1 = Engine.Ticks;
+                bool pressedRemove = false;
 
                 buttonRemove.MouseOver += (sender, e) =>
                 {
                     if (status == 2)
                     {
-                        if (Mouse.LButtonPressed && Engine.Ticks > t1)
+                        if (pressedRemove && Engine.Ticks > t1)
                         {
                             t1 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
@@ -678,22 +680,22 @@ namespace ClassicUO.Game.UI.Gumps
                                 _StepChanger++;
                         }
                     }
-                    else if (Engine.Ticks > t1)
-                    {
-                        status = 2;
-                        t1 = 0;
-                    }
                 };
 
                 buttonRemove.MouseDown += (sender, e) =>
                 {
+                    if (e.Button != MouseButton.Left)
+                        return;
+
+                    pressedRemove = true;
                     _StepChanger = 0;
-                    status = 1;
-                    t1 = Engine.Ticks + 200;
+                    status = 2;
+                    t1 = Engine.Ticks + 500;
                 };
 
                 buttonRemove.MouseUp += (sender, e) =>
                 {
+                    pressedRemove = false;
                     status = 0;
                     _StepsDone = _StepChanger = 1;
                 };
