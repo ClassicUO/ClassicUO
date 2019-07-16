@@ -627,6 +627,22 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.UseItemInHand:
+                    Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
+                    if (item != null)
+                    {
+                        GameActions.DoubleClick(itemInLeftHand.Serial);
+                    } else
+                    {
+                        Item itemInRightHand = World.Player.Equipment[(int)Layer.TwoHanded];
+                        if (itemInRightHand != null)
+                        {
+                            GameActions.DoubleClick(itemInRightHand.Serial);
+                        }
+                    }
+
+                    break;
+
                 case MacroType.LastTarget:
 
                     if (WaitForTargetTimer == 0)
@@ -1333,7 +1349,8 @@ namespace ClassicUO.Game.Managers
         AuraOnOff,
         Grab,
         SetGrabBag,
-        NamesOnOff
+        NamesOnOff,
+        UseItemInHand
     }
 
     internal enum MacroSubType
