@@ -41,7 +41,14 @@ namespace ClassicUO.Game.Managers
         MultiPlacement = 2,
         SetTargetClientSide = 3,
         Grab,
-        SetGrabBag
+        SetGrabBag,
+        HueCommandTarget
+    }
+
+    public enum CursorType
+    {
+        Invalid = -1,
+        Target = 6983686
     }
 
     public enum TargetType

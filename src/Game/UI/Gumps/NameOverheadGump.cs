@@ -259,6 +259,12 @@ namespace ClassicUO.Game.UI.Gumps
                             Engine.UI.Add(new InfoGump(Entity));
 
                             break;
+
+                        case CursorTarget.HueCommandTarget:
+                            CommandManager.OnHueTarget(Entity);
+
+                            break;
+
                     }
                 }
                 else
