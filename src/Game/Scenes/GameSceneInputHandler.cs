@@ -357,6 +357,15 @@ namespace ClassicUO.Game.Scenes
 
                         break;
 
+                    case CursorTarget.HueCommandTarget:
+
+                        if (SelectedObject.Object is Entity selectedEntity)
+                        {
+                            CommandManager.OnHueTarget(selectedEntity);
+                        }
+
+                        break;
+
                     default:
                         Log.Message(LogTypes.Warning, "Not implemented.");
 
