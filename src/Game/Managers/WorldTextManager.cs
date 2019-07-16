@@ -348,8 +348,6 @@ namespace ClassicUO.Game.Managers
             {
                 if (!_staticToUpdate.Contains(obj.Parent.Parent))
                     _staticToUpdate.Add(obj.Parent.Parent);
-                else 
-                    return;
             }
             
             var item = _firstNode;

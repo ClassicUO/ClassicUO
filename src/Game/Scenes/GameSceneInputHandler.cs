@@ -379,20 +379,26 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Static st:
-                        string name = st.Name;
+                        if (st.EntityTextContainerContainer == null || st.EntityTextContainerContainer.IsEmpty)
+                        {
+                            string name = st.Name;
 
-                        if (string.IsNullOrEmpty(name))
-                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            if (string.IsNullOrEmpty(name))
+                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        }
 
                         break;
 
                     case Multi multi:
-                        name = multi.Name;
+                        if (multi.EntityTextContainerContainer == null || multi.EntityTextContainerContainer.IsEmpty)
+                        {
+                            string name = multi.Name;
 
-                        if (string.IsNullOrEmpty(name))
-                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            if (string.IsNullOrEmpty(name))
+                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        }
 
                         break;
 
