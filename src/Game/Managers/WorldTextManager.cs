@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Managers
 
             _staticToUpdate.Clear();
 
-            _firstNode = null;
+            _firstNode = new MessageInfo();
             _drawPointer = null;
         }
     }
