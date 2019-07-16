@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
                     color = 0x0021;
                 else if (perc < 50)
                     color = 0x0030;
-                else if (color < 80)
+                else if (perc < 80)
                     color = 0x0058;
 
                 HitsTexture?.Destroy();
