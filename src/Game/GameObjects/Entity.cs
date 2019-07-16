@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected long LastAnimationChangeTime { get; set; }
 
-        public EntityCollection<Item> Items { get; private set; }
+        public EntityCollection<Item> Items { get; protected set; }
 
         public bool HasEquipment => _equipment != null;
 
