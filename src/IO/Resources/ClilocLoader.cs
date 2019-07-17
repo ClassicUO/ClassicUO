@@ -151,7 +151,7 @@ namespace ClassicUO.IO.Resources
             }
 
             if (capitalize)
-                baseCliloc = StringHelper.CapitalizeWordsByLimitator(baseCliloc);
+                baseCliloc = StringHelper.CapitalizeAllWords(baseCliloc);
 
             return baseCliloc;
         }
