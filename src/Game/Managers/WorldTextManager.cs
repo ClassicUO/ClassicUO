@@ -114,6 +114,7 @@ namespace ClassicUO.Game.Managers
 
             bool health = Engine.Profile.Current.ShowMobilesHP;
             int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
+            int mode = Engine.Profile.Current.MobileHPType;
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
@@ -129,7 +130,7 @@ namespace ClassicUO.Game.Managers
 
                 if (parent is Mobile m)
                 {
-                    if (health && ((alwaysHP == 2 && m.Hits != m.HitsMax) || alwaysHP <= 1))
+                    if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
                     {
                         offY += 22;
                     }
