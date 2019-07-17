@@ -3574,15 +3574,16 @@ namespace ClassicUO.Network
             byte type = p.ReadByte();
             Serial serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
-            ushort graphicInc = p.ReadUShort();
+            byte graphicInc = p.ReadByte();
             ushort amount = p.ReadUShort();
+            p.Skip(2);
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction dir = (Direction) p.ReadByte();
             Hue hue = p.ReadUShort();
             Flags flags = (Flags) p.ReadByte();
-            ushort unknwn = p.ReadUShort();
+            p.Skip(2);
 
             if (serial != World.Player)
             {
