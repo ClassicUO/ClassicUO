@@ -3572,59 +3572,124 @@ namespace ClassicUO.Network
 
             p.Skip(2);
             byte type = p.ReadByte();
-            Item item = World.GetOrCreateItem(p.ReadUInt());
+            Serial serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
-            ushort graphicInc = p.ReadByte();
-            //item.Direction = (Direction)p.ReadByte();
-            item.Amount = p.ReadUShort();
-            p.Skip(2); //amount again? wtf???
-            Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            item.Direction = (Direction) p.ReadByte();
-            item.LightID = (byte) item.Direction;
-            item.Hue = p.ReadUShort();
-            item.Flags = (Flags) p.ReadByte();
+            ushort graphicInc = p.ReadUShort();
+            ushort amount = p.ReadUShort();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            sbyte z = p.ReadSByte();
+            Direction dir = (Direction) p.ReadByte();
+            Hue hue = p.ReadUShort();
+            Flags flags = (Flags) p.ReadByte();
+            ushort unknwn = p.ReadUShort();
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_7090)
-                p.ReadUShort(); //unknown
-            item.Container = Serial.INVALID;
-
-            if (graphic != 0x2006)
-                graphic += graphicInc;
-            else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
-
-            if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
-
-            if (type == 2)
+            if (serial != World.Player)
             {
-                //if (item.IsMulti)
-                //    item.IsMulti = false;
-                //if (item.IsMulti)
-                //{
-                //    if (World.HouseManager.TryGetHouse(item, out var house))
-                //    {
-                //        house.Generate(true);
-                //    }
-                //}
+                Item item = World.GetOrCreateItem(serial);
+                item.Amount = amount;
+                Position position = new Position(x, y, z);
+                item.Direction = dir;
+                item.LightID = (byte) dir;
+                item.Hue = hue;
+                item.Flags = flags;
+                item.Container = Serial.INVALID;
 
-                item.IsMulti = true;
-                item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
-                item.Graphic = (ushort) (graphic & 0x3FFF);
+                if (graphic != 0x2006)
+                    graphic += graphicInc;
+                else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
+
+                if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
+
+                if (type == 2)
+                {
+                    item.IsMulti = true;
+                    item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
+                    item.Graphic = (ushort)(graphic & 0x3FFF);
+                }
+                else
+                {
+                    item.IsMulti = false;
+                    item.Graphic = graphic;
+                }
+
+                item.Position = position;
+                item.CheckGraphicChange(item.AnimIndex);
+                item.ProcessDelta();
+
+                if (World.Items.Add(item))
+                    World.Items.ProcessDelta();
+
+                item.AddToTile();
+            }
+            else if (p.ID == 0xF7)
+            {
+
+                Graphic oldGraphic = World.Player.Graphic;
+                bool oldDead = World.Player.IsDead;
+
+                World.Player.Position = new Position(x, y, z);
+                World.RangeSize.X = x;
+                World.RangeSize.Y = y;
+                World.Player.Graphic = graphic;
+                World.Player.Direction = dir;
+                World.Player.Hue = hue;
+                World.Player.Flags = flags;
+
+
+#if JAEDAN_MOVEMENT_PATCH
+            World.Player.ForcePosition(x, y, z, dir);
+#elif MOVEMENT2
+            World.Player.ResetSteps();
+
+            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
+
+            if (endX == x && endY == y && endZ == z)
+            {
+                if (endDir != dir)
+                {
+                    World.Player.EnqueueStep(x, y, z, dir, false);
+                }
             }
             else
             {
-                item.IsMulti = false;
-                item.Graphic = graphic;
+                World.Player.ForcePosition(x, y, z , dir);
             }
+#else
+                World.Player.CloseBank();
+                World.Player.Walker.WalkingFailed = false;
+                World.Player.Position = new Position(x, y, z);
+                World.RangeSize.X = x;
+                World.RangeSize.Y = y;
+                World.Player.Direction = dir;
+                World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
 
-            item.Position = position;
-            item.CheckGraphicChange(item.AnimIndex);
-            item.ProcessDelta();
+                if (oldGraphic != 0 && oldGraphic != World.Player.Graphic)
+                {
+                    if (World.Player.IsDead)
+                    {
+                        TargetManager.Reset();
+                    }
+                }
 
-            if (World.Items.Add(item))
-                World.Items.ProcessDelta();
+                if (oldDead != World.Player.IsDead)
+                {
+                    if (World.Player.IsDead)
+                        World.ChangeSeason(Seasons.Desolation, 42);
+                    else
+                        World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
+                }
 
-            //if (item.OnGround)
-            item.AddToTile();
+                World.Player.Walker.ResendPacketSended = false;
+                World.Player.AddToTile();
+#endif
+                World.Player.ProcessDelta();
+
+                var scene = Engine.SceneManager.GetScene<GameScene>();
+
+                if (scene != null)
+                    scene.UpdateDrawPosition = true;
+            }
         }
 
         private static void BoatMoving(Packet p)
@@ -3647,7 +3712,9 @@ namespace ClassicUO.Network
 
             item.Position = new Position(x, y, (sbyte) z);
             item.AddToTile();
-
+            //item.Graphic += (byte) facingDirection;
+            //item.WantUpdateMulti = true;
+            //item.CheckGraphicChange();
             if (World.HouseManager.TryGetHouse(item, out House house))
                 house.Generate(true);
 
@@ -3681,6 +3748,24 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
+
+            int count = p.ReadUShort();
+
+            for (int i = 0; i < count; i++)
+            {
+                byte id = p.ReadByte();
+
+                if (id == 0xF3)
+                {
+                    UpdateItemSA(p);
+                }
+                else
+                {
+                    Log.Message(LogTypes.Warning, $"Unknown packet ID: [0x{id:X2}] in 0xF7");
+
+                    break;
+                }
+            }
         }
 
         private static void AddItemToContainer(Serial serial, Graphic graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
