@@ -409,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ShopItem(Item item)
             {
                 Item = item;
-                string itemName = StringHelper.CapitalizeAllWords(item.Name);
+                string itemName = StringHelper.CapitalizeWordsByLimitator(item.Name);
 
                 TextureControl control;
 

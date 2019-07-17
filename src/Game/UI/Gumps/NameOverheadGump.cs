@@ -95,9 +95,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize:true);
+                        t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
-                        //t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+                        if (string.IsNullOrEmpty(t))
+                            t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize:true);
                     }
 
                     if (string.IsNullOrEmpty(t))
