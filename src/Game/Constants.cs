@@ -64,13 +64,9 @@ namespace ClassicUO.Game
 
         public const int MAX_FAST_WALK_STACK_SIZE = 5;
 
-        public const int MAX_HOUSE_DISTANCE = 50;
+        public const byte FOLIAGE_ALPHA = 76;
+        public const byte ALPHA_TIME = 20;
 
-        public const float FOLIAGE_ALPHA = .7f;
-        public const int ALPHA_TIME = 25;
-
-        public const float ALPHA_OBJECT_VALUE = 200.0f;
-        public const int ALPHA_OBJECT_TIME = 200;
 
         public const int SPELLBOOK_1_SPELLS_COUNT = 64;
         public const int SPELLBOOK_2_SPELLS_COUNT = 17;

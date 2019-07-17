@@ -108,7 +108,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (World.Player.IsDrivingBoat)
                 {
-
                     if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
                     {
                         _boatRun = run;
