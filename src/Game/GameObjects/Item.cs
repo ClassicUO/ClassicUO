@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
                 i._amount = 0;
                 i._animDataFrame = default;
                 i._animSpeed = 0;
-                i._container = 0;
+                i._container = Serial.INVALID;
                 i._isMulti = false;
                 i._layer = 0;
                 i._price = 0;
@@ -114,6 +114,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDestroyed)
                 return;
+
+            _container = Serial.INVALID;
+            _delta = 0;
 
             base.Destroy();
             _pool.Enqueue(this);

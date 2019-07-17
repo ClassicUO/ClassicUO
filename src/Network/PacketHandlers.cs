@@ -2172,6 +2172,9 @@ namespace ClassicUO.Network
                 return;
 
             Entity corpse = World.Get(p.ReadUInt());
+            if (corpse == null)
+                return;
+
             Layer layer = (Layer) p.ReadByte();
 
             while (layer != Layer.Invalid && p.Position < p.Length)
