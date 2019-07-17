@@ -266,7 +266,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     obj.UseObjectHandles = (ismobile ||
                                             iscorpse ||
-                                            obj is Item it && (!it.IsLocked/* || it.IsLocked && itemData.IsContainer*/) && !it.IsMulti) &&
+                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
                     _objectHandlesCount++;
                 }
