@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AcceptMouseInput = true;
+            //AcceptMouseInput = true;
             CanBeSaved = true;
             CanMove = true;
             LocalSerial = Mobile.Serial;
@@ -342,6 +342,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             return true;
         }
+
+        //public override bool Contains(int x, int y)
+        //{
+        //    //x = Mouse.Position.X - ScreenCoordinateX;
+        //    //y = Mouse.Position.Y - ScreenCoordinateY;
+
+
+        //    for (int i = 0; i < Children.Count; i++)
+        //    {
+        //        var c = Children[i];
+
+        //        if (c.Contains(x, y))
+        //            return true;
+        //    }
+
+        //    return false;
+        //}
 
 
         public override void Save(BinaryWriter writer)
