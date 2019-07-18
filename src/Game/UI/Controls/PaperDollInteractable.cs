@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Item item = World.Items.Get(serial);
 
-                if (item != null)
+                if (item != null && item.Layer >= 0 && (int) item.Layer <= _pgumps.Length)
                 {
                     ref var gump = ref _pgumps[(int)item.Layer];
                     gump?.Dispose();
