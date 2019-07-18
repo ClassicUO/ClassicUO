@@ -138,7 +138,10 @@ namespace ClassicUO.IO
         public string[] GetTokensAtLine(int line)
         {
             if (line >= _parts.Count || line < 0)
-                throw new IndexOutOfRangeException();
+            {
+                Log.Message(LogTypes.Error, $"Index out of range [Line: {line}]. Returned '0'");
+                return new [] {"0"};
+            }
 
             return _parts[line];
         }
@@ -149,7 +152,10 @@ namespace ClassicUO.IO
             string[] p = GetTokensAtLine(line);
 
             if (index >= p.Length || index < 0)
-                throw new IndexOutOfRangeException();
+            {
+                Log.Message(LogTypes.Error, $"Index out of range [Line: {line}]. Returned '0'");
+                return "0";
+            }
 
             return p[index];
         }
@@ -217,7 +223,8 @@ namespace ClassicUO.IO
                         return true;
                     }
 
-                    throw new Exception("Wrong def file");
+                    //throw new Exception("Wrong def file");
+
                 }
             }
 

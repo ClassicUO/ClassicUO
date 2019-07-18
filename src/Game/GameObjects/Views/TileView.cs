@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInLand(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

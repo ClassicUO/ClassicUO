@@ -225,6 +225,17 @@ namespace ClassicUO.Game.UI.Controls
                             }
 
                             break;
+
+                        case CursorTarget.HueCommandTarget:
+                            SelectedObject.Object = Item;
+
+                            if (Item != null)
+                            {
+                                CommandManager.OnHueTarget(Item);
+                            }
+
+                            break;
+
                     }
                 }
                 else

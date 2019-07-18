@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int MALE_OFFSET = 50000;
         private const int FEMALE_OFFSET = 60000;
-        private readonly bool _isPartialHue;
+        private bool _isPartialHue;
 
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
@@ -52,41 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             if (transparent)
                 Alpha = 0.5f;
 
-            _isPartialHue = item.ItemData.IsPartialHue;
-
-            int offset = !owner.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
-
-            ushort id = Item.ItemData.AnimID;
-
-            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
-            {
-                if (dict.TryGetValue(id, out EquipConvData data))
-                {
-                    if (data.Gump > MALE_OFFSET)
-                        id = (ushort) (data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
-                    else
-                        id = data.Gump;
-                }
-            }
-
-            Texture = FileManager.Gumps.GetTexture((ushort) (id + offset));
-
-            if (!owner.IsMale && Texture == null)
-                Texture = FileManager.Gumps.GetTexture((ushort) (id + MALE_OFFSET));
-
-            if (Texture == null)
-            {
-                if (item.Layer != Layer.Face)
-                    Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
-                Dispose();
-
-                return;
-            }
-
-            Width = Texture.Width;
-            Height = Texture.Height;
-
-            WantUpdateSize = false;
+            Update(item);
         }
 
         public Mobile Mobile { get; set; }
@@ -120,6 +86,47 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
+        }
+
+        public void Update(Item item, bool transparent = false)
+        {
+            Alpha = transparent ? 0.5f : 0;
+
+            _isPartialHue = item.ItemData.IsPartialHue;
+
+            int offset = !Mobile.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
+
+            ushort id = Item.ItemData.AnimID;
+
+            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
+            {
+                if (dict.TryGetValue(id, out EquipConvData data))
+                {
+                    if (data.Gump > MALE_OFFSET)
+                        id = (ushort)(data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
+                    else
+                        id = data.Gump;
+                }
+            }
+
+            Texture = FileManager.Gumps.GetTexture((ushort)(id + offset));
+
+            if (!Mobile.IsMale && Texture == null)
+                Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
+
+            if (Texture == null)
+            {
+                if (item.Layer != Layer.Face)
+                    Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
+                Dispose();
+
+                return;
+            }
+
+            Width = Texture.Width;
+            Height = Texture.Height;
+
+            WantUpdateSize = false;
         }
 
 

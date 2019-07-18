@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -31,10 +32,19 @@ namespace ClassicUO.Game.Managers
 {
     internal class HealthLinesManager
     {
-        public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP && Engine.Profile.Current.MobileHPType >= 1;
+        public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP;
 
 
         private Vector3 _vectorHue = Vector3.Zero;
+
+
+        private static readonly Texture2D _edge, _back; 
+        static HealthLinesManager()
+        {
+            _edge = Textures.GetTexture(Color.Black);
+            _back = Textures.GetTexture(Color.Red);
+        }
+
 
         public void Draw(UltimaBatcher2D batcher, float scale)
         {
@@ -49,17 +59,27 @@ namespace ClassicUO.Game.Managers
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
 
-
-            Texture2D black = Textures.GetTexture(Color.Black);
-            Texture2D red = Textures.GetTexture(Color.Red);
+            
 
             Color color;
 
+            int mode = Engine.Profile.Current.MobileHPType;
+
+            if (mode < 0)
+                return;
+
+            int showWhen = Engine.Profile.Current.MobileHPShowWhen;
+
             foreach (Mobile mobile in World.Mobiles)
             {
+                int current = mobile.Hits;
+                int max = mobile.HitsMax;
+
+                if (showWhen == 1 && current == max)
+                    continue;
+
                 int x = screenX + mobile.RealScreenPosition.X;
                 int y = screenY + mobile.RealScreenPosition.Y;
-
 
                 x += (int) mobile.Offset.X + 22;
                 y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
@@ -76,6 +96,59 @@ namespace ClassicUO.Game.Managers
                 x += screenX;
                 y += screenY;
 
+            
+                if (mode != 1 && !mobile.IsDead)
+                {
+                    if ((showWhen == 2 && current != max) || showWhen <= 1)
+                    {
+                        int xx = x;
+                        int yy = y;
+
+                        if (!mobile.IsMounted)
+                            yy += 22;
+
+
+                        FileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
+                                                                      mobile.GetGraphicForAnimation(),
+                                                                      /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                      /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                                      mobile.IsMounted,
+                                                                      /*(byte) m.AnimIndex*/ 0,
+                                                                      out int centerX,
+                                                                      out int centerY,
+                                                                      out int width,
+                                                                      out int height);
+
+                        //xx -= width + centerX;
+                       
+                        yy -= height + centerY + 28;
+
+
+                        int ww = mobile.HitsMax;
+
+                        if (ww > 0)
+                        {
+                            ww = mobile.Hits * 100 / ww;
+
+                            if (ww > 100)
+                                ww = 100;
+                            else if (ww < 1)
+                                ww = 0;
+
+                            mobile.UpdateHits((byte) ww);
+                        }
+
+                        if (mobile.HitsPercentage != 0)
+                        {
+                            xx -= (mobile.HitsTexture.Width >> 1) + 3;
+                            xx += 22;
+                            yy -= mobile.HitsTexture.Height;
+
+                            if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
+                                mobile.HitsTexture.Draw(batcher, xx, yy);
+                        }
+                    }
+                }
 
                 if (x < screenX || x > screenX + screenW - BAR_WIDTH)
                     continue;
@@ -83,35 +156,35 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                int current = mobile.Hits;
-                int max = mobile.HitsMax;
-
-
-                if (max > 0)
+                if (mode >= 1)
                 {
-                    max = current * 100 / max;
+                    if (max > 0)
+                    {
+                        max = current * 100 / max;
 
-                    if (max > 100)
-                        max = 100;
+                        if (max > 100)
+                            max = 100;
 
-                    if (max > 1)
-                        max = BAR_WIDTH * max / 100;
+                        if (max > 1)
+                            max = BAR_WIDTH * max / 100;
+                    }
+
+                    batcher.Draw2D(_edge, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
+                    batcher.Draw2D(_back, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
+
+                    if (mobile.IsParalyzed)
+                        color = Color.AliceBlue;
+                    else if (mobile.IsYellowHits)
+                        color = Color.Orange;
+                    else if (mobile.IsPoisoned)
+                        color = Color.LimeGreen;
+                    else
+                        color = Color.CornflowerBlue;
+
+                    batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
                 }
 
-
-                batcher.Draw2D(black, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
-                batcher.Draw2D(red, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
-
-                if (mobile.IsParalyzed)
-                    color = Color.AliceBlue;
-                else if (mobile.IsYellowHits)
-                    color = Color.Orange;
-                else if (mobile.IsPoisoned)
-                    color = Color.LimeGreen;
-                else
-                    color = Color.CornflowerBlue;
-
-                batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
+               
             }
         }
     }

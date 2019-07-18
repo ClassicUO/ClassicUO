@@ -87,7 +87,7 @@ namespace ClassicUO.Game
 
         public override string ToString()
         {
-            return $"0x{Value:X4}";
+            return $"{Value} (0x{Value:X4})";
         }
 
         public override int GetHashCode()

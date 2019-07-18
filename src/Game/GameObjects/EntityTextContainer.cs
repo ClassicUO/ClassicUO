@@ -86,36 +86,36 @@ namespace ClassicUO.Game.GameObjects
                 isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
             }
 
-            for (int i = 0; i < _messages.Count; i++)
-            {
-                var a = _messages[i];
+            //for (int i = 0; i < _messages.Count; i++)
+            //{
+            //    var a = _messages[i];
 
-                if (type == MessageType.Label && a.RenderedText != null && (ishealthmessage && a.IsHealthMessage || a.RenderedText.Text == msg) && a.Type == type)
-                {
-                    if (a.RenderedText.Hue != hue || ishealthmessage)
-                    {
-                        a.Hue = hue;
-                        a.RenderedText.Hue = hue;
+            //    if (type == MessageType.Label && a.RenderedText != null && (ishealthmessage && a.IsHealthMessage || a.RenderedText.Text == msg) && a.Type == type)
+            //    {
+            //        if (a.RenderedText.Hue != hue || ishealthmessage)
+            //        {
+            //            a.Hue = hue;
+            //            a.RenderedText.Hue = hue;
 
-                        if (ishealthmessage)
-                        {
-                            a.Time = CalculateTimeToLive(a.RenderedText);
-                            a.RenderedText.Text = msg;
-                        }
-                        else
-                            a.RenderedText.CreateTexture();
-                    }
+            //            if (ishealthmessage)
+            //            {
+            //                a.Time = CalculateTimeToLive(a.RenderedText);
+            //                a.RenderedText.Text = msg;
+            //            }
+            //            else
+            //                a.RenderedText.CreateTexture();
+            //        }
                     
-                    _messages.RemoveAt(i);
+            //        _messages.RemoveAt(i);
 
-                    if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-                        _messages.AddToFront(a);
-                    else
-                        _messages.Insert(1, a);
+            //        if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
+            //            _messages.AddToFront(a);
+            //        else
+            //            _messages.Insert(1, a);
 
-                    return null;
-                }
-            }
+            //        return null;
+            //    }
+            //}
 
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
                 IsHealthMessage = ishealthmessage
             };
 
-            int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 5;
+            int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 4;
 
             for (int i = 0, limit3 = 0; i < _messages.Count; i++)
             {
@@ -189,10 +189,13 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-                _messages.AddToFront(msgInfo);
-            else
-                _messages.Insert(1, msgInfo);
+
+            _messages.AddToFront(msgInfo);
+
+            //if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
+            //    _messages.AddToFront(msgInfo);
+            //else
+            //    _messages.Insert(1, msgInfo);
 
 
           

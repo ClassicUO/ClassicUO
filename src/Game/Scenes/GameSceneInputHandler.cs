@@ -108,7 +108,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (World.Player.IsDrivingBoat)
                 {
-
                     if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
                     {
                         _boatRun = run;
@@ -199,7 +198,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (mobile != World.Player)
                     {
-                        Engine.UI.GetGump<HealthBarGump>(mobile)?.Dispose();
+                        //Instead of destroying existing HP bar, continue if already opened.
+                        if (Engine.UI.GetGump<HealthBarGump>(mobile)?.IsInitialized ?? false)
+                        {
+                            continue;
+                        }
                         GameActions.RequestMobileStatus(mobile);
                         HealthBarGump hbg = new HealthBarGump(mobile);
                         // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
@@ -357,6 +360,15 @@ namespace ClassicUO.Game.Scenes
 
                         break;
 
+                    case CursorTarget.HueCommandTarget:
+
+                        if (SelectedObject.Object is Entity selectedEntity)
+                        {
+                            CommandManager.OnHueTarget(selectedEntity);
+                        }
+
+                        break;
+
                     default:
                         Log.Message(LogTypes.Warning, "Not implemented.");
 
@@ -370,20 +382,26 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Static st:
-                        string name = st.Name;
+                        if (st.EntityTextContainerContainer == null || st.EntityTextContainerContainer.IsEmpty)
+                        {
+                            string name = st.Name;
 
-                        if (string.IsNullOrEmpty(name))
-                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            if (string.IsNullOrEmpty(name))
+                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        }
 
                         break;
 
                     case Multi multi:
-                        name = multi.Name;
+                        if (multi.EntityTextContainerContainer == null || multi.EntityTextContainerContainer.IsEmpty)
+                        {
+                            string name = multi.Name;
 
-                        if (string.IsNullOrEmpty(name))
-                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                            if (string.IsNullOrEmpty(name))
+                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        }
 
                         break;
 

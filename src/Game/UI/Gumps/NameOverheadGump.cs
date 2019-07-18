@@ -64,7 +64,8 @@ namespace ClassicUO.Game.UI.Gumps
                 IsUnicode = true,
                 Font = 0xFF,
                 Hue = hue,
-                FontStyle = FontStyle.BlackBorder,
+                MaxWidth = 100,
+                FontStyle = FontStyle.BlackBorder | FontStyle.Cropped,
                 Align = TEXT_ALIGN_TYPE.TS_CENTER,
                 IsHTML = true
             };
@@ -93,11 +94,16 @@ namespace ClassicUO.Game.UI.Gumps
                         t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
                     }
                     else
+                    {
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+
+                        if (string.IsNullOrEmpty(t))
+                            t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize:true);
+                    }
 
                     if (string.IsNullOrEmpty(t))
                         return false;
-
+                    
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
@@ -106,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (width > 200)
                         width = 200;
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder | FontStyle.Cropped));
 
                     if (width > 200)
                         width = 200;
@@ -126,9 +132,23 @@ namespace ClassicUO.Game.UI.Gumps
                     return true;
                 }
 
+
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
+                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+
+                    if (width > 200)
+                        width = 200;
+
+                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder | FontStyle.Cropped));
+
+                    if (width > 200)
+                        width = 200;
+
+                    _renderedText.MaxWidth = width;
+
                     _renderedText.Text = Entity.Name;
+
                     Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
                     Height = _background.Height = _renderedText.Height + 4;
 
@@ -240,6 +260,12 @@ namespace ClassicUO.Game.UI.Gumps
                             Engine.UI.Add(new InfoGump(Entity));
 
                             break;
+
+                        case CursorTarget.HueCommandTarget:
+                            CommandManager.OnHueTarget(Entity);
+
+                            break;
+
                     }
                 }
                 else
@@ -379,7 +405,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
 
             base.Draw(batcher, x, y);
 

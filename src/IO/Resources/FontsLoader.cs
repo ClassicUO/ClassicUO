@@ -463,11 +463,11 @@ namespace ClassicUO.IO.Resources
                                 uint pcl = 0;
 
                                 if (isPartial)
-                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor);
+                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
                                 else
-                                    pcl = FileManager.Hues.GetColor(pic, charColor);
+                                    pcl = FileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
                                 int block = testrY * width + x + w;
-                                pData[block] = HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
+                                pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
                             }
                         }
                     }

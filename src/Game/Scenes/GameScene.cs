@@ -93,26 +93,7 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
-
-        //public IGameEntity SelectedObject
-        //{
-        //    get => _selectedObject;
-        //    set
-        //    {
-        //        _selectedObject = Game.SelectedObject.Object = value;
-        //        //if (_selectedObject == value)
-        //        //    return;
-
-        //        //if (_selectedObject != null && _selectedObject.IsSelected)
-        //        //    _selectedObject.IsSelected = false;
-
-        //        //_selectedObject = value;
-
-        //        //if (_selectedObject != null)
-        //        //    _selectedObject.IsSelected = true;
-        //    }
-        //}
-
+        
         public JournalManager Journal { get; private set; }
 
         public WorldTextManager Overheads { get; private set; }
@@ -405,7 +386,7 @@ namespace ClassicUO.Game.Scenes
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
             if (_alphaChanged)
-                _alphaTimer = Engine.Ticks + 20;
+                _alphaTimer = Engine.Ticks + Constants.ALPHA_TIME;
 
             GetViewPort();
 

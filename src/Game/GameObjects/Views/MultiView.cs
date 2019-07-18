@@ -72,8 +72,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (CharacterIsBehindFoliage)
                 {
-                    if (AlphaHue != 76)
-                        ProcessAlpha(76);
+                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
+                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
                 }
                 else
                 {
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
             }
 
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+            if (SelectedObject.IsPointInStatic(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
     }

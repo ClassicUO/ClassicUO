@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(256)]
-        public void UpdateRealScreenPosition(Point offset)
+        public void UpdateRealScreenPosition(ref Point offset)
         {
             RealScreenPosition.X = _screenPosition.X - offset.X - 22;
             RealScreenPosition.Y = _screenPosition.Y - offset.Y - 22;
