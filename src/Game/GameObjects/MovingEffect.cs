@@ -246,9 +246,9 @@ namespace ClassicUO.Game.GameObjects
                     bool incZ = sz < tz;
 
                     if (incZ)
-                        totalOffsetZ = (tz - sz) * 4;
+                        totalOffsetZ = (tz - sz) << 2;
                     else
-                        totalOffsetZ = (sz - tz) * 4;
+                        totalOffsetZ = (sz - tz) << 2;
                     totalOffsetZ /= stepsCountX;
 
                     if (totalOffsetZ == 0)
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                countY -= (int) Offset.Z + (tz - sz) * 4;
+                countY -= (int) Offset.Z + ((tz - sz) << 2);
                 float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
                 AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
 
