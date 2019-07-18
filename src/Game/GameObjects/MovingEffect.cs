@@ -117,10 +117,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > totalMS)
+            if (_lastMoveTime > Engine.Ticks)
                 return;
 
-            _lastMoveTime = (uint) (totalMS + MovingDelay);
+            _lastMoveTime = Engine.Ticks + MovingDelay;
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
