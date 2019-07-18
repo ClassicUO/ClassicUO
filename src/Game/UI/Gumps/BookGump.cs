@@ -543,9 +543,13 @@ namespace ClassicUO.Game.UI.Gumps
         private void OnLeftClick()
         {
             var curpage = ActiveInternalPage;
-            var entry = m_Pages[curpage].TxEntry;
-            var caretpos = m_Pages[curpage].TxEntry.CaretIndex;
-            _AtEnd = (sbyte) (caretpos == 0 && curpage > 0 ? -1 : caretpos + 1 >= entry.Text.Length && curpage >= 0 && curpage < BookPageCount ? 1 : 0);
+
+            if (curpage >= 0 && curpage < m_Pages.Count)
+            {
+                var entry = m_Pages[curpage].TxEntry;
+                var caretpos = m_Pages[curpage].TxEntry.CaretIndex;
+                _AtEnd = (sbyte) (caretpos == 0 && curpage > 0 ? -1 : caretpos + 1 >= entry.Text.Length && curpage >= 0 && curpage < BookPageCount ? 1 : 0);
+            }
         }
 
         public override void OnKeyboardReturn(int textID, string text)
