@@ -224,9 +224,32 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ItemGumpPaperdoll g = null;
 
+
+                    bool invertTunicWithArms = false;
+
+                    var torso = Mobile.Equipment[(int) Layer.Torso];
+
+                    if (torso != null && (torso.Graphic == 0x13BF || torso.Graphic == 0x13C4)) // chainmail tunic
+                    {
+                        invertTunicWithArms = true;
+                    }
+
                     for (int i = 0; i < _layerOrder.Length; i++)
                     {
                         int layerIndex = (int) _layerOrder[i];
+
+                        if (invertTunicWithArms)
+                        {
+                            if (layerIndex == (int)Layer.Arms)
+                                layerIndex = (int) Layer.Torso;
+                            else if (layerIndex == (int) Layer.Torso)
+                            {
+                                layerIndex = (int) Layer.Arms;
+                                invertTunicWithArms = false;
+                            }
+                        }
+                        
+
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
                         bool canPickUp = isGM || World.Player == Mobile;
@@ -265,14 +288,11 @@ namespace ClassicUO.Game.UI.Controls
                             itemGump.IsVisible = false;
                             continue;
                         }
+
                         g = _pgumps[layerIndex];
+
                         switch (_layerOrder[i])
                         {
-                            //case Layer.Robe:
-                            //case Layer.OneHanded:
-                            //case Layer.TwoHanded:
-                            //    g = _pgumps[layerIndex];
-                            //    break;
                             case Layer.Hair:
                             case Layer.Beard:
                                 canPickUp = false;
@@ -280,28 +300,23 @@ namespace ClassicUO.Game.UI.Controls
                                 break;
 
                             case Layer.Torso:
-                                g = _pgumps[(int) Layer.Arms];
 
-                                if (g != null && !g.IsDisposed)
-                                {
-                                    if (item.Graphic != 0x13BF && item.Graphic != 0x13C4 && //chainmail tunic
-                                        g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417) //platemail arms
-                                        g = null;
-                                }
+                                //if (item.Graphic == 0x13BF || item.Graphic == 0x13C4) // chainmail tunic
+                                //{
+
+                                //}
+
+                                //g = _pgumps[(int) Layer.Arms];
+
+                                //if (g != null && !g.IsDisposed)
+                                //{
+                                //    if (item.Graphic != 0x13BF && item.Graphic != 0x13C4 && //chainmail tunic
+                                //        g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417) //platemail arms
+                                //        g = null;
+                                //}
 
                                 goto case Layer.Arms;
 
-                            //case Layer.Legs:
-                            //case Layer.Gloves:
-                            //case Layer.Shirt:
-                            //    var robe = _mobile.Equipment[(int)Layer.Robe];
-
-                            //    if (robe != null)
-                            //    {
-                            //        g = _pgumps[(int)Layer.Robe];
-                            //    }
-
-                            //    break;
                             case Layer.Arms:
                                 var robe = _mobile.Equipment[(int)Layer.Robe];
 
