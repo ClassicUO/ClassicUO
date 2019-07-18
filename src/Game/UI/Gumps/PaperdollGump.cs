@@ -319,6 +319,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+
             // This is to update the state of the war mode button.
             if (_isWarMode != Mobile.InWarMode && Mobile == World.Player)
             {

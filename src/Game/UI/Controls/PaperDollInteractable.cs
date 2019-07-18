@@ -39,6 +39,7 @@ namespace ClassicUO.Game.UI.Controls
         };
         private Item _fakeItem;
         private Mobile _mobile;
+        private GumpPic _body, _unk;
 
         private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
 
@@ -83,6 +84,19 @@ namespace ClassicUO.Game.UI.Controls
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
+            foreach (Serial serial in e)
+            {
+                Item item = World.Items.Get(serial);
+
+                if (item != null)
+                {
+                    ref var gump = ref _pgumps[(int)item.Layer];
+                    gump?.Dispose();
+                    gump = null;
+                }
+            }
+
+         
             UpdateEntity();
         }
 
@@ -133,7 +147,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            Clear();
+            //Clear();
 
             // Add the base gump - the semi-naked paper doll.
             Graphic body = 0;
@@ -158,28 +172,53 @@ namespace ClassicUO.Game.UI.Controls
 
             if (isGM)
             {
-                Add(new GumpPic(0, 0, body, 0x03EA)
+                if (_body == null)
                 {
-                    AcceptMouseInput = true,
-                    //IsPaperdoll = true,
-                    IsPartialHue = true
-                });
+                    Add(_body = new GumpPic(0, 0, body, 0x03EA)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = true
+                    });
+                    _body.Initialize();
+                }
+                else
+                    _body.Graphic = body;
 
-                Add(new GumpPic(0, 0, 0xC72B, 0)
+                if (_unk == null)
                 {
-                    AcceptMouseInput = true,
-                    //IsPaperdoll = true,
-                    IsPartialHue = true
-                });
+                    Add(_unk = new GumpPic(0, 0, 0xC72B, 0)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = true
+                    });
+                    _unk.Initialize();
+                }
+                else
+                    _unk.Graphic = 0xC72B;
             }
             else
             {
-                Add(new GumpPic(0, 0, body, _mobile.Hue)
+                if (_unk != null)
                 {
-                    AcceptMouseInput = true,
-                    //IsPaperdoll = true,
-                    IsPartialHue = true
-                });
+                    _unk.Dispose();
+                    _unk = null;
+                }
+
+                if (_body == null)
+                {
+                    Add(_body = new GumpPic(0, 0, body, _mobile.Hue)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = true
+                    });
+                    _body.Initialize();
+                }
+                else
+                {
+                    _body.Graphic = body;
+                    _body.Hue = _mobile.Hue;
+                }
+
 
                 if (Mobile.HasEquipment)
                 {
@@ -190,7 +229,8 @@ namespace ClassicUO.Game.UI.Controls
                         int layerIndex = (int) _layerOrder[i];
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
-                        bool canPickUp = World.InGame;
+                        bool canPickUp = isGM || World.Player == Mobile;
+                        ref var itemGump = ref _pgumps[layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                         {
@@ -198,11 +238,41 @@ namespace ClassicUO.Game.UI.Controls
                             isfake = true;
                             canPickUp = false;
                         }
-                        else if (item == null || item.IsDestroyed || Mobile.IsCovered(_mobile, (Layer) layerIndex))
+                        else if (item == null || item.IsDestroyed)
+                        {
+                            itemGump?.Dispose();
+                            itemGump = null;
                             continue;
+                        }
 
+                        bool isNew = false;
+                        if (itemGump != null)
+                        {
+                            itemGump.IsVisible = true;
+                        }
+                        else
+                        {
+                            Add(itemGump = new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                            {
+                                CanPickUp = canPickUp
+                            });
+                            itemGump.Initialize();
+                            isNew = true;
+                        }
+
+                        if (Mobile.IsCovered(_mobile, (Layer) layerIndex))
+                        {
+                            itemGump.IsVisible = false;
+                            continue;
+                        }
+                        g = _pgumps[layerIndex];
                         switch (_layerOrder[i])
                         {
+                            //case Layer.Robe:
+                            //case Layer.OneHanded:
+                            //case Layer.TwoHanded:
+                            //    g = _pgumps[layerIndex];
+                            //    break;
                             case Layer.Hair:
                             case Layer.Beard:
                                 canPickUp = false;
@@ -221,10 +291,26 @@ namespace ClassicUO.Game.UI.Controls
 
                                 goto case Layer.Arms;
 
-                            case Layer.Arms:
-                                var robe = _mobile.Equipment[(int) Layer.Robe];
+                            //case Layer.Legs:
+                            //case Layer.Gloves:
+                            //case Layer.Shirt:
+                            //    var robe = _mobile.Equipment[(int)Layer.Robe];
 
-                                if (robe != null) continue;
+                            //    if (robe != null)
+                            //    {
+                            //        g = _pgumps[(int)Layer.Robe];
+                            //    }
+
+                            //    break;
+                            case Layer.Arms:
+                                var robe = _mobile.Equipment[(int)Layer.Robe];
+
+                                if (robe != null)
+                                {
+                                    itemGump.IsVisible = false;
+
+                                    continue;
+                                }
 
                                 break;
 
@@ -236,7 +322,11 @@ namespace ClassicUO.Game.UI.Controls
                                     if (robe.Graphic > 0x3173)
                                     {
                                         if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
+                                        {
+                                            itemGump.IsVisible = false;
+
                                             continue;
+                                        }
                                     }
                                     else
                                     {
@@ -246,21 +336,30 @@ namespace ClassicUO.Game.UI.Controls
                                                 if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
                                                     break;
 
+                                            itemGump.IsVisible = false;
+
                                             continue;
                                         }
 
                                         if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
+                                        {
+                                            itemGump.IsVisible = false;
+
                                             continue;
+                                        }
                                     }
                                 }
 
                                 break;
                         }
 
-                        Add(_pgumps[layerIndex] = new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+
+                        if (!isNew || isfake)
                         {
-                            CanPickUp = canPickUp
-                        });
+                            itemGump.Update(item, isfake);
+                            itemGump.CanPickUp = canPickUp;
+                        }
+
 
                         if (g != null)
                         {
@@ -278,15 +377,31 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (backpack != null)
                 {
-                    Add(_pgumps[(int) Layer.Backpack] = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                    ref var backpackGump = ref _pgumps[(int) Layer.Backpack];
+                    if (backpackGump == null)
                     {
-                        AcceptMouseInput = true,
-                        CanPickUp = false
-                    });
-                    _pgumps[(int) Layer.Backpack].MouseDoubleClick += OnDoubleclickBackpackGump;
+                        Add(backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                        {
+                            AcceptMouseInput = true,
+                            CanPickUp = false
+                        });
+                        backpackGump.Initialize();
+                        backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
+                        backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
+                    }
+                    else
+                    {
+                        backpackGump.Update(backpack);
+
+                        Children.Remove(backpackGump);
+                        Children.Add(backpackGump); //move to top
+                    }
+
                 }
             }
         }
+
+
 
         internal bool IsOverBackpack
         {
