@@ -145,7 +145,6 @@ namespace ClassicUO.Game.Managers
                             yy -= mobile.HitsTexture.Height;
 
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
-
                                 mobile.HitsTexture.Draw(batcher, xx, yy);
                         }
                     }

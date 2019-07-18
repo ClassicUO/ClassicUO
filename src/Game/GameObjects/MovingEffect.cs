@@ -67,14 +67,15 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0) mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    //if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
+                    //    mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else if (source is Item)
                 {
                     SetSource(source.Position.X, source.Position.Y, source.Position.Z);
 
-                    if ((xSource | ySource | zSource) != 0)
-                        source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    //if ((xSource | ySource | zSource) != 0)
+                    //    source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else
                     SetSource(xSource, ySource, zSourceB);
@@ -90,15 +91,15 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetTarget(target);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
-                        mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
+                    //if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
+                    //    mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else if (target is Item)
                 {
                     SetTarget(target);
 
-                    if ((xTarget | yTarget | zTarget) != 0)
-                        target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
+                    //if ((xTarget | yTarget | zTarget) != 0)
+                    //    target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else
                     SetTarget(xTarget, yTarget, zTargB);
