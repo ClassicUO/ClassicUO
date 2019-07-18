@@ -631,8 +631,11 @@ namespace ClassicUO.Renderer
                     //    vertex4.Hue = vertex5.Hue = hue;
                     //}
 
-                    if (idx + count + 4 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
                     ref var vertex5_s = ref VertexInfo[idx + count++];
@@ -746,8 +749,11 @@ namespace ClassicUO.Renderer
                     //    vertex6.Hue = vertex7.Hue = hue;
                     //}
 
-                    if (idx + count + 4 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
                     ref var vertex7_s = ref VertexInfo[idx + count++];
@@ -787,7 +793,7 @@ namespace ClassicUO.Renderer
                     vertex6_s.Normal.X = 0;
                     vertex6_s.Normal.Y = 0;
                     vertex6_s.Normal.Z = 1;
-                    vertex6_s.Normal.X = 0;
+                    vertex7_s.Normal.X = 0;
                     vertex7_s.Normal.Y = 0;
                     vertex7_s.Normal.Z = 1;
                     vertex8_s.Normal.X = 0;
@@ -823,6 +829,12 @@ namespace ClassicUO.Renderer
             {
                 if (h3mod != 0.0f)
                 {
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
+                        Flush();
+                    }
+
                     ref var vertex0 = ref VertexInfo[idx + count++];
                     ref var vertex1 = ref VertexInfo[idx + count++];
                     ref var vertex2 = ref VertexInfo[idx + count++];
@@ -882,8 +894,11 @@ namespace ClassicUO.Renderer
 
                     }
 
-                    if (idx + count + 4 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
                     ref var vertex5_s = ref VertexInfo[idx + count++];
@@ -943,8 +958,12 @@ namespace ClassicUO.Renderer
                     }
 
 
-                    if (idx + count + 4 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
+
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
                     ref var vertex7_s = ref VertexInfo[idx + count++];
@@ -984,7 +1003,7 @@ namespace ClassicUO.Renderer
                     vertex6_s.Normal.X = 0;
                     vertex6_s.Normal.Y = 0;
                     vertex6_s.Normal.Z = 1;
-                    vertex6_s.Normal.X = 0;
+                    vertex7_s.Normal.X = 0;
                     vertex7_s.Normal.Y = 0;
                     vertex7_s.Normal.Z = 1;
                     vertex8_s.Normal.X = 0;
