@@ -707,17 +707,20 @@ namespace ClassicUO.Network
 
             if (serial.IsMobile)
             {
+                Mobile m = (Mobile)entity;
+
                 if (World.Party.Contains(serial))
                 {
-                    //
+                    m.RemoveFromTile();
                 }
-
-                Mobile m = (Mobile) entity;
-                World.RemoveMobile(serial);
-                m.Items.ProcessDelta();
-                World.Mobiles.Remove(m);
-                World.Items.ProcessDelta();
-                World.Mobiles.ProcessDelta();
+                else
+                {
+                    World.RemoveMobile(serial);
+                    m.Items.ProcessDelta();
+                    World.Mobiles.Remove(m);
+                    World.Items.ProcessDelta();
+                    World.Mobiles.ProcessDelta();
+                }
             }
             else if (serial.IsItem)
             {
@@ -939,6 +942,7 @@ namespace ClassicUO.Network
                 destZ = destEntity.Position.Z;
             }
 
+            Log.Message(LogTypes.Warning, "DragAnimation [0x23] not implemented yet");
             // effect moving. To do
         }
 

@@ -163,7 +163,7 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (mob.Distance > ClientViewRange)
+                    if (!Party.Contains(mob) && mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -296,7 +296,7 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Get(serial);
 
-            if (mobile == null)
+            if (mobile == null || Party.Contains(serial))
                 return false;
 
             foreach (Item i in mobile.Items)

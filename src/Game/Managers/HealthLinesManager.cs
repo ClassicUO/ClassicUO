@@ -72,6 +72,9 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
+                if (World.Party.Contains(mobile) && mobile.Distance > World.ClientViewRange)
+                    continue;
+
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
 
