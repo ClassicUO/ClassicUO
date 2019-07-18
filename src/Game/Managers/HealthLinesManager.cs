@@ -119,8 +119,9 @@ namespace ClassicUO.Game.Managers
                                                                       out int width,
                                                                       out int height);
 
+                        //xx -= width + centerX;
+                       
                         yy -= height + centerY + 28;
-                        xx += centerX;
 
 
                         int ww = mobile.HitsMax;
@@ -139,7 +140,8 @@ namespace ClassicUO.Game.Managers
 
                         if (mobile.HitsPercentage != 0)
                         {
-                            xx -= (mobile.HitsTexture.Width >> 1);
+                            xx -= (mobile.HitsTexture.Width >> 1) + 3;
+                            xx += 22;
                             yy -= mobile.HitsTexture.Height;
 
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
