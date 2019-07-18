@@ -1850,7 +1850,13 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            Equipment[(int) Layer.Bank]?.Destroy();
+            var bank = Equipment[(int) Layer.Bank];
+
+            if (bank != null)
+            {
+                Engine.UI.GetGump<ContainerGump>(bank)?.Dispose();
+            }
+
         }
 
 

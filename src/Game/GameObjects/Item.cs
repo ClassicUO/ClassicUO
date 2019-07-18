@@ -67,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var i = _pool.Dequeue();
                 i.IsDestroyed = false;
+                i.Graphic = 0;
                 i.Serial = serial;
                 i._amount = 0;
                 i._animDataFrame = default;
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
                 i.LightID = 0;
                 i.MultiDistanceBonus = 0;
-                i.BookType = 0;
+                i.BookType = SpellBookType.Unknown;
                 i.Flags = 0;
                 i.WantUpdateMulti = true;
                 i._force = false;
