@@ -631,7 +631,7 @@ namespace ClassicUO.Renderer
                     //    vertex4.Hue = vertex5.Hue = hue;
                     //}
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (idx + count + 4 >= MAX_SPRITES)
                         Flush();
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
@@ -746,7 +746,7 @@ namespace ClassicUO.Renderer
                     //    vertex6.Hue = vertex7.Hue = hue;
                     //}
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (idx + count + 4 >= MAX_SPRITES)
                         Flush();
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
@@ -882,7 +882,7 @@ namespace ClassicUO.Renderer
 
                     }
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (idx + count + 4 >= MAX_SPRITES)
                         Flush();
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
@@ -943,7 +943,7 @@ namespace ClassicUO.Renderer
                     }
 
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (idx + count + 4 >= MAX_SPRITES)
                         Flush();
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
