@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
@@ -29,11 +31,13 @@ namespace ClassicUO.Game.Managers
 {
     internal class PartyManager
     {
+        private const int PARTY_SIZE = 10;
+
         public Serial Leader { get; set; }
         public Serial Inviter { get; set; }
         public bool CanLoot { get; set; }
 
-        public PartyMember[] Members { get; } = new PartyMember[10];
+        public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
 
 
         public long PartyHealTimer { get; set; }
@@ -55,7 +59,7 @@ namespace ClassicUO.Game.Managers
                         Leader = 0;
                         Inviter = 0;
 
-                        for (int i = 0; i < Members.Length; i++)
+                        for (int i = 0; i < PARTY_SIZE; i++)
                         {
                             if (Members[i] == null || Members[i].Serial == 0)
                                 break;
@@ -113,7 +117,7 @@ namespace ClassicUO.Game.Managers
                     Serial ser = p.ReadUInt();
                     string name = p.ReadUnicode();
 
-                    for (int i = 0; i < Members.Length; i++)
+                    for (int i = 0; i < PARTY_SIZE; i++)
                     {
                         if (Members[i] == null)
                             break;
@@ -140,7 +144,7 @@ namespace ClassicUO.Game.Managers
 
         public bool Contains(Serial serial)
         {
-            for (int i = 0; i < Members.Length; i++)
+            for (int i = 0; i < PARTY_SIZE; i++)
             {
                 if (Members[i] != null && Members[i].Serial == serial)
                     return true;
@@ -151,11 +155,11 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            for (int i = 0; i < Members.Length; i++) Members[i] = null;
+            for (int i = 0; i < PARTY_SIZE; i++) Members[i] = null;
         }
     }
     
-    internal class PartyMember
+    internal class PartyMember : IEquatable<PartyMember>
     {
         private string _name;
         public Serial Serial;
@@ -176,6 +180,14 @@ namespace ClassicUO.Game.Managers
 
                 return _name;
             }
+        }
+
+        public bool Equals(PartyMember other)
+        {
+            if (other == null)
+                return false;
+
+            return other.Serial == Serial;
         }
     }
 }
