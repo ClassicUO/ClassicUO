@@ -198,7 +198,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (mobile != World.Player)
                     {
-                        Engine.UI.GetGump<HealthBarGump>(mobile)?.Dispose();
+                        //Instead of destroying existing HP bar, continue if already opened.
+                        if (Engine.UI.GetGump<HealthBarGump>(mobile)?.IsInitialized ?? false)
+                        {
+                            continue;
+                        }
                         GameActions.RequestMobileStatus(mobile);
                         HealthBarGump hbg = new HealthBarGump(mobile);
                         // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
