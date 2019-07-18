@@ -3587,41 +3587,81 @@ namespace ClassicUO.Network
 
             if (serial != World.Player)
             {
-                Item item = World.GetOrCreateItem(serial);
-                item.Amount = amount;
-                Position position = new Position(x, y, z);
-                item.Direction = dir;
-                item.LightID = (byte) dir;
-                item.Hue = hue;
-                item.Flags = flags;
-                item.Container = Serial.INVALID;
-
-                if (graphic != 0x2006)
-                    graphic += graphicInc;
-                else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
-
-                if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
-
-                if (type == 2)
+                if (serial.IsItem)
                 {
-                    item.IsMulti = true;
-                    item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
-                    item.Graphic = (ushort)(graphic & 0x3FFF);
+                    Item item = World.GetOrCreateItem(serial);
+                    item.Amount = amount;
+                    Position position = new Position(x, y, z);
+                    item.Direction = dir;
+                    item.LightID = (byte) dir;
+                    item.Hue = hue;
+                    item.Flags = flags;
+                    item.Container = Serial.INVALID;
+
+                    if (graphic != 0x2006)
+                        graphic += graphicInc;
+                    else if (!item.IsClicked && Engine.Profile.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
+
+                    if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
+
+                    if (type == 2)
+                    {
+                        item.IsMulti = true;
+                        item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
+                        item.Graphic = (ushort) (graphic & 0x3FFF);
+                    }
+                    else
+                    {
+                        item.IsMulti = false;
+                        item.Graphic = graphic;
+                    }
+
+                    item.Position = position;
+                    item.CheckGraphicChange(item.AnimIndex);
+                    item.ProcessDelta();
+
+                    if (World.Items.Add(item))
+                        World.Items.ProcessDelta();
+
+                    item.AddToTile();
                 }
                 else
                 {
-                    item.IsMulti = false;
-                    item.Graphic = graphic;
+                    Mobile mobile = World.Mobiles.Get(serial);
+                    if (mobile == null)
+                        return;
+
+                    mobile.Graphic = (ushort) (graphic + graphicInc);
+                    mobile.Hue = hue;
+                    mobile.Flags = flags;
+                    mobile.ProcessDelta();
+
+                    if (World.Mobiles.Add(mobile))
+                        World.Mobiles.ProcessDelta();
+
+                    if (mobile == World.Player)
+                        return;
+
+                    Direction direction = dir & Direction.Up;
+                    bool isrun = (dir & Direction.Running) != 0;
+
+                    if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
+                    {
+                        mobile.Position = new Position(x, y, z);
+                        mobile.Direction = direction;
+                        mobile.IsRunning = isrun;
+                        mobile.AddToTile();
+                    }
+
+                    if (!mobile.EnqueueStep(x, y, z, direction, isrun))
+                    {
+                        mobile.Position = new Position(x, y, z);
+                        mobile.Direction = direction;
+                        mobile.IsRunning = isrun;
+                        mobile.ClearSteps();
+                        mobile.AddToTile();
+                    }
                 }
-
-                item.Position = position;
-                item.CheckGraphicChange(item.AnimIndex);
-                item.ProcessDelta();
-
-                if (World.Items.Add(item))
-                    World.Items.ProcessDelta();
-
-                item.AddToTile();
             }
             else if (p.ID == 0xF7)
             {
