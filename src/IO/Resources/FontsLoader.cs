@@ -323,7 +323,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
 
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
@@ -358,7 +358,7 @@ namespace ClassicUO.IO.Resources
             if (len <= 0)
                 return null;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -439,7 +439,7 @@ namespace ClassicUO.IO.Resources
                 {
                     byte index = (byte) ptr.Data[i].Item;
                     int offsY = GetFontOffsetY(font, index);
-                    FontCharacterData fcd = fd.Chars[_fontIndex[index]];
+                    ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[index]];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
@@ -518,7 +518,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -553,7 +553,7 @@ namespace ClassicUO.IO.Resources
                     charCount = 0;
                 }
 
-                FontCharacterData fcd = fd.Chars[_fontIndex[(byte) si]];
+                ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[(byte) si]];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
