@@ -323,18 +323,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     switch (textBox.Text[0])
                     {
-                        case ':':
-                            Mode = ChatMode.Emote;
-                            break;
-
-                        case ';':
-                            Mode = ChatMode.Whisper;
-                            break;
-
-                        case '!':
-                            Mode = ChatMode.Yell;
-                            break;
-
+                     
                         case '/':
                             Mode = ChatMode.Party;
                             break;
@@ -352,10 +341,22 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                     }
                 }
-                else if (textBox.Text.Length == 2)
+                else if (textBox.Text.Length == 2 && textBox.Text[1] == ' ')
                 {
-                    if (textBox.Text[0] == ':' && textBox.Text[1] == ' ')
-                        Mode = ChatMode.Emote;
+                    switch (textBox.Text[0])
+                    {
+                        case ':':
+                            Mode = ChatMode.Emote;
+                            break;
+                        case ';':
+                            Mode = ChatMode.Whisper;
+                            break;
+
+                        case '!':
+                            Mode = ChatMode.Yell;
+                            break;
+
+                    }
                 }
             }
             else if (Mode == ChatMode.ClientCommand && textBox.Text.Length == 1 && textBox.Text[0] == '-')
@@ -485,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!IsActive && Engine.Profile.Current.ActivateChatAfterEnter)
+            if ((!IsActive && Engine.Profile.Current.ActivateChatAfterEnter) || (Mode != ChatMode.Default && string.IsNullOrEmpty(text)))
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
@@ -493,7 +494,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (string.IsNullOrEmpty(text))
+            {
                 return;
+            }
+
 
             ChatMode sentMode = Mode;
             textBox.SetText(string.Empty);
