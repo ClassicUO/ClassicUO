@@ -711,9 +711,9 @@ namespace ClassicUO.Network
 
                 if (World.Party.Contains(serial))
                 {
-                    m.RemoveFromTile();
+                   // m.RemoveFromTile();
                 }
-                else
+               // else
                 {
                     World.RemoveMobile(serial);
                     m.Items.ProcessDelta();

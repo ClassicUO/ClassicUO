@@ -124,10 +124,7 @@ namespace ClassicUO.Game.Managers
 
                         if (Members[i].Serial == ser)
                         {
-                            Mobile m = Members[i].Mobile;
-
-                            if (m != null)
-                                Chat.HandleMessage(null, name, m.Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
+                            Chat.HandleMessage(null, name, name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
 
                             break;
                         }
@@ -170,13 +167,16 @@ namespace ClassicUO.Game.Managers
             _name = Name;
         }
 
-        public Mobile Mobile => World.Mobiles.Get(Serial);
-
         public string Name
         {
             get
             {
-                if (Mobile != null) _name = Mobile.Name;
+                var mobile = World.Mobiles.Get(Serial);
+
+                if (mobile != null)
+                {
+                    _name = mobile.Name;
+                }
 
                 return _name;
             }

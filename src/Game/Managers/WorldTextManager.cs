@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Managers
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks)
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
                     continue;
 
                 var parent = o.Parent.Parent;
