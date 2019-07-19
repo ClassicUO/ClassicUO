@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI
                 {
                     int count = 0;
                     _rects[0].X = msg.X;
-                    _rects[0].Y = msg.Y;
+                    _rects[0].Y = msg.Y - msg.OffsetY;
                     _rects[0].Width = msg.RenderedText.Width;
                     _rects[0].Height = msg.RenderedText.Height;
                     _rects[0].X -= _rects[0].Width >> 1;
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI
                             continue;
 
                         _rects[1].X = m.X;
-                        _rects[1].Y = m.Y;
+                        _rects[1].Y = m.Y - msg.OffsetY;
                         _rects[1].Width = m.RenderedText.Width;
                         _rects[1].Height = m.RenderedText.Height;
                         _rects[1].X -= _rects[1].Width >> 1;
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI
             {
                 var msg = _messages[i];
 
-                msg.RenderedText.Draw(batcher, msg.X + x - (msg.RenderedText.Width >> 1), msg.Y + y + msg.OffsetY, msg.Alpha);
+                msg.RenderedText.Draw(batcher, msg.X + x - (msg.RenderedText.Width >> 1), y + (msg.Y - msg.OffsetY) - msg.RenderedText.Height, msg.Alpha);
             }
         }
 
