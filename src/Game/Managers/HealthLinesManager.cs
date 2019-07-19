@@ -53,6 +53,8 @@ namespace ClassicUO.Game.Managers
 
             const int BAR_WIDTH = 27;
             const int BAR_HEIGHT = 3;
+            const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
+            const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
             int screenX = Engine.Profile.Current.GameWindowPosition.X;
             int screenY = Engine.Profile.Current.GameWindowPosition.Y;
@@ -89,8 +91,7 @@ namespace ClassicUO.Game.Managers
 
                 x += 5;
 
-                x -= BAR_WIDTH >> 1;
-                y -= BAR_HEIGHT >> 1;
+               
 
                 x = (int) (x / scale);
                 y = (int) (y / scale);
@@ -99,7 +100,9 @@ namespace ClassicUO.Game.Managers
                 x += screenX;
                 y += screenY;
 
-            
+                x -= BAR_WIDTH_HALF;
+                y -= BAR_HEIGHT_HALF;
+
                 if (mode != 1 && !mobile.IsDead)
                 {
                     if ((showWhen == 2 && current != max) || showWhen <= 1)
@@ -108,7 +111,7 @@ namespace ClassicUO.Game.Managers
                         int yy = y;
 
                         if (!mobile.IsMounted)
-                            yy += 22;
+                            yy += (int) (22 / scale);
 
 
                         FileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
@@ -122,9 +125,8 @@ namespace ClassicUO.Game.Managers
                                                                       out int width,
                                                                       out int height);
 
-                        //xx -= width + centerX;
                        
-                        yy -= height + centerY + 28;
+                        yy -= (int) ((height + centerY + 28) / scale);
 
 
                         int ww = mobile.HitsMax;
@@ -145,8 +147,9 @@ namespace ClassicUO.Game.Managers
                         {
                             xx -= (mobile.HitsTexture.Width >> 1) + 3;
                             xx += 22;
-                            yy -= mobile.HitsTexture.Height;
+                            yy -= mobile.HitsTexture.Height / 1;
 
+                         
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
                                 mobile.HitsTexture.Draw(batcher, xx, yy);
                         }
