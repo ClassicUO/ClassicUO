@@ -1899,8 +1899,8 @@ namespace ClassicUO.Network
                 GameActions.RequestMobileStatus(mobile);
 
             mobile.Graphic = p.ReadUShort();
-            int x = p.ReadUShort();
-            int y = p.ReadUShort();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction) p.ReadByte();
             mobile.Hue = p.ReadUShort();
@@ -1919,7 +1919,7 @@ namespace ClassicUO.Network
 
             if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
             {
-                mobile.Position = new Position((ushort) x, (ushort) y, z);
+                mobile.Position = new Position(x, y, z);
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
 
@@ -1928,10 +1928,16 @@ namespace ClassicUO.Network
 
             if (!mobile.EnqueueStep(x, y, z, dir, isrun))
             {
-                mobile.Position = new Position((ushort) x, (ushort) y, z);
+                mobile.Position = new Position(x, y, z);
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
                 mobile.ClearSteps();
+                mobile.AddToTile();
+            }
+
+            if (mobile.Tile == null || mobile.X != x || mobile.Y != y || mobile.Z != z)
+            {
+                mobile.Position = new Position(x, y, z);
                 mobile.AddToTile();
             }
         }
@@ -2024,6 +2030,12 @@ namespace ClassicUO.Network
                     mobile.ClearSteps();
                     mobile.AddToTile();
                 }
+            }
+
+            if (mobile.Tile == null || mobile.X != x || mobile.Y != y || mobile.Z != z)
+            {
+                mobile.Position = new Position(x, y, z);
+                mobile.AddToTile();
             }
 
             mobile.ProcessDelta();
