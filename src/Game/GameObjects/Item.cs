@@ -116,9 +116,6 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            _container = Serial.INVALID;
-            _delta = 0;
-
             base.Destroy();
             _pool.Enqueue(this);
         }

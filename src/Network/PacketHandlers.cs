@@ -726,8 +726,10 @@ namespace ClassicUO.Network
             {
                 Item it = (Item) entity;
 
-                if (it.IsMulti) World.HouseManager.Remove(it);
+                if (it.IsMulti)
+                    World.HouseManager.Remove(it);
 
+                World.RemoveItem(it);
                 Entity cont = World.Get(it.Container);
 
                 if (cont != null)
@@ -743,7 +745,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                World.RemoveItem(it);
+                
                 World.Items.Remove(it);
                 World.Items.ProcessDelta();
 
