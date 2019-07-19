@@ -143,7 +143,8 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < PARTY_SIZE; i++)
             {
-                if (Members[i] != null && Members[i].Serial == serial)
+                var mem = Members[i];
+                if (mem != null && mem.Serial == serial)
                     return true;
             }
 

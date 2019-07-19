@@ -643,7 +643,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         _requestedWarMode = true;
                         //GameActions.ChangeWarMode(1);
-                        NetClient.Socket.Send(new PChangeWarMode(true));
+                        if (!World.Player.InWarMode)
+                            NetClient.Socket.Send(new PChangeWarMode(true));
                     }
                 }
             }
