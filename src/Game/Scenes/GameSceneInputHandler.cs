@@ -230,6 +230,8 @@ namespace ClassicUO.Game.Scenes
                         hbg.X = x - (rect.Width >> 1);
                         hbg.Y = y - (rect.Height >> 1) - 100;
                         Engine.UI.Add(hbg);
+
+                        hbg.SetInScreen();
                     }
                 }
             }
