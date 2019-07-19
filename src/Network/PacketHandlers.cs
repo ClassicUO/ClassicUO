@@ -1934,12 +1934,6 @@ namespace ClassicUO.Network
                 mobile.ClearSteps();
                 mobile.AddToTile();
             }
-
-            if (mobile.Tile == null || mobile.X != x || mobile.Y != y || mobile.Z != z)
-            {
-                mobile.Position = new Position(x, y, z);
-                mobile.AddToTile();
-            }
         }
 
         private static void UpdateObject(Packet p)
@@ -2030,12 +2024,6 @@ namespace ClassicUO.Network
                     mobile.ClearSteps();
                     mobile.AddToTile();
                 }
-            }
-
-            if (mobile.Tile == null || mobile.X != x || mobile.Y != y || mobile.Z != z)
-            {
-                mobile.Position = new Position(x, y, z);
-                mobile.AddToTile();
             }
 
             mobile.ProcessDelta();
