@@ -176,6 +176,9 @@ namespace ClassicUO.Game.Managers
                 if (mobile != null)
                 {
                     _name = mobile.Name;
+
+                    if (string.IsNullOrEmpty(_name))
+                        _name = "<not seeing>";
                 }
 
                 return _name;
