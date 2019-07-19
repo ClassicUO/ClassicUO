@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Managers
 
                         if (Members[i].Serial == ser)
                         {
-                            Chat.HandleMessage(null, name, name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
+                            Chat.HandleMessage(null, name, Members[i].Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
 
                             break;
                         }
