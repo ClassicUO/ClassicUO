@@ -181,6 +181,12 @@ namespace ClassicUO.Game.Scenes
             else
                 Scale = Engine.Profile.Current.ScaleZoom;
 
+
+            _rectangleObj.X = _selectionStart.Item1;
+            _rectangleObj.Y = _selectionStart.Item2;
+            _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
+            _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
+
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
@@ -189,10 +195,22 @@ namespace ClassicUO.Game.Scenes
                 int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int) mobile.Offset.X + 22 + 5;
                 int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int) mobile.Offset.Z) + 22 + 5;
 
+                x -= mobile.FrameInfo.X;
+                y -= mobile.FrameInfo.Y;
+                int w = mobile.FrameInfo.Width;
+                int h = mobile.FrameInfo.Height;
+
                 x = (int)(x * (1 / Scale));
                 y = (int)(y * (1 / Scale));
 
-                if (x > _selectionStart.Item1 && x < _selectionEnd.Item1 && y > _selectionStart.Item2 && y < _selectionEnd.Item2)
+                _rectanglePlayer.X = x;
+                _rectanglePlayer.Y = y;
+                _rectanglePlayer.Width = w;
+                _rectanglePlayer.Height = h;
+
+               
+
+                if (_rectangleObj.Intersects(_rectanglePlayer))
                 {
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
 
