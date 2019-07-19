@@ -1893,7 +1893,9 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt()); //World.GetOrCreateMobile(p.ReadUInt());
+            if (mobile == null)
+                return;
 
             if (!mobile.Exists)
                 GameActions.RequestMobileStatus(mobile);
@@ -1917,14 +1919,14 @@ namespace ClassicUO.Network
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
-            if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
-            {
-                mobile.Position = new Position(x, y, z);
-                mobile.Direction = dir;
-                mobile.IsRunning = isrun;
+            //if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
+            //{
+            //    mobile.Position = new Position(x, y, z);
+            //    mobile.Direction = dir;
+            //    mobile.IsRunning = isrun;
 
-                mobile.AddToTile();
-            }
+            //    mobile.AddToTile();
+            //}
 
             if (!mobile.EnqueueStep(x, y, z, dir, isrun))
             {
