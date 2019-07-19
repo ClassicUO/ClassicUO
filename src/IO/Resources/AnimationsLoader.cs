@@ -1193,8 +1193,10 @@ namespace ClassicUO.IO.Resources
                     uint pixelOffset = reader.ReadUInt();
                     //int vsize = pixelDataOffsets.Count;
 
-                    UOPFrameData data = new UOPFrameData(start, pixelOffset);
-                    pixelDataOffsets[i] = data;
+                    ref UOPFrameData data = ref pixelDataOffsets[i];
+                    data.DataStart = start;
+                    data.PixelDataOffset = pixelOffset;
+
                     //if (vsize + 1 < data.FrameID)
                     //{
                     //    while (vsize + 1 != data.FrameID)
@@ -1602,16 +1604,10 @@ namespace ClassicUO.IO.Resources
             public readonly bool DrawBack;
         }
 
-        private readonly struct UOPFrameData
+        private struct UOPFrameData
         {
-            public UOPFrameData(long ptr, uint offset)
-            {
-                DataStart = ptr;
-                PixelDataOffset = offset;
-            }
-
-            public readonly long DataStart;
-            public readonly uint PixelDataOffset;
+            public long DataStart;
+            public uint PixelDataOffset;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
