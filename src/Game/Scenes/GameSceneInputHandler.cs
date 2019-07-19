@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -176,16 +177,13 @@ namespace ClassicUO.Game.Scenes
         {
             SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
 
-            if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
-                Scale = 1f;
-            else
-                Scale = Engine.Profile.Current.ScaleZoom;
-
-
             _rectangleObj.X = _selectionStart.Item1;
             _rectangleObj.Y = _selectionStart.Item2;
             _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
             _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
+
+            int finalX = 100;
+            int finalY = 100;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -227,11 +225,58 @@ namespace ClassicUO.Game.Scenes
                         // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
                         // maybe should be fixed elsewhere
                         hbg.Initialize();
-                        hbg.X = x - (rect.Width >> 1);
-                        hbg.Y = y - (rect.Height >> 1) - 100;
+
+
+                        if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
+                        {
+                            finalY = 100;
+                            finalX += rect.Width + 2;
+                        }
+
+                        if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                        {
+                            finalX = 100;
+                        }
+
+                        hbg.X = finalX;
+                        hbg.Y = finalY;
+
+                        foreach (var bar in Engine.UI.Gumps
+                                                  .OfType<HealthBarGump>()
+                                                  .OrderBy(s => s.ScreenCoordinateX)
+                                                  .ThenBy(s => s.ScreenCoordinateY))
+                        {
+                            if (bar.Bounds.Intersects(hbg.Bounds))
+                            {
+                                finalY = bar.Bounds.Bottom + 2;
+
+                                if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
+                                {
+                                    finalY = 100;
+                                    finalX = bar.Bounds.Right + 2;
+                                }
+
+                                if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                                {
+                                    finalX = 100;
+                                }
+
+                                hbg.X = finalX;
+                                hbg.Y = finalY;
+                            }
+                        }
+
+    
+                        finalY += rect.Height + 2;
+
+
+                        //hbg.X = x - (rect.Width >> 1);
+                        //hbg.Y = y - (rect.Height >> 1) - 100;
                         Engine.UI.Add(hbg);
 
                         hbg.SetInScreen();
+
+
                     }
                 }
             }
