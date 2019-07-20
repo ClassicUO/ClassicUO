@@ -109,13 +109,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
-                    if (width > 200)
-                        width = 200;
+                    if (width > 100)
+                        width = 100;
 
                     width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder | FontStyle.Cropped));
 
-                    if (width > 200)
-                        width = 200;
+                    if (width > 100)
+                        width = 100;
 
                     _renderedText.MaxWidth = width;
 

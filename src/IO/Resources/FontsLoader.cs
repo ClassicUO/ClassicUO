@@ -333,6 +333,15 @@ namespace ClassicUO.IO.Resources
                 GetHTMLData(font, str, ref strLen, align, flags);
                 sb.Append(str.Substring(0, str.Length - strLen));
                 str = str.Substring(str.Length - strLen, strLen);
+
+
+                int newWidth = GetWidthExASCII(font, str, width, align, flags);
+
+                if (newWidth <= width)
+                {
+                    sb.Append(str);
+                    return sb.ToString();
+                }
             }
 
             if (isCropped)
@@ -733,14 +742,24 @@ namespace ClassicUO.IO.Resources
 
             uint* table = (uint*) _unicodeFontAddress[font];
 
+
             StringBuilder sb = new StringBuilder();
 
             if (IsUsingHTML)
             {
                 int strLen = str.Length;
+
                 GetHTMLData(font, str, ref strLen, align, flags);
                 sb.Append(str.Substring(0, str.Length - strLen));
                 str = str.Substring(str.Length - strLen, strLen);
+
+                int newWidth = GetWidthExUnicode(font, str, width, align, flags);
+
+                if (newWidth <= width)
+                {
+                    sb.Append(str);
+                    return sb.ToString();
+                }
             }
 
             if (isCropped)
@@ -748,8 +767,9 @@ namespace ClassicUO.IO.Resources
                 uint offset = table['.'];
 
                 if (offset != 0 && offset != 0xFFFFFFFF)
-                    width -= *(byte*) ((IntPtr) table + (int) offset + 2) * 3 + 3;
+                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3 + 3;
             }
+
 
             int textLength = 0;
 
