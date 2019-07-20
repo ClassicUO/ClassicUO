@@ -136,6 +136,7 @@ namespace ClassicUO.Renderer
             }
         }
 
+        [MethodImpl(256)]
         public bool DrawSprite(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
@@ -200,6 +201,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteFlipped(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
@@ -264,6 +266,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteLand(Texture2D texture, int x, int y, ref Rectangle rect, ref Vector3[] normals, ref Vector3 hue)
         {
             EnsureSize();
@@ -322,6 +325,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
         {
             EnsureSize();
@@ -408,6 +412,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
@@ -528,6 +533,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
             EnsureSize();
@@ -1030,6 +1036,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        [MethodImpl(256)]
         public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
@@ -1091,6 +1098,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
         {
             EnsureSize();
@@ -1155,6 +1163,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
         {
             EnsureSize();
@@ -1216,6 +1225,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool Draw2D(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
         {
             EnsureSize();
@@ -1274,6 +1284,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, ref Vector3 hue)
         {
             int y = dy;
@@ -1313,7 +1324,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-
+        [MethodImpl(256)]
         public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
         {
             EnsureSize();
@@ -1338,12 +1349,6 @@ namespace ClassicUO.Renderer
             float ww = r.Width / 2f;
             float hh = r.Height / 2f;
 
-            Vector3 center = new Vector3
-            {
-                X = originX,
-                Y = originY
-            };
-
 
             float rotSin = (float) Math.Sin(angle);
             float rotCos = (float) Math.Cos(angle);
@@ -1355,7 +1360,8 @@ namespace ClassicUO.Renderer
             float cosy = rotCos * hh;
 
 
-            vertex0.Position = center;
+            vertex0.Position.X = originX;
+            vertex0.Position.Y = originY;
             vertex0.Position.X += cosx - -siny;
             vertex0.Position.Y -= sinx + -cosy;
             vertex0.Normal.X = 0;
@@ -1365,7 +1371,8 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.Y = 0;
             vertex0.TextureCoordinate.Z = 0;
 
-            vertex1.Position = center;
+            vertex1.Position.X = originX;
+            vertex1.Position.Y = originY;
             vertex1.Position.X += cosx - siny;
             vertex1.Position.Y += -sinx + -cosy;
             vertex1.Normal.X = 0;
@@ -1375,7 +1382,8 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.Y = 1;
             vertex1.TextureCoordinate.Z = 0;
 
-            vertex2.Position = center;
+            vertex2.Position.X = originX;
+            vertex2.Position.Y = originY;
             vertex2.Position.X += -cosx - -siny;
             vertex2.Position.Y += sinx + cosy;
             vertex2.Normal.X = 0;
@@ -1385,7 +1393,8 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.Y = 0;
             vertex2.TextureCoordinate.Z = 0;
 
-            vertex3.Position = center;
+            vertex3.Position.X = originX;
+            vertex3.Position.Y = originY;
             vertex3.Position.X += -cosx - siny;
             vertex3.Position.Y += sinx + -cosy;
             vertex3.Normal.X = 0;
@@ -1415,7 +1424,8 @@ namespace ClassicUO.Renderer
         {
             for (byte i = 0; i < 4; i++)
             {
-                if (DrawingArea.Contains(VertexInfo[index + i].Position) == ContainmentType.Contains)
+                DrawingArea.Contains(ref VertexInfo[index + i].Position, out ContainmentType res);
+                if (res == ContainmentType.Contains)
                     return true;
             }
 
