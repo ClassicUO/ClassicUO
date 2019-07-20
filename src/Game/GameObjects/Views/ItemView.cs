@@ -93,6 +93,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
             {
+                if (_originalGraphic == 0)
+                    _originalGraphic = DisplayedGraphic;
+
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds.X = (Texture.Width >> 1) - 22;
                 Bounds.Y = Texture.Height - 44;
