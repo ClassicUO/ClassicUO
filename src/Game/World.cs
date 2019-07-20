@@ -274,17 +274,6 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
 
-            //if (item.Container.IsValid)
-            //{
-            //    var cont = Get(item.Container);
-
-            //    if (cont != null)
-            //    {
-            //        cont.Items.Remove(cont);
-            //        cont.Items.ProcessDelta();
-            //    }
-            //    item.Container = Serial.INVALID;
-            //}
 
             item.Items.Clear();
             item.Destroy();
@@ -300,12 +289,7 @@ namespace ClassicUO.Game
                 return false;
 
             foreach (Item i in mobile.Items)
-            {
                 RemoveItem(i);
-
-                Items.Remove(i);
-            }
-            Items.ProcessDelta();
 
             mobile.Items.Clear();
             mobile.Destroy();
