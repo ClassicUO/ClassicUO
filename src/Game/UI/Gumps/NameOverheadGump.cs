@@ -162,23 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             return true;
         }
-
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
-        {
-            byte dir = 0 & 0x7F;
-            byte animGroup = 0;
-            bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-            if (frameIndex == 0xFF)
-                frameIndex = (byte) mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
-
-            if (centerX == 0 && centerY == 0 && width == 0 && height == 0)
-                height = mobile.IsMounted ? 100 : 60;
-        }
-
-
+        
 
         protected override void CloseWithRightClick()
         {
@@ -305,7 +289,17 @@ namespace ClassicUO.Game.UI.Gumps
             if (Entity is Mobile m)
             {
                 _positionLocked = true;
-                GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
+
+                FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                                                              m.GetGraphicForAnimation(),
+                                                              /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                              /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                              m.IsMounted,
+                                                              /*(byte) m.AnimIndex*/ 0,
+                                                              out int centerX,
+                                                              out int centerY,
+                                                              out int width,
+                                                              out int height);
 
                 _lockedPosition.X = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
                 _lockedPosition.Y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) / scale);
@@ -372,7 +366,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
+
+                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                                                                  m.GetGraphicForAnimation(),
+                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                                  m.IsMounted,
+                                                                  /*(byte) m.AnimIndex*/ 0,
+                                                                  out int centerX,
+                                                                  out int centerY,
+                                                                  out int width,
+                                                                  out int height);
 
                     x = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
                     y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);

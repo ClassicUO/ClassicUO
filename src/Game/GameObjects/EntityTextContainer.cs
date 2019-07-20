@@ -388,8 +388,17 @@ namespace ClassicUO.Game.GameObjects
                     if (!m.IsMounted)
                         offY = -22;
 
-                    GetAnimationDimensions(m, 0, out int centerX, out int centerY, out int width, out int height);
 
+                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                                                                  m.GetGraphicForAnimation(),
+                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                                  m.IsMounted,
+                                                                  /*(byte) m.AnimIndex*/ 0,
+                                                                  out int centerX,
+                                                                  out int centerY,
+                                                                  out int width,
+                                                                  out int height);
                     x += (int) m.Offset.X;
                     x += 22;
                     y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
@@ -447,19 +456,6 @@ namespace ClassicUO.Game.GameObjects
                 item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha, hue);
                 offY += item.RenderedText.Height;
             }
-        }
-
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
-        {
-            byte dir = 0 & 0x7F;
-            byte animGroup = 0;
-            bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-            if (frameIndex == 0xFF)
-                frameIndex = (byte) mobile.AnimIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out centerX, out centerY, out width, out height);
-            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
 
