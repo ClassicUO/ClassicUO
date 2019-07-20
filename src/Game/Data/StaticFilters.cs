@@ -290,6 +290,26 @@ namespace ClassicUO.Game.Data
         }
 
         [MethodImpl(256)]
+        public static bool IsRock(ushort g)
+        {
+            switch (g)
+            {
+                case 4945:
+                case 4948:
+                case 4950:
+                case 4953:
+                case 4955:
+                case 4958:
+                case 4959:
+                case 4960:
+                case 4962:
+                    return true;
+                default:
+                    return g >= 6001 && g <= 6012;
+            }
+        }
+
+        [MethodImpl(256)]
         public static bool IsField(ushort g)
         {
             return g >= 0x398C && g <= 0x399F ||
