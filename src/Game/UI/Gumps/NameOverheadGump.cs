@@ -380,8 +380,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (Entity.Texture != null)
             {
-                x = (int) ((Entity.RealScreenPosition.X + 22) / scale);
-                y = (int) ((Entity.RealScreenPosition.Y - (Entity.Texture.Height >> 1)) / scale);
+                switch (Entity.Texture)
+                {
+                    case ArtTexture artText:
+                        x = (int)((Entity.RealScreenPosition.X + 22) / scale);
+                        y = (int)((Entity.RealScreenPosition.Y - (artText.ImageRectangle.Height >> 1)) / scale);
+                        break;
+                    default:
+                        x = (int)((Entity.RealScreenPosition.X + 22) / scale);
+                        y = (int)((Entity.RealScreenPosition.Y - (Entity.Texture.Height >> 1)) / scale);
+                        break;
+                }
             }
             else
             {
