@@ -291,8 +291,7 @@ namespace ClassicUO.Network
             {
                 ushort damage = p.ReadUShort();
 
-                Engine.SceneManager.GetScene<GameScene>()
-                      .Overheads
+                World.WorldTextManager
                       .AddDamage(entity,
                                  damage
                                 );
@@ -3099,8 +3098,7 @@ namespace ClassicUO.Network
                     {
                         byte damage = p.ReadByte();
 
-                        Engine.SceneManager.GetScene<GameScene>()
-                              .Overheads
+                        World.WorldTextManager
                               .AddDamage(en, damage);
                     }
 

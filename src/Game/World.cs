@@ -63,6 +63,9 @@ namespace ClassicUO.Game
 
         public static int OldMusicIndex { get; set; }
 
+        public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+
+        public static JournalManager Journal { get; } = new JournalManager();
 
         public static int MapIndex
         {
@@ -208,6 +211,8 @@ namespace ClassicUO.Game
                 }
 
                 _effectManager.Update(totalMS, frameMS);
+
+                WorldTextManager.Update(totalMS, frameMS);
             }
         }
 
@@ -331,6 +336,9 @@ namespace ClassicUO.Game
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
+
+            Journal.Clear();
+            WorldTextManager.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)

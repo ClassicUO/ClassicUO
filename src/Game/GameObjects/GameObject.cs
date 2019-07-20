@@ -244,9 +244,7 @@ namespace ClassicUO.Game.GameObjects
             if (EntityTextContainerContainer == null)
                 EntityTextContainerContainer = new EntityTextContainer(this);
 
-            var msg = EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
-
-            Engine.SceneManager.GetScene<GameScene>().Overheads.AddMessage(msg);
+            World.WorldTextManager.AddMessage(EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage));
         }
 
 
