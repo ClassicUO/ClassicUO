@@ -46,20 +46,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Network
 {
-    internal class PacketHandler
-    {
-        public PacketHandler(Action<Packet> callback)
-        {
-            Callback = callback;
-        }
-
-        public Action<Packet> Callback { get; }
-    }
-
     internal class PacketHandlers
     {
         private static Serial _requestedGridLoot;
-        private readonly List<PacketHandler>[] _handlers = new List<PacketHandler>[0x100];
+
+
+        private readonly Action<Packet>[] _handlers = new Action<Packet>[0x100];
 
         static PacketHandlers()
         {
@@ -67,33 +59,35 @@ namespace ClassicUO.Network
             NetClient.PacketReceived += ToClient.OnPacket;
         }
 
-        private PacketHandlers()
-        {
-            for (int i = 0; i < _handlers.Length; i++) _handlers[i] = new List<PacketHandler>();
-        }
 
         public static PacketHandlers ToClient { get; }
 
 
         public void Add(byte id, Action<Packet> handler)
         {
-            lock (_handlers) _handlers[id].Add(new PacketHandler(handler));
+            _handlers[id] = handler;
         }
 
-        public void Remove(byte id, Action<Packet> handler)
-        {
-            lock (_handlers) _handlers[id].Remove(_handlers[id].FirstOrDefault(s => s.Callback == handler));
-        }
 
         private void OnPacket(object sender, Packet p)
         {
-            lock (_handlers)
+            var handler = _handlers[p.ID];
+
+            if (handler != null)
             {
-                for (int i = 0; i < _handlers[p.ID].Count; i++)
-                {
-                    p.MoveToData();
-                    _handlers[p.ID][i].Callback(p);
-                }
+                p.MoveToData();
+                handler(p);
+            }
+        }
+
+        public void OnPacket(Packet p)
+        {
+            var handler = _handlers[p.ID];
+
+            if (handler != null)
+            {
+                p.MoveToData();
+                handler(p);
             }
         }
 
