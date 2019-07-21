@@ -21,9 +21,12 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -105,6 +108,11 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
             Engine.DebugInfo.StaticsRendered++;
+
+            //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
+            //{
+            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X , posY - Bounds.Y /*- 10*/, false);
+            //}
 
             if (base.Draw(batcher, posX, posY))
             {
