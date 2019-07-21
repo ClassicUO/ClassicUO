@@ -23,7 +23,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    internal readonly struct Property
+    internal class Property
     {
         public Property(uint cliloc, string args)
         {

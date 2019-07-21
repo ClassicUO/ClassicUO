@@ -3229,12 +3229,22 @@ namespace ClassicUO.Network
             if (entity != null)
             {
                 entity.PropertiesHash = revision;
-                entity.UpdateProperties(ReadProperties(p));
+
+                uint cliloc;
+                List<Property> props = new List<Property>();
+                while ((cliloc = p.ReadUInt()) != 0)
+                {
+                    ushort len = p.ReadUShort();
+                    string str = p.ReadUnicodeReversed(len);
+
+                    props.Add(new Property(cliloc, str));
+                }
+                entity.UpdateProperties(props);
                 entity.ProcessDelta();
 
                 if (serial.IsItem && entity.Properties.Any())
                 {
-                    Property property = entity.Properties.Values.FirstOrDefault();
+                    Property property = entity.Properties.FirstOrDefault();
                     entity.Name = FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true);
                 }
             }
@@ -3245,7 +3255,7 @@ namespace ClassicUO.Network
 
                 if (gump != null)
                 {
-                    Property property = it.Properties.Values.FirstOrDefault();
+                    Property property = it.Properties.FirstOrDefault();
 
                     gump.SetNameTo(it, FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
                 }
@@ -3858,19 +3868,6 @@ namespace ClassicUO.Network
             World.Items.Add(item);
         }
 
-
-        private static IEnumerable<Property> ReadProperties(Packet p)
-        {
-            uint cliloc;
-
-            while ((cliloc = p.ReadUInt()) != 0)
-            {
-                ushort len = p.ReadUShort();
-                string str = p.ReadUnicodeReversed(len);
-
-                yield return new Property(cliloc, str);
-            }
-        }
 
         [Flags]
         private enum AffixType

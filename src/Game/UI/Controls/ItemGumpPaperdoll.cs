@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -88,6 +90,7 @@ namespace ClassicUO.Game.UI.Controls
             return Texture.Contains(x, y);
         }
 
+
         public void Update(Item item, bool transparent = false)
         {
             Alpha = transparent ? 0.5f : 0;
@@ -128,6 +131,7 @@ namespace ClassicUO.Game.UI.Controls
 
             WantUpdateSize = false;
         }
+
 
 
         //protected override void OnMouseUp(int x, int y, MouseButton button)

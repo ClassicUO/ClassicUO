@@ -108,6 +108,16 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (item == _fakeItem.Serial)
                     {
+                        Item i = World.Items.Get(item);
+
+                        if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
+                        {
+                            ref var gump = ref _pgumps[(int) i.Layer];
+                            gump?.Dispose();
+                            gump = null;
+
+                        }
+
                         _fakeItem = null;
 
                         break;
