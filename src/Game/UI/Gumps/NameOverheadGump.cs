@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                               out int height);
 
                 _lockedPosition.X = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                _lockedPosition.Y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8)) / scale);
+                _lockedPosition.Y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
             }
 
             base.OnMouseOver(x, y);
