@@ -447,26 +447,19 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Static st:
-                        if (st.EntityTextContainerContainer == null || st.EntityTextContainerContainer.IsEmpty)
-                        {
-                            string name = st.Name;
+                        string name = st.Name;
 
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-                        }
-
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                         break;
 
                     case Multi multi:
-                        if (multi.EntityTextContainerContainer == null || multi.EntityTextContainerContainer.IsEmpty)
-                        {
-                            string name = multi.Name;
+                        name = multi.Name;
 
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-                        }
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
                         break;
 
@@ -526,7 +519,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
-                case MessageInfo msg when msg.Parent.Parent is Entity entity:
+                case MessageInfo msg when msg.Owner is Entity entity:
                     result = true;
                     GameActions.DoubleClick(entity);
 

@@ -48,6 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
             Width = _gText.Width;
             Height = _gText.Height;
+            Hue = 0;
         }
 
         public Label(List<string> parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
@@ -67,18 +68,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Hue Hue
-        {
-            get => _gText.Hue;
-            set
-            {
-                if (_gText.Hue != value)
-                {
-                    _gText.Hue = value;
-                    _gText.CreateTexture();
-                }
-            }
-        }
+
+        public Hue Hue { get; set; }
+   
 
         public byte Font => _gText.Font;
 
@@ -88,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsDisposed) return false;
 
-            _gText.Draw(batcher, x, y, Alpha);
+            _gText.Draw(batcher, x, y, Alpha, Hue);
 
             return base.Draw(batcher, x, y);
         }

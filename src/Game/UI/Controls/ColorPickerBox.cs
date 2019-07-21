@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 if (value < 0 || value >= _hues.Length)
-                    throw new IndexOutOfRangeException();
+                    return;
 
                 if (_selectedIndex != value)
                 {

@@ -30,10 +30,83 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
+
+    class TextContainer
+    {
+        public MessageInfo Items;
+
+        public int Size, MaxSize = 5, TotalHeight;
+
+        public void Add(MessageInfo obj)
+        {
+            if (obj != null)
+            {
+                if (Items == null)
+                    Items = obj;
+                else
+                {
+                    var curr = Items;
+
+                    while (curr.ListRight != null)
+                    {
+                        curr = curr.ListRight;
+                    }
+
+                    curr.ListRight = obj;
+                    obj.ListLeft = curr;
+                }
+            }
+
+            if (Size >= MaxSize)
+            {
+                if (Items != null)
+                {
+                    var items = Items;
+
+                    Items = Items.ListRight;
+
+                    if (Items != null)
+                        Items.ListLeft = null;
+
+                    items.ListRight = null;
+                    items.ListLeft = null;
+                    items.RenderedText?.Destroy();
+                }
+            }
+            else
+                Size++;
+        }
+
+
+        public void Clear()
+        {
+            var item = Items;
+            Items = null;
+
+            while (item != null)
+            {
+                if (item.Right != null)
+                    item.Right.Left = item.Left;
+
+                if (item.Left != null)
+                    item.Left.Right = item.Right;
+
+                item.Left = item.Right = null;
+                
+                var next = item.ListRight;
+                item.ListRight = null;
+                item.RenderedText?.Destroy();
+                item = next;
+            }
+
+            Size = 0;
+            TotalHeight = 0;
+        }
+    }
+
     internal class EntityTextContainer
     {
         public Rectangle _rectangle;
@@ -51,7 +124,6 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
 
-        public EntityTextContainer Left, Right;
 
         public bool IsEmpty => _messages.Count == 0;
 
@@ -88,38 +160,6 @@ namespace ClassicUO.Game.GameObjects
                 isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
             }
 
-            //for (int i = 0; i < _messages.Count; i++)
-            //{
-            //    var a = _messages[i];
-
-            //    if (type == MessageType.Label && a.RenderedText != null && (ishealthmessage && a.IsHealthMessage || a.RenderedText.Text == msg) && a.Type == type)
-            //    {
-            //        if (a.RenderedText.Hue != hue || ishealthmessage)
-            //        {
-            //            a.Hue = hue;
-            //            a.RenderedText.Hue = hue;
-
-            //            if (ishealthmessage)
-            //            {
-            //                a.Time = CalculateTimeToLive(a.RenderedText);
-            //                a.RenderedText.Text = msg;
-            //            }
-            //            else
-            //                a.RenderedText.CreateTexture();
-            //        }
-                    
-            //        _messages.RemoveAt(i);
-
-            //        if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-            //            _messages.AddToFront(a);
-            //        else
-            //            _messages.Insert(1, a);
-
-            //        return null;
-            //    }
-            //}
-
-
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
@@ -146,10 +186,8 @@ namespace ClassicUO.Game.GameObjects
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
                 Hue = hue,
-                Parent = this,
+                //Parent = this,
             };
-
-            //int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 4;
 
             for (int i = 0, limit3 = 0; i < _messages.Count; i++)
             {
@@ -193,13 +231,6 @@ namespace ClassicUO.Game.GameObjects
 
             _messages.AddToFront(msgInfo);
 
-            //if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-            //    _messages.AddToFront(msgInfo);
-            //else
-            //    _messages.Insert(1, msgInfo);
-
-
-          
             return msgInfo;
         }
 
@@ -480,12 +511,15 @@ namespace ClassicUO.Game.GameObjects
         public ushort Hue;
         public bool IsTransparent;
 
-        public EntityTextContainer Parent;
+        //public EntityTextContainer Parent;
         public RenderedText RenderedText;
         public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
+        public GameObject Owner;
 
         public MessageInfo Left, Right;
+
+        public MessageInfo ListLeft, ListRight;
     }
 }

@@ -1,6 +1,8 @@
 #define NOCOLOR 0
 #define COLOR 1
 #define PARTIAL_COLOR 2
+#define HUE_TEXT_NO_BLACK 3
+#define HUE_TEXT 4
 #define LAND 6
 #define LAND_COLOR 7
 #define SPECTRAL 10
@@ -106,6 +108,12 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	else if (mode == LAND_COLOR)
 	{
 		color.rgb = get_rgb(color.r, IN.Hue.x, swap) * get_light(IN.Normal);
+	}
+	else if (mode == HUE_TEXT || (mode == HUE_TEXT_NO_BLACK && color.b > 0.04f))
+	{
+		float3 rgb = get_rgb(color.r + 30, IN.Hue.x, swap);
+
+		color.rgb = rgb;
 	}
 	else if (mode == SPECTRAL)
 	{

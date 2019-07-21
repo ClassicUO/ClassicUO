@@ -136,7 +136,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)
-                scrollArea.Add(new ServerEntryGump(server));
+            {
+                HoveredLabel label;
+                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, font: 5)
+                {
+                    X = 74,
+                    //Y = 250
+                });
+
+                label.MouseUp += (sender, e) => { OnButtonClick((int) (Buttons.Server + server.Index)); };
+            }
 
             Add(scrollArea);
 
@@ -228,76 +237,35 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
-            private readonly RenderedText _labelName;
-            private readonly RenderedText _labelPacketLoss;
-            private readonly RenderedText _labelPing;
+
+            private readonly HoveredLabel _serverName;
 
             public ServerEntryGump(ServerListEntry entry)
             {
                 _buttonId = entry.Index;
-                _labelName = CreateRenderedText(entry.Name);
-                _labelPing = CreateRenderedText("-");
-                _labelPacketLoss = CreateRenderedText("-");
-                _labelName.CreateTexture();
-                _labelPing.CreateTexture();
-                _labelPacketLoss.CreateTexture();
+
+                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, font: 5));
+                _serverName.X = 74;
+                _serverName.Y = 250;
+
                 AcceptMouseInput = true;
                 Width = 393;
                 Height = 25;
 
-                //Height = new[]
-                //{
-                //    _labelName.Height, _labelPing.Height, _labelPacketLoss.Height
-                //}.Max();
-
-
                 WantUpdateSize = false;
-            }
-
-            private RenderedText CreateRenderedText(string text)
-            {
-                return new RenderedText
-                {
-                    Text = text,
-                    Font = 5,
-                    IsUnicode = false,
-                    Hue = _buttonId == Engine.GlobalSettings.LastServerNum ? SELECTED_COLOR : NORMAL_COLOR,
-                    Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                    MaxWidth = 0
-                };
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                if (IsDisposed)
-                    return false;
-
-                _labelName.Draw(batcher, x + 74, y);
-                _labelPing.Draw(batcher, x + 250, y);
-                _labelPacketLoss.Draw(batcher, x + 310, y);
-
-                return base.Draw(batcher, x, y);
             }
 
             protected override void OnMouseOver(int x, int y)
             {
-                _labelName.Hue = SELECTED_COLOR;
-                _labelPing.Hue = SELECTED_COLOR;
-                _labelPacketLoss.Hue = SELECTED_COLOR;
-                _labelName.CreateTexture();
-                _labelPing.CreateTexture();
-                _labelPacketLoss.CreateTexture();
+                _serverName.Hue = SELECTED_COLOR;
+
                 base.OnMouseOver(x, y);
             }
 
             protected override void OnMouseExit(int x, int y)
             {
-                _labelName.Hue = NORMAL_COLOR;
-                _labelPing.Hue = NORMAL_COLOR;
-                _labelPacketLoss.Hue = NORMAL_COLOR;
-                _labelName.CreateTexture();
-                _labelPing.CreateTexture();
-                _labelPacketLoss.CreateTexture();
+                _serverName.Hue = 0;
+
                 base.OnMouseExit(x, y);
             }
 
@@ -309,9 +277,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public override void Dispose()
             {
                 base.Dispose();
-                _labelName.Destroy();
-                _labelPing.Destroy();
-                _labelPacketLoss.Destroy();
             }
         }
     }

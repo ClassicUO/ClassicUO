@@ -444,12 +444,6 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             UpdateDrawPosition = false;
-
-            //if (_renderList.Length - _renderListCount != 0)
-            //{
-            //    if (_renderList[_renderListCount] != null)
-            //        Array.Clear(_renderList, _renderListCount, _renderList.Length - _renderListCount);
-            //}
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -722,20 +716,19 @@ namespace ClassicUO.Game.Scenes
         {
             _healthLinesManager.Draw(batcher, Scale);
 
-            //batcher.SetBlendState(_blendText);
-
             int renderIndex = _renderIndex - 1;
 
             if (renderIndex < 1)
                 renderIndex = 99;
 
+
+            World.WorldTextManager.Select(renderIndex);
+            World.WorldTextManager.MoveToTopIfSelected();
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
-            SelectedObject.LastObject = SelectedObject.Object;
 
-            // batcher.SetBlendState(null);
-            // workaround to set overheads clickable
-            //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+
+            SelectedObject.LastObject = SelectedObject.Object;
         }
 
         private Vector3 _selectionLines = Vector3.Zero;

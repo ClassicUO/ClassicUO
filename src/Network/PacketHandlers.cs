@@ -2390,7 +2390,6 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player)
                 UoAssist.SignalHits();
-                UoAssist.SignalHits();
         }
 
         private static void UpdateMana(Packet p)

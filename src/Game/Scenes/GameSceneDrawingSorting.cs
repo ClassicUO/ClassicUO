@@ -269,7 +269,8 @@ namespace ClassicUO.Game.Scenes
                                             iscorpse ||
                                             obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
-                    _objectHandlesCount++;
+                    if (obj.UseObjectHandles)
+                        _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)
                 {
@@ -377,6 +378,8 @@ namespace ClassicUO.Game.Scenes
                         obj.ProcessAlpha(0xFF);
                 }
 
+                obj.UpdateTextCoords();
+
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
@@ -386,9 +389,8 @@ namespace ClassicUO.Game.Scenes
 
                
 
-                _renderList[_renderListCount] = obj;
+                _renderList[_renderListCount++] = obj;
                 obj.UseInRender = (byte) _renderIndex;
-                _renderListCount++;
             }
         }
 
@@ -566,6 +568,9 @@ namespace ClassicUO.Game.Scenes
                 height = MAX;
 
             int size = Math.Max(width, height);
+
+            if (size < World.ClientViewRange)
+                size = World.ClientViewRange;
 
             int realMinRangeX = World.Player.X - size;
 

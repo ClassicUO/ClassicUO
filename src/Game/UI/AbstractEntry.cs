@@ -53,16 +53,8 @@ namespace ClassicUO.Game.UI
 
         public ushort Hue
         {
-            get => RenderText.Hue;
-            set
-            {
-                if (RenderText.Hue != value)
-                {
-                    RenderCaret.Hue = RenderText.Hue = value;
-                    RenderText.CreateTexture();
-                    RenderCaret.CreateTexture();
-                }
-            }
+            get;
+            set;
         }
 
         public virtual string Text
@@ -234,7 +226,7 @@ namespace ClassicUO.Game.UI
                             (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
                         else
                             (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-                        RenderCaret.Draw(batcher, x + rx, y + ry);
+                        RenderCaret.Draw(batcher, x + rx, y + ry, 0, Hue);
                     }
                 }
             }

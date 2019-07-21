@@ -25,6 +25,9 @@ using System;
 using System.Linq;
 
 using ClassicUO.Input;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -92,6 +95,23 @@ namespace ClassicUO.Game.UI.Controls
         public event EventHandler<int> OnOptionSelected;
         public event EventHandler OnBeforeContextMenu;
 
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+
+            if (ScissorStack.PushScissors(scissor))
+            {
+                bool ok = batcher.EnableScissorTest(true);
+                base.Draw(batcher, x, y);
+
+                if (ok)
+                    batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors();
+            }
+
+            return true;
+        }
+
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
@@ -116,19 +136,21 @@ namespace ClassicUO.Game.UI.Controls
                 _box = box;
                 ResizePic background;
                 Add(background = new ResizePic(0x0BB8));
-                Label[] labels = new Label[items.Length];
+                HoveredLabel[] labels = new HoveredLabel[items.Length];
                 var index = 0;
 
                 foreach (var item in items)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x024C, font: _box._font)
+                    var label = new HoveredLabel(item, false, 0x0453, 0, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,
-                        Tag = index
+                        Tag = index,
+                        DrawBackgroundCurrentIndex = true
                     };
                     label.MouseUp += Label_MouseUp;
                     labels[index] = label;
+
                     index++;
                 }
 
@@ -138,7 +160,6 @@ namespace ClassicUO.Game.UI.Controls
                 if (maxHeight != 0 && totalHeight > maxHeight)
                 {
                     var scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
-
                     foreach (var label in labels)
                     {
                         label.Y = 0;

@@ -124,11 +124,7 @@ namespace ClassicUO.Game.GameObjects
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
         }
-        protected override void InitializeTextContainer()
-        {
-            if (EntityTextContainerContainer == null)
-                EntityTextContainerContainer = new EntityTextContainer(this, 1);
-        }
+     
         public override void Destroy()
         {
             if (IsDestroyed)

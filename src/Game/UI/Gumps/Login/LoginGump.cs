@@ -202,16 +202,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (_textboxPassword.Hue != 0x0021)
                     _textboxPassword.Hue = 0x0021;
             }
-            else if (_textboxPassword.Hue != 0x034F)
-                _textboxPassword.Hue = 0x034F;
+            else if (_textboxPassword.Hue != 0)
+                _textboxPassword.Hue = 0;
 
             if (_textboxAccount.HasKeyboardFocus)
             {
                 if (_textboxAccount.Hue != 0x0021)
                     _textboxAccount.Hue = 0x0021;
             }
-            else if (_textboxAccount.Hue != 0x034F)
-                _textboxAccount.Hue = 0x034F;
+            else if (_textboxAccount.Hue != 0)
+                _textboxAccount.Hue = 0;
         }
 
         public override void OnButtonClick(int buttonID)

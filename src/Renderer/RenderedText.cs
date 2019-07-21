@@ -179,17 +179,25 @@ namespace ClassicUO.Renderer
                 return false;
 
             _hueVector.X = hue;
-            _hueVector.Y = 0;
-            _hueVector.Z = 0;
 
             if (hue != 0)
-                _hueVector.Y = 1;
+            {
+                if (IsUnicode)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BALCK;
+                else if (Font != 5 && Font != 8)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE;
+                else
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+            }
+            else
+                _hueVector.Y = 0;
+
             _hueVector.Z = alpha;
 
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
-        public void CreateTexture()
+        private void CreateTexture()
         {
             if (Texture != null && !Texture.IsDisposed)
             {
