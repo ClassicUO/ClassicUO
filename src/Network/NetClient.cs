@@ -526,7 +526,16 @@ namespace ClassicUO.Network
             {
                 Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;
-                if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
+
+                if (_isCompressionEnabled)
+                {
+                    //int outSize = 65536;
+                    //Huffman2.Decompress(buffer, _recvBuffer, ref outSize, ref bytesLen);
+                    //bytesLen = outSize;
+
+                    DecompressBuffer(ref buffer, ref bytesLen);
+                }
+
                 lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
             }

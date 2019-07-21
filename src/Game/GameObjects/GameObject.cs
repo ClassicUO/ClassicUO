@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _position = value;
                     _screenPosition.X = (_position.X - _position.Y) * 22;
-                    _screenPosition.Y = (_position.X + _position.Y) * 22 - _position.Z * 4;
+                    _screenPosition.Y = (_position.X + _position.Y) * 22 - (_position.Z << 2);
                     IsPositionChanged = true;
                     OnPositionChanged();
                 }
