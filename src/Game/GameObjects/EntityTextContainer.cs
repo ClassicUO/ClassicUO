@@ -40,11 +40,13 @@ namespace ClassicUO.Game.GameObjects
         private readonly Deque<MessageInfo> _messages = new Deque<MessageInfo>();
 
 
-        public EntityTextContainer(GameObject parent)
+        public EntityTextContainer(GameObject parent, int maxSize)
         {
             Parent = parent;
+            MaxSize = maxSize;
         }
 
+        public int MaxSize { get; }
 
         public GameObject Parent { get; }
         public bool IsDestroyed { get; private set; }
@@ -78,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             return timeToLive;
         }
 
-        public MessageInfo AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type, bool ishealthmessage = false)
+        public MessageInfo AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type)
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
             {
@@ -145,14 +147,13 @@ namespace ClassicUO.Game.GameObjects
                 Type = type,
                 Hue = hue,
                 Parent = this,
-                IsHealthMessage = ishealthmessage
             };
 
-            int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 4;
+            //int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 4;
 
             for (int i = 0, limit3 = 0; i < _messages.Count; i++)
             {
-                if (i < max)
+                if (i < MaxSize - 1)
                 {
                     var c = _messages[i];
 
@@ -477,7 +478,7 @@ namespace ClassicUO.Game.GameObjects
     {
         public byte Alpha;
         public ushort Hue;
-        public bool IsHealthMessage, IsTransparent;
+        public bool IsTransparent;
 
         public EntityTextContainer Parent;
         public RenderedText RenderedText;

@@ -236,17 +236,21 @@ namespace ClassicUO.Game.GameObjects
             AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f, bool ishealthmessage = false)
+        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (EntityTextContainerContainer == null)
-                EntityTextContainerContainer = new EntityTextContainer(this);
+            InitializeTextContainer();
 
-            World.WorldTextManager.AddMessage(EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage));
+            if (EntityTextContainerContainer != null)
+                World.WorldTextManager.AddMessage(EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type));
         }
 
+        protected virtual void InitializeTextContainer()
+        {
+
+        }
 
         protected virtual void OnPositionChanged()
         {
