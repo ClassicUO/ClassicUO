@@ -150,13 +150,12 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 			}
 		}
 	}
-	else if (mode == 4 || (mode == 3 && (color.r > 0.04 || color.g > 0.04 || color.b > 0.04) ))
+	else if (mode == 4 || (mode == 3 && color.r > 0.08)
 	{
-		color.rgb = get_rgb(color.r + 30, IN.Hue.x, swap);
+		color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
 	}
 
-	color.rgb *= alpha;
-	return color;
+	return color * alpha;
 
 
 	//else if (mode == LAND)

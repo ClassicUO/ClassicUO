@@ -74,6 +74,14 @@ namespace ClassicUO.Game.GameObjects
                     items.ListRight = null;
                     items.ListLeft = null;
                     items.RenderedText?.Destroy();
+
+                    if (items.Right != null)
+                        items.Right.Left = items.Left;
+
+                    if (items.Left != null)
+                        items.Left.Right = items.Right;
+                    items.Left = null;
+                    items.Right = null;
                 }
             }
             else

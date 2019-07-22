@@ -284,26 +284,6 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
-                else
-                {
-                    if ( t.Left != null && (t.Time < Engine.Ticks || t.RenderedText == null || t.RenderedText.IsDestroyed))
-                    {
-                        var next = t.Right;
-
-                        if (t.Right != null)
-                            t.Right.Left = t.Left;
-
-                        if (t.Left != null)
-                            t.Left.Right = t.Right;
-
-                        t.Left = t.Right = null;
-
-                        if (next == null)
-                            break;
-
-                        _drawPointer = next;
-                    }
-                }
 
                 if (_drawPointer.Right == null)
                     break;
