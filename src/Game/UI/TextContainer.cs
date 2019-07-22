@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI
                 Time = Engine.Ticks + 4000,
                 X = x,
                 Y = y,
-                OffsetY = offset,
+                OffsetY = -offset,
                 ItemSerial = itemSerial
             };
 
