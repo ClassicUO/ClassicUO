@@ -68,16 +68,7 @@ namespace ClassicUO.Game.UI
 
             if (_renderedText == null)
             {
-                _renderedText = new RenderedText
-                {
-                    Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                    Font = 1,
-                    IsUnicode = true,
-                    IsHTML = true,
-                    RecalculateWidthByInfo = true,
-                    Cell = 5,
-                    FontStyle = FontStyle.BlackBorder
-                };
+                _renderedText = RenderedText.Create(string.Empty,font: 1, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true);
             }
             else if (_renderedText.Text != Text)
             {

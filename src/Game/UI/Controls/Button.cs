@@ -79,20 +79,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _caption = caption;
 
-                _fontTexture[0] = new RenderedText
-                {
-                    IsUnicode = isunicode,
-                    Hue = FontHue,
-                    Font = font,
-                    Text = caption
-                };
+                _fontTexture[0] = RenderedText.Create(caption,FontHue, font, isunicode);
 
                 if (hoverHue != ushort.MaxValue)
                 {
-                    _fontTexture[1] = new RenderedText
-                    {
-                        IsUnicode = isunicode, Hue = HueHover, Font = font, Text = caption
-                    };
+                    _fontTexture[1] = RenderedText.Create(caption, HueHover, font, isunicode);
                 }
             }
 

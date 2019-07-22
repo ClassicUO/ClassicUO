@@ -39,7 +39,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class BaseGameObject
     {
-        //bool IsSelected { get; set; }
     }
 
 
@@ -52,9 +51,10 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        //public EntityTextContainer EntityTextContainerContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
+
+        public TextContainer TextContainer { get; private set; }
 
         public Position Position
         {
@@ -103,27 +103,6 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-
-        //public Tile Tile
-        //{
-        //    get => _tile;
-        //    set
-        //    {
-        //        if (_tile != value)
-        //        {
-        //            _tile?.RemoveGameObject(this);
-        //            _tile = value;
-
-        //            if (_tile != null)
-        //                _tile.AddGameObject(this);
-        //            else
-        //            {
-        //                if (this != World.Player && !IsDisposed) Dispose();
-        //            }
-        //        }
-        //    }
-        //}
-
         public bool IsDestroyed { get; protected set; }
 
         public int Distance
@@ -159,13 +138,11 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Tile Tile { get; private set; }
-
         public GameObject Left { get; set; }
         public GameObject Right { get; set; }
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            //EntityTextContainerContainer?.Update();
         }
 
         [MethodImpl(256)]
@@ -222,10 +199,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(256)]
-        public void UpdateRealScreenPosition(ref Point offset)
+        public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
-            RealScreenPosition.X = _screenPosition.X - offset.X - 22;
-            RealScreenPosition.Y = _screenPosition.Y - offset.Y - 22;
+            RealScreenPosition.X = _screenPosition.X - offsetX - 22;
+            RealScreenPosition.Y = _screenPosition.Y - offsetY - 22;
             IsPositionChanged = false;
         }
 
@@ -239,21 +216,17 @@ namespace ClassicUO.Game.GameObjects
             AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        private TextContainer _container;
-
-        public TextContainer TextContainer => _container;
-
         public void UpdateTextCoords()
         {
-            if (_container == null)
+            if (TextContainer == null)
                 return;
 
-            var last = _container.Items;
+            var last = TextContainer.Items;
 
             while (last?.ListRight != null)
                 last = last.ListRight;
 
-            _container.TotalHeight = 0;
+            TextContainer.TotalHeight = 0;
             if (last == null)
                 return;
 
@@ -264,12 +237,10 @@ namespace ClassicUO.Game.GameObjects
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
                     last.OffsetY = offY;
-                    _container.TotalHeight += last.RenderedText.Height;
+                    TextContainer.TotalHeight += last.RenderedText.Height;
                     offY += last.RenderedText.Height;
                 }
             }
-
-            
         }
 
         public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode)
@@ -277,12 +248,12 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (_container == null)
-                _container = new TextContainer();
+            if (TextContainer == null)
+                TextContainer = new TextContainer();
 
             var msg = CreateMessage(text, hue, font, isunicode, type);
             msg.Owner = this;
-            _container.Add(msg);
+            TextContainer.Add(msg);
             World.WorldTextManager.AddMessage(msg);
         }
 
@@ -301,28 +272,16 @@ namespace ClassicUO.Game.GameObjects
             else
                 width = 0;
 
-            RenderedText rtext = new RenderedText
-            {
-                Font = font,
-                MaxWidth = width,
-                Hue = hue,
-                IsUnicode = isunicode,
-                SaveHitMap = true,
-                FontStyle = FontStyle.BlackBorder,
-                Text = msg
-            };
+            RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-
-            var msgInfo = new MessageInfo
+            return new MessageInfo
             {
                 Alpha = 255,
                 RenderedText = rtext,
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
                 Hue = hue,
-            };
-
-            return msgInfo;
+            }; 
         }
 
         private static long CalculateTimeToLive(RenderedText rtext)
@@ -351,11 +310,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        protected virtual void InitializeTextContainer()
-        {
-
-        }
-
         protected virtual void OnPositionChanged()
         {
         }
@@ -372,10 +326,7 @@ namespace ClassicUO.Game.GameObjects
             Tile?.RemoveGameObject(this);
             Tile = null;
 
-            _container?.Clear();
-
-            //EntityTextContainerContainer?.Destroy();
-            //EntityTextContainerContainer = null;
+            TextContainer?.Clear();
 
             IsDestroyed = true;
             PriorityZ = 0;
@@ -395,8 +346,7 @@ namespace ClassicUO.Game.GameObjects
             Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
             DrawTransparent = false;
-           
-
+            
             Texture = null;
         }
     }

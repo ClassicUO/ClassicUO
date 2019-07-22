@@ -53,16 +53,7 @@ namespace ClassicUO.Game.UI
 
             TextContainerEntry msg = new TextContainerEntry
             {
-                RenderedText = new RenderedText
-                {
-                    Font = font,
-                    FontStyle = FontStyle.BlackBorder,
-                    Hue = hue,
-                    IsUnicode = isunicode,
-                    MaxWidth = 200,
-                    Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                    Text = text
-                },
+                RenderedText = RenderedText.Create(text, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER,200),
                 Time = Engine.Ticks + 4000,
                 X = x,
                 Y = y,

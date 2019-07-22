@@ -53,12 +53,48 @@ namespace ClassicUO.Renderer
         private byte _font;
         private string _text;
 
-        public RenderedText()
+        private static readonly Queue<RenderedText> _pool = new Queue<RenderedText>();
+
+        private RenderedText()
         {
-            Hue = 0xFFFF;
-            Cell = 30;
+
         }
 
+        public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
+                                          int maxWidth = 0, byte cell = 30, bool isHTML = false, 
+                                          bool recalculateWidthByInfo = false, bool saveHitmap = false)
+        {
+            RenderedText r;
+            if (_pool.Count != 0)
+            {
+                r = _pool.Dequeue();
+                r.IsDestroyed = false;
+                r.Links.Clear();
+            }
+            else
+            {
+                r = new RenderedText();
+            }
+
+            r.Hue = hue;
+            r.Font = font;
+            r.IsUnicode = isunicode;
+            r.FontStyle = style;
+            r.Cell = cell;
+            r.Align = align;
+            r.MaxWidth = maxWidth;
+            r.IsHTML = isHTML;
+            r.RecalculateWidthByInfo = recalculateWidthByInfo;
+            r.Width = 0;
+            r.Height = 0;
+            r.SaveHitMap = saveHitmap;
+
+            if (r.Text != text)
+                r.Text = text; // here makes the texture
+            else 
+                r.CreateTexture();
+            return r;
+        }
 
         public bool IsUnicode { get; set; }
 
@@ -122,9 +158,9 @@ namespace ClassicUO.Renderer
 
         public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
 
-        public bool IsPartialHue { get; set; }
+        public bool IsPartialHue { get; private set; }
 
-        public bool SaveHitMap { get; set; }
+        public bool SaveHitMap { get; private set; }
 
         public bool IsDestroyed { get; private set; }
 
@@ -239,6 +275,8 @@ namespace ClassicUO.Renderer
 
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Dispose();
+
+            _pool.Enqueue(this);
         }
     }
 }

@@ -63,13 +63,7 @@ namespace ClassicUO.Game.GameObjects
                     color = 0x0058;
 
                 HitsTexture?.Destroy();
-                HitsTexture = new RenderedText()
-                {
-                    Font = 3,
-                    IsUnicode = false,
-                    Hue = color,
-                    Text = $"[{perc}%]"
-                };
+                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
             }
         }
 

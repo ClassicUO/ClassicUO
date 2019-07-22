@@ -183,14 +183,13 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
-                    obj.UpdateRealScreenPosition(ref _offset);
+                    obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
 
                 obj.UseInRender = 0xFF;
 
                 int drawX = obj.RealScreenPosition.X;
                 int drawY = obj.RealScreenPosition.Y;
 
- 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
 
@@ -224,7 +223,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-
                             if (itemData.IsFoliage && World.Season >= Seasons.Winter)
                             {
                                 continue;
@@ -247,7 +245,6 @@ namespace ClassicUO.Game.Scenes
                                     changinAlpha = obj.ProcessAlpha(0);
                                 else
                                     changinAlpha = obj.AlphaHue != 0;
-
 
                                 if (!changinAlpha)
                                     continue;
@@ -385,9 +382,6 @@ namespace ClassicUO.Game.Scenes
                     int newsize = _renderList.Length + 1000;
                     Array.Resize(ref _renderList, newsize);
                 }
-
-
-               
 
                 _renderList[_renderListCount++] = obj;
                 obj.UseInRender = (byte) _renderIndex;

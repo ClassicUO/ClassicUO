@@ -56,10 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             SpriteTexture t = _textures[INACTIVE];
             Width = t.Width;
 
-            _text = new RenderedText
-            {
-                Font = font, Hue = color, IsUnicode = isunicode, MaxWidth = maxWidth, Text = text
-            };
+            _text = RenderedText.Create(text, color, font, isunicode, maxWidth: maxWidth);
             Width += _text.Width;
 
             Height = Math.Max(t.Width, _text.Height);

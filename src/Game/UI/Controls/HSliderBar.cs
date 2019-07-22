@@ -63,10 +63,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (hasText)
             {
-                _text = new RenderedText
-                {
-                    Font = font, Hue = color, IsUnicode = unicode
-                };
+                _text = RenderedText.Create(string.Empty, color, font, unicode);
                 _drawUp = drawUp;
             }
 
