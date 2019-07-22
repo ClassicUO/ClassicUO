@@ -45,23 +45,43 @@ namespace ClassicUO.Game.UI
         private readonly List<TextContainerEntry> _messages = new List<TextContainerEntry>();
         private readonly Rectangle[] _rects = new Rectangle[2];
 
+        private int _lastX, _lastY, _lastHeight;
 
         public void Add(string text, ushort hue, byte font, bool isunicode, int x, int y, Serial itemSerial)
         {
-            int offset = _messages.Where(s => s.X /*+ (s.RenderedText.Width >> 1)*/ == x && s.Y == y)
-                                  .Sum(s => s.RenderedText.Height);
+            var renderedText = RenderedText.Create(text, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 200);
+
+
+            int offset = 0;
+            if (_lastX == x && _lastY == y)
+            {
+                offset = _lastHeight;
+
+                //var last = _messages[_messages.Count - 1];
+                //last.Y -= renderedText.Height;
+                //last.OffsetY -= _lastHeight - renderedText.Height;
+
+                _lastHeight += renderedText.Height;
+
+            }
+            else
+            {
+                _lastX = x;
+                _lastY = y;
+                _lastHeight = renderedText.Height;
+            }
+
+            offset -= renderedText.Height;
 
             TextContainerEntry msg = new TextContainerEntry
             {
-                RenderedText = RenderedText.Create(text, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER,200),
+                RenderedText = renderedText,
                 Time = Engine.Ticks + 4000,
                 X = x,
                 Y = y,
                 OffsetY = -offset,
                 ItemSerial = itemSerial
             };
-
-            //msg.X -= msg.RenderedText.Width >> 1;
 
             _messages.Add(msg);
         }
@@ -138,7 +158,10 @@ namespace ClassicUO.Game.UI
             {
                 var msg = _messages[i];
 
-                msg.RenderedText.Draw(batcher, msg.X + x - (msg.RenderedText.Width >> 1), y + (msg.Y - msg.OffsetY) - msg.RenderedText.Height, msg.Alpha);
+                int xx = x + msg.X - (msg.RenderedText.Width >> 1);
+                int yy = y + (msg.Y - msg.OffsetY) - msg.RenderedText.Height;
+
+                msg.RenderedText.Draw(batcher, xx, yy, msg.Alpha);
             }
         }
 
