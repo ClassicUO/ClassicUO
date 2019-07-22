@@ -31,13 +31,15 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class NameOverHeadHandlerGump : Gump
     {
+        private static int _lastX = 100, _lastY = 100;
+
         public NameOverHeadHandlerGump() : base(0, 0)
         {
-            CanMove = false;
+            CanMove = true;
             AcceptMouseInput = true;
 
-            X = 100;
-            Y = 100;
+            X = _lastX;
+            Y = _lastY;
             WantUpdateSize = false;
 
             ControlInfo.Layer = UILayer.Over;
@@ -101,17 +103,14 @@ namespace ClassicUO.Game.UI.Gumps
             };
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+
+        protected override void OnDragEnd(int x, int y)
         {
-            return base.Draw(batcher, x, y);
+            _lastX = ScreenCoordinateX;
+            _lastY = ScreenCoordinateY;
+            SetInScreen();
+
+            base.OnDragEnd(x, y);
         }
-
-        //public override void Update(double totalMS, double frameMS)
-        //{
-        //    base.Update(totalMS, frameMS);
-
-        //    if (!Input.Keyboard.Ctrl || !Input.Keyboard.Shift)
-        //        Dispose();
-        //}
     }
 }

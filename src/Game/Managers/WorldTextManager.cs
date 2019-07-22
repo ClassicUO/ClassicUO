@@ -112,9 +112,13 @@ namespace ClassicUO.Game.Managers
          
             ProcessWorldText(false);
 
+            bool health = Engine.Profile.Current.ShowMobilesHP;
+            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
+            int mode = Engine.Profile.Current.MobileHPType;
+
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks)
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
                     continue;
 
                 var parent = o.Parent.Parent;
@@ -126,10 +130,24 @@ namespace ClassicUO.Game.Managers
 
                 if (parent is Mobile m)
                 {
-                    if (!m.IsMounted)
-                        offY = -22;
+                    if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
+                    {
+                        offY += 22;
+                    }
 
-                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex, m.GetGraphicForAnimation(), m.IsMounted, 0, out int centerX, out int centerY, out int width, out int height);
+                    if (!m.IsMounted)
+                        offY -= 22;
+
+                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex, 
+                                                                  m.GetGraphicForAnimation(), 
+                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, 
+                                                                  m.IsMounted,
+                                                                  /*(byte) m.AnimIndex*/ 0, 
+                                                                  out int centerX, 
+                                                                  out int centerY,
+                                                                  out int width, 
+                                                                  out int height);
                     x += (int)m.Offset.X;
                     x += 22;
                     y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
@@ -240,7 +258,6 @@ namespace ClassicUO.Game.Managers
                     SelectedObject.Object = o;
                 }
             }
-
         }
 
 
@@ -332,8 +349,6 @@ namespace ClassicUO.Game.Managers
             {
                 if (!_staticToUpdate.Contains(obj.Parent.Parent))
                     _staticToUpdate.Add(obj.Parent.Parent);
-                else 
-                    return;
             }
             
             var item = _firstNode;
@@ -447,7 +462,7 @@ namespace ClassicUO.Game.Managers
 
             _staticToUpdate.Clear();
 
-            _firstNode = null;
+            _firstNode = new MessageInfo();
             _drawPointer = null;
         }
     }

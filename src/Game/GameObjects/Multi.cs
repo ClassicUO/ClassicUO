@@ -112,6 +112,12 @@ namespace ClassicUO.Game.GameObjects
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
         }
 
+        protected override void InitializeTextContainer()
+        {
+            if (EntityTextContainerContainer == null)
+                EntityTextContainerContainer = new EntityTextContainer(this, 1);
+        }
+
         public override void Destroy()
         {
             if (IsDestroyed)

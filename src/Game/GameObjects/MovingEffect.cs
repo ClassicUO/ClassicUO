@@ -67,14 +67,15 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0) mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    //if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
+                    //    mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else if (source is Item)
                 {
                     SetSource(source.Position.X, source.Position.Y, source.Position.Z);
 
-                    if ((xSource | ySource | zSource) != 0)
-                        source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    //if ((xSource | ySource | zSource) != 0)
+                    //    source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else
                     SetSource(xSource, ySource, zSourceB);
@@ -90,15 +91,15 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SetTarget(target);
 
-                    if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
-                        mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
+                    //if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
+                    //    mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else if (target is Item)
                 {
                     SetTarget(target);
 
-                    if ((xTarget | yTarget | zTarget) != 0)
-                        target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
+                    //if ((xTarget | yTarget | zTarget) != 0)
+                    //    target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else
                     SetTarget(xTarget, yTarget, zTargB);
@@ -111,15 +112,15 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Explode { get; set; }
 
-        public int MovingDelay { get; set; } = 20;
+        public byte MovingDelay { get; set; } = 20;
 
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > totalMS)
+            if (_lastMoveTime > Engine.Ticks)
                 return;
 
-            _lastMoveTime = (uint) (totalMS + MovingDelay);
+            _lastMoveTime = Engine.Ticks + MovingDelay;
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
@@ -245,9 +246,9 @@ namespace ClassicUO.Game.GameObjects
                     bool incZ = sz < tz;
 
                     if (incZ)
-                        totalOffsetZ = (tz - sz) * 4;
+                        totalOffsetZ = (tz - sz) << 2;
                     else
-                        totalOffsetZ = (sz - tz) * 4;
+                        totalOffsetZ = (sz - tz) << 2;
                     totalOffsetZ /= stepsCountX;
 
                     if (totalOffsetZ == 0)
@@ -271,7 +272,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                countY -= (int) Offset.Z + (tz - sz) * 4;
+                countY -= (int) Offset.Z + ((tz - sz) << 2);
                 float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
                 AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
 

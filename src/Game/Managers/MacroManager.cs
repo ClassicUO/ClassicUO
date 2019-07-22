@@ -409,6 +409,7 @@ namespace ClassicUO.Game.Managers
                                         Engine.UI.Add(new MiniMapGump());
                                     else
                                     {
+                                        miniMapGump.ToggleSize();
                                         miniMapGump.SetInScreen();
                                         miniMapGump.BringOnTop();
                                     }
@@ -626,6 +627,22 @@ namespace ClassicUO.Game.Managers
 
                     if (World.Get(GameActions.LastObject) != null)
                         GameActions.DoubleClick(GameActions.LastObject);
+
+                    break;
+
+                case MacroType.UseItemInHand:
+                    Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
+                    if (itemInLeftHand != null)
+                    {
+                        GameActions.DoubleClick(itemInLeftHand.Serial);
+                    } else
+                    {
+                        Item itemInRightHand = World.Player.Equipment[(int)Layer.TwoHanded];
+                        if (itemInRightHand != null)
+                        {
+                            GameActions.DoubleClick(itemInRightHand.Serial);
+                        }
+                    }
 
                     break;
 
@@ -1335,7 +1352,8 @@ namespace ClassicUO.Game.Managers
         AuraOnOff,
         Grab,
         SetGrabBag,
-        NamesOnOff
+        NamesOnOff,
+        UseItemInHand
     }
 
     internal enum MacroSubType

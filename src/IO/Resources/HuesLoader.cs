@@ -227,7 +227,7 @@ namespace ClassicUO.IO.Resources
                 int e = color % 8;
                 uint cl = HuesHelper.Color16To32(c);
                 (byte B, byte G, byte R, byte A) = HuesHelper.GetBGRA(cl);
-                //(byte R, byte G, byte B, byte A) = GetBGRA(cl);
+                //(byte R, byte G, byte B, byte A) = HuesHelper.GetBGRA(cl);
 
                 if (R == G && B == G)
                     return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);

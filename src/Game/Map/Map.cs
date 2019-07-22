@@ -120,10 +120,14 @@ namespace ClassicUO.Game.Map
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
             var tile = GetTile(x, y);
-
-            var obj = tile.FirstNode;
-
             groundZ = staticZ = 0;
+
+            if (tile == null)
+            {
+                return;
+            }
+            
+            var obj = tile.FirstNode;
 
             while (obj != null)
             {

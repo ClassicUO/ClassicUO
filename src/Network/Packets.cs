@@ -300,7 +300,7 @@ namespace ClassicUO.Network
             WriteBool(state);
             WriteByte(0x32);
             WriteByte(0);
-            WriteByte(0);
+            //WriteByte(0);
         }
     }
 

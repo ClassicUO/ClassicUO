@@ -21,9 +21,12 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -75,8 +78,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (CharacterIsBehindFoliage)
                 {
-                    if (AlphaHue != 76)
-                        ProcessAlpha(76);
+                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
+                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
                 }
                 else
                 {
@@ -105,6 +108,11 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
             Engine.DebugInfo.StaticsRendered++;
+
+            //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
+            //{
+            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X , posY - Bounds.Y /*- 10*/, false);
+            //}
 
             if (base.Draw(batcher, posX, posY))
             {
@@ -135,7 +143,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
             }
 
-            if (SelectedObject.IsPointInStatic(Graphic, x - Bounds.X, y - Bounds.Y))
+            if (SelectedObject.IsPointInStatic(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
     }

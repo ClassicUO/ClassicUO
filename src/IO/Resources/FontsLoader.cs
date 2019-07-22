@@ -309,7 +309,7 @@ namespace ClassicUO.IO.Resources
 
                 if (realWidth > width)
                 {
-                    string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
+                    string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
 
                     return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial, saveHitmap);
                 }
@@ -318,17 +318,35 @@ namespace ClassicUO.IO.Resources
             return GeneratePixelsASCII(font, str, color, width, align, flags, out isPartial, saveHitmap);
         }
 
-        private string GetTextByWidthASCII(byte font, string str, int width, bool isCropped)
+        private string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
+
+            StringBuilder sb = new StringBuilder();
+
+            if (IsUsingHTML)
+            {
+                int strLen = str.Length;
+                GetHTMLData(font, str, ref strLen, align, flags);
+                sb.Append(str.Substring(0, str.Length - strLen));
+                str = str.Substring(str.Length - strLen, strLen);
+
+
+                int newWidth = GetWidthExASCII(font, str, width, align, flags);
+
+                if (newWidth <= width)
+                {
+                    sb.Append(str);
+                    return sb.ToString();
+                }
+            }
 
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
             int textLength = 0;
-            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {
@@ -358,7 +376,7 @@ namespace ClassicUO.IO.Resources
             if (len <= 0)
                 return null;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -439,7 +457,7 @@ namespace ClassicUO.IO.Resources
                 {
                     byte index = (byte) ptr.Data[i].Item;
                     int offsY = GetFontOffsetY(font, index);
-                    FontCharacterData fcd = fd.Chars[_fontIndex[index]];
+                    ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[index]];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
@@ -463,11 +481,11 @@ namespace ClassicUO.IO.Resources
                                 uint pcl = 0;
 
                                 if (isPartial)
-                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor);
+                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
                                 else
-                                    pcl = FileManager.Hues.GetColor(pic, charColor);
+                                    pcl = FileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
                                 int block = testrY * width + x + w;
-                                pData[block] = HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
+                                pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
                             }
                         }
                     }
@@ -518,7 +536,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            FontData fd = _font[font];
+            ref readonly FontData fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -553,7 +571,7 @@ namespace ClassicUO.IO.Resources
                     charCount = 0;
                 }
 
-                FontCharacterData fcd = fd.Chars[_fontIndex[(byte) si]];
+                ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[(byte) si]];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
@@ -708,7 +726,7 @@ namespace ClassicUO.IO.Resources
 
                 if (realWidth > width)
                 {
-                    string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
+                    string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
 
                     return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags, saveHitmap);
                 }
@@ -717,23 +735,43 @@ namespace ClassicUO.IO.Resources
             return GeneratePixelsUnicode(font, str, color, cell, width, align, flags, saveHitmap);
         }
 
-        public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
+        public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return string.Empty;
 
             uint* table = (uint*) _unicodeFontAddress[font];
 
+
+            StringBuilder sb = new StringBuilder();
+
+            if (IsUsingHTML)
+            {
+                int strLen = str.Length;
+
+                GetHTMLData(font, str, ref strLen, align, flags);
+                sb.Append(str.Substring(0, str.Length - strLen));
+                str = str.Substring(str.Length - strLen, strLen);
+
+                int newWidth = GetWidthExUnicode(font, str, width, align, flags);
+
+                if (newWidth <= width)
+                {
+                    sb.Append(str);
+                    return sb.ToString();
+                }
+            }
+
             if (isCropped)
             {
                 uint offset = table['.'];
 
                 if (offset != 0 && offset != 0xFFFFFFFF)
-                    width -= *(byte*) ((IntPtr) table + (int) offset + 2) * 3 + 3;
+                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3 + 3;
             }
 
+
             int textLength = 0;
-            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {

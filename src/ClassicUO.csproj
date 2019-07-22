@@ -318,7 +318,6 @@
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharAppearanceGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoadingGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />

@@ -74,12 +74,12 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnInitialize()
         {
             InitializeJournalEntries();
-            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded += AddJournalEntry;
+            World.Journal.EntryAdded += AddJournalEntry;
         }
 
         public override void Dispose()
         {
-            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded -= AddJournalEntry;
+            World.Journal.EntryAdded -= AddJournalEntry;
             base.Dispose();
         }
 
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void InitializeJournalEntries()
         {
-            foreach (JournalEntry t in Engine.SceneManager.GetScene<GameScene>().Journal.Entries)
+            foreach (JournalEntry t in World.Journal.Entries)
                 AddJournalEntry(null, t);
 
             _scrollBar.MinValue = 0;

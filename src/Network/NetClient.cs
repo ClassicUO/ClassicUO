@@ -247,7 +247,10 @@ namespace ClassicUO.Network
                 ref byte[] data = ref p.ToArray();
                 int length = p.Length;
 
-                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length)) PacketReceived.Raise(p);
+                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
+                {
+                    PacketReceived.Raise(p);
+                }
             }
 
             Flush();
@@ -526,7 +529,16 @@ namespace ClassicUO.Network
             {
                 Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;
-                if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
+
+                if (_isCompressionEnabled)
+                {
+                    //int outSize = 65536;
+                    //Huffman2.Decompress(buffer, _recvBuffer, ref outSize, ref bytesLen);
+                    //bytesLen = outSize;
+
+                    DecompressBuffer(ref buffer, ref bytesLen);
+                }
+
                 lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
             }

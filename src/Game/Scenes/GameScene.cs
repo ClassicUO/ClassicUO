@@ -93,29 +93,7 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
-
-        //public IGameEntity SelectedObject
-        //{
-        //    get => _selectedObject;
-        //    set
-        //    {
-        //        _selectedObject = Game.SelectedObject.Object = value;
-        //        //if (_selectedObject == value)
-        //        //    return;
-
-        //        //if (_selectedObject != null && _selectedObject.IsSelected)
-        //        //    _selectedObject.IsSelected = false;
-
-        //        //_selectedObject = value;
-
-        //        //if (_selectedObject != null)
-        //        //    _selectedObject.IsSelected = true;
-        //    }
-        //}
-
-        public JournalManager Journal { get; private set; }
-
-        public WorldTextManager Overheads { get; private set; }
+        
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
@@ -150,8 +128,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             HeldItem = new ItemHold();
-            Journal = new JournalManager();
-            Overheads = new WorldTextManager();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(Engine.Profile.Current.Macros);
             _healthLinesManager = new HealthLinesManager();
@@ -264,7 +240,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            Journal.Add(text, hue, name, e.IsUnicode);
+            World.Journal.Add(text, hue, name, e.IsUnicode);
         }
 
         public override void Unload()
@@ -295,11 +271,7 @@ namespace ClassicUO.Game.Scenes
             Engine.UI?.Clear();
             World.Clear();
 
-            Overheads?.Clear();
-            Overheads = null;
-            Journal?.Clear();
-            Journal = null;
-            Overheads = null;
+          
             _useItemQueue?.Clear();
             _useItemQueue = null;
             Hotkeys = null;
@@ -405,7 +377,7 @@ namespace ClassicUO.Game.Scenes
             _alphaChanged = _alphaTimer < Engine.Ticks;
 
             if (_alphaChanged)
-                _alphaTimer = Engine.Ticks + 20;
+                _alphaTimer = Engine.Ticks + Constants.ALPHA_TIME;
 
             GetViewPort();
 
@@ -509,7 +481,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             World.Update(totalMS, frameMS);
-            Overheads.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
 
 
@@ -758,8 +729,8 @@ namespace ClassicUO.Game.Scenes
             if (renderIndex < 1)
                 renderIndex = 99;
 
-            Overheads.ProcessWorldText(true);
-            Overheads.Draw(batcher, x, y, renderIndex);
+            World.WorldTextManager.ProcessWorldText(true);
+            World.WorldTextManager.Draw(batcher, x, y, renderIndex);
             SelectedObject.LastObject = SelectedObject.Object;
 
             // batcher.SetBlendState(null);

@@ -67,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
             //{
             //    var i = _pool.Dequeue();
             //    i.IsDestroyed = false;
+            //    i.Graphic = 0;
             //    i.Serial = serial;
             //    i._amount = 0;
             //    i._animDataFrame = default;
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
             //    i.LightID = 0;
             //    i.MultiDistanceBonus = 0;
-            //    i.BookType = 0;
+            //    i.BookType = SpellBookType.Unknown;
             //    i.Flags = 0;
             //    i.WantUpdateMulti = true;
             //    i._force = false;
@@ -95,13 +96,14 @@ namespace ClassicUO.Game.GameObjects
             //    i.Direction = 0;
             //    i.Equipment = null;
             //    i.LastAnimationChangeTime = 0;
-            //    i.Items.Clear();
+            //    i.Items = new EntityCollection<Item>();
             //    i.IsClicked = false;
             //    i.Properties.Clear();
             //    i._delta = 0;
             //    i.PropertiesHash = 0;
 
             //    i._itemData = null;
+                
 
             //    return i;
             //}
@@ -352,7 +354,6 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
-                    m.AlphaHue = 0xFF;
 
                     house.Components.Add(m);
                 }

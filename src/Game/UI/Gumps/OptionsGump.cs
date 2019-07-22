@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
-        private Combobox _hpComboBox, _healtbarType, _fieldsType;
+        private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
         private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
@@ -298,6 +298,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             hpAreaItem.Add(_showHpMobile);
+
             int mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
@@ -308,6 +309,24 @@ namespace ClassicUO.Game.UI.Gumps
                 "Percentage", "Line", "Both"
             }, mode);
             hpAreaItem.Add(_hpComboBox);
+
+            text = new Label("mode:", true, HUE_FONT)
+            {
+                X = _showHpMobile.Bounds.Right + 170,
+                Y = 20
+            };
+            hpAreaItem.Add(text);
+
+            mode = Engine.Profile.Current.MobileHPShowWhen;
+
+            if (mode != 0 && mode > 2)
+                mode = 0;
+
+            _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 100, new[]
+            {
+                "Always", "Less than 100%", "Smart"
+            }, mode);
+            hpAreaItem.Add(_hpComboBoxShowWhen);
 
             mode = Engine.Profile.Current.CloseHealthBarType;
 
@@ -794,7 +813,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
-            _saveJournalCheckBox.ValueChanged += (o, e) => { Engine.SceneManager.GetScene<GameScene>().Journal?.CreateWriter(_saveJournalCheckBox.IsChecked); };
+            _saveJournalCheckBox.ValueChanged += (o, e) => { World.Journal.CreateWriter(_saveJournalCheckBox.IsChecked); };
             _saveJournalCheckBox.IsChecked = Engine.Profile.Current.SaveJournalToFile;
 
             // [BLOCK] activate chat
@@ -1195,6 +1214,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
+                    _hpComboBoxShowWhen.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
                     _poisonColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _paralyzedColorPickerBox.SetColor(0x014C, FileManager.Hues.GetPolygoneColor(12, 0x014C));
@@ -1364,6 +1384,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ParalyzedHue = _paralyzedColorPickerBox.Hue;
             Engine.Profile.Current.InvulnerableHue = _invulnerableColorPickerBox.Hue;
             Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
+            Engine.Profile.Current.MobileHPShowWhen = _hpComboBoxShowWhen.SelectedIndex;
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             Engine.Profile.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;

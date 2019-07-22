@@ -41,7 +41,13 @@ namespace ClassicUO.Game.Managers
         MultiPlacement = 2,
         SetTargetClientSide = 3,
         Grab,
-        SetGrabBag
+        SetGrabBag,
+        HueCommandTarget
+    }
+
+    internal class CursorType
+    {
+        public static readonly Serial Target = new Serial(6983686);
     }
 
     public enum TargetType

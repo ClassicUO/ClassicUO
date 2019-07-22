@@ -93,6 +93,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
             {
+                if (_originalGraphic == 0)
+                    _originalGraphic = DisplayedGraphic;
+
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds.X = (Texture.Width >> 1) - 22;
                 Bounds.Y = Texture.Height - 44;
@@ -106,8 +109,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (CharacterIsBehindFoliage)
                 {
-                    if (AlphaHue != 76)
-                        ProcessAlpha(76);
+                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
+                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
                 }
                 else
                 {
@@ -321,7 +324,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(_originalGraphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInStatic(Texture, _originalGraphic, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

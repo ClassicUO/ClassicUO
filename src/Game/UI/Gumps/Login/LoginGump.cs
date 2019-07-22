@@ -50,6 +50,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Full background
                 Add(new GumpPic(0, 0, 0x2329, 0));
 
+            // UO Flag
+            Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+
             //// Quit Button
             Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
             {

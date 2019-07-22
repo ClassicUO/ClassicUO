@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
@@ -46,6 +47,7 @@ namespace ClassicUO.Game.GameObjects
             0x0240, 0x0241, 0x0242, 0x0243, 0x0244, 0x0245, 0x0246, 0x03E0, 0x03E1, 0
         };
 
+        [MethodImpl(256)]
         public override Graphic GetGraphicForAnimation()
         {
             ushort g = Graphic;
@@ -65,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
             return g;
         }
 
+        [MethodImpl(256)]
         public Direction GetDirectionForAnimation()
         {
             return Steps.Count != 0 ? (Direction) Steps.Front().Direction : Direction;
@@ -113,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (isrun)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && FileManager.Animations.AnimationExists(graphic, 19))
                         result = 19;
                     else
                     {
@@ -135,12 +138,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static ushort GetMountAnimation(Mobile mobile)
-        {
-            if (mobile.IsMounted) return mobile.Equipment[(int) Layer.Mount].GetGraphicForAnimation();
-
-            return mobile.Graphic;
-        }
 
         private static void LABEL_222(ANIMATION_FLAGS flags, ref ushort v13)
         {
@@ -456,11 +453,6 @@ namespace ClassicUO.Game.GameObjects
             LABEL_222(flags, ref v13);
         }
 
-
-
-        private static void ConvertAnimation(ANIMATION_GROUPS_TYPE type)
-        {
-        }
 
 
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0, bool isParent = false)
@@ -1170,6 +1162,7 @@ namespace ClassicUO.Game.GameObjects
             return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
+        [MethodImpl(256)]
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
             if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT) return 0;
@@ -1223,6 +1216,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
+        [MethodImpl(256)]
         private static bool TestStepNoChangeDirection(Mobile mob, byte group)
         {
             switch ((PEOPLE_ANIMATION_GROUP) group)
@@ -1249,6 +1243,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_0(Mobile mobile, ushort action, byte mode)
         {
             if (action <= 10)
@@ -1351,6 +1346,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_1_2(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1371,6 +1367,7 @@ namespace ClassicUO.Game.GameObjects
             return 16;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_3(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1398,6 +1395,7 @@ namespace ClassicUO.Game.GameObjects
             return 3;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_4(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1419,6 +1417,7 @@ namespace ClassicUO.Game.GameObjects
             return 10;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_5(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1455,6 +1454,7 @@ namespace ClassicUO.Game.GameObjects
             return 9;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_6_14(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1477,6 +1477,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
             if (mobile.IsMounted) return 0xFF;
@@ -1491,6 +1492,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_8(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1512,6 +1514,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_9_10(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];
@@ -1521,6 +1524,7 @@ namespace ClassicUO.Game.GameObjects
             return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte) 0xFF : (byte) 20;
         }
 
+        [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
         {
             ref IndexAnimation ia = ref FileManager.Animations.DataIndex[mobile.Graphic];

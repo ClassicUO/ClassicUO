@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _position = value;
                     _screenPosition.X = (_position.X - _position.Y) * 22;
-                    _screenPosition.Y = (_position.X + _position.Y) * 22 - _position.Z * 4;
+                    _screenPosition.Y = (_position.X + _position.Y) * 22 - (_position.Z << 2);
                     IsPositionChanged = true;
                     OnPositionChanged();
                 }
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(256)]
-        public void UpdateRealScreenPosition(Point offset)
+        public void UpdateRealScreenPosition(ref Point offset)
         {
             RealScreenPosition.X = _screenPosition.X - offset.X - 22;
             RealScreenPosition.Y = _screenPosition.Y - offset.Y - 22;
@@ -236,19 +236,21 @@ namespace ClassicUO.Game.GameObjects
             AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f, bool ishealthmessage = false)
+        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (EntityTextContainerContainer == null)
-                EntityTextContainerContainer = new EntityTextContainer(this);
+            InitializeTextContainer();
 
-            var msg = EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type, ishealthmessage);
-
-            Engine.SceneManager.GetScene<GameScene>().Overheads.AddMessage(msg);
+            if (EntityTextContainerContainer != null)
+                World.WorldTextManager.AddMessage(EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type));
         }
 
+        protected virtual void InitializeTextContainer()
+        {
+
+        }
 
         protected virtual void OnPositionChanged()
         {

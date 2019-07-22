@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
@@ -38,7 +40,7 @@ namespace ClassicUO.Game.Managers
             Register("info", s =>
             {
                 if (!TargetManager.IsTargeting)
-                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, 6983686, 0);
+                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
                 else
                     TargetManager.CancelTarget();
             });
@@ -51,6 +53,13 @@ namespace ClassicUO.Game.Managers
                     GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
                     GameActions.Print($"Current CurrDateTime is {Engine.CurrDateTime}");
                 }
+            });
+            Register("hue", s =>
+            {
+                if (!TargetManager.IsTargeting)
+                    TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
+                else
+                    TargetManager.CancelTarget();
             });
         }
 
@@ -86,6 +95,13 @@ namespace ClassicUO.Game.Managers
                 action.Invoke(args);
             else
                 Log.Message(LogTypes.Warning, $"Commad: '{name}' not exists");
+        }
+
+        public static void OnHueTarget(Entity entity)
+        {
+            TargetManager.TargetGameObject(entity);
+            Mouse.LastLeftButtonClickTime = 0;
+            GameActions.Print($"Item ID: {entity.Graphic}\nHue: {entity.Hue}");
         }
     }
 }
