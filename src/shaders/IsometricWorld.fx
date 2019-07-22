@@ -75,25 +75,26 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
 	
 	int mode = int(IN.Hue.y);
-	bool swap = false;
-	if(mode >= COLOR_SWAP)
-	{
-		mode -= COLOR_SWAP;
-		swap = true;
-	}
+	
 
-	if (mode == LIGHTS)
+	/*if (mode == LIGHTS)
 	{
 		if (color.a != 0.0f && IN.Hue.x != 0.0f)
 		{
 			color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
 		}
 		return color;
-	}
+	}*/
 
 	if (color.a == 0.0f)
 		discard;
 
+	bool swap = false;
+	if (mode >= COLOR_SWAP)
+	{
+		mode -= COLOR_SWAP;
+		swap = true;
+	}
 
 	float alpha = 1 - IN.Hue.z;
 
@@ -101,32 +102,89 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		color.rgb = get_rgb(color.r, IN.Hue.x, swap);
 	}
-	else if (mode == LAND)
+	else if (mode > 5)
 	{
-		color.rgb *= get_light(IN.Normal);
-	}
-	else if (mode == LAND_COLOR)
-	{
-		color.rgb = get_rgb(color.r, IN.Hue.x, swap) * get_light(IN.Normal);
-	}
-	else if (mode == HUE_TEXT || (mode == HUE_TEXT_NO_BLACK && color.b > 0.04f))
-	{
-		float3 rgb = get_rgb(color.r + 30, IN.Hue.x, swap);
+		if (mode > 9)
+		{
+			float red = color.r;
+			
+			if (mode > 10)
+			{
+				if (mode > 11)
+				{
+					if (mode > 12)
+					{
+						if (IN.Hue.x != 0.0f)
+						{
+							color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
+						}
+						return color;
+					}
 
-		color.rgb = rgb;
+					red = 0.6f;
+				}
+				else
+				{
+					red *= 0.5f;
+				}
+			}
+			else
+			{
+				red *= 1.5f;
+			}
+
+			alpha = 1 - red;
+			color.rgb = VEC3_ZERO;
+		}
+		else
+		{
+			float3 norm = get_light(IN.Normal);
+
+			if (mode > 6)
+			{
+				color.rgb = get_rgb(color.r, IN.Hue.x, swap) * norm;
+			}
+			else
+			{
+				color.rgb *= norm;
+			}
+		}
 	}
-	else if (mode == SPECTRAL)
+	else if (mode == 4 || (mode == 3 && (color.r > 0.04 || color.g > 0.04 || color.b > 0.04) ))
 	{
-		alpha = 1 - (color.r * 1.5f);
-		color.rgb = VEC3_ZERO;
-	}
-	else if (mode == SHADOW)
-	{
-		alpha = 0.5f;
-		color.rgb = VEC3_ZERO;
+		color.rgb = get_rgb(color.r + 30, IN.Hue.x, swap);
 	}
 
-	return color * alpha;
+	color.rgb *= alpha;
+	return color;
+
+
+	//else if (mode == LAND)
+	//{
+	//	color.rgb *= get_light(IN.Normal);
+	//}
+	//else if (mode == LAND_COLOR)
+	//{
+	//	color.rgb = get_rgb(color.r, IN.Hue.x, swap) * get_light(IN.Normal);
+	//}
+	//else if (mode == HUE_TEXT || (mode == HUE_TEXT_NO_BLACK && color.r > 0.04f))
+	//{
+	//	float3 rgb = get_rgb(color.r + 30, IN.Hue.x, swap);
+
+	//	color.rgb = rgb;
+	//}
+	//else if (mode == SPECTRAL)
+	//{
+	//	alpha = 1 - (color.r * 1.5f);
+	//	color.rgb = VEC3_ZERO;
+	//}
+	//else if (mode == SHADOW)
+	//{
+	//	alpha = 0.5f;
+	//	color.rgb = VEC3_ZERO;
+	//}
+
+	//return color * alpha;
 }
 
 

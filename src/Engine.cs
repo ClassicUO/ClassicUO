@@ -185,6 +185,9 @@ namespace ClassicUO
             IsMouseVisible = _settings.RunMouseInASeparateThread;
 
             Window.Title = $"ClassicUO - {Version}";
+
+            if (Bootstrap.StartMinimized)
+                SDL.SDL_MinimizeWindow(Window.Handle);
         }
 
         public bool IsQuitted { get; private set; }
