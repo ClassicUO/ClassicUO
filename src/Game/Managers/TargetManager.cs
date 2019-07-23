@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Managers
 
                 Mouse.CancelDoubleClick = true;
             }
-            else if (selectedEntity is GameObject gobj)
+            else if (TargeringType == TargetType.Neutral && selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
                 short z = gobj.Z;
