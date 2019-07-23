@@ -172,9 +172,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            int row = x / (Width / _columns);
-            int column = y / (Height / _rows);
-            SelectedIndex = row + column * _columns;
+            if (button == MouseButton.Left)
+            {
+                int row = x / (Width / _columns);
+                int column = y / (Height / _rows);
+                SelectedIndex = row + column * _columns;
+            }
         }
 
 

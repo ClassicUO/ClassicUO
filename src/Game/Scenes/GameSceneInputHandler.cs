@@ -448,10 +448,13 @@ namespace ClassicUO.Game.Scenes
                 {
                     case Static st:
                         string name = st.Name;
-
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
                         obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                            obj.TextContainer.MaxSize = 1;
+
                         break;
 
                     case Multi multi:
@@ -461,6 +464,8 @@ namespace ClassicUO.Game.Scenes
                             name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
                         obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                            obj.TextContainer.MaxSize = 1;
                         break;
 
                     case Entity ent:
