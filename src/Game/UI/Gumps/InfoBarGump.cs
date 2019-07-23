@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 dataHue = Vector3.Zero;
 
-            if (Engine.Profile.Current.InfoBarHighlightType == 1)
+            if (Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 ShaderHuesTraslator.GetHueVector(ref dataHue, _warningLinesHue);
                 batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref dataHue);
