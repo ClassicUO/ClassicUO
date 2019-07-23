@@ -90,6 +90,8 @@ namespace ClassicUO.Game.Scenes
 
         public MacroManager Macros { get; private set; }
 
+        public InfoBarManager InfoBars { get; private set; }
+
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
@@ -130,6 +132,7 @@ namespace ClassicUO.Game.Scenes
             HeldItem = new ItemHold();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(Engine.Profile.Current.Macros);
+            InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
 
             WorldViewportGump viewport = new WorldViewportGump(this);

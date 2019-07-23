@@ -176,6 +176,17 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
 
+        [JsonProperty] public bool ShowInfoBar { get; set; }
+        [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
+        [JsonProperty]
+        public InfoBarItem[] InfoBarItems { get; set; } =
+        {
+            new InfoBarItem("Hits", InfoBarVars.HP, 0x1B6),
+            new InfoBarItem("Mana", InfoBarVars.Mana, 0x1ED),
+            new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E),
+            new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2),
+        };
+
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
         [JsonProperty]
