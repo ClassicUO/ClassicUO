@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
             _label = new Label(label, true, 999) { Height = 20, Hue = hue };
             _var = var;
 
-            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0xFFFF };
+            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
             Add(_label);
             Add(_data);
         }
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    _data.Hue = 0xFFFF;
+                    _data.Hue =  0x0481;
                     _warningLinesHue = GetVarHue(_var);
                 }
                 
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (percent <= 0.75)
                         return 0x0035;
                     else
-                        return 0xFFFF;
+                        return 0x0481;
                 case InfoBarVars.Mana:
                     percent = (float) World.Player.Mana / (float) World.Player.ManaMax;
                     if (percent <= 0.25)
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (percent <= 0.75)
                         return 0x0035;
                     else
-                        return 0xFFFF;
+                        return 0x0481;
                 case InfoBarVars.Stamina:
                     percent = (float) World.Player.Stamina / (float) World.Player.StaminaMax;
                     if (percent <= 0.25)
@@ -264,7 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (percent <= 0.75)
                         return 0x0035;
                     else
-                        return 0xFFFF;
+                        return 0x0481;
                 case InfoBarVars.Weight:
                     percent = (float) World.Player.Weight / (float) World.Player.WeightMax;
                     if (percent >= 1)
@@ -274,9 +274,9 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (percent >= 0.5)
                         return 0x0035;
                     else
-                        return 0xFFFF;
+                        return 0x0481;
                 default:
-                    return 0xFFFF;
+                    return 0x0481;
             }
         }
 
