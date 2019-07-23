@@ -130,6 +130,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public void RemoveMultiTargetHouse()
+        {
+            if (_houses.TryGetValue(0, out var house))
+            {
+                house.ClearComponents();
+                _houses.Remove(0);
+            }
+        }
+
         public bool Exists(Serial serial)
         {
             return _houses.ContainsKey(serial);

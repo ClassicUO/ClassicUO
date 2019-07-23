@@ -546,6 +546,53 @@ namespace ClassicUO.Game.Scenes
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
 
+
+            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
+                if (_multi == null)
+                    _multi = new Item(Serial.INVALID)
+                    {
+                        Graphic = TargetManager.MultiTargetInfo.Model,
+                        IsMulti = true,
+                    };
+
+                if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj)
+                {
+                    Position pos = TargetManager.MultiTargetInfo.Offset;
+                    Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
+
+                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
+
+                    if (gobj is Static st && st.ItemData.IsWet)
+                        groundZ = gobj.Z;
+
+
+                    pos = new Position((ushort)(pos2.X - pos.X), (ushort)(pos2.Y - pos.Y), groundZ);
+
+                    _multi.Position = pos;
+                    _multi.CheckGraphicChange();
+                    _multi.AddToTile();
+
+                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
+
+                    foreach (Multi s in house.Components)
+                    {
+                        s.IsFromTarget = true;
+                        s.Position = new Position((ushort)(_multi.X + s.MultiOffsetX), (ushort)(_multi.Y + s.MultiOffsetY), (sbyte)(_multi.Z + s.MultiOffsetZ));
+                        s.AddToTile();
+                    }
+                }
+            }
+            else if (_multi != null)
+            {
+                World.HouseManager.RemoveMultiTargetHouse();
+                _multi.Destroy();
+                _multi = null;
+            }
+
+
+
+
             FillGameObjectList();
         }
 
@@ -622,46 +669,20 @@ namespace ClassicUO.Game.Scenes
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    //if (!_renderList[i].TryGetTarget(out var obj))
-                    //    continue;
-
                     GameObject obj = _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
+                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                            RenderedObjectsCount++;
                     }
                 }
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                {
-                    Item multiTarget = new Item(Serial.INVALID)
-                    {
-                        Graphic = TargetManager.MultiTargetInfo.Model,
-                        IsMulti = true
-                    };
 
-                    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj /*&& (gobj is Land || gobj is Static)*/)
-                    {
-                        Position pos = TargetManager.MultiTargetInfo.Offset;
-                        Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
-
-                        World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
-
-                        if (gobj is Static st && st.ItemData.IsWet)
-                            groundZ = gobj.Z;
-
-
-                        pos = new Position((ushort) (pos2.X - pos.X), (ushort) (pos2.Y - pos.Y), groundZ);
-
-                        multiTarget.Position = pos;
-                        multiTarget.CheckGraphicChange();
-                    }
-
-                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
-                }
+                if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                    _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
             }
 
             //batcher.SetStencil(null);
@@ -674,6 +695,7 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
+        private Item _multi;
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
