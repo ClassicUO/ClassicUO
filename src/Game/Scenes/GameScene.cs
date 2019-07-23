@@ -594,7 +594,14 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-
+            if (_isMouseLeftDown && !IsHoldingItem && Engine.Ticks - _holdMouse2secOverItemTime >= 1000)
+            {
+                if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
+                {
+                    _isMouseLeftDown = false;
+                    _holdMouse2secOverItemTime = 0;
+                }
+            }
 
             FillGameObjectList();
         }

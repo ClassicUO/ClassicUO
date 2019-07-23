@@ -83,6 +83,8 @@ namespace ClassicUO.Game.Scenes
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
         private (int, int) _selectionStart, _selectionEnd;
+        private uint _holdMouse2secOverItemTime;
+        private bool _isMouseLeftDown;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -301,12 +303,24 @@ namespace ClassicUO.Game.Scenes
                     _isSelectionActive = true;
                 }
             }
+            else
+            {
+                _isMouseLeftDown = true;
+                _holdMouse2secOverItemTime = Engine.Ticks;
+            }
         }
 
         internal override void OnLeftMouseUp()
         {
+            if (_isMouseLeftDown)
+            {
+                _isMouseLeftDown = false;
+                _holdMouse2secOverItemTime = 0;
+            }
+
             //  drag-select code comes first to allow selection finish on mouseup outside of viewport
-            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y) _isSelectionActive = false;
+            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y)
+                _isSelectionActive = false;
 
             if (_isSelectionActive)
             {
