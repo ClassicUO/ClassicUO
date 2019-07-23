@@ -88,6 +88,9 @@ namespace ClassicUO.Renderer
             r.Width = 0;
             r.Height = 0;
             r.SaveHitMap = saveHitmap;
+            r.HTMLColor = 0xFFFF_FFFF;
+            r.HasBackgroundColor = false;
+            r.IsPartialHue = false;
 
             if (r.Text != text)
                 r.Text = text; // here makes the texture
